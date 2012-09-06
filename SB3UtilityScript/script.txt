@@ -1,0 +1,58 @@
+/* ppParser OpenPP([DefaultVar]string path)
+   xxParser OpenXX([DefaultVar]ppParser parser, string name)
+   void ExportMqo([DefaultVar]xxParser parser, object[] meshNames, string dirPath, bool singleMqo, bool worldCoords) */
+
+/* meshes={"a01_O_hadaka_01", "a01_O_udeL_01"}
+
+ppParser=OpenPP("C:\illusion\AG3\data\js3_00_02_00.pp")
+xxParser=OpenXX(ppParser, "a15_01.xx")
+ExportMqo(xxParser, {"a01_O_hadaka_01", "a01_O_udeL_01"}, ".", true, false)
+ExportMqo(dirPath=".", meshNames=meshes, xxParser, worldCoords=false, true) // the equivalent using some named parameters out-of-order
+
+OpenPP("C:\illusion\AG3\data\js3_00_02_00.pp")
+.OpenXX("a15_01.xx")
+.ExportMqo(meshes, ".", true, false) */
+
+/* pp = OpenPP(path="d:\Archives\Games\AA\AAAIP\testbench\chars.pp")
+xx = OpenXX(pp, "A01_00_00_00.xx")
+ExportMqo(xx, {"A01_O_body"}, ".", true, false)
+
+pp = OpenPP("d:\RGF\Real Kanojo\data\rk10.pp")
+xx = OpenXX(pp, "cm_body_00_12.xx")
+ExportMqo(xx, {"men_body_B"}, ".", true, false) */
+
+LoadPlugin(PluginDirectory+"ODFPlugin.dll")
+// odfFolder = OpenODFFolderOf("d:\Renai+H\odf\a\a_000_base_HI.ODF")
+
+// body = OpenODF("d:\Renai+H\odf\a\a_000_base_HI.ODF")
+// ExportMqo([DefaultVar]odfParser parser, object[] meshNames, string dirPath, bool singleMqo, bool worldCoords)
+// ExportMqo(body, { "Mesh_c_body_only_Layer1", "Mesh_c_body_only_Layer2" }, "d:\Renai+H\odf\a\exp", true, false)
+
+// body = OpenODF("d:\LGKL\data\odf\Body\base_body_A\RT_body_type_A.ODF.def") // decrypted
+// body = OpenODF("d:\Archives\Games\Tea Time\odf\RT_body_type_A.ODF") // encrypted
+// WriteODF(body)
+
+// body = OpenODF("d:\Archives\Games\Netowaku Netoraru Karemachi Kanojo\Character Maker v4 Trial\data\odf\Body\base_body_A\RT_body_type_A.ODF")
+// body = OpenODF("d:\LGKL\data\odf\Body\base_body_A\RT_body_type_A.ODF")
+// ExportODFtoFbx([DefaultVar]odfParser parser, object[] meshNames, string path, string exportFormat, bool allFrames, bool skins, bool _8dot3)
+// ExportODFtoFbx(body, { "Mesh_RT_base_Layer1" }, "d:\Archives\Games\Tea Time\odf\export\mesh.fbx", "FBX", true, true, false)
+
+// head = OpenODF("d:\LGKL\data\odf\Head\Model\head_S\HEAD_RT_base.ODF") // decrypted
+// ExportMqo(head, { "Mesh_HEAD_RT_base_Layer1" }, "d:\LGKL\data\odf\Head\Model\head_S\exp", true, false) // encrypted textures
+
+// head = OpenODF("d:\Archives\Games\Tea Time\hair_b_unt_a\RT_base.ODF") // encrypted
+// WriteODF(head)
+
+// body = OpenODF("d:\LGKL\data\odf\Body\base_body_A\RT_body_type_A.ODF") // decrypted
+// ExportMorphMqo([DefaultVar]string dirPath, odfParser odfParser, string morphObjName, bool skipUnusedProfiles)
+// ExportMorphMqo(null, body, "Fat_A_BODY_Lower_asoko.Mop", true)
+
+// ImportMqoAsODF([DefaultVar]string path)
+// mqo = ImportMqoAsODF("d:\LGKL\data\odf\Body\base_body_A\RT_body_type_A\meshes1-broken_left_arm.odf.mqo")
+
+// mqo = ImportMorphMqo("d:\LGKL\data\odf\Body\base_body_A\RT_body_type_A\Mesh_RT_base_Layer1-Fat_A_BODY_Arm_L.Mop-0.morph.mqo")
+// fbx = ImportFbxAsODF("d:\LGKL\data\odf\Body\base_body_A\RT_body_type_A\meshes2.fbx")
+
+LoadPlugin(PluginDirectory+"AiDroidPlugin.dll")
+// parser = OpenREM("d:\AIDROID\KG\WT\pt_WT(v2)\WT0010_01_BEBFBGC2C3C4C5C6 (29706).REM")
+parser = OpenREM("d:\AIDROID\KG\FF\pt_FF(v2)\zlc-FF0000_00_00 (8622).REM")
