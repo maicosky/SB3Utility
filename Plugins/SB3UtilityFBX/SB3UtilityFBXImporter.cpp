@@ -352,9 +352,18 @@ namespace SB3Utility
 							throw gcnew Exception(gcnew String("Mesh ") + gcnew String(pMeshNode->GetName()) + " has additive weights and aren't supported");
 						}
 
+#if 1
 						KFbxXMatrix lMatrix;
 						pCluster->GetTransformLinkMatrix(lMatrix);
 						lMatrix = lMatrix.Inverse();
+#else
+						KFbxXMatrix lMatrix, lMeshMatrix;
+						pCluster->GetTransformMatrix(lMeshMatrix);
+						/*KFbxXMatrix geomMatrix = pMeshNode->GetScene()->GetEvaluator()->GetNodeLocalTransform(pMeshNode);
+						lMeshMatrix *= geomMatrix;*/
+						pCluster->GetTransformLinkMatrix(lMatrix);
+						lMatrix = (lMeshMatrix.Inverse() * lMatrix).Inverse();
+#endif
 						Matrix boneMatrix;
 						for (int m = 0; m < 4; m++)
 						{
@@ -572,10 +581,14 @@ namespace SB3Utility
 				pTextures->Add(pTexture);
 
 				String^ texPath = Path::GetDirectoryName(gcnew String(cPath)) + Path::DirectorySeparatorChar + texName;
-				ImportedTexture^ tex = gcnew ImportedTexture(texPath);
-				if (tex != nullptr)
+				try
 				{
+					ImportedTexture^ tex = gcnew ImportedTexture(texPath);
 					TextureList->Add(tex);
+				}
+				catch (Exception^)
+				{
+					Report::ReportLog("Import of texture " + texPath + " failed.");
 				}
 			}
 		}
@@ -638,6 +651,7 @@ namespace SB3Utility
 			array<ImportedAnimationKeyframe^>^ keyArray = gcnew array<ImportedAnimationKeyframe^>(keyCount[0]);
 			for (int i = 0; i < keyCount[0]; i++)
 			{
+				keyArray[i] = gcnew ImportedAnimationKeyframe();
 				keyArray[i]->Scaling = Vector3(pAnimCurveSX->KeyGetValue(i), pAnimCurveSY->KeyGetValue(i), pAnimCurveSZ->KeyGetValue(i));
 				keyArray[i]->Rotation = Fbx::EulerToQuaternion(Vector3(pAnimCurveRX->KeyGetValue(i), pAnimCurveRY->KeyGetValue(i), pAnimCurveRZ->KeyGetValue(i)));
 				keyArray[i]->Translation = Vector3(pAnimCurveTX->KeyGetValue(i), pAnimCurveTY->KeyGetValue(i), pAnimCurveTZ->KeyGetValue(i));

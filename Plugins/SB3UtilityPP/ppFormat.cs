@@ -40,7 +40,8 @@ namespace SB3Utility
 		AAJCH,
 		Wakeari,
 		LoveGirl,
-		Hero
+		Hero,
+		HETTrial
 	}
 
 	public abstract class ppFormat
@@ -75,7 +76,8 @@ namespace SB3Utility
 			new ppFormat_AAJCH(),
 			new ppFormat_Wakeari(),
 			new ppFormat_LoveGirl(),
-			new ppFormat_Hero()
+			new ppFormat_Hero(),
+			new ppFormat_HETTrial()
 		};
 
 		public abstract Stream ReadStream(Stream stream);
@@ -173,6 +175,10 @@ namespace SB3Utility
 			else if (Utility.ImageSupported(ext))
 			{
 				tryFunc = new Func<ppSubfile, bool>(TryFileImage);
+			}
+			else if (ext == ".lst")
+			{
+				tryFunc = new Func<ppSubfile, bool>(TryFileLst);
 			}
 
 			if (tryFunc != null)
@@ -275,6 +281,68 @@ namespace SB3Utility
 				{
 					byte[] data = reader.ReadToEnd();
 					var imgInfo = ImageInformation.FromMemory(data);
+				}
+			}
+			catch
+			{
+				return false;
+			}
+
+			return true;
+		}
+
+		private static bool TryFileLst(ppSubfile subfile)
+		{
+			try
+			{
+				using (BinaryReader reader = new BinaryReader(subfile.CreateReadStream()))
+				{
+					byte[] buf = reader.ReadBytes(128);
+					string ascii = Utility.EncodingShiftJIS.GetString(buf);
+
+					int i = 0, numbersInLine = 0, stringsInLine = 0;
+					while (i < buf.Length)
+					{
+						int startPos = i;
+						while (i < ascii.Length && char.IsDigit(ascii[i]))
+							i++;
+						if (i > startPos)
+							numbersInLine++;
+						if (ascii[i] == '\t')
+						{
+							i++;
+							continue;
+						}
+						else if (ascii[i] == '\r')
+						{
+							return (numbersInLine > 0 || stringsInLine > 0) && ascii[++i] == '\n';
+						}
+						else
+						{
+							startPos = i;
+							while (i < ascii.Length)
+							{
+								if (ascii[i] == 't')
+								{
+									i++;
+									break;
+								}
+								if (ascii[i] == '\r')
+								{
+									if (ascii[++i] == '\n')
+										break;
+									return false;
+								}
+								if (char.IsControl(ascii[i]) || (byte)ascii[i] >= (byte)'\xe0')
+									return false;
+								i++;
+							}
+							if (i > startPos)
+								stringsInLine++;
+						}
+					}
+					if (numbersInLine == 0 && stringsInLine == 0)
+						return false;
 				}
 			}
 			catch
@@ -731,6 +799,20 @@ namespace SB3Utility
 				0x32,0x11,0x27,0x4F,0x8F,0xA8,0x6A,0xA8,
 				0x70,0x1D,0xED,0x66,0x0E,0x62,0x27,0x40,
 				0x0A,0x9D,0x24,0x5F,0x49,0x85,0xC2,0xAA });
+		}
+	}
+
+	public class ppFormat_HETTrial : ppFormat_WakeariHeader
+	{
+		public ppFormat_HETTrial() : base("HET Trial", ppFormatIdx.HETTrial) { }
+
+		protected override ICryptoTransform CryptoTransform()
+		{
+			return new CryptoTransformOneCode(new byte[] {
+				0x54, 0x31, 0x47, 0x70, 0x3E, 0x12, 0xF3, 0xB2,
+				0x25, 0xD2, 0xB6, 0x94, 0x44, 0x0F, 0x74, 0xA3,
+				0xE0, 0xB7, 0x50, 0x05, 0x1E, 0x6D, 0xD7, 0xBB,
+				0x17, 0x2E, 0x7A, 0x23, 0x2E, 0x34, 0x42, 0xC1 });
 		}
 	}
 

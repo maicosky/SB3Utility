@@ -14,16 +14,26 @@ namespace SB3Utility
 	[PluginTool("Workspace")]
 	public partial class FormWorkspace : DockContent
 	{
-		public FormWorkspace(string path, IImported importer, string editorVar, ImportedEditor editor)
+		public FormWorkspace()
 		{
 			try
 			{
 				InitializeComponent();
-				toolStripTextBoxTargetPosition.AfterEditTextChanged += toolStripTextBoxTargetPosition_AfterEditTextChanged;
-				toolStripTextBoxMaterialName.AfterEditTextChanged += toolStripTextBoxMaterialName_AfterEditTextChanged;
-				InitWorkspace(path, importer, editorVar, editor);
 
 				Gui.Docking.ShowDockContent(this, Gui.Docking.DockFiles);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		public FormWorkspace(string path, IImported importer, string editorVar, ImportedEditor editor)
+			: this()
+		{
+			try
+			{
+				InitWorkspace(path, importer, editorVar, editor);
 			}
 			catch (Exception ex)
 			{
@@ -60,22 +70,8 @@ namespace SB3Utility
 			AddList(editor.Meshes, typeof(ImportedMesh).Name, editorVar);
 			AddList(importer.MaterialList, typeof(ImportedMaterial).Name, editorVar);
 			AddList(importer.TextureList, typeof(ImportedTexture).Name, editorVar);
-			AddList(importer.MorphList, typeof(ImportedMorph).Name, editorVar);
-
-			if ((importer.AnimationList != null) && (importer.AnimationList.Count > 0))
-			{
-				TreeNode root = new TreeNode(typeof(ImportedAnimation).Name);
-				root.Checked = true;
-				this.treeView.AddChild(root);
-
-				for (int i = 0; i < importer.AnimationList.Count; i++)
-				{
-					TreeNode node = new TreeNode("Animation" + i);
-					node.Checked = true;
-					node.Tag = new DragSource(editorVar, typeof(ImportedAnimation), i);
-					this.treeView.AddChild(root, node);
-				}
-			}
+			AddList(editor.Morphs, typeof(ImportedMorph).Name, editorVar);
+			AddList(editor.Animations, typeof(ImportedAnimation).Name, editorVar);
 
 			foreach (TreeNode root in this.treeView.Nodes)
 			{
@@ -100,7 +96,7 @@ namespace SB3Utility
 				for (int i = 0; i < list.Count; i++)
 				{
 					dynamic item = list[i];
-					TreeNode node = new TreeNode(item.Name);
+					TreeNode node = new TreeNode(item is WorkspaceAnimation ? "Animation" + i : item.Name);
 					node.Checked = true;
 					node.Tag = new DragSource(editorVar, typeof(T), i);
 					this.treeView.AddChild(root, node);
@@ -118,6 +114,33 @@ namespace SB3Utility
 							UpdateSubmeshNode(submeshNode);
 						}
 					}
+					else if (item is WorkspaceMorph)
+					{
+						WorkspaceMorph morph = item;
+						for (int j = 0; j < morph.KeyframeList.Count; j++)
+						{
+							ImportedMorphKeyframe keyframe = morph.KeyframeList[j];
+							TreeNode keyframeNode = new TreeNode();
+							keyframeNode.Checked = morph.isMorphKeyframeEnabled(keyframe);
+							keyframeNode.Tag = keyframe;
+							keyframeNode.ContextMenuStrip = this.contextMenuStripMorphKeyframe;
+							this.treeView.AddChild(node, keyframeNode);
+							UpdateMorphKeyframeNode(keyframeNode);
+						}
+					}
+					else if (item is WorkspaceAnimation)
+					{
+						WorkspaceAnimation animation = item;
+						for (int j = 0; j < animation.TrackList.Count; j++)
+						{
+							ImportedAnimationTrack track = animation.TrackList[j];
+							TreeNode trackNode = new TreeNode();
+							trackNode.Checked = animation.isTrackEnabled(track);
+							trackNode.Tag = track;
+							trackNode.Text = "Track: " + track.Name + ", Keyframes: " + track.Keyframes.Length;
+							this.treeView.AddChild(node, trackNode);
+						}
+					}
 				}
 			}
 		}
@@ -130,6 +153,16 @@ namespace SB3Utility
 			var srcEditor = (ImportedEditor)Gui.Scripting.Variables[dragSrc.Variable];
 			bool replaceSubmesh = srcEditor.Meshes[(int)dragSrc.Id].isSubmeshReplacingOriginal(submesh);
 			node.Text = "Sub: V " + submesh.VertexList.Count + ", F " + submesh.FaceList.Count + ", Base: " + submesh.Index + ", Replace: " + replaceSubmesh + ", Mat: " + submesh.Material + ", World:" + submesh.WorldCoords;
+		}
+
+		private void UpdateMorphKeyframeNode(TreeNode node)
+		{
+			ImportedMorphKeyframe keyframe = (ImportedMorphKeyframe)node.Tag;
+			TreeNode morphNode = node.Parent;
+			DragSource dragSrc = (DragSource)morphNode.Tag;
+			var srcEditor = (ImportedEditor)Gui.Scripting.Variables[dragSrc.Variable];
+			string newName = srcEditor.Morphs[(int)dragSrc.Id].getMorphKeyframeNewName(keyframe);
+			node.Text = "Morph: " + keyframe.Name + (newName != String.Empty ? ", Rename to: " + newName : null);
 		}
 
 		private void BuildTree(string editorVar, ImportedFrame frame, TreeNode parent, ImportedEditor editor)
@@ -155,6 +188,24 @@ namespace SB3Utility
 				DragSource dragSrc = (DragSource)meshNode.Tag;
 				var srcEditor = (ImportedEditor)Gui.Scripting.Variables[dragSrc.Variable];
 				srcEditor.Meshes[(int)dragSrc.Id].setSubmeshEnabled(submesh, submeshNode.Checked);
+			}
+			else if (e.Node.Tag is ImportedMorphKeyframe)
+			{
+				TreeNode keyframeNode = e.Node;
+				ImportedMorphKeyframe keyframe = (ImportedMorphKeyframe)keyframeNode.Tag;
+				TreeNode morphNode = keyframeNode.Parent;
+				DragSource dragSrc = (DragSource)morphNode.Tag;
+				var srcEditor = (ImportedEditor)Gui.Scripting.Variables[dragSrc.Variable];
+				srcEditor.Morphs[(int)dragSrc.Id].setMorphKeyframeEnabled(keyframe, keyframeNode.Checked);
+			}
+			else if (e.Node.Tag is ImportedAnimationTrack)
+			{
+				TreeNode trackNode = e.Node;
+				ImportedAnimationTrack track = (ImportedAnimationTrack)trackNode.Tag;
+				TreeNode animationNode = trackNode.Parent;
+				DragSource dragSrc = (DragSource)animationNode.Tag;
+				var srcEditor = (ImportedEditor)Gui.Scripting.Variables[dragSrc.Variable];
+				srcEditor.Animations[(int)dragSrc.Id].setTrackEnabled(track, trackNode.Checked);
 			}
 		}
 
@@ -376,6 +427,33 @@ namespace SB3Utility
 			submesh.WorldCoords ^= true;
 			worldCoordinatesToolStripMenuItem.Checked = submesh.WorldCoords;
 			UpdateSubmeshNode(submeshNode);
+		}
+
+		private void contextMenuStripMorphKeyframe_Opening(object sender, CancelEventArgs e)
+		{
+			Point contextLoc = new Point(contextMenuStripMorphKeyframe.Left, contextMenuStripMorphKeyframe.Top);
+			Point relativeLoc = treeView.PointToClient(contextLoc);
+			TreeNode morphKeyframeNode = treeView.GetNodeAt(relativeLoc);
+			ImportedMorphKeyframe keyframe = (ImportedMorphKeyframe)morphKeyframeNode.Tag;
+			TreeNode morphNode = morphKeyframeNode.Parent;
+			DragSource dragSrc = (DragSource)morphNode.Tag;
+			var srcEditor = (ImportedEditor)Gui.Scripting.Variables[dragSrc.Variable];
+			string newName = srcEditor.Morphs[(int)dragSrc.Id].getMorphKeyframeNewName(keyframe);
+			toolStripEditTextBoxNewMorphKeyframeName.Text = newName;
+		}
+
+		private void toolStripEditTextBoxNewMorphKeyframeName_AfterEditTextChanged(object sender, EventArgs e)
+		{
+			Point contextLoc = new Point(contextMenuStripMorphKeyframe.Left, contextMenuStripMorphKeyframe.Top);
+			Point relativeLoc = treeView.PointToClient(contextLoc);
+			TreeNode morphKeyframeNode = treeView.GetNodeAt(relativeLoc);
+			ImportedMorphKeyframe keyframe = (ImportedMorphKeyframe)morphKeyframeNode.Tag;
+			TreeNode morphNode = morphKeyframeNode.Parent;
+			DragSource dragSrc = (DragSource)morphNode.Tag;
+			var srcEditor = (ImportedEditor)Gui.Scripting.Variables[dragSrc.Variable];
+			string newName = toolStripEditTextBoxNewMorphKeyframeName.Text;
+			srcEditor.Morphs[(int)dragSrc.Id].setMorphKeyframeNewName(keyframe, newName != String.Empty ? newName : null);
+			UpdateMorphKeyframeNode(morphKeyframeNode);
 		}
 	}
 }

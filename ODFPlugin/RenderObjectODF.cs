@@ -94,7 +94,7 @@ namespace ODFPlugin
 
 		public void Render()
 		{
-//			UpdateFrameMatrices(rootFrame, Matrix.Identity);
+			UpdateFrameMatrices(rootFrame, Matrix.Identity);
 
 			for (int i = 0; i < meshFrames.Count; i++)
 			{
@@ -260,7 +260,6 @@ namespace ODFPlugin
 #if !DONT_MIRROR
 			parser.FrameSection.RootFrame.Matrix = Matrix.Scaling(scale) * Matrix.RotationQuaternion(rotate) * Matrix.Translation(translate);
 #endif
-UpdateFrameMatrices(rootFrame, Matrix.Identity);
 			return rootFrame;
 		}
 

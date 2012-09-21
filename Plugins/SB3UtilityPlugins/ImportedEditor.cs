@@ -10,6 +10,8 @@ namespace SB3Utility
 		public IImported Imported { get; protected set; }
 		public List<ImportedFrame> Frames { get; protected set; }
 		public List<WorkspaceMesh> Meshes { get; protected set; }
+		public List<WorkspaceMorph> Morphs { get; protected set; }
+		public List<WorkspaceAnimation> Animations { get; protected set; }
 
 		public ImportedEditor(IImported imported)
 		{
@@ -31,6 +33,26 @@ namespace SB3Utility
 				{
 					WorkspaceMesh wsMesh = new WorkspaceMesh(mesh);
 					Meshes.Add(wsMesh);
+				}
+			}
+
+			if (Imported.MorphList != null && Imported.MorphList.Count > 0)
+			{
+				Morphs = new List<WorkspaceMorph>(Imported.MorphList.Count);
+				foreach (ImportedMorph morph in Imported.MorphList)
+				{
+					WorkspaceMorph wsMorph = new WorkspaceMorph(morph);
+					Morphs.Add(wsMorph);
+				}
+			}
+
+			if (Imported.AnimationList != null && Imported.AnimationList.Count > 0)
+			{
+				Animations = new List<WorkspaceAnimation>(Imported.AnimationList.Count);
+				foreach (ImportedAnimation animation in Imported.AnimationList)
+				{
+					WorkspaceAnimation wsAnimation = new WorkspaceAnimation(animation);
+					Animations.Add(wsAnimation);
 				}
 			}
 		}
@@ -57,6 +79,27 @@ namespace SB3Utility
 		{
 			ImportedSubmesh submesh = this.Meshes[meshId].SubmeshList[id];
 			this.Meshes[meshId].setSubmeshReplacingOriginal(submesh, replaceOriginal);
+		}
+
+		[Plugin]
+		public void setMorphKeyframeEnabled(int morphId, int id, bool enabled)
+		{
+			ImportedMorphKeyframe keyframe = this.Morphs[morphId].KeyframeList[id];
+			this.Morphs[morphId].setMorphKeyframeEnabled(keyframe, enabled);
+		}
+
+		[Plugin]
+		public void setMorphKeyframeNewName(int morphId, int id, string newName)
+		{
+			ImportedMorphKeyframe keyframe = this.Morphs[morphId].KeyframeList[id];
+			this.Morphs[morphId].setMorphKeyframeNewName(keyframe, newName);
+		}
+
+		[Plugin]
+		public void setTrackEnabled(int animationId, int id, bool enabled)
+		{
+			ImportedAnimationTrack track = this.Animations[animationId].TrackList[id];
+			this.Animations[animationId].setTrackEnabled(track, enabled);
 		}
 	}
 }

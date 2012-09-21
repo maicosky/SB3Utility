@@ -79,6 +79,19 @@ namespace ODFPlugin
 		List<int> renderObjectIds;
 
 		private TreeNode[] prevMorphProfileNodes = null;
+		private ListViewItem loadedAnimationClip = null;
+
+		private int animationId;
+		private KeyframedAnimationSet animationSet = null;
+
+		private Timer renderTimer = new Timer();
+		private DateTime startTime;
+		private double trackPos = 0;
+		private bool play = false;
+		private bool trackEnabled = false;
+		private bool userTrackBar = true;
+
+		public float AnimationSpeed { get; set; }
 
 		private bool listViewItemSyncSelectedSent = false;
 		private bool propertiesChanged = false;
@@ -118,6 +131,18 @@ namespace ODFPlugin
 				{
 					Properties.Settings.Default.Save();
 					propertiesChanged = false;
+				}
+				if (Editor.Parser.AnimSection != null)
+				{
+					if (animationSet != null)
+					{
+						Pause();
+						Gui.Renderer.RemoveAnimationSet(animationId);
+						Gui.Renderer.ResetPose();
+						animationSet.Dispose();
+					}
+
+					Gui.Renderer.RenderObjectAdded -= new EventHandler(Renderer_RenderObjectAdded);
 				}
 				DisposeRenderObjects();
 			}
@@ -250,13 +275,11 @@ namespace ODFPlugin
 			if (control is TextBox)
 			{
 				TextBox textBox = (TextBox)control;
-//				textBox.TextChanged -= new EventHandler(control_TextChanged);
 				textBox.Text = String.Empty;
 			}
 			else if (control is ComboBox)
 			{
 				ComboBox comboBox = (ComboBox)control;
-//				comboBox.SelectedIndexChanged -= new EventHandler(comboBox_SelectedIndexChanged);
 				comboBox.SelectedIndex = -1;
 			}
 			else if (control is CheckBox)
@@ -672,15 +695,24 @@ namespace ODFPlugin
 		{
 			if (this.Editor.Parser.AnimSection != null)
 			{
-				createAnimationClipListView(this.Editor.Parser.BANMList, listViewAnimationClip);
+				AnimationSpeed = Decimal.ToSingle(numericAnimationClipSpeed.Value);
+
+				renderTimer.Interval = 10;
+				renderTimer.Tick += new EventHandler(renderTimer_Tick);
+				Play();
+
+				createAnimationClipListView(this.Editor.Parser, listViewAnimationClip);
 				tabPageAnimation.Text = "Animation [" + listViewAnimationClip.Items.Count + "]";
 
-				createAnimationTrackListView(this.Editor.Parser.AnimSection);
-//				animationSetMaxKeyframes(animationNodeList);
+				odfANIMSection startAnimation = this.Editor.Parser.AnimSection;
+				createAnimationTrackListView(startAnimation);
+				animationSetMaxKeyframes(startAnimation);
+
+				Gui.Renderer.RenderObjectAdded += new EventHandler(Renderer_RenderObjectAdded);
 			}
 			else
 			{
-//				animationSetMaxKeyframes(null);
+				animationSetMaxKeyframes(null);
 				if (tabPageAnimation.Parent != null)
 					tabPageAnimation.Parent.Controls.Remove(tabPageAnimation);
 			}
@@ -716,19 +748,27 @@ namespace ODFPlugin
 			}
 		}
 
-		public static void createAnimationClipListView(List<odfBANMSection> clipList, ListView clipListView)
+		public static void createAnimationClipListView(odfParser parser, ListView clipListView)
 		{
 			clipListView.BeginUpdate();
-			for (int i = 0; i < clipList.Count; i++)
+			clipListView.Items.Clear();
+			float startKeyframeIndex = parser.AnimSection[0].KeyframeList[0].Index;
+			float endKeyframeIndex = parser.AnimSection[0].KeyframeList[parser.AnimSection[0].KeyframeList.Count - 1].Index;
+			ListViewItem item = new ListViewItem(new string[] { 0.ToString(), "ANIM", startKeyframeIndex.ToString(), endKeyframeIndex.ToString(), parser.AnimSection.Count.ToString() });
+			item.Tag = parser.AnimSection;
+			clipListView.Items.Add(item);
+			List<odfBANMSection> clipList = parser.BANMList;
+			for (int i = 1; i <= clipList.Count; i++)
 			{
-				odfBANMSection clip = clipList[i];
+				odfBANMSection clip = clipList[i - 1];
 				string clipName = clip.Name.ToString();
 				if (clipName == string.Empty)
 					clipName = "unnamed (" + clip.Id.ToString() + ")";
-				ListViewItem item = new ListViewItem(new string[] { i.ToString(), clipName, clip.StartKeyframeIndex.ToString(), clip.EndKeyframeIndex.ToString(), clip.Count.ToString() });
+				item = new ListViewItem(new string[] { i.ToString(), clipName, clip.StartKeyframeIndex.ToString(), clip.EndKeyframeIndex.ToString(), clip.Count.ToString() });
 				item.Tag = clip;
 				clipListView.Items.Add(item);
 			}
+			clipListView.AutoResizeColumn(1, ColumnHeaderAutoResizeStyle.ColumnContent);
 			clipListView.EndUpdate();
 		}
 
@@ -1522,6 +1562,8 @@ namespace ODFPlugin
 
 		private void HighlightBone(odfBone bone, bool show)
 		{
+			if (Editor.Parser.MeshSection == null)
+				return;
 			bool render = false;
 			odfBoneList boneList = bone.Parent;
 			for (int idx = 0; idx < Editor.Parser.MeshSection.Count; idx++)
@@ -2232,6 +2274,8 @@ namespace ODFPlugin
 		{
 			try
 			{
+				if (Editor.Parser.MeshSection == null)
+					return;
 				odfTrack track = (odfTrack)e.Item.Tag;
 				odfBone trackBone = null;
 				for (int i = 0; i < Editor.Parser.EnvelopeSection.Count; i++)
@@ -2256,6 +2300,333 @@ namespace ODFPlugin
 			{
 				Utility.ReportException(ex);
 			}
+		}
+
+		KeyframedAnimationSet CreateAnimationSet(odfANIMSection trackList)
+		{
+			if ((trackList == null) || (trackList.Count <= 0))
+			{
+				return null;
+			}
+
+			KeyframedAnimationSet set = new KeyframedAnimationSet(trackList.Name == String.Empty ? "ANIM" : trackList.Name, 1, PlaybackType.Once, trackList.Count, new CallbackKey[0]);
+			for (int i = 0; i < trackList.Count; i++)
+			{
+				var track = trackList[i];
+				var keyframes = track.KeyframeList;
+				ScaleKey[] scaleKeys = new ScaleKey[keyframes.Count];
+				RotationKey[] rotationKeys = new RotationKey[keyframes.Count];
+				TranslationKey[] translationKeys = new TranslationKey[keyframes.Count];
+				try
+				{
+					set.RegisterAnimationKeys(odf.FindFrame(track.BoneFrameId, Editor.Parser.FrameSection.RootFrame).Name, scaleKeys, rotationKeys, translationKeys);
+					for (int j = 0; j < keyframes.Count; j++)
+					{
+						float time = keyframes[j].Index;
+
+						ScaleKey scale = new ScaleKey();
+						scale.Time = time;
+						scale.Value = keyframes[j].FastScaling;
+						//scaleKeys[j] = scale;
+						set.SetScaleKey(i, j, scale);
+
+						RotationKey rotation = new RotationKey();
+						rotation.Time = time;
+						rotation.Value = Quaternion.Invert(keyframes[j].ExtraFastRotation);
+						//rotationKeys[j] = rotation;
+						set.SetRotationKey(i, j, rotation);
+
+						TranslationKey translation = new TranslationKey();
+						translation.Time = time;
+						translation.Value = keyframes[j].FastTranslation;
+						//translationKeys[j] = translation;
+						set.SetTranslationKey(i, j, translation);
+					}
+				}
+				catch
+				{
+					odfFrame boneFrame = odf.FindFrame(track.BoneFrameId, Editor.Parser.FrameSection.RootFrame);
+					Report.ReportLog("Failed to create track " + (boneFrame != null ? boneFrame.Name : track.BoneFrameId.ToString()));
+				}
+			}
+
+			return set;
+		}
+
+		void SetTrackPosition(double position)
+		{
+			Gui.Renderer.SetTrackPosition(animationId, position);
+			trackPos = position;
+		}
+
+		void AdvanceTime(double time)
+		{
+			Gui.Renderer.AdvanceTime(animationId, time, null);
+			trackPos += time;
+		}
+
+		public void Play()
+		{
+			if (loadedAnimationClip != null)
+			{
+				double start = loadedAnimationClip.Tag is odfANIMSection ? 0 : ((odfBANMSection)loadedAnimationClip.Tag).StartKeyframeIndex;
+				if (trackPos < start)
+				{
+					SetTrackPosition(start);
+					AdvanceTime(0);
+				}
+			}
+
+			this.play = true;
+			this.startTime = DateTime.Now;
+			renderTimer.Start();
+			buttonAnimationClipPlayPause.ImageIndex = 1;
+		}
+
+		public void Pause()
+		{
+			this.play = false;
+			renderTimer.Stop();
+			buttonAnimationClipPlayPause.ImageIndex = 0;
+		}
+
+		public void AnimationSetClip(int idx)
+		{
+			bool play = this.play;
+			Pause();
+
+			if (loadedAnimationClip != null)
+			{
+				listViewAnimationClip.ItemSelectionChanged -= new ListViewItemSelectionChangedEventHandler(listViewAnimationClip_ItemSelectionChanged);
+				loadedAnimationClip.Selected = false;
+				listViewAnimationClip.ItemSelectionChanged += new ListViewItemSelectionChangedEventHandler(listViewAnimationClip_ItemSelectionChanged);
+			}
+
+			if (idx < 0)
+			{
+				loadedAnimationClip = null;
+				animationSetMaxKeyframes(null);
+				DisableTrack();
+			}
+			else
+			{
+				loadedAnimationClip = listViewAnimationClip.Items[idx];
+				odfANIMSection animations = (odfANIMSection)loadedAnimationClip.Tag;
+				double start;
+				string animName;
+				if (animations is odfBANMSection)
+				{
+					start = ((odfBANMSection)animations).StartKeyframeIndex;
+					animName = animations.Name;
+				}
+				else
+				{
+					start = 0;
+					animName = "ANIM";
+				}
+				animationSetMaxKeyframes(animations);
+
+				if (animationSet != null && animName != animationSet.Name)
+				{
+					Gui.Renderer.RemoveAnimationSet(animationId);
+					Gui.Renderer.ResetPose();
+					animationSet.Dispose();
+					animationSet = null;
+				}
+				if (animationSet == null || animName != animationSet.Name)
+				{
+					animationSet = CreateAnimationSet(animations);
+					if (animationSet != null)
+					{
+						animationId = Gui.Renderer.AddAnimationSet(animationSet);
+					}
+				}
+
+				EnableTrack();
+				SetTrackPosition(start);
+				AdvanceTime(0);
+
+				listViewAnimationClip.ItemSelectionChanged -= new ListViewItemSelectionChangedEventHandler(listViewAnimationClip_ItemSelectionChanged);
+				loadedAnimationClip.Selected = true;
+				loadedAnimationClip.EnsureVisible();
+				listViewAnimationClip.ItemSelectionChanged += new ListViewItemSelectionChangedEventHandler(listViewAnimationClip_ItemSelectionChanged);
+
+				SetKeyframeNum((int)start);
+			}
+
+			if (play)
+			{
+				Play();
+			}
+		}
+
+		private void EnableTrack()
+		{
+			Gui.Renderer.EnableTrack(animationId);
+			trackEnabled = true;
+		}
+
+		private void DisableTrack()
+		{
+			Gui.Renderer.DisableTrack(animationId);
+			Gui.Renderer.ResetPose();
+			trackEnabled = false;
+		}
+
+		private void SetKeyframeNum(int num)
+		{
+			if ((num >= 0) && (num <= numericAnimationClipKeyframe.Maximum))
+			{
+				userTrackBar = false;
+				numericAnimationClipKeyframe.Value = num;
+				trackBarAnimationClipKeyframe.Value = num;
+				userTrackBar = true;
+			}
+		}
+
+		private void listViewAnimationClip_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
+		{
+			if (e.IsSelected)
+			{
+				AnimationSetClip(e.Item.Index);
+			}
+			else
+			{
+				if (loadedAnimationClip == e.Item)
+				{
+					AnimationSetClip(-1);
+				}
+			}
+		}
+
+		private void renderTimer_Tick(object sender, EventArgs e)
+		{
+			if (play && (loadedAnimationClip != null))
+			{
+				TimeSpan elapsedTime = DateTime.Now - this.startTime;
+				if (elapsedTime.TotalSeconds > 0)
+				{
+					double advanceTime = elapsedTime.TotalSeconds * AnimationSpeed;
+					double start, end;
+					if (loadedAnimationClip.Tag is odfBANMSection)
+					{
+						start = ((odfBANMSection)loadedAnimationClip.Tag).StartKeyframeIndex;
+						end = ((odfBANMSection)loadedAnimationClip.Tag).EndKeyframeIndex;
+					}
+					else
+					{
+						List<odfKeyframe> firstTracksKeyframes = Editor.Parser.AnimSection[0].KeyframeList;
+						start = firstTracksKeyframes[0].Index;
+						end = firstTracksKeyframes[firstTracksKeyframes.Count - 1].Index;
+					}
+					if ((trackPos + advanceTime) >= end)
+					{
+/*						if (FollowSequence && (clip.Next != 0) && (clip.Next != loadedAnimationClip.Index))
+						{
+							AnimationSetClip(clip.Next);
+						}
+						else*/
+						{
+							SetTrackPosition(start);
+							AdvanceTime(0);
+						}
+					}
+					else
+					{
+						AdvanceTime(advanceTime);
+					}
+
+					SetKeyframeNum((int)trackPos);
+					this.startTime = DateTime.Now;
+				}
+			}
+		}
+
+		private void numericAnimationClipSpeed_ValueChanged(object sender, EventArgs e)
+		{
+			AnimationSpeed = Decimal.ToSingle(numericAnimationClipSpeed.Value);
+		}
+
+		private void buttonAnimationClipPlayPause_Click(object sender, EventArgs e)
+		{
+			if (this.play)
+			{
+				Pause();
+			}
+			else
+			{
+				Play();
+			}
+		}
+
+		private void trackBarAnimationClipKeyframe_ValueChanged(object sender, EventArgs e)
+		{
+			if (userTrackBar && (Editor.Parser.AnimSection != null))
+			{
+				Pause();
+
+				if (!trackEnabled)
+				{
+					EnableTrack();
+				}
+				SetTrackPosition(Decimal.ToDouble(trackBarAnimationClipKeyframe.Value));
+				AdvanceTime(0);
+
+				userTrackBar = false;
+				numericAnimationClipKeyframe.Value = trackBarAnimationClipKeyframe.Value;
+				userTrackBar = true;
+			}
+		}
+
+		private void numericAnimationClipKeyframe_ValueChanged(object sender, EventArgs e)
+		{
+			if (userTrackBar && (Editor.Parser.AnimSection != null))
+			{
+				Pause();
+
+				if (!trackEnabled)
+				{
+					EnableTrack();
+				}
+				SetTrackPosition((double)numericAnimationClipKeyframe.Value);
+				AdvanceTime(0);
+
+				userTrackBar = false;
+				trackBarAnimationClipKeyframe.Value = Decimal.ToInt32(numericAnimationClipKeyframe.Value);
+				userTrackBar = true;
+			}
+		}
+
+		private void Renderer_RenderObjectAdded(object sender, EventArgs e)
+		{
+			if (trackEnabled)
+			{
+				EnableTrack();
+			}
+			SetTrackPosition(trackPos);
+			AdvanceTime(0);
+		}
+
+		private void animationSetMaxKeyframes(odfANIMSection animationTrackList)
+		{
+			int max = 0;
+			if (animationTrackList != null)
+			{
+				foreach (odfTrack animationTrack in animationTrackList)
+				{
+					int numKeyframes = (int)animationTrack.KeyframeList[animationTrack.KeyframeList.Count - 1].Index;
+					if (numKeyframes > max)
+					{
+						max = numKeyframes;
+					}
+				}
+			}
+
+			labelSkeletalRender.Text = "/ " + max;
+			numericAnimationClipKeyframe.Maximum = max;
+			trackBarAnimationClipKeyframe.Maximum = max;
+//			numericAnimationKeyframeStart.Maximum = max;
+//			numericAnimationKeyframeEnd.Maximum = max;
 		}
 
 		#endregion AnimationView

@@ -21,8 +21,10 @@ namespace ODFPlugin
 			Parser = parser;
 			Frames = new List<odfFrame>();
 			InitFrames(parser.FrameSection.RootFrame);
-			Materials = parser.MaterialSection.ChildList;
-			Textures = parser.TextureSection.ChildList;
+			if (parser.MaterialSection != null)
+				Materials = parser.MaterialSection.ChildList;
+			if (parser.TextureSection != null)
+				Textures = parser.TextureSection.ChildList;
 		}
 
 		void InitFrames(odfFrame frame)

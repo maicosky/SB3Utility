@@ -22,7 +22,6 @@
 			base.Dispose(disposing);
 		}
 
-
 		#region Windows Form Designer generated code
 
 		/// <summary>
@@ -32,10 +31,8 @@
 		private void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
-			this.textBoxMeshObjInfo = new SB3Utility.EditTextBox();
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMeshView));
 			this.label15 = new System.Windows.Forms.Label();
-			this.textBoxMeshObjID = new SB3Utility.EditTextBox();
-			this.textBoxMeshObjName = new SB3Utility.EditTextBox();
 			this.groupBoxMeshObjects = new System.Windows.Forms.GroupBox();
 			this.dataGridViewMesh = new System.Windows.Forms.DataGridView();
 			this.ColumnSubmeshName = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -43,6 +40,9 @@
 			this.ColumnSubmeshFaces = new System.Windows.Forms.DataGridViewTextBoxColumn();
 			this.ColumnSubmeshMaterial = new System.Windows.Forms.DataGridViewComboBoxColumn();
 			this.ColumnSubmeshUnknowns = new System.Windows.Forms.DataGridViewTextBoxColumn();
+			this.textBoxMeshObjInfo = new SB3Utility.EditTextBox();
+			this.textBoxMeshObjID = new SB3Utility.EditTextBox();
+			this.textBoxMeshObjName = new SB3Utility.EditTextBox();
 			this.checkBoxMeshObjSkinned = new System.Windows.Forms.CheckBox();
 			this.label14 = new System.Windows.Forms.Label();
 			this.buttonMeshObjEdit = new System.Windows.Forms.Button();
@@ -67,7 +67,6 @@
 			this.buttonBoneCopy = new System.Windows.Forms.Button();
 			this.buttonBoneGotoFrame = new System.Windows.Forms.Button();
 			this.buttonMeshRemove = new System.Windows.Forms.Button();
-			this.textBoxBoneFrameID = new SB3Utility.EditTextBox();
 			this.label27 = new System.Windows.Forms.Label();
 			this.label9 = new System.Windows.Forms.Label();
 			this.buttonMeshGotoFrame = new System.Windows.Forms.Button();
@@ -180,6 +179,15 @@
 			this.listViewAnimationTrack = new System.Windows.Forms.ListView();
 			this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.buttonAnimationClipPlayPause = new System.Windows.Forms.Button();
+			this.imageList1 = new System.Windows.Forms.ImageList(this.components);
+			this.trackBarAnimationClipKeyframe = new System.Windows.Forms.TrackBar();
+			this.checkBoxAnimationClipLoadNextClip = new System.Windows.Forms.CheckBox();
+			this.numericAnimationClipSpeed = new System.Windows.Forms.NumericUpDown();
+			this.numericAnimationClipKeyframe = new System.Windows.Forms.NumericUpDown();
+			this.labelSkeletalRender = new System.Windows.Forms.Label();
+			this.label30 = new System.Windows.Forms.Label();
 			this.listViewAnimationClip = new System.Windows.Forms.ListView();
 			this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -248,6 +256,7 @@
 			this.tabPageBoneMatrix = new System.Windows.Forms.TabPage();
 			this.dataGridViewBoneMatrix = new SB3Utility.DataGridViewEditor();
 			this.label26 = new System.Windows.Forms.Label();
+			this.textBoxBoneFrameID = new SB3Utility.EditTextBox();
 			this.textBoxBoneFrameName = new SB3Utility.EditTextBox();
 			this.tabPageMeshView = new System.Windows.Forms.TabPage();
 			this.splitContainer2 = new System.Windows.Forms.SplitContainer();
@@ -267,7 +276,6 @@
 			this.buttonMaterialRemove = new System.Windows.Forms.Button();
 			this.buttonMaterialCopy = new System.Windows.Forms.Button();
 			this.label3 = new System.Windows.Forms.Label();
-			this.textBoxMatID = new SB3Utility.EditTextBox();
 			this.label17 = new System.Windows.Forms.Label();
 			this.groupBoxMeshTextures = new System.Windows.Forms.GroupBox();
 			this.comboBoxMatTex4 = new System.Windows.Forms.ComboBox();
@@ -303,6 +311,7 @@
 			this.textBoxMatAmbientA = new SB3Utility.EditTextBox();
 			this.groupBoxMaterialExtraSetsUnknowns = new System.Windows.Forms.GroupBox();
 			this.textBoxMatMataUnknown1 = new System.Windows.Forms.TextBox();
+			this.textBoxMatID = new SB3Utility.EditTextBox();
 			this.textBoxMatName = new SB3Utility.EditTextBox();
 			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
 			this.menuStrip1 = new System.Windows.Forms.MenuStrip();
@@ -388,6 +397,10 @@
 			this.splitContainerAnimation.Panel1.SuspendLayout();
 			this.splitContainerAnimation.Panel2.SuspendLayout();
 			this.splitContainerAnimation.SuspendLayout();
+			this.groupBox1.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.trackBarAnimationClipKeyframe)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.numericAnimationClipSpeed)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.numericAnimationClipKeyframe)).BeginInit();
 			this.tabControlViews.SuspendLayout();
 			this.tabPageFrameView.SuspendLayout();
 			this.tabControlFrameMatrix.SuspendLayout();
@@ -417,15 +430,6 @@
 			this.menuStrip1.SuspendLayout();
 			this.SuspendLayout();
 			// 
-			// textBoxMeshObjInfo
-			// 
-			this.textBoxMeshObjInfo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.textBoxMeshObjInfo.Location = new System.Drawing.Point(4, 55);
-			this.textBoxMeshObjInfo.Name = "textBoxMeshObjInfo";
-			this.textBoxMeshObjInfo.Size = new System.Drawing.Size(466, 20);
-			this.textBoxMeshObjInfo.TabIndex = 148;
-			// 
 			// label15
 			// 
 			this.label15.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -435,23 +439,6 @@
 			this.label15.Size = new System.Drawing.Size(18, 13);
 			this.label15.TabIndex = 146;
 			this.label15.Text = "ID";
-			// 
-			// textBoxMeshObjID
-			// 
-			this.textBoxMeshObjID.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.textBoxMeshObjID.Location = new System.Drawing.Point(397, 31);
-			this.textBoxMeshObjID.Name = "textBoxMeshObjID";
-			this.textBoxMeshObjID.Size = new System.Drawing.Size(73, 20);
-			this.textBoxMeshObjID.TabIndex = 146;
-			// 
-			// textBoxMeshObjName
-			// 
-			this.textBoxMeshObjName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.textBoxMeshObjName.Location = new System.Drawing.Point(4, 31);
-			this.textBoxMeshObjName.Name = "textBoxMeshObjName";
-			this.textBoxMeshObjName.Size = new System.Drawing.Size(389, 20);
-			this.textBoxMeshObjName.TabIndex = 144;
 			// 
 			// groupBoxMeshObjects
 			// 
@@ -545,6 +532,32 @@
 			this.ColumnSubmeshUnknowns.Name = "ColumnSubmeshUnknowns";
 			this.ColumnSubmeshUnknowns.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
 			this.ColumnSubmeshUnknowns.Width = 64;
+			// 
+			// textBoxMeshObjInfo
+			// 
+			this.textBoxMeshObjInfo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.textBoxMeshObjInfo.Location = new System.Drawing.Point(4, 55);
+			this.textBoxMeshObjInfo.Name = "textBoxMeshObjInfo";
+			this.textBoxMeshObjInfo.Size = new System.Drawing.Size(466, 20);
+			this.textBoxMeshObjInfo.TabIndex = 148;
+			// 
+			// textBoxMeshObjID
+			// 
+			this.textBoxMeshObjID.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.textBoxMeshObjID.Location = new System.Drawing.Point(397, 31);
+			this.textBoxMeshObjID.Name = "textBoxMeshObjID";
+			this.textBoxMeshObjID.Size = new System.Drawing.Size(73, 20);
+			this.textBoxMeshObjID.TabIndex = 146;
+			// 
+			// textBoxMeshObjName
+			// 
+			this.textBoxMeshObjName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.textBoxMeshObjName.Location = new System.Drawing.Point(4, 31);
+			this.textBoxMeshObjName.Name = "textBoxMeshObjName";
+			this.textBoxMeshObjName.Size = new System.Drawing.Size(389, 20);
+			this.textBoxMeshObjName.TabIndex = 144;
 			// 
 			// checkBoxMeshObjSkinned
 			// 
@@ -838,14 +851,6 @@
 			this.buttonMeshRemove.UseVisualStyleBackColor = true;
 			this.buttonMeshRemove.Click += new System.EventHandler(this.buttonMeshRemove_Click);
 			// 
-			// textBoxBoneFrameID
-			// 
-			this.textBoxBoneFrameID.BackColor = System.Drawing.SystemColors.ControlLightLight;
-			this.textBoxBoneFrameID.Location = new System.Drawing.Point(176, 17);
-			this.textBoxBoneFrameID.Name = "textBoxBoneFrameID";
-			this.textBoxBoneFrameID.Size = new System.Drawing.Size(73, 20);
-			this.textBoxBoneFrameID.TabIndex = 16;
-			// 
 			// label27
 			// 
 			this.label27.AutoSize = true;
@@ -1132,6 +1137,7 @@
 			this.buttonEditHex.TabStop = false;
 			this.buttonEditHex.Text = "Edit Hex";
 			this.buttonEditHex.UseVisualStyleBackColor = true;
+			this.buttonEditHex.Visible = false;
 			// 
 			// label8
 			// 
@@ -2040,11 +2046,12 @@
 			// splitContainerAnimation.Panel2
 			// 
 			this.splitContainerAnimation.Panel2.AutoScroll = true;
+			this.splitContainerAnimation.Panel2.Controls.Add(this.groupBox1);
 			this.splitContainerAnimation.Panel2.Controls.Add(this.listViewAnimationClip);
 			this.splitContainerAnimation.Panel2.Controls.Add(this.label33);
 			this.splitContainerAnimation.Panel2MinSize = 100;
 			this.splitContainerAnimation.Size = new System.Drawing.Size(463, 549);
-			this.splitContainerAnimation.SplitterDistance = 368;
+			this.splitContainerAnimation.SplitterDistance = 309;
 			this.splitContainerAnimation.SplitterWidth = 5;
 			this.splitContainerAnimation.TabIndex = 159;
 			// 
@@ -2076,7 +2083,7 @@
 			this.listViewAnimationTrack.Name = "listViewAnimationTrack";
 			this.listViewAnimationTrack.ShowGroups = false;
 			this.listViewAnimationTrack.ShowItemToolTips = true;
-			this.listViewAnimationTrack.Size = new System.Drawing.Size(463, 357);
+			this.listViewAnimationTrack.Size = new System.Drawing.Size(463, 298);
 			this.listViewAnimationTrack.Sorting = System.Windows.Forms.SortOrder.Ascending;
 			this.listViewAnimationTrack.TabIndex = 137;
 			this.listViewAnimationTrack.UseCompatibleStateImageBehavior = false;
@@ -2093,8 +2100,125 @@
 			this.columnHeader4.Text = "Keyframes";
 			this.columnHeader4.Width = 64;
 			// 
+			// groupBox1
+			// 
+			this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.groupBox1.Controls.Add(this.buttonAnimationClipPlayPause);
+			this.groupBox1.Controls.Add(this.trackBarAnimationClipKeyframe);
+			this.groupBox1.Controls.Add(this.checkBoxAnimationClipLoadNextClip);
+			this.groupBox1.Controls.Add(this.numericAnimationClipSpeed);
+			this.groupBox1.Controls.Add(this.numericAnimationClipKeyframe);
+			this.groupBox1.Controls.Add(this.labelSkeletalRender);
+			this.groupBox1.Controls.Add(this.label30);
+			this.groupBox1.Location = new System.Drawing.Point(0, 166);
+			this.groupBox1.Name = "groupBox1";
+			this.groupBox1.Size = new System.Drawing.Size(287, 65);
+			this.groupBox1.TabIndex = 155;
+			this.groupBox1.TabStop = false;
+			// 
+			// buttonAnimationClipPlayPause
+			// 
+			this.buttonAnimationClipPlayPause.ImageAlign = System.Drawing.ContentAlignment.BottomCenter;
+			this.buttonAnimationClipPlayPause.ImageIndex = 0;
+			this.buttonAnimationClipPlayPause.ImageList = this.imageList1;
+			this.buttonAnimationClipPlayPause.Location = new System.Drawing.Point(7, 12);
+			this.buttonAnimationClipPlayPause.Name = "buttonAnimationClipPlayPause";
+			this.buttonAnimationClipPlayPause.Size = new System.Drawing.Size(20, 19);
+			this.buttonAnimationClipPlayPause.TabIndex = 150;
+			this.buttonAnimationClipPlayPause.UseVisualStyleBackColor = true;
+			this.buttonAnimationClipPlayPause.Click += new System.EventHandler(this.buttonAnimationClipPlayPause_Click);
+			// 
+			// imageList1
+			// 
+			this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
+			this.imageList1.TransparentColor = System.Drawing.Color.White;
+			this.imageList1.Images.SetKeyName(0, "play.bmp");
+			this.imageList1.Images.SetKeyName(1, "pause.bmp");
+			// 
+			// trackBarAnimationClipKeyframe
+			// 
+			this.trackBarAnimationClipKeyframe.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.trackBarAnimationClipKeyframe.AutoSize = false;
+			this.trackBarAnimationClipKeyframe.Location = new System.Drawing.Point(33, 14);
+			this.trackBarAnimationClipKeyframe.Name = "trackBarAnimationClipKeyframe";
+			this.trackBarAnimationClipKeyframe.Size = new System.Drawing.Size(143, 18);
+			this.trackBarAnimationClipKeyframe.TabIndex = 149;
+			this.trackBarAnimationClipKeyframe.TickStyle = System.Windows.Forms.TickStyle.None;
+			this.trackBarAnimationClipKeyframe.ValueChanged += new System.EventHandler(this.trackBarAnimationClipKeyframe_ValueChanged);
+			// 
+			// checkBoxAnimationClipLoadNextClip
+			// 
+			this.checkBoxAnimationClipLoadNextClip.AutoSize = true;
+			this.checkBoxAnimationClipLoadNextClip.Checked = true;
+			this.checkBoxAnimationClipLoadNextClip.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.checkBoxAnimationClipLoadNextClip.Location = new System.Drawing.Point(7, 42);
+			this.checkBoxAnimationClipLoadNextClip.Name = "checkBoxAnimationClipLoadNextClip";
+			this.checkBoxAnimationClipLoadNextClip.Size = new System.Drawing.Size(95, 17);
+			this.checkBoxAnimationClipLoadNextClip.TabIndex = 151;
+			this.checkBoxAnimationClipLoadNextClip.Text = "Load Next Clip";
+			this.checkBoxAnimationClipLoadNextClip.UseVisualStyleBackColor = true;
+			this.checkBoxAnimationClipLoadNextClip.Visible = false;
+			// 
+			// numericAnimationClipSpeed
+			// 
+			this.numericAnimationClipSpeed.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.numericAnimationClipSpeed.DecimalPlaces = 1;
+			this.numericAnimationClipSpeed.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+			this.numericAnimationClipSpeed.Location = new System.Drawing.Point(182, 39);
+			this.numericAnimationClipSpeed.Maximum = new decimal(new int[] {
+            500,
+            0,
+            0,
+            0});
+			this.numericAnimationClipSpeed.Name = "numericAnimationClipSpeed";
+			this.numericAnimationClipSpeed.Size = new System.Drawing.Size(55, 20);
+			this.numericAnimationClipSpeed.TabIndex = 145;
+			this.numericAnimationClipSpeed.Value = new decimal(new int[] {
+            15,
+            0,
+            0,
+            0});
+			this.numericAnimationClipSpeed.ValueChanged += new System.EventHandler(this.numericAnimationClipSpeed_ValueChanged);
+			// 
+			// numericAnimationClipKeyframe
+			// 
+			this.numericAnimationClipKeyframe.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.numericAnimationClipKeyframe.Location = new System.Drawing.Point(182, 13);
+			this.numericAnimationClipKeyframe.Name = "numericAnimationClipKeyframe";
+			this.numericAnimationClipKeyframe.Size = new System.Drawing.Size(55, 20);
+			this.numericAnimationClipKeyframe.TabIndex = 147;
+			this.numericAnimationClipKeyframe.ValueChanged += new System.EventHandler(this.numericAnimationClipKeyframe_ValueChanged);
+			// 
+			// labelSkeletalRender
+			// 
+			this.labelSkeletalRender.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.labelSkeletalRender.AutoSize = true;
+			this.labelSkeletalRender.Location = new System.Drawing.Point(238, 17);
+			this.labelSkeletalRender.Name = "labelSkeletalRender";
+			this.labelSkeletalRender.Size = new System.Drawing.Size(21, 13);
+			this.labelSkeletalRender.TabIndex = 148;
+			this.labelSkeletalRender.Text = "/ 0";
+			// 
+			// label30
+			// 
+			this.label30.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.label30.AutoSize = true;
+			this.label30.Location = new System.Drawing.Point(237, 43);
+			this.label30.Name = "label30";
+			this.label30.Size = new System.Drawing.Size(38, 13);
+			this.label30.TabIndex = 146;
+			this.label30.Text = "Speed";
+			// 
 			// listViewAnimationClip
 			// 
+			this.listViewAnimationClip.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.listViewAnimationClip.AutoArrange = false;
 			this.listViewAnimationClip.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader8,
@@ -2102,19 +2226,19 @@
             this.columnHeader2,
             this.columnHeader6,
             this.columnHeader7});
-			this.listViewAnimationClip.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.listViewAnimationClip.FullRowSelect = true;
 			this.listViewAnimationClip.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
 			this.listViewAnimationClip.HideSelection = false;
 			this.listViewAnimationClip.LabelWrap = false;
-			this.listViewAnimationClip.Location = new System.Drawing.Point(0, 13);
+			this.listViewAnimationClip.Location = new System.Drawing.Point(0, 17);
 			this.listViewAnimationClip.Name = "listViewAnimationClip";
 			this.listViewAnimationClip.ShowGroups = false;
 			this.listViewAnimationClip.ShowItemToolTips = true;
-			this.listViewAnimationClip.Size = new System.Drawing.Size(463, 163);
+			this.listViewAnimationClip.Size = new System.Drawing.Size(463, 149);
 			this.listViewAnimationClip.TabIndex = 111;
 			this.listViewAnimationClip.UseCompatibleStateImageBehavior = false;
 			this.listViewAnimationClip.View = System.Windows.Forms.View.Details;
+			this.listViewAnimationClip.ItemSelectionChanged += new System.Windows.Forms.ListViewItemSelectionChangedEventHandler(this.listViewAnimationClip_ItemSelectionChanged);
 			// 
 			// columnHeader8
 			// 
@@ -2144,8 +2268,7 @@
 			// label33
 			// 
 			this.label33.AutoSize = true;
-			this.label33.Dock = System.Windows.Forms.DockStyle.Top;
-			this.label33.Location = new System.Drawing.Point(0, 0);
+			this.label33.Location = new System.Drawing.Point(0, 2);
 			this.label33.Name = "label33";
 			this.label33.Size = new System.Drawing.Size(78, 13);
 			this.label33.TabIndex = 135;
@@ -2703,9 +2826,9 @@
 			this.tabPageBoneView.Controls.Add(this.buttonBoneRemove);
 			this.tabPageBoneView.Controls.Add(this.buttonBoneCopy);
 			this.tabPageBoneView.Controls.Add(this.buttonBoneGotoFrame);
-			this.tabPageBoneView.Controls.Add(this.textBoxBoneFrameID);
 			this.tabPageBoneView.Controls.Add(this.label27);
 			this.tabPageBoneView.Controls.Add(this.label26);
+			this.tabPageBoneView.Controls.Add(this.textBoxBoneFrameID);
 			this.tabPageBoneView.Controls.Add(this.textBoxBoneFrameName);
 			this.tabPageBoneView.Location = new System.Drawing.Point(4, 22);
 			this.tabPageBoneView.Name = "tabPageBoneView";
@@ -2803,6 +2926,14 @@
 			this.label26.Size = new System.Drawing.Size(67, 13);
 			this.label26.TabIndex = 10;
 			this.label26.Text = "Frame Name";
+			// 
+			// textBoxBoneFrameID
+			// 
+			this.textBoxBoneFrameID.BackColor = System.Drawing.SystemColors.ControlLightLight;
+			this.textBoxBoneFrameID.Location = new System.Drawing.Point(176, 17);
+			this.textBoxBoneFrameID.Name = "textBoxBoneFrameID";
+			this.textBoxBoneFrameID.Size = new System.Drawing.Size(73, 20);
+			this.textBoxBoneFrameID.TabIndex = 16;
 			// 
 			// textBoxBoneFrameName
 			// 
@@ -2976,10 +3107,10 @@
 			this.tabPageMaterialView.Controls.Add(this.buttonMaterialRemove);
 			this.tabPageMaterialView.Controls.Add(this.buttonMaterialCopy);
 			this.tabPageMaterialView.Controls.Add(this.label3);
-			this.tabPageMaterialView.Controls.Add(this.textBoxMatID);
 			this.tabPageMaterialView.Controls.Add(this.label17);
 			this.tabPageMaterialView.Controls.Add(this.groupBoxMeshTextures);
 			this.tabPageMaterialView.Controls.Add(this.groupBoxMaterialProperties);
+			this.tabPageMaterialView.Controls.Add(this.textBoxMatID);
 			this.tabPageMaterialView.Controls.Add(this.textBoxMatName);
 			this.tabPageMaterialView.Location = new System.Drawing.Point(4, 22);
 			this.tabPageMaterialView.Name = "tabPageMaterialView";
@@ -3017,13 +3148,6 @@
 			this.label3.TabIndex = 104;
 			this.label3.Text = "ID";
 			this.toolTip1.SetToolTip(this.label3, "Material IDs are used in Mesh Objects and in MATA sections.");
-			// 
-			// textBoxMatID
-			// 
-			this.textBoxMatID.Location = new System.Drawing.Point(176, 17);
-			this.textBoxMatID.Name = "textBoxMatID";
-			this.textBoxMatID.Size = new System.Drawing.Size(73, 20);
-			this.textBoxMatID.TabIndex = 15;
 			// 
 			// label17
 			// 
@@ -3355,6 +3479,13 @@
 			this.textBoxMatMataUnknown1.TabIndex = 55;
 			this.toolTip1.SetToolTip(this.textBoxMatMataUnknown1, "float");
 			// 
+			// textBoxMatID
+			// 
+			this.textBoxMatID.Location = new System.Drawing.Point(176, 17);
+			this.textBoxMatID.Name = "textBoxMatID";
+			this.textBoxMatID.Size = new System.Drawing.Size(73, 20);
+			this.textBoxMatID.TabIndex = 15;
+			// 
 			// textBoxMatName
 			// 
 			this.textBoxMatName.Location = new System.Drawing.Point(2, 17);
@@ -3584,6 +3715,11 @@
 			this.splitContainerAnimation.Panel2.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainerAnimation)).EndInit();
 			this.splitContainerAnimation.ResumeLayout(false);
+			this.groupBox1.ResumeLayout(false);
+			this.groupBox1.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.trackBarAnimationClipKeyframe)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.numericAnimationClipSpeed)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.numericAnimationClipKeyframe)).EndInit();
 			this.tabControlViews.ResumeLayout(false);
 			this.tabPageFrameView.ResumeLayout(false);
 			this.tabPageFrameView.PerformLayout();
@@ -3669,7 +3805,6 @@
 		private System.Windows.Forms.ComboBox comboBoxMatSetSelector;
 		private System.Windows.Forms.TextBox textBoxMatNumAddSets;
 		private System.Windows.Forms.TextBox textBoxMatMataUnknown2;
-		private System.Windows.Forms.TabPage tabPageTextureView;
 		private System.Windows.Forms.Label label57;
 		private SB3Utility.EditTextBox textBoxMatSpecularG;
 		private System.Windows.Forms.Label label18;
@@ -3678,7 +3813,6 @@
 		private System.Windows.Forms.Label label21;
 		private SB3Utility.EditTextBox textBoxMatUnknown1;
 		private System.Windows.Forms.SplitContainer splitContainer1;
-		private System.Windows.Forms.TabControl tabControlViews;
 		private System.Windows.Forms.TabPage tabPageFrameView;
 		private System.Windows.Forms.GroupBox groupBoxTXPT;
 		private System.Windows.Forms.ListView listViewTXPTinfos;
@@ -3726,9 +3860,7 @@
 		private System.Windows.Forms.TextBox textBoxFrameUnk3;
 		private System.Windows.Forms.TextBox textBoxFrameUnk2;
 		private System.Windows.Forms.TextBox textBoxFrameUnk1;
-		private System.Windows.Forms.TabPage tabPageBoneView;
 		private System.Windows.Forms.Label label26;
-		private System.Windows.Forms.TabPage tabPageMeshView;
 		private SB3Utility.EditTextBox textBoxMeshInfo;
 		private SB3Utility.EditTextBox textBoxMeshID;
 		private System.Windows.Forms.Label label13;
@@ -3739,7 +3871,6 @@
 		private System.Windows.Forms.Panel panelMeshExportOptionsFbx;
 		private System.Windows.Forms.CheckBox checkBox8dot3;
 		private System.Windows.Forms.Label label49;
-		private System.Windows.Forms.TabPage tabPageMaterialView;
 		private System.Windows.Forms.Button buttonMaterialRemove;
 		private System.Windows.Forms.Button buttonMaterialCopy;
 		private System.Windows.Forms.Label label3;
@@ -3916,6 +4047,20 @@
 		private System.Windows.Forms.ToolStripMenuItem closeViewFilesAtStartToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem deleteMorphsAutomaticallyToolStripMenuItem;
 		private System.Windows.Forms.Button buttonMeshNormals;
+		protected System.Windows.Forms.TabControl tabControlViews;
+		protected System.Windows.Forms.TabPage tabPageTextureView;
+		protected System.Windows.Forms.TabPage tabPageBoneView;
+		protected System.Windows.Forms.TabPage tabPageMeshView;
+		protected System.Windows.Forms.TabPage tabPageMaterialView;
+		private System.Windows.Forms.ImageList imageList1;
+		private System.Windows.Forms.GroupBox groupBox1;
+		private System.Windows.Forms.Button buttonAnimationClipPlayPause;
+		private System.Windows.Forms.TrackBar trackBarAnimationClipKeyframe;
+		public System.Windows.Forms.CheckBox checkBoxAnimationClipLoadNextClip;
+		public System.Windows.Forms.NumericUpDown numericAnimationClipSpeed;
+		private System.Windows.Forms.NumericUpDown numericAnimationClipKeyframe;
+		private System.Windows.Forms.Label labelSkeletalRender;
+		private System.Windows.Forms.Label label30;
 
 	}
 }

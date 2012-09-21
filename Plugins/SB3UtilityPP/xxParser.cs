@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.IO;
 using SlimDX;
 
@@ -189,7 +190,16 @@ namespace SB3Utility
 
 						if (Format >= 8)
 						{
-							submesh.Unknown5 = reader.ReadBytes(21); // 1 + 4 + 12 + 4
+							byte format = reader.ReadByte();
+							string nullFrame = reader.ReadName();
+							byte[] u5end = reader.ReadBytes(12 + 4);
+
+							byte[] encryptedName = Utility.EncryptName(nullFrame);
+							submesh.Unknown5 = new byte[1 + 4 + encryptedName.Length + 12 + 4];
+							submesh.Unknown5[0] = format;
+							BitConverter.GetBytes(encryptedName.Length).CopyTo(submesh.Unknown5, 1);
+							encryptedName.CopyTo(submesh.Unknown5, 1 + 4);
+							u5end.CopyTo(submesh.Unknown5, 1 + 4 + encryptedName.Length);
 						}
 					}
 					else
