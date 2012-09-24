@@ -1,8 +1,15 @@
-﻿[0.4.42.8]
+﻿[0.4.42.9]
+  - MQO export with world coordinates failed
+  - MQO import always failed
+  - Renderer crashed for meshes with missing textures
+    (head meshes having wrong extentions in textures)
+
+[0.4.42.8]
   - added replacing morphs
+  - materials and textures merged from workspace
 
 [0.4.42.7]
   - ODF/ODA animations are shown
 
 [p133]
-  - ODF animtions are shown
+  - ODF animations are shown
