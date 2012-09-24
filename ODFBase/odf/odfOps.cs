@@ -407,6 +407,26 @@ namespace ODFPlugin
 			destSubmesh.Unknown10 = (byte[])srcSubmesh.Unknown10.Clone();
 		}
 
+		public static void CreateUnknown(odfMaterial material)
+		{
+			UnknownDefaults.odfMaterial(material);
+		}
+
+		public static void CopyUnknown(odfMaterial srcMat, odfMaterial dstMat)
+		{
+			dstMat.Unknown1 = srcMat.Unknown1;
+		}
+
+		public static void CreateUnknown(odfTexture texture, int formatType)
+		{
+			UnknownDefaults.odfTexture(texture, formatType);
+		}
+
+		public static void CopyUnknown(odfTexture srcTex, odfTexture dstTex)
+		{
+			dstTex.Unknown1 = (byte[])srcTex.Unknown1.Clone();
+		}
+
 		public static void MergeBoneLists(odfMesh mesh, Dictionary<ObjectID, ObjectID> submeshIDtrans, odfParser parser)
 		{
 			foreach (odfSubmesh submesh in mesh)
@@ -764,6 +784,67 @@ namespace ODFPlugin
 				}
 			}
 			return dupList;
+		}
+
+		public static void ReplaceMorph(string destMorphName, odfParser parser, WorkspaceMorph wsMorphList, string newMorphName, bool replaceNormals, float minSquaredDistance)
+		{
+			odfMorphSection morphSection = parser.MorphSection;
+			if (morphSection == null)
+			{
+				Report.ReportLog("The .odf file doesn't have a morph section. Skipping these morphs");
+				return;
+			}
+
+			odfMorphObject morphObj = odf.FindMorphObject(destMorphName, morphSection);
+			if (morphObj == null)
+			{
+				Report.ReportLog("Couldn't find morph object " + destMorphName + ". Skipping these morphs");
+				return;
+			}
+
+			Report.ReportLog("Replacing morphs ...");
+			try
+			{
+				ushort[] meshIndices = morphObj.MeshIndices;
+				foreach (ImportedMorphKeyframe wsMorph in wsMorphList.KeyframeList)
+				{
+					if (!wsMorphList.isMorphKeyframeEnabled(wsMorph))
+						continue;
+					odfMorphProfile profile = odf.FindMorphProfile(wsMorph.Name, morphObj);
+					if (profile == null)
+					{
+						Report.ReportLog("Warning: Couldn't find morph profile " + wsMorph.Name + ". Skipping this morph");
+						continue;
+					}
+
+					List<ImportedVertex> vertList = wsMorph.VertexList;
+					for (int i = 0; i < meshIndices.Length; i++)
+					{
+						Vector3 orgPos = new Vector3(profile.VertexList[i].Position.X, profile.VertexList[i].Position.Y, profile.VertexList[i].Position.Z),
+							newPos = new Vector3(vertList[meshIndices[i]].Position.X, vertList[meshIndices[i]].Position.Y, vertList[meshIndices[i]].Position.Z);
+						if ((orgPos - newPos).LengthSquared() >= minSquaredDistance)
+							profile.VertexList[i].Position = vertList[meshIndices[i]].Position;
+						if (replaceNormals)
+						{
+							profile.VertexList[i].Normal = vertList[meshIndices[i]].Normal;
+						}
+					}
+
+					string morphNewName = wsMorphList.getMorphKeyframeNewName(wsMorph);
+					if (morphNewName != String.Empty)
+					{
+						profile.Name = new ObjectName(morphNewName, null);
+					}
+				}
+				if (newMorphName != String.Empty)
+				{
+					morphObj.Name = new ObjectName(newMorphName, null);
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
 		}
 	}
 }

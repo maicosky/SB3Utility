@@ -1285,5 +1285,16 @@ namespace ODFPlugin
 			if (!emptyFieldsOnly || submesh.Unknown10 == null)
 				submesh.Unknown10 = new byte[24];
 		}
+
+		public static void odfMaterial(odfMaterial material)
+		{
+			material.Unknown1 = 1;
+		}
+
+		public static void odfTexture(odfTexture texture, int formatType)
+		{
+			if (formatType < 10)
+				texture.Unknown1 = new byte[72];
+		}
 	}
 }

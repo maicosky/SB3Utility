@@ -78,7 +78,6 @@ namespace ODFPlugin
 		List<RenderObjectODF> renderObjectMeshes;
 		List<int> renderObjectIds;
 
-		private TreeNode[] prevMorphProfileNodes = null;
 		private ListViewItem loadedAnimationClip = null;
 
 		private int animationId;
@@ -677,12 +676,12 @@ namespace ODFPlugin
 						}
 					}
 					treeViewMorphObj.EndUpdate();
-					prevMorphProfileNodes = new TreeNode[this.Editor.Parser.MorphSection.Count];
+					listViewMorphProfileSelection.SelectedItems.Clear();
+					listViewMorphProfileSelection.Items.Clear();
 					tabPageMorph.Text = "Morph [" + this.Editor.Parser.MorphSection.Count + "]";
 				}
 				else
 				{
-					prevMorphProfileNodes = null;
 					if (tabPageMorph.Parent != null)
 						tabPageMorph.Parent.Controls.Remove(tabPageMorph);
 				}
@@ -1735,7 +1734,7 @@ namespace ODFPlugin
 				DragSource source = (DragSource)node.Tag;
 				if (source.Type == typeof(odfFrame))
 				{
-					using (var dragOptions = new FormODFDragDrop(Editor, true))
+					using (var dragOptions = new FormODFDragDrop(Editor, FormODFDragDrop.Panel.Frame))
 					{
 						var srcEditor = (odfEditor)Gui.Scripting.Variables[source.Variable];
 						var srcFrameName = srcEditor.Frames[(int)source.Id].Name;
@@ -1760,7 +1759,7 @@ namespace ODFPlugin
 				}
 				else if (source.Type == typeof(ImportedFrame))
 				{
-					using (var dragOptions = new FormODFDragDrop(Editor, true))
+					using (var dragOptions = new FormODFDragDrop(Editor, FormODFDragDrop.Panel.Frame))
 					{
 						var srcEditor = (ImportedEditor)Gui.Scripting.Variables[source.Variable];
 						var srcFrameName = srcEditor.Frames[(int)source.Id].Name;
@@ -1775,7 +1774,7 @@ namespace ODFPlugin
 				}
 				else if (source.Type == typeof(WorkspaceMesh))
 				{
-					using (var dragOptions = new FormODFDragDrop(Editor, false))
+					using (var dragOptions = new FormODFDragDrop(Editor, FormODFDragDrop.Panel.Mesh))
 					{
 						var srcEditor = (ImportedEditor)Gui.Scripting.Variables[source.Variable];
 
@@ -2135,6 +2134,135 @@ namespace ODFPlugin
 			catch (Exception ex)
 			{
 				Utility.ReportException(ex);
+			}
+		}
+
+		private void treeViewMorphObj_ItemDrag(object sender, ItemDragEventArgs e)
+		{
+			try
+			{
+				if (e.Item is TreeNode)
+				{
+					treeViewMorphObj.DoDragDrop(e.Item, DragDropEffects.Copy);
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void treeViewMorphObj_DragEnter(object sender, DragEventArgs e)
+		{
+			try
+			{
+				UpdateDragDropMorphs(sender, e);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void treeViewMorphObj_DragOver(object sender, DragEventArgs e)
+		{
+			try
+			{
+				UpdateDragDropMorphs(sender, e);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void treeViewMorphObj_DragDrop(object sender, DragEventArgs e)
+		{
+			try
+			{
+				TreeNode node = (TreeNode)e.Data.GetData(typeof(TreeNode));
+				if (node == null)
+				{
+					Gui.Docking.DockDragDrop(sender, e);
+				}
+				else
+				{
+					ProcessDragDropMorphs(node);
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void ProcessDragDropMorphs(TreeNode node)
+		{
+			if (node.Tag is DragSource)
+			{
+				if ((node.Parent != null) && !node.Checked && node.StateImageIndex != (int)CheckState.Indeterminate)
+				{
+					return;
+				}
+
+				DragSource? dest = null;
+				if (treeViewMorphObj.SelectedNode != null)
+				{
+					dest = treeViewMorphObj.SelectedNode.Tag as DragSource?;
+				}
+
+				DragSource source = (DragSource)node.Tag;
+				if (source.Type == typeof(WorkspaceMorph))
+				{
+					using (var dragOptions = new FormODFDragDrop(Editor, FormODFDragDrop.Panel.MorphList))
+					{
+						var srcEditor = (ImportedEditor)Gui.Scripting.Variables[source.Variable];
+						dragOptions.textBoxName.Text = srcEditor.Morphs[(int)source.Id].Name;
+						if (dragOptions.ShowDialog() == DialogResult.OK)
+						{
+							// repeating only final choices for repeatability of the script
+							WorkspaceMorph wsMorph = srcEditor.Morphs[(int)source.Id];
+							foreach (ImportedMorphKeyframe keyframe in wsMorph.KeyframeList)
+							{
+								if (!wsMorph.isMorphKeyframeEnabled(keyframe))
+								{
+									Gui.Scripting.RunScript(source.Variable + ".setMorphKeyframeEnabled(morphId=" + (int)source.Id + ", id=" + wsMorph.KeyframeList.IndexOf(keyframe) + ", enabled=false)");
+								}
+							}
+							Gui.Scripting.RunScript(EditorVar + ".ReplaceMorph(morph=" + source.Variable + ".Morphs[" + (int)source.Id + "], destMorphName=\"" + dragOptions.textBoxName.Text + "\", newName=\"" + dragOptions.textBoxNewName.Text + "\", replaceNormals=" + dragOptions.radioButtonReplaceNormalsYes.Checked + ", minSquaredDistance=" + dragOptions.numericUpDownMinimumDistanceSquared.Value + ")");
+//							UnloadMorphs();
+							InitMorphs();
+						}
+					}
+				}
+			}
+			else
+			{
+				foreach (TreeNode child in node.Nodes)
+				{
+					ProcessDragDropMorphs(child);
+				}
+			}
+		}
+
+		private void UpdateDragDropMorphs(object sender, DragEventArgs e)
+		{
+			Point p = treeViewMorphObj.PointToClient(new Point(e.X, e.Y));
+			TreeNode target = treeViewMorphObj.GetNodeAt(p);
+			if ((target != null) && ((p.X < target.Bounds.Left) || (p.X > target.Bounds.Right) || (p.Y < target.Bounds.Top) || (p.Y > target.Bounds.Bottom)))
+			{
+				target = null;
+			}
+			treeViewMorphObj.SelectedNode = target;
+
+			TreeNode node = (TreeNode)e.Data.GetData(typeof(TreeNode));
+			if (node == null)
+			{
+				Gui.Docking.DockDragEnter(sender, e);
+			}
+			else
+			{
+				e.Effect = e.AllowedEffect & DragDropEffects.Copy;
 			}
 		}
 

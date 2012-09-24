@@ -1,0 +1,8 @@
+﻿[0.4.42.8]
+  - added replacing morphs
+
+[0.4.42.7]
+  - ODF/ODA animations are shown
+
+[p133]
+  - ODF animtions are shown

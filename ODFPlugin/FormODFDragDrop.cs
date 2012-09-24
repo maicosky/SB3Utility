@@ -12,24 +12,33 @@ namespace ODFPlugin
 {
 	public partial class FormODFDragDrop : Form
 	{
+		public enum Panel
+		{
+			Frame, Mesh, MorphList
+		}
+
 		public CopyFrameMethod FrameMethod { get; protected set; }
 		public CopyMeshMethod NormalsMethod { get; protected set; }
 		public CopyMeshMethod BonesMethod { get; protected set; }
 
 		private odfEditor editor;
 
-		public FormODFDragDrop(odfEditor destEditor, bool frame)
+		public FormODFDragDrop(odfEditor destEditor, Panel panel)
 		{
 			InitializeComponent();
 			editor = destEditor;
 
-			if (frame)
+			switch (panel)
 			{
+			case Panel.Frame:
 				panelFrame.BringToFront();
-			}
-			else
-			{
+				break;
+			case Panel.Mesh:
 				panelMesh.BringToFront();
+				break;
+			case Panel.MorphList:
+				panelMorphList.BringToFront();
+				break;
 			}
 
 			numericFrameId.Maximum = editor.Frames.Count - 1;

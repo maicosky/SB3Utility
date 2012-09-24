@@ -222,25 +222,28 @@ namespace ODFPlugin
 					parser.MaterialSection.AddChild(mat);
 				}
 				ObjectID[] texIDs = new ObjectID[4] { ObjectID.INVALID, ObjectID.INVALID, ObjectID.INVALID, ObjectID.INVALID };
-				for (int j = 0; j < materials[i].Textures.Length; j++)
+				if (materials != null)
 				{
-					string texName = materials[i].Textures[j];
-					odfTexture tex = odf.FindTextureInfo(texName, parser.TextureSection);
-					if (tex == null)
+					for (int j = 0; j < materials[i].Textures.Length; j++)
 					{
-						for (int k = 0; k < textures.Count; k++)
+						string texName = materials[i].Textures[j];
+						odfTexture tex = odf.FindTextureInfo(texName, parser.TextureSection);
+						if (tex == null)
 						{
-							if (textures[k].Name == texName)
+							for (int k = 0; k < textures.Count; k++)
 							{
-								tex = CreateTexture(textures[k], parser.GetNewID(typeof(odfTexture)), parser.TextureSection._FormatType, Path.GetDirectoryName(parser.ODFPath));
-								parser.TextureSection.AddChild(tex);
-								texIDs[j] = tex.Id;
-								break;
+								if (textures[k].Name == texName)
+								{
+									tex = CreateTexture(textures[k], parser.GetNewID(typeof(odfTexture)), parser.TextureSection._FormatType, Path.GetDirectoryName(parser.ODFPath));
+									parser.TextureSection.AddChild(tex);
+									texIDs[j] = tex.Id;
+									break;
+								}
 							}
 						}
+						else
+							texIDs[j] = tex.Id;
 					}
-					else
-						texIDs[j] = tex.Id;
 				}
 
 				odfSubmesh newSubmesh = newMesh[i];
@@ -432,12 +435,40 @@ namespace ODFPlugin
 			return odfMat;
 		}
 
+		public static void ReplaceMaterial(odfParser parser, ImportedMaterial material)
+		{
+			odfMaterial mat = CreateMaterial(material, null);
+
+			bool found = false;
+			for (int i = 0; i < parser.MaterialSection.Count; i++)
+			{
+				if (parser.MaterialSection[i].Name == material.Name)
+				{
+					odfMaterial original = parser.MaterialSection[i];
+					mat.Id = original.Id;
+					CopyUnknown(original, mat);
+
+					parser.MaterialSection.RemoveChild(i);
+					parser.MaterialSection.InsertChild(i, mat);
+					found = true;
+					break;
+				}
+			}
+
+			if (!found)
+			{
+				mat.Id = parser.GetNewID(typeof(odfMaterial));
+				CreateUnknown(mat);
+				parser.MaterialSection.AddChild(mat);
+			}
+		}
+
 		public static odfTexture CreateTexture(ImportedTexture impTex, ObjectID id, int format, string odfPath)
 		{
 			odfTexture odfTex = new odfTexture(new ObjectName(impTex.Name, null), id, format);
 			odfTex.TextureFile = new ObjectName(impTex.Name, null);
 
-			string destPath = odfPath + Path.DirectorySeparatorChar + odfTex.TextureFile;
+			string destPath = odfPath + @"\" + odfTex.TextureFile;
 			DirectoryInfo dir = new DirectoryInfo(odfPath);
 			if (!dir.Exists)
 			{
@@ -450,12 +481,20 @@ namespace ODFPlugin
 				File.Move(destPath, backup);
 			}
 
-			using (BinaryWriter writer = new BinaryWriter(File.OpenWrite(destPath)))
-			{
-				writer.Write(impTex.Data);
-			}
+			odf.ImportTexture(impTex, destPath);
 
 			return odfTex;
+		}
+
+		public static void ReplaceTexture(odfParser parser, ImportedTexture impTex)
+		{
+			odfTexture newTex = CreateTexture(impTex, null, parser.TextureSection._FormatType, Path.GetDirectoryName(parser.ODFPath));
+
+			if (odf.FindTextureInfo(impTex.Name, parser.TextureSection) == null)
+			{
+				newTex.Id = parser.GetNewID(typeof(odfTexture));
+				parser.TextureSection.AddChild(newTex);
+			}
 		}
 	}
 }

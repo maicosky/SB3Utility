@@ -374,17 +374,24 @@ namespace ODFPlugin
 							odfTexture tex = odf.FindTextureInfo(submesh.TextureIds[0], parser.TextureSection);
 							if (tex != null)
 							{
-								odfTextureFile texFile = new odfTextureFile(null, Path.GetDirectoryName(parser.ODFPath) + Path.DirectorySeparatorChar + tex.TextureFile);
-								int fileSize = 0;
-								byte[] data;
-								using (BinaryReader reader = texFile.DecryptFile(ref fileSize))
+								try
 								{
-									data = reader.ReadBytes(fileSize);
+									odfTextureFile texFile = new odfTextureFile(null, Path.GetDirectoryName(parser.ODFPath) + Path.DirectorySeparatorChar + tex.TextureFile);
+									int fileSize = 0;
+									byte[] data;
+									using (BinaryReader reader = texFile.DecryptFile(ref fileSize))
+									{
+										data = reader.ReadBytes(fileSize);
+									}
+									Texture memTex = Texture.FromMemory(device, data);
+									texIdx = TextureDic.Count;
+									TextureDic.Add((int)submesh.TextureIds[0], texIdx);
+									Textures[texIdx] = memTex;
 								}
-								Texture memTex = Texture.FromMemory(device, data);
-								texIdx = TextureDic.Count;
-								TextureDic.Add((int)submesh.TextureIds[0], texIdx);
-								Textures[texIdx] = memTex;
+								catch (Exception ex)
+								{
+									Utility.ReportException(ex);
+								}
 							}
 						}
 						meshContainer.TextureIndex = texIdx;

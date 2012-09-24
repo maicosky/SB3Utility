@@ -50,17 +50,8 @@ namespace ODFPluginOld
 		[Plugin]
 		public static Mqo.Importer ImportMqoAsODF([DefaultVar]string path)
 		{
-			Console.WriteLine("ImpMqo As ODF");
 			return new Mqo.Importer(path);
 		}
-
-/*		[Plugin]
-		[PluginType(PluginFlags.Importer)]
-		public static Mqo.ImporterMorph ImportMorphMqoAsODF([DefaultVar]string path)
-		{
-			Console.WriteLine("ImpMorphMqo As ODF");
-			return new Mqo.ImporterMorph(path);
-		}*/
 	}
 
 	public class Mqo
@@ -437,66 +428,6 @@ namespace ODFPluginOld
 			}
 		}
 
-/*		public class ImporterMorph : IImported
-		{
-			public List<ImportedFrame> FrameList { get; protected set; }
-			public List<ImportedMesh> MeshList { get; protected set; }
-			public List<ImportedMaterial> MaterialList { get; protected set; }
-			public List<ImportedTexture> TextureList { get; protected set; }
-			public List<ImportedAnimation> AnimationList { get; protected set; }
-			public List<ImportedMorph> MorphList { get; protected set; }
-
-			public ImporterMorph(string path)
-			{
-				try
-				{
-					Importer importer = new Importer(path);
-					MorphList = new List<ImportedMorph>();
-
-					ImportedMorph morphList = new ImportedMorph();
-					MorphList.Add(morphList);
-					morphList.KeyframeList = new List<ImportedMorphKeyframe>(importer.MeshList.Count);
-					foreach (ImportedMesh meshList in importer.MeshList)
-					{
-						foreach (ImportedSubmesh submesh in meshList.SubmeshList)
-						{
-							ImportedMorphKeyframe morph = new ImportedMorphKeyframe();
-							morph.Name = meshList.Name;
-							morph.VertexList = submesh.VertexList;
-							morphList.KeyframeList.Add(morph);
-						}
-					}
-
-					int startIdx = path.IndexOf('-') + 1;
-					int endIdx = path.LastIndexOf('-');
-					if (startIdx > endIdx)
-					{
-						int extIdx = path.ToLower().LastIndexOf(".morph.mqo");
-						for (int i = extIdx - 1; i >= 0; i--)
-						{
-							if (!Char.IsDigit(path[i]))
-							{
-								endIdx = i + 1;
-								break;
-							}
-						}
-					}
-					if ((startIdx > 0) && (endIdx > 0) && (startIdx < endIdx))
-					{
-						morphList.Name = path.Substring(startIdx, endIdx - startIdx);
-					}
-					if (morphList.Name == String.Empty)
-					{
-						morphList.Name = "(no name)";
-					}
-				}
-				catch (Exception ex)
-				{
-					Report.ReportLog("Error importing .morphs.mqo: " + ex.Message);
-				}
-			}
-		}*/
-
 		private static class ExporterCommon
 		{
 			public static void WriteMeshObject(StreamWriter writer, List<ImportedVertex> vertexList, List<ImportedFace> faceList, int mqoMatIdx, bool[] colorVertex)
@@ -676,10 +607,10 @@ namespace ODFPluginOld
 						if (worldCoords)
 						{
 							odfFrame parent = odf.FindMeshFrame(meshes[i].Id, parser.FrameSection.RootFrame);
-							while (parent is odfFrame)
+							while (parent != null)
 							{
 								transform = parent.Matrix * transform;
-								parent = parent.Parent;
+								parent = parent.Parent as odfFrame;
 							}
 						}
 

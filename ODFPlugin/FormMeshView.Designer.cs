@@ -1718,6 +1718,7 @@
 			// 
 			// treeViewMorphObj
 			// 
+			this.treeViewMorphObj.AllowDrop = true;
 			this.treeViewMorphObj.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
@@ -1726,7 +1727,11 @@
 			this.treeViewMorphObj.Name = "treeViewMorphObj";
 			this.treeViewMorphObj.Size = new System.Drawing.Size(462, 250);
 			this.treeViewMorphObj.TabIndex = 7;
+			this.treeViewMorphObj.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.treeViewMorphObj_ItemDrag);
 			this.treeViewMorphObj.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewMorphObj_AfterSelect);
+			this.treeViewMorphObj.DragDrop += new System.Windows.Forms.DragEventHandler(this.treeViewMorphObj_DragDrop);
+			this.treeViewMorphObj.DragEnter += new System.Windows.Forms.DragEventHandler(this.treeViewMorphObj_DragEnter);
+			this.treeViewMorphObj.DragOver += new System.Windows.Forms.DragEventHandler(this.treeViewMorphObj_DragOver);
 			// 
 			// label4
 			// 
@@ -2110,7 +2115,7 @@
 			this.groupBox1.Controls.Add(this.numericAnimationClipKeyframe);
 			this.groupBox1.Controls.Add(this.labelSkeletalRender);
 			this.groupBox1.Controls.Add(this.label30);
-			this.groupBox1.Location = new System.Drawing.Point(0, 166);
+			this.groupBox1.Location = new System.Drawing.Point(0, 164);
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.Size = new System.Drawing.Size(287, 65);
 			this.groupBox1.TabIndex = 155;
@@ -2234,7 +2239,7 @@
 			this.listViewAnimationClip.Name = "listViewAnimationClip";
 			this.listViewAnimationClip.ShowGroups = false;
 			this.listViewAnimationClip.ShowItemToolTips = true;
-			this.listViewAnimationClip.Size = new System.Drawing.Size(463, 149);
+			this.listViewAnimationClip.Size = new System.Drawing.Size(463, 147);
 			this.listViewAnimationClip.TabIndex = 111;
 			this.listViewAnimationClip.UseCompatibleStateImageBehavior = false;
 			this.listViewAnimationClip.View = System.Windows.Forms.View.Details;

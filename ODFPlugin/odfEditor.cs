@@ -699,11 +699,11 @@ namespace ODFPlugin
 			}
 		}
 
-/*		[Plugin]
+		[Plugin]
 		public void MergeMaterial(ImportedMaterial mat)
 		{
-			xx.ReplaceMaterial(Parser, mat);
-		}*/
+			odf.ReplaceMaterial(Parser, mat);
+		}
 
 		[Plugin]
 		public void MergeMaterial(odfMaterial srcMat, odfParser srcParser)
@@ -910,72 +910,34 @@ namespace ODFPlugin
 		[Plugin]
 		public odfTexture AddTexture(ImportedTexture image)
 		{
-			odfTexture tex = new odfTexture(new ObjectName(image.Name, null), Parser.GetNewID(typeof(odfTexture)), Parser.TextureSection._FormatType);
-			tex.TextureFile = new ObjectName(image.Name, null);
+			odfTexture tex = odf.CreateTexture(image, Parser.GetNewID(typeof(odfTexture)), Parser.TextureSection._FormatType, Path.GetDirectoryName(Parser.ODFPath));
 			Parser.TextureSection.AddChild(tex);
-
-			string path = Path.GetDirectoryName(Parser.ODFPath) + Path.DirectorySeparatorChar + image.Name;
-			DirectoryInfo dir = new DirectoryInfo(Path.GetDirectoryName(path));
-			if (!dir.Exists)
-			{
-				dir.Create();
-			}
-
-			if (File.Exists(path))
-			{
-				string backup = Utility.GetDestFile(dir, Path.GetFileNameWithoutExtension(path) + ".bak", Path.GetExtension(tex.TextureFile));
-				File.Move(path, backup);
-			}
-
-			odf.ImportTexture(image, path);
 			return tex;
 		}
 
 		[Plugin]
 		public void ReplaceTexture(int idx, ImportedTexture image)
 		{
-			odfTexture newTex = AddTexture(image);
-			Parser.TextureSection.RemoveChild(newTex);
-			Parser.UsedIDs.Remove((int)newTex.Id);
-
 			odfTexture oldTex = Parser.TextureSection[idx];
 			Parser.TextureSection.RemoveChild(oldTex);
 
-			newTex.Id = oldTex.Id;
+			odfTexture newTex = odf.CreateTexture(image, oldTex.Id, Parser.TextureSection._FormatType, Path.GetDirectoryName(Parser.ODFPath));
 			Parser.TextureSection.InsertChild(idx, newTex);
 		}
 
-/*		[Plugin]
+		[Plugin]
 		public void MergeTexture(ImportedTexture tex)
 		{
-			xx.ReplaceTexture(Parser, tex);
-		}*/
+			odf.ReplaceTexture(Parser, tex);
+		}
 
 		[Plugin]
 		public void MergeTexture(odfTexture tex, odfParser srcParser)
 		{
-			ImportedTexture impTex = new ImportedTexture(Path.GetDirectoryName(srcParser.ODFPath) + Path.DirectorySeparatorChar + tex.TextureFile);
+			ImportedTexture impTex = new ImportedTexture(Path.GetDirectoryName(srcParser.ODFPath) + @"\" + tex.TextureFile);
 
-			string destPath = Path.GetDirectoryName(Parser.ODFPath) + Path.DirectorySeparatorChar + tex.TextureFile;
-			DirectoryInfo dir = new DirectoryInfo(Path.GetDirectoryName(destPath));
-			if (!dir.Exists)
-			{
-				dir.Create();
-			}
-
-			if (File.Exists(destPath))
-			{
-				string backup = Utility.GetDestFile(dir, Path.GetFileNameWithoutExtension(destPath) + ".bak", Path.GetExtension(tex.TextureFile));
-				File.Move(destPath, backup);
-			}
-
-			FileStream file = File.OpenWrite(destPath);
-			using (BinaryWriter writer = new BinaryWriter(file))
-			{
-				writer.Write(impTex.Data);
-			}
-
-			var newTex = tex.Clone(Parser.TextureSection._FormatType);
+			odfTexture newTex = odf.CreateTexture(impTex, null, Parser.TextureSection._FormatType, Path.GetDirectoryName(Parser.ODFPath));
+			newTex = tex.Clone(Parser.TextureSection._FormatType);
 
 			bool found = false;
 			for (int i = 0; i < Parser.TextureSection.Count; i++)
@@ -984,8 +946,8 @@ namespace ODFPlugin
 				if (oldTex.Name == newTex.Name)
 				{
 					newTex.Id = oldTex.Id;
-					Parser.TextureSection.ChildList.RemoveAt(i);
-					Parser.TextureSection.ChildList.Insert(i, newTex);
+					Parser.TextureSection.RemoveChild(i);
+					Parser.TextureSection.InsertChild(i, newTex);
 					found = true;
 					break;
 				}
@@ -1062,6 +1024,12 @@ namespace ODFPlugin
 		public void ExportMorphObject(string path, odfParser parser, string morphObj, bool skipUnusedProfiles)
 		{
 			ODFPluginOld.Plugins.ExportMorphMqo(path, parser, morphObj, skipUnusedProfiles);
+		}
+
+		[Plugin]
+		public void ReplaceMorph(WorkspaceMorph morph, string destMorphName, string newName, bool replaceNormals, double minSquaredDistance)
+		{
+			odf.ReplaceMorph(destMorphName, Parser, morph, newName, replaceNormals, (float)minSquaredDistance);
 		}
 	}
 }

@@ -43,6 +43,7 @@
 			this.textBoxFrameName = new System.Windows.Forms.TextBox();
 			this.label2 = new System.Windows.Forms.Label();
 			this.panelMesh = new System.Windows.Forms.Panel();
+			this.textBoxMeshName = new System.Windows.Forms.TextBox();
 			this.numericMeshId = new System.Windows.Forms.NumericUpDown();
 			this.textBoxMeshFrameName = new System.Windows.Forms.TextBox();
 			this.panel4 = new System.Windows.Forms.Panel();
@@ -61,7 +62,17 @@
 			this.label6 = new System.Windows.Forms.Label();
 			this.label7 = new System.Windows.Forms.Label();
 			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-			this.textBoxMeshName = new System.Windows.Forms.TextBox();
+			this.panelMorphList = new System.Windows.Forms.Panel();
+			this.textBoxNewName = new System.Windows.Forms.TextBox();
+			this.label8 = new System.Windows.Forms.Label();
+			this.numericUpDownMinimumDistanceSquared = new System.Windows.Forms.NumericUpDown();
+			this.label9 = new System.Windows.Forms.Label();
+			this.textBoxName = new System.Windows.Forms.TextBox();
+			this.panel5 = new System.Windows.Forms.Panel();
+			this.radioButtonReplaceNormalsNo = new System.Windows.Forms.RadioButton();
+			this.radioButtonReplaceNormalsYes = new System.Windows.Forms.RadioButton();
+			this.label10 = new System.Windows.Forms.Label();
+			this.label11 = new System.Windows.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this.numericFrameMeshMatOffset)).BeginInit();
 			this.panelFrame.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericFrameId)).BeginInit();
@@ -71,6 +82,9 @@
 			this.panel4.SuspendLayout();
 			this.panel3.SuspendLayout();
 			this.panel1.SuspendLayout();
+			this.panelMorphList.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.numericUpDownMinimumDistanceSquared)).BeginInit();
+			this.panel5.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// buttonOK
@@ -245,6 +259,15 @@
 			this.panelMesh.Name = "panelMesh";
 			this.panelMesh.Size = new System.Drawing.Size(367, 121);
 			this.panelMesh.TabIndex = 16;
+			// 
+			// textBoxMeshName
+			// 
+			this.textBoxMeshName.Location = new System.Drawing.Point(221, 34);
+			this.textBoxMeshName.Name = "textBoxMeshName";
+			this.textBoxMeshName.ReadOnly = true;
+			this.textBoxMeshName.Size = new System.Drawing.Size(127, 20);
+			this.textBoxMeshName.TabIndex = 25;
+			this.toolTip1.SetToolTip(this.textBoxMeshName, "Destination mesh name to be replaced");
 			// 
 			// numericMeshId
 			// 
@@ -424,14 +447,124 @@
 			this.label7.TabIndex = 16;
 			this.label7.Text = "Method";
 			// 
-			// textBoxMeshName
+			// panelMorphList
 			// 
-			this.textBoxMeshName.Location = new System.Drawing.Point(221, 34);
-			this.textBoxMeshName.Name = "textBoxMeshName";
-			this.textBoxMeshName.ReadOnly = true;
-			this.textBoxMeshName.Size = new System.Drawing.Size(127, 20);
-			this.textBoxMeshName.TabIndex = 25;
-			this.toolTip1.SetToolTip(this.textBoxMeshName, "Destination mesh name to be replaced");
+			this.panelMorphList.Controls.Add(this.textBoxNewName);
+			this.panelMorphList.Controls.Add(this.label8);
+			this.panelMorphList.Controls.Add(this.numericUpDownMinimumDistanceSquared);
+			this.panelMorphList.Controls.Add(this.label9);
+			this.panelMorphList.Controls.Add(this.textBoxName);
+			this.panelMorphList.Controls.Add(this.panel5);
+			this.panelMorphList.Controls.Add(this.label10);
+			this.panelMorphList.Controls.Add(this.label11);
+			this.panelMorphList.Location = new System.Drawing.Point(12, 12);
+			this.panelMorphList.Name = "panelMorphList";
+			this.panelMorphList.Size = new System.Drawing.Size(367, 121);
+			this.panelMorphList.TabIndex = 17;
+			// 
+			// textBoxNewName
+			// 
+			this.textBoxNewName.Location = new System.Drawing.Point(139, 36);
+			this.textBoxNewName.Name = "textBoxNewName";
+			this.textBoxNewName.Size = new System.Drawing.Size(112, 20);
+			this.textBoxNewName.TabIndex = 20;
+			// 
+			// label8
+			// 
+			this.label8.AutoSize = true;
+			this.label8.Location = new System.Drawing.Point(9, 39);
+			this.label8.Name = "label8";
+			this.label8.Size = new System.Drawing.Size(59, 13);
+			this.label8.TabIndex = 19;
+			this.label8.Text = "Rename to";
+			// 
+			// numericUpDownMinimumDistanceSquared
+			// 
+			this.numericUpDownMinimumDistanceSquared.DecimalPlaces = 6;
+			this.numericUpDownMinimumDistanceSquared.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            393216});
+			this.numericUpDownMinimumDistanceSquared.Location = new System.Drawing.Point(138, 87);
+			this.numericUpDownMinimumDistanceSquared.Maximum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+			this.numericUpDownMinimumDistanceSquared.Name = "numericUpDownMinimumDistanceSquared";
+			this.numericUpDownMinimumDistanceSquared.Size = new System.Drawing.Size(71, 20);
+			this.numericUpDownMinimumDistanceSquared.TabIndex = 18;
+			this.numericUpDownMinimumDistanceSquared.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            327680});
+			// 
+			// label9
+			// 
+			this.label9.AutoSize = true;
+			this.label9.Location = new System.Drawing.Point(9, 89);
+			this.label9.Name = "label9";
+			this.label9.Size = new System.Drawing.Size(96, 13);
+			this.label9.TabIndex = 17;
+			this.label9.Text = "Minimum Distance²";
+			// 
+			// textBoxName
+			// 
+			this.textBoxName.Location = new System.Drawing.Point(139, 10);
+			this.textBoxName.Name = "textBoxName";
+			this.textBoxName.Size = new System.Drawing.Size(112, 20);
+			this.textBoxName.TabIndex = 14;
+			// 
+			// panel5
+			// 
+			this.panel5.Controls.Add(this.radioButtonReplaceNormalsNo);
+			this.panel5.Controls.Add(this.radioButtonReplaceNormalsYes);
+			this.panel5.Location = new System.Drawing.Point(132, 62);
+			this.panel5.Name = "panel5";
+			this.panel5.Size = new System.Drawing.Size(108, 21);
+			this.panel5.TabIndex = 16;
+			// 
+			// radioButtonReplaceNormalsNo
+			// 
+			this.radioButtonReplaceNormalsNo.AutoSize = true;
+			this.radioButtonReplaceNormalsNo.Location = new System.Drawing.Point(53, 2);
+			this.radioButtonReplaceNormalsNo.Name = "radioButtonReplaceNormalsNo";
+			this.radioButtonReplaceNormalsNo.Size = new System.Drawing.Size(39, 17);
+			this.radioButtonReplaceNormalsNo.TabIndex = 1;
+			this.radioButtonReplaceNormalsNo.Text = "No";
+			this.radioButtonReplaceNormalsNo.UseVisualStyleBackColor = true;
+			// 
+			// radioButtonReplaceNormalsYes
+			// 
+			this.radioButtonReplaceNormalsYes.AutoSize = true;
+			this.radioButtonReplaceNormalsYes.Checked = true;
+			this.radioButtonReplaceNormalsYes.Location = new System.Drawing.Point(6, 2);
+			this.radioButtonReplaceNormalsYes.Name = "radioButtonReplaceNormalsYes";
+			this.radioButtonReplaceNormalsYes.Size = new System.Drawing.Size(43, 17);
+			this.radioButtonReplaceNormalsYes.TabIndex = 0;
+			this.radioButtonReplaceNormalsYes.TabStop = true;
+			this.radioButtonReplaceNormalsYes.Text = "Yes";
+			this.radioButtonReplaceNormalsYes.UseVisualStyleBackColor = true;
+			// 
+			// label10
+			// 
+			this.label10.AutoSize = true;
+			this.label10.Location = new System.Drawing.Point(9, 66);
+			this.label10.Name = "label10";
+			this.label10.Size = new System.Drawing.Size(94, 13);
+			this.label10.TabIndex = 15;
+			this.label10.Text = "Replace Normals?";
+			// 
+			// label11
+			// 
+			this.label11.AutoSize = true;
+			this.label11.Location = new System.Drawing.Point(9, 13);
+			this.label11.Name = "label11";
+			this.label11.Size = new System.Drawing.Size(105, 13);
+			this.label11.TabIndex = 13;
+			this.label11.Text = "Target Morph Object";
 			// 
 			// FormODFDragDrop
 			// 
@@ -440,6 +573,7 @@
 			this.ClientSize = new System.Drawing.Size(390, 192);
 			this.Controls.Add(this.buttonCancel);
 			this.Controls.Add(this.buttonOK);
+			this.Controls.Add(this.panelMorphList);
 			this.Controls.Add(this.panelMesh);
 			this.Controls.Add(this.panelFrame);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
@@ -463,6 +597,11 @@
 			this.panel3.PerformLayout();
 			this.panel1.ResumeLayout(false);
 			this.panel1.PerformLayout();
+			this.panelMorphList.ResumeLayout(false);
+			this.panelMorphList.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.numericUpDownMinimumDistanceSquared)).EndInit();
+			this.panel5.ResumeLayout(false);
+			this.panel5.PerformLayout();
 			this.ResumeLayout(false);
 
 		}
@@ -502,5 +641,16 @@
 		private System.Windows.Forms.TextBox textBoxMeshFrameName;
 		private System.Windows.Forms.ToolTip toolTip1;
 		private System.Windows.Forms.TextBox textBoxMeshName;
+		private System.Windows.Forms.Panel panelMorphList;
+		public System.Windows.Forms.TextBox textBoxNewName;
+		private System.Windows.Forms.Label label8;
+		public System.Windows.Forms.NumericUpDown numericUpDownMinimumDistanceSquared;
+		private System.Windows.Forms.Label label9;
+		public System.Windows.Forms.TextBox textBoxName;
+		private System.Windows.Forms.Panel panel5;
+		public System.Windows.Forms.RadioButton radioButtonReplaceNormalsNo;
+		public System.Windows.Forms.RadioButton radioButtonReplaceNormalsYes;
+		private System.Windows.Forms.Label label10;
+		private System.Windows.Forms.Label label11;
 	}
 }
