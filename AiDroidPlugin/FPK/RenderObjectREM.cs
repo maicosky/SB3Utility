@@ -5,7 +5,6 @@ using System.Drawing;
 using System.IO;
 using SlimDX;
 using SlimDX.Direct3D9;
-using System.Runtime.InteropServices;
 
 using SB3Utility;
 
@@ -96,7 +95,7 @@ namespace AiDroidPlugin
 
 		public void Render()
 		{
-//			UpdateFrameMatrices(rootFrame, Matrix.Identity);
+			UpdateFrameMatrices(rootFrame, Matrix.Identity);
 
 			for (int i = 0; i < meshFrames.Count; i++)
 			{
@@ -262,7 +261,6 @@ namespace AiDroidPlugin
 #if !DONT_MIRROR
 			parser.RemFile.BONC.rootFrame.trans = Matrix.Scaling(scale) * Matrix.RotationQuaternion(rotate) * Matrix.Translation(translate);
 #endif
-UpdateFrameMatrices(rootFrame, Matrix.Identity);
 			return rootFrame;
 		}
 
@@ -402,7 +400,7 @@ UpdateFrameMatrices(rootFrame, Matrix.Identity);
 							ImportedTexture importedTex = null;
 							if (!ImportedTextures.TryGetValue(mat.texture.ToString(), out importedTex))
 							{
-								importedTex = rem.ImportedTexture(mat.texture, Path.GetDirectoryName(parser.RemPath), true);
+								importedTex = rem.ImportedTexture(mat.texture, parser.RemPath, true);
 								ImportedTextures.Add(mat.texture.ToString(), importedTex);
 							}
 							Texture memTex = Texture.FromMemory(device, importedTex.Data);

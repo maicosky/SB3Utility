@@ -1,48 +1,37 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.IO;
 
-namespace SB3Utility
+using SB3Utility;
+
+namespace AiDroidPlugin
 {
 	public static partial class Plugins
 	{
 		/// <summary>
-		/// Parses a .pp archive file from the specified path.
+		/// Parses a .fpk archive file from the specified path.
 		/// </summary>
 		/// <param name="path"><b>[DefaultVar]</b> Path of the file.</param>
-		/// <returns>A ppParser that represents the .pp archive.</returns>
+		/// <returns>A fpkParser that represents the .fpk archive.</returns>
 		[Plugin]
-		public static ppParser OpenPP([DefaultVar]string path)
+		public static fpkParser OpenFPK([DefaultVar]string path)
 		{
-			ppFormat format = ppFormat.GetFormat(path);
+			fpkDirFormat format = fpkDirFormat.GetFormat(path);
 			if (format == null)
 			{
-				throw new Exception("Couldn't auto-detect the ppFormat");
+				throw new Exception("Couldn't auto-detect the format of " + path);
 			}
-			return new ppParser(path, format);
-		}
-
-		/// <summary>
-		/// Parses a .pp archive file from the specified path.
-		/// </summary>
-		/// <param name="path"><b>[DefaultVar]</b> Path of the file.</param>
-		/// <param name="format"><b>(int)</b> Index of the ppFormat array</param>
-		/// <returns>A ppParser that represents the .pp archive.</returns>
-		[Plugin]
-		public static ppParser OpenPP([DefaultVar]string path, double format)
-		{
-			return new ppParser(path, ppFormat.Array[(int)format]);
+			return new fpkParser(path, format);
 		}
 
 		/// <summary>
 		/// Extracts a subfile with the specified name and writes it to the specified path.
 		/// </summary>
-		/// <param name="parser"><b>[DefaultVar]</b> The ppParser with the subfile.</param>
+		/// <param name="parser"><b>[DefaultVar]</b> The fpkParser with the subfile.</param>
 		/// <param name="name">The name of the subfile.</param>
 		/// <param name="path">The destination path to write the subfile.</param>
 		[Plugin]
-		public static void ExportSubfile([DefaultVar]ppParser parser, string name, string path)
+		public static void ExportSubfile([DefaultVar]fpkParser parser, string name, string path)
 		{
 			for (int i = 0; i < parser.Subfiles.Count; i++)
 			{
@@ -65,12 +54,8 @@ namespace SB3Utility
 		}
 
 		[Plugin]
-		public static void ExportPP([DefaultVar]ppParser parser, string path)
+		public static void ExportFPK([DefaultVar]fpkParser parser, string path)
 		{
-			if (path == String.Empty)
-			{
-				path = @".\";
-			}
 			DirectoryInfo dir = new DirectoryInfo(path);
 			if (!dir.Exists)
 			{

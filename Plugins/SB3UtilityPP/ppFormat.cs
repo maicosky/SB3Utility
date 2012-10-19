@@ -41,7 +41,7 @@ namespace SB3Utility
 		Wakeari,
 		LoveGirl,
 		Hero,
-		HETTrial
+		HET
 	}
 
 	public abstract class ppFormat
@@ -77,7 +77,7 @@ namespace SB3Utility
 			new ppFormat_Wakeari(),
 			new ppFormat_LoveGirl(),
 			new ppFormat_Hero(),
-			new ppFormat_HETTrial()
+			new ppFormat_HET()
 		};
 
 		public abstract Stream ReadStream(Stream stream);
@@ -179,6 +179,10 @@ namespace SB3Utility
 			else if (ext == ".lst")
 			{
 				tryFunc = new Func<ppSubfile, bool>(TryFileLst);
+			}
+			else if (ext == ".wav" || ext == ".ogg")
+			{
+				tryFunc = new Func<ppSubfile, bool>(TryFileSound);
 			}
 
 			if (tryFunc != null)
@@ -351,6 +355,21 @@ namespace SB3Utility
 			}
 
 			return true;
+		}
+
+		public static bool TryFileSound(ppSubfile subfile)
+		{
+			using (BinaryReader reader = new BinaryReader(subfile.CreateReadStream()))
+			{
+				byte[] buf = reader.ReadBytes(4);
+				if (buf[0] == 'O' && buf[1] == 'g' && buf[2] == 'g' && buf[3] == 'S' ||
+					buf[0] == 'R' && buf[1] == 'I' && buf[2] == 'F' && buf[3] == 'F')
+				{
+					return true;
+				}
+			}
+
+			return false;
 		}
 		#endregion
 	}
@@ -802,9 +821,9 @@ namespace SB3Utility
 		}
 	}
 
-	public class ppFormat_HETTrial : ppFormat_WakeariHeader
+	public class ppFormat_HET : ppFormat_WakeariHeader
 	{
-		public ppFormat_HETTrial() : base("HET Trial", ppFormatIdx.HETTrial) { }
+		public ppFormat_HET() : base("HET", ppFormatIdx.HET) { }
 
 		protected override ICryptoTransform CryptoTransform()
 		{

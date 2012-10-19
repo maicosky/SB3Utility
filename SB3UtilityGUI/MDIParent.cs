@@ -67,6 +67,8 @@ namespace SB3Utility
 
 				Gui.Scripting.Variables.Add(MainVar, this);
 				PluginManager.RegisterFunctions(Assembly.GetExecutingAssembly());
+
+				Gui.Config = Properties.Settings.Default;
 			}
 			catch (Exception ex)
 			{
@@ -139,10 +141,12 @@ namespace SB3Utility
 				viewLogToolStripMenuItem.CheckedChanged += new EventHandler(viewLogToolStripMenuItem_CheckedChanged);
 				viewScriptToolStripMenuItem.CheckedChanged += new EventHandler(viewScriptToolStripMenuItem_CheckedChanged);
 
+				KeysConverter conv = new KeysConverter();
 				foreach (var tool in PluginManager.Tools)
 				{
 					ToolStripMenuItem item = new ToolStripMenuItem(tool[1], null, new EventHandler(OpenTool));
 					item.Tag = tool[0];
+					item.ShortcutKeys = (Keys)conv.ConvertFromString(tool[2]);
 					toolsToolStripMenuItem.DropDownItems.Add(item);
 				}
 #if DEBUG
@@ -588,6 +592,16 @@ namespace SB3Utility
 
 				viewToolStripMenuItemCheckedChangedSent = false;
 			}
+		}
+
+		private void toolStripMenuItem1_Click(object sender, EventArgs e)
+		{
+			string vars = string.Empty;
+			foreach (string var in Gui.Scripting.Variables.Keys)
+			{
+				vars += vars.Length == 0 ? var : ", " + var;
+			}
+			Report.ReportLog("open variables=" + (vars.Length > 0 ? vars : "none"));
 		}
 	}
 }

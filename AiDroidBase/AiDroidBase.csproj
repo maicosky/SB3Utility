@@ -41,10 +41,11 @@
     <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FPK\fpkParser.cs" />
     <Compile Include="FPK\remOps.cs" />
     <Compile Include="FPK\REMParser.cs" />
     <Compile Include="FPK\REMStructures.cs" />
-    <Compile Include="Imported.cs" />
+    <Compile Include="FPK\zlc2Stream.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

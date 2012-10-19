@@ -1,4 +1,64 @@
-﻿[0.4.42.9]
+﻿[0.4.42.21]
+  - Export of morphs as fbx and mqo with the GUI
+
+[0.4.42.20]
+  - FBX InterpolationHelper class aligns tracks for exporting compressed animations
+  - Issue: FbxProperties for SRT have to be created outside of the class as they seem to be put on the stack.
+
+[0.4.42.19]
+  - GUI : removing the last (and also used) material caused an error in DataGridViewMesh
+  - GUI : removed explicit activation of the renderer upon mesh selection change
+  - GUI : added automatic centering of the renderer view after mesh selection change
+
+[0.4.42.18]
+  - tab stops in frame, bone, mesh, material and texture editors didn't work
+  - added keyframe range for fbx export of animations
+
+[0.4.42.17]
+  - Some scripting variables weren't released and prevented GC to tidy up.
+  - Added help for GC in FormXX. Memory is faster released for external XX files.
+  - Opening/dropping the same XX/XA files again closes the previously opened editor.
+  - Sound handling moved into it's own class
+
+[0.4.42.16]
+  - sound tab wasn't considered by menu actions
+
+[0.4.42.15]
+  - format of pp files entirely made up of sounds wasn't correctly detected
+  - playing sounds via irrKlang library
+
+[0.4.42.14]
+  - Copy->New bones crashed the Renderer.
+
+[0.4.42.13a]
+  - reopening image didn't update internal variable (GUItexture).
+
+[0.4.42.12]
+  - JCH animation files for AA couldn't be opened
+  - saving pp files after opening an XA (having morphs or animations) corrupted the XA
+  - script commands only executable in the GUI are marked with a comment
+
+[0.4.42.11]
+  - added more hotkeys and shortcuts
+  - texture display was not refreshed after ReplaceTexture
+  - added quick save script / run quick saved
+  - ppEdtitor.SavePP() deleted the pp file in the current directory
+  - ExportPP() couldn't work in the current directory
+  - added shortcut key to attribute PluginTool
+  known issues:
+  - drag 'n drop doesn't work in the script window and log window
+  - shortcut keys dont work in the script window and log window
+
+[0.4.42.10]
+  Fixes:
+  - replacing/adding compressed tga images
+  - CTRL-V pasted twice in hex editor (COPY-C did the same)
+  Change:
+  - added menu to xx editor for reopening, saving, closing
+  - added menu to image files for reopening and closing
+  - pp menu got hotkeys
+
+[0.4.42.9]
   Fixes:
   - Frame and bone matrices can be edited on SRT and Matrix; updating the corresponding matrix after each input of a cell
   - CopyNormalsNear, CopyBonesNear didn't find Normals/Bones for destination vertices exceeding source vertices

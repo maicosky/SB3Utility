@@ -8,7 +8,7 @@ using SB3Utility;
 namespace ODFPlugin
 {
 	[Plugin]
-	public class odfEditor
+	public class odfEditor : IDisposable
 	{
 		public List<odfFrame> Frames { get; protected set; }
 		public List<odfMaterial> Materials { get; protected set; }
@@ -35,6 +35,16 @@ namespace ODFPlugin
 			{
 				InitFrames(frame[i]);
 			}
+		}
+
+		public void Dispose()
+		{
+			Frames.Clear();
+			if (Materials != null)
+				Materials.Clear();
+			if (Textures != null)
+				Textures.Clear();
+			Parser = null;
 		}
 
 		[Plugin]

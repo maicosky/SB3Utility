@@ -52,6 +52,7 @@ namespace SB3Utility
 		public xxEditor Editor { get; protected set; }
 		public string EditorVar { get; protected set; }
 		public string ParserVar { get; protected set; }
+		public string FormVar { get; protected set; }
 
 		string exportDir;
 		EditTextBox[][] matMatrixText = new EditTextBox[5][];
@@ -90,22 +91,39 @@ namespace SB3Utility
 			try
 			{
 				InitializeComponent();
+				saveFileDialog1.Filter = ".xx Files (*.xx)|*.xx|All Files (*.*)|*.*";
 
 				this.ShowHint = DockState.Document;
 				this.Text = Path.GetFileName(path);
 				this.ToolTipText = path;
 				this.exportDir = Path.GetDirectoryName(path) + @"\" + Path.GetFileNameWithoutExtension(path);
 
-				ParserVar = Gui.Scripting.GetNextVariable("xxParser");
-				string parserCommand = ParserVar + " = OpenXX(path=\"" + path + "\")";
-				xxParser parser = (xxParser)Gui.Scripting.RunScript(parserCommand);
-
-				EditorVar = Gui.Scripting.GetNextVariable("xxEditor");
-				string editorCommand = EditorVar + " = xxEditor(parser=" + ParserVar + ")";
-				Editor = (xxEditor)Gui.Scripting.RunScript(editorCommand);
-
 				Init();
-				LoadXX();
+				ParserVar = Gui.Scripting.GetNextVariable("xxParser");
+				EditorVar = Gui.Scripting.GetNextVariable("xxEditor");
+				FormVar = variable;
+				ReopenXX();
+
+				List<DockContent> formXXList;
+				if (Gui.Docking.DockContents.TryGetValue(typeof(FormXX), out formXXList))
+				{
+					var listCopy = new List<FormXX>(formXXList.Count);
+					for (int i = 0; i < formXXList.Count; i++)
+					{
+						listCopy.Add((FormXX)formXXList[i]);
+					}
+
+					foreach (var form in listCopy)
+					{
+						if (form != this)
+						{
+							if (form.ToolTipText == this.ToolTipText)
+							{
+								form.Close();
+							}
+						}
+					}
+				}
 			}
 			catch (Exception ex)
 			{
@@ -113,11 +131,24 @@ namespace SB3Utility
 			}
 		}
 
+		private void ReopenXX()
+		{
+			string path = this.ToolTipText;
+			string parserCommand = ParserVar + " = OpenXX(path=\"" + path + "\")";
+			xxParser parser = (xxParser)Gui.Scripting.RunScript(parserCommand);
+
+			string editorCommand = EditorVar + " = xxEditor(parser=" + ParserVar + ")";
+			Editor = (xxEditor)Gui.Scripting.RunScript(editorCommand);
+
+			LoadXX();
+		}
+
 		public FormXX(ppParser ppParser, string xxParserVar)
 		{
 			try
 			{
 				InitializeComponent();
+				this.Controls.Remove(this.menuStrip1);
 
 				xxParser parser = (xxParser)Gui.Scripting.Variables[xxParserVar];
 
@@ -144,12 +175,33 @@ namespace SB3Utility
 		{
 			try
 			{
-				DisposeRenderObjects();
+				if (FormVar != null)
+				{
+					Gui.Scripting.Variables.Remove(ParserVar);
+					Gui.Scripting.Variables.Remove(FormVar);
+				}
+				Gui.Scripting.Variables.Remove(EditorVar);
+
+				UnloadXX();
 			}
 			catch (Exception ex)
 			{
 				Utility.ReportException(ex);
 			}
+		}
+
+		private void UnloadXX()
+		{
+			Editor.Dispose();
+			Editor = null;
+			DisposeRenderObjects();
+			CrossRefsClear();
+			ClearKeyList<xxMaterial>(crossRefMeshMaterials);
+			ClearKeyList<xxTexture>(crossRefMeshTextures);
+			ClearKeyList<xxFrame>(crossRefMaterialMeshes);
+			ClearKeyList<xxTexture>(crossRefMaterialTextures);
+			ClearKeyList<xxFrame>(crossRefTextureMeshes);
+			ClearKeyList<xxMaterial>(crossRefTextureMaterials);
 		}
 
 		void DisposeRenderObjects()
@@ -166,6 +218,14 @@ namespace SB3Utility
 					renderObjectMeshes[i].Dispose();
 					renderObjectMeshes[i] = null;
 				}
+			}
+		}
+
+		void ClearKeyList<T>(Dictionary<int, List<KeyList<T>>> dic)
+		{
+			foreach (var pair in dic)
+			{
+				pair.Value.Clear();
 			}
 		}
 
@@ -751,11 +811,14 @@ namespace SB3Utility
 			texturelistHeader.AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
 
 			TreeNode texturesNode = new TreeNode("Textures");
+			TreeNode currentTexture = null;
 			for (int i = 0; i < Editor.Parser.TextureList.Count; i++)
 			{
 				TreeNode texNode = new TreeNode(Editor.Parser.TextureList[i].Name);
 				texNode.Tag = new DragSource(EditorVar, typeof(xxTexture), i);
 				texturesNode.Nodes.Add(texNode);
+				if (loadedTexture == i)
+					currentTexture = texNode;
 			}
 
 			if (treeViewObjectTree.Nodes.Count > 2)
@@ -763,6 +826,8 @@ namespace SB3Utility
 				treeViewObjectTree.Nodes.RemoveAt(2);
 			}
 			treeViewObjectTree.Nodes.Insert(2, texturesNode);
+			if (currentTexture != null)
+				currentTexture.EnsureVisible();
 		}
 
 		void LoadFrame(int id)
@@ -1385,10 +1450,6 @@ namespace SB3Utility
 					int id = (int)e.Item.Tag;
 					if (e.IsSelected)
 					{
-						if (!Gui.Docking.DockRenderer.IsHidden)
-						{
-							Gui.Docking.DockRenderer.Activate();
-						}
 						tabControlViews.SelectedTab = tabPageMeshView;
 						LoadMesh(id);
 						CrossRefAddItem(crossRefMeshMaterials[id], crossRefMeshMaterialsCount, listViewMeshMaterial, listViewMaterial);
@@ -1402,6 +1463,10 @@ namespace SB3Utility
 						}
 						RenderObjectXX renderObj = renderObjectMeshes[id];
 						renderObjectIds[id] = Gui.Renderer.AddRenderObject(renderObj);
+						if (!Gui.Docking.DockRenderer.IsHidden)
+						{
+							Gui.Renderer.CenterView();
+						}
 					}
 					else
 					{
@@ -2408,6 +2473,7 @@ namespace SB3Utility
 				Gui.Scripting.RunScript(EditorVar + ".CopyBone(meshId=" + loadedBone[0] + ", boneId=" + loadedBone[1] + ")");
 
 				InitFrames();
+				RecreateRenderObjects();
 			}
 			catch (Exception ex)
 			{
@@ -2582,9 +2648,9 @@ namespace SB3Utility
 				Gui.Scripting.RunScript(EditorVar + ".RemoveMaterial(id=" + loadedMaterial + ")");
 
 				RecreateRenderObjects();
+				LoadMesh(loadedMesh);
 				InitMaterials();
 				RecreateCrossRefs();
-				LoadMesh(loadedMesh);
 				LoadMaterial(-1);
 			}
 			catch (Exception ex)
@@ -2719,6 +2785,14 @@ namespace SB3Utility
 				InitTextures();
 				RecreateCrossRefs();
 				LoadMaterial(loadedMaterial);
+				foreach (ListViewItem item in listViewTexture.Items)
+				{
+					if ((int)item.Tag == loadedTexture)
+					{
+						item.Selected = true;
+						break;
+					}
+				}
 			}
 			catch (Exception ex)
 			{
@@ -2845,6 +2919,12 @@ namespace SB3Utility
 					xaVars = "null";
 				}
 
+				int startKeyframe = -1;
+				Int32.TryParse(textBoxKeyframeRange.Text.Substring(0, textBoxKeyframeRange.Text.LastIndexOf('-')), out startKeyframe);
+				int endKeyframe = 0;
+				Int32.TryParse(textBoxKeyframeRange.Text.Substring(textBoxKeyframeRange.Text.LastIndexOf('-') + 1), out endKeyframe);
+				bool linear = radioButtonLinear.Checked;
+
 				switch ((MeshExportFormat)comboBoxMeshExportFormat.SelectedIndex)
 				{
 					case MeshExportFormat.Mqo:
@@ -2863,16 +2943,16 @@ namespace SB3Utility
 						//Fbx.Exporter.Export(Utility.GetDestFile(dir, "meshes", ".dae"), parser, meshParents, xaSubfileList, checkBoxMeshExportFbxAllFrames.Checked, checkBoxMeshExportFbxSkins.Checked, ".dae");
 						break;
 					case MeshExportFormat.Fbx:
-						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".fbx") + "\", exportFormat=\".fbx\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ")");
+						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".fbx") + "\", exportFormat=\".fbx\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ")");
 						break;
 					case MeshExportFormat.Dxf:
-						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".dxf") + "\", exportFormat=\".dxf\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ")");
+						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".dxf") + "\", exportFormat=\".dxf\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ")");
 						break;
 					case MeshExportFormat._3ds:
-						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".3ds") + "\", exportFormat=\".3ds\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ")");
+						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".3ds") + "\", exportFormat=\".3ds\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ")");
 						break;
 					case MeshExportFormat.Obj:
-						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".obj") + "\", exportFormat=\".obj\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ")");
+						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".obj") + "\", exportFormat=\".obj\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ")");
 						break;
 					default:
 						throw new Exception("Unexpected ExportFormat");
@@ -2984,6 +3064,28 @@ namespace SB3Utility
 			{
 				Utility.ReportException(ex);
 			}
+		}
+
+		private void reopenToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			UnloadXX();
+			ReopenXX();
+		}
+
+		private void savexxToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			Gui.Scripting.RunScript(EditorVar + ".SaveXX(path=\"" + this.ToolTipText + "\", backup=" + keepBackupToolStripMenuItem.Checked + ")");
+		}
+
+		private void savexxAsToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+				Gui.Scripting.RunScript(EditorVar + ".SaveXX(path=\"" + saveFileDialog1.FileName + "\", backup=" + keepBackupToolStripMenuItem.Checked + ")");
+		}
+
+		private void closeToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			this.Close();
 		}
 	}
 }

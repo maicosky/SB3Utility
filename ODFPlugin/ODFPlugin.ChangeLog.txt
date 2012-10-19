@@ -1,4 +1,7 @@
-﻿[0.4.42.9]
+﻿[0.4.42.18]
+  - freeing scripting variables
+
+[0.4.42.9]
   - MQO export with world coordinates failed
   - MQO import always failed
   - Renderer crashed for meshes with missing textures

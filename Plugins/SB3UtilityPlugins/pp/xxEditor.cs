@@ -8,7 +8,7 @@ using SlimDX;
 namespace SB3Utility
 {
 	[Plugin]
-	public class xxEditor
+	public class xxEditor : IDisposable
 	{
 		public List<xxFrame> Frames { get; protected set; }
 		public List<xxFrame> Meshes { get; protected set; }
@@ -37,6 +37,13 @@ namespace SB3Utility
 			{
 				InitFrames(frame[i]);
 			}
+		}
+
+		public void Dispose()
+		{
+			Frames.Clear();
+			Meshes.Clear();
+			Parser = null;
 		}
 
 		[Plugin]
@@ -503,7 +510,12 @@ namespace SB3Utility
 		{
 			xxFrame frame = Meshes[meshId];
 			List<xxBone> boneList = frame.Mesh.BoneList;
-			boneList.Add(boneList[boneId].Clone());
+			xxBone root = xx.FindBone(boneList, Frames[0].Name);
+			if (root != null)
+				throw new Exception("One bone already targets the root frame.");
+			xxBone copy = boneList[boneId].Clone();
+			copy.Name = Frames[0].Name;
+			boneList.Add(copy);
 		}
 
 		[Plugin]
@@ -759,6 +771,12 @@ namespace SB3Utility
 			}
 
 			tex.Name = name;
+		}
+
+		[Plugin]
+		public void SaveXX(string path, bool backup)
+		{
+			xx.SaveXX(Parser, path, backup);
 		}
 	}
 }

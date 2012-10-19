@@ -9,16 +9,27 @@ using SB3Utility;
 
 namespace AiDroidPlugin
 {
-	public class remParser
+	public class remParser : IWriteFile
 	{
-		public remFile RemFile;
-		public string RemPath;
+		public remFile RemFile { get; protected set; }
+		public string Name { get; set; }
+		public string RemPath { get; set; }
 
-		public remParser(string path)
+		public remParser(Stream stream, string name, string path)
+			: this(stream)
 		{
-			RemPath = path;
-			RemFile = Read(path);
-			Report.ReportLog(path + " loaded successfully");
+			this.Name = name;
+			this.RemPath = path;
+		}
+
+		private remParser(Stream stream)
+		{
+			RemFile = Read(stream);
+		}
+
+		public void WriteTo(Stream stream)
+		{
+			RemFile.WriteTo(stream);
 		}
 
 		private static remId GetIdentifier(byte[] buffer, int startIdx, int lengthInBuffer)
@@ -67,7 +78,7 @@ namespace AiDroidPlugin
 				secBufIdx += length;
 			}
 			if (secBufIdx != sectionLength)
-				Console.WriteLine("Warning! MATC section has wrong length.");
+				Report.ReportLog("Warning! MATC section has wrong length.");
 			return matSec;
 		}
 
@@ -118,7 +129,7 @@ namespace AiDroidPlugin
 			boneSec.rootFrame = root;
 
 			if (secBufIdx != sectionLength)
-				Console.WriteLine("Warning! BONC section has wrong length.");
+				Report.ReportLog("Warning! BONC section has wrong length.");
 			return boneSec;
 		}
 
@@ -195,7 +206,7 @@ namespace AiDroidPlugin
 				secBufIdx += length;
 			}
 			if (secBufIdx != sectionLength)
-				Console.WriteLine("Warning! MESC section has wrong length.");
+				Report.ReportLog("Warning! MESC section has wrong length.");
 			return meshSec;
 		}
 
@@ -256,15 +267,15 @@ namespace AiDroidPlugin
 				secBufIdx += length;
 			}
 			if (secBufIdx != sectionLength)
-				Console.WriteLine("Warning! SKIC section has wrong length.");
+				Report.ReportLog("Warning! SKIC section has wrong length.");
 			return skinSec;
 		}
 
-		public static remFile Read(string filename)
+		public static remFile Read(Stream stream)
 		{
 			try
 			{
-				using (BinaryReader binaryReader = new BinaryReader(File.OpenRead(filename)))
+				using (BinaryReader binaryReader = new BinaryReader(stream))
 				{
 					remFile file = new remFile();
 					string[] sectionNames = { "MATC", "BONC", "MESC", "SKIC" };
@@ -273,8 +284,7 @@ namespace AiDroidPlugin
 						string sectionName = Encoding.ASCII.GetString(binaryReader.ReadBytes(4));
 						if (sectionName != sectionNames[sectionIdx])
 						{
-							Console.WriteLine("Strange section or order");
-							return null;
+							Report.ReportLog("Strange section or order for " + sectionName);
 						}
 						int sectionLength = binaryReader.ReadInt32();
 						int numSubSections = binaryReader.ReadInt32();
@@ -287,14 +297,12 @@ namespace AiDroidPlugin
 						case 3: file.SKIC = ReadSkin(sectionName, sectionLength, numSubSections, sectionBuffer); break;
 						}
 					}
-					if (binaryReader.BaseStream.Position != binaryReader.BaseStream.Length)
-						Console.WriteLine("EOF not reached at " + binaryReader.BaseStream.Position + " (" + binaryReader.BaseStream.Length + ")");
 					return file;
 				}
 			}
 			catch (FileNotFoundException)
 			{
-				Console.WriteLine("file not found");
+				Report.ReportLog("file not found");
 			}
 			return null;
 		}

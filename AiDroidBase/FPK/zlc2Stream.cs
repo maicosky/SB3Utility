@@ -1,12 +1,14 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using System.IO.Compression;
 
-namespace SB3Utility
+using SB3Utility;
+
+namespace AiDroidPlugin
 {
-	public class JchStream : Stream
+	public class zlc2Stream : Stream
 	{
 		private Stream stream;
 		private CompressionMode mode;
@@ -14,20 +16,20 @@ namespace SB3Utility
 
 		private List<byte> readBuf;
 		private bool hasReadHeader;
-		private byte compressByte;
 		private int copyPos;
 		private int fileSize;
 		private int totalRead;
+		private byte code;
+		private int j;
 
 		private MemoryStream writeBuf;
-		private int[] byteCount;
 
-		public JchStream(Stream stream, CompressionMode mode)
+		public zlc2Stream(Stream stream, CompressionMode mode)
 			: this(stream, mode, false)
 		{
 		}
 
-		public JchStream(Stream stream, CompressionMode mode, bool leaveOpen)
+		public zlc2Stream(Stream stream, CompressionMode mode, bool leaveOpen)
 		{
 			if (stream == null)
 			{
@@ -38,14 +40,14 @@ namespace SB3Utility
 			{
 				if (!stream.CanRead)
 				{
-					throw new ArgumentException("The base stream is not writeable.", "stream");
+					throw new ArgumentException("The base stream is not readable.", "stream");
 				}
 			}
 			else if (mode == CompressionMode.Compress)
 			{
 				if (!stream.CanWrite)
 				{
-					throw new ArgumentException("The base stream is not readable.", "stream");
+					throw new ArgumentException("The base stream is not writeable.", "stream");
 				}
 			}
 			else
@@ -65,7 +67,6 @@ namespace SB3Utility
 			else
 			{
 				writeBuf = new MemoryStream();
-				byteCount = new int[256];
 			}
 		}
 
@@ -147,6 +148,13 @@ namespace SB3Utility
 			return base.BeginWrite(buffer, offset, count, callback, state);
 		}
 
+		class MatchInfo
+		{
+			public MatchInfo prev;
+			public MatchInfo next;
+			public int pos;
+		}
+
 		public override void Close()
 		{
 			if (stream != null)
@@ -157,112 +165,93 @@ namespace SB3Utility
 				}
 				else
 				{
-					int maxByteCount = 0;
-					for (int i = 0; i < byteCount.Length; i++)
-					{
-						if (byteCount[i] > maxByteCount)
-						{
-							compressByte = (byte)i;
-							maxByteCount = byteCount[i];
-						}
-					}
+					byte[] inputBuf = writeBuf.GetBuffer();
+					int bufPos = 0;
+					int bufStart = bufPos;
+					int bufSize = (int)writeBuf.Length;
 
 					BinaryWriter writer = new BinaryWriter(stream);
-					writer.Write(compressByte);
-					writer.Write((int)writeBuf.Length);
+					byte[] format = { (byte)'Z', (byte)'L', (byte)'C', (byte)'2' };
+					writer.Write(format);
+					writer.Write(bufSize);
 
-					byte[] inputBuf = writeBuf.GetBuffer();
-					int bufLength = (int)writeBuf.Length;
-					int windowStart = 0;
-					int windowEnd = 0;
-					for (int i = 0; i < bufLength; )
+					int outPos = 0;
+					int j = 8;
+					int bufEndPos = bufSize;
+
+					MatchInfo[] matches = new MatchInfo[0x1000];
+					for (int i = 0; i < matches.Length; i++)
+						matches[i] = new MatchInfo();
+					MatchInfo[] matchMap = new MatchInfo[0x1000000];
+					int addPos = 0;
+
+					byte[] codeBlock = new byte[1+2*8];
+					while (true)
 					{
-						Match maxMatch = new Match();
-						int maxMatchLength = 0;
-						for (int windowIdx = windowStart; windowIdx < windowEnd; windowIdx++)
+						if (j==8)
 						{
-							int blockSize = 0;
-							int numBlocks = 1;
-							if (inputBuf[i] == inputBuf[windowIdx])
-							{
-								for (int k = 1; k < 0xFF; k++)
-								{
-									blockSize++;
-									int offset = i + k;
-									if ((offset >= bufLength) || ((windowIdx + k) >= windowEnd) || (inputBuf[offset] != inputBuf[windowIdx + k]))
-									{
-										break;
-									}
-								}
+							writer.Write(codeBlock, 0, outPos);
+							codeBlock[0] = 0;
+							outPos = 1;
+							j = 0;
+						}
+						if (bufPos == bufEndPos) break;
 
-								for (int k = 1; k < 0xFF; k++)
-								{
-									bool addBlock = true;
-									for (int m = 0; m < blockSize; m++)
-									{
-										int offset = i + (blockSize * k) + m;
-										if ((offset >= bufLength) || (inputBuf[offset] != inputBuf[windowIdx + m]))
-										{
-											addBlock = false;
-											break;
-										}
-									}
-									if (addBlock)
-									{
-										numBlocks++;
-									}
-									else
-									{
-										break;
-									}
-								}
+						int matchDist = 0;
+						int matchLen = 0;
+						MatchInfo m = matchMap[0xFFFFFF & BitConverter.ToInt32(inputBuf, bufPos)];
+						for (int p=0; m != null && p<50; p++) {
+							int len = 3;
+							while (inputBuf[m.pos + len] == inputBuf[bufPos + len] && len < 18) len++;
 
-								int matchLength = blockSize * numBlocks;
-								if (matchLength > maxMatchLength)
-								{
-									maxMatch.blockSize = blockSize;
-									maxMatch.numBlocks = numBlocks;
-									maxMatch.distance = i - windowIdx;
-									maxMatch.length = matchLength;
-									maxMatchLength = matchLength;
-								}
+							if (len > matchLen) {
+								matchLen = len;
+								matchDist = bufPos - m.pos;
 							}
+							m = m.prev;
+						}
+						if (bufPos + matchLen > bufEndPos) {
+							matchLen = bufEndPos - bufPos;
 						}
 
-						int windowOffset = 1;
-						if (maxMatchLength > 4)
-						{
-							writer.Write(compressByte);
-							if (maxMatch.distance == compressByte)
-							{
-								writer.Write((byte)0);
-							}
-							else
-							{
-								writer.Write((byte)maxMatch.distance);
-							}
-							writer.Write((byte)maxMatch.blockSize);
-							writer.Write((byte)maxMatch.numBlocks);
-							i += maxMatch.length;
-							windowOffset = maxMatch.length;
+						int bp = bufPos;
+						if (matchLen >= 3) {
+							codeBlock[0] |= (byte)(1<<(7-j));
+							codeBlock[outPos++] = (byte)matchDist;
+							codeBlock[outPos++] = (byte)(((matchDist&0xF00)>>4) + (matchLen-3));
+							bufPos += matchLen;
 						}
-						else
-						{
-							WriteSingleByte(writer, inputBuf[i], compressByte);
-							i++;
+						else {
+							codeBlock[outPos++] = inputBuf[bufPos++];
+						}
+						while(bp < bufPos) {
+							MatchInfo m2 = matches[addPos];
+
+							int index = (0xFFFFFF & BitConverter.ToInt32(inputBuf, bp));
+							if (m2.next != null) {
+								m2.next.prev = null;
+								m2.next = null;
+							}
+							else if (m2.pos > 0) {
+								matchMap[(0xFFFFFF & BitConverter.ToInt32(inputBuf, m2.pos))] = null;
+							}
+							m2.prev = matchMap[index];
+							matchMap[index] = m2;
+							if (m2.prev != null) {
+								m2.prev.next = m2;
+							}
+							m2.pos = bp;
+
+							bp++;
+							if (++addPos == 0x1000 - 18) addPos = 0;
 						}
 
-						windowEnd += windowOffset;
-						int windowSize = windowEnd - windowStart;
-						if (windowSize >= 0xFF)
-						{
-							windowStart += windowSize - 0xFF;
-						}
+						j++;
 					}
+					writer.Write(codeBlock, 0, outPos);
 
 					writeBuf.Close();
 					writeBuf = null;
-					byteCount = null;
 				}
 
 				if (!leaveOpen)
@@ -271,24 +260,6 @@ namespace SB3Utility
 				}
 
 				stream = null;
-			}
-		}
-
-		private class Match
-		{
-			public int distance;
-			public int length;
-			public int blockSize;
-			public int numBlocks;
-		}
-
-		private static void WriteSingleByte(BinaryWriter writer, byte b, byte compressedByte)
-		{
-			writer.Write(b);
-
-			if (b == compressedByte)
-			{
-				writer.Write(b);
 			}
 		}
 
@@ -324,8 +295,10 @@ namespace SB3Utility
 			BinaryReader reader = new BinaryReader(stream);
 			if (!hasReadHeader)
 			{
-				compressByte = reader.ReadByte();
 				fileSize = reader.ReadInt32();
+
+				code = 0;
+				j = 8;
 
 				hasReadHeader = true;
 			}
@@ -342,42 +315,52 @@ namespace SB3Utility
 
 			while (readBuf.Count - copyPos < count)
 			{
-				byte b = reader.ReadByte();
-				if (b == compressByte)
+				if (j == 8)
 				{
-					byte distance = reader.ReadByte();
-					if (distance == compressByte)
-					{
-						readBuf.Add(distance);
-					}
-					else
-					{
-						if (distance == 0)
-						{
-							distance = compressByte;
-						}
-						byte blockSize = reader.ReadByte();
-						byte numBlocks = reader.ReadByte();
-						byte[] block = new byte[blockSize];
-						readBuf.CopyTo(readBuf.Count - distance, block, 0, blockSize);
-
-						for (int i = 0; i < numBlocks; i++)
-						{
-							readBuf.AddRange(block);
-						}
-					}
+					j = 0;
+					code = reader.ReadByte();
+				}
+				if ((code & 0x80) == 0)
+				{
+					readBuf.Add(reader.ReadByte());
 				}
 				else
 				{
-					readBuf.Add(b);
+					byte a = reader.ReadByte();
+					byte b = reader.ReadByte();
+					int len = (b & 0xF) + 3;
+					int dist = ((b & 0xF0)<<4) + a;
+					if (dist == 0)
+					{
+						dist = 0x1000;
+					}
+					byte[] block = new byte[len];
+					if (dist >= len)
+					{
+						readBuf.CopyTo(readBuf.Count - dist, block, 0, len);
+					}
+					else
+					{
+						readBuf.CopyTo(readBuf.Count - dist, block, 0, dist);
+						len -= dist;
+						int start = 0;
+						while (len > 0)
+						{
+							block[dist + start] = block[start++];
+							len--;
+						}
+					}
+					readBuf.AddRange(block);
 				}
+				code <<= 1;
+				j++;
 			}
 
 			readBuf.CopyTo(copyPos, buffer, offset, count);
 			copyPos += count;
-			if (copyPos > 255)
+			if (copyPos > 0x1000)
 			{
-				int remove = copyPos - 255;
+				int remove = copyPos - 0x1000;
 				readBuf.RemoveRange(0, remove);
 				copyPos -= remove;
 			}
@@ -405,11 +388,6 @@ namespace SB3Utility
 			if (mode != CompressionMode.Compress)
 			{
 				throw new NotSupportedException("This operation is not supported.");
-			}
-
-			for (int i = 0; i < count; i++)
-			{
-				byteCount[buffer[offset + i]]++;
 			}
 
 			writeBuf.Write(buffer, offset, count);

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.IO;
 
@@ -12,11 +11,27 @@ namespace AiDroidPlugin
 	{
 		public static ImportedTexture ImportedTexture(remId texture, string remPath, bool diffuse_else_ambient)
 		{
+			String texh_folder = null;
+			string cd = Directory.GetCurrentDirectory();
+			string dir = Path.GetDirectoryName(remPath);
+			for (int i = 0; i < 3; i++)
+			{
+				dir = Path.GetDirectoryName(dir);
+				Directory.SetCurrentDirectory(dir);
+				if (Directory.Exists("TEXH"))
+				{
+					texh_folder = dir + @"\TEXH\";
+					break;
+				}
+			}
+			Directory.SetCurrentDirectory(cd);
+			if (texh_folder == null)
+			{
+				Report.ReportLog("TEXH folder could not be located.");
+				return null;
+			}
+
 			string matTexName = texture.ToString();
-			String texh_folder = "..\\..\\TEXH\\";
-			if (remPath.Contains("(v2)"))
-				texh_folder = "..\\" + texh_folder;
-			texh_folder = remPath + Path.DirectorySeparatorChar + texh_folder;
 			String body = texture.ToString().Substring(0, matTexName.LastIndexOf('.'));
 			String ext =  texture.ToString().Substring(matTexName.LastIndexOf('.'));
 			String pattern = body + (diffuse_else_ambient ? "" : "_mask01") + ext;
@@ -109,9 +124,35 @@ namespace AiDroidPlugin
 			return null;
 		}
 
+		public static remMesh FindMesh(remId meshName, remMESCsection meshSection)
+		{
+			foreach (remMesh mesh in meshSection.meshes)
+			{
+				if (mesh.name == meshName)
+				{
+					return mesh;
+				}
+			}
+
+			return null;
+		}
+
+		public static remMesh FindMesh(remBone meshFrame, remMESCsection meshSection)
+		{
+			foreach (remMesh mesh in meshSection.meshes)
+			{
+				if (mesh.frame == meshFrame.name)
+				{
+					return mesh;
+				}
+			}
+
+			return null;
+		}
+
 		public static remSkin FindSkin(remId meshId, remSKICsection skins)
 		{
-			for (int i = 0; i < skins.length; i++)
+			for (int i = 0; i < skins.numSkins; i++)
 			{
 				if (skins[i].mesh == meshId)
 					return skins[i];

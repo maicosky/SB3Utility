@@ -45,7 +45,7 @@ namespace ODFPlugin
 			}
 		}
 
-		public string FormVariable { get; protected set; }
+		public string FormVar { get; protected set; }
 		public odfEditor Editor { get; protected set; }
 		public string EditorVar { get; protected set; }
 		public string ParserVar { get; protected set; }
@@ -113,6 +113,8 @@ namespace ODFPlugin
 			string editorCommand = EditorVar + " = odfEditor(parser=" + ParserVar + ")";
 			Editor = (odfEditor)Gui.Scripting.RunScript(editorCommand);
 
+			FormVar = variable;
+
 			Init();
 			LoadODF();
 		}
@@ -144,6 +146,12 @@ namespace ODFPlugin
 					Gui.Renderer.RenderObjectAdded -= new EventHandler(Renderer_RenderObjectAdded);
 				}
 				DisposeRenderObjects();
+
+				Gui.Scripting.Variables.Remove(ParserVar);
+				Gui.Scripting.Variables.Remove(FormVar);
+				Gui.Scripting.Variables.Remove(EditorVar);
+				Editor.Dispose();
+				Editor = null;
 			}
 			catch (Exception ex)
 			{
