@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ODFPlugin.Properties {
+namespace AiDroidPlugin.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -26,10 +26,10 @@ namespace ODFPlugin.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Configuration.SettingsProviderAttribute(typeof(PortableSettingsProvider))]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool CloseViewFilesAtStart {
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool KeepBackupOfFPK {
             get {
-                return ((bool)(this["CloseViewFilesAtStart"]));
+                return ((bool)(this["KeepBackupOfFPK"]));
             }
         }
         
@@ -37,9 +37,9 @@ namespace ODFPlugin.Properties {
         [global::System.Configuration.SettingsProviderAttribute(typeof(PortableSettingsProvider))]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool SuppressWarnings {
+        public bool CompressFPK {
             get {
-                return ((bool)(this["SuppressWarnings"]));
+                return ((bool)(this["CompressFPK"]));
             }
         }
         
@@ -47,19 +47,9 @@ namespace ODFPlugin.Properties {
         [global::System.Configuration.SettingsProviderAttribute(typeof(PortableSettingsProvider))]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool KeepBackupOfODF {
+        public bool KeepBackupOfREM {
             get {
-                return ((bool)(this["KeepBackupOfODF"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Configuration.SettingsProviderAttribute(typeof(PortableSettingsProvider))]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool DeleteMorphsAutomatically {
-            get {
-                return ((bool)(this["DeleteMorphsAutomatically"]));
+                return ((bool)(this["KeepBackupOfREM"]));
             }
         }
     }

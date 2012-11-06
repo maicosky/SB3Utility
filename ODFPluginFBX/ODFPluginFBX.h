@@ -30,85 +30,13 @@ using namespace SlimDX;
 using namespace SB3Utility;
 using namespace ODFPlugin;
 
-namespace ODFPluginOld
+namespace ODFPlugin
 {
-	public interface class ICanImport
-	{
-		void Import();
-	};
-
 	public ref class Fbx
 	{
 	public:
 		static Vector3 QuaternionToEuler(Quaternion q);
 		static Quaternion EulerToQuaternion(Vector3 v);
-
-		ref class ImporterBase : IDisposable
-		{
-		private:
-			bool disposed;
-
-		protected:
-			KFbxSdkManager* pSdkManager;
-			KFbxScene* pScene;
-			KFbxImporter* pImporter;
-
-			String^ currentDirectory;
-
-			ImporterBase(String^ path);
-			ImporterBase(ImporterBase^ copy);
-
-		public:
-			static ICanImport^ TestFormat(String^ path);
-			void Load();
-
-			~ImporterBase();
-			!ImporterBase();
-		};
-
-		ref class Importer : public ImporterBase, public ICanImport //, public IImported
-		{
-		public:
-			virtual property List<ImportedFrame^>^ FrameList;
-			virtual property List<ImportedMesh^>^ MeshList;
-			virtual property List<ImportedMaterial^>^ MaterialList;
-			virtual property List<ImportedTexture^>^ TextureList;
-//			virtual property List<ImportedAnimation^>^ AnimationList;
-//			virtual property List<ImportedMorph^>^ MorphList;
-
-			Importer(ImporterBase^ base);
-			~Importer();
-			!Importer();
-
-			virtual void Import();
-
-		private:
-			KArrayTemplate<KFbxSurfacePhong*>* pMaterials;
-			KArrayTemplate<KFbxTexture*>* pTextures;
-			int unnamedMeshCount;
-
-			void ImportNode(ImportedFrame^ parent, KFbxNode* pNode);
-			ImportedFrame^ ImportFrame(ImportedFrame^ parent, KFbxNode* pNode);
-			void ImportMesh(ImportedFrame^ parent, KArrayTemplate<KFbxNode*>* pMeshArray);
-			ImportedMaterial^ ImportMaterial(KFbxMesh* pMesh, array<String^>^ textures);
-			String^ ImportTexture(KFbxFileTexture* pTexture);
-			template <class T> void GetVector(KFbxLayerElementTemplate<T>* pLayerElement, T& pVector, int controlPointIdx, int vertexIdx);
-
-			ref class Vertex
-			{
-			public:
-				int index;
-				array<float>^ position;
-				array<float>^ normal;
-				array<float>^ uv;
-				List<Byte>^ boneIndices;
-				List<float>^ weights;
-
-				bool Equals(Vertex^ vertex);
-
-				Vertex();
-			};
-		};
 
 		ref class Exporter
 		{

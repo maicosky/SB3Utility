@@ -5,7 +5,7 @@ using System.IO;
 using SB3Utility;
 using ODFPlugin;
 
-namespace ODFPluginOld
+namespace ODFPlugin
 {
 	public static partial class Plugins
 	{
@@ -31,19 +31,6 @@ namespace ODFPluginOld
 		public static void ExportMorphFbx([DefaultVar]odfParser parser, string path, odfMesh mesh, odfMorphClip morphClip, string exportFormat)
 		{
 //			Fbx.Exporter.ExportMorph(path, xxparser, meshFrame, morphClip, xaparser, exportFormat);
-		}
-
-		[Plugin]
-		public static Fbx.Importer ImportFbxAsODF([DefaultVar]string path)
-		{
-			ICanImport importer = Fbx.ImporterBase.TestFormat(path);
-			if (importer == null)
-			{
-				Report.ReportLog("Fbx doesn't include an ODF layer!");
-				return null;
-			}
-			importer.Import();
-			return importer as Fbx.Importer;
 		}
 	}
 }

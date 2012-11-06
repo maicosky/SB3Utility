@@ -17,9 +17,6 @@
     <ClCompile Include="ODFPluginFBXExporter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ODFPluginFBXImporter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ODFPluginFBXMapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

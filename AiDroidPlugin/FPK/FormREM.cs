@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.IO;
 using System.Drawing;
@@ -18,6 +19,22 @@ namespace AiDroidPlugin
 	[PluginOpensFile(".rem")]
 	public partial class FormREM : DockContent
 	{
+		private enum MeshExportFormat
+		{
+			[Description("Metasequoia")]
+			Mqo,
+			[Description("Collada (FBX 2012.2)")]
+			ColladaFbx,
+			[Description("FBX 2012.2")]
+			Fbx,
+			[Description("AutoCAD DXF")]
+			Dxf,
+			[Description("3D Studio 3DS")]
+			_3ds,
+			[Description("Alias OBJ")]
+			Obj
+		}
+
 		private class KeyList<T>
 		{
 			public List<T> List { get; protected set; }
@@ -65,14 +82,14 @@ namespace AiDroidPlugin
 
 		private bool listViewItemSyncSelectedSent = false;
 
+		TreeNode objRootNode;
+
 		public FormREM(string path, string variable)
 		{
 			try
 			{
 				InitializeComponent();
-				saveFileDialog1.Filter = ".xx Files (*.xx)|*.xx|All Files (*.*)|*.*";
-
-				this.menuStrip1.Enabled = false;
+				saveFileDialog1.Filter = ".rem Files (*.rem)|*.rem|All Files (*.*)|*.*";
 
 				this.ShowHint = DockState.Document;
 				this.Text = Path.GetFileName(path);
@@ -217,35 +234,35 @@ namespace AiDroidPlugin
 		{
 			DisposeRenderObjects();
 
-			renderObjectMeshes = new List<RenderObjectREM>(new RenderObjectREM[Editor.Parser.RemFile.MESC.numMeshes]);
-			renderObjectIds = new List<int>(new int[Editor.Parser.RemFile.MESC.numMeshes]);
+			renderObjectMeshes = new List<RenderObjectREM>(new RenderObjectREM[Editor.Parser.MESC.Count]);
+			renderObjectIds = new List<int>(new int[Editor.Parser.MESC.Count]);
 
 			foreach (ListViewItem item in listViewMesh.SelectedItems)
 			{
 				int id = (int)item.Tag;
-				remMesh mesh = Editor.Parser.RemFile.MESC[id];
+				remMesh mesh = Editor.Parser.MESC[id];
 				renderObjectMeshes[id] = new RenderObjectREM(Editor.Parser, mesh);
 
 				RenderObjectREM renderObj = renderObjectMeshes[id];
 				renderObjectIds[id] = Gui.Renderer.AddRenderObject(renderObj);
 			}
 
-/*			HighlightSubmeshes();
+			HighlightSubmeshes();
 			if (highlightedBone != null)
-				HighlightBone(highlightedBone, true);*/
+				HighlightBone(highlightedBone, true);
 		}
 
 		void Init()
 		{
 			panelTexturePic.Resize += new EventHandler(panelTexturePic_Resize);
-//			splitContainer1.Panel2MinSize = tabControlViews.Width;
+			splitContainer1.Panel2MinSize = tabControlViews.Width;
 
 			matTexNameCombo = new ComboBox[4] { comboBoxMatTex1, comboBoxMatTex2, comboBoxMatTex3, comboBoxMatTex4 };
 
-			matMatrixText[0] = new EditTextBox[4] { textBoxMatDiffuseR, textBoxMatDiffuseG, textBoxMatDiffuseB, textBoxMatDiffuseA };
-			matMatrixText[1] = new EditTextBox[4] { textBoxMatAmbientR, textBoxMatAmbientG, textBoxMatAmbientB, textBoxMatAmbientA };
-			matMatrixText[2] = new EditTextBox[4] { textBoxMatSpecularR, textBoxMatSpecularG, textBoxMatSpecularB, textBoxMatSpecularA };
-			matMatrixText[3] = new EditTextBox[4] { textBoxMatEmissiveR, textBoxMatEmissiveG, textBoxMatEmissiveB, textBoxMatEmissiveA };
+			matMatrixText[0] = new EditTextBox[3] { textBoxMatDiffuseR, textBoxMatDiffuseG, textBoxMatDiffuseB };
+			matMatrixText[1] = new EditTextBox[3] { textBoxMatAmbientR, textBoxMatAmbientG, textBoxMatAmbientB };
+			matMatrixText[2] = new EditTextBox[3] { textBoxMatSpecularR, textBoxMatSpecularG, textBoxMatSpecularB };
+			matMatrixText[3] = new EditTextBox[3] { textBoxMatEmissiveR, textBoxMatEmissiveG, textBoxMatEmissiveB };
 			matMatrixText[4] = new EditTextBox[1] { textBoxMatSpecularPower };
 
 			InitDataGridViewSRT(dataGridViewFrameSRT, dataGridViewFrameMatrix);
@@ -253,10 +270,14 @@ namespace AiDroidPlugin
 			InitDataGridViewSRT(dataGridViewBoneSRT, dataGridViewBoneMatrix);
 			InitDataGridViewMatrix(dataGridViewBoneMatrix, dataGridViewBoneSRT);
 
-/*			textBoxFrameName.AfterEditTextChanged += new EventHandler(textBoxFrameName_AfterEditTextChanged);
-			textBoxBoneName.AfterEditTextChanged += new EventHandler(textBoxBoneName_AfterEditTextChanged);*/
+			textBoxFrameName.AfterEditTextChanged += new EventHandler(textBoxFrameName_AfterEditTextChanged);
+			textBoxBoneName.AfterEditTextChanged += new EventHandler(textBoxBoneName_AfterEditTextChanged);
+			textBoxMeshName.AfterEditTextChanged += new EventHandler(textBoxMeshName_AfterEditTextChanged);
+			textBoxMeshUnknown1.AfterEditTextChanged += textBoxMeshUnknowns_AfterEditTextChanged;
+			textBoxMeshUnknown2.AfterEditTextChanged += textBoxMeshUnknowns_AfterEditTextChanged;
 			textBoxMatName.AfterEditTextChanged += new EventHandler(textBoxMatName_AfterEditTextChanged);
-			textBoxTexName.AfterEditTextChanged += new EventHandler(textBoxTexName_AfterEditTextChanged);
+			textBoxMatUnknownIntOrFlag.AfterEditTextChanged += matUnknownsText_AfterEditTextChanged;
+			textBoxMatUnknownId.AfterEditTextChanged += matUnknownsText_AfterEditTextChanged;
 
 			ColumnSubmeshMaterial.DisplayMember = "Item1";
 			ColumnSubmeshMaterial.ValueMember = "Item2";
@@ -274,19 +295,59 @@ namespace AiDroidPlugin
 			{
 				matTexNameCombo[i].Tag = i;
 				matTexNameCombo[i].SelectedIndexChanged += new EventHandler(matTexNameCombo_SelectedIndexChanged);
-				matTexNameCombo[i].TextChanged += new EventHandler(matTexNameCombo_TextChanged);
 			}
 
-/*			MeshExportFormat[] values = Enum.GetValues(typeof(MeshExportFormat)) as MeshExportFormat[];
+			MeshExportFormat[] values = Enum.GetValues(typeof(MeshExportFormat)) as MeshExportFormat[];
 			string[] descriptions = new string[values.Length];
 			for (int i = 0; i < descriptions.Length; i++)
 			{
 				descriptions[i] = values[i].GetDescription();
 			}
 			comboBoxMeshExportFormat.Items.AddRange(descriptions);
-			comboBoxMeshExportFormat.SelectedIndex = 4;*/
+			comboBoxMeshExportFormat.SelectedIndex = 0;
 
 			Gui.Docking.ShowDockContent(this, Gui.Docking.DockEditors);
+
+			keepBackupToolStripMenuItem.CheckedChanged += keepBackupToolStripMenuItem_CheckedChanged;
+		}
+
+		private void ClearControl(Control control)
+		{
+			if (control is TextBox)
+			{
+				TextBox textBox = (TextBox)control;
+				textBox.Text = String.Empty;
+			}
+			else if (control is ComboBox)
+			{
+				ComboBox comboBox = (ComboBox)control;
+				comboBox.SelectedIndex = -1;
+			}
+			else if (control is CheckBox)
+			{
+				CheckBox checkBox = (CheckBox)control;
+				checkBox.Checked = false;
+			}
+			else if (control is ListView)
+			{
+				ListView listView = (ListView)control;
+				listView.Items.Clear();
+			}
+			else if (control is GroupBox)
+			{
+				if (control.Tag != null && (bool)control.Tag)
+				{
+					GroupBox group = (GroupBox)control;
+					foreach (Control control2 in group.Controls)
+						ClearControl(control2);
+				}
+			}
+			else if (control is TabPage)
+			{
+				TabPage tab = (TabPage)control;
+				foreach (Control control2 in tab.Controls)
+					ClearControl(control2);
+			}
 		}
 
 		void InitDataGridViewSRT(DataGridViewEditor viewSRT, DataGridViewEditor viewMatrix)
@@ -310,21 +371,6 @@ namespace AiDroidPlugin
 			}
 
 			viewSRT.Tag = viewMatrix;
-		}
-
-		private void dataGridViewSRT_CellValueChanged(object sender, DataGridViewCellEventArgs e)
-		{
-			DataGridView viewSRT = (DataGridView)sender;
-			Vector3[] srt = GetSRT(viewSRT);
-			Matrix mat = FbxUtility.SRTToMatrix(srt[0], srt[1], srt[2]);
-			LoadMatrix(mat, null, (DataGridView)viewSRT.Tag);
-		}
-
-		private void dataGridViewMatrix_CellValueChanged(object sender, DataGridViewCellEventArgs e)
-		{
-			DataGridView viewMatrix = (DataGridView)sender;
-			Matrix mat = GetMatrix(viewMatrix);
-			LoadMatrix(mat, (DataGridView)viewMatrix.Tag, null);
 		}
 
 		void LoadMatrix(Matrix matrix, DataGridView viewSRT, DataGridView viewMatrix)
@@ -470,8 +516,8 @@ namespace AiDroidPlugin
 
 		void LoadREM()
 		{
-			renderObjectMeshes = new List<RenderObjectREM>(new RenderObjectREM[Editor.Parser.RemFile.MESC.numMeshes]);
-			renderObjectIds = new List<int>(new int[Editor.Parser.RemFile.MESC.numMeshes]);
+			renderObjectMeshes = new List<RenderObjectREM>(new RenderObjectREM[Editor.Parser.MESC.Count]);
+			renderObjectIds = new List<int>(new int[Editor.Parser.MESC.Count]);
 
 			InitFrames();
 			InitMeshes();
@@ -483,7 +529,7 @@ namespace AiDroidPlugin
 
 		void InitFrames()
 		{
-			TreeNode objRootNode = CreateFrameTree(Editor.Parser.RemFile.BONC.rootFrame, null);
+			objRootNode = CreateFrameTree(Editor.Parser.BONC.rootFrame, null);
 
 			if (treeViewObjectTree.Nodes.Count > 0)
 			{
@@ -495,22 +541,22 @@ namespace AiDroidPlugin
 		private TreeNode CreateFrameTree(remBone frame, TreeNode parentNode)
 		{
 			TreeNode newNode = new TreeNode(frame.name);
-			newNode.Tag = new DragSource(EditorVar, typeof(remBone), Editor.Parser.RemFile.BONC.frames.IndexOf(frame));
+			newNode.Tag = new DragSource(EditorVar, typeof(remBone), Editor.Parser.BONC.IndexOf(frame));
 
-			remMesh mesh = rem.FindMesh(frame, Editor.Parser.RemFile.MESC);
+			remMesh mesh = rem.FindMesh(frame, Editor.Parser.MESC);
 			if (mesh != null)
 			{
-				int meshId = Editor.Parser.RemFile.MESC.meshes.IndexOf(mesh);
-				TreeNode meshNode = new TreeNode("Mesh");
+				int meshId = Editor.Parser.MESC.IndexOf(mesh);
+				TreeNode meshNode = new TreeNode("Mesh " + mesh.name);
 				meshNode.Tag = new DragSource(EditorVar, typeof(remMesh), meshId);
 				newNode.Nodes.Add(meshNode);
 
-				remSkin skin = rem.FindSkin(mesh.name, Editor.Parser.RemFile.SKIC);
+				remSkin skin = rem.FindSkin(mesh.name, Editor.Parser.SKIC);
 				if (skin != null)
 				{
 					TreeNode boneListNode = new TreeNode("Bones");
 					meshNode.Nodes.Add(boneListNode);
-					for (int i = 0; i < skin.numWeights; i++)
+					for (int i = 0; i < skin.Count; i++)
 					{
 						remBoneWeights boneWeights = skin[i];
 						TreeNode boneNode = new TreeNode(boneWeights.bone);
@@ -524,7 +570,7 @@ namespace AiDroidPlugin
 			{
 				parentNode.Nodes.Add(newNode);
 			}
-			for (int i = 0; i < frame.numChilds; i++)
+			for (int i = 0; i < frame.Count; i++)
 			{
 				CreateFrameTree(frame[i], newNode);
 			}
@@ -534,10 +580,10 @@ namespace AiDroidPlugin
 
 		void InitMeshes()
 		{
-			ListViewItem[] meshItems = new ListViewItem[Editor.Parser.RemFile.MESC.numMeshes];
-			for (int i = 0; i < Editor.Parser.RemFile.MESC.numMeshes; i++)
+			ListViewItem[] meshItems = new ListViewItem[Editor.Parser.MESC.Count];
+			for (int i = 0; i < Editor.Parser.MESC.Count; i++)
 			{
-				remMesh mesh = Editor.Parser.RemFile.MESC[i];
+				remMesh mesh = Editor.Parser.MESC[i];
 				meshItems[i] = new ListViewItem(mesh.name);
 				meshItems[i].Tag = i;
 			}
@@ -548,11 +594,11 @@ namespace AiDroidPlugin
 
 		void InitMaterials()
 		{
-			List<Tuple<string, int>> columnMaterials = new List<Tuple<string, int>>(Editor.Parser.RemFile.MATC.numMats);
-			ListViewItem[] materialItems = new ListViewItem[Editor.Parser.RemFile.MATC.numMats];
-			for (int i = 0; i < Editor.Parser.RemFile.MATC.numMats; i++)
+			List<Tuple<string, int>> columnMaterials = new List<Tuple<string, int>>(Editor.Parser.MATC.Count);
+			ListViewItem[] materialItems = new ListViewItem[Editor.Parser.MATC.Count];
+			for (int i = 0; i < Editor.Parser.MATC.Count; i++)
 			{
-				remMaterial mat = Editor.Parser.RemFile.MATC[i];
+				remMaterial mat = Editor.Parser.MATC[i];
 				materialItems[i] = new ListViewItem(mat.name);
 				materialItems[i].Tag = i;
 
@@ -563,12 +609,11 @@ namespace AiDroidPlugin
 			materiallistHeader.AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
 
 			ColumnSubmeshMaterial.DataSource = columnMaterials;
-			SetComboboxEvent = false;
 
 			TreeNode materialsNode = new TreeNode("Materials");
-			for (int i = 0; i < Editor.Parser.RemFile.MATC.numMats; i++)
+			for (int i = 0; i < Editor.Parser.MATC.Count; i++)
 			{
-				TreeNode matNode = new TreeNode(Editor.Parser.RemFile.MATC[i].name);
+				TreeNode matNode = new TreeNode(Editor.Parser.MATC[i].name);
 				matNode.Tag = new DragSource(EditorVar, typeof(remMaterial), i);
 				materialsNode.Nodes.Add(matNode);
 			}
@@ -582,7 +627,7 @@ namespace AiDroidPlugin
 
 		void InitTextures()
 		{
-			for (int i = 0; i < matTexNameCombo.Length; i++)
+			for (int i = 0; i < 1/*matTexNameCombo.Length*/; i++)
 			{
 				matTexNameCombo[i].Items.Clear();
 				matTexNameCombo[i].Items.Add("(none)");
@@ -594,7 +639,7 @@ namespace AiDroidPlugin
 				string tex = Editor.Textures[i];
 				textureItems[i] = new ListViewItem(tex);
 				textureItems[i].Tag = i;
-				for (int j = 0; j < matTexNameCombo.Length; j++)
+				for (int j = 0; j < 1/*matTexNameCombo.Length*/; j++)
 				{
 					matTexNameCombo[j].Items.Add(tex);
 				}
@@ -646,7 +691,7 @@ namespace AiDroidPlugin
 					return null;
 				}
 
-				if (Editor.Parser.RemFile.BONC.frames[(int)source.Value.Id].name == name)
+				if (Editor.Parser.BONC[(int)source.Value.Id].name == name)
 				{
 					return node;
 				}
@@ -671,7 +716,7 @@ namespace AiDroidPlugin
 					return null;
 				}
 
-				if (Editor.Parser.RemFile.BONC.frames[(int)source.Value.Id].Equals(frame))
+				if (Editor.Parser.BONC[(int)source.Value.Id].Equals(frame))
 				{
 					return node;
 				}
@@ -686,26 +731,22 @@ namespace AiDroidPlugin
 			return null;
 		}
 
-		TreeNode FindBoneNode(remBoneWeights bone, TreeNodeCollection nodes)
+		TreeNode FindMeshNode(remMesh mesh, TreeNodeCollection nodes)
 		{
 			foreach (TreeNode node in nodes)
 			{
 				var source = node.Tag as DragSource?;
-
-				var tuple = node.Tag as Tuple<remBoneWeights, int[]>;
-				if ((source != null) && (source.Value.Type == typeof(remBoneWeights)))
+				if ((source != null) && (source.Value.Type == typeof(remMesh)))
 				{
-					var id = (int[])source.Value.Id;
-					remMesh mesh = Editor.Parser.RemFile.MESC[id[0]];
-					remSkin skin = rem.FindSkin(mesh.name, Editor.Parser.RemFile.SKIC);
-					remBoneWeights boneWeights = skin[id[1]];
-					if (boneWeights.Equals(bone))
+					var id = (int)source.Value.Id;
+					remMesh nodeMesh = Editor.Parser.MESC[id];
+					if (nodeMesh.Equals(mesh))
 					{
 						return node;
 					}
 				}
 
-				TreeNode found = FindBoneNode(bone, node.Nodes);
+				TreeNode found = FindMeshNode(mesh, node.Nodes);
 				if (found != null)
 				{
 					return found;
@@ -713,6 +754,101 @@ namespace AiDroidPlugin
 			}
 
 			return null;
+		}
+
+		void LoadFrame(int frameIdx)
+		{
+			if (frameIdx < 0)
+			{
+				ClearControl(tabPageFrameView);
+				LoadMatrix(Matrix.Identity, dataGridViewFrameSRT, dataGridViewFrameMatrix);
+			}
+			else
+			{
+				remBone frame = Editor.Parser.BONC[frameIdx];
+				textBoxFrameName.Text = frame.name;
+				LoadMatrix(frame.matrix, dataGridViewFrameSRT, dataGridViewFrameMatrix);
+			}
+			loadedFrame = frameIdx;
+		}
+
+		void LoadBone(int[] id)
+		{
+			if (id == null)
+			{
+				ClearControl(tabPageBoneView);
+				LoadMatrix(Matrix.Identity, dataGridViewBoneSRT, dataGridViewBoneMatrix);
+			}
+			else
+			{
+				remMesh mesh = Editor.Parser.MESC[id[0]];
+				remSkin skin = rem.FindSkin(mesh.name, Editor.Parser.SKIC);
+				remBoneWeights boneWeights = skin[id[1]];
+				textBoxBoneName.Text = boneWeights.bone;
+				LoadMatrix(boneWeights.matrix, dataGridViewBoneSRT, dataGridViewBoneMatrix);
+			}
+			loadedBone = id;
+		}
+
+		void LoadMesh(int id)
+		{
+			dataGridViewMesh.Rows.Clear();
+			if (id < 0)
+			{
+				ClearControl(tabPageMeshView);
+				checkBoxMeshSkinned.Checked = false;
+			}
+			else
+			{
+				remMesh mesh = Editor.Parser.MESC[id];
+				for (int i = 0; i < mesh.numMats; i++)
+				{
+					remId matId = mesh.materials[i];
+					remMaterial mat = rem.FindMaterial(matId, Editor.Parser.MATC);
+					int matIdx = Editor.Parser.MATC.IndexOf(mat);
+					rem.Submesh submesh = new rem.Submesh(mesh, null, i);
+					dataGridViewMesh.Rows.Add(new object[] { submesh.numVertices, submesh.numFaces, matIdx >= 0 && matIdx < Editor.Parser.MATC.Count ? (object)matIdx : null });
+				}
+				dataGridViewMesh.ClearSelection();
+
+				textBoxMeshName.Text = mesh.name;
+				checkBoxMeshSkinned.Checked = rem.FindSkin(mesh.name, Editor.Parser.SKIC) != null;
+				textBoxMeshUnknown1.Text = mesh.unknown[0].ToString("X8");
+				textBoxMeshUnknown2.Text = mesh.unknown[1].ToString("X8");
+			}
+			loadedMesh = id;
+		}
+
+		void LoadMaterial(int id)
+		{
+			if (loadedMaterial >= 0)
+			{
+				loadedMaterial = -1;
+			}
+
+			if (id < 0)
+			{
+				ClearControl(tabPageMaterialView);
+			}
+			else
+			{
+				remMaterial mat = Editor.Parser.MATC[id];
+				textBoxMatName.Text = mat.name;
+				matTexNameCombo[0].Text = mat.texture == null ? "(none)" : mat.texture;
+
+				Color3[] colors = new Color3[] { mat.diffuse, mat.ambient, mat.specular, mat.emissive };
+				for (int i = 0; i < colors.Length; i++)
+				{
+					matMatrixText[i][0].Text = colors[i].Red.ToFloatString();
+					matMatrixText[i][1].Text = colors[i].Green.ToFloatString();
+					matMatrixText[i][2].Text = colors[i].Blue.ToFloatString();
+				}
+				matMatrixText[4][0].Text = mat.specularPower.ToString();
+
+				textBoxMatUnknownIntOrFlag.Text = mat.unk_or_flag.ToString("X8");
+				textBoxMatUnknownId.Text = mat.unknown != null ? mat.unknown : String.Empty;
+			}
+			loadedMaterial = id;
 		}
 
 		void LoadTexture(int id)
@@ -740,6 +876,53 @@ namespace AiDroidPlugin
 			loadedTexture = id;
 		}
 
+		private void RecreateFrames()
+		{
+			CrossRefsClear();
+			DisposeRenderObjects();
+			LoadFrame(-1);
+			LoadMesh(-1);
+			InitFrames();
+			InitMeshes();
+			RecreateRenderObjects();
+			RecreateCrossRefs();
+		}
+
+		private void RecreateMeshes()
+		{
+			CrossRefsClear();
+			DisposeRenderObjects();
+			LoadMesh(-1);
+			InitFrames();
+			InitMeshes();
+			InitMaterials();
+			InitTextures();
+			RecreateRenderObjects();
+			RecreateCrossRefs();
+		}
+
+		private void RecreateMaterials()
+		{
+			CrossRefsClear();
+			DisposeRenderObjects();
+			LoadMaterial(-1);
+			InitMaterials();
+			RecreateRenderObjects();
+			RecreateCrossRefs();
+			LoadMesh(loadedMesh);
+		}
+
+		private void RecreateTextures()
+		{
+			CrossRefsClear();
+			DisposeRenderObjects();
+			LoadTexture(-1);
+			InitTextures();
+			RecreateRenderObjects();
+			RecreateCrossRefs();
+			LoadMaterial(loadedMaterial);
+		}
+
 		#region CrossRefs
 
 		private void RecreateCrossRefs()
@@ -759,8 +942,8 @@ namespace AiDroidPlugin
 			crossRefTextureMeshesCount.Clear();
 			crossRefTextureMaterialsCount.Clear();
 
-			var meshes = Editor.Parser.RemFile.MESC.meshes;
-			var materials = Editor.Parser.RemFile.MATC.materials;
+			var meshes = Editor.Parser.MESC.ChildList;
+			var materials = Editor.Parser.MATC.ChildList;
 			var textures = Editor.Textures;
 
 			for (int i = 0; i < meshes.Count; i++)
@@ -790,9 +973,12 @@ namespace AiDroidPlugin
 			for (int i = 0; i < materials.Count; i++)
 			{
 				remMaterial mat = materials[i];
-				int texIdx = textures.IndexOf(mat.texture);
-				crossRefMaterialTextures[i].Add(new KeyList<string>(textures, i));
-				crossRefTextureMaterials[texIdx].Add(new KeyList<remMaterial>(materials, i));
+				if (mat.texture != null)
+				{
+					int texIdx = textures.IndexOf(mat.texture);
+					crossRefMaterialTextures[i].Add(new KeyList<string>(textures, texIdx));
+					crossRefTextureMaterials[texIdx].Add(new KeyList<remMaterial>(materials, i));
+				}
 			}
 
 			for (int i = 0; i < meshes.Count; i++)
@@ -800,13 +986,18 @@ namespace AiDroidPlugin
 				remMesh mesh = meshes[i];
 				for (int j = 0; j < mesh.materials.Count; j++)
 				{
-					remMaterial mat = rem.FindMaterial(mesh.materials[j], Editor.Parser.RemFile.MATC);
-					int matIdx = Editor.Parser.RemFile.MATC.materials.IndexOf(mat);
+					remMaterial mat = rem.FindMaterial(mesh.materials[j], Editor.Parser.MATC);
+					if (mat == null)
+						continue;
+					int matIdx = Editor.Parser.MATC.IndexOf(mat);
 					crossRefMeshMaterials[i].Add(new KeyList<remMaterial>(materials, matIdx));
 					crossRefMaterialMeshes[matIdx].Add(new KeyList<remMesh>(meshes, i));
-					int texIdx = textures.IndexOf(mat.texture);
-					crossRefMeshTextures[i].Add(new KeyList<string>(textures, texIdx));
-					crossRefTextureMeshes[texIdx].Add(new KeyList<remMesh>(meshes, i));
+					if (mat.texture != null)
+					{
+						int texIdx = textures.IndexOf(mat.texture);
+						crossRefMeshTextures[i].Add(new KeyList<string>(textures, texIdx));
+						crossRefTextureMeshes[texIdx].Add(new KeyList<remMesh>(meshes, i));
+					}
 				}
 			}
 
@@ -968,6 +1159,359 @@ namespace AiDroidPlugin
 
 		#endregion CrossRefs
 
+		#region ObjTreeView
+
+		private void treeViewObjectTree_AfterSelect(object sender, TreeViewEventArgs e)
+		{
+			try
+			{
+				if (e.Node.Tag is DragSource)
+				{
+					var tag = (DragSource)e.Node.Tag;
+					if (tag.Type == typeof(remBone))
+					{
+						tabControlViews.SelectTabWithoutLoosingFocus(tabPageFrameView);
+						LoadFrame((int)tag.Id);
+					}
+					else if (tag.Type == typeof(remMesh))
+					{
+						SetListViewAfterNodeSelect(listViewMesh, tag);
+					}
+					else if (tag.Type == typeof(remBoneWeights))
+					{
+						tabControlViews.SelectTabWithoutLoosingFocus(tabPageBoneView);
+						int[] ids = (int[])tag.Id;
+						LoadBone(ids);
+
+						if (highlightedBone != null)
+							HighlightBone(highlightedBone, false);
+						HighlightBone(ids, true);
+						highlightedBone = ids;
+					}
+					else if (tag.Type == typeof(remMaterial))
+					{
+						SetListViewAfterNodeSelect(listViewMaterial, tag);
+					}
+					else if (tag.Type == typeof(string))
+					{
+						SetListViewAfterNodeSelect(listViewTexture, tag);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void SetListViewAfterNodeSelect(ListView listView, DragSource tag)
+		{
+			while (listView.SelectedItems.Count > 0)
+			{
+				listView.SelectedItems[0].Selected = false;
+			}
+
+			for (int i = 0; i < listView.Items.Count; i++)
+			{
+				var item = listView.Items[i];
+				if ((int)item.Tag == (int)tag.Id)
+				{
+					item.Selected = true;
+					break;
+				}
+			}
+		}
+
+		private void treeViewObjectTree_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
+		{
+			if (e.Node.Tag is DragSource && ((DragSource)e.Node.Tag).Type == typeof(remBoneWeights) && e.Node.IsSelected)
+			{
+				if (highlightedBone != null)
+				{
+					HighlightBone(highlightedBone, false);
+					highlightedBone = null;
+				}
+				else
+				{
+					highlightedBone = (int[])((DragSource)e.Node.Tag).Id;
+					HighlightBone(highlightedBone, true);
+				}
+			}
+		}
+
+		private void HighlightBone(int[] boneIds, bool show)
+		{
+			RenderObjectREM renderObj = renderObjectMeshes[boneIds[0]];
+			if (renderObj != null)
+			{
+				remMesh mesh = Editor.Parser.MESC[boneIds[0]];
+//				renderObj.HighlightBone(mesh, boneIds[1], show);
+				Gui.Renderer.Render();
+			}
+		}
+
+		private void buttonObjectTreeExpand_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				treeViewObjectTree.BeginUpdate();
+				treeViewObjectTree.ExpandAll();
+				treeViewObjectTree.EndUpdate();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonObjectTreeCollapse_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				treeViewObjectTree.BeginUpdate();
+				treeViewObjectTree.CollapseAll();
+				treeViewObjectTree.EndUpdate();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void treeViewObjectTree_ItemDrag(object sender, ItemDragEventArgs e)
+		{
+			try
+			{
+				if (e.Item is TreeNode)
+				{
+					treeViewObjectTree.DoDragDrop(e.Item, DragDropEffects.Copy);
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void treeViewObjectTree_DragEnter(object sender, DragEventArgs e)
+		{
+			try
+			{
+				UpdateDragDrop(sender, e);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void treeViewObjectTree_DragOver(object sender, DragEventArgs e)
+		{
+			try
+			{
+				UpdateDragDrop(sender, e);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void treeViewObjectTree_DragDrop(object sender, DragEventArgs e)
+		{
+			try
+			{
+				TreeNode node = (TreeNode)e.Data.GetData(typeof(TreeNode));
+				if (node == null)
+				{
+					Gui.Docking.DockDragDrop(sender, e);
+				}
+				else
+				{
+					ProcessDragDropSources(node);
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void ProcessDragDropSources(TreeNode node)
+		{
+			if (node.Tag is DragSource)
+			{
+				if ((node.Parent != null) && !node.Checked && node.StateImageIndex != (int)CheckState.Indeterminate)
+				{
+					return;
+				}
+
+				DragSource? dest = null;
+				if (treeViewObjectTree.SelectedNode != null)
+				{
+					dest = treeViewObjectTree.SelectedNode.Tag as DragSource?;
+				}
+
+				DragSource source = (DragSource)node.Tag;
+				if (source.Type == typeof(remBone))
+				{
+					using (var dragOptions = new FormREMDragDrop(Editor, true))
+					{
+						var srcEditor = (remEditor)Gui.Scripting.Variables[source.Variable];
+						string srcFrameName = null;
+						string srcFrameParameter = null;
+						if ((int)source.Id >= 0)
+						{
+							srcFrameName = srcEditor.Parser.BONC[(int)source.Id].name;
+							srcFrameParameter = source.Variable + ".Frames[" + (int)source.Id + "]";
+						}
+						else
+						{
+							srcFrameName = srcEditor.Parser.BONC.rootFrame.name;
+							srcFrameParameter = "null";
+						}
+						dragOptions.numericFrameId.Value = GetDestParentIdx(srcFrameName, dest);
+						if (dragOptions.ShowDialog() == DialogResult.OK)
+						{
+							Gui.Scripting.RunScript(EditorVar + "." + dragOptions.FrameMethod.GetName() + "(srcFrame=" + srcFrameParameter + ", srcParser=" + source.Variable + ".Parser, destParentIdx=" + dragOptions.numericFrameId.Value + ")");
+							RecreateFrames();
+						}
+					}
+				}
+				else if (source.Type == typeof(remMaterial))
+				{
+					Gui.Scripting.RunScript(EditorVar + ".MergeMaterial(mat=" + source.Variable + ".Materials[" + (int)source.Id + "])");
+					RecreateMaterials();
+				}
+				else if (source.Type == typeof(string))
+				{
+					Gui.Scripting.RunScript(EditorVar + ".MergeTexture(tex=" + source.Variable + ".Textures[" + (int)source.Id + "], srcParser=" + source.Variable + ".Parser)");
+					RecreateTextures();
+				}
+				else if (source.Type == typeof(ImportedFrame))
+				{
+					using (var dragOptions = new FormREMDragDrop(Editor, true))
+					{
+						var srcEditor = (ImportedEditor)Gui.Scripting.Variables[source.Variable];
+						var srcFrameName = srcEditor.Frames[(int)source.Id].Name;
+						dragOptions.numericFrameId.Value = GetDestParentIdx(srcFrameName, dest);
+						if (dragOptions.ShowDialog() == DialogResult.OK)
+						{
+							Gui.Scripting.RunScript(EditorVar + "." + dragOptions.FrameMethod.GetName() + "(srcFrame=" + source.Variable + ".Frames[" + (int)source.Id + "], destParentIdx=" + dragOptions.numericFrameId.Value + ")");
+							RecreateFrames();
+						}
+					}
+				}
+				else if (source.Type == typeof(WorkspaceMesh))
+				{
+					using (var dragOptions = new FormREMDragDrop(Editor, false))
+					{
+						var srcEditor = (ImportedEditor)Gui.Scripting.Variables[source.Variable];
+
+						var destFrameId = Editor.GetFrameIdx(srcEditor.Imported.MeshList[(int)source.Id].Name);
+						if (destFrameId < 0)
+						{
+							destFrameId = 0;
+						}
+						dragOptions.numericMeshId.Value = destFrameId;
+
+						if (dragOptions.ShowDialog() == DialogResult.OK)
+						{
+							// repeating only final choices for repeatability of the script
+							WorkspaceMesh wsMesh = srcEditor.Meshes[(int)source.Id];
+							foreach (ImportedSubmesh submesh in wsMesh.SubmeshList)
+							{
+								if (wsMesh.isSubmeshEnabled(submesh))
+								{
+									if (!wsMesh.isSubmeshReplacingOriginal(submesh))
+									{
+										Gui.Scripting.RunScript(source.Variable + ".setSubmeshReplacingOriginal(meshIdx=" + (int)source.Id + ", idx=" + wsMesh.SubmeshList.IndexOf(submesh) + ", replaceOriginal=false)");
+									}
+								}
+								else
+								{
+									Gui.Scripting.RunScript(source.Variable + ".setSubmeshEnabled(meshIdx=" + (int)source.Id + ", idx=" + wsMesh.SubmeshList.IndexOf(submesh) + ", enabled=false)");
+								}
+							}
+							Gui.Scripting.RunScript(EditorVar + ".ReplaceMesh(mesh=" + source.Variable + ".Meshes[" + (int)source.Id + "], frameIdx=" + dragOptions.numericMeshId.Value +
+								", materials=" + source.Variable + ".Imported.MaterialList, textures=" + source.Variable + ".Imported.TextureList, merge=" + dragOptions.radioButtonMeshMerge.Checked + ", normals=\"" + dragOptions.NormalsMethod.GetName() + "\", bones=\"" + dragOptions.BonesMethod.GetName() + "\")");
+							RecreateMeshes();
+						}
+					}
+				}
+				else if (source.Type == typeof(ImportedMaterial))
+				{
+					Gui.Scripting.RunScript(EditorVar + ".MergeMaterial(mat=" + source.Variable + ".Imported.MaterialList[" + (int)source.Id + "])");
+					RecreateMaterials();
+				}
+				else if (source.Type == typeof(ImportedTexture))
+				{
+					Gui.Scripting.RunScript(EditorVar + ".MergeTexture(tex=" + source.Variable + ".Imported.TextureList[" + (int)source.Id + "])");
+					RecreateTextures();
+				}
+			}
+			else
+			{
+				foreach (TreeNode child in node.Nodes)
+				{
+					ProcessDragDropSources(child);
+				}
+			}
+		}
+
+		private int GetDestParentIdx(string srcFrameName, DragSource? dest)
+		{
+			int destParentId = -1;
+			if (dest == null)
+			{
+				var destFrameIdx = Editor.GetFrameIdx(srcFrameName);
+				if (destFrameIdx >= 0)
+				{
+					var destFrameParent = Editor.Parser.BONC[destFrameIdx].Parent;
+					if (destFrameParent != null)
+					{
+						for (int i = 0; i < Editor.Parser.BONC.Count; i++)
+						{
+							if (Editor.Parser.BONC[i] == destFrameParent)
+							{
+								destParentId = i;
+								break;
+							}
+						}
+					}
+				}
+			}
+			else if (dest.Value.Type == typeof(remBone))
+			{
+				destParentId = (int)dest.Value.Id;
+			}
+
+			return destParentId;
+		}
+
+		private void UpdateDragDrop(object sender, DragEventArgs e)
+		{
+			Point p = treeViewObjectTree.PointToClient(new Point(e.X, e.Y));
+			TreeNode target = treeViewObjectTree.GetNodeAt(p);
+			if ((target != null) && ((p.X < target.Bounds.Left) || (p.X > target.Bounds.Right) || (p.Y < target.Bounds.Top) || (p.Y > target.Bounds.Bottom)))
+			{
+				target = null;
+			}
+			treeViewObjectTree.SelectedNode = target;
+
+			TreeNode node = (TreeNode)e.Data.GetData(typeof(TreeNode));
+			if (node == null)
+			{
+				Gui.Docking.DockDragEnter(sender, e);
+			}
+			else
+			{
+				e.Effect = e.AllowedEffect & DragDropEffects.Copy;
+			}
+		}
+
+		#endregion ObjTreeView
+
 		#region MeshView
 
 		private void listViewMesh_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
@@ -983,28 +1527,34 @@ namespace AiDroidPlugin
 					int meshIdx = (int)e.Item.Tag;
 					if (e.IsSelected)
 					{
-						if (!Gui.Docking.DockRenderer.IsHidden)
-						{
-							Gui.Docking.DockRenderer.Activate();
-						}
-						tabControlViews.SelectedTab = tabPageMeshView;
-//						LoadMesh(meshIdx);
+						tabControlViews.SelectTabWithoutLoosingFocus(tabPageMeshView);
+						LoadMesh(meshIdx);
 						CrossRefAddItem(crossRefMeshMaterials[meshIdx], crossRefMeshMaterialsCount, listViewMeshMaterial, listViewMaterial);
 						CrossRefAddItem(crossRefMeshTextures[meshIdx], crossRefMeshTexturesCount, listViewMeshTexture, listViewTexture);
 
 						if (renderObjectMeshes[meshIdx] == null)
 						{
-							remMesh mesh = Editor.Parser.RemFile.MESC[meshIdx];
+							remMesh mesh = Editor.Parser.MESC[meshIdx];
 							renderObjectMeshes[meshIdx] = new RenderObjectREM(Editor.Parser, mesh);
 						}
 						RenderObjectREM renderObj = renderObjectMeshes[meshIdx];
 						renderObjectIds[meshIdx] = Gui.Renderer.AddRenderObject(renderObj);
+						if (!Gui.Docking.DockRenderer.IsHidden)
+						{
+							Gui.Docking.DockRenderer.Enabled = false;
+							Gui.Docking.DockRenderer.Activate();
+							Gui.Docking.DockRenderer.Enabled = true;
+							if ((bool)Gui.Config["AutoCenterView"])
+							{
+								Gui.Renderer.CenterView();
+							}
+						}
 					}
 					else
 					{
 						if (meshIdx == loadedMesh)
 						{
-//							LoadMesh(-1);
+							LoadMesh(-1);
 						}
 						CrossRefRemoveItem(crossRefMeshMaterials[meshIdx], crossRefMeshMaterialsCount, listViewMeshMaterial);
 						CrossRefRemoveItem(crossRefMeshTextures[meshIdx], crossRefMeshTexturesCount, listViewMeshTexture);
@@ -1054,8 +1604,8 @@ namespace AiDroidPlugin
 					int id = (int)e.Item.Tag;
 					if (e.IsSelected)
 					{
-						tabControlViews.SelectedTab = tabPageMaterialView;
-//						LoadMaterial(id);
+						tabControlViews.SelectTabWithoutLoosingFocus(tabPageMaterialView);
+						LoadMaterial(id);
 						CrossRefAddItem(crossRefMaterialMeshes[id], crossRefMaterialMeshesCount, listViewMaterialMesh, listViewMesh);
 						CrossRefAddItem(crossRefMaterialTextures[id], crossRefMaterialTexturesCount, listViewMaterialTexture, listViewTexture);
 					}
@@ -1063,7 +1613,7 @@ namespace AiDroidPlugin
 					{
 						if (id == loadedMaterial)
 						{
-//							LoadMaterial(-1);
+							LoadMaterial(-1);
 						}
 						CrossRefRemoveItem(crossRefMaterialMeshes[id], crossRefMaterialMeshesCount, listViewMaterialMesh);
 						CrossRefRemoveItem(crossRefMaterialTextures[id], crossRefMaterialTexturesCount, listViewMaterialTexture);
@@ -1111,7 +1661,7 @@ namespace AiDroidPlugin
 					int id = (int)e.Item.Tag;
 					if (e.IsSelected)
 					{
-						tabControlViews.SelectedTab = tabPageTextureView;
+						tabControlViews.SelectTabWithoutLoosingFocus(tabPageTextureView);
 						LoadTexture(id);
 						CrossRefAddItem(crossRefTextureMeshes[id], crossRefTextureMeshesCount, listViewTextureMesh, listViewMesh);
 						CrossRefAddItem(crossRefTextureMaterials[id], crossRefTextureMaterialsCount, listViewTextureMaterial, listViewMaterial);
@@ -1164,17 +1714,266 @@ namespace AiDroidPlugin
 					return;
 				}
 
-/*				Gui.Scripting.RunScript(EditorVar + ".SetFrameName(id=" + loadedFrame + ", name=\"" + textBoxFrameName.Text + "\")");
+				Gui.Scripting.RunScript(EditorVar + ".SetFrameName(idx=" + loadedFrame + ", name=\"" + textBoxFrameName.Text + "\")");
 
+				remBone frame = Editor.Parser.BONC[loadedFrame];
+				TreeNode node = FindFrameNode(frame, objRootNode.Nodes);
+				node.Text = frame.name;
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonFrameMoveUp_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedFrame < 0)
+					return;
+
+				remBone frame = Editor.Parser.BONC[loadedFrame];
+				if (frame.Parent == null)
+					return;
+				remBone parentFrame = (remBone)frame.Parent;
+				int pos = parentFrame.IndexOf(frame);
+				if (pos < 1)
+					return;
+
+				TreeNode node = FindFrameNode(frame, objRootNode.Nodes);
+				TreeNode parentNode = node.Parent;
+				bool selected = node.Equals(node.TreeView.SelectedNode);
+				int nodeIdx = node.Index;
+				node.TreeView.BeginUpdate();
+				parentNode.Nodes.RemoveAt(nodeIdx);
+				parentNode.Nodes.Insert(nodeIdx - 1, node);
+				if (selected)
+				{
+					node.TreeView.SelectedNode = node;
+				}
+				node.TreeView.EndUpdate();
+
+				DragSource src = (DragSource)parentNode.Tag;
+				Gui.Scripting.RunScript(EditorVar + ".MoveFrame(idx=" + loadedFrame + ", parent=" + (int)src.Id + ", parentDestination=" + (pos - 1) + ")");
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonFrameMoveDown_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedFrame < 0)
+					return;
+
+				remBone frame = Editor.Parser.BONC[loadedFrame];
+				if (frame.Parent == null)
+					return;
+				remBone parentFrame = (remBone)frame.Parent;
+				int pos = parentFrame.IndexOf(frame);
+				if (pos == parentFrame.Count - 1)
+					return;
+
+				TreeNode node = FindFrameNode(frame, objRootNode.Nodes);
+				TreeNode parentNode = node.Parent;
+				bool selected = node.Equals(node.TreeView.SelectedNode);
+				int nodeIdx = node.Index;
+				node.TreeView.BeginUpdate();
+				parentNode.Nodes.RemoveAt(nodeIdx);
+				parentNode.Nodes.Insert(nodeIdx + 1, node);
+				if (selected)
+				{
+					node.TreeView.SelectedNode = node;
+				}
+				node.TreeView.EndUpdate();
+
+				DragSource src = (DragSource)parentNode.Tag;
+				Gui.Scripting.RunScript(EditorVar + ".MoveFrame(idx=" + loadedFrame + ", parent=" + (int)src.Id + ", parentDestination=" + (pos + 1) + ")");
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonFrameRemove_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedFrame < 0)
+					return;
+				if (Editor.Parser.BONC[loadedFrame].Parent == null)
+				{
+					Report.ReportLog("Can't remove the root frame");
+					return;
+				}
+
+				int frameIdx = loadedFrame;
+
+				DisposeRenderObjects();
+				LoadFrame(-1);
+				LoadBone(null);
+
+				Gui.Scripting.RunScript(EditorVar + ".RemoveFrame(idx=" + frameIdx + ")");
+
+				LoadREM();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonFrameMatrixIdentity_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				Matrix m = Matrix.Identity;
+				LoadMatrix(m, dataGridViewFrameSRT, dataGridViewFrameMatrix);
+				FrameMatrixApply(m);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonFrameMatrixCombined_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedFrame < 0)
+				{
+					return;
+				}
+
+				remBone frame = Editor.Parser.BONC[loadedFrame];
+				Matrix m = Matrix.Identity;
+				while (frame != null)
+				{
+					m *= frame.matrix;
+					frame = frame.Parent as remBone;
+				}
+				LoadMatrix(m, dataGridViewFrameSRT, dataGridViewFrameMatrix);
+				FrameMatrixApply(m);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonFrameMatrixLocalized_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedFrame < 0)
+				{
+					return;
+				}
+
+				remBone frame = Editor.Parser.BONC[loadedFrame];
+				Matrix m = Matrix.Identity;
+				remBone parent = frame.Parent as remBone;
+				while (parent != null)
+				{
+					m *= parent.matrix;
+					parent = parent.Parent as remBone;
+				}
+				m = frame.matrix * Matrix.Invert(m);
+				LoadMatrix(m, dataGridViewFrameSRT, dataGridViewFrameMatrix);
+				FrameMatrixApply(m);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonFrameMatrixInverse_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				Matrix m = Matrix.Invert(GetMatrix(dataGridViewFrameMatrix));
+				LoadMatrix(m, dataGridViewFrameSRT, dataGridViewFrameMatrix);
+				FrameMatrixApply(m);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void dataGridViewFrameSRT_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+		{
+			Vector3[] srt = GetSRT(dataGridViewFrameSRT);
+			Matrix m = FbxUtility.SRTToMatrix(srt[0], srt[1], srt[2]);
+			LoadMatrix(m, dataGridViewFrameSRT, dataGridViewFrameMatrix);
+			FrameSRTApply(srt);
+		}
+
+		private void FrameSRTApply(Vector3[] srt)
+		{
+			try
+			{
+				if (loadedFrame < 0)
+				{
+					return;
+				}
+
+				string command = EditorVar + ".SetFrameSRT(idx=" + loadedFrame;
+				char[] argPrefix = new char[3] { 's', 'r', 't' };
+				char[] argAxis = new char[3] { 'X', 'Y', 'Z' };
+				for (int i = 0; i < 3; i++)
+				{
+					for (int j = 0; j < 3; j++)
+					{
+						command += ", " + argPrefix[i] + argAxis[j] + "=" + srt[i][j].ToFloatString();
+					}
+				}
+				command += ")";
+
+				Gui.Scripting.RunScript(command);
 				RecreateRenderObjects();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
 
-				xxFrame frame = Editor.Frames[loadedFrame];
-				TreeNode node = FindFrameNode(frame, treeViewObjectTree.Nodes);
-				node.Text = frame.Name;
+		private void dataGridViewFrameMatrix_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+		{
+			Matrix m = GetMatrix(dataGridViewFrameMatrix);
+			LoadMatrix(m, dataGridViewFrameSRT, dataGridViewFrameMatrix);
+			FrameMatrixApply(m);
+		}
 
-				RenameListViewItems(Editor.Meshes, listViewMesh, frame, frame.Name);
-				RenameListViewItems(Editor.Meshes, listViewMaterialMesh, frame, frame.Name);
-				RenameListViewItems(Editor.Meshes, listViewTextureMesh, frame, frame.Name);*/
+		private void FrameMatrixApply(Matrix m)
+		{
+			try
+			{
+				if (loadedFrame < 0)
+				{
+					return;
+				}
+
+				string command = EditorVar + ".SetFrameMatrix(idx=" + loadedFrame;
+				for (int i = 0; i < 4; i++)
+				{
+					for (int j = 0; j < 4; j++)
+					{
+						command += ", m" + (i + 1) + (j + 1) + "=" + m[i, j].ToFloatString();
+					}
+				}
+				command += ")";
+
+				Gui.Scripting.RunScript(command);
+				RecreateRenderObjects();
 			}
 			catch (Exception ex)
 			{
@@ -1184,7 +1983,484 @@ namespace AiDroidPlugin
 
 		#endregion Frame
 
+		#region Bone
+
+		void textBoxBoneName_AfterEditTextChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedBone == null)
+				{
+					return;
+				}
+
+				Gui.Scripting.RunScript(EditorVar + ".SetBoneFrame(meshIdx=" + loadedBone[0] + ", boneIdx=" + loadedBone[1] + ", frame=\"" + textBoxBoneName.Text + "\")");
+
+				LoadBone(loadedBone);
+				InitFrames();
+				RecreateRenderObjects();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonBoneGotoFrame_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedBone != null)
+				{
+					remMesh mesh = Editor.Parser.MESC[loadedBone[0]];
+					remSkin skin = rem.FindSkin(mesh.name, Editor.Parser.SKIC);
+					remBoneWeights boneWeights = skin[loadedBone[1]];
+					remBone boneFrame = rem.FindFrame(boneWeights.bone, Editor.Parser.BONC.rootFrame);
+					TreeNode node = FindFrameNode(boneFrame, objRootNode.Nodes);
+					if (node != null)
+					{
+						tabControlLists.SelectedTab = tabPageObject;
+						treeViewObjectTree.SelectedNode = node;
+						node.Expand();
+						node.EnsureVisible();
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonBoneRemove_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedBone == null)
+				{
+					return;
+				}
+
+				Gui.Scripting.RunScript(EditorVar + ".RemoveBone(meshIdx=" + loadedBone[0] + ", boneIdx=" + loadedBone[1] + ")");
+
+				LoadBone(null);
+				InitFrames();
+				highlightedBone = null;
+				RecreateRenderObjects();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonBoneCopy_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedBone == null)
+				{
+					return;
+				}
+
+				Gui.Scripting.RunScript(EditorVar + ".CopyBoneWeights(meshIdx=" + loadedBone[0] + ", boneIdx=" + loadedBone[1] + ")");
+
+				InitFrames();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void dataGridViewBoneSRT_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+		{
+			Vector3[] srt = GetSRT(dataGridViewBoneSRT);
+			Matrix m = FbxUtility.SRTToMatrix(srt[0], srt[1], srt[2]);
+			LoadMatrix(m, dataGridViewBoneSRT, dataGridViewBoneMatrix);
+			BoneSRTApply(srt);
+		}
+
+		private void BoneSRTApply(Vector3[] srt)
+		{
+			try
+			{
+				if (loadedBone == null)
+				{
+					return;
+				}
+
+				string command = EditorVar + ".SetBoneSRT(meshIdx=" + loadedBone[0] + ", boneIdx=" + loadedBone[1];
+				char[] argPrefix = new char[3] { 's', 'r', 't' };
+				char[] argAxis = new char[3] { 'X', 'Y', 'Z' };
+				for (int i = 0; i < 3; i++)
+				{
+					for (int j = 0; j < 3; j++)
+					{
+						command += ", " + argPrefix[i] + argAxis[j] + "=" + srt[i][j].ToFloatString();
+					}
+				}
+				command += ")";
+
+				Gui.Scripting.RunScript(command);
+				RecreateRenderObjects();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void dataGridViewBoneMatrix_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+		{
+			Matrix m = GetMatrix(dataGridViewBoneMatrix);
+			LoadMatrix(m, dataGridViewBoneSRT, dataGridViewBoneMatrix);
+			BoneMatrixApply(m);
+		}
+
+		private void BoneMatrixApply(Matrix m)
+		{
+			try
+			{
+				if (loadedBone == null)
+				{
+					return;
+				}
+
+				string command = EditorVar + ".SetBoneMatrix(meshIdx=" + loadedBone[0] + ", boneIdx=" + loadedBone[1];
+				for (int i = 0; i < 4; i++)
+				{
+					for (int j = 0; j < 4; j++)
+					{
+						command += ", m" + (i + 1) + (j + 1) + "=" + m[i, j].ToFloatString();
+					}
+				}
+				command += ")";
+				Gui.Scripting.RunScript(command);
+
+				RecreateRenderObjects();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		#endregion Bone
+
 		#region Mesh
+
+		void textBoxMeshName_AfterEditTextChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedMesh < 0)
+				{
+					return;
+				}
+
+				remMesh mesh = Editor.Parser.MESC[loadedMesh];
+				Gui.Scripting.RunScript(EditorVar + ".SetMeshName(idx=" + loadedMesh + ", name=\"" + textBoxMeshName.Text + "\")");
+
+				string meshName = mesh.ToString();
+
+				TreeNode node = FindMeshNode(mesh, objRootNode.Nodes);
+				node.Text = meshName;
+
+				RenameListViewItems(Editor.Parser.MESC.ChildList, listViewMesh, mesh, meshName);
+				RenameListViewItems(Editor.Parser.MESC.ChildList, listViewMaterialMesh, mesh, meshName);
+				RenameListViewItems(Editor.Parser.MESC.ChildList, listViewTextureMesh, mesh, meshName);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void comboBoxMeshExportFormat_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				switch ((MeshExportFormat)comboBoxMeshExportFormat.SelectedIndex)
+				{
+				case MeshExportFormat.Mqo:
+					panelMeshExportOptionsMqo.BringToFront();
+					break;
+				case MeshExportFormat.Fbx:
+				case MeshExportFormat.ColladaFbx:
+				case MeshExportFormat.Dxf:
+				case MeshExportFormat._3ds:
+				case MeshExportFormat.Obj:
+					panelMeshExportOptionsFbx.BringToFront();
+					break;
+				default:
+					panelMeshExportOptionsDefault.BringToFront();
+					break;
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonMeshExport_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				DirectoryInfo dir = new DirectoryInfo(exportDir);
+
+				string meshNames = String.Empty;
+				if (listViewMesh.SelectedItems.Count > 0)
+				{
+					for (int i = 0; i < listViewMesh.SelectedItems.Count; i++)
+					{
+						meshNames += "\"" + Editor.Parser.MESC[(int)listViewMesh.SelectedItems[i].Tag].name + "\", ";
+					}
+				}
+				else
+				{
+					if (listViewMesh.Items.Count <= 0)
+					{
+						Report.ReportLog("There are no meshes for exporting");
+						return;
+					}
+
+					for (int i = 0; i < listViewMesh.Items.Count; i++)
+					{
+						meshNames += "\"" + Editor.Parser.MESC[(int)listViewMesh.Items[i].Tag].name + "\", ";
+					}
+				}
+				meshNames = "{ " + meshNames.Substring(0, meshNames.Length - 2) + " }";
+
+				Report.ReportLog("Started exporting to " + comboBoxMeshExportFormat.SelectedItem + " format...");
+				Application.DoEvents();
+
+				switch ((MeshExportFormat)comboBoxMeshExportFormat.SelectedIndex)
+				{
+					case MeshExportFormat.Mqo:
+						Gui.Scripting.RunScript("ExportMqo(parser=" + ParserVar + ", meshNames=" + meshNames + ", dirPath=\"" + dir.FullName + "\", singleMqo=" + checkBoxMeshExportMqoSingleFile.Checked + ", worldCoords=" + checkBoxMeshExportMqoWorldCoords.Checked + ")");
+						break;
+/*					case MeshExportFormat.ColladaFbx:
+						Report.ReportLog("not implemented");
+						//Fbx.Exporter.Export(Utility.GetDestFile(dir, "meshes", ".dae"), parser, meshParents, xaSubfileList, checkBoxMeshExportFbxAllFrames.Checked, checkBoxMeshExportFbxSkins.Checked, ".dae");
+						break;
+					case MeshExportFormat.Fbx:
+						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".fbx") + "\", exportFormat=\".fbx\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ")");
+						break;
+					case MeshExportFormat.Dxf:
+						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".dxf") + "\", exportFormat=\".dxf\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ")");
+						break;
+					case MeshExportFormat._3ds:
+						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".3ds") + "\", exportFormat=\".3ds\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ")");
+						break;
+					case MeshExportFormat.Obj:
+						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".obj") + "\", exportFormat=\".obj\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ")");
+						break;*/
+					default:
+						throw new Exception("Unexpected ExportFormat");
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		void textBoxMeshUnknowns_AfterEditTextChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedMesh < 0)
+				{
+					return;
+				}
+
+				remMesh mesh = Editor.Parser.MESC[loadedMesh];
+				Gui.Scripting.RunScript(EditorVar + ".SetMeshUnknowns(" +
+					ScriptHelper.Parameters(new string[] {
+						"idx=" + loadedMesh,
+						"unknowns={0x" + Int32.Parse(textBoxMeshUnknown1.Text, System.Globalization.NumberStyles.AllowHexSpecifier).ToString("X"),
+						"0x" + Int32.Parse(textBoxMeshUnknown2.Text, System.Globalization.NumberStyles.AllowHexSpecifier).ToString("X") + "}"
+					}) +
+				")");
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonMeshGotoFrame_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedMesh >= 0)
+				{
+					TreeNode node = FindMeshNode(Editor.Parser.MESC[loadedMesh], objRootNode.Nodes);
+					if (node != null)
+					{
+						node = node.Parent;
+						tabControlLists.SelectedTab = tabPageObject;
+						treeViewObjectTree.SelectedNode = node;
+						node.Expand();
+						node.EnsureVisible();
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonMeshRemove_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedMesh < 0)
+				{
+					return;
+				}
+
+				Gui.Scripting.RunScript(EditorVar + ".RemoveMesh(idx=" + loadedMesh + ")");
+
+				RecreateMeshes();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonMeshNormals_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedMesh < 0)
+				{
+					return;
+				}
+
+				using (var normals = new FormXXNormals())
+				{
+					if (normals.ShowDialog() == DialogResult.OK)
+					{
+						Gui.Scripting.RunScript(EditorVar + ".CalculateNormals(idx=" + loadedMesh + ", threshold=" + normals.numericThreshold.Value + ")");
+
+						RecreateRenderObjects();
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonSubmeshEdit_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedMesh < 0)
+				{
+					return;
+				}
+
+				Report.ReportLog("not implemented");
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonSubmeshRemove_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if ((loadedMesh < 0) || (dataGridViewMesh.SelectedRows.Count <= 0))
+				{
+					return;
+				}
+
+				dataGridViewMesh.SelectionChanged -= new EventHandler(dataGridViewMesh_SelectionChanged);
+
+				int lastSelectedRow = -1;
+				List<int> indices = new List<int>();
+				foreach (DataGridViewRow row in dataGridViewMesh.SelectedRows)
+				{
+					indices.Add(row.Index);
+					lastSelectedRow = row.Index;
+				}
+				indices.Sort();
+
+				bool meshRemoved = (indices.Count == Editor.Parser.MESC[loadedMesh].numMats);
+
+				for (int i = 0; i < indices.Count; i++)
+				{
+					int index = indices[i] - i;
+					Gui.Scripting.RunScript(EditorVar + ".RemoveSubmesh(meshIdx=" + loadedMesh + ", submeshIdx=" + index + ")");
+				}
+
+				dataGridViewMesh.SelectionChanged += new EventHandler(dataGridViewMesh_SelectionChanged);
+
+				if (meshRemoved)
+				{
+					RecreateMeshes();
+				}
+				else
+				{
+					LoadMesh(loadedMesh);
+					if (lastSelectedRow == dataGridViewMesh.Rows.Count)
+						lastSelectedRow--;
+					dataGridViewMesh.Rows[lastSelectedRow].Selected = true;
+					dataGridViewMesh.FirstDisplayedScrollingRowIndex = lastSelectedRow;
+					RecreateRenderObjects();
+					RecreateCrossRefs();
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void dataGridViewMesh_SelectionChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				HighlightSubmeshes();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		void HighlightSubmeshes()
+		{
+			if (loadedMesh < 0)
+			{
+				return;
+			}
+
+			RenderObjectREM renderObj = renderObjectMeshes[loadedMesh];
+			if (renderObj != null)
+			{
+				renderObj.HighlightSubmesh.Clear();
+				foreach (DataGridViewRow row in dataGridViewMesh.SelectedRows)
+				{
+					renderObj.HighlightSubmesh.Add(row.Index);
+				}
+				Gui.Renderer.Render();
+			}
+		}
+
+		private void dataGridViewMesh_DataError(object sender, DataGridViewDataErrorEventArgs e)
+		{
+			e.Cancel = true;
+		}
 
 		// http://connect.microsoft.com/VisualStudio/feedback/details/151567/datagridviewcomboboxcell-needs-selectedindexchanged-event
 		private void dataGridViewMesh_EditingControlShowing(object sender, DataGridViewEditingControlShowingEventArgs e)
@@ -1238,13 +2514,11 @@ namespace AiDroidPlugin
 				if (matIdValue != currentCellValueBeforeEndEdit)
 				{
 					int rowIdx = dataGridViewMesh.CurrentCell.RowIndex;
-//					odfSubmesh submesh = Editor.Parser.MeshSection[loadedMesh][rowIdx];
 
-//					ObjectID newId = new ObjectID(BitConverter.GetBytes(matIdValue));
-					Gui.Scripting.RunScript(EditorVar + ".SetSubmeshMaterial(meshIdx=" + loadedMesh + ", submeshIdx=" + rowIdx + ", matId=\"" + matIdValue + "\")");
+					Gui.Scripting.RunScript(EditorVar + ".SetSubmeshMaterial(meshIdx=" + loadedMesh + ", submeshIdx=" + rowIdx + ", matIdx=" + matIdValue + ")");
 
-/*					RecreateRenderObjects();
-					RecreateCrossRefs();*/
+					RecreateRenderObjects();
+					RecreateCrossRefs();
 
 					dataGridViewMesh.CurrentCell.Value = matIdValue;
 				}
@@ -1268,20 +2542,36 @@ namespace AiDroidPlugin
 					return;
 				}
 
-				Gui.Scripting.RunScript(EditorVar + ".SetMaterialName(id=" + loadedMaterial + ", name=\"" + textBoxMatName.Text + "\")");
+				Gui.Scripting.RunScript(EditorVar + ".SetMaterialName(idx=" + loadedMaterial + ", name=\"" + textBoxMatName.Text + "\")");
 
-/*				xxMaterial mat = Editor.Parser.MaterialList[loadedMaterial];
-				RenameListViewItems(Editor.Parser.MaterialList, listViewMaterial, mat, mat.Name);
-				RenameListViewItems(Editor.Parser.MaterialList, listViewMeshMaterial, mat, mat.Name);
-				RenameListViewItems(Editor.Parser.MaterialList, listViewTextureMaterial, mat, mat.Name);
+				remMaterial mat = Editor.Parser.MATC[loadedMaterial];
+				RenameListViewItems(Editor.Parser.MATC.ChildList, listViewMaterial, mat, mat.name);
+				RenameListViewItems(Editor.Parser.MATC.ChildList, listViewMeshMaterial, mat, mat.name);
+				RenameListViewItems(Editor.Parser.MATC.ChildList, listViewTextureMaterial, mat, mat.name);
 
 				InitMaterials();
-				LoadMaterial(loadedMaterial);*/
+				LoadMaterial(loadedMaterial);
 			}
 			catch (Exception ex)
 			{
 				Utility.ReportException(ex);
 			}
+		}
+
+		private void checkBoxTEXH_CheckedChanged(object sender, EventArgs e)
+		{
+			Editor.InitTextures(checkBoxTEXH.Checked, checkBoxNoMask.Checked);
+			InitTextures();
+			RecreateCrossRefs();
+			LoadMaterial(loadedMaterial);
+		}
+
+		private void checkBoxNoMask_CheckedChanged(object sender, EventArgs e)
+		{
+			Editor.InitTextures(checkBoxTEXH.Checked, checkBoxNoMask.Checked);
+			InitTextures();
+			RecreateCrossRefs();
+			LoadMaterial(loadedMaterial);
 		}
 
 		void matTexNameCombo_SelectedIndexChanged(object sender, EventArgs e)
@@ -1293,40 +2583,15 @@ namespace AiDroidPlugin
 					return;
 				}
 
-/*				ComboBox combo = (ComboBox)sender;
+				ComboBox combo = (ComboBox)sender;
 				int matTexIdx = (int)combo.Tag;
-				string name = (combo.SelectedIndex == 0) ? String.Empty : (string)combo.Items[combo.SelectedIndex];
+				string name = ((string)combo.Items[combo.SelectedIndex] == "(none)") ? String.Empty : (string)combo.Items[combo.SelectedIndex];
 
-				Gui.Scripting.RunScript(EditorVar + ".SetMaterialTexture(id=" + loadedMaterial + ", index=" + matTexIdx + ", name=\"" + name + "\")");
+				Gui.Scripting.RunScript(EditorVar + ".SetMaterialTexture(idx=" + loadedMaterial + ", name=\"" + name + "\")");
 
 				RecreateRenderObjects();
 				RecreateCrossRefs();
-				LoadMaterial(loadedMaterial);*/
-			}
-			catch (Exception ex)
-			{
-				Utility.ReportException(ex);
-			}
-		}
-
-		void matTexNameCombo_TextChanged(object sender, EventArgs e)
-		{
-			try
-			{
-				if (loadedMaterial < 0)
-				{
-					return;
-				}
-
-/*				ComboBox combo = (ComboBox)sender;
-				int matTexIdx = (int)combo.Tag;
-				string name = combo.Text;
-
-				Gui.Scripting.RunScript(EditorVar + ".SetMaterialTexture(id=" + loadedMaterial + ", index=" + matTexIdx + ", name=\"" + name + "\")");
-
-				RecreateRenderObjects();
-				RecreateCrossRefs();
-				LoadMaterial(loadedMaterial);*/
+				LoadMaterial(loadedMaterial);
 			}
 			catch (Exception ex)
 			{
@@ -1343,8 +2608,8 @@ namespace AiDroidPlugin
 					return;
 				}
 
-/*				xxMaterial mat = Editor.Parser.MaterialList[loadedMaterial];
-				Gui.Scripting.RunScript(EditorVar + ".SetMaterialPhong(id=" + loadedMaterial +
+				remMaterial mat = Editor.Parser.MATC[loadedMaterial];
+				Gui.Scripting.RunScript(EditorVar + ".SetMaterialPhong(idx=" + loadedMaterial +
 					", diffuse=" + MatMatrixColorScript(matMatrixText[0]) +
 					", ambient=" + MatMatrixColorScript(matMatrixText[1]) +
 					", specular=" + MatMatrixColorScript(matMatrixText[2]) +
@@ -1353,7 +2618,7 @@ namespace AiDroidPlugin
 
 				RecreateRenderObjects();
 				RecreateCrossRefs();
-				LoadMaterial(loadedMaterial);*/
+				LoadMaterial(loadedMaterial);
 			}
 			catch (Exception ex)
 			{
@@ -1366,15 +2631,103 @@ namespace AiDroidPlugin
 			return "{ " +
 				Single.Parse(textBoxes[0].Text).ToFloatString() + ", " +
 				Single.Parse(textBoxes[1].Text).ToFloatString() + ", " +
-				Single.Parse(textBoxes[2].Text).ToFloatString() + ", " +
-				Single.Parse(textBoxes[3].Text).ToFloatString() + " }";
+				Single.Parse(textBoxes[2].Text).ToFloatString() + " }";
+		}
+
+		void matUnknownsText_AfterEditTextChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedMaterial < 0)
+				{
+					return;
+				}
+
+				remMaterial mat = Editor.Parser.MATC[loadedMaterial];
+				Gui.Scripting.RunScript(EditorVar + ".SetMaterialUnknowns(idx=" + loadedMaterial +
+					", unknown1=0x" + Int32.Parse(textBoxMatUnknownIntOrFlag.Text, System.Globalization.NumberStyles.AllowHexSpecifier).ToString("X") +
+					", unknown2=\"" + textBoxMatUnknownId.Text + "\")");
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonMaterialRemove_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedMaterial < 0)
+				{
+					return;
+				}
+
+				remMaterial mat = Editor.Parser.MATC[loadedMaterial];
+				Gui.Scripting.RunScript(EditorVar + ".RemoveMaterial(idx=" + loadedMaterial + ")");
+
+				RecreateRenderObjects();
+				LoadMesh(loadedMesh);
+				InitMaterials();
+				RecreateCrossRefs();
+				LoadMaterial(-1);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonMaterialCopy_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedMaterial < 0)
+				{
+					return;
+				}
+
+				remMaterial mat = Editor.Parser.MATC[loadedMaterial];
+				Gui.Scripting.RunScript(EditorVar + ".CopyMaterial(idx=" + loadedMaterial + ")");
+
+				InitMaterials();
+				RecreateCrossRefs();
+				LoadMesh(loadedMesh);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
 		}
 
 		#endregion Material
 
 		#region Texture
 
-		void textBoxTexName_AfterEditTextChanged(object sender, EventArgs e)
+		private void buttonTextureAdd_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (Gui.ImageControl.Image == null)
+				{
+					Report.ReportLog("An image hasn't been loaded");
+					return;
+				}
+
+				Gui.Scripting.RunScript(EditorVar + ".AddTexture(image=" + Gui.ImageControl.ImageScriptVariable + ")");
+
+				RecreateRenderObjects();
+				InitTextures();
+				RecreateCrossRefs();
+				LoadMaterial(loadedMaterial);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonTextureReplace_Click(object sender, EventArgs e)
 		{
 			try
 			{
@@ -1382,16 +2735,26 @@ namespace AiDroidPlugin
 				{
 					return;
 				}
+				if (Gui.ImageControl.Image == null)
+				{
+					Report.ReportLog("An image hasn't been loaded");
+					return;
+				}
 
-				Gui.Scripting.RunScript(EditorVar + ".SetTextureName(id=" + loadedTexture + ", name=\"" + textBoxTexName.Text + "\")");
+				Gui.Scripting.RunScript(EditorVar + ".ReplaceTexture(idx=" + loadedTexture + ", image=" + Gui.ImageControl.ImageScriptVariable + ")");
 
-/*				xxTexture tex = Editor.Parser.TextureList[loadedTexture];
-				RenameListViewItems(Editor.Parser.TextureList, listViewTexture, tex, tex.Name);
-				RenameListViewItems(Editor.Parser.TextureList, listViewMeshTexture, tex, tex.Name);
-				RenameListViewItems(Editor.Parser.TextureList, listViewMaterialTexture, tex, tex.Name);
-
+				RecreateRenderObjects();
 				InitTextures();
-				LoadMaterial(loadedMaterial);*/
+				RecreateCrossRefs();
+				LoadMaterial(loadedMaterial);
+				foreach (ListViewItem item in listViewTexture.Items)
+				{
+					if ((int)item.Tag == loadedTexture)
+					{
+						item.Selected = true;
+						break;
+					}
+				}
 			}
 			catch (Exception ex)
 			{
@@ -1400,5 +2763,36 @@ namespace AiDroidPlugin
 		}
 
 		#endregion Texture
+
+		#region Menu Strip Item Handlers
+
+		private void reopenToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			UnloadREM();
+			ReopenREM();
+		}
+
+		private void saveremToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			Gui.Scripting.RunScript(EditorVar + ".SaveREM(path=\"" + this.ToolTipText + "\", backup=" + keepBackupToolStripMenuItem.Checked + ")");
+		}
+
+		private void saveremAsToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+				Gui.Scripting.RunScript(EditorVar + ".SaveREM(path=\"" + saveFileDialog1.FileName + "\", backup=" + keepBackupToolStripMenuItem.Checked + ")");
+		}
+
+		private void closeToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			this.Close();
+		}
+
+		private void keepBackupToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+		{
+			Properties.Settings.Default["KeepBackupOfREM"] = keepBackupToolStripMenuItem.Checked;
+		}
+
+		#endregion Menu Strip Item Handlers
 	}
 }

@@ -11,7 +11,11 @@ namespace AiDroidPlugin
 {
 	public class remParser : IWriteFile
 	{
-		public remFile RemFile { get; protected set; }
+		public remMATCsection MATC = null;
+		public remBONCsection BONC = null;
+		public remMESCsection MESC = null;
+		public remSKICsection SKIC = null;
+
 		public string Name { get; set; }
 		public string RemPath { get; set; }
 
@@ -22,14 +26,49 @@ namespace AiDroidPlugin
 			this.RemPath = path;
 		}
 
-		private remParser(Stream stream)
+		public remParser(Stream stream)
 		{
-			RemFile = Read(stream);
+			try
+			{
+				using (BinaryReader binaryReader = new BinaryReader(stream))
+				{
+					string[] sectionNames = { "MATC", "BONC", "MESC", "SKIC" };
+					for (int sectionIdx = 0; sectionIdx < sectionNames.Length; sectionIdx++)
+					{
+						string sectionName = Encoding.ASCII.GetString(binaryReader.ReadBytes(4));
+						if (sectionName.Length < 4)
+						{
+							throw new Exception("file incomplete");
+						}
+						if (sectionName != sectionNames[sectionIdx])
+						{
+							Report.ReportLog("Strange section or order for " + sectionName);
+						}
+						int sectionLength = binaryReader.ReadInt32();
+						int numSubSections = binaryReader.ReadInt32();
+						byte[] sectionBuffer = binaryReader.ReadBytes((int)sectionLength);
+						switch (sectionIdx)
+						{
+						case 0: this.MATC = ReadMaterials(sectionName, sectionLength, numSubSections, sectionBuffer); break;
+						case 1: this.BONC = ReadBones(sectionName, sectionLength, numSubSections, sectionBuffer); break;
+						case 2: this.MESC = ReadMeshes(sectionName, sectionLength, numSubSections, sectionBuffer); break;
+						case 3: this.SKIC = ReadSkin(sectionName, sectionLength, numSubSections, sectionBuffer); break;
+						}
+					}
+				}
+			}
+			catch (FileNotFoundException)
+			{
+				Report.ReportLog("file not found");
+			}
 		}
 
 		public void WriteTo(Stream stream)
 		{
-			RemFile.WriteTo(stream);
+			MATC.WriteTo(stream);
+			BONC.WriteTo(stream);
+			MESC.WriteTo(stream);
+			SKIC.WriteTo(stream);
 		}
 
 		private static remId GetIdentifier(byte[] buffer, int startIdx, int lengthInBuffer)
@@ -61,7 +100,7 @@ namespace AiDroidPlugin
 				int length = BitConverter.ToInt32(sectionBuffer, secBufIdx+4);
 
 				remMaterial mat = new remMaterial();
-				Trace.Assert(TypeCheck(mat.type, type));
+				Trace.Assert(TypeCheck(remMaterial.ClassType, type));
 				mat.name = GetIdentifier(sectionBuffer, secBufIdx+8);
 
 				for (int i = 0; i < mat.properties.Length; i++)
@@ -73,7 +112,7 @@ namespace AiDroidPlugin
 				if (length >= 0x240+256)
 					mat.texture = GetIdentifier(sectionBuffer, secBufIdx+0x240);
 
-				matSec.AddMaterial(mat);
+				matSec.AddChild(mat);
 
 				secBufIdx += length;
 			}
@@ -92,7 +131,7 @@ namespace AiDroidPlugin
 				int length = BitConverter.ToInt32(sectionBuffer, secBufIdx+4);
 
 				remBone bone = new remBone(length > 256+16*4+4 ? (length - 256+16*4+4) / 256 : 0);
-				Trace.Assert(TypeCheck(bone.type, type));
+				Trace.Assert(TypeCheck(remBone.ClassType, type));
 				bone.name = GetIdentifier(sectionBuffer, secBufIdx+8);
 
 				Matrix matrix = new Matrix();
@@ -103,34 +142,47 @@ namespace AiDroidPlugin
 						row[j] = BitConverter.ToSingle(sectionBuffer, secBufIdx+8+256 + (i*4 + j) * 4);
 					matrix.set_Rows(i, row);
 				}
-				bone.trans = matrix;
+				bone.matrix = matrix;
 
 				int numChilds = BitConverter.ToInt32(sectionBuffer, secBufIdx+8+256 + 16*4);
+				List<remId> childNames = new List<remId>(numChilds);
 				for (int i = 0; i < numChilds; i++)
-					bone.AddChild(GetIdentifier(sectionBuffer, secBufIdx+8+256 + 16*4 + 4 + i*256));
-
-				boneSec.AddParentBone(bone);
+					childNames.Add(GetIdentifier(sectionBuffer, secBufIdx+8+256 + 16*4 + 4 + i*256));
+				AddParentBone(boneSec, bone, childNames);
 
 				secBufIdx += length;
 			}
 
-			remBone root = new remBone(1);
-			root.name = new remId("RootFrame");
-			root.trans = Matrix.Identity;
 			for (int i = 0; i < numBones; i++)
 			{
 				if (boneSec[i].Parent == null)
 				{
-					root.AddChild(boneSec[i].name);
-					boneSec[i].Parent = root;
-					root.childs.Add(boneSec[i]);
+					boneSec[i].Parent = boneSec.rootFrame;
+					boneSec.rootFrame.AddChild(boneSec[i]);
 				}
 			}
-			boneSec.rootFrame = root;
 
 			if (secBufIdx != sectionLength)
 				Report.ReportLog("Warning! BONC section has wrong length.");
 			return boneSec;
+		}
+
+		private static void AddParentBone(remBONCsection sec, remBone parent, List<remId> childNames)
+		{
+			for (int i = 0; i < childNames.Count; i++)
+			{
+				remId child = childNames[i];
+				for (int j = 0; j < sec.Count; j++)
+				{
+					if (sec[j].name == child)
+					{
+						parent.AddChild(sec[j]);
+						break;
+					}
+				}
+			}
+
+			sec.ChildList.Add(parent);
 		}
 
 		private static remMESCsection ReadMeshes(string sectionName, int sectionLength, int numMeshes, byte[] sectionBuffer)
@@ -143,7 +195,7 @@ namespace AiDroidPlugin
 				int length = BitConverter.ToInt32(sectionBuffer, secBufIdx+4);
 
 				remMesh mesh = new remMesh(5);
-				Trace.Assert(TypeCheck(mesh.type, type));
+				Trace.Assert(TypeCheck(remMesh.ClassType, type));
 				mesh.name = GetIdentifier(sectionBuffer, secBufIdx+8);
 
 				int numMats = BitConverter.ToInt32(sectionBuffer, secBufIdx+8+256);
@@ -201,7 +253,7 @@ namespace AiDroidPlugin
 					faceExtraIdx += 4;
 				}
 
-				meshSec.AddMesh(mesh);
+				meshSec.AddChild(mesh);
 
 				secBufIdx += length;
 			}
@@ -222,7 +274,7 @@ namespace AiDroidPlugin
 				remId mesh = GetIdentifier(sectionBuffer, secBufIdx+8);
 				int numWeights = BitConverter.ToInt32(sectionBuffer, secBufIdx+8+256);
 				remSkin skin = new remSkin(numWeights);
-				Trace.Assert(TypeCheck(skin.type, type));
+				Trace.Assert(TypeCheck(remSkin.ClassType, type));
 				skin.mesh = mesh;
 				int weightBufIdx = secBufIdx+8+256+4;
 				for (int weightIdx = 0; weightIdx < numWeights; weightIdx++)
@@ -244,7 +296,7 @@ namespace AiDroidPlugin
 						}
 						matrix.set_Rows(i, row);
 					}
-					weights.trans = matrix;
+					weights.matrix = matrix;
 
 					weights.vertexIndices = new int[numVertIdxWts];
 					for (int i = 0; i < numVertIdxWts; i++)
@@ -259,52 +311,16 @@ namespace AiDroidPlugin
 						weightBufIdx += 4;
 					}
 
-					skin.AddWeights(weights);
+					skin.AddChild(weights);
 				}
 
-				skinSec.AddSkin(skin);
+				skinSec.AddChild(skin);
 
 				secBufIdx += length;
 			}
 			if (secBufIdx != sectionLength)
 				Report.ReportLog("Warning! SKIC section has wrong length.");
 			return skinSec;
-		}
-
-		public static remFile Read(Stream stream)
-		{
-			try
-			{
-				using (BinaryReader binaryReader = new BinaryReader(stream))
-				{
-					remFile file = new remFile();
-					string[] sectionNames = { "MATC", "BONC", "MESC", "SKIC" };
-					for (int sectionIdx = 0; sectionIdx < sectionNames.Length; sectionIdx++)
-					{
-						string sectionName = Encoding.ASCII.GetString(binaryReader.ReadBytes(4));
-						if (sectionName != sectionNames[sectionIdx])
-						{
-							Report.ReportLog("Strange section or order for " + sectionName);
-						}
-						int sectionLength = binaryReader.ReadInt32();
-						int numSubSections = binaryReader.ReadInt32();
-						byte[] sectionBuffer = binaryReader.ReadBytes((int)sectionLength);
-						switch (sectionIdx)
-						{
-						case 0: file.MATC = ReadMaterials(sectionName, sectionLength, numSubSections, sectionBuffer); break;
-						case 1: file.BONC = ReadBones(sectionName, sectionLength, numSubSections, sectionBuffer); break;
-						case 2: file.MESC = ReadMeshes(sectionName, sectionLength, numSubSections, sectionBuffer); break;
-						case 3: file.SKIC = ReadSkin(sectionName, sectionLength, numSubSections, sectionBuffer); break;
-						}
-					}
-					return file;
-				}
-			}
-			catch (FileNotFoundException)
-			{
-				Report.ReportLog("file not found");
-			}
-			return null;
 		}
 	}
 }

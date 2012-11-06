@@ -80,6 +80,9 @@ namespace AiDroidPlugin
 						}
 					}
 				}
+
+				keepBackupToolStripMenuItem.CheckedChanged += keepBackupToolStripMenuItem_CheckedChanged;
+				compressToolStripMenuItem.CheckedChanged += compressToolStripMenuItem_CheckedChanged;
 			}
 			catch (Exception ex)
 			{
@@ -250,7 +253,19 @@ namespace AiDroidPlugin
 
 		private void exportFPKToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			throw new NotImplementedException();
+			try
+			{
+				folderBrowserDialog1.SelectedPath = Path.GetDirectoryName(this.Editor.Parser.FilePath);
+				folderBrowserDialog1.RootFolder = Environment.SpecialFolder.MyComputer;
+				if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+				{
+					Gui.Scripting.RunScript("ExportFPK(parser=" + ParserVar + ", path=\"" + folderBrowserDialog1.SelectedPath + "\")");
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
 		}
 
 		private void reopenToolStripMenuItem_Click(object sender, EventArgs e)
@@ -288,7 +303,7 @@ namespace AiDroidPlugin
 		{
 			try
 			{
-				BackgroundWorker worker = (BackgroundWorker)Gui.Scripting.RunScript(EditorVar + ".SaveFPK(keepBackup=" + keepBackupToolStripMenuItem.Checked + ", background=True)");
+				BackgroundWorker worker = (BackgroundWorker)Gui.Scripting.RunScript(EditorVar + ".SaveFPK(keepBackup=" + keepBackupToolStripMenuItem.Checked + ", compress=" + compressToolStripMenuItem.Checked + ", background=True)");
 				ShowBlockingDialog(Editor.Parser.FilePath, worker);
 			}
 			catch (Exception ex)
@@ -303,7 +318,7 @@ namespace AiDroidPlugin
 			{
 				if (saveFileDialog1.ShowDialog() == DialogResult.OK)
 				{
-					BackgroundWorker worker = (BackgroundWorker)Gui.Scripting.RunScript(EditorVar + ".SaveFPK(path=\"" + saveFileDialog1.FileName + "\", keepBackup=" + keepBackupToolStripMenuItem.Checked + ", background=True)");
+					BackgroundWorker worker = (BackgroundWorker)Gui.Scripting.RunScript(EditorVar + ".SaveFPK(path=\"" + saveFileDialog1.FileName + "\", keepBackup=" + keepBackupToolStripMenuItem.Checked + ", compress=" + compressToolStripMenuItem.Checked + ", background=True)");
 					ShowBlockingDialog(saveFileDialog1.FileName, worker);
 				}
 			}
@@ -339,19 +354,58 @@ namespace AiDroidPlugin
 
 		private void exportSubfilesToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			throw new NotImplementedException();
+			try
+			{
+				folderBrowserDialog1.SelectedPath = Path.GetDirectoryName(this.Editor.Parser.FilePath);
+				folderBrowserDialog1.RootFolder = Environment.SpecialFolder.MyComputer;
+				if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+				{
+					ListView subfilesList = null;
+					if (tabControlSubfiles.SelectedTab == tabPageREMSubfiles)
+					{
+						subfilesList = remSubfilesList;
+					}
+					else if (tabControlSubfiles.SelectedTab == tabPageREASubfiles)
+					{
+						subfilesList = reaSubfilesList;
+					}
+					else if (tabControlSubfiles.SelectedTab == tabPageImageSubfiles)
+					{
+						subfilesList = imageSubfilesList;
+					}
+					else if (tabControlSubfiles.SelectedTab == tabPageSoundSubfiles)
+					{
+						subfilesList = soundSubfilesList;
+					}
+					else if (tabControlSubfiles.SelectedTab == tabPageOtherSubfiles)
+					{
+						subfilesList = otherSubfilesList;
+					}
+					if (subfilesList != null)
+					{
+						foreach (ListViewItem item in subfilesList.SelectedItems)
+						{
+							IWriteFile subfile = (IWriteFile)item.Tag;
+							Gui.Scripting.RunScript("ExportSubfile(parser=" + ParserVar + ", name=\"" + subfile.Name + "\", path=\"" + folderBrowserDialog1.SelectedPath + @"\" + subfile.Name + "\")");
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
 		}
 
 		private void addFilesToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			throw new NotImplementedException();
 			try
 			{
 				if (openFileDialog1.ShowDialog() == DialogResult.OK)
 				{
 					foreach (string path in openFileDialog1.FileNames)
 					{
-//						Gui.Scripting.RunScript(EditorVar + ".AddSubfile(path=\"" + path + "\", replace=True)");
+						Gui.Scripting.RunScript(EditorVar + ".AddSubfile(path=\"" + path + "\", replace=True)");
 					}
 
 					InitSubfileLists();
@@ -365,12 +419,199 @@ namespace AiDroidPlugin
 
 		private void removeToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			throw new NotImplementedException();
+			try
+			{
+				bool removed = false;
+
+				if (tabControlSubfiles.SelectedTab == tabPageREMSubfiles)
+				{
+					foreach (ListViewItem item in remSubfilesList.SelectedItems)
+					{
+						IWriteFile writeFile = (IWriteFile)item.Tag;
+
+						if (ChildParserVars.ContainsKey(writeFile.Name))
+						{
+							ChildParserVars.Remove(writeFile.Name);
+						}
+
+						if (ChildForms.ContainsKey(writeFile.Name))
+						{
+							ChildForms[writeFile.Name].Close();
+						}
+
+						Gui.Scripting.RunScript(EditorVar + ".RemoveSubfile(name=\"" + writeFile.Name + "\")");
+						removed = true;
+					}
+				}
+				else if (tabControlSubfiles.SelectedTab == tabPageREASubfiles)
+				{
+					foreach (ListViewItem item in reaSubfilesList.SelectedItems)
+					{
+						IWriteFile writeFile = (IWriteFile)item.Tag;
+
+						if (ChildParserVars.ContainsKey(writeFile.Name))
+						{
+							ChildParserVars.Remove(writeFile.Name);
+						}
+
+						if (ChildForms.ContainsKey(writeFile.Name))
+						{
+							ChildForms[writeFile.Name].Close();
+						}
+
+						Gui.Scripting.RunScript(EditorVar + ".RemoveSubfile(name=\"" + writeFile.Name + "\")");
+						removed = true;
+					}
+				}
+				else if (tabControlSubfiles.SelectedTab == tabPageImageSubfiles)
+				{
+					foreach (ListViewItem item in imageSubfilesList.SelectedItems)
+					{
+						IWriteFile writeFile = (IWriteFile)item.Tag;
+						Gui.Scripting.RunScript(EditorVar + ".RemoveSubfile(name=\"" + writeFile.Name + "\")");
+						removed = true;
+					}
+				}
+				else if (tabControlSubfiles.SelectedTab == tabPageSoundSubfiles)
+				{
+					foreach (ListViewItem item in soundSubfilesList.SelectedItems)
+					{
+						item.Selected = false;
+						IWriteFile writeFile = (IWriteFile)item.Tag;
+						Gui.Scripting.RunScript(EditorVar + ".RemoveSubfile(name=\"" + writeFile.Name + "\")");
+						removed = true;
+					}
+				}
+				else if (tabControlSubfiles.SelectedTab == tabPageOtherSubfiles)
+				{
+					foreach (ListViewItem item in otherSubfilesList.SelectedItems)
+					{
+						IWriteFile writeFile = (IWriteFile)item.Tag;
+						Gui.Scripting.RunScript(EditorVar + ".RemoveSubfile(name=\"" + writeFile.Name + "\")");
+						removed = true;
+					}
+				}
+
+				if (removed)
+				{
+					InitSubfileLists();
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
 		}
 
 		private void renameToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			throw new NotImplementedException();
+			try
+			{
+				ListViewItem item = null;
+				if (tabControlSubfiles.SelectedTab == tabPageREMSubfiles)
+				{
+					if (remSubfilesList.SelectedItems.Count > 0)
+					{
+						item = remSubfilesList.SelectedItems[0];
+					}
+				}
+				else if (tabControlSubfiles.SelectedTab == tabPageREASubfiles)
+				{
+					if (reaSubfilesList.SelectedItems.Count > 0)
+					{
+						item = reaSubfilesList.SelectedItems[0];
+					}
+				}
+				else if (tabControlSubfiles.SelectedTab == tabPageImageSubfiles)
+				{
+					if (imageSubfilesList.SelectedItems.Count > 0)
+					{
+						item = imageSubfilesList.SelectedItems[0];
+					}
+				}
+				else if (tabControlSubfiles.SelectedTab == tabPageSoundSubfiles)
+				{
+					if (soundSubfilesList.SelectedItems.Count > 0)
+					{
+						item = soundSubfilesList.SelectedItems[0];
+					}
+				}
+				else if (tabControlSubfiles.SelectedTab == tabPageOtherSubfiles)
+				{
+					if (otherSubfilesList.SelectedItems.Count > 0)
+					{
+						item = otherSubfilesList.SelectedItems[0];
+					}
+				}
+
+				if (item != null)
+				{
+					using (FormPPRename renameForm = new FormPPRename(item))
+					{
+						if (renameForm.ShowDialog() == DialogResult.OK)
+						{
+							IWriteFile subfile = (IWriteFile)item.Tag;
+							string newName = (string)Gui.Scripting.RunScript(EditorVar + ".RenameSubfile(subfile=\"" + subfile.Name + "\", newName=\"" + renameForm.NewName + "\")");
+
+							item.Text = newName;
+							item.ListView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+
+							if (tabControlSubfiles.SelectedTab == tabPageREMSubfiles)
+							{
+								if (ChildParserVars.ContainsKey(subfile.Name))
+								{
+									string value = ChildParserVars[subfile.Name];
+									ChildParserVars.Remove(subfile.Name);
+									ChildParserVars.Add(newName, value);
+								}
+
+								if (ChildForms.ContainsKey(subfile.Name))
+								{
+									DockContent value = ChildForms[subfile.Name];
+									ChildForms.Remove(subfile.Name);
+									ChildForms.Add(newName, value);
+									value.Text = newName;
+									value.ToolTipText = Editor.Parser.FilePath + @"\" + newName;
+								}
+							}
+							else if (tabControlSubfiles.SelectedTab == tabPageREASubfiles)
+							{
+								if (ChildParserVars.ContainsKey(subfile.Name))
+								{
+									string value = ChildParserVars[subfile.Name];
+									ChildParserVars.Remove(subfile.Name);
+									ChildParserVars.Add(newName, value);
+								}
+
+								if (ChildForms.ContainsKey(subfile.Name))
+								{
+									DockContent value = ChildForms[subfile.Name];
+									ChildForms.Remove(subfile.Name);
+									ChildForms.Add(newName, value);
+									value.Text = newName;
+									value.ToolTipText = Editor.Parser.FilePath + @"\" + newName;
+								}
+							}
+
+							InitSubfileLists();
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void keepBackupToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+		{
+			Properties.Settings.Default["KeepBackupOfFPK"] = keepBackupToolStripMenuItem.Checked;
+		}
+
+		private void compressToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+		{
+			Properties.Settings.Default["CompressFPK"] = compressToolStripMenuItem.Checked;
 		}
 
 		private void remSubfilesList_DoubleClick(object sender, EventArgs e)
@@ -408,8 +649,11 @@ namespace AiDroidPlugin
 			{
 				IWriteFile writeFile = (IWriteFile)item.Tag;
 				FormREM formREM = (FormREM)Gui.Scripting.RunScript(FormVariable + ".OpenREMSubfile(name=\"" + writeFile.Name + "\")", false);
-				formREM.Activate();
-				list.Add(formREM);
+				if (formREM != null)
+				{
+					formREM.Activate();
+					list.Add(formREM);
+				}
 			}
 			return list;
 		}
@@ -417,35 +661,43 @@ namespace AiDroidPlugin
 		[Plugin]
 		public FormREM OpenREMSubfile(string name)
 		{
-			DockContent child;
-			if (!ChildForms.TryGetValue(name, out child))
+			try
 			{
-				string childParserVar;
-				if (!ChildParserVars.TryGetValue(name, out childParserVar))
+				DockContent child;
+				if (!ChildForms.TryGetValue(name, out child))
 				{
-					childParserVar = Gui.Scripting.GetNextVariable("remParser");
-					Gui.Scripting.RunScript(childParserVar + " = OpenREM(parser=" + ParserVar + ", name=\"" + name + "\")");
-					Gui.Scripting.RunScript(EditorVar + ".ReplaceSubfile(file=" + childParserVar + ")");
-					ChildParserVars.Add(name, childParserVar);
-
-					foreach (ListViewItem item in remSubfilesList.Items)
+					string childParserVar;
+					if (!ChildParserVars.TryGetValue(name, out childParserVar))
 					{
-						if (((IWriteFile)item.Tag).Name.Equals(name, StringComparison.InvariantCultureIgnoreCase))
+						childParserVar = Gui.Scripting.GetNextVariable("remParser");
+						Gui.Scripting.RunScript(childParserVar + " = OpenREM(parser=" + ParserVar + ", name=\"" + name + "\")");
+						Gui.Scripting.RunScript(EditorVar + ".ReplaceSubfile(file=" + childParserVar + ")");
+						ChildParserVars.Add(name, childParserVar);
+
+						foreach (ListViewItem item in remSubfilesList.Items)
 						{
-							item.Font = new Font(item.Font, FontStyle.Bold);
-							remSubfilesList.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
-							break;
+							if (((IWriteFile)item.Tag).Name.Equals(name, StringComparison.InvariantCultureIgnoreCase))
+							{
+								item.Font = new Font(item.Font, FontStyle.Bold);
+								remSubfilesList.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+								break;
+							}
 						}
 					}
+
+					child = new FormREM(Editor.Parser, childParserVar);
+					child.FormClosing += new FormClosingEventHandler(ChildForms_FormClosing);
+					child.Tag = name;
+					ChildForms.Add(name, child);
 				}
 
-				child = new FormREM(Editor.Parser, childParserVar);
-				child.FormClosing += new FormClosingEventHandler(ChildForms_FormClosing);
-				child.Tag = name;
-				ChildForms.Add(name, child);
+				return child as FormREM;
 			}
-
-			return child as FormREM;
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+				return null;
+			}
 		}
 
 		private void imageSubfilesList_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)

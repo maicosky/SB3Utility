@@ -184,6 +184,11 @@ namespace ODFPlugin
 					}
 				}
 			}
+
+			foreach (odfFrame child in frame)
+			{
+				DeleteReferringBones(child);
+			}
 		}
 
 		[Plugin]
@@ -1033,7 +1038,7 @@ namespace ODFPlugin
 		[Plugin]
 		public void ExportMorphObject(string path, odfParser parser, string morphObj, bool skipUnusedProfiles)
 		{
-			ODFPluginOld.Plugins.ExportMorphMqo(path, parser, morphObj, skipUnusedProfiles);
+			ODFPlugin.Plugins.ExportMorphMqo(path, parser, morphObj, skipUnusedProfiles);
 		}
 
 		[Plugin]

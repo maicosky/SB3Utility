@@ -275,6 +275,11 @@ namespace ODFPlugin
 			}
 			comboBoxMeshExportFormat.Items.AddRange(descriptions);
 			comboBoxMeshExportFormat.SelectedIndex = 2;
+
+			closeViewFilesAtStartToolStripMenuItem.CheckedChanged += closeViewFilesAtStartToolStripMenuItem_CheckedChanged;
+			suppressWarningsToolStripMenuItem.CheckedChanged += suppressWarningsToolStripMenuItem_CheckedChanged;
+			keepBackupToolStripMenuItem.CheckedChanged += keepBackupToolStripMenuItem_CheckedChanged;
+			deleteMorphsAutomaticallyToolStripMenuItem.CheckedChanged += deleteMorphsAutomaticallyToolStripMenuItem_CheckedChanged;
 		}
 
 		private void ClearControl(Control control)
@@ -1250,7 +1255,7 @@ namespace ODFPlugin
 											break;
 										}
 									}
-									if (!foundMatTex && !SuppressWarningsToolStripMenuItem.Checked)
+									if (!foundMatTex && !suppressWarningsToolStripMenuItem.Checked)
 									{
 										Report.ReportLog("Warning: Couldn't find texture " + texID + " of mesh object " + meshObj.Name + ".");
 									}
@@ -1292,14 +1297,14 @@ namespace ODFPlugin
 										break;
 									}
 								}
-								if (!foundMatTex && !SuppressWarningsToolStripMenuItem.Checked)
+								if (!foundMatTex && !suppressWarningsToolStripMenuItem.Checked)
 								{
 									Report.ReportLog("Warning: Couldn't find texture " + texID + " of mesh object " + meshObj.Name + ".");
 								}
 							}
 						}
 					}
-					else if (!SuppressWarningsToolStripMenuItem.Checked)
+					else if (!suppressWarningsToolStripMenuItem.Checked)
 					{
 						Report.ReportLog("Warning: Mesh " + mesh.Name + " Object " + meshObj.Name + " has an invalid material id.");
 					}
@@ -1503,7 +1508,8 @@ namespace ODFPlugin
 				var tag = (DragSource)e.Node.Tag;
 				if (tag.Type == typeof(odfFrame))
 				{
-					tabControlViews.SelectedTab = tabPageFrameView;
+					tabControlViews.SelectTabWithoutLoosingFocus(tabPageFrameView);
+					tabControlViews.Enabled = true;
 					LoadFrame((int)tag.Id);
 				}
 				else if (tag.Type == typeof(odfMesh))
@@ -1522,7 +1528,7 @@ namespace ODFPlugin
 			else if (e.Node.Tag is Tuple<odfBone, Tuple<int, int>>)
 			{
 				var tag = (Tuple<odfBone, Tuple<int, int>>)e.Node.Tag;
-				tabControlViews.SelectedTab = tabPageBoneView;
+				tabControlViews.SelectTabWithoutLoosingFocus(tabPageBoneView);
 				LoadBone(tag.Item2);
 
 				if (highlightedBone != null)
@@ -1628,7 +1634,7 @@ namespace ODFPlugin
 			{
 				if (node.Tag is DragSource)
 				{
-					var src =  (DragSource)node.Tag;
+					var src = (DragSource)node.Tag;
 					if (src.Type == typeof(odfMesh) && (int)src.Id == Editor.Parser.MeshSection.IndexOf(mesh))
 					{
 						return node;
@@ -1636,26 +1642,6 @@ namespace ODFPlugin
 				}
 
 				TreeNode found = FindMeshNode(mesh, node.Nodes);
-				if (found != null)
-				{
-					return found;
-				}
-			}
-
-			return null;
-		}
-
-		TreeNode FindBoneNode(odfBone bone, TreeNodeCollection nodes)
-		{
-			foreach (TreeNode node in nodes)
-			{
-				var tuple = node.Tag as Tuple<odfBone, int[]>;
-				if ((tuple != null) && tuple.Item1.Equals(bone))
-				{
-					return node;
-				}
-
-				TreeNode found = FindBoneNode(bone, node.Nodes);
 				if (found != null)
 				{
 					return found;
@@ -1935,11 +1921,7 @@ namespace ODFPlugin
 					int meshIdx = (int)e.Item.Tag;
 					if (e.IsSelected)
 					{
-						if (!Gui.Docking.DockRenderer.IsHidden)
-						{
-							Gui.Docking.DockRenderer.Activate();
-						}
-						tabControlViews.SelectedTab = tabPageMeshView;
+						tabControlViews.SelectTabWithoutLoosingFocus(tabPageMeshView);
 						LoadMesh(meshIdx);
 						CrossRefAddItem(crossRefMeshMaterials[meshIdx], crossRefMeshMaterialsCount, listViewMeshMaterial, listViewMaterial);
 						CrossRefAddItem(crossRefMeshTextures[meshIdx], crossRefMeshTexturesCount, listViewMeshTexture, listViewTexture);
@@ -1952,6 +1934,16 @@ namespace ODFPlugin
 						}
 						RenderObjectODF renderObj = renderObjectMeshes[meshIdx];
 						renderObjectIds[meshIdx] = Gui.Renderer.AddRenderObject(renderObj);
+						if (!Gui.Docking.DockRenderer.IsHidden)
+						{
+							Gui.Docking.DockRenderer.Enabled = false;
+							Gui.Docking.DockRenderer.Activate();
+							Gui.Docking.DockRenderer.Enabled = true;
+							if ((bool)Gui.Config["AutoCenterView"])
+							{
+								Gui.Renderer.CenterView();
+							}
+						}
 					}
 					else
 					{
@@ -1997,7 +1989,7 @@ namespace ODFPlugin
 					int matIdx = (int)e.Item.Tag;
 					if (e.IsSelected)
 					{
-						tabControlViews.SelectedTab = tabPageMaterialView;
+						tabControlViews.SelectTabWithoutLoosingFocus(tabPageMaterialView);
 						LoadMaterial(matIdx);
 						CrossRefAddItem(crossRefMaterialMeshes[matIdx], crossRefMaterialMeshesCount, listViewMaterialMesh, listViewMesh);
 						CrossRefAddItem(crossRefMaterialTextures[matIdx], crossRefMaterialTexturesCount, listViewMaterialTexture, listViewTexture);
@@ -2044,7 +2036,7 @@ namespace ODFPlugin
 					int texIdx = (int)e.Item.Tag;
 					if (e.IsSelected)
 					{
-						tabControlViews.SelectedTab = tabPageTextureView;
+						tabControlViews.SelectTabWithoutLoosingFocus(tabPageTextureView);
 						LoadTexture(texIdx);
 						CrossRefAddItem(crossRefTextureMeshes[texIdx], crossRefTextureMeshesCount, listViewTextureMesh, listViewMesh);
 						CrossRefAddItem(crossRefTextureMaterials[texIdx], crossRefTextureMaterialsCount, listViewTextureMaterial, listViewMaterial);
@@ -3104,7 +3096,7 @@ namespace ODFPlugin
 					return;
 				}
 
-				Gui.Scripting.RunScript(EditorVar + ".SetBoneFrameId(boneListIdx= " + loadedBone.Item1 + ", boneIdx=" + loadedBone.Item2 + ", frameId=\"" + textBoxBoneFrameID.Text + "\")");
+				Gui.Scripting.RunScript(EditorVar + ".SetBoneFrameId(boneListIdx=" + loadedBone.Item1 + ", boneIdx=" + loadedBone.Item2 + ", frameId=\"" + textBoxBoneFrameID.Text + "\")");
 
 				LoadBone(loadedBone);
 				InitFrames();
@@ -4095,42 +4087,22 @@ namespace ODFPlugin
 
 		private void closeViewFilesAtStartToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
 		{
-			Properties.Settings.Default.CloseViewFilesAtStart = closeViewFilesAtStartToolStripMenuItem.Checked;
+			Properties.Settings.Default["CloseViewFilesAtStart"] = closeViewFilesAtStartToolStripMenuItem.Checked;
 		}
 
-		private void closeViewFilesAtStartToolStripMenuItem_Click(object sender, EventArgs e)
+		private void suppressWarningsToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
 		{
-			closeViewFilesAtStartToolStripMenuItem.Checked ^= true;
-		}
-
-		private void SuppressWarningsToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
-		{
-			Properties.Settings.Default.SuppressWarnings = SuppressWarningsToolStripMenuItem.Checked;
-		}
-
-		private void SuppressWarningsToolStripMenuItem_Click(object sender, EventArgs e)
-		{
-			SuppressWarningsToolStripMenuItem.Checked ^= true;
+			Properties.Settings.Default["SuppressWarnings"] = suppressWarningsToolStripMenuItem.Checked;
 		}
 
 		private void keepBackupToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
 		{
-			Properties.Settings.Default.KeepBackupOfODFs = keepBackupToolStripMenuItem.Checked;
-		}
-
-		private void keepBackupToolStripMenuItem_Click(object sender, EventArgs e)
-		{
-			keepBackupToolStripMenuItem.Checked ^= true;
+			Properties.Settings.Default["KeepBackupOfODF"] = keepBackupToolStripMenuItem.Checked;
 		}
 
 		private void deleteMorphsAutomaticallyToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
 		{
-			Properties.Settings.Default.DeleteMorphsAutomatically = deleteMorphsAutomaticallyToolStripMenuItem.Checked;
-		}
-
-		private void deleteMorphsAutomaticallyToolStripMenuItem_Click(object sender, EventArgs e)
-		{
-			deleteMorphsAutomaticallyToolStripMenuItem.Checked ^= true;
+			Properties.Settings.Default["DeleteMorphsAutomatically"] = deleteMorphsAutomaticallyToolStripMenuItem.Checked;
 		}
 
 		#endregion Menu Strip Item Handlers

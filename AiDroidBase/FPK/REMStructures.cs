@@ -9,6 +9,28 @@ using SB3Utility;
 
 namespace AiDroidPlugin
 {
+	public interface remSection : IObjInfo
+	{
+		byte[] Type { get; }
+
+		int Length();
+	}
+
+	public abstract class remContainer<ChildType> : ObjChildren<ChildType>, remSection where ChildType : IObjChild
+	{
+		public abstract byte[] Type { get; }
+
+		public remContainer(int childCapacity)
+		{
+			InitChildren(childCapacity);
+		}
+
+		public List<ChildType> ChildList { get { return children; } }
+
+		public abstract int Length();
+		public abstract void WriteTo(Stream stream);
+	}
+
 	public class remId : IObjInfo, IComparable
 	{
 		public string buffer = null; // length 256
@@ -53,7 +75,7 @@ namespace AiDroidPlugin
 		}
 		static public implicit operator string(remId name)
 		{
-			return name.ToString();
+			return name != null ? name.ToString() : null;
 		}
 
 		public void WriteTo(Stream stream)
@@ -89,21 +111,12 @@ namespace AiDroidPlugin
 		}
 	}
 
-	public abstract class remFileSection : IObjInfo
+	public class remMaterial : remSection, IObjChild
 	{
-		public byte[] type = null;
+		public static byte[] ClassType = Encoding.ASCII.GetBytes("MATO");
 
-		public remFileSection(byte[] t)
-		{
-			this.type = t;
-		}
+		public byte[] Type { get { return ClassType; } }
 
-		public abstract int Length();
-		public abstract void WriteTo(Stream stream);
-	}
-
-	public class remMaterial : remFileSection, IObjInfo
-	{
 		public remId name = null;
 		public float[] properties = null; // diffuse, ambient, specular, emissive with RGB only
 		public int specularPower = 0;
@@ -117,37 +130,38 @@ namespace AiDroidPlugin
 			set { properties[i] = value; }
 		}
 
-		public float[] diffuse
+		public Color3 diffuse
 		{
-			get { return new float[] { properties[0], properties[1], properties[2] }; }
-			set { properties[0] = value[0]; properties[1] = value[1]; properties[2] = value[2]; }
+			get { return new Color3(properties[0], properties[1], properties[2]); }
+			set { properties[0] = value.Red; properties[1] = value.Green; properties[2] = value.Blue; }
 		}
 
-		public float[] ambient
+		public Color3 ambient
 		{
-			get { return new float[] { properties[3], properties[4], properties[5] }; }
-			set { properties[3] = value[0]; properties[4] = value[1]; properties[5] = value[2]; }
+			get { return new Color3(properties[3], properties[4], properties[5]); }
+			set { properties[3] = value.Red; properties[4] = value.Green; properties[5] = value.Blue; }
 		}
 
-		public float[] emissive
+		public Color3 emissive
 		{
-			get { return new float[] { properties[6], properties[7], properties[8] }; }
-			set { properties[6] = value[0]; properties[7] = value[1]; properties[8] = value[2]; }
+			get { return new Color3(properties[6], properties[7], properties[8]); }
+			set { properties[6] = value.Red; properties[7] = value.Green; properties[8] = value.Blue; }
 		}
 
-		public float[] specular
+		public Color3 specular
 		{
-			get { return new float[] { properties[9], properties[10], properties[11] }; }
-			set { properties[9] = value[0]; properties[10] = value[1]; properties[11] = value[2]; }
+			get { return new Color3(properties[9], properties[10], properties[11]); }
+			set { properties[9] = value.Red; properties[10] = value.Green; properties[11] = value.Blue; }
 		}
 
 		public remMaterial()
-			: base(Encoding.ASCII.GetBytes("MATO"))
 		{
 			properties = new float[12];
 		}
 
-		public override int Length()
+		public dynamic Parent { get; set; }
+
+		public int Length()
 		{
 			return 4+4+256+4*3*4+4+4+256 + (texture != null ? 256 : 0);
 		}
@@ -157,10 +171,10 @@ namespace AiDroidPlugin
 			return name;
 		}
 
-		public override void WriteTo(Stream stream)
+		public void WriteTo(Stream stream)
 		{
 			BinaryWriter writer = new BinaryWriter(stream);
-			writer.Write(base.type);
+			writer.Write(remMaterial.ClassType);
 			writer.Write(Length());
 			name.WriteTo(stream);
 			writer.Write(properties);
@@ -170,33 +184,35 @@ namespace AiDroidPlugin
 			if (texture != null)
 				texture.WriteTo(stream);
 		}
+
+		public remMaterial Clone()
+		{
+			remMaterial mat = new remMaterial();
+			mat.name = new remId(name);
+			for (int i = 0; i < properties.Length; i++)
+			{
+				mat.properties[i] = properties[i];
+			}
+			mat.specularPower = specularPower;
+			rem.CopyUnknown(this, mat);
+			mat.texture = new remId(texture);
+
+			return mat;
+		}
 	}
 
-	public class remMATCsection : remFileSection
+	public class remMATCsection : remContainer<remMaterial>, IObjInfo
 	{
-		public int numMats { get { return materials.Count; } }
-		public List<remMaterial> materials = null;
+		public static byte[] ClassType = Encoding.ASCII.GetBytes("MATC");
 
-		public remMaterial this[int i]
-		{
-			get { return materials[i]; }
-		}
+		public override byte[] Type { get { return ClassType; } }
 
-		public void AddMaterial(remMaterial material)
-		{
-			materials.Add(material);
-		}
-
-		public remMATCsection(int numSubs)
-			: base(Encoding.ASCII.GetBytes("MATC"))
-		{
-			materials = new List<remMaterial>(numSubs);
-		}
+		public remMATCsection(int numSubs) : base(numSubs) { }
 
 		public override int Length()
 		{
 			int len = 0;
-			foreach (remMaterial mat in materials)
+			foreach (remMaterial mat in this)
 			{
 				len += mat.Length();
 			}
@@ -206,107 +222,101 @@ namespace AiDroidPlugin
 		public override void WriteTo(Stream stream)
 		{
 			BinaryWriter writer = new BinaryWriter(stream);
-			writer.Write(base.type);
+			writer.Write(remMATCsection.ClassType);
 			writer.Write(Length());
-			writer.Write(numMats);
-			if (numMats > 0)
+			writer.Write(Count);
+			if (Count > 0)
 			{
-				for (int i = 0; i < numMats; i++)
-					materials[i].WriteTo(stream);
+				for (int i = 0; i < Count; i++)
+				{
+					this[i].WriteTo(stream);
+				}
 			}
 		}
 	}
 
-	public class remBone : remFileSection, IObjChild
+	public class remBone : remContainer<remBone>, IObjChild
 	{
+		public static byte[] ClassType = Encoding.ASCII.GetBytes("BONO");
+
+		public override byte[] Type { get { return ClassType; } }
+
 		public remId name = null;
-		public Matrix trans;
-		public int numChilds { get { return childNames.Count; } }
-		public List<remId> childNames = null;
+		public Matrix matrix;
 
-		public List<remBone> childs;
-
-		public void AddChild(remId child)
-		{
-			childNames.Add(child);
-		}
-
-		public remBone this[int i]
-		{
-			get { return childs[i]; }
-		}
-
-		public remBone(int numChilds)
-			: base(Encoding.ASCII.GetBytes("BONO"))
-		{
-			childNames = new List<remId>(numChilds);
-			childs = new List<remBone>(numChilds);
-		}
+		public remBone(int numChilds) : base(numChilds) { }
 
 		public dynamic Parent { get; set; }
 
 		public override int Length()
 		{
-			return 4+4+256+16*4+4 + (numChilds * 256);
+			return 4+4+256+16*4+4 + (Count * 256);
 		}
 
 		public override void WriteTo(Stream stream)
 		{
 			BinaryWriter writer = new BinaryWriter(stream);
-			writer.Write(base.type);
+			writer.Write(remBone.ClassType);
 			writer.Write(Length());
 			name.WriteTo(stream);
-			writer.Write(trans);
-			writer.Write(numChilds);
-			if (numChilds > 0)
+			writer.Write(matrix);
+			writer.Write(Count);
+			if (Count > 0)
 			{
-				for (int i = 0; i < numChilds; i++)
-					childNames[i].WriteTo(stream);
+				for (int i = 0; i < Count; i++)
+				{
+					children[i].name.WriteTo(stream);
+				}
 			}
+		}
+
+		public remBone Clone(bool mesh, bool childFrames, remParser parser, List<remMesh> clonedMeshes, List<remSkin> clonedSkins)
+		{
+			remBone frame = new remBone(Count);
+			frame.name = name;
+			frame.matrix = matrix;
+
+			if (mesh)
+			{
+				remMesh remMesh = rem.FindMesh(this, parser.MESC);
+				if (remMesh != null)
+				{
+					remMesh clone = remMesh.Clone(true, true, parser, clonedSkins);
+					clone.frame = frame.name;
+					clonedMeshes.Add(clone);
+				}
+			}
+			if (childFrames)
+			{
+				for (int i = 0; i < Count; i++)
+				{
+					frame.AddChild(this[i].Clone(mesh, true, parser, clonedMeshes, clonedSkins));
+				}
+			}
+			return frame;
 		}
 	}
 
-	public class remBONCsection : remFileSection
+	public class remBONCsection : remContainer<remBone>
 	{
-		public int numBones { get { return frames.Count; } }
-		public List<remBone> frames = null;
+		public static byte[] ClassType = Encoding.ASCII.GetBytes("BONC");
+
+		public override byte[] Type { get { return ClassType; } }
 
 		public remBone rootFrame = null;
 
-		public remBone this[int i]
-		{
-			get { return frames[i]; }
-		}
-
-		public void AddParentBone(remBone parent)
-		{
-			for (int i = 0; i < parent.numChilds; i++)
-			{
-				remId child = parent.childNames[i];
-				for (int j = 0; j < frames.Count; j++)
-				{
-					if (frames[j].name == child)
-					{
-						frames[j].Parent = parent;
-						parent.childs.Add(frames[j]);
-						break;
-					}
-				}
-			}
-
-			frames.Add(parent);
-		}
-
 		public remBONCsection(int numSubs)
-			: base(Encoding.ASCII.GetBytes("BONC"))
+			: base(numSubs)
 		{
-			this.frames = new List<remBone>(numSubs);
+			rootFrame = new remBone(1);
+			rootFrame.name = new remId("RootFrame");
+			rootFrame.matrix = Matrix.Identity;
 		}
 
 		public override int Length()
 		{
 			int len = 0;
-			foreach (remBone bone in frames)
+			foreach (remBone bone in children)
 			{
 				len += bone.Length();
 			}
@@ -316,13 +326,15 @@ namespace AiDroidPlugin
 		public override void WriteTo(Stream stream)
 		{
 			BinaryWriter writer = new BinaryWriter(stream);
-			writer.Write(base.type);
+			writer.Write(remBONCsection.ClassType);
 			writer.Write(Length());
-			writer.Write(numBones);
-			if (numBones > 0)
+			writer.Write(Count);
+			if (Count > 0)
 			{
-				for (int i = 0; i < numBones; i++)
-					frames[i].WriteTo(stream);
+				for (int i = 0; i < Count; i++)
+				{
+					children[i].WriteTo(stream);
+				}
 			}
 		}
 	}
@@ -342,10 +354,25 @@ namespace AiDroidPlugin
 			writer.Write(Normal);
 			writer.Write((int)RGBA);
 		}
+
+		public remVertex Clone()
+		{
+			remVertex vert = new remVertex();
+			vert.Position = Position;
+			vert.UV = UV;
+			vert.Normal = Normal;
+			vert.RGBA = RGBA;
+
+			return vert;
+		}
 	}
 
-	public class remMesh : remFileSection
+	public class remMesh : IObjChild, remSection
 	{
+		public static byte[] ClassType = Encoding.ASCII.GetBytes("MESO");
+
+		public byte[] Type { get { return ClassType; } }
+
 		public remId name = null;
 		public int numMats { get { return materials.Count; } }
 		public remId frame = null;
@@ -363,7 +390,6 @@ namespace AiDroidPlugin
 		}
 
 		public remMesh(int numMats)
-			: base(Encoding.ASCII.GetBytes("MESO"))
 		{
 			materials = new List<remId>(numMats);
 		}
@@ -373,15 +399,17 @@ namespace AiDroidPlugin
 			return name;
 		}
 
-		public override int Length()
+		public dynamic Parent { get; set; }
+
+		public int Length()
 		{
 			return 4+4+256+4+256+4+4+2*4 + numMats * 256 + numVertices * (3+2+3+1)*4 + numFaces * (3+1)*4;
 		}
 
-		public override void WriteTo(Stream stream)
+		public void WriteTo(Stream stream)
 		{
 			BinaryWriter writer = new BinaryWriter(stream);
-			writer.Write(base.type);
+			writer.Write(remMesh.ClassType);
 			writer.Write(Length());
 			name.WriteTo(stream);
 			writer.Write(numMats);
@@ -407,33 +435,52 @@ namespace AiDroidPlugin
 				writer.Write(faceMarks);
 			}
 		}
+
+		public remMesh Clone(bool submeshes, bool boneList, remParser parser, List<remSkin> clonedSkins)
+		{
+			remMesh mesh = new remMesh(numMats);
+			mesh.name = new remId(name);
+			rem.CopyUnknowns(this, mesh);
+
+			if (submeshes)
+			{
+				for (int i = 0; i < numMats; i++)
+				{
+					mesh.AddMaterial(new remId(materials[i]));
+				}
+				mesh.vertices = new remVertex[numVertices];
+				for (int i = 0; i < numVertices; i++)
+				{
+					mesh.vertices[i] = vertices[i].Clone();
+				}
+				mesh.faces = (int[])faces.Clone();
+				mesh.faceMarks = (int[])faceMarks.Clone();
+			}
+
+			remSkin skin = rem.FindSkin(name, parser.SKIC);
+			if (skin != null)
+			{
+				skin = skin.Clone();
+				skin.mesh = mesh.name;
+				clonedSkins.Add(skin);
+			}
+
+			return mesh;
+		}
 	}
 
-	public class remMESCsection : remFileSection
+	public class remMESCsection : remContainer<remMesh>
 	{
-		public int numMeshes { get { return meshes.Count; } }
-		public List<remMesh> meshes = null;
+		public static byte[] ClassType = Encoding.ASCII.GetBytes("MESC");
 
-		public remMesh this[int i]
-		{
-			get { return meshes[i]; }
-		}
+		public override byte[] Type { get { return ClassType; } }
 
-		public void AddMesh(remMesh mesh)
-		{
-			meshes.Add(mesh);
-		}
-
-		public remMESCsection(int numSubs)
-			: base(Encoding.ASCII.GetBytes("MESC"))
-		{
-			meshes = new List<remMesh>(numSubs);
-		}
+		public remMESCsection(int numSubs) : base(numSubs) { }
 
 		public override int Length()
 		{
 			int len = 0;
-			foreach (remMesh mesh in meshes)
+			foreach (remMesh mesh in this)
 			{
 				len += mesh.Length();
 			}
@@ -443,62 +490,71 @@ namespace AiDroidPlugin
 		public override void WriteTo(Stream stream)
 		{
 			BinaryWriter writer = new BinaryWriter(stream);
-			writer.Write(base.type);
+			writer.Write(remMESCsection.ClassType);
 			writer.Write(Length());
-			writer.Write(numMeshes);
-			if (numMeshes > 0)
+			writer.Write(Count);
+			if (Count > 0)
 			{
-				for (int i = 0; i < numMeshes; i++)
-					meshes[i].WriteTo(stream);
+				for (int i = 0; i < Count; i++)
+				{
+					this[i].WriteTo(stream);
+				}
 			}
 		}
 	}
 
-	public class remBoneWeights : IObjInfo
+	public class remBoneWeights : IObjChild, IObjInfo
 	{
 		public remId bone = null;
 		public int numVertIdxWts { get { return vertexIndices.Length; } }
-		public Matrix trans;
+		public Matrix matrix;
 		public int[] vertexIndices = null;
 		public float[] vertexWeights = null;
+
+		public dynamic Parent { get; set; }
 
 		public void WriteTo(Stream stream)
 		{
 			bone.WriteTo(stream);
 			BinaryWriter writer = new BinaryWriter(stream);
 			writer.Write(numVertIdxWts);
-			writer.Write(trans);
+			writer.Write(matrix);
 			writer.Write(vertexIndices);
 			writer.Write(vertexWeights);
 		}
+
+		public remBoneWeights CloneWithoutWeightInfo()
+		{
+			remBoneWeights boneWeights = new remBoneWeights();
+			boneWeights.bone = new remId(this.bone);
+			boneWeights.matrix = this.matrix;
+			return boneWeights;
+		}
+		public remBoneWeights Clone()
+		{
+			remBoneWeights boneWeights = CloneWithoutWeightInfo();
+			boneWeights.vertexIndices = (int[])this.vertexIndices.Clone();
+			boneWeights.vertexWeights = (float[])this.vertexWeights.Clone();
+			return boneWeights;
+		}
 	}
 
-	public class remSkin : remFileSection
+	public class remSkin : remContainer<remBoneWeights>, IObjChild
 	{
+		public static byte[] ClassType = Encoding.ASCII.GetBytes("SKIO");
+
+		public override byte[] Type { get { return ClassType; } }
+
 		public remId mesh = null;
-		public int numWeights { get { return weights.Count; } }
-		public List<remBoneWeights> weights = null;
 
-		public remBoneWeights this[int i]
-		{
-			get { return weights[i]; }
-		}
+		public remSkin(int numWeights) : base(numWeights) { }
 
-		public void AddWeights(remBoneWeights weights)
-		{
-			this.weights.Add(weights);
-		}
-
-		public remSkin(int numWeights)
-			: base(Encoding.ASCII.GetBytes("SKIO"))
-		{
-			weights = new List<remBoneWeights>(numWeights);
-		}
+		public dynamic Parent { get; set; }
 
 		public override int Length()
 		{
 			int len = 4+4+256+4;
-			foreach (remBoneWeights w in weights)
+			foreach (remBoneWeights w in this)
 			{
 				len += 256+4+16*4 + (4+4)*w.numVertIdxWts;
 			}
@@ -508,45 +564,43 @@ namespace AiDroidPlugin
 		public override void WriteTo(Stream stream)
 		{
 			BinaryWriter writer = new BinaryWriter(stream);
-			writer.Write(base.type);
+			writer.Write(remSkin.ClassType);
 			writer.Write(Length());
 			mesh.WriteTo(stream);
-			writer.Write(numWeights);
-			if (numWeights > 0)
+			writer.Write(Count);
+			if (Count > 0)
 			{
-				for (int i = 0; i < numWeights; i++)
+				for (int i = 0; i < Count; i++)
 				{
-					weights[i].WriteTo(stream);
+					this[i].WriteTo(stream);
 				}
 			}
 		}
+
+		public remSkin Clone()
+		{
+			remSkin skin = new remSkin(Count);
+			foreach (remBoneWeights boneWeights in this)
+			{
+				skin.AddChild(boneWeights.Clone());
+			}
+
+			return skin;
+		}
 	}
 
-	public class remSKICsection : remFileSection
+	public class remSKICsection : remContainer<remSkin>
 	{
-		public int numSkins { get { return skins.Count; } }
-		public List<remSkin> skins = null;
+		public static byte[] ClassType = Encoding.ASCII.GetBytes("SKIC");
 
-		public remSkin this[int i]
-		{
-			get { return skins[i]; }
-		}
+		public override byte[] Type { get { return ClassType; } }
 
-		public void AddSkin(remSkin skin)
-		{
-			skins.Add(skin);
-		}
-
-		public remSKICsection(int numSubs)
-			: base(Encoding.ASCII.GetBytes("SKIC"))
-		{
-			skins = new List<remSkin>(numSubs);
-		}
+		public remSKICsection(int numSubs) : base(numSubs) { }
 
 		public override int Length()
 		{
 			int len = 0;
-			foreach (remSkin skin in skins)
+			foreach (remSkin skin in this)
 			{
 				len += skin.Length();
 			}
@@ -556,30 +610,28 @@ namespace AiDroidPlugin
 		public override void WriteTo(Stream stream)
 		{
 			BinaryWriter writer = new BinaryWriter(stream);
-			writer.Write(base.type);
+			writer.Write(remSKICsection.ClassType);
 			writer.Write(Length());
-			writer.Write(numSkins);
-			if (numSkins > 0)
+			writer.Write(Count);
+			if (Count > 0)
 			{
-				for (int i = 0; i < numSkins; i++)
-					skins[i].WriteTo(stream);
+				for (int i = 0; i < Count; i++)
+					this[i].WriteTo(stream);
 			}
 		}
 	}
 
-	public class remFile : IObjInfo
+	public static class UnknownDefaults
 	{
-		public remMATCsection MATC = null;
-		public remBONCsection BONC = null;
-		public remMESCsection MESC = null;
-		public remSKICsection SKIC = null;
-
-		public void WriteTo(Stream stream)
+		public static void remMesh(remMesh mesh)
 		{
-			MATC.WriteTo(stream);
-			BONC.WriteTo(stream);
-			MESC.WriteTo(stream);
-			SKIC.WriteTo(stream);
+			mesh.unknown = new int[2] { 1, 1 };
+		}
+
+		public static void remMaterial(remMaterial mat)
+		{
+			mat.unk_or_flag = 0;
+			mat.unknown = null;
 		}
 	}
 }

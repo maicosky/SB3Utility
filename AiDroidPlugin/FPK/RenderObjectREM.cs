@@ -41,9 +41,9 @@ namespace AiDroidPlugin
 
 			this.device = Gui.Renderer.Device;
 
-			Textures = new Texture[parser.RemFile.MATC.numMats];
-			TextureDic = new Dictionary<string, int>(parser.RemFile.MATC.numMats);
-			Materials = new Material[parser.RemFile.MATC.numMats];
+			Textures = new Texture[parser.MATC.Count];
+			TextureDic = new Dictionary<string, int>(parser.MATC.Count);
+			Materials = new Material[parser.MATC.Count];
 			BoneMatrixDic = new Dictionary<string, Matrix>();
 
 			rootFrame = CreateHierarchy(parser, mesh, device, out meshFrames);
@@ -53,7 +53,14 @@ namespace AiDroidPlugin
 
 			for (int i = 0; i < meshFrames.Count; i++)
 			{
-				Bounds = BoundingBox.Merge(Bounds, meshFrames[i].Bounds);
+				if (i == 0)
+				{
+					Bounds = meshFrames[i].Bounds;
+				}
+				else
+				{
+					Bounds = BoundingBox.Merge(Bounds, meshFrames[i].Bounds);
+				}
 			}
 		}
 
@@ -253,13 +260,13 @@ namespace AiDroidPlugin
 #if !DONT_MIRROR
 			Vector3 translate, scale;
 			Quaternion rotate;
-			parser.RemFile.BONC.rootFrame.trans.Decompose(out scale, out rotate, out translate);
-			parser.RemFile.BONC.rootFrame.trans = Matrix.Scaling(scale.X, scale.Y, -scale.Z) * Matrix.RotationQuaternion(rotate) * Matrix.Translation(translate);
+			parser.BONC.rootFrame.matrix.Decompose(out scale, out rotate, out translate);
+			parser.BONC.rootFrame.matrix = Matrix.Scaling(scale.X, scale.Y, -scale.Z) * Matrix.RotationQuaternion(rotate) * Matrix.Translation(translate);
 #endif
-			AnimationFrame rootFrame = CreateFrame(parser.RemFile.BONC.rootFrame, parser, extractFrames, mesh, device, Matrix.Identity, meshFrames);
+			AnimationFrame rootFrame = CreateFrame(parser.BONC.rootFrame, parser, extractFrames, mesh, device, Matrix.Identity, meshFrames);
 			SetupBoneMatrices(rootFrame, rootFrame);
 #if !DONT_MIRROR
-			parser.RemFile.BONC.rootFrame.trans = Matrix.Scaling(scale) * Matrix.RotationQuaternion(rotate) * Matrix.Translation(translate);
+			parser.BONC.rootFrame.matrix = Matrix.Scaling(scale) * Matrix.RotationQuaternion(rotate) * Matrix.Translation(translate);
 #endif
 			return rootFrame;
 		}
@@ -268,7 +275,7 @@ namespace AiDroidPlugin
 		{
 			AnimationFrame animationFrame = new AnimationFrame();
 			animationFrame.Name = frame.name.ToString();
-			animationFrame.TransformationMatrix = frame.trans;
+			animationFrame.TransformationMatrix = frame.matrix;
 			animationFrame.OriginalTransform = animationFrame.TransformationMatrix;
 			animationFrame.CombinedTransform = combinedParent * animationFrame.TransformationMatrix;
 
@@ -306,9 +313,9 @@ namespace AiDroidPlugin
 					}
 				}
 
-				remSkin boneList = rem.FindSkin(mesh.name, parser.RemFile.SKIC);
+				remSkin boneList = rem.FindSkin(mesh.name, parser.SKIC);
 				bool skinned = boneList != null;
-				int numBones = skinned ? boneList.numWeights : 0;
+				int numBones = skinned ? boneList.Count: 0;
 				string[] boneNames = new string[numBones];
 				Matrix[] boneOffsets = new Matrix[numBones];
 				for (int boneIdx = 0; boneIdx < numBones; boneIdx++)
@@ -320,7 +327,7 @@ namespace AiDroidPlugin
 #if !DONT_MIRROR
 						Vector3 translate, scale;
 						Quaternion rotate;
-						boneList[boneIdx].trans.Decompose(out scale, out rotate, out translate);
+						boneList[boneIdx].matrix.Decompose(out scale, out rotate, out translate);
 						mirrored = Matrix.Scaling(scale.X, scale.Y, -scale.Z) * Matrix.RotationQuaternion(rotate) * Matrix.Translation(translate);
 #else
 						mirrored = bone.Matrix;
@@ -381,16 +388,16 @@ namespace AiDroidPlugin
 					meshContainer.BoneOffsets = boneOffsets;
 					meshContainers[i] = meshContainer;
 
-					remMaterial mat = rem.FindMaterial(mesh.materials[i], parser.RemFile.MATC);
+					remMaterial mat = rem.FindMaterial(mesh.materials[i], parser.MATC);
 					if (mat != null)
 					{
 						Material material3D = new Material();
-						material3D.Ambient = new Color4(mat.ambient[0], mat.ambient[1], mat.ambient[2]);
-						material3D.Diffuse = new Color4(mat.diffuse[0], mat.diffuse[1], mat.diffuse[2]);
-						material3D.Emissive = new Color4(mat.emissive[0], mat.emissive[1], mat.emissive[2]);
-						material3D.Specular = new Color4(mat.specular[0], mat.specular[1], mat.specular[2]);
+						material3D.Ambient = new Color4(mat.ambient);
+						material3D.Diffuse = new Color4(mat.diffuse);
+						material3D.Emissive = new Color4(mat.emissive);
+						material3D.Specular = new Color4(mat.specular);
 						material3D.Power = mat.specularPower;
-						int matIdx = parser.RemFile.MATC.materials.IndexOf(mat);
+						int matIdx = parser.MATC.IndexOf(mat);
 						Materials[matIdx] = material3D;
 						meshContainer.MaterialIndex = matIdx;
 
@@ -424,7 +431,7 @@ namespace AiDroidPlugin
 				meshFrames.Add(animationFrame);
 			}
 
-			for (int i = 0; i < frame.numChilds; i++)
+			for (int i = 0; i < frame.Count; i++)
 			{
 				remBone child = frame[i];
 				if (extractFrames.Contains(child.name.ToString()))
@@ -441,7 +448,7 @@ namespace AiDroidPlugin
 
 		private float[][] ConvertVertexWeights(List<remVertex> vertexList, int[] vertexIndices, remSkin boneList, out byte[][] vertexBoneIndices)
 		{
-			int numBones = boneList != null ? boneList.numWeights : 0;
+			int numBones = boneList != null ? boneList.Count : 0;
 			float[][] vertexWeights = new float[vertexList.Count][];
 			vertexBoneIndices = new byte[vertexList.Count][];
 			for (int j = 0; j < vertexList.Count; j++)
@@ -464,7 +471,7 @@ namespace AiDroidPlugin
 				int weightIdx = 0;
 				for (int k = 0; k < numBones; k++)
 				{
-					remBoneWeights bone = boneList.weights[k];
+					remBoneWeights bone = boneList[k];
 					for (int l = 0; l < bone.numVertIdxWts; l++)
 					{
 						if (bone.vertexIndices[l] == meshVertIdx)

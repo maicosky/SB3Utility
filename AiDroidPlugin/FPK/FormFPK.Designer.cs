@@ -48,6 +48,7 @@
 			this.renameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.keepBackupToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.compressToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
 			this.tabControlSubfiles = new System.Windows.Forms.TabControl();
 			this.tabPageREMSubfiles = new System.Windows.Forms.TabPage();
@@ -216,19 +217,27 @@
 			// optionsToolStripMenuItem
 			// 
 			this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.keepBackupToolStripMenuItem});
+            this.keepBackupToolStripMenuItem,
+            this.compressToolStripMenuItem});
 			this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
 			this.optionsToolStripMenuItem.Size = new System.Drawing.Size(56, 20);
 			this.optionsToolStripMenuItem.Text = "&Options";
 			// 
 			// keepBackupToolStripMenuItem
 			// 
-			this.keepBackupToolStripMenuItem.Checked = true;
+			this.keepBackupToolStripMenuItem.Checked = global::AiDroidPlugin.Properties.Settings.Default.KeepBackupOfFPK;
 			this.keepBackupToolStripMenuItem.CheckOnClick = true;
-			this.keepBackupToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.keepBackupToolStripMenuItem.Name = "keepBackupToolStripMenuItem";
 			this.keepBackupToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
 			this.keepBackupToolStripMenuItem.Text = "Keep &Backup";
+			// 
+			// compressToolStripMenuItem
+			// 
+			this.compressToolStripMenuItem.Checked = global::AiDroidPlugin.Properties.Settings.Default.CompressFPK;
+			this.compressToolStripMenuItem.CheckOnClick = true;
+			this.compressToolStripMenuItem.Name = "compressToolStripMenuItem";
+			this.compressToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.compressToolStripMenuItem.Text = "Compress";
 			// 
 			// tabControlSubfiles
 			// 
@@ -476,6 +485,7 @@
 		private System.Windows.Forms.TabPage tabPageSoundSubfiles;
 		private System.Windows.Forms.ListView soundSubfilesList;
 		private System.Windows.Forms.ColumnHeader columnHeader1;
+		private System.Windows.Forms.ToolStripMenuItem compressToolStripMenuItem;
 
 	}
 }

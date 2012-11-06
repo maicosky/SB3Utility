@@ -1,4 +1,10 @@
-﻿[0.4.42.18]
+﻿[0.4.42.22]
+  - menu options for REM persistent in DLL config file
+  - Center View corrected
+  - useless editor.Set{Frame|Material|Texture}Name() no longer invoked
+  - removed unused importers for MQO and FBX
+
+[0.4.42.18]
   - freeing scripting variables
 
 [0.4.42.9]

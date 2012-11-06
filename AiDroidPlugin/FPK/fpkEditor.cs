@@ -19,15 +19,15 @@ namespace AiDroidPlugin
 		}
 
 		[Plugin]
-		public BackgroundWorker SaveFPK(bool keepBackup, bool background)
+		public BackgroundWorker SaveFPK(bool keepBackup, bool compress, bool background)
 		{
-			return SaveFPK(Parser.FilePath, keepBackup, background);
+			return SaveFPK(Parser.FilePath, keepBackup, compress, background);
 		}
 
 		[Plugin]
-		public BackgroundWorker SaveFPK(string path, bool keepBackup, bool background)
+		public BackgroundWorker SaveFPK(string path, bool keepBackup, bool compress, bool background)
 		{
-			return Parser.WriteArchive(path, keepBackup, background);
+			return Parser.WriteArchive(path, keepBackup, compress, background);
 		}
 
 		[Plugin]
@@ -94,6 +94,14 @@ namespace AiDroidPlugin
 				throw new Exception("A subfile with " + newName + " already exists");
 			}
 
+			if (Parser.DirFormat is fpkDirFormat_Style2)
+			{
+				int hashCode = fpkDirFormat_Style2.Hash(Utility.EncodingShiftJIS.GetBytes(newName));
+				if (Parser.Subfiles[index] is fpkSubfile)
+				{
+					((fpkSubfile)Parser.Subfiles[index]).crc = 0;
+				}
+			}
 			Parser.Subfiles[index].Name = newName;
 			return newName;
 		}

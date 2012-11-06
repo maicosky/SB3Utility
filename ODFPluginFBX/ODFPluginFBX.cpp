@@ -2,108 +2,11 @@
 #include <fbxfilesdk/kfbxio/kfbxiosettings.h>
 #include "ODFPluginFBX.h"
 
-namespace ODFPluginOld
+namespace ODFPlugin
 {
 	char* Fbx::StringToCharArray(String^ s)
 	{
 		return (char*)(void*)Marshal::StringToHGlobalAnsi(s);
-	}
-
-	ICanImport^ Fbx::ImporterBase::TestFormat(System::String ^path)
-	{
-		ImporterBase^ base = gcnew ImporterBase(path);
-		base->Load();
-		KFbxDisplayLayer* layer = base->pScene->FindMember(FBX_TYPE(KFbxDisplayLayer), "ODF");
-		bool symmetrical = base->pScene->FindMember(FBX_TYPE(KFbxDisplayLayer), "SYMMETRICAL") != NULL;
-		return layer ? (ICanImport^)gcnew Fbx::Importer(base) : nullptr;
-	}
-
-	Fbx::ImporterBase::ImporterBase(String^ path)
-	{
-		pin_ptr<KFbxSdkManager*> pSdkManagerPin = &pSdkManager;
-		pin_ptr<KFbxScene*> pScenePin = &pScene;
-		Init(pSdkManagerPin, pScenePin);
-
-		pImporter = KFbxImporter::Create(pSdkManager, "");
-
-		IOS_REF.SetBoolProp(IMP_FBX_MATERIAL, true);
-		IOS_REF.SetBoolProp(IMP_FBX_TEXTURE, true);
-		IOS_REF.SetBoolProp(IMP_FBX_LINK, true);
-		IOS_REF.SetBoolProp(IMP_FBX_SHAPE, true);
-		IOS_REF.SetBoolProp(IMP_FBX_GOBO, true);
-		IOS_REF.SetBoolProp(IMP_FBX_ANIMATION, true);
-		IOS_REF.SetBoolProp(IMP_FBX_GLOBAL_SETTINGS, true);
-
-		WITH_MARSHALLED_STRING
-		(
-			cPath, path, \
-			if (!pImporter->Initialize(cPath, -1, pSdkManager->GetIOSettings())) \
-			{ \
-				throw gcnew Exception("Failed to initialize KFbxImporter: " + gcnew String(pImporter->GetLastErrorString())); \
-			}
-		);
-
-		currentDirectory = Directory::GetCurrentDirectory();
-		Directory::SetCurrentDirectory(Path::GetDirectoryName(path));
-
-		disposed = false;
-	}
-
-	Fbx::ImporterBase::ImporterBase(ImporterBase^ copy)
-	{
-		this->currentDirectory = copy->currentDirectory;
-		copy->currentDirectory = nullptr;
-
-		this->disposed = copy->disposed;
-		copy->disposed = true;
-
-		this->pImporter = copy->pImporter;
-		copy->pImporter = NULL;
-
-		this->pScene = copy->pScene;
-		copy->pScene = NULL;
-
-		this->pSdkManager = copy->pSdkManager;
-		copy->pSdkManager = NULL;
-	}
-
-	Fbx::ImporterBase::~ImporterBase()
-	{
-		this->!ImporterBase();
-		GC::SuppressFinalize(this);
-	}
-
-	Fbx::ImporterBase::!ImporterBase()
-	{
-		if (!this->disposed)
-		{
-			if (currentDirectory != nullptr)
-			{
-				Directory::SetCurrentDirectory(currentDirectory);
-				currentDirectory = nullptr;
-			}
-			if (pImporter != NULL)
-			{
-				pImporter->Destroy();
-				pImporter = NULL;
-			}
-			if (pScene != NULL)
-			{
-				pScene->Destroy();
-				pScene = NULL;
-			}
-			if (pSdkManager != NULL)
-			{
-				pSdkManager->Destroy();
-				pSdkManager = NULL;
-			}
-		}
-		disposed = true;
-	}
-
-	void Fbx::ImporterBase::Load()
-	{
-		pImporter->Import(pScene);
 	}
 
 	void Fbx::Init(KFbxSdkManager** pSdkManager, KFbxScene** pScene)

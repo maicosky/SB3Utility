@@ -73,21 +73,7 @@ namespace ODFPlugin
 			}
 		}
 
-		public static List<ODFPluginOld.ImportedVertex> ImportedVertexListOld(List<odfVertex> vertList)
-		{
-			List<ODFPluginOld.ImportedVertex> importedList = new List<ODFPluginOld.ImportedVertex>(vertList.Count);
-			for (int i = 0; i < vertList.Count; i++)
-			{
-				ODFPluginOld.ImportedVertex importedVert = new ODFPluginOld.ImportedVertex();
-				importedList.Add(importedVert);
-				importedVert.Position = vertList[i].Position;
-				importedVert.Normal = vertList[i].Normal;
-				importedVert.UV = vertList[i].UV;
-			}
-			return importedList;
-		}
-
-		public static List<ImportedVertex> ImportedVertexList(List<odfVertex> vertList)
+		public static List<ImportedVertex> ImportedVertexListUnskinned(List<odfVertex> vertList)
 		{
 			List<ImportedVertex> importedList = new List<ImportedVertex>(vertList.Count);
 			for (int i = 0; i < vertList.Count; i++)
@@ -96,23 +82,7 @@ namespace ODFPlugin
 				importedList.Add(importedVert);
 				importedVert.Position = vertList[i].Position;
 				importedVert.Normal = vertList[i].Normal;
-				importedVert.UV = new float[2] { vertList[i].UV[0], vertList[i].UV[1] };
-			}
-			return importedList;
-		}
-
-		public static List<ODFPluginOld.ImportedFace> ImportedFaceListOld(List<odfFace> faceList)
-		{
-			List<ODFPluginOld.ImportedFace> importedList = new List<ODFPluginOld.ImportedFace>(faceList.Count);
-			for (int i = 0; i < faceList.Count; i++)
-			{
-				ODFPluginOld.ImportedFace importedFace = new ODFPluginOld.ImportedFace();
-				importedList.Add(importedFace);
-				importedFace.VertexIndices = new ushort[3];
-				for (int j = 0; j < 3; j++)
-				{
-					importedFace.VertexIndices[j] = faceList[i].VertexIndices[j];
-				}
+				importedVert.UV = new float[] { vertList[i].UV[0], vertList[i].UV[1] };
 			}
 			return importedList;
 		}

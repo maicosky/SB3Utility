@@ -260,12 +260,12 @@ namespace AiDroidPlugin
 
 		public override Stream WriteStream(Stream stream)
 		{
-			throw new NotImplementedException();
+			return stream;
 		}
 
 		public override object FinishWriteTo(Stream stream)
 		{
-			throw new NotImplementedException();
+			return null;
 		}
 	}
 
@@ -349,6 +349,7 @@ namespace AiDroidPlugin
 
 		private string destPath;
 		private bool keepBackup;
+		private bool compress;
 
 		public fpkParser(string path, fpkDirFormat dirFormat)
 		{
@@ -357,10 +358,11 @@ namespace AiDroidPlugin
 			this.Subfiles = DirFormat.ReadDirectory(path);
 		}
 
-		public BackgroundWorker WriteArchive(string destPath, bool keepBackup, bool background)
+		public BackgroundWorker WriteArchive(string destPath, bool keepBackup, bool compress, bool background)
 		{
 			this.destPath = destPath;
 			this.keepBackup = keepBackup;
+			this.compress = compress;
 
 			BackgroundWorker worker = new BackgroundWorker();
 			worker.WorkerSupportsCancellation = true;
@@ -443,15 +445,16 @@ namespace AiDroidPlugin
 								}
 								writer.Write(reader.ReadBytes(subfile.size % Utility.BufSize));
 							}
-							CRCs[i] = subfile.crc;
+							CRCs[i] = this.DirFormat is fpkDirFormat_Style2 && subfile.crc == 0 ?
+								fpkDirFormat_Style2.Hash(Utility.EncodingShiftJIS.GetBytes(Subfiles[i].Name)) : subfile.crc;
 						}
 						else
 						{
-							fpkSubfileFormat_ZLC2 format = new fpkSubfileFormat_ZLC2();
-							Stream stream =  format.WriteStream(writer.BaseStream);
+							fpkSubfileFormat format = compress ? (fpkSubfileFormat)new fpkSubfileFormat_ZLC2() : (fpkSubfileFormat)new fpkSubfileFormat_Uncompressed();
+							Stream stream = format.WriteStream(writer.BaseStream);
 							Subfiles[i].WriteTo(stream);
 							format.FinishWriteTo(stream);
-							CRCs[i] = this.DirFormat.GetType() == typeof(fpkDirFormat_Style2) ?
+							CRCs[i] = this.DirFormat is fpkDirFormat_Style2 ?
 								fpkDirFormat_Style2.Hash(Utility.EncodingShiftJIS.GetBytes(Subfiles[i].Name)) : 0;
 						}
 

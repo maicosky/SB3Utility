@@ -92,7 +92,6 @@
   <ItemGroup>
     <ClCompile Include="ODFPluginFBX.cpp" />
     <ClCompile Include="ODFPluginFBXExporter.cpp" />
-    <ClCompile Include="ODFPluginFBXImporter.cpp" />
     <ClCompile Include="ODFPluginFBXMapper.cpp" />
   </ItemGroup>
   <ItemGroup>

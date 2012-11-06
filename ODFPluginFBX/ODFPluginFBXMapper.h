@@ -4,7 +4,7 @@
 
 using namespace System;
 
-namespace ODFPluginOld {
+namespace ODFPlugin {
 
 	class W32
 	{

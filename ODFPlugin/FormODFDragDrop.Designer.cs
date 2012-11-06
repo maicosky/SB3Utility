@@ -31,8 +31,6 @@
 			this.components = new System.ComponentModel.Container();
 			this.buttonOK = new System.Windows.Forms.Button();
 			this.buttonCancel = new System.Windows.Forms.Button();
-			this.numericFrameMeshMatOffset = new System.Windows.Forms.NumericUpDown();
-			this.label4 = new System.Windows.Forms.Label();
 			this.panelFrame = new System.Windows.Forms.Panel();
 			this.numericFrameId = new System.Windows.Forms.NumericUpDown();
 			this.panel2 = new System.Windows.Forms.Panel();
@@ -73,7 +71,6 @@
 			this.radioButtonReplaceNormalsYes = new System.Windows.Forms.RadioButton();
 			this.label10 = new System.Windows.Forms.Label();
 			this.label11 = new System.Windows.Forms.Label();
-			((System.ComponentModel.ISupportInitialize)(this.numericFrameMeshMatOffset)).BeginInit();
 			this.panelFrame.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericFrameId)).BeginInit();
 			this.panel2.SuspendLayout();
@@ -109,40 +106,12 @@
 			this.buttonCancel.Text = "Cancel";
 			this.buttonCancel.UseVisualStyleBackColor = true;
 			// 
-			// numericFrameMeshMatOffset
-			// 
-			this.numericFrameMeshMatOffset.Location = new System.Drawing.Point(129, 66);
-			this.numericFrameMeshMatOffset.Maximum = new decimal(new int[] {
-            1000000,
-            0,
-            0,
-            0});
-			this.numericFrameMeshMatOffset.Minimum = new decimal(new int[] {
-            1000000,
-            0,
-            0,
-            -2147483648});
-			this.numericFrameMeshMatOffset.Name = "numericFrameMeshMatOffset";
-			this.numericFrameMeshMatOffset.Size = new System.Drawing.Size(58, 20);
-			this.numericFrameMeshMatOffset.TabIndex = 14;
-			// 
-			// label4
-			// 
-			this.label4.AutoSize = true;
-			this.label4.Location = new System.Drawing.Point(17, 69);
-			this.label4.Name = "label4";
-			this.label4.Size = new System.Drawing.Size(104, 13);
-			this.label4.TabIndex = 13;
-			this.label4.Text = "Mesh Material Offset";
-			// 
 			// panelFrame
 			// 
 			this.panelFrame.Controls.Add(this.numericFrameId);
 			this.panelFrame.Controls.Add(this.panel2);
 			this.panelFrame.Controls.Add(this.label1);
-			this.panelFrame.Controls.Add(this.numericFrameMeshMatOffset);
 			this.panelFrame.Controls.Add(this.textBoxFrameName);
-			this.panelFrame.Controls.Add(this.label4);
 			this.panelFrame.Controls.Add(this.label2);
 			this.panelFrame.Location = new System.Drawing.Point(12, 12);
 			this.panelFrame.Name = "panelFrame";
@@ -573,16 +542,15 @@
 			this.ClientSize = new System.Drawing.Size(390, 192);
 			this.Controls.Add(this.buttonCancel);
 			this.Controls.Add(this.buttonOK);
+			this.Controls.Add(this.panelFrame);
 			this.Controls.Add(this.panelMorphList);
 			this.Controls.Add(this.panelMesh);
-			this.Controls.Add(this.panelFrame);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.Name = "FormODFDragDrop";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.Text = "Options";
 			this.toolTip1.SetToolTip(this, "You may want to choose \'Suppress Warnings\' in the editor menu if you get flooded " +
         "in the log.");
-			((System.ComponentModel.ISupportInitialize)(this.numericFrameMeshMatOffset)).EndInit();
 			this.panelFrame.ResumeLayout(false);
 			this.panelFrame.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericFrameId)).EndInit();
@@ -610,7 +578,6 @@
 
 		private System.Windows.Forms.Button buttonOK;
 		private System.Windows.Forms.Button buttonCancel;
-		private System.Windows.Forms.Label label4;
 		private System.Windows.Forms.Panel panelFrame;
 		private System.Windows.Forms.Panel panelMesh;
 		private System.Windows.Forms.Panel panel4;
@@ -619,7 +586,6 @@
 		private System.Windows.Forms.Label label5;
 		private System.Windows.Forms.Label label3;
 		private System.Windows.Forms.Label label7;
-		public System.Windows.Forms.NumericUpDown numericFrameMeshMatOffset;
 		public System.Windows.Forms.RadioButton radioButtonBonesCopyNear;
 		public System.Windows.Forms.RadioButton radioButtonBonesReplace;
 		public System.Windows.Forms.RadioButton radioButtonBonesCopyOrder;

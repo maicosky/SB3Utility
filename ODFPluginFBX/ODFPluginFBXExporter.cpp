@@ -3,7 +3,7 @@
 #include "ODFPluginFBX.h"
 #include "ODFPluginFBXMapper.h"
 
-namespace ODFPluginOld
+namespace ODFPlugin
 {
 	void Fbx::Exporter::Export(String^ path, odfParser^ parser, List<odfMesh^>^ meshes, String^ exportFormat, bool allFrames, bool skins, bool _8dot3)
 	{

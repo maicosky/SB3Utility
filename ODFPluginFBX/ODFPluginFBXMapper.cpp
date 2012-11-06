@@ -5,7 +5,7 @@ using namespace System::Runtime::InteropServices;
 
 #include "ODFPluginFBXMapper.h"
 
-namespace ODFPluginOld
+namespace ODFPlugin
 {
 	String^ W32::GetShortPathNameW(String^ path)
 	{
