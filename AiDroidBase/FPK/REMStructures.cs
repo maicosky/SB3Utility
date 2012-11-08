@@ -373,9 +373,9 @@ namespace AiDroidPlugin
 
 		public byte[] Type { get { return ClassType; } }
 
-		public remId name = null;
-		public int numMats { get { return materials.Count; } }
 		public remId frame = null;
+		public int numMats { get { return materials.Count; } }
+		public remId name = null;
 		public int numFaces { get { return faces != null ? faces.Length / 3 : 0; } }
 		public int numVertices { get { return vertices != null ? vertices.Length : 0; } }
 		public int[] unknown = new int[2];
@@ -411,9 +411,9 @@ namespace AiDroidPlugin
 			BinaryWriter writer = new BinaryWriter(stream);
 			writer.Write(remMesh.ClassType);
 			writer.Write(Length());
-			name.WriteTo(stream);
-			writer.Write(numMats);
 			frame.WriteTo(stream);
+			writer.Write(numMats);
+			name.WriteTo(stream);
 			writer.Write(numFaces);
 			writer.Write(numVertices);
 			writer.Write(unknown);

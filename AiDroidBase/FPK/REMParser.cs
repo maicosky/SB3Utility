@@ -196,10 +196,10 @@ namespace AiDroidPlugin
 
 				remMesh mesh = new remMesh(5);
 				Trace.Assert(TypeCheck(remMesh.ClassType, type));
-				mesh.name = GetIdentifier(sectionBuffer, secBufIdx+8);
+				mesh.frame = GetIdentifier(sectionBuffer, secBufIdx+8);
 
 				int numMats = BitConverter.ToInt32(sectionBuffer, secBufIdx+8+256);
-				mesh.frame = GetIdentifier(sectionBuffer, secBufIdx+8+256+4);
+				mesh.name = GetIdentifier(sectionBuffer, secBufIdx+8+256+4);
 				int numFaces = BitConverter.ToInt32(sectionBuffer, secBufIdx+8+256+4+256);
 				int numVertices = BitConverter.ToInt32(sectionBuffer, secBufIdx+8+256+4+256 + 4);
 				for (int i = 0; i < mesh.unknown.Length; i++)

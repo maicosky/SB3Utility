@@ -128,7 +128,7 @@ namespace AiDroidPlugin
 			remId newName = new remId(name);
 			foreach (remMesh mesh in Parser.MESC)
 			{
-				if (mesh.frame == name)
+				if (mesh.frame == Parser.BONC[idx].name)
 				{
 					mesh.frame = newName;
 					break;

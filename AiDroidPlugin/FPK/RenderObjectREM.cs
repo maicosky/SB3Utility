@@ -28,7 +28,6 @@ namespace AiDroidPlugin
 		private Texture[] Textures;
 		private Dictionary<string, int> TextureDic;
 		private Material[] Materials;
-		private Dictionary<string, Matrix> BoneMatrixDic;
 
 		private static Dictionary<string, ImportedTexture> ImportedTextures = new Dictionary<string, ImportedTexture>();
 
@@ -44,7 +43,6 @@ namespace AiDroidPlugin
 			Textures = new Texture[parser.MATC.Count];
 			TextureDic = new Dictionary<string, int>(parser.MATC.Count);
 			Materials = new Material[parser.MATC.Count];
-			BoneMatrixDic = new Dictionary<string, Matrix>();
 
 			rootFrame = CreateHierarchy(parser, mesh, device, out meshFrames);
 
@@ -130,7 +128,6 @@ namespace AiDroidPlugin
 		{
 			device.SetRenderState(RenderState.ZEnable, ZBufferType.UseZBuffer);
 			device.SetRenderState(RenderState.Lighting, true);
-//			device.SetRenderState(RenderState.Lighting, false);
 
 #if !DONT_MIRROR
 			Cull culling = (Gui.Renderer.Culling) ? Cull.Clockwise : Cull.None;
@@ -142,8 +139,6 @@ namespace AiDroidPlugin
 			FillMode fill = (Gui.Renderer.Wireframe) ? FillMode.Wireframe : FillMode.Solid;
 			device.SetRenderState(RenderState.FillMode, fill);
 
-//			device.SetRenderState(RenderState.NormalizeNormals, true);
-
 			if (meshContainer.BoneNames.Length > 0)
 			{
 				device.SetRenderState(RenderState.VertexBlend, VertexBlend.Weights3);
@@ -152,24 +147,13 @@ namespace AiDroidPlugin
 //				device.SetRenderState(RenderState.DiffuseMaterialSource, ColorSource.Color1);
 				device.SetRenderState(RenderState.AmbientMaterialSource, ColorSource.Color1);
 
-//				Matrix[] bitMatrices = new Matrix[meshContainer.BoneNames.Length];
 				for (int i = 0; i < meshContainer.BoneNames.Length; i++)
 				{
 					if (meshContainer.BoneFrames[i] != null)
 					{
 						device.SetTransform(i, meshContainer.BoneOffsets[i] * meshContainer.BoneFrames[i].CombinedTransform);
-/*						bitMatrices[i] = Matrix.Invert(meshContainer.BoneOffsets[i]);
-						bitMatrices[i] = Matrix.Transpose(bitMatrices[i]);*/
 					}
 				}
-/*				Mesh mesh = meshContainer.MeshData.Mesh;
-				DataStream src = mesh.LockVertexBuffer(LockFlags.ReadOnly);
-				DataStream dst = meshContainer.SkinInfo.LockVertexBuffer(LockFlags.None);
-				Report.ReportLog("locked " + (dst == null ? "no dst" : "dst not null"));
-				mesh.SkinInfo.UpdateSkinnedMesh(meshContainer.BoneOffsets, bitMatrices, src, dst);
-				Report.ReportLog("update");
-				mesh.UnlockVertexBuffer();
-				Report.ReportLog("unlocked");*/
 			}
 			else
 			{
@@ -188,7 +172,6 @@ namespace AiDroidPlugin
 			Texture tex = ((texIdx >= 0) && (texIdx < Textures.Length)) ? Textures[texIdx] : null;
 			device.SetTexture(0, tex);
 
-//			meshContainer.MeshData.Mesh.ComputeNormals();
 			meshContainer.MeshData.Mesh.DrawSubset(0);
 
 			if (HighlightSubmesh.Contains(submeshNum))
@@ -258,15 +241,13 @@ namespace AiDroidPlugin
 			meshFrames = new List<AnimationFrame>(1);
 			HashSet<string> extractFrames = rem.SearchHierarchy(parser, mesh);
 #if !DONT_MIRROR
-			Vector3 translate, scale;
-			Quaternion rotate;
-			parser.BONC.rootFrame.matrix.Decompose(out scale, out rotate, out translate);
-			parser.BONC.rootFrame.matrix = Matrix.Scaling(scale.X, scale.Y, -scale.Z) * Matrix.RotationQuaternion(rotate) * Matrix.Translation(translate);
+			Matrix orignalMatrix = parser.BONC.rootFrame.matrix;
+			parser.BONC.rootFrame.matrix *= Matrix.Scaling(1f, 1f, -1f);
 #endif
 			AnimationFrame rootFrame = CreateFrame(parser.BONC.rootFrame, parser, extractFrames, mesh, device, Matrix.Identity, meshFrames);
 			SetupBoneMatrices(rootFrame, rootFrame);
 #if !DONT_MIRROR
-			parser.BONC.rootFrame.matrix = Matrix.Scaling(scale) * Matrix.RotationQuaternion(rotate) * Matrix.Translation(translate);
+			parser.BONC.rootFrame.matrix = orignalMatrix;
 #endif
 			return rootFrame;
 		}
@@ -321,20 +302,7 @@ namespace AiDroidPlugin
 				for (int boneIdx = 0; boneIdx < numBones; boneIdx++)
 				{
 					boneNames[boneIdx] = boneList[boneIdx].bone.ToString();
-					Matrix mirrored;
-					if (!BoneMatrixDic.TryGetValue(boneNames[boneIdx], out mirrored))
-					{
-#if !DONT_MIRROR
-						Vector3 translate, scale;
-						Quaternion rotate;
-						boneList[boneIdx].matrix.Decompose(out scale, out rotate, out translate);
-						mirrored = Matrix.Scaling(scale.X, scale.Y, -scale.Z) * Matrix.RotationQuaternion(rotate) * Matrix.Translation(translate);
-#else
-						mirrored = bone.Matrix;
-#endif
-						BoneMatrixDic.Add(boneNames[boneIdx], mirrored);
-					}
-					boneOffsets[boneIdx] = mirrored;
+					boneOffsets[boneIdx] = boneList[boneIdx].matrix;
 				}
 
 				AnimationMeshContainer[] meshContainers = new AnimationMeshContainer[submeshFaceLists.Count];
@@ -364,18 +332,16 @@ namespace AiDroidPlugin
 					for (int j = 0; j < vertexList.Count; j++)
 					{
 						remVertex vertex = vertexList[j];
-#if !DONT_MIRROR
-						Vector3 position = new Vector3(vertex.Position.X, vertex.Position.Y, -vertex.Position.Z);
-						Vector3 normal = new Vector3(vertex.Normal.X, vertex.Normal.Y, -vertex.Normal.Z);
-#else
 						Vector3 position = vertex.Position;
 						Vector3 normal = vertex.Normal;
-#endif
 						float[] boneWeights = vertexWeights[j];
 
 						normalLines[j * 2] = new PositionBlendWeightsIndexedColored(position, boneWeights, vertexBoneIndices[j], Color.Coral.ToArgb());
 						normalLines[(j * 2) + 1] = new PositionBlendWeightsIndexedColored(position + normal, boneWeights, vertexBoneIndices[j], Color.Blue.ToArgb());
 
+#if !DONT_MIRROR
+						position.Z *= -1f;
+#endif
 						min = Vector3.Minimize(min, position);
 						max = Vector3.Maximize(max, position);
 					}
@@ -502,13 +468,8 @@ namespace AiDroidPlugin
 				for (int j = 0; j < vertexList.Count; j++)
 				{
 					remVertex vertex = vertexList[j];
-#if !DONT_MIRROR
-					Vector3 position = new Vector3(vertex.Position.X, vertex.Position.Y, -vertex.Position.Z);
-					Vector3 normal = new Vector3(vertex.Normal.X, vertex.Normal.Y, -vertex.Normal.Z);
-#else
 					Vector3 position = vertex.Position;
 					Vector3 normal = vertex.Normal;
-#endif
 					float[] boneWeights = vertexWeights[j];
 					vertexStream.Write(position.X);
 					vertexStream.Write(position.Y);
@@ -610,7 +571,7 @@ namespace AiDroidPlugin
 				{
 					AnimationFrame bone = boneFrames[i];
 
-					if (bone != null && bone.Parent != null /*&& BoneMatrixDic.TryGetValue(bone.Parent.Name, out boneParentMatrix)*/)
+					if (bone != null && bone.Parent != null)
 					{
 						byte parentBoneIdx = 0xFF;
 						for (byte j = 0; j < mesh.BoneNames.Length; j++)
@@ -625,13 +586,11 @@ namespace AiDroidPlugin
 						{
 							continue;
 						}
-						Matrix boneMatrix = Matrix.Invert(mesh.BoneOffsets[i]/*boneMatrix*/);
-						Matrix boneParentMatrix = Matrix.Invert(mesh.BoneOffsets[parentBoneIdx]/*boneParentMatrix*/);
+						Matrix boneMatrix = Matrix.Invert(mesh.BoneOffsets[i]);
+						Matrix boneParentMatrix = Matrix.Invert(mesh.BoneOffsets[parentBoneIdx]);
 
 						Vector3 bonePos = Vector3.TransformCoordinate(new Vector3(), boneMatrix);
-//						bonePos.Z *= -1f;
 						Vector3 boneParentPos = Vector3.TransformCoordinate(new Vector3(), boneParentMatrix);
-//						boneParentPos.Z *= -1f;
 
 						Vector3 direction = bonePos - boneParentPos;
 						Vector3 perpendicular = direction.Perpendicular();
