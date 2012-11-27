@@ -1,0 +1,6 @@
+﻿[0.4.42.24]
+  - added "Unique Bone" option : a change of the bone's matrix is applied to all meshes
+
+[0.4.42.23]
+  - Fix: renaming mesh frames orphaned meshes. (mesh.frame and mesh.name exchanged additionally)
+  - Fix: bone matrix math to render meshes corrected

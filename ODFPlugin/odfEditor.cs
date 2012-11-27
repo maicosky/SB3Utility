@@ -8,11 +8,12 @@ using SB3Utility;
 namespace ODFPlugin
 {
 	[Plugin]
-	public class odfEditor : IDisposable
+	public partial class odfEditor : IDisposable
 	{
 		public List<odfFrame> Frames { get; protected set; }
 		public List<odfMaterial> Materials { get; protected set; }
 		public List<odfTexture> Textures { get; protected set; }
+		public List<odfANIMSection> Animations { get; protected set; }
 
 		public odfParser Parser { get; protected set; }
 
@@ -25,6 +26,13 @@ namespace ODFPlugin
 				Materials = parser.MaterialSection.ChildList;
 			if (parser.TextureSection != null)
 				Textures = parser.TextureSection.ChildList;
+			if (parser.AnimSection != null)
+			{
+				Animations = new List<odfANIMSection>(1);
+				Animations.Add(parser.AnimSection);
+				if (parser.BANMList != null)
+					Animations.AddRange(parser.BANMList);
+			}
 		}
 
 		void InitFrames(odfFrame frame)
@@ -1038,13 +1046,7 @@ namespace ODFPlugin
 		[Plugin]
 		public void ExportMorphObject(string path, odfParser parser, string morphObj, bool skipUnusedProfiles)
 		{
-			ODFPlugin.Plugins.ExportMorphMqo(path, parser, morphObj, skipUnusedProfiles);
-		}
-
-		[Plugin]
-		public void ReplaceMorph(WorkspaceMorph morph, string destMorphName, string newName, bool replaceNormals, double minSquaredDistance)
-		{
-			odf.ReplaceMorph(destMorphName, Parser, morph, newName, replaceNormals, (float)minSquaredDistance);
+			Plugins.ExportMorphMqo(path, parser, morphObj, skipUnusedProfiles);
 		}
 	}
 }

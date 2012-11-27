@@ -478,6 +478,24 @@ namespace AiDroidPlugin
 		}
 
 		[Plugin]
+		public void SetBoneSRT(string boneFrame, double sX, double sY, double sZ, double rX, double rY, double rZ, double tX, double tY, double tZ)
+		{
+			remId boneFrameId = new remId(boneFrame);
+			Matrix m = FbxUtility.SRTToMatrix(new Vector3((float)sX, (float)sY, (float)sZ), new Vector3((float)rX, (float)rY, (float)rZ), new Vector3((float)tX, (float)tY, (float)tZ));
+			foreach (remSkin skin in Parser.SKIC)
+			{
+				foreach (remBoneWeights boneWeights in skin)
+				{
+					if (boneWeights.bone == boneFrameId)
+					{
+						boneWeights.matrix = m;
+						break;
+					}
+				}
+			}
+		}
+
+		[Plugin]
 		public void SetBoneMatrix(int meshIdx, int boneIdx,
 			double m11, double m12, double m13, double m14,
 			double m21, double m22, double m23, double m24,
@@ -510,6 +528,49 @@ namespace AiDroidPlugin
 			m.M44 = (float)m44;
 
 			boneWeights.matrix = m;
+		}
+
+		[Plugin]
+		public void SetBoneMatrix(string boneFrame,
+			double m11, double m12, double m13, double m14,
+			double m21, double m22, double m23, double m24,
+			double m31, double m32, double m33, double m34,
+			double m41, double m42, double m43, double m44)
+		{
+			remId boneFrameId = new remId(boneFrame);
+			Matrix m = new Matrix();
+
+			m.M11 = (float)m11;
+			m.M12 = (float)m12;
+			m.M13 = (float)m13;
+			m.M14 = (float)m14;
+
+			m.M21 = (float)m21;
+			m.M22 = (float)m22;
+			m.M23 = (float)m23;
+			m.M24 = (float)m24;
+
+			m.M31 = (float)m31;
+			m.M32 = (float)m32;
+			m.M33 = (float)m33;
+			m.M34 = (float)m34;
+
+			m.M41 = (float)m41;
+			m.M42 = (float)m42;
+			m.M43 = (float)m43;
+			m.M44 = (float)m44;
+
+			foreach (remSkin skin in Parser.SKIC)
+			{
+				foreach (remBoneWeights boneWeights in skin)
+				{
+					if (boneWeights.bone == boneFrameId)
+					{
+						boneWeights.matrix = m;
+						break;
+					}
+				}
+			}
 		}
 
 		[Plugin]

@@ -47,6 +47,7 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="odf\odaOps.cs" />
     <Compile Include="odf\odfFileSection.cs" />
     <Compile Include="odf\odfFormat.cs" />
     <Compile Include="odf\odfOps.cs" />

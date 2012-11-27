@@ -10,7 +10,7 @@ using SB3Utility;
 
 namespace ODFPlugin
 {
-	public partial class FormODFDragDrop : Form
+	public partial class FormMeshViewDragDrop : Form
 	{
 		public enum Panel
 		{
@@ -23,7 +23,7 @@ namespace ODFPlugin
 
 		private odfEditor editor;
 
-		public FormODFDragDrop(odfEditor destEditor, Panel panel)
+		public FormMeshViewDragDrop(odfEditor destEditor, Panel panel)
 		{
 			InitializeComponent();
 			editor = destEditor;

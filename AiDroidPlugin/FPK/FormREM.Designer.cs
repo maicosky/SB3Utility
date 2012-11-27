@@ -97,16 +97,17 @@
 			this.label4 = new System.Windows.Forms.Label();
 			this.textBoxFrameName = new SB3Utility.EditTextBox();
 			this.tabPageBoneView = new System.Windows.Forms.TabPage();
-			this.tabControlBoneMatrix = new System.Windows.Forms.TabControl();
-			this.tabPageBoneSRT = new System.Windows.Forms.TabPage();
-			this.dataGridViewBoneSRT = new SB3Utility.DataGridViewEditor();
-			this.tabPageBoneMatrix = new System.Windows.Forms.TabPage();
-			this.dataGridViewBoneMatrix = new SB3Utility.DataGridViewEditor();
 			this.buttonBoneRemove = new System.Windows.Forms.Button();
 			this.buttonBoneCopy = new System.Windows.Forms.Button();
 			this.buttonBoneGotoFrame = new System.Windows.Forms.Button();
 			this.label25 = new System.Windows.Forms.Label();
 			this.textBoxBoneName = new SB3Utility.EditTextBox();
+			this.checkBoxUniqueBone = new System.Windows.Forms.CheckBox();
+			this.tabControlBoneMatrix = new System.Windows.Forms.TabControl();
+			this.tabPageBoneSRT = new System.Windows.Forms.TabPage();
+			this.dataGridViewBoneSRT = new SB3Utility.DataGridViewEditor();
+			this.tabPageBoneMatrix = new System.Windows.Forms.TabPage();
+			this.dataGridViewBoneMatrix = new SB3Utility.DataGridViewEditor();
 			this.tabPageMeshView = new System.Windows.Forms.TabPage();
 			this.groupBox5 = new System.Windows.Forms.GroupBox();
 			this.textBoxMeshUnknown2 = new SB3Utility.EditTextBox();
@@ -340,7 +341,7 @@
 			this.keepBackupToolStripMenuItem.CheckOnClick = true;
 			this.keepBackupToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.keepBackupToolStripMenuItem.Name = "keepBackupToolStripMenuItem";
-			this.keepBackupToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.keepBackupToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
 			this.keepBackupToolStripMenuItem.Text = "Keep &Backup";
 			// 
 			// splitContainer1
@@ -1010,18 +1011,77 @@
 			// 
 			// tabPageBoneView
 			// 
-			this.tabPageBoneView.Controls.Add(this.tabControlBoneMatrix);
 			this.tabPageBoneView.Controls.Add(this.buttonBoneRemove);
 			this.tabPageBoneView.Controls.Add(this.buttonBoneCopy);
 			this.tabPageBoneView.Controls.Add(this.buttonBoneGotoFrame);
 			this.tabPageBoneView.Controls.Add(this.label25);
 			this.tabPageBoneView.Controls.Add(this.textBoxBoneName);
+			this.tabPageBoneView.Controls.Add(this.checkBoxUniqueBone);
+			this.tabPageBoneView.Controls.Add(this.tabControlBoneMatrix);
 			this.tabPageBoneView.Location = new System.Drawing.Point(4, 22);
 			this.tabPageBoneView.Name = "tabPageBoneView";
 			this.tabPageBoneView.Size = new System.Drawing.Size(253, 492);
 			this.tabPageBoneView.TabIndex = 8;
 			this.tabPageBoneView.Text = "Bone";
 			this.tabPageBoneView.UseVisualStyleBackColor = true;
+			// 
+			// buttonBoneRemove
+			// 
+			this.buttonBoneRemove.Location = new System.Drawing.Point(89, 41);
+			this.buttonBoneRemove.Name = "buttonBoneRemove";
+			this.buttonBoneRemove.Size = new System.Drawing.Size(75, 23);
+			this.buttonBoneRemove.TabIndex = 14;
+			this.buttonBoneRemove.Text = "Remove";
+			this.buttonBoneRemove.UseVisualStyleBackColor = true;
+			this.buttonBoneRemove.Click += new System.EventHandler(this.buttonBoneRemove_Click);
+			// 
+			// buttonBoneCopy
+			// 
+			this.buttonBoneCopy.Location = new System.Drawing.Point(176, 41);
+			this.buttonBoneCopy.Name = "buttonBoneCopy";
+			this.buttonBoneCopy.Size = new System.Drawing.Size(75, 23);
+			this.buttonBoneCopy.TabIndex = 16;
+			this.buttonBoneCopy.Text = "Copy->New";
+			this.buttonBoneCopy.UseVisualStyleBackColor = true;
+			this.buttonBoneCopy.Click += new System.EventHandler(this.buttonBoneCopy_Click);
+			// 
+			// buttonBoneGotoFrame
+			// 
+			this.buttonBoneGotoFrame.Location = new System.Drawing.Point(2, 41);
+			this.buttonBoneGotoFrame.Name = "buttonBoneGotoFrame";
+			this.buttonBoneGotoFrame.Size = new System.Drawing.Size(75, 23);
+			this.buttonBoneGotoFrame.TabIndex = 12;
+			this.buttonBoneGotoFrame.Text = "Goto Frame";
+			this.buttonBoneGotoFrame.UseVisualStyleBackColor = true;
+			this.buttonBoneGotoFrame.Click += new System.EventHandler(this.buttonBoneGotoFrame_Click);
+			// 
+			// label25
+			// 
+			this.label25.AutoSize = true;
+			this.label25.Location = new System.Drawing.Point(-2, 9);
+			this.label25.Name = "label25";
+			this.label25.Size = new System.Drawing.Size(35, 13);
+			this.label25.TabIndex = 106;
+			this.label25.Text = "Name";
+			// 
+			// textBoxBoneName
+			// 
+			this.textBoxBoneName.Location = new System.Drawing.Point(35, 6);
+			this.textBoxBoneName.Name = "textBoxBoneName";
+			this.textBoxBoneName.Size = new System.Drawing.Size(215, 20);
+			this.textBoxBoneName.TabIndex = 7;
+			// 
+			// checkBoxUniqueBone
+			// 
+			this.checkBoxUniqueBone.AutoSize = true;
+			this.checkBoxUniqueBone.Checked = true;
+			this.checkBoxUniqueBone.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.checkBoxUniqueBone.Location = new System.Drawing.Point(162, 80);
+			this.checkBoxUniqueBone.Name = "checkBoxUniqueBone";
+			this.checkBoxUniqueBone.Size = new System.Drawing.Size(88, 17);
+			this.checkBoxUniqueBone.TabIndex = 107;
+			this.checkBoxUniqueBone.Text = "Unique Bone";
+			this.checkBoxUniqueBone.UseVisualStyleBackColor = true;
 			// 
 			// tabControlBoneMatrix
 			// 
@@ -1101,52 +1161,6 @@
 			this.dataGridViewBoneMatrix.TabIndex = 145;
 			this.dataGridViewBoneMatrix.TabStop = false;
 			this.dataGridViewBoneMatrix.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewBoneMatrix_CellValueChanged);
-			// 
-			// buttonBoneRemove
-			// 
-			this.buttonBoneRemove.Location = new System.Drawing.Point(89, 41);
-			this.buttonBoneRemove.Name = "buttonBoneRemove";
-			this.buttonBoneRemove.Size = new System.Drawing.Size(75, 23);
-			this.buttonBoneRemove.TabIndex = 14;
-			this.buttonBoneRemove.Text = "Remove";
-			this.buttonBoneRemove.UseVisualStyleBackColor = true;
-			this.buttonBoneRemove.Click += new System.EventHandler(this.buttonBoneRemove_Click);
-			// 
-			// buttonBoneCopy
-			// 
-			this.buttonBoneCopy.Location = new System.Drawing.Point(176, 41);
-			this.buttonBoneCopy.Name = "buttonBoneCopy";
-			this.buttonBoneCopy.Size = new System.Drawing.Size(75, 23);
-			this.buttonBoneCopy.TabIndex = 16;
-			this.buttonBoneCopy.Text = "Copy->New";
-			this.buttonBoneCopy.UseVisualStyleBackColor = true;
-			this.buttonBoneCopy.Click += new System.EventHandler(this.buttonBoneCopy_Click);
-			// 
-			// buttonBoneGotoFrame
-			// 
-			this.buttonBoneGotoFrame.Location = new System.Drawing.Point(2, 41);
-			this.buttonBoneGotoFrame.Name = "buttonBoneGotoFrame";
-			this.buttonBoneGotoFrame.Size = new System.Drawing.Size(75, 23);
-			this.buttonBoneGotoFrame.TabIndex = 12;
-			this.buttonBoneGotoFrame.Text = "Goto Frame";
-			this.buttonBoneGotoFrame.UseVisualStyleBackColor = true;
-			this.buttonBoneGotoFrame.Click += new System.EventHandler(this.buttonBoneGotoFrame_Click);
-			// 
-			// label25
-			// 
-			this.label25.AutoSize = true;
-			this.label25.Location = new System.Drawing.Point(-2, 9);
-			this.label25.Name = "label25";
-			this.label25.Size = new System.Drawing.Size(35, 13);
-			this.label25.TabIndex = 106;
-			this.label25.Text = "Name";
-			// 
-			// textBoxBoneName
-			// 
-			this.textBoxBoneName.Location = new System.Drawing.Point(35, 6);
-			this.textBoxBoneName.Name = "textBoxBoneName";
-			this.textBoxBoneName.Size = new System.Drawing.Size(215, 20);
-			this.textBoxBoneName.TabIndex = 7;
 			// 
 			// tabPageMeshView
 			// 
@@ -2261,5 +2275,6 @@
 		private System.Windows.Forms.GroupBox groupBox6;
 		private System.Windows.Forms.CheckBox checkBoxNoMask;
 		private System.Windows.Forms.CheckBox checkBoxTEXH;
+		private System.Windows.Forms.CheckBox checkBoxUniqueBone;
 	}
 }

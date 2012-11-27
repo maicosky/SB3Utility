@@ -1,6 +1,6 @@
 ﻿namespace ODFPlugin
 {
-	partial class FormODFDragDrop
+	partial class FormMeshViewDragDrop
 	{
 		/// <summary>
 		/// Required designer variable.

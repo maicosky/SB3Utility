@@ -69,6 +69,10 @@ namespace SB3Utility
 
 				Gui.Scripting.Variables.Add(MainVar, this);
 				PluginManager.RegisterFunctions(Assembly.GetExecutingAssembly());
+
+				eulerFilterToolStripMenuItem.CheckedChanged += eulerFilterToolStripMenuItem_Click;
+				toolStripEditTextBoxFilterPrecision.Text = ((Single)Gui.Config["FbxImportAnimationFilterPrecision"]).ToString();
+				toolStripEditTextBoxFilterPrecision.AfterEditTextChanged += new EventHandler(toolStripEditTextBoxFilterPrecision_AfterEditTextChanged);
 			}
 			catch (Exception ex)
 			{
@@ -592,6 +596,16 @@ namespace SB3Utility
 
 				viewToolStripMenuItemCheckedChangedSent = false;
 			}
+		}
+
+		private void eulerFilterToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			Properties.Settings.Default["FbxImportAnimationEulerFilter"] = eulerFilterToolStripMenuItem.Checked;
+		}
+
+		private void toolStripEditTextBoxFilterPrecision_AfterEditTextChanged(object sender, EventArgs e)
+		{
+			Properties.Settings.Default["FbxImportAnimationFilterPrecision"] = Single.Parse(toolStripEditTextBoxFilterPrecision.Text);
 		}
 
 		private void toolStripMenuItem1_Click(object sender, EventArgs e)

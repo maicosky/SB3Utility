@@ -1,6 +1,6 @@
-﻿namespace SB3Utility
+﻿namespace ODFPlugin
 {
-	partial class FormXADragDrop
+	partial class FormAnimViewDragDrop
 	{
 		/// <summary>
 		/// Required designer variable.
@@ -28,13 +28,21 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			this.buttonOK = new System.Windows.Forms.Button();
 			this.buttonCancel = new System.Windows.Forms.Button();
+			this.buttonOK = new System.Windows.Forms.Button();
 			this.panelAnimation = new System.Windows.Forms.Panel();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
-			this.numericResample = new System.Windows.Forms.NumericUpDown();
+			this.checkBoxNegateQuaternionFlips = new System.Windows.Forms.CheckBox();
+			this.groupBox3 = new System.Windows.Forms.GroupBox();
+			this.label9 = new System.Windows.Forms.Label();
 			this.label1 = new System.Windows.Forms.Label();
+			this.numericResample = new System.Windows.Forms.NumericUpDown();
+			this.groupBox2 = new System.Windows.Forms.GroupBox();
+			this.radioButtonInterpolationCubic = new System.Windows.Forms.RadioButton();
+			this.radioButtonInterpolationLinear = new System.Windows.Forms.RadioButton();
 			this.label2 = new System.Windows.Forms.Label();
+			this.textBoxTargetAnimationClip = new System.Windows.Forms.TextBox();
+			this.label8 = new System.Windows.Forms.Label();
 			this.label4 = new System.Windows.Forms.Label();
 			this.numericPosition = new System.Windows.Forms.NumericUpDown();
 			this.comboBoxMethod = new System.Windows.Forms.ComboBox();
@@ -51,62 +59,111 @@
 			this.label7 = new System.Windows.Forms.Label();
 			this.panelAnimation.SuspendLayout();
 			this.groupBox1.SuspendLayout();
+			this.groupBox3.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericResample)).BeginInit();
+			this.groupBox2.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericPosition)).BeginInit();
 			this.panelMorphList.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDownMinimumDistanceSquared)).BeginInit();
 			this.panel1.SuspendLayout();
 			this.SuspendLayout();
 			// 
-			// buttonOK
-			// 
-			this.buttonOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.buttonOK.Location = new System.Drawing.Point(87, 152);
-			this.buttonOK.Name = "buttonOK";
-			this.buttonOK.Size = new System.Drawing.Size(75, 23);
-			this.buttonOK.TabIndex = 9;
-			this.buttonOK.Text = "OK";
-			this.buttonOK.UseVisualStyleBackColor = true;
-			// 
 			// buttonCancel
 			// 
 			this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.buttonCancel.Location = new System.Drawing.Point(225, 152);
+			this.buttonCancel.Location = new System.Drawing.Point(225, 157);
 			this.buttonCancel.Name = "buttonCancel";
 			this.buttonCancel.Size = new System.Drawing.Size(75, 23);
-			this.buttonCancel.TabIndex = 10;
+			this.buttonCancel.TabIndex = 17;
 			this.buttonCancel.Text = "Cancel";
 			this.buttonCancel.UseVisualStyleBackColor = true;
+			// 
+			// buttonOK
+			// 
+			this.buttonOK.DialogResult = System.Windows.Forms.DialogResult.OK;
+			this.buttonOK.Location = new System.Drawing.Point(87, 157);
+			this.buttonOK.Name = "buttonOK";
+			this.buttonOK.Size = new System.Drawing.Size(75, 23);
+			this.buttonOK.TabIndex = 16;
+			this.buttonOK.Text = "OK";
+			this.buttonOK.UseVisualStyleBackColor = true;
 			// 
 			// panelAnimation
 			// 
 			this.panelAnimation.Controls.Add(this.groupBox1);
-			this.panelAnimation.Location = new System.Drawing.Point(12, 12);
+			this.panelAnimation.Location = new System.Drawing.Point(12, 0);
 			this.panelAnimation.Name = "panelAnimation";
-			this.panelAnimation.Size = new System.Drawing.Size(367, 121);
-			this.panelAnimation.TabIndex = 15;
+			this.panelAnimation.Size = new System.Drawing.Size(375, 153);
+			this.panelAnimation.TabIndex = 18;
 			// 
 			// groupBox1
 			// 
-			this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+			this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.groupBox1.Controls.Add(this.numericResample);
-			this.groupBox1.Controls.Add(this.label1);
+			this.groupBox1.Controls.Add(this.checkBoxNegateQuaternionFlips);
+			this.groupBox1.Controls.Add(this.groupBox3);
 			this.groupBox1.Controls.Add(this.label2);
+			this.groupBox1.Controls.Add(this.textBoxTargetAnimationClip);
+			this.groupBox1.Controls.Add(this.label8);
 			this.groupBox1.Controls.Add(this.label4);
 			this.groupBox1.Controls.Add(this.numericPosition);
 			this.groupBox1.Controls.Add(this.comboBoxMethod);
-			this.groupBox1.Location = new System.Drawing.Point(38, 17);
+			this.groupBox1.Location = new System.Drawing.Point(14, 6);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(291, 87);
+			this.groupBox1.Size = new System.Drawing.Size(347, 141);
 			this.groupBox1.TabIndex = 9;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Replacing Options";
 			// 
+			// checkBoxNegateQuaternionFlips
+			// 
+			this.checkBoxNegateQuaternionFlips.AutoSize = true;
+			this.checkBoxNegateQuaternionFlips.Checked = true;
+			this.checkBoxNegateQuaternionFlips.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.checkBoxNegateQuaternionFlips.Location = new System.Drawing.Point(7, 119);
+			this.checkBoxNegateQuaternionFlips.Name = "checkBoxNegateQuaternionFlips";
+			this.checkBoxNegateQuaternionFlips.Size = new System.Drawing.Size(140, 17);
+			this.checkBoxNegateQuaternionFlips.TabIndex = 11;
+			this.checkBoxNegateQuaternionFlips.Text = "Negate Quaternion Flips";
+			this.checkBoxNegateQuaternionFlips.UseVisualStyleBackColor = true;
+			// 
+			// groupBox3
+			// 
+			this.groupBox3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.groupBox3.Controls.Add(this.label9);
+			this.groupBox3.Controls.Add(this.label1);
+			this.groupBox3.Controls.Add(this.numericResample);
+			this.groupBox3.Controls.Add(this.groupBox2);
+			this.groupBox3.Location = new System.Drawing.Point(7, 33);
+			this.groupBox3.Name = "groupBox3";
+			this.groupBox3.Size = new System.Drawing.Size(336, 57);
+			this.groupBox3.TabIndex = 10;
+			this.groupBox3.TabStop = false;
+			// 
+			// label9
+			// 
+			this.label9.AutoSize = true;
+			this.label9.Location = new System.Drawing.Point(2, 35);
+			this.label9.Name = "label9";
+			this.label9.Size = new System.Drawing.Size(177, 13);
+			this.label9.TabIndex = 8;
+			this.label9.Text = "Interpolation Method for Resampling";
+			// 
+			// label1
+			// 
+			this.label1.AutoSize = true;
+			this.label1.Location = new System.Drawing.Point(2, 12);
+			this.label1.Name = "label1";
+			this.label1.Size = new System.Drawing.Size(248, 13);
+			this.label1.TabIndex = 4;
+			this.label1.Text = "Resample Number of Keyframes to (or -1 to disable)";
+			// 
 			// numericResample
 			// 
-			this.numericResample.Location = new System.Drawing.Point(179, 16);
+			this.numericResample.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.numericResample.Location = new System.Drawing.Point(250, 9);
 			this.numericResample.Maximum = new decimal(new int[] {
             1000000,
             0,
@@ -116,62 +173,109 @@
             1,
             0,
             0,
-            0});
+            -2147483648});
 			this.numericResample.Name = "numericResample";
-			this.numericResample.Size = new System.Drawing.Size(104, 20);
+			this.numericResample.Size = new System.Drawing.Size(80, 20);
 			this.numericResample.TabIndex = 5;
 			this.numericResample.Value = new decimal(new int[] {
             1,
             0,
             0,
-            0});
+            -2147483648});
 			// 
-			// label1
+			// groupBox2
 			// 
-			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(6, 19);
-			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(170, 13);
-			this.label1.TabIndex = 4;
-			this.label1.Text = "Resample Number of Keyframes to";
+			this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.groupBox2.Controls.Add(this.radioButtonInterpolationCubic);
+			this.groupBox2.Controls.Add(this.radioButtonInterpolationLinear);
+			this.groupBox2.Location = new System.Drawing.Point(192, 26);
+			this.groupBox2.Name = "groupBox2";
+			this.groupBox2.Size = new System.Drawing.Size(138, 27);
+			this.groupBox2.TabIndex = 9;
+			this.groupBox2.TabStop = false;
+			// 
+			// radioButtonInterpolationCubic
+			// 
+			this.radioButtonInterpolationCubic.AutoSize = true;
+			this.radioButtonInterpolationCubic.Location = new System.Drawing.Point(66, 8);
+			this.radioButtonInterpolationCubic.Name = "radioButtonInterpolationCubic";
+			this.radioButtonInterpolationCubic.Size = new System.Drawing.Size(52, 17);
+			this.radioButtonInterpolationCubic.TabIndex = 1;
+			this.radioButtonInterpolationCubic.Text = "Cubic";
+			this.radioButtonInterpolationCubic.UseVisualStyleBackColor = true;
+			// 
+			// radioButtonInterpolationLinear
+			// 
+			this.radioButtonInterpolationLinear.AutoSize = true;
+			this.radioButtonInterpolationLinear.Checked = true;
+			this.radioButtonInterpolationLinear.Location = new System.Drawing.Point(6, 8);
+			this.radioButtonInterpolationLinear.Name = "radioButtonInterpolationLinear";
+			this.radioButtonInterpolationLinear.Size = new System.Drawing.Size(54, 17);
+			this.radioButtonInterpolationLinear.TabIndex = 0;
+			this.radioButtonInterpolationLinear.TabStop = true;
+			this.radioButtonInterpolationLinear.Text = "Linear";
+			this.radioButtonInterpolationLinear.UseVisualStyleBackColor = true;
 			// 
 			// label2
 			// 
 			this.label2.AutoSize = true;
-			this.label2.Location = new System.Drawing.Point(6, 64);
+			this.label2.Location = new System.Drawing.Point(155, 97);
 			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(168, 13);
+			this.label2.Size = new System.Drawing.Size(128, 13);
 			this.label2.TabIndex = 3;
-			this.label2.Text = "Merge/Insert At Keyframe Position";
+			this.label2.Text = "Merge/Insert At Keyframe";
+			// 
+			// textBoxTargetAnimationClip
+			// 
+			this.textBoxTargetAnimationClip.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.textBoxTargetAnimationClip.Location = new System.Drawing.Point(119, 13);
+			this.textBoxTargetAnimationClip.Name = "textBoxTargetAnimationClip";
+			this.textBoxTargetAnimationClip.Size = new System.Drawing.Size(222, 20);
+			this.textBoxTargetAnimationClip.TabIndex = 7;
+			// 
+			// label8
+			// 
+			this.label8.AutoSize = true;
+			this.label8.Location = new System.Drawing.Point(6, 16);
+			this.label8.Name = "label8";
+			this.label8.Size = new System.Drawing.Size(107, 13);
+			this.label8.TabIndex = 6;
+			this.label8.Text = "Target Animation Clip";
 			// 
 			// label4
 			// 
 			this.label4.AutoSize = true;
-			this.label4.Location = new System.Drawing.Point(6, 42);
+			this.label4.Location = new System.Drawing.Point(98, 97);
 			this.label4.Name = "label4";
-			this.label4.Size = new System.Drawing.Size(189, 13);
+			this.label4.Size = new System.Drawing.Size(40, 13);
 			this.label4.TabIndex = 2;
-			this.label4.Text = "Importing Method for Animation Tracks";
+			this.label4.Text = "Tracks";
 			// 
 			// numericPosition
 			// 
-			this.numericPosition.Location = new System.Drawing.Point(179, 61);
+			this.numericPosition.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.numericPosition.Location = new System.Drawing.Point(289, 95);
 			this.numericPosition.Maximum = new decimal(new int[] {
             1000000,
             0,
             0,
             0});
 			this.numericPosition.Name = "numericPosition";
-			this.numericPosition.Size = new System.Drawing.Size(104, 20);
+			this.numericPosition.Size = new System.Drawing.Size(54, 20);
 			this.numericPosition.TabIndex = 1;
 			// 
 			// comboBoxMethod
 			// 
+			this.comboBoxMethod.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.comboBoxMethod.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.comboBoxMethod.FormattingEnabled = true;
-			this.comboBoxMethod.Location = new System.Drawing.Point(199, 38);
+			this.comboBoxMethod.Location = new System.Drawing.Point(7, 94);
 			this.comboBoxMethod.Name = "comboBoxMethod";
-			this.comboBoxMethod.Size = new System.Drawing.Size(84, 21);
+			this.comboBoxMethod.Size = new System.Drawing.Size(87, 21);
 			this.comboBoxMethod.TabIndex = 0;
 			// 
 			// panelMorphList
@@ -187,7 +291,7 @@
 			this.panelMorphList.Location = new System.Drawing.Point(12, 12);
 			this.panelMorphList.Name = "panelMorphList";
 			this.panelMorphList.Size = new System.Drawing.Size(367, 121);
-			this.panelMorphList.TabIndex = 16;
+			this.panelMorphList.TabIndex = 19;
 			// 
 			// textBoxNewName
 			// 
@@ -293,7 +397,7 @@
 			this.label7.TabIndex = 13;
 			this.label7.Text = "Target Morph Clip";
 			// 
-			// FormXADragDrop
+			// FormAnimViewDragDrop
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -303,13 +407,17 @@
 			this.Controls.Add(this.panelAnimation);
 			this.Controls.Add(this.panelMorphList);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-			this.Name = "FormXADragDrop";
+			this.Name = "FormAnimViewDragDrop";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.Text = "Options";
 			this.panelAnimation.ResumeLayout(false);
 			this.groupBox1.ResumeLayout(false);
 			this.groupBox1.PerformLayout();
+			this.groupBox3.ResumeLayout(false);
+			this.groupBox3.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericResample)).EndInit();
+			this.groupBox2.ResumeLayout(false);
+			this.groupBox2.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericPosition)).EndInit();
 			this.panelMorphList.ResumeLayout(false);
 			this.panelMorphList.PerformLayout();
@@ -322,26 +430,34 @@
 
 		#endregion
 
-		private System.Windows.Forms.Button buttonOK;
 		private System.Windows.Forms.Button buttonCancel;
+		private System.Windows.Forms.Button buttonOK;
 		private System.Windows.Forms.Panel panelAnimation;
-		private System.Windows.Forms.Panel panelMorphList;
-		private System.Windows.Forms.Label label3;
-		public System.Windows.Forms.NumericUpDown numericUpDownMinimumDistanceSquared;
-		private System.Windows.Forms.Label label5;
-		private System.Windows.Forms.Panel panel1;
-		private System.Windows.Forms.Label label6;
-		private System.Windows.Forms.Label label7;
-		public System.Windows.Forms.TextBox textBoxNewName;
-		public System.Windows.Forms.TextBox textBoxName;
-		public System.Windows.Forms.RadioButton radioButtonReplaceNormalsNo;
-		public System.Windows.Forms.RadioButton radioButtonReplaceNormalsYes;
 		private System.Windows.Forms.GroupBox groupBox1;
+		public System.Windows.Forms.NumericUpDown numericResample;
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.Label label4;
-		public System.Windows.Forms.NumericUpDown numericResample;
-		public System.Windows.Forms.ComboBox comboBoxMethod;
 		public System.Windows.Forms.NumericUpDown numericPosition;
+		public System.Windows.Forms.ComboBox comboBoxMethod;
+		private System.Windows.Forms.Panel panelMorphList;
+		public System.Windows.Forms.TextBox textBoxNewName;
+		private System.Windows.Forms.Label label3;
+		public System.Windows.Forms.NumericUpDown numericUpDownMinimumDistanceSquared;
+		private System.Windows.Forms.Label label5;
+		public System.Windows.Forms.TextBox textBoxName;
+		private System.Windows.Forms.Panel panel1;
+		public System.Windows.Forms.RadioButton radioButtonReplaceNormalsNo;
+		public System.Windows.Forms.RadioButton radioButtonReplaceNormalsYes;
+		private System.Windows.Forms.Label label6;
+		private System.Windows.Forms.Label label7;
+		private System.Windows.Forms.Label label8;
+		public System.Windows.Forms.TextBox textBoxTargetAnimationClip;
+		private System.Windows.Forms.Label label9;
+		private System.Windows.Forms.GroupBox groupBox2;
+		private System.Windows.Forms.GroupBox groupBox3;
+		public System.Windows.Forms.RadioButton radioButtonInterpolationCubic;
+		public System.Windows.Forms.RadioButton radioButtonInterpolationLinear;
+		public System.Windows.Forms.CheckBox checkBoxNegateQuaternionFlips;
 	}
 }

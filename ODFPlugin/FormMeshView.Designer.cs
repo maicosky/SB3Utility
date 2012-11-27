@@ -31,42 +31,18 @@
 		private void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle14 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMeshView));
-			this.label15 = new System.Windows.Forms.Label();
-			this.groupBoxMeshObjects = new System.Windows.Forms.GroupBox();
-			this.dataGridViewMesh = new System.Windows.Forms.DataGridView();
-			this.ColumnSubmeshName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-			this.ColumnSubmeshVerts = new System.Windows.Forms.DataGridViewTextBoxColumn();
-			this.ColumnSubmeshFaces = new System.Windows.Forms.DataGridViewTextBoxColumn();
-			this.ColumnSubmeshMaterial = new System.Windows.Forms.DataGridViewComboBoxColumn();
-			this.ColumnSubmeshUnknowns = new System.Windows.Forms.DataGridViewTextBoxColumn();
-			this.checkBoxMeshObjSkinned = new System.Windows.Forms.CheckBox();
-			this.label14 = new System.Windows.Forms.Label();
-			this.buttonMeshObjEdit = new System.Windows.Forms.Button();
-			this.buttonMeshObjRemove = new System.Windows.Forms.Button();
-			this.checkBoxMeshExportMqoSingleFile = new System.Windows.Forms.CheckBox();
-			this.checkBoxMeshExportMqoWorldCoords = new System.Windows.Forms.CheckBox();
-			this.panelMeshExportOptionsMqo = new System.Windows.Forms.Panel();
-			this.checkBoxMeshExportColladaAllFrames = new System.Windows.Forms.CheckBox();
-			this.panelMeshExportOptionsDefault = new System.Windows.Forms.Panel();
-			this.checkBoxMeshExportFbxAllFrames = new System.Windows.Forms.CheckBox();
-			this.checkBoxMeshExportFbxSkins = new System.Windows.Forms.CheckBox();
-			this.panelMeshExportOptionsDirectX = new System.Windows.Forms.Panel();
-			this.numericMeshExportDirectXTicksPerSecond = new System.Windows.Forms.NumericUpDown();
-			this.numericMeshExportDirectXKeyframeLength = new System.Windows.Forms.NumericUpDown();
-			this.label34 = new System.Windows.Forms.Label();
-			this.label35 = new System.Windows.Forms.Label();
-			this.numericUpDownStartKeyframe = new System.Windows.Forms.NumericUpDown();
-			this.label48 = new System.Windows.Forms.Label();
-			this.numericUpDownEndKeyframe = new System.Windows.Forms.NumericUpDown();
-			this.panelMeshExportOptionsCollada = new System.Windows.Forms.Panel();
 			this.buttonBoneRemove = new System.Windows.Forms.Button();
 			this.buttonBoneCopy = new System.Windows.Forms.Button();
 			this.buttonBoneGotoFrame = new System.Windows.Forms.Button();
-			this.buttonMeshRemove = new System.Windows.Forms.Button();
 			this.label27 = new System.Windows.Forms.Label();
-			this.label9 = new System.Windows.Forms.Label();
-			this.buttonMeshGotoFrame = new System.Windows.Forms.Button();
 			this.label60 = new System.Windows.Forms.Label();
 			this.comboBoxMatSetSelector = new System.Windows.Forms.ComboBox();
 			this.textBoxMatNumAddSets = new System.Windows.Forms.TextBox();
@@ -174,21 +150,20 @@
 			this.listViewAnimationTrack = new System.Windows.Forms.ListView();
 			this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.dataGridViewAnimationClip = new System.Windows.Forms.DataGridView();
+			this.ColumnIdx = new System.Windows.Forms.DataGridViewTextBoxColumn();
+			this.ColumnName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+			this.ColumnStart = new System.Windows.Forms.DataGridViewTextBoxColumn();
+			this.ColumnEnd = new System.Windows.Forms.DataGridViewTextBoxColumn();
+			this.ColumnTracks = new System.Windows.Forms.DataGridViewTextBoxColumn();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.buttonAnimationClipPlayPause = new System.Windows.Forms.Button();
 			this.imageList1 = new System.Windows.Forms.ImageList(this.components);
 			this.trackBarAnimationClipKeyframe = new System.Windows.Forms.TrackBar();
-			this.checkBoxAnimationClipLoadNextClip = new System.Windows.Forms.CheckBox();
 			this.numericAnimationClipSpeed = new System.Windows.Forms.NumericUpDown();
 			this.numericAnimationClipKeyframe = new System.Windows.Forms.NumericUpDown();
 			this.labelSkeletalRender = new System.Windows.Forms.Label();
 			this.label30 = new System.Windows.Forms.Label();
-			this.listViewAnimationClip = new System.Windows.Forms.ListView();
-			this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.columnHeader7 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.label33 = new System.Windows.Forms.Label();
 			this.tabControlViews = new System.Windows.Forms.TabControl();
 			this.tabPageFrameView = new System.Windows.Forms.TabPage();
@@ -248,14 +223,46 @@
 			this.tabPageMeshView = new System.Windows.Forms.TabPage();
 			this.splitContainer2 = new System.Windows.Forms.SplitContainer();
 			this.buttonMeshNormals = new System.Windows.Forms.Button();
+			this.label9 = new System.Windows.Forms.Label();
 			this.label13 = new System.Windows.Forms.Label();
 			this.groupBoxExportOptions = new System.Windows.Forms.GroupBox();
 			this.label28 = new System.Windows.Forms.Label();
 			this.comboBoxMeshExportFormat = new System.Windows.Forms.ComboBox();
 			this.buttonMeshExport = new System.Windows.Forms.Button();
 			this.panelMeshExportOptionsFbx = new System.Windows.Forms.Panel();
-			this.checkBox8dot3 = new System.Windows.Forms.CheckBox();
-			this.label49 = new System.Windows.Forms.Label();
+			this.textBoxEulerFilterPrecision = new System.Windows.Forms.TextBox();
+			this.textBoxKeyframeRange = new System.Windows.Forms.TextBox();
+			this.checkBoxInterpolationLinear = new System.Windows.Forms.CheckBox();
+			this.checkBoxEulerFilter = new System.Windows.Forms.CheckBox();
+			this.checkBoxODAskeleton = new System.Windows.Forms.CheckBox();
+			this.label48 = new System.Windows.Forms.Label();
+			this.checkBoxMeshExportFbxSkins = new System.Windows.Forms.CheckBox();
+			this.checkBoxMeshExportFbxAllFrames = new System.Windows.Forms.CheckBox();
+			this.panelMeshExportOptionsDefault = new System.Windows.Forms.Panel();
+			this.panelMeshExportOptionsDirectX = new System.Windows.Forms.Panel();
+			this.numericMeshExportDirectXTicksPerSecond = new System.Windows.Forms.NumericUpDown();
+			this.numericMeshExportDirectXKeyframeLength = new System.Windows.Forms.NumericUpDown();
+			this.label34 = new System.Windows.Forms.Label();
+			this.label35 = new System.Windows.Forms.Label();
+			this.panelMeshExportOptionsCollada = new System.Windows.Forms.Panel();
+			this.checkBoxMeshExportColladaAllFrames = new System.Windows.Forms.CheckBox();
+			this.panelMeshExportOptionsMqo = new System.Windows.Forms.Panel();
+			this.checkBoxMeshExportMqoSingleFile = new System.Windows.Forms.CheckBox();
+			this.checkBoxMeshExportMqoWorldCoords = new System.Windows.Forms.CheckBox();
+			this.buttonMeshGotoFrame = new System.Windows.Forms.Button();
+			this.buttonMeshRemove = new System.Windows.Forms.Button();
+			this.groupBoxMeshObjects = new System.Windows.Forms.GroupBox();
+			this.dataGridViewMesh = new System.Windows.Forms.DataGridView();
+			this.ColumnSubmeshName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+			this.ColumnSubmeshVerts = new System.Windows.Forms.DataGridViewTextBoxColumn();
+			this.ColumnSubmeshFaces = new System.Windows.Forms.DataGridViewTextBoxColumn();
+			this.ColumnSubmeshMaterial = new System.Windows.Forms.DataGridViewComboBoxColumn();
+			this.ColumnSubmeshUnknowns = new System.Windows.Forms.DataGridViewTextBoxColumn();
+			this.label15 = new System.Windows.Forms.Label();
+			this.checkBoxMeshObjSkinned = new System.Windows.Forms.CheckBox();
+			this.label14 = new System.Windows.Forms.Label();
+			this.buttonMeshObjEdit = new System.Windows.Forms.Button();
+			this.buttonMeshObjRemove = new System.Windows.Forms.Button();
 			this.tabPageMaterialView = new System.Windows.Forms.TabPage();
 			this.buttonMaterialRemove = new System.Windows.Forms.Button();
 			this.buttonMaterialCopy = new System.Windows.Forms.Button();
@@ -292,6 +299,8 @@
 			this.keepBackupToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.deleteMorphsAutomaticallyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+			this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.dataGridViewFrameSRT = new SB3Utility.DataGridViewEditor();
 			this.dataGridViewFrameMatrix = new SB3Utility.DataGridViewEditor();
 			this.textBoxFrameID = new SB3Utility.EditTextBox();
@@ -328,15 +337,6 @@
 			this.textBoxMatName = new SB3Utility.EditTextBox();
 			this.textBoxTexName = new SB3Utility.EditTextBox();
 			this.textBoxTexID = new SB3Utility.EditTextBox();
-			this.groupBoxMeshObjects.SuspendLayout();
-			((System.ComponentModel.ISupportInitialize)(this.dataGridViewMesh)).BeginInit();
-			this.panelMeshExportOptionsMqo.SuspendLayout();
-			this.panelMeshExportOptionsDirectX.SuspendLayout();
-			((System.ComponentModel.ISupportInitialize)(this.numericMeshExportDirectXTicksPerSecond)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.numericMeshExportDirectXKeyframeLength)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.numericUpDownStartKeyframe)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.numericUpDownEndKeyframe)).BeginInit();
-			this.panelMeshExportOptionsCollada.SuspendLayout();
 			this.tabPageTextureView.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer3)).BeginInit();
 			this.splitContainer3.Panel1.SuspendLayout();
@@ -397,6 +397,7 @@
 			this.splitContainerAnimation.Panel1.SuspendLayout();
 			this.splitContainerAnimation.Panel2.SuspendLayout();
 			this.splitContainerAnimation.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.dataGridViewAnimationClip)).BeginInit();
 			this.groupBox1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.trackBarAnimationClipKeyframe)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericAnimationClipSpeed)).BeginInit();
@@ -419,6 +420,13 @@
 			this.splitContainer2.SuspendLayout();
 			this.groupBoxExportOptions.SuspendLayout();
 			this.panelMeshExportOptionsFbx.SuspendLayout();
+			this.panelMeshExportOptionsDirectX.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.numericMeshExportDirectXTicksPerSecond)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.numericMeshExportDirectXKeyframeLength)).BeginInit();
+			this.panelMeshExportOptionsCollada.SuspendLayout();
+			this.panelMeshExportOptionsMqo.SuspendLayout();
+			this.groupBoxMeshObjects.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.dataGridViewMesh)).BeginInit();
 			this.tabPageMaterialView.SuspendLayout();
 			this.groupBoxMeshTextures.SuspendLayout();
 			this.groupBoxMaterialProperties.SuspendLayout();
@@ -429,370 +437,6 @@
 			((System.ComponentModel.ISupportInitialize)(this.dataGridViewBoneSRT)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridViewBoneMatrix)).BeginInit();
 			this.SuspendLayout();
-			// 
-			// label15
-			// 
-			this.label15.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.label15.AutoSize = true;
-			this.label15.Location = new System.Drawing.Point(394, 16);
-			this.label15.Name = "label15";
-			this.label15.Size = new System.Drawing.Size(18, 13);
-			this.label15.TabIndex = 146;
-			this.label15.Text = "ID";
-			// 
-			// groupBoxMeshObjects
-			// 
-			this.groupBoxMeshObjects.Controls.Add(this.dataGridViewMesh);
-			this.groupBoxMeshObjects.Controls.Add(this.textBoxMeshObjInfo);
-			this.groupBoxMeshObjects.Controls.Add(this.label15);
-			this.groupBoxMeshObjects.Controls.Add(this.textBoxMeshObjID);
-			this.groupBoxMeshObjects.Controls.Add(this.textBoxMeshObjName);
-			this.groupBoxMeshObjects.Controls.Add(this.checkBoxMeshObjSkinned);
-			this.groupBoxMeshObjects.Controls.Add(this.label14);
-			this.groupBoxMeshObjects.Controls.Add(this.buttonMeshObjEdit);
-			this.groupBoxMeshObjects.Controls.Add(this.buttonMeshObjRemove);
-			this.groupBoxMeshObjects.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.groupBoxMeshObjects.Location = new System.Drawing.Point(0, 0);
-			this.groupBoxMeshObjects.Name = "groupBoxMeshObjects";
-			this.groupBoxMeshObjects.Size = new System.Drawing.Size(476, 375);
-			this.groupBoxMeshObjects.TabIndex = 143;
-			this.groupBoxMeshObjects.TabStop = false;
-			this.groupBoxMeshObjects.Text = "Submeshes";
-			// 
-			// dataGridViewMesh
-			// 
-			this.dataGridViewMesh.AllowUserToAddRows = false;
-			this.dataGridViewMesh.AllowUserToDeleteRows = false;
-			this.dataGridViewMesh.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.dataGridViewMesh.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-			this.dataGridViewMesh.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.ColumnSubmeshName,
-            this.ColumnSubmeshVerts,
-            this.ColumnSubmeshFaces,
-            this.ColumnSubmeshMaterial,
-            this.ColumnSubmeshUnknowns});
-			this.dataGridViewMesh.Location = new System.Drawing.Point(3, 110);
-			this.dataGridViewMesh.Name = "dataGridViewMesh";
-			this.dataGridViewMesh.RowHeadersVisible = false;
-			this.dataGridViewMesh.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-			this.dataGridViewMesh.ShowCellErrors = false;
-			this.dataGridViewMesh.ShowRowErrors = false;
-			this.dataGridViewMesh.Size = new System.Drawing.Size(470, 261);
-			this.dataGridViewMesh.TabIndex = 203;
-			this.dataGridViewMesh.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dataGridViewMesh_DataError);
-			this.dataGridViewMesh.EditingControlShowing += new System.Windows.Forms.DataGridViewEditingControlShowingEventHandler(this.dataGridViewMesh_EditingControlShowing);
-			this.dataGridViewMesh.SelectionChanged += new System.EventHandler(this.dataGridViewMesh_SelectionChanged);
-			// 
-			// ColumnSubmeshName
-			// 
-			this.ColumnSubmeshName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-			this.ColumnSubmeshName.FillWeight = 41.06195F;
-			this.ColumnSubmeshName.HeaderText = "Name";
-			this.ColumnSubmeshName.MinimumWidth = 10;
-			this.ColumnSubmeshName.Name = "ColumnSubmeshName";
-			this.ColumnSubmeshName.ReadOnly = true;
-			this.ColumnSubmeshName.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-			// 
-			// ColumnSubmeshVerts
-			// 
-			this.ColumnSubmeshVerts.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-			this.ColumnSubmeshVerts.FillWeight = 10F;
-			this.ColumnSubmeshVerts.HeaderText = "Verts";
-			this.ColumnSubmeshVerts.Name = "ColumnSubmeshVerts";
-			this.ColumnSubmeshVerts.ReadOnly = true;
-			this.ColumnSubmeshVerts.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-			// 
-			// ColumnSubmeshFaces
-			// 
-			this.ColumnSubmeshFaces.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-			this.ColumnSubmeshFaces.FillWeight = 10F;
-			this.ColumnSubmeshFaces.HeaderText = "Faces";
-			this.ColumnSubmeshFaces.Name = "ColumnSubmeshFaces";
-			this.ColumnSubmeshFaces.ReadOnly = true;
-			this.ColumnSubmeshFaces.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-			// 
-			// ColumnSubmeshMaterial
-			// 
-			this.ColumnSubmeshMaterial.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-			this.ColumnSubmeshMaterial.FillWeight = 38.93805F;
-			this.ColumnSubmeshMaterial.HeaderText = "Material";
-			this.ColumnSubmeshMaterial.MinimumWidth = 10;
-			this.ColumnSubmeshMaterial.Name = "ColumnSubmeshMaterial";
-			this.ColumnSubmeshMaterial.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-			// 
-			// ColumnSubmeshUnknowns
-			// 
-			this.ColumnSubmeshUnknowns.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-			this.ColumnSubmeshUnknowns.FillWeight = 23F;
-			this.ColumnSubmeshUnknowns.HeaderText = "Unknowns";
-			this.ColumnSubmeshUnknowns.MinimumWidth = 10;
-			this.ColumnSubmeshUnknowns.Name = "ColumnSubmeshUnknowns";
-			this.ColumnSubmeshUnknowns.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-			this.ColumnSubmeshUnknowns.Width = 64;
-			// 
-			// checkBoxMeshObjSkinned
-			// 
-			this.checkBoxMeshObjSkinned.AutoCheck = false;
-			this.checkBoxMeshObjSkinned.AutoSize = true;
-			this.checkBoxMeshObjSkinned.Enabled = false;
-			this.checkBoxMeshObjSkinned.Location = new System.Drawing.Point(178, 85);
-			this.checkBoxMeshObjSkinned.Name = "checkBoxMeshObjSkinned";
-			this.checkBoxMeshObjSkinned.Size = new System.Drawing.Size(65, 17);
-			this.checkBoxMeshObjSkinned.TabIndex = 192;
-			this.checkBoxMeshObjSkinned.TabStop = false;
-			this.checkBoxMeshObjSkinned.Text = "Skinned";
-			this.checkBoxMeshObjSkinned.UseVisualStyleBackColor = true;
-			// 
-			// label14
-			// 
-			this.label14.AutoSize = true;
-			this.label14.Location = new System.Drawing.Point(2, 16);
-			this.label14.Name = "label14";
-			this.label14.Size = new System.Drawing.Size(35, 13);
-			this.label14.TabIndex = 142;
-			this.label14.Text = "Name";
-			// 
-			// buttonMeshObjEdit
-			// 
-			this.buttonMeshObjEdit.Enabled = false;
-			this.buttonMeshObjEdit.Location = new System.Drawing.Point(5, 81);
-			this.buttonMeshObjEdit.Name = "buttonMeshObjEdit";
-			this.buttonMeshObjEdit.Size = new System.Drawing.Size(75, 23);
-			this.buttonMeshObjEdit.TabIndex = 200;
-			this.buttonMeshObjEdit.Text = "Edit";
-			this.buttonMeshObjEdit.UseVisualStyleBackColor = true;
-			this.buttonMeshObjEdit.Click += new System.EventHandler(this.buttonMeshObjEdit_Click);
-			// 
-			// buttonMeshObjRemove
-			// 
-			this.buttonMeshObjRemove.Location = new System.Drawing.Point(90, 81);
-			this.buttonMeshObjRemove.Name = "buttonMeshObjRemove";
-			this.buttonMeshObjRemove.Size = new System.Drawing.Size(75, 23);
-			this.buttonMeshObjRemove.TabIndex = 202;
-			this.buttonMeshObjRemove.Text = "Remove";
-			this.buttonMeshObjRemove.UseVisualStyleBackColor = true;
-			this.buttonMeshObjRemove.Click += new System.EventHandler(this.buttonMeshObjRemove_Click);
-			// 
-			// checkBoxMeshExportMqoSingleFile
-			// 
-			this.checkBoxMeshExportMqoSingleFile.AutoSize = true;
-			this.checkBoxMeshExportMqoSingleFile.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
-			this.checkBoxMeshExportMqoSingleFile.Checked = true;
-			this.checkBoxMeshExportMqoSingleFile.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.checkBoxMeshExportMqoSingleFile.Location = new System.Drawing.Point(37, 2);
-			this.checkBoxMeshExportMqoSingleFile.Name = "checkBoxMeshExportMqoSingleFile";
-			this.checkBoxMeshExportMqoSingleFile.Size = new System.Drawing.Size(79, 17);
-			this.checkBoxMeshExportMqoSingleFile.TabIndex = 102;
-			this.checkBoxMeshExportMqoSingleFile.TabStop = false;
-			this.checkBoxMeshExportMqoSingleFile.Text = "Single Mqo";
-			this.checkBoxMeshExportMqoSingleFile.UseVisualStyleBackColor = true;
-			// 
-			// checkBoxMeshExportMqoWorldCoords
-			// 
-			this.checkBoxMeshExportMqoWorldCoords.AutoSize = true;
-			this.checkBoxMeshExportMqoWorldCoords.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
-			this.checkBoxMeshExportMqoWorldCoords.Location = new System.Drawing.Point(131, 2);
-			this.checkBoxMeshExportMqoWorldCoords.Name = "checkBoxMeshExportMqoWorldCoords";
-			this.checkBoxMeshExportMqoWorldCoords.Size = new System.Drawing.Size(113, 17);
-			this.checkBoxMeshExportMqoWorldCoords.TabIndex = 104;
-			this.checkBoxMeshExportMqoWorldCoords.TabStop = false;
-			this.checkBoxMeshExportMqoWorldCoords.Text = "World Coordinates";
-			this.checkBoxMeshExportMqoWorldCoords.UseVisualStyleBackColor = true;
-			// 
-			// panelMeshExportOptionsMqo
-			// 
-			this.panelMeshExportOptionsMqo.Controls.Add(this.checkBoxMeshExportMqoSingleFile);
-			this.panelMeshExportOptionsMqo.Controls.Add(this.checkBoxMeshExportMqoWorldCoords);
-			this.panelMeshExportOptionsMqo.Location = new System.Drawing.Point(3, 43);
-			this.panelMeshExportOptionsMqo.Name = "panelMeshExportOptionsMqo";
-			this.panelMeshExportOptionsMqo.Size = new System.Drawing.Size(246, 47);
-			this.panelMeshExportOptionsMqo.TabIndex = 100;
-			// 
-			// checkBoxMeshExportColladaAllFrames
-			// 
-			this.checkBoxMeshExportColladaAllFrames.AutoSize = true;
-			this.checkBoxMeshExportColladaAllFrames.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
-			this.checkBoxMeshExportColladaAllFrames.Location = new System.Drawing.Point(37, 2);
-			this.checkBoxMeshExportColladaAllFrames.Name = "checkBoxMeshExportColladaAllFrames";
-			this.checkBoxMeshExportColladaAllFrames.Size = new System.Drawing.Size(74, 17);
-			this.checkBoxMeshExportColladaAllFrames.TabIndex = 92;
-			this.checkBoxMeshExportColladaAllFrames.TabStop = false;
-			this.checkBoxMeshExportColladaAllFrames.Text = "All Frames";
-			this.checkBoxMeshExportColladaAllFrames.UseVisualStyleBackColor = true;
-			// 
-			// panelMeshExportOptionsDefault
-			// 
-			this.panelMeshExportOptionsDefault.Location = new System.Drawing.Point(3, 43);
-			this.panelMeshExportOptionsDefault.Name = "panelMeshExportOptionsDefault";
-			this.panelMeshExportOptionsDefault.Size = new System.Drawing.Size(246, 47);
-			this.panelMeshExportOptionsDefault.TabIndex = 70;
-			// 
-			// checkBoxMeshExportFbxAllFrames
-			// 
-			this.checkBoxMeshExportFbxAllFrames.AutoSize = true;
-			this.checkBoxMeshExportFbxAllFrames.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
-			this.checkBoxMeshExportFbxAllFrames.Checked = true;
-			this.checkBoxMeshExportFbxAllFrames.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.checkBoxMeshExportFbxAllFrames.Location = new System.Drawing.Point(22, 2);
-			this.checkBoxMeshExportFbxAllFrames.Name = "checkBoxMeshExportFbxAllFrames";
-			this.checkBoxMeshExportFbxAllFrames.Size = new System.Drawing.Size(74, 17);
-			this.checkBoxMeshExportFbxAllFrames.TabIndex = 52;
-			this.checkBoxMeshExportFbxAllFrames.TabStop = false;
-			this.checkBoxMeshExportFbxAllFrames.Text = "All Frames";
-			this.checkBoxMeshExportFbxAllFrames.UseVisualStyleBackColor = true;
-			// 
-			// checkBoxMeshExportFbxSkins
-			// 
-			this.checkBoxMeshExportFbxSkins.AutoSize = true;
-			this.checkBoxMeshExportFbxSkins.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
-			this.checkBoxMeshExportFbxSkins.Checked = true;
-			this.checkBoxMeshExportFbxSkins.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.checkBoxMeshExportFbxSkins.Location = new System.Drawing.Point(113, 2);
-			this.checkBoxMeshExportFbxSkins.Name = "checkBoxMeshExportFbxSkins";
-			this.checkBoxMeshExportFbxSkins.Size = new System.Drawing.Size(52, 17);
-			this.checkBoxMeshExportFbxSkins.TabIndex = 54;
-			this.checkBoxMeshExportFbxSkins.TabStop = false;
-			this.checkBoxMeshExportFbxSkins.Text = "Skins";
-			this.checkBoxMeshExportFbxSkins.UseVisualStyleBackColor = true;
-			// 
-			// panelMeshExportOptionsDirectX
-			// 
-			this.panelMeshExportOptionsDirectX.Controls.Add(this.numericMeshExportDirectXTicksPerSecond);
-			this.panelMeshExportOptionsDirectX.Controls.Add(this.numericMeshExportDirectXKeyframeLength);
-			this.panelMeshExportOptionsDirectX.Controls.Add(this.label34);
-			this.panelMeshExportOptionsDirectX.Controls.Add(this.label35);
-			this.panelMeshExportOptionsDirectX.Location = new System.Drawing.Point(3, 43);
-			this.panelMeshExportOptionsDirectX.Name = "panelMeshExportOptionsDirectX";
-			this.panelMeshExportOptionsDirectX.Size = new System.Drawing.Size(246, 47);
-			this.panelMeshExportOptionsDirectX.TabIndex = 80;
-			// 
-			// numericMeshExportDirectXTicksPerSecond
-			// 
-			this.numericMeshExportDirectXTicksPerSecond.Location = new System.Drawing.Point(60, 1);
-			this.numericMeshExportDirectXTicksPerSecond.Maximum = new decimal(new int[] {
-            1000000,
-            0,
-            0,
-            0});
-			this.numericMeshExportDirectXTicksPerSecond.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-			this.numericMeshExportDirectXTicksPerSecond.Name = "numericMeshExportDirectXTicksPerSecond";
-			this.numericMeshExportDirectXTicksPerSecond.Size = new System.Drawing.Size(45, 20);
-			this.numericMeshExportDirectXTicksPerSecond.TabIndex = 84;
-			this.numericMeshExportDirectXTicksPerSecond.TabStop = false;
-			this.numericMeshExportDirectXTicksPerSecond.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-			// 
-			// numericMeshExportDirectXKeyframeLength
-			// 
-			this.numericMeshExportDirectXKeyframeLength.Location = new System.Drawing.Point(199, 1);
-			this.numericMeshExportDirectXKeyframeLength.Maximum = new decimal(new int[] {
-            1000000,
-            0,
-            0,
-            0});
-			this.numericMeshExportDirectXKeyframeLength.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-			this.numericMeshExportDirectXKeyframeLength.Name = "numericMeshExportDirectXKeyframeLength";
-			this.numericMeshExportDirectXKeyframeLength.Size = new System.Drawing.Size(45, 20);
-			this.numericMeshExportDirectXKeyframeLength.TabIndex = 88;
-			this.numericMeshExportDirectXKeyframeLength.TabStop = false;
-			this.numericMeshExportDirectXKeyframeLength.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-			// 
-			// label34
-			// 
-			this.label34.AutoSize = true;
-			this.label34.Location = new System.Drawing.Point(1, 5);
-			this.label34.Name = "label34";
-			this.label34.Size = new System.Drawing.Size(57, 13);
-			this.label34.TabIndex = 82;
-			this.label34.Text = "Ticks/Sec";
-			// 
-			// label35
-			// 
-			this.label35.AutoSize = true;
-			this.label35.Location = new System.Drawing.Point(110, 5);
-			this.label35.Name = "label35";
-			this.label35.Size = new System.Drawing.Size(87, 13);
-			this.label35.TabIndex = 86;
-			this.label35.Text = "Keyframe Length";
-			// 
-			// numericUpDownStartKeyframe
-			// 
-			this.numericUpDownStartKeyframe.Enabled = false;
-			this.numericUpDownStartKeyframe.Location = new System.Drawing.Point(90, 24);
-			this.numericUpDownStartKeyframe.Maximum = new decimal(new int[] {
-            100000,
-            0,
-            0,
-            0});
-			this.numericUpDownStartKeyframe.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            -2147483648});
-			this.numericUpDownStartKeyframe.Name = "numericUpDownStartKeyframe";
-			this.numericUpDownStartKeyframe.Size = new System.Drawing.Size(55, 20);
-			this.numericUpDownStartKeyframe.TabIndex = 60;
-			this.numericUpDownStartKeyframe.TabStop = false;
-			this.toolTip1.SetToolTip(this.numericUpDownStartKeyframe, "start keyframe or -1 for all keyframes");
-			this.numericUpDownStartKeyframe.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            -2147483648});
-			// 
-			// label48
-			// 
-			this.label48.AutoSize = true;
-			this.label48.Location = new System.Drawing.Point(32, 27);
-			this.label48.Name = "label48";
-			this.label48.Size = new System.Drawing.Size(56, 13);
-			this.label48.TabIndex = 58;
-			this.label48.Text = "Keyframes";
-			// 
-			// numericUpDownEndKeyframe
-			// 
-			this.numericUpDownEndKeyframe.Enabled = false;
-			this.numericUpDownEndKeyframe.Location = new System.Drawing.Point(162, 24);
-			this.numericUpDownEndKeyframe.Maximum = new decimal(new int[] {
-            100000,
-            0,
-            0,
-            0});
-			this.numericUpDownEndKeyframe.Name = "numericUpDownEndKeyframe";
-			this.numericUpDownEndKeyframe.Size = new System.Drawing.Size(55, 20);
-			this.numericUpDownEndKeyframe.TabIndex = 64;
-			this.numericUpDownEndKeyframe.TabStop = false;
-			this.toolTip1.SetToolTip(this.numericUpDownEndKeyframe, "end keyframe");
-			this.numericUpDownEndKeyframe.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-			// 
-			// panelMeshExportOptionsCollada
-			// 
-			this.panelMeshExportOptionsCollada.Controls.Add(this.checkBoxMeshExportColladaAllFrames);
-			this.panelMeshExportOptionsCollada.Location = new System.Drawing.Point(3, 43);
-			this.panelMeshExportOptionsCollada.Name = "panelMeshExportOptionsCollada";
-			this.panelMeshExportOptionsCollada.Size = new System.Drawing.Size(246, 47);
-			this.panelMeshExportOptionsCollada.TabIndex = 90;
 			// 
 			// buttonBoneRemove
 			// 
@@ -824,16 +468,6 @@
 			this.buttonBoneGotoFrame.UseVisualStyleBackColor = true;
 			this.buttonBoneGotoFrame.Click += new System.EventHandler(this.buttonBoneGotoFrame_Click);
 			// 
-			// buttonMeshRemove
-			// 
-			this.buttonMeshRemove.Location = new System.Drawing.Point(92, 174);
-			this.buttonMeshRemove.Name = "buttonMeshRemove";
-			this.buttonMeshRemove.Size = new System.Drawing.Size(75, 23);
-			this.buttonMeshRemove.TabIndex = 133;
-			this.buttonMeshRemove.Text = "Remove";
-			this.buttonMeshRemove.UseVisualStyleBackColor = true;
-			this.buttonMeshRemove.Click += new System.EventHandler(this.buttonMeshRemove_Click);
-			// 
 			// label27
 			// 
 			this.label27.AutoSize = true;
@@ -842,25 +476,6 @@
 			this.label27.Size = new System.Drawing.Size(50, 13);
 			this.label27.TabIndex = 14;
 			this.label27.Text = "Frame ID";
-			// 
-			// label9
-			// 
-			this.label9.AutoSize = true;
-			this.label9.Location = new System.Drawing.Point(1, 2);
-			this.label9.Name = "label9";
-			this.label9.Size = new System.Drawing.Size(35, 13);
-			this.label9.TabIndex = 134;
-			this.label9.Text = "Name";
-			// 
-			// buttonMeshGotoFrame
-			// 
-			this.buttonMeshGotoFrame.Location = new System.Drawing.Point(6, 174);
-			this.buttonMeshGotoFrame.Name = "buttonMeshGotoFrame";
-			this.buttonMeshGotoFrame.Size = new System.Drawing.Size(75, 23);
-			this.buttonMeshGotoFrame.TabIndex = 130;
-			this.buttonMeshGotoFrame.Text = "Goto Frame";
-			this.buttonMeshGotoFrame.UseVisualStyleBackColor = true;
-			this.buttonMeshGotoFrame.Click += new System.EventHandler(this.buttonMeshGotoFrame_Click);
 			// 
 			// label60
 			// 
@@ -1135,6 +750,8 @@
 			this.tabControlLists.SelectedIndex = 0;
 			this.tabControlLists.Size = new System.Drawing.Size(477, 581);
 			this.tabControlLists.TabIndex = 0;
+			this.tabControlLists.SelectedIndexChanged += new System.EventHandler(this.tabControlLists_SelectedIndexChanged);
+			this.tabControlLists.Selecting += new System.Windows.Forms.TabControlCancelEventHandler(this.tabControlLists_Selecting);
 			// 
 			// tabPageObject
 			// 
@@ -1677,6 +1294,7 @@
 			this.radioButtonMorphExportFormatMqo.Name = "radioButtonMorphExportFormatMqo";
 			this.radioButtonMorphExportFormatMqo.Size = new System.Drawing.Size(46, 17);
 			this.radioButtonMorphExportFormatMqo.TabIndex = 0;
+			this.radioButtonMorphExportFormatMqo.TabStop = true;
 			this.radioButtonMorphExportFormatMqo.Text = "Mqo";
 			this.radioButtonMorphExportFormatMqo.UseVisualStyleBackColor = true;
 			// 
@@ -2029,8 +1647,8 @@
 			// splitContainerAnimation.Panel2
 			// 
 			this.splitContainerAnimation.Panel2.AutoScroll = true;
+			this.splitContainerAnimation.Panel2.Controls.Add(this.dataGridViewAnimationClip);
 			this.splitContainerAnimation.Panel2.Controls.Add(this.groupBox1);
-			this.splitContainerAnimation.Panel2.Controls.Add(this.listViewAnimationClip);
 			this.splitContainerAnimation.Panel2.Controls.Add(this.label33);
 			this.splitContainerAnimation.Panel2MinSize = 100;
 			this.splitContainerAnimation.Size = new System.Drawing.Size(463, 549);
@@ -2057,7 +1675,9 @@
 			this.listViewAnimationTrack.AutoArrange = false;
 			this.listViewAnimationTrack.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader3,
-            this.columnHeader4});
+            this.columnHeader4,
+            this.columnHeader1,
+            this.columnHeader2});
 			this.listViewAnimationTrack.FullRowSelect = true;
 			this.listViewAnimationTrack.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
 			this.listViewAnimationTrack.HideSelection = false;
@@ -2082,21 +1702,130 @@
 			// columnHeader4
 			// 
 			this.columnHeader4.Text = "Keyframes";
+			this.columnHeader4.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
 			this.columnHeader4.Width = 64;
+			// 
+			// dataGridViewAnimationClip
+			// 
+			this.dataGridViewAnimationClip.AllowDrop = true;
+			this.dataGridViewAnimationClip.AllowUserToAddRows = false;
+			this.dataGridViewAnimationClip.AllowUserToDeleteRows = false;
+			this.dataGridViewAnimationClip.AllowUserToResizeRows = false;
+			dataGridViewCellStyle8.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+			this.dataGridViewAnimationClip.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle8;
+			this.dataGridViewAnimationClip.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.dataGridViewAnimationClip.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCellsExceptHeaders;
+			this.dataGridViewAnimationClip.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+			this.dataGridViewAnimationClip.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.ColumnIdx,
+            this.ColumnName,
+            this.ColumnStart,
+            this.ColumnEnd,
+            this.ColumnTracks});
+			this.dataGridViewAnimationClip.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
+			this.dataGridViewAnimationClip.Location = new System.Drawing.Point(0, 17);
+			this.dataGridViewAnimationClip.Name = "dataGridViewAnimationClip";
+			dataGridViewCellStyle13.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+			dataGridViewCellStyle13.BackColor = System.Drawing.SystemColors.Control;
+			dataGridViewCellStyle13.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			dataGridViewCellStyle13.ForeColor = System.Drawing.SystemColors.WindowText;
+			dataGridViewCellStyle13.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+			dataGridViewCellStyle13.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+			dataGridViewCellStyle13.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+			this.dataGridViewAnimationClip.RowHeadersDefaultCellStyle = dataGridViewCellStyle13;
+			this.dataGridViewAnimationClip.RowHeadersVisible = false;
+			dataGridViewCellStyle14.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+			this.dataGridViewAnimationClip.RowsDefaultCellStyle = dataGridViewCellStyle14;
+			this.dataGridViewAnimationClip.RowTemplate.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+			this.dataGridViewAnimationClip.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+			this.dataGridViewAnimationClip.ShowCellErrors = false;
+			this.dataGridViewAnimationClip.ShowRowErrors = false;
+			this.dataGridViewAnimationClip.Size = new System.Drawing.Size(463, 174);
+			this.dataGridViewAnimationClip.TabIndex = 2;
+			this.dataGridViewAnimationClip.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewAnimationClip_CellDoubleClick);
+			this.dataGridViewAnimationClip.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewAnimationClip_CellEndEdit);
+			this.dataGridViewAnimationClip.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dataGridViewAnimationClip_DataError);
+			this.dataGridViewAnimationClip.SelectionChanged += new System.EventHandler(this.dataGridViewAnimationClip_SelectionChanged);
+			this.dataGridViewAnimationClip.DragDrop += new System.Windows.Forms.DragEventHandler(this.dataGridViewAnimationClip_DragDrop);
+			this.dataGridViewAnimationClip.DragEnter += new System.Windows.Forms.DragEventHandler(this.dataGridViewAnimationClip_DragEnter);
+			this.dataGridViewAnimationClip.DragOver += new System.Windows.Forms.DragEventHandler(this.dataGridViewAnimationClip_DragOver);
+			this.dataGridViewAnimationClip.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dataGridViewAnimationClip_KeyDown);
+			this.dataGridViewAnimationClip.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.dataGridViewAnimationClip_KeyPress);
+			// 
+			// ColumnIdx
+			// 
+			this.ColumnIdx.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+			dataGridViewCellStyle9.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+			dataGridViewCellStyle9.Format = "N0";
+			dataGridViewCellStyle9.NullValue = null;
+			this.ColumnIdx.DefaultCellStyle = dataGridViewCellStyle9;
+			this.ColumnIdx.HeaderText = "Idx";
+			this.ColumnIdx.Name = "ColumnIdx";
+			this.ColumnIdx.ReadOnly = true;
+			this.ColumnIdx.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+			this.ColumnIdx.Width = 27;
+			// 
+			// ColumnName
+			// 
+			this.ColumnName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+			this.ColumnName.HeaderText = "Name";
+			this.ColumnName.Name = "ColumnName";
+			this.ColumnName.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+			this.ColumnName.Width = 41;
+			// 
+			// ColumnStart
+			// 
+			this.ColumnStart.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+			dataGridViewCellStyle10.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+			dataGridViewCellStyle10.Format = "N0";
+			dataGridViewCellStyle10.NullValue = null;
+			this.ColumnStart.DefaultCellStyle = dataGridViewCellStyle10;
+			this.ColumnStart.HeaderText = "Start";
+			this.ColumnStart.Name = "ColumnStart";
+			this.ColumnStart.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+			this.ColumnStart.Width = 35;
+			// 
+			// ColumnEnd
+			// 
+			this.ColumnEnd.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+			dataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+			dataGridViewCellStyle11.Format = "N0";
+			dataGridViewCellStyle11.NullValue = null;
+			this.ColumnEnd.DefaultCellStyle = dataGridViewCellStyle11;
+			this.ColumnEnd.HeaderText = "End";
+			this.ColumnEnd.Name = "ColumnEnd";
+			this.ColumnEnd.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+			this.ColumnEnd.Width = 32;
+			// 
+			// ColumnTracks
+			// 
+			this.ColumnTracks.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+			dataGridViewCellStyle12.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+			dataGridViewCellStyle12.Format = "N0";
+			dataGridViewCellStyle12.NullValue = null;
+			this.ColumnTracks.DefaultCellStyle = dataGridViewCellStyle12;
+			this.ColumnTracks.HeaderText = "Tracks";
+			this.ColumnTracks.Name = "ColumnTracks";
+			this.ColumnTracks.ReadOnly = true;
+			this.ColumnTracks.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+			this.ColumnTracks.Width = 46;
 			// 
 			// groupBox1
 			// 
-			this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.groupBox1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
 			this.groupBox1.Controls.Add(this.buttonAnimationClipPlayPause);
 			this.groupBox1.Controls.Add(this.trackBarAnimationClipKeyframe);
-			this.groupBox1.Controls.Add(this.checkBoxAnimationClipLoadNextClip);
 			this.groupBox1.Controls.Add(this.numericAnimationClipSpeed);
 			this.groupBox1.Controls.Add(this.numericAnimationClipKeyframe);
 			this.groupBox1.Controls.Add(this.labelSkeletalRender);
 			this.groupBox1.Controls.Add(this.label30);
-			this.groupBox1.Location = new System.Drawing.Point(0, 158);
+			this.groupBox1.Location = new System.Drawing.Point(0, 191);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(287, 65);
+			this.groupBox1.Size = new System.Drawing.Size(463, 40);
 			this.groupBox1.TabIndex = 155;
 			this.groupBox1.TabStop = false;
 			// 
@@ -2126,23 +1855,10 @@
 			this.trackBarAnimationClipKeyframe.AutoSize = false;
 			this.trackBarAnimationClipKeyframe.Location = new System.Drawing.Point(33, 14);
 			this.trackBarAnimationClipKeyframe.Name = "trackBarAnimationClipKeyframe";
-			this.trackBarAnimationClipKeyframe.Size = new System.Drawing.Size(143, 18);
+			this.trackBarAnimationClipKeyframe.Size = new System.Drawing.Size(233, 18);
 			this.trackBarAnimationClipKeyframe.TabIndex = 17;
 			this.trackBarAnimationClipKeyframe.TickStyle = System.Windows.Forms.TickStyle.None;
 			this.trackBarAnimationClipKeyframe.ValueChanged += new System.EventHandler(this.trackBarAnimationClipKeyframe_ValueChanged);
-			// 
-			// checkBoxAnimationClipLoadNextClip
-			// 
-			this.checkBoxAnimationClipLoadNextClip.AutoSize = true;
-			this.checkBoxAnimationClipLoadNextClip.Checked = true;
-			this.checkBoxAnimationClipLoadNextClip.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.checkBoxAnimationClipLoadNextClip.Location = new System.Drawing.Point(7, 42);
-			this.checkBoxAnimationClipLoadNextClip.Name = "checkBoxAnimationClipLoadNextClip";
-			this.checkBoxAnimationClipLoadNextClip.Size = new System.Drawing.Size(95, 17);
-			this.checkBoxAnimationClipLoadNextClip.TabIndex = 21;
-			this.checkBoxAnimationClipLoadNextClip.Text = "Load Next Clip";
-			this.checkBoxAnimationClipLoadNextClip.UseVisualStyleBackColor = true;
-			this.checkBoxAnimationClipLoadNextClip.Visible = false;
 			// 
 			// numericAnimationClipSpeed
 			// 
@@ -2153,7 +1869,7 @@
             0,
             0,
             65536});
-			this.numericAnimationClipSpeed.Location = new System.Drawing.Point(182, 39);
+			this.numericAnimationClipSpeed.Location = new System.Drawing.Point(368, 13);
 			this.numericAnimationClipSpeed.Maximum = new decimal(new int[] {
             500,
             0,
@@ -2172,7 +1888,7 @@
 			// numericAnimationClipKeyframe
 			// 
 			this.numericAnimationClipKeyframe.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.numericAnimationClipKeyframe.Location = new System.Drawing.Point(182, 13);
+			this.numericAnimationClipKeyframe.Location = new System.Drawing.Point(270, 13);
 			this.numericAnimationClipKeyframe.Name = "numericAnimationClipKeyframe";
 			this.numericAnimationClipKeyframe.Size = new System.Drawing.Size(55, 20);
 			this.numericAnimationClipKeyframe.TabIndex = 19;
@@ -2182,7 +1898,7 @@
 			// 
 			this.labelSkeletalRender.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this.labelSkeletalRender.AutoSize = true;
-			this.labelSkeletalRender.Location = new System.Drawing.Point(238, 17);
+			this.labelSkeletalRender.Location = new System.Drawing.Point(326, 17);
 			this.labelSkeletalRender.Name = "labelSkeletalRender";
 			this.labelSkeletalRender.Size = new System.Drawing.Size(21, 13);
 			this.labelSkeletalRender.TabIndex = 148;
@@ -2192,62 +1908,11 @@
 			// 
 			this.label30.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this.label30.AutoSize = true;
-			this.label30.Location = new System.Drawing.Point(237, 43);
+			this.label30.Location = new System.Drawing.Point(423, 17);
 			this.label30.Name = "label30";
 			this.label30.Size = new System.Drawing.Size(38, 13);
 			this.label30.TabIndex = 146;
 			this.label30.Text = "Speed";
-			// 
-			// listViewAnimationClip
-			// 
-			this.listViewAnimationClip.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.listViewAnimationClip.AutoArrange = false;
-			this.listViewAnimationClip.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader8,
-            this.columnHeader1,
-            this.columnHeader2,
-            this.columnHeader6,
-            this.columnHeader7});
-			this.listViewAnimationClip.FullRowSelect = true;
-			this.listViewAnimationClip.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
-			this.listViewAnimationClip.HideSelection = false;
-			this.listViewAnimationClip.LabelWrap = false;
-			this.listViewAnimationClip.Location = new System.Drawing.Point(0, 17);
-			this.listViewAnimationClip.Name = "listViewAnimationClip";
-			this.listViewAnimationClip.ShowGroups = false;
-			this.listViewAnimationClip.ShowItemToolTips = true;
-			this.listViewAnimationClip.Size = new System.Drawing.Size(463, 141);
-			this.listViewAnimationClip.TabIndex = 2;
-			this.listViewAnimationClip.UseCompatibleStateImageBehavior = false;
-			this.listViewAnimationClip.View = System.Windows.Forms.View.Details;
-			this.listViewAnimationClip.ItemSelectionChanged += new System.Windows.Forms.ListViewItemSelectionChangedEventHandler(this.listViewAnimationClip_ItemSelectionChanged);
-			// 
-			// columnHeader8
-			// 
-			this.columnHeader8.Text = "Idx";
-			this.columnHeader8.Width = 30;
-			// 
-			// columnHeader1
-			// 
-			this.columnHeader1.Text = "Name";
-			this.columnHeader1.Width = 235;
-			// 
-			// columnHeader2
-			// 
-			this.columnHeader2.Text = "Start";
-			this.columnHeader2.Width = 37;
-			// 
-			// columnHeader6
-			// 
-			this.columnHeader6.Text = "End";
-			this.columnHeader6.Width = 37;
-			// 
-			// columnHeader7
-			// 
-			this.columnHeader7.Text = "Tracks";
-			this.columnHeader7.Width = 46;
 			// 
 			// label33
 			// 
@@ -2847,6 +2512,15 @@
 			this.buttonMeshNormals.UseVisualStyleBackColor = true;
 			this.buttonMeshNormals.Click += new System.EventHandler(this.buttonMeshNormals_Click);
 			// 
+			// label9
+			// 
+			this.label9.AutoSize = true;
+			this.label9.Location = new System.Drawing.Point(1, 2);
+			this.label9.Name = "label9";
+			this.label9.Size = new System.Drawing.Size(35, 13);
+			this.label9.TabIndex = 134;
+			this.label9.Text = "Name";
+			// 
 			// label13
 			// 
 			this.label13.AutoSize = true;
@@ -2861,11 +2535,11 @@
 			this.groupBoxExportOptions.Controls.Add(this.label28);
 			this.groupBoxExportOptions.Controls.Add(this.comboBoxMeshExportFormat);
 			this.groupBoxExportOptions.Controls.Add(this.buttonMeshExport);
+			this.groupBoxExportOptions.Controls.Add(this.panelMeshExportOptionsFbx);
 			this.groupBoxExportOptions.Controls.Add(this.panelMeshExportOptionsDefault);
 			this.groupBoxExportOptions.Controls.Add(this.panelMeshExportOptionsDirectX);
 			this.groupBoxExportOptions.Controls.Add(this.panelMeshExportOptionsCollada);
 			this.groupBoxExportOptions.Controls.Add(this.panelMeshExportOptionsMqo);
-			this.groupBoxExportOptions.Controls.Add(this.panelMeshExportOptionsFbx);
 			this.groupBoxExportOptions.Location = new System.Drawing.Point(4, 72);
 			this.groupBoxExportOptions.Name = "groupBoxExportOptions";
 			this.groupBoxExportOptions.Size = new System.Drawing.Size(252, 93);
@@ -2903,11 +2577,12 @@
 			// 
 			// panelMeshExportOptionsFbx
 			// 
-			this.panelMeshExportOptionsFbx.Controls.Add(this.checkBox8dot3);
-			this.panelMeshExportOptionsFbx.Controls.Add(this.label49);
+			this.panelMeshExportOptionsFbx.Controls.Add(this.textBoxEulerFilterPrecision);
+			this.panelMeshExportOptionsFbx.Controls.Add(this.textBoxKeyframeRange);
+			this.panelMeshExportOptionsFbx.Controls.Add(this.checkBoxInterpolationLinear);
+			this.panelMeshExportOptionsFbx.Controls.Add(this.checkBoxEulerFilter);
+			this.panelMeshExportOptionsFbx.Controls.Add(this.checkBoxODAskeleton);
 			this.panelMeshExportOptionsFbx.Controls.Add(this.label48);
-			this.panelMeshExportOptionsFbx.Controls.Add(this.numericUpDownEndKeyframe);
-			this.panelMeshExportOptionsFbx.Controls.Add(this.numericUpDownStartKeyframe);
 			this.panelMeshExportOptionsFbx.Controls.Add(this.checkBoxMeshExportFbxSkins);
 			this.panelMeshExportOptionsFbx.Controls.Add(this.checkBoxMeshExportFbxAllFrames);
 			this.panelMeshExportOptionsFbx.Location = new System.Drawing.Point(3, 43);
@@ -2915,28 +2590,409 @@
 			this.panelMeshExportOptionsFbx.Size = new System.Drawing.Size(246, 47);
 			this.panelMeshExportOptionsFbx.TabIndex = 50;
 			// 
-			// checkBox8dot3
+			// textBoxEulerFilterPrecision
 			// 
-			this.checkBox8dot3.AutoSize = true;
-			this.checkBox8dot3.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
-			this.checkBox8dot3.Location = new System.Drawing.Point(199, 2);
-			this.checkBox8dot3.Name = "checkBox8dot3";
-			this.checkBox8dot3.Size = new System.Drawing.Size(41, 17);
-			this.checkBox8dot3.TabIndex = 56;
-			this.checkBox8dot3.TabStop = false;
-			this.checkBox8dot3.Text = "8.3";
-			this.toolTip1.SetToolTip(this.checkBox8dot3, "Required for exports into directories with japanese characters.\r\nImports includin" +
-        "g those characters can fail!");
-			this.checkBox8dot3.UseVisualStyleBackColor = true;
+			this.textBoxEulerFilterPrecision.Location = new System.Drawing.Point(214, 3);
+			this.textBoxEulerFilterPrecision.Name = "textBoxEulerFilterPrecision";
+			this.textBoxEulerFilterPrecision.Size = new System.Drawing.Size(28, 20);
+			this.textBoxEulerFilterPrecision.TabIndex = 142;
+			this.textBoxEulerFilterPrecision.Text = "0.25";
+			this.toolTip1.SetToolTip(this.textBoxEulerFilterPrecision, "Euler Filter Precision");
 			// 
-			// label49
+			// textBoxKeyframeRange
 			// 
-			this.label49.AutoSize = true;
-			this.label49.Location = new System.Drawing.Point(148, 26);
-			this.label49.Name = "label49";
-			this.label49.Size = new System.Drawing.Size(10, 13);
-			this.label49.TabIndex = 62;
-			this.label49.Text = "-";
+			this.textBoxKeyframeRange.Location = new System.Drawing.Point(143, 24);
+			this.textBoxKeyframeRange.Name = "textBoxKeyframeRange";
+			this.textBoxKeyframeRange.Size = new System.Drawing.Size(45, 20);
+			this.textBoxKeyframeRange.TabIndex = 0;
+			this.textBoxKeyframeRange.TabStop = false;
+			this.textBoxKeyframeRange.Text = "-1-0";
+			this.toolTip1.SetToolTip(this.textBoxKeyframeRange, "Starting with -1 exports the whole animation");
+			// 
+			// checkBoxInterpolationLinear
+			// 
+			this.checkBoxInterpolationLinear.AutoSize = true;
+			this.checkBoxInterpolationLinear.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
+			this.checkBoxInterpolationLinear.Checked = true;
+			this.checkBoxInterpolationLinear.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.checkBoxInterpolationLinear.Location = new System.Drawing.Point(189, 26);
+			this.checkBoxInterpolationLinear.Name = "checkBoxInterpolationLinear";
+			this.checkBoxInterpolationLinear.Size = new System.Drawing.Size(55, 17);
+			this.checkBoxInterpolationLinear.TabIndex = 61;
+			this.checkBoxInterpolationLinear.TabStop = false;
+			this.checkBoxInterpolationLinear.Text = "Linear";
+			this.toolTip1.SetToolTip(this.checkBoxInterpolationLinear, "Unchecked uses cubic  keyframe interpolation");
+			this.checkBoxInterpolationLinear.UseVisualStyleBackColor = true;
+			// 
+			// checkBoxEulerFilter
+			// 
+			this.checkBoxEulerFilter.AutoSize = true;
+			this.checkBoxEulerFilter.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
+			this.checkBoxEulerFilter.Checked = true;
+			this.checkBoxEulerFilter.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.checkBoxEulerFilter.Location = new System.Drawing.Point(136, 4);
+			this.checkBoxEulerFilter.Name = "checkBoxEulerFilter";
+			this.checkBoxEulerFilter.Size = new System.Drawing.Size(75, 17);
+			this.checkBoxEulerFilter.TabIndex = 142;
+			this.checkBoxEulerFilter.TabStop = false;
+			this.checkBoxEulerFilter.Text = "Euler Filter";
+			this.toolTip1.SetToolTip(this.checkBoxEulerFilter, "Corrects Rotations");
+			this.checkBoxEulerFilter.UseVisualStyleBackColor = true;
+			// 
+			// checkBoxODAskeleton
+			// 
+			this.checkBoxODAskeleton.AutoSize = true;
+			this.checkBoxODAskeleton.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
+			this.checkBoxODAskeleton.Checked = true;
+			this.checkBoxODAskeleton.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.checkBoxODAskeleton.Location = new System.Drawing.Point(-2, 26);
+			this.checkBoxODAskeleton.Name = "checkBoxODAskeleton";
+			this.checkBoxODAskeleton.Size = new System.Drawing.Size(76, 17);
+			this.checkBoxODAskeleton.TabIndex = 60;
+			this.checkBoxODAskeleton.TabStop = false;
+			this.checkBoxODAskeleton.Text = "ODA Skel.";
+			this.toolTip1.SetToolTip(this.checkBoxODAskeleton, "Uses the skeleton of the ODA instead of the one in the ODF");
+			this.checkBoxODAskeleton.UseVisualStyleBackColor = true;
+			// 
+			// label48
+			// 
+			this.label48.AutoSize = true;
+			this.label48.Location = new System.Drawing.Point(86, 27);
+			this.label48.Name = "label48";
+			this.label48.Size = new System.Drawing.Size(56, 13);
+			this.label48.TabIndex = 58;
+			this.label48.Text = "Keyframes";
+			this.toolTip1.SetToolTip(this.label48, "Keyframe resampling");
+			// 
+			// checkBoxMeshExportFbxSkins
+			// 
+			this.checkBoxMeshExportFbxSkins.AutoSize = true;
+			this.checkBoxMeshExportFbxSkins.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
+			this.checkBoxMeshExportFbxSkins.Checked = true;
+			this.checkBoxMeshExportFbxSkins.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.checkBoxMeshExportFbxSkins.Location = new System.Drawing.Point(78, 2);
+			this.checkBoxMeshExportFbxSkins.Name = "checkBoxMeshExportFbxSkins";
+			this.checkBoxMeshExportFbxSkins.Size = new System.Drawing.Size(52, 17);
+			this.checkBoxMeshExportFbxSkins.TabIndex = 54;
+			this.checkBoxMeshExportFbxSkins.TabStop = false;
+			this.checkBoxMeshExportFbxSkins.Text = "Skins";
+			this.checkBoxMeshExportFbxSkins.UseVisualStyleBackColor = true;
+			// 
+			// checkBoxMeshExportFbxAllFrames
+			// 
+			this.checkBoxMeshExportFbxAllFrames.AutoSize = true;
+			this.checkBoxMeshExportFbxAllFrames.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
+			this.checkBoxMeshExportFbxAllFrames.Checked = true;
+			this.checkBoxMeshExportFbxAllFrames.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.checkBoxMeshExportFbxAllFrames.Location = new System.Drawing.Point(-2, 2);
+			this.checkBoxMeshExportFbxAllFrames.Name = "checkBoxMeshExportFbxAllFrames";
+			this.checkBoxMeshExportFbxAllFrames.Size = new System.Drawing.Size(74, 17);
+			this.checkBoxMeshExportFbxAllFrames.TabIndex = 52;
+			this.checkBoxMeshExportFbxAllFrames.TabStop = false;
+			this.checkBoxMeshExportFbxAllFrames.Text = "All Frames";
+			this.checkBoxMeshExportFbxAllFrames.UseVisualStyleBackColor = true;
+			// 
+			// panelMeshExportOptionsDefault
+			// 
+			this.panelMeshExportOptionsDefault.Location = new System.Drawing.Point(3, 43);
+			this.panelMeshExportOptionsDefault.Name = "panelMeshExportOptionsDefault";
+			this.panelMeshExportOptionsDefault.Size = new System.Drawing.Size(246, 47);
+			this.panelMeshExportOptionsDefault.TabIndex = 70;
+			// 
+			// panelMeshExportOptionsDirectX
+			// 
+			this.panelMeshExportOptionsDirectX.Controls.Add(this.numericMeshExportDirectXTicksPerSecond);
+			this.panelMeshExportOptionsDirectX.Controls.Add(this.numericMeshExportDirectXKeyframeLength);
+			this.panelMeshExportOptionsDirectX.Controls.Add(this.label34);
+			this.panelMeshExportOptionsDirectX.Controls.Add(this.label35);
+			this.panelMeshExportOptionsDirectX.Location = new System.Drawing.Point(3, 43);
+			this.panelMeshExportOptionsDirectX.Name = "panelMeshExportOptionsDirectX";
+			this.panelMeshExportOptionsDirectX.Size = new System.Drawing.Size(246, 47);
+			this.panelMeshExportOptionsDirectX.TabIndex = 80;
+			// 
+			// numericMeshExportDirectXTicksPerSecond
+			// 
+			this.numericMeshExportDirectXTicksPerSecond.Location = new System.Drawing.Point(60, 1);
+			this.numericMeshExportDirectXTicksPerSecond.Maximum = new decimal(new int[] {
+            1000000,
+            0,
+            0,
+            0});
+			this.numericMeshExportDirectXTicksPerSecond.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+			this.numericMeshExportDirectXTicksPerSecond.Name = "numericMeshExportDirectXTicksPerSecond";
+			this.numericMeshExportDirectXTicksPerSecond.Size = new System.Drawing.Size(45, 20);
+			this.numericMeshExportDirectXTicksPerSecond.TabIndex = 84;
+			this.numericMeshExportDirectXTicksPerSecond.TabStop = false;
+			this.numericMeshExportDirectXTicksPerSecond.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+			// 
+			// numericMeshExportDirectXKeyframeLength
+			// 
+			this.numericMeshExportDirectXKeyframeLength.Location = new System.Drawing.Point(199, 1);
+			this.numericMeshExportDirectXKeyframeLength.Maximum = new decimal(new int[] {
+            1000000,
+            0,
+            0,
+            0});
+			this.numericMeshExportDirectXKeyframeLength.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+			this.numericMeshExportDirectXKeyframeLength.Name = "numericMeshExportDirectXKeyframeLength";
+			this.numericMeshExportDirectXKeyframeLength.Size = new System.Drawing.Size(45, 20);
+			this.numericMeshExportDirectXKeyframeLength.TabIndex = 88;
+			this.numericMeshExportDirectXKeyframeLength.TabStop = false;
+			this.numericMeshExportDirectXKeyframeLength.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+			// 
+			// label34
+			// 
+			this.label34.AutoSize = true;
+			this.label34.Location = new System.Drawing.Point(1, 5);
+			this.label34.Name = "label34";
+			this.label34.Size = new System.Drawing.Size(57, 13);
+			this.label34.TabIndex = 82;
+			this.label34.Text = "Ticks/Sec";
+			// 
+			// label35
+			// 
+			this.label35.AutoSize = true;
+			this.label35.Location = new System.Drawing.Point(110, 5);
+			this.label35.Name = "label35";
+			this.label35.Size = new System.Drawing.Size(87, 13);
+			this.label35.TabIndex = 86;
+			this.label35.Text = "Keyframe Length";
+			// 
+			// panelMeshExportOptionsCollada
+			// 
+			this.panelMeshExportOptionsCollada.Controls.Add(this.checkBoxMeshExportColladaAllFrames);
+			this.panelMeshExportOptionsCollada.Location = new System.Drawing.Point(3, 43);
+			this.panelMeshExportOptionsCollada.Name = "panelMeshExportOptionsCollada";
+			this.panelMeshExportOptionsCollada.Size = new System.Drawing.Size(246, 47);
+			this.panelMeshExportOptionsCollada.TabIndex = 90;
+			// 
+			// checkBoxMeshExportColladaAllFrames
+			// 
+			this.checkBoxMeshExportColladaAllFrames.AutoSize = true;
+			this.checkBoxMeshExportColladaAllFrames.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
+			this.checkBoxMeshExportColladaAllFrames.Location = new System.Drawing.Point(37, 2);
+			this.checkBoxMeshExportColladaAllFrames.Name = "checkBoxMeshExportColladaAllFrames";
+			this.checkBoxMeshExportColladaAllFrames.Size = new System.Drawing.Size(74, 17);
+			this.checkBoxMeshExportColladaAllFrames.TabIndex = 92;
+			this.checkBoxMeshExportColladaAllFrames.TabStop = false;
+			this.checkBoxMeshExportColladaAllFrames.Text = "All Frames";
+			this.checkBoxMeshExportColladaAllFrames.UseVisualStyleBackColor = true;
+			// 
+			// panelMeshExportOptionsMqo
+			// 
+			this.panelMeshExportOptionsMqo.Controls.Add(this.checkBoxMeshExportMqoSingleFile);
+			this.panelMeshExportOptionsMqo.Controls.Add(this.checkBoxMeshExportMqoWorldCoords);
+			this.panelMeshExportOptionsMqo.Location = new System.Drawing.Point(3, 43);
+			this.panelMeshExportOptionsMqo.Name = "panelMeshExportOptionsMqo";
+			this.panelMeshExportOptionsMqo.Size = new System.Drawing.Size(246, 47);
+			this.panelMeshExportOptionsMqo.TabIndex = 100;
+			// 
+			// checkBoxMeshExportMqoSingleFile
+			// 
+			this.checkBoxMeshExportMqoSingleFile.AutoSize = true;
+			this.checkBoxMeshExportMqoSingleFile.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
+			this.checkBoxMeshExportMqoSingleFile.Checked = true;
+			this.checkBoxMeshExportMqoSingleFile.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.checkBoxMeshExportMqoSingleFile.Location = new System.Drawing.Point(37, 2);
+			this.checkBoxMeshExportMqoSingleFile.Name = "checkBoxMeshExportMqoSingleFile";
+			this.checkBoxMeshExportMqoSingleFile.Size = new System.Drawing.Size(79, 17);
+			this.checkBoxMeshExportMqoSingleFile.TabIndex = 102;
+			this.checkBoxMeshExportMqoSingleFile.TabStop = false;
+			this.checkBoxMeshExportMqoSingleFile.Text = "Single Mqo";
+			this.checkBoxMeshExportMqoSingleFile.UseVisualStyleBackColor = true;
+			// 
+			// checkBoxMeshExportMqoWorldCoords
+			// 
+			this.checkBoxMeshExportMqoWorldCoords.AutoSize = true;
+			this.checkBoxMeshExportMqoWorldCoords.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
+			this.checkBoxMeshExportMqoWorldCoords.Location = new System.Drawing.Point(131, 2);
+			this.checkBoxMeshExportMqoWorldCoords.Name = "checkBoxMeshExportMqoWorldCoords";
+			this.checkBoxMeshExportMqoWorldCoords.Size = new System.Drawing.Size(113, 17);
+			this.checkBoxMeshExportMqoWorldCoords.TabIndex = 104;
+			this.checkBoxMeshExportMqoWorldCoords.TabStop = false;
+			this.checkBoxMeshExportMqoWorldCoords.Text = "World Coordinates";
+			this.checkBoxMeshExportMqoWorldCoords.UseVisualStyleBackColor = true;
+			// 
+			// buttonMeshGotoFrame
+			// 
+			this.buttonMeshGotoFrame.Location = new System.Drawing.Point(6, 174);
+			this.buttonMeshGotoFrame.Name = "buttonMeshGotoFrame";
+			this.buttonMeshGotoFrame.Size = new System.Drawing.Size(75, 23);
+			this.buttonMeshGotoFrame.TabIndex = 130;
+			this.buttonMeshGotoFrame.Text = "Goto Frame";
+			this.buttonMeshGotoFrame.UseVisualStyleBackColor = true;
+			this.buttonMeshGotoFrame.Click += new System.EventHandler(this.buttonMeshGotoFrame_Click);
+			// 
+			// buttonMeshRemove
+			// 
+			this.buttonMeshRemove.Location = new System.Drawing.Point(92, 174);
+			this.buttonMeshRemove.Name = "buttonMeshRemove";
+			this.buttonMeshRemove.Size = new System.Drawing.Size(75, 23);
+			this.buttonMeshRemove.TabIndex = 133;
+			this.buttonMeshRemove.Text = "Remove";
+			this.buttonMeshRemove.UseVisualStyleBackColor = true;
+			this.buttonMeshRemove.Click += new System.EventHandler(this.buttonMeshRemove_Click);
+			// 
+			// groupBoxMeshObjects
+			// 
+			this.groupBoxMeshObjects.Controls.Add(this.dataGridViewMesh);
+			this.groupBoxMeshObjects.Controls.Add(this.textBoxMeshObjInfo);
+			this.groupBoxMeshObjects.Controls.Add(this.label15);
+			this.groupBoxMeshObjects.Controls.Add(this.textBoxMeshObjID);
+			this.groupBoxMeshObjects.Controls.Add(this.textBoxMeshObjName);
+			this.groupBoxMeshObjects.Controls.Add(this.checkBoxMeshObjSkinned);
+			this.groupBoxMeshObjects.Controls.Add(this.label14);
+			this.groupBoxMeshObjects.Controls.Add(this.buttonMeshObjEdit);
+			this.groupBoxMeshObjects.Controls.Add(this.buttonMeshObjRemove);
+			this.groupBoxMeshObjects.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.groupBoxMeshObjects.Location = new System.Drawing.Point(0, 0);
+			this.groupBoxMeshObjects.Name = "groupBoxMeshObjects";
+			this.groupBoxMeshObjects.Size = new System.Drawing.Size(476, 375);
+			this.groupBoxMeshObjects.TabIndex = 143;
+			this.groupBoxMeshObjects.TabStop = false;
+			this.groupBoxMeshObjects.Text = "Submeshes";
+			// 
+			// dataGridViewMesh
+			// 
+			this.dataGridViewMesh.AllowUserToAddRows = false;
+			this.dataGridViewMesh.AllowUserToDeleteRows = false;
+			this.dataGridViewMesh.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.dataGridViewMesh.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+			this.dataGridViewMesh.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.ColumnSubmeshName,
+            this.ColumnSubmeshVerts,
+            this.ColumnSubmeshFaces,
+            this.ColumnSubmeshMaterial,
+            this.ColumnSubmeshUnknowns});
+			this.dataGridViewMesh.Location = new System.Drawing.Point(3, 110);
+			this.dataGridViewMesh.Name = "dataGridViewMesh";
+			this.dataGridViewMesh.RowHeadersVisible = false;
+			this.dataGridViewMesh.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+			this.dataGridViewMesh.ShowCellErrors = false;
+			this.dataGridViewMesh.ShowRowErrors = false;
+			this.dataGridViewMesh.Size = new System.Drawing.Size(470, 261);
+			this.dataGridViewMesh.TabIndex = 203;
+			this.dataGridViewMesh.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dataGridViewMesh_DataError);
+			this.dataGridViewMesh.EditingControlShowing += new System.Windows.Forms.DataGridViewEditingControlShowingEventHandler(this.dataGridViewMesh_EditingControlShowing);
+			this.dataGridViewMesh.SelectionChanged += new System.EventHandler(this.dataGridViewMesh_SelectionChanged);
+			// 
+			// ColumnSubmeshName
+			// 
+			this.ColumnSubmeshName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+			this.ColumnSubmeshName.FillWeight = 41.06195F;
+			this.ColumnSubmeshName.HeaderText = "Name";
+			this.ColumnSubmeshName.MinimumWidth = 10;
+			this.ColumnSubmeshName.Name = "ColumnSubmeshName";
+			this.ColumnSubmeshName.ReadOnly = true;
+			this.ColumnSubmeshName.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+			// 
+			// ColumnSubmeshVerts
+			// 
+			this.ColumnSubmeshVerts.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+			this.ColumnSubmeshVerts.FillWeight = 10F;
+			this.ColumnSubmeshVerts.HeaderText = "Verts";
+			this.ColumnSubmeshVerts.Name = "ColumnSubmeshVerts";
+			this.ColumnSubmeshVerts.ReadOnly = true;
+			this.ColumnSubmeshVerts.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+			// 
+			// ColumnSubmeshFaces
+			// 
+			this.ColumnSubmeshFaces.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+			this.ColumnSubmeshFaces.FillWeight = 10F;
+			this.ColumnSubmeshFaces.HeaderText = "Faces";
+			this.ColumnSubmeshFaces.Name = "ColumnSubmeshFaces";
+			this.ColumnSubmeshFaces.ReadOnly = true;
+			this.ColumnSubmeshFaces.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+			// 
+			// ColumnSubmeshMaterial
+			// 
+			this.ColumnSubmeshMaterial.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+			this.ColumnSubmeshMaterial.FillWeight = 38.93805F;
+			this.ColumnSubmeshMaterial.HeaderText = "Material";
+			this.ColumnSubmeshMaterial.MinimumWidth = 10;
+			this.ColumnSubmeshMaterial.Name = "ColumnSubmeshMaterial";
+			this.ColumnSubmeshMaterial.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+			// 
+			// ColumnSubmeshUnknowns
+			// 
+			this.ColumnSubmeshUnknowns.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+			this.ColumnSubmeshUnknowns.FillWeight = 23F;
+			this.ColumnSubmeshUnknowns.HeaderText = "Unknowns";
+			this.ColumnSubmeshUnknowns.MinimumWidth = 10;
+			this.ColumnSubmeshUnknowns.Name = "ColumnSubmeshUnknowns";
+			this.ColumnSubmeshUnknowns.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+			this.ColumnSubmeshUnknowns.Width = 64;
+			// 
+			// label15
+			// 
+			this.label15.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.label15.AutoSize = true;
+			this.label15.Location = new System.Drawing.Point(394, 16);
+			this.label15.Name = "label15";
+			this.label15.Size = new System.Drawing.Size(18, 13);
+			this.label15.TabIndex = 146;
+			this.label15.Text = "ID";
+			// 
+			// checkBoxMeshObjSkinned
+			// 
+			this.checkBoxMeshObjSkinned.AutoCheck = false;
+			this.checkBoxMeshObjSkinned.AutoSize = true;
+			this.checkBoxMeshObjSkinned.Enabled = false;
+			this.checkBoxMeshObjSkinned.Location = new System.Drawing.Point(178, 85);
+			this.checkBoxMeshObjSkinned.Name = "checkBoxMeshObjSkinned";
+			this.checkBoxMeshObjSkinned.Size = new System.Drawing.Size(65, 17);
+			this.checkBoxMeshObjSkinned.TabIndex = 192;
+			this.checkBoxMeshObjSkinned.TabStop = false;
+			this.checkBoxMeshObjSkinned.Text = "Skinned";
+			this.checkBoxMeshObjSkinned.UseVisualStyleBackColor = true;
+			// 
+			// label14
+			// 
+			this.label14.AutoSize = true;
+			this.label14.Location = new System.Drawing.Point(2, 16);
+			this.label14.Name = "label14";
+			this.label14.Size = new System.Drawing.Size(35, 13);
+			this.label14.TabIndex = 142;
+			this.label14.Text = "Name";
+			// 
+			// buttonMeshObjEdit
+			// 
+			this.buttonMeshObjEdit.Enabled = false;
+			this.buttonMeshObjEdit.Location = new System.Drawing.Point(5, 81);
+			this.buttonMeshObjEdit.Name = "buttonMeshObjEdit";
+			this.buttonMeshObjEdit.Size = new System.Drawing.Size(75, 23);
+			this.buttonMeshObjEdit.TabIndex = 200;
+			this.buttonMeshObjEdit.Text = "Edit";
+			this.buttonMeshObjEdit.UseVisualStyleBackColor = true;
+			this.buttonMeshObjEdit.Click += new System.EventHandler(this.buttonMeshObjEdit_Click);
+			// 
+			// buttonMeshObjRemove
+			// 
+			this.buttonMeshObjRemove.Location = new System.Drawing.Point(90, 81);
+			this.buttonMeshObjRemove.Name = "buttonMeshObjRemove";
+			this.buttonMeshObjRemove.Size = new System.Drawing.Size(75, 23);
+			this.buttonMeshObjRemove.TabIndex = 202;
+			this.buttonMeshObjRemove.Text = "Remove";
+			this.buttonMeshObjRemove.UseVisualStyleBackColor = true;
+			this.buttonMeshObjRemove.Click += new System.EventHandler(this.buttonMeshObjRemove_Click);
 			// 
 			// tabPageMaterialView
 			// 
@@ -3308,6 +3364,18 @@
 			this.saveFileDialog1.Filter = "ODF files|*.ODF|All files|*.*";
 			this.saveFileDialog1.RestoreDirectory = true;
 			// 
+			// columnHeader1
+			// 
+			this.columnHeader1.Text = "First";
+			this.columnHeader1.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+			this.columnHeader1.Width = 35;
+			// 
+			// columnHeader2
+			// 
+			this.columnHeader2.Text = "Last";
+			this.columnHeader2.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+			this.columnHeader2.Width = 40;
+			// 
 			// dataGridViewFrameSRT
 			// 
 			this.dataGridViewFrameSRT.AllowUserToAddRows = false;
@@ -3645,19 +3713,6 @@
 			this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.Name = "FormMeshView";
 			this.Text = "FormMeshView";
-			this.groupBoxMeshObjects.ResumeLayout(false);
-			this.groupBoxMeshObjects.PerformLayout();
-			((System.ComponentModel.ISupportInitialize)(this.dataGridViewMesh)).EndInit();
-			this.panelMeshExportOptionsMqo.ResumeLayout(false);
-			this.panelMeshExportOptionsMqo.PerformLayout();
-			this.panelMeshExportOptionsDirectX.ResumeLayout(false);
-			this.panelMeshExportOptionsDirectX.PerformLayout();
-			((System.ComponentModel.ISupportInitialize)(this.numericMeshExportDirectXTicksPerSecond)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.numericMeshExportDirectXKeyframeLength)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.numericUpDownStartKeyframe)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.numericUpDownEndKeyframe)).EndInit();
-			this.panelMeshExportOptionsCollada.ResumeLayout(false);
-			this.panelMeshExportOptionsCollada.PerformLayout();
 			this.tabPageTextureView.ResumeLayout(false);
 			this.splitContainer3.Panel1.ResumeLayout(false);
 			this.splitContainer3.Panel1.PerformLayout();
@@ -3732,6 +3787,7 @@
 			this.splitContainerAnimation.Panel2.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainerAnimation)).EndInit();
 			this.splitContainerAnimation.ResumeLayout(false);
+			((System.ComponentModel.ISupportInitialize)(this.dataGridViewAnimationClip)).EndInit();
 			this.groupBox1.ResumeLayout(false);
 			this.groupBox1.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.trackBarAnimationClipKeyframe)).EndInit();
@@ -3762,6 +3818,17 @@
 			this.groupBoxExportOptions.PerformLayout();
 			this.panelMeshExportOptionsFbx.ResumeLayout(false);
 			this.panelMeshExportOptionsFbx.PerformLayout();
+			this.panelMeshExportOptionsDirectX.ResumeLayout(false);
+			this.panelMeshExportOptionsDirectX.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.numericMeshExportDirectXTicksPerSecond)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.numericMeshExportDirectXKeyframeLength)).EndInit();
+			this.panelMeshExportOptionsCollada.ResumeLayout(false);
+			this.panelMeshExportOptionsCollada.PerformLayout();
+			this.panelMeshExportOptionsMqo.ResumeLayout(false);
+			this.panelMeshExportOptionsMqo.PerformLayout();
+			this.groupBoxMeshObjects.ResumeLayout(false);
+			this.groupBoxMeshObjects.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.dataGridViewMesh)).EndInit();
 			this.tabPageMaterialView.ResumeLayout(false);
 			this.tabPageMaterialView.PerformLayout();
 			this.groupBoxMeshTextures.ResumeLayout(false);
@@ -3806,9 +3873,6 @@
 		private System.Windows.Forms.NumericUpDown numericMeshExportDirectXKeyframeLength;
 		private System.Windows.Forms.Label label34;
 		private System.Windows.Forms.Label label35;
-		public System.Windows.Forms.NumericUpDown numericUpDownStartKeyframe;
-		private System.Windows.Forms.Label label48;
-		public System.Windows.Forms.NumericUpDown numericUpDownEndKeyframe;
 		private System.Windows.Forms.Panel panelMeshExportOptionsCollada;
 		private System.Windows.Forms.Button buttonBoneRemove;
 		private System.Windows.Forms.Button buttonBoneCopy;
@@ -3886,8 +3950,6 @@
 		private System.Windows.Forms.ComboBox comboBoxMeshExportFormat;
 		private System.Windows.Forms.Button buttonMeshExport;
 		private System.Windows.Forms.Panel panelMeshExportOptionsFbx;
-		private System.Windows.Forms.CheckBox checkBox8dot3;
-		private System.Windows.Forms.Label label49;
 		private System.Windows.Forms.Button buttonMaterialRemove;
 		private System.Windows.Forms.Button buttonMaterialCopy;
 		private System.Windows.Forms.Label label3;
@@ -4030,12 +4092,6 @@
 		private System.Windows.Forms.SplitContainer splitContainerAnimation;
 		private System.Windows.Forms.ColumnHeader columnHeader3;
 		private System.Windows.Forms.ColumnHeader columnHeader4;
-		public System.Windows.Forms.ListView listViewAnimationClip;
-		private System.Windows.Forms.ColumnHeader columnHeader8;
-		private System.Windows.Forms.ColumnHeader columnHeader1;
-		private System.Windows.Forms.ColumnHeader columnHeader2;
-		private System.Windows.Forms.ColumnHeader columnHeader6;
-		private System.Windows.Forms.ColumnHeader columnHeader7;
 		private System.Windows.Forms.Label label33;
 		private System.Windows.Forms.SplitContainer splitContainer2;
 		private System.Windows.Forms.SplitContainer splitContainer3;
@@ -4073,11 +4129,24 @@
 		private System.Windows.Forms.GroupBox groupBox1;
 		private System.Windows.Forms.Button buttonAnimationClipPlayPause;
 		private System.Windows.Forms.TrackBar trackBarAnimationClipKeyframe;
-		public System.Windows.Forms.CheckBox checkBoxAnimationClipLoadNextClip;
 		public System.Windows.Forms.NumericUpDown numericAnimationClipSpeed;
 		private System.Windows.Forms.NumericUpDown numericAnimationClipKeyframe;
 		private System.Windows.Forms.Label labelSkeletalRender;
 		private System.Windows.Forms.Label label30;
+		private System.Windows.Forms.Label label48;
+		private System.Windows.Forms.TextBox textBoxKeyframeRange;
+		private System.Windows.Forms.CheckBox checkBoxODAskeleton;
+		private System.Windows.Forms.CheckBox checkBoxInterpolationLinear;
+		private System.Windows.Forms.CheckBox checkBoxEulerFilter;
+		private System.Windows.Forms.DataGridView dataGridViewAnimationClip;
+		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnIdx;
+		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnName;
+		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnStart;
+		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnEnd;
+		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnTracks;
+		private System.Windows.Forms.TextBox textBoxEulerFilterPrecision;
+		private System.Windows.Forms.ColumnHeader columnHeader1;
+		private System.Windows.Forms.ColumnHeader columnHeader2;
 
 	}
 }

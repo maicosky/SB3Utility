@@ -1296,5 +1296,18 @@ namespace ODFPlugin
 			if (formatType < 10)
 				texture.Unknown1 = new byte[72];
 		}
+
+		public static void odfTrack(odfTrack track)
+		{
+			track.AlwaysZero16 = new byte[16];
+		}
+
+		public static void odfKeyframe(odfKeyframe keyframe)
+		{
+			keyframe.Unknown1 = 1;
+			keyframe.Unknown2 = 1;
+			keyframe.Unknown3 = 1;
+			keyframe.AlwaysZero88 = new byte[88];
+		}
 	}
 }

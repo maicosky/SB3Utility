@@ -60,19 +60,26 @@
     <Compile Include="FormAnimView.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="FormAnimViewDragDrop.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormAnimViewDragDrop.Designer.cs">
+      <DependentUpon>FormAnimViewDragDrop.cs</DependentUpon>
+    </Compile>
     <Compile Include="FormMeshView.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="FormMeshView.Designer.cs">
       <DependentUpon>FormMeshView.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormODFDragDrop.cs">
+    <Compile Include="FormMeshViewDragDrop.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormODFDragDrop.designer.cs">
-      <DependentUpon>FormODFDragDrop.cs</DependentUpon>
+    <Compile Include="FormMeshViewDragDrop.designer.cs">
+      <DependentUpon>FormMeshViewDragDrop.cs</DependentUpon>
     </Compile>
     <Compile Include="Mqo.cs" />
+    <Compile Include="odaEditor.cs" />
     <Compile Include="odfEditor.cs" />
     <Compile Include="odfFile.cs" />
     <Compile Include="odfFolder.cs" />
@@ -96,11 +103,6 @@
       <Name>ODFBase</Name>
       <Private>False</Private>
     </ProjectReference>
-    <ProjectReference Include="..\ODFPluginFBX\ODFPluginFBX.vcxproj">
-      <Project>{F8C1BF95-4C68-4B65-9F80-759A8E0D7DA7}</Project>
-      <Name>ODFPluginFBX</Name>
-      <Private>False</Private>
-    </ProjectReference>
     <ProjectReference Include="..\Plugins\SB3UtilityPlugins\SB3UtilityPlugins.csproj">
       <Project>{76C12FB4-AEBF-4271-9CCA-6F04A25ED266}</Project>
       <Name>SB3UtilityPlugins</Name>
@@ -118,11 +120,14 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="FormAnimViewDragDrop.resx">
+      <DependentUpon>FormAnimViewDragDrop.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FormMeshView.resx">
       <DependentUpon>FormMeshView.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormODFDragDrop.resx">
-      <DependentUpon>FormODFDragDrop.cs</DependentUpon>
+    <EmbeddedResource Include="FormMeshViewDragDrop.resx">
+      <DependentUpon>FormMeshViewDragDrop.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

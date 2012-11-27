@@ -1415,6 +1415,36 @@ namespace AiDroidPlugin
 						}
 						dragOptions.numericMeshId.Value = destFrameId;
 
+						bool normalsCopyNear = false;
+						bool bonesCopyNear = false;
+						if (srcEditor.Meshes != null)
+						{
+							normalsCopyNear = true;
+							bonesCopyNear = true;
+							foreach (ImportedMesh mesh in srcEditor.Meshes)
+							{
+								foreach (ImportedSubmesh submesh in mesh.SubmeshList)
+								{
+									foreach (ImportedVertex vert in submesh.VertexList)
+									{
+										if (vert.Normal.X != 0f || vert.Normal.Y != 0f || vert.Normal.Z != 0f)
+										{
+											normalsCopyNear = false;
+											break;
+										}
+									}
+								}
+								if (mesh.BoneList != null && mesh.BoneList.Count > 0)
+								{
+									bonesCopyNear = false;
+								}
+							}
+						}
+						if (normalsCopyNear)
+							dragOptions.radioButtonNormalsCopyNear.Checked = true;
+						if (bonesCopyNear)
+							dragOptions.radioButtonBonesCopyNear.Checked = true;
+
 						if (dragOptions.ShowDialog() == DialogResult.OK)
 						{
 							// repeating only final choices for repeatability of the script
@@ -2090,7 +2120,9 @@ namespace AiDroidPlugin
 					return;
 				}
 
-				string command = EditorVar + ".SetBoneSRT(meshIdx=" + loadedBone[0] + ", boneIdx=" + loadedBone[1];
+				string command = EditorVar + (checkBoxUniqueBone.Checked
+					? ".SetBoneSRT(boneFrame=\"" + textBoxBoneName.Text + "\""
+					: ".SetBoneSRT(meshIdx=" + loadedBone[0] + ", boneIdx=" + loadedBone[1]);
 				char[] argPrefix = new char[3] { 's', 'r', 't' };
 				char[] argAxis = new char[3] { 'X', 'Y', 'Z' };
 				for (int i = 0; i < 3; i++)
@@ -2127,7 +2159,9 @@ namespace AiDroidPlugin
 					return;
 				}
 
-				string command = EditorVar + ".SetBoneMatrix(meshIdx=" + loadedBone[0] + ", boneIdx=" + loadedBone[1];
+				string command = EditorVar + (checkBoxUniqueBone.Checked
+					? ".SetBoneMatrix(boneFrame=\"" + textBoxBoneName.Text + "\""
+					: ".SetBoneMatrix(meshIdx=" + loadedBone[0] + ", boneIdx=" + loadedBone[1]);
 				for (int i = 0; i < 4; i++)
 				{
 					for (int j = 0; j < 4; j++)

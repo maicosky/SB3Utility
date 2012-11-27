@@ -78,7 +78,7 @@ namespace ODFPlugin
 		List<RenderObjectODF> renderObjectMeshes;
 		List<int> renderObjectIds;
 
-		private ListViewItem loadedAnimationClip = null;
+		private DataGridViewRow loadedAnimationClip = null;
 
 		private int animationId;
 		private KeyframedAnimationSet animationSet = null;
@@ -133,18 +133,7 @@ namespace ODFPlugin
 					Properties.Settings.Default.Save();
 					propertiesChanged = false;
 				}
-				if (Editor.Parser.AnimSection != null)
-				{
-					if (animationSet != null)
-					{
-						Pause();
-						Gui.Renderer.RemoveAnimationSet(animationId);
-						Gui.Renderer.ResetPose();
-						animationSet.Dispose();
-					}
-
-					Gui.Renderer.RenderObjectAdded -= new EventHandler(Renderer_RenderObjectAdded);
-				}
+				UnloadAnims();
 				DisposeRenderObjects();
 
 				Gui.Scripting.Variables.Remove(ParserVar);
@@ -244,13 +233,13 @@ namespace ODFPlugin
 			}
 			Gui.Docking.ShowDockContent(this, Gui.Docking.DockEditors);
 
-			List<DockContent> formMeshViewList;
-			if (Gui.Docking.DockContents.TryGetValue(typeof(FormMeshView), out formMeshViewList))
+			List<DockContent> formList;
+			if (Gui.Docking.DockContents.TryGetValue(this is FormAnimView ? typeof(FormAnimView) : typeof(FormMeshView), out formList))
 			{
-				var listCopy = new List<FormMeshView>(formMeshViewList.Count);
-				for (int i = 0; i < formMeshViewList.Count; i++)
+				var listCopy = new List<FormMeshView>(formList.Count);
+				for (int i = 0; i < formList.Count; i++)
 				{
-					listCopy.Add((FormMeshView)formMeshViewList[i]);
+					listCopy.Add((FormMeshView)formList[i]);
 				}
 
 				string path = ((odfParser)Gui.Scripting.Variables[ParserVar]).ODFPath;
@@ -713,12 +702,7 @@ namespace ODFPlugin
 				renderTimer.Tick += new EventHandler(renderTimer_Tick);
 				Play();
 
-				createAnimationClipListView(this.Editor.Parser, listViewAnimationClip);
-				tabPageAnimation.Text = "Animation [" + listViewAnimationClip.Items.Count + "]";
-
-				odfANIMSection startAnimation = this.Editor.Parser.AnimSection;
-				createAnimationTrackListView(startAnimation);
-				animationSetMaxKeyframes(startAnimation);
+				LoadAnims();
 
 				Gui.Renderer.RenderObjectAdded += new EventHandler(Renderer_RenderObjectAdded);
 			}
@@ -730,29 +714,60 @@ namespace ODFPlugin
 			}
 		}
 
+		private void LoadAnims()
+		{
+			createAnimationClipDataGridView(this.Editor.Parser, dataGridViewAnimationClip);
+			tabPageAnimation.Text = "Animation [" + dataGridViewAnimationClip.Rows.Count + "]";
+
+			odfANIMSection startAnimation = this.Editor.Parser.AnimSection;
+			createAnimationTrackListView(startAnimation);
+			animationSetMaxKeyframes(startAnimation);
+		}
+
+		private void UnloadAnims()
+		{
+			if (Editor.Parser.AnimSection != null)
+			{
+				if (animationSet != null)
+				{
+					Pause();
+					Gui.Renderer.RemoveAnimationSet(animationId);
+					Gui.Renderer.ResetPose();
+					animationSet.Dispose();
+					animationSet = null;
+				}
+
+				Gui.Renderer.RenderObjectAdded -= new EventHandler(Renderer_RenderObjectAdded);
+			}
+		}
+
 		private void createAnimationTrackListView(odfANIMSection trackList)
 		{
 			if (trackList.Count > 0)
 			{
 				listViewAnimationTrack.BeginUpdate();
+				listViewAnimationTrack.Items.Clear();
 				for (int i = 0; i < trackList.Count; i++)
 				{
 					odfTrack track = trackList[i];
-					string numTracks = String.Empty;
-					for (int j = 0; j < this.listViewAnimationClip.SelectedItems.Count; j++)
+					string numTracks = String.Empty, first = String.Empty, last = String.Empty;
+					if (this.dataGridViewAnimationClip.SelectedRows.Count > 0)
 					{
-						odfBANMSection banm = (odfBANMSection)this.listViewAnimationClip.SelectedItems[j].Tag;
-						for (int k = 0; k < banm.Count; k++)
+						odfANIMSection anim = (odfANIMSection)this.dataGridViewAnimationClip.SelectedRows[0].Tag;
+						for (int k = 0; k < anim.Count; k++)
 						{
-							odfTrack bTrack = banm[k];
+							odfTrack bTrack = anim[k];
 							if (bTrack.BoneFrameId == track.BoneFrameId)
 							{
-								numTracks += "," + bTrack.KeyframeList.Count;
+								numTracks = bTrack.KeyframeList.Count.ToString();
+								first = bTrack.KeyframeList[0].Index.ToString();
+								last = bTrack.KeyframeList[bTrack.KeyframeList.Count - 1].Index.ToString();
+								break;
 							}
 						}
 					}
 					odfFrame frame = odf.FindFrame(track.BoneFrameId, this.Editor.Parser.FrameSection.RootFrame);
-					ListViewItem item = new ListViewItem(new string[] { frame != null ? frame.Name : track.BoneFrameId + " (orphaned track)", track.KeyframeList.Count.ToString()+numTracks });
+					ListViewItem item = new ListViewItem(new string[] { frame != null ? frame.Name : track.BoneFrameId + " (orphaned track)", numTracks, first, last });
 					item.Tag = track;
 					listViewAnimationTrack.Items.Add(item);
 				}
@@ -760,15 +775,15 @@ namespace ODFPlugin
 			}
 		}
 
-		public static void createAnimationClipListView(odfParser parser, ListView clipListView)
+		public static void createAnimationClipDataGridView(odfParser parser, DataGridView clipDataGridView)
 		{
-			clipListView.BeginUpdate();
-			clipListView.Items.Clear();
+			clipDataGridView.Rows.Clear();
 			float startKeyframeIndex = parser.AnimSection[0].KeyframeList[0].Index;
 			float endKeyframeIndex = parser.AnimSection[0].KeyframeList[parser.AnimSection[0].KeyframeList.Count - 1].Index;
-			ListViewItem item = new ListViewItem(new string[] { 0.ToString(), "ANIM", startKeyframeIndex.ToString(), endKeyframeIndex.ToString(), parser.AnimSection.Count.ToString() });
-			item.Tag = parser.AnimSection;
-			clipListView.Items.Add(item);
+			DataGridViewRow row = new DataGridViewRow();
+			row.CreateCells(clipDataGridView, new string[] { 0.ToString(), "ANIM", startKeyframeIndex.ToString(), endKeyframeIndex.ToString(), parser.AnimSection.Count.ToString() });
+			row.Tag = parser.AnimSection;
+			clipDataGridView.Rows.Add(row);
 			List<odfBANMSection> clipList = parser.BANMList;
 			for (int i = 1; i <= clipList.Count; i++)
 			{
@@ -776,12 +791,11 @@ namespace ODFPlugin
 				string clipName = clip.Name.ToString();
 				if (clipName == string.Empty)
 					clipName = "unnamed (" + clip.Id.ToString() + ")";
-				item = new ListViewItem(new string[] { i.ToString(), clipName, clip.StartKeyframeIndex.ToString(), clip.EndKeyframeIndex.ToString(), clip.Count.ToString() });
-				item.Tag = clip;
-				clipListView.Items.Add(item);
+				row = new DataGridViewRow();
+				row.CreateCells(clipDataGridView, new string[] { i.ToString(), clipName, clip.StartKeyframeIndex.ToString(), clip.EndKeyframeIndex.ToString(), clip.Count.ToString() });
+				row.Tag = clip;
+				clipDataGridView.Rows.Add(row);
 			}
-			clipListView.AutoResizeColumn(1, ColumnHeaderAutoResizeStyle.ColumnContent);
-			clipListView.EndUpdate();
 		}
 
 		void LoadFrame(int frameIdx)
@@ -1728,13 +1742,13 @@ namespace ODFPlugin
 				DragSource source = (DragSource)node.Tag;
 				if (source.Type == typeof(odfFrame))
 				{
-					using (var dragOptions = new FormODFDragDrop(Editor, FormODFDragDrop.Panel.Frame))
+					using (var dragOptions = new FormMeshViewDragDrop(Editor, FormMeshViewDragDrop.Panel.Frame))
 					{
 						var srcEditor = (odfEditor)Gui.Scripting.Variables[source.Variable];
 						var srcFrameName = srcEditor.Frames[(int)source.Id].Name;
 						dragOptions.numericFrameId.Value = GetDestParentId(srcFrameName, dest);
 						if (dragOptions.ShowDialog() == DialogResult.OK)
-						{ // MergeFrame AddFrame ReplaceFrame
+						{
 							Gui.Scripting.RunScript(EditorVar + "." + dragOptions.FrameMethod.GetName() + "(srcFrame=" + source.Variable + ".Frames[" + (int)source.Id + "], srcParser=" + source.Variable + ".Parser, destParentIdx=" + dragOptions.numericFrameId.Value
 								+ (dragOptions.FrameMethod == CopyFrameMethod.ReplaceFrame ? ", deleteMorphs=" + deleteMorphsAutomaticallyToolStripMenuItem.Checked : "") + ")");
 							RecreateFrames();
@@ -1753,7 +1767,7 @@ namespace ODFPlugin
 				}
 				else if (source.Type == typeof(ImportedFrame))
 				{
-					using (var dragOptions = new FormODFDragDrop(Editor, FormODFDragDrop.Panel.Frame))
+					using (var dragOptions = new FormMeshViewDragDrop(Editor, FormMeshViewDragDrop.Panel.Frame))
 					{
 						var srcEditor = (ImportedEditor)Gui.Scripting.Variables[source.Variable];
 						var srcFrameName = srcEditor.Frames[(int)source.Id].Name;
@@ -1768,7 +1782,7 @@ namespace ODFPlugin
 				}
 				else if (source.Type == typeof(WorkspaceMesh))
 				{
-					using (var dragOptions = new FormODFDragDrop(Editor, FormODFDragDrop.Panel.Mesh))
+					using (var dragOptions = new FormMeshViewDragDrop(Editor, FormMeshViewDragDrop.Panel.Mesh))
 					{
 						var srcEditor = (ImportedEditor)Gui.Scripting.Variables[source.Variable];
 
@@ -1778,6 +1792,36 @@ namespace ODFPlugin
 							destFrameIdx = 0;
 						}
 						dragOptions.numericMeshId.Value = destFrameIdx;
+
+						bool normalsCopyNear = false;
+						bool bonesCopyNear = false;
+						if (srcEditor.Meshes != null)
+						{
+							normalsCopyNear = true;
+							bonesCopyNear = true;
+							foreach (ImportedMesh mesh in srcEditor.Meshes)
+							{
+								foreach (ImportedSubmesh submesh in mesh.SubmeshList)
+								{
+									foreach (ImportedVertex vert in submesh.VertexList)
+									{
+										if (vert.Normal.X != 0f || vert.Normal.Y != 0f || vert.Normal.Z != 0f)
+										{
+											normalsCopyNear = false;
+											break;
+										}
+									}
+								}
+								if (mesh.BoneList != null && mesh.BoneList.Count > 0)
+								{
+									bonesCopyNear = false;
+								}
+							}
+						}
+						if (normalsCopyNear)
+							dragOptions.radioButtonNormalsCopyNear.Checked = true;
+						if (bonesCopyNear)
+							dragOptions.radioButtonBonesCopyNear.Checked = true;
 
 						if (dragOptions.ShowDialog() == DialogResult.OK)
 						{
@@ -2214,7 +2258,7 @@ namespace ODFPlugin
 				DragSource source = (DragSource)node.Tag;
 				if (source.Type == typeof(WorkspaceMorph))
 				{
-					using (var dragOptions = new FormODFDragDrop(Editor, FormODFDragDrop.Panel.MorphList))
+					using (var dragOptions = new FormMeshViewDragDrop(Editor, FormMeshViewDragDrop.Panel.MorphList))
 					{
 						var srcEditor = (ImportedEditor)Gui.Scripting.Variables[source.Variable];
 						dragOptions.textBoxName.Text = srcEditor.Morphs[(int)source.Id].Name;
@@ -2398,6 +2442,25 @@ namespace ODFPlugin
 
 		#region AnimationView
 
+			#region DisableAutomaticSelectionOfFirstRow
+
+		DataGridViewRow currentRowWhenTabClicked;
+
+		private void tabControlLists_Selecting(object sender, TabControlCancelEventArgs e)
+		{
+			currentRowWhenTabClicked = dataGridViewAnimationClip.CurrentRow;
+		}
+
+		private void tabControlLists_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			if (tabControlLists.SelectedTab == tabPageAnimation)
+			{
+				dataGridViewAnimationClip.CurrentRow.Selected = currentRowWhenTabClicked != null && currentRowWhenTabClicked.Selected;
+			}
+		}
+
+			#endregion DisableAutomaticSelectionOfFirstRow
+
 		private void listViewAnimationTrack_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
 		{
 			try
@@ -2525,9 +2588,9 @@ namespace ODFPlugin
 
 			if (loadedAnimationClip != null)
 			{
-				listViewAnimationClip.ItemSelectionChanged -= new ListViewItemSelectionChangedEventHandler(listViewAnimationClip_ItemSelectionChanged);
+				dataGridViewAnimationClip.SelectionChanged -= dataGridViewAnimationClip_SelectionChanged;
 				loadedAnimationClip.Selected = false;
-				listViewAnimationClip.ItemSelectionChanged += new ListViewItemSelectionChangedEventHandler(listViewAnimationClip_ItemSelectionChanged);
+				dataGridViewAnimationClip.SelectionChanged += dataGridViewAnimationClip_SelectionChanged;
 			}
 
 			if (idx < 0)
@@ -2538,7 +2601,7 @@ namespace ODFPlugin
 			}
 			else
 			{
-				loadedAnimationClip = listViewAnimationClip.Items[idx];
+				loadedAnimationClip = dataGridViewAnimationClip.Rows[idx];
 				odfANIMSection animations = (odfANIMSection)loadedAnimationClip.Tag;
 				double start;
 				string animName;
@@ -2574,10 +2637,9 @@ namespace ODFPlugin
 				SetTrackPosition(start);
 				AdvanceTime(0);
 
-				listViewAnimationClip.ItemSelectionChanged -= new ListViewItemSelectionChangedEventHandler(listViewAnimationClip_ItemSelectionChanged);
+				dataGridViewAnimationClip.SelectionChanged -= dataGridViewAnimationClip_SelectionChanged;
 				loadedAnimationClip.Selected = true;
-				loadedAnimationClip.EnsureVisible();
-				listViewAnimationClip.ItemSelectionChanged += new ListViewItemSelectionChangedEventHandler(listViewAnimationClip_ItemSelectionChanged);
+				dataGridViewAnimationClip.SelectionChanged += dataGridViewAnimationClip_SelectionChanged;
 
 				SetKeyframeNum((int)start);
 			}
@@ -2612,19 +2674,36 @@ namespace ODFPlugin
 			}
 		}
 
-		private void listViewAnimationClip_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
+		private void dataGridViewAnimationClip_SelectionChanged(object sender, EventArgs e)
 		{
-			if (e.IsSelected)
+			try
 			{
-				AnimationSetClip(e.Item.Index);
-			}
-			else
-			{
-				if (loadedAnimationClip == e.Item)
+				DataGridView thisDataGridView = (DataGridView)sender;
+				int clipNumber;
+				if (thisDataGridView.SelectedRows.Count > 0)
 				{
-					AnimationSetClip(-1);
+					DataGridViewRow row = thisDataGridView.SelectedRows[0];
+					if (row == loadedAnimationClip)
+						return;
+					clipNumber = thisDataGridView.Rows.IndexOf(row);
 				}
+				else
+				{
+					clipNumber = -1;
+				}
+				AnimationSetClip(clipNumber);
+				createAnimationTrackListView(((odfParser)Gui.Scripting.Variables[ParserVar]).AnimSection);
+				dataGridViewAnimationClip.EndEdit();
 			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void dataGridViewAnimationClip_DataError(object sender, DataGridViewDataErrorEventArgs e)
+		{
+			e.Cancel = true;
 		}
 
 		private void renderTimer_Tick(object sender, EventArgs e)
@@ -2755,6 +2834,162 @@ namespace ODFPlugin
 			trackBarAnimationClipKeyframe.Maximum = max;
 //			numericAnimationKeyframeStart.Maximum = max;
 //			numericAnimationKeyframeEnd.Maximum = max;
+		}
+
+		private void dataGridViewAnimationClip_DragEnter(object sender, DragEventArgs e)
+		{
+			try
+			{
+				UpdateDragDropAnimations(sender, e);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void dataGridViewAnimationClip_DragOver(object sender, DragEventArgs e)
+		{
+			try
+			{
+				UpdateDragDropAnimations(sender, e);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void dataGridViewAnimationClip_DragDrop(object sender, DragEventArgs e)
+		{
+			try
+			{
+				TreeNode node = (TreeNode)e.Data.GetData(typeof(TreeNode));
+				if (node == null)
+				{
+					Gui.Docking.DockDragDrop(sender, e);
+				}
+				else
+				{
+					ProcessDragDropAnimations(node);
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void ProcessDragDropAnimations(TreeNode node)
+		{
+			if (node.Tag is DragSource)
+			{
+				if ((node.Parent != null) && !node.Checked && node.StateImageIndex != (int)CheckState.Indeterminate)
+				{
+					return;
+				}
+
+				DragSource source = (DragSource)node.Tag;
+				if (source.Type == typeof(WorkspaceAnimation))
+				{
+					using (var dragOptions = new FormAnimViewDragDrop(Editor, false))
+					{
+						odfANIMSection anim = (odfANIMSection)dataGridViewAnimationClip.SelectedRows[0].Tag;
+						dragOptions.textBoxTargetAnimationClip.Text = anim.Name == String.Empty ? "ANIM" : anim.Name;
+						var srcEditor = (ImportedEditor)Gui.Scripting.Variables[source.Variable];
+						dragOptions.numericResample.Value = -1;
+						dragOptions.comboBoxMethod.SelectedIndex = (int)ReplaceAnimationMethod.Replace;
+						if (dragOptions.ShowDialog() == DialogResult.OK)
+						{
+							// repeating only final choices for repeatability of the script
+							WorkspaceAnimation wsAnimation = srcEditor.Animations[(int)source.Id];
+							foreach (ImportedAnimationTrack track in wsAnimation.TrackList)
+							{
+								if (!wsAnimation.isTrackEnabled(track))
+								{
+									Gui.Scripting.RunScript(source.Variable + ".setTrackEnabled(animationId=" + (int)source.Id + ", id=" + wsAnimation.TrackList.IndexOf(track) + ", enabled=false)");
+								}
+							}
+							Gui.Scripting.RunScript(EditorVar + ".ReplaceAnimation(animation=" + source.Variable + ".Animations[" + (int)source.Id + "], resampleCount=" + dragOptions.numericResample.Value + ", linear=" + dragOptions.radioButtonInterpolationLinear.Checked + ", method=\"" + dragOptions.comboBoxMethod.SelectedItem + "\", clip=\"" + dragOptions.textBoxTargetAnimationClip.Text + "\", insertPos=" + dragOptions.numericPosition.Value + ", negateQuaternionFlips=" + dragOptions.checkBoxNegateQuaternionFlips.Checked + ")");
+							UnloadAnims();
+							LoadAnims();
+						}
+					}
+				}
+			}
+			else
+			{
+				foreach (TreeNode child in node.Nodes)
+				{
+					ProcessDragDropAnimations(child);
+				}
+			}
+		}
+
+		private void UpdateDragDropAnimations(object sender, DragEventArgs e)
+		{
+			Point p = dataGridViewAnimationClip.PointToClient(new Point(e.X, e.Y));
+			DataGridView.HitTestInfo h = dataGridViewAnimationClip.HitTest(p.X, p.Y);
+
+			if (h.RowIndex < 0)
+			{
+				Gui.Docking.DockDragEnter(sender, e);
+			}
+			else
+			{
+				DataGridViewRow target = dataGridViewAnimationClip.Rows[h.RowIndex];
+				dataGridViewAnimationClip.SelectionChanged -= dataGridViewAnimationClip_SelectionChanged;
+				if (dataGridViewAnimationClip.SelectedRows.Count > 0)
+				{
+					dataGridViewAnimationClip.SelectedRows[0].Selected = false;
+				}
+				target.Selected = true;
+				dataGridViewAnimationClip.SelectionChanged += dataGridViewAnimationClip_SelectionChanged;
+				e.Effect = e.AllowedEffect & DragDropEffects.Copy;
+			}
+		}
+
+		private void dataGridViewAnimationClip_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+		{
+			if (!dataGridViewAnimationClip.Rows[0].Selected)
+			{
+				dataGridViewAnimationClip.BeginEdit(true);
+			}
+		}
+
+		private void dataGridViewAnimationClip_KeyDown(object sender, KeyEventArgs e)
+		{
+			if (e.KeyCode == Keys.Enter)
+			{
+				e.Handled = true;
+			}
+		}
+
+		private void dataGridViewAnimationClip_KeyPress(object sender, KeyPressEventArgs e)
+		{
+			if (e.KeyChar == (char)Keys.Enter && !dataGridViewAnimationClip.Rows[0].Selected)
+			{
+				dataGridViewAnimationClip.BeginEdit(true);
+			}
+		}
+
+		private void dataGridViewAnimationClip_CellEndEdit(object sender, DataGridViewCellEventArgs e)
+		{
+			string clipName = (string)dataGridViewAnimationClip.Rows[e.RowIndex].Cells[1].Value;
+			switch (e.ColumnIndex)
+			{
+			case 1:
+				Gui.Scripting.RunScript(EditorVar + ".SetAnimationClipName(name=\"" + Editor.Animations[e.RowIndex].Name + "\", newName=\"" + clipName + "\")");
+				break;
+			case 2:
+				string clipStart = (string)dataGridViewAnimationClip.Rows[e.RowIndex].Cells[2].Value;
+				Gui.Scripting.RunScript(EditorVar + ".SetAnimationClipStart(name=\"" + clipName + "\", start=" + clipStart + ")");
+				break;
+			case 3:
+				string clipEnd = (string)dataGridViewAnimationClip.Rows[e.RowIndex].Cells[3].Value;
+				Gui.Scripting.RunScript(EditorVar + ".SetAnimationClipEnd(name=\"" + clipName + "\", end=" + clipEnd + ")");
+				break;
+			}
 		}
 
 		#endregion AnimationView
@@ -3347,6 +3582,35 @@ namespace ODFPlugin
 				}
 				meshNames = "{ " + meshNames.Substring(0, meshNames.Length - 2) + " }";
 
+				string odaVars = loadedAnimationClip != null ? ParserVar + ", " + "\"" + (((odfANIMSection)loadedAnimationClip.Tag).Name == String.Empty ? "ANIM" : ((odfANIMSection)loadedAnimationClip.Tag).Name) + "\", " : String.Empty;
+				List<DockContent> formODAList;
+				if (Gui.Docking.DockContents.TryGetValue(typeof(FormAnimView), out formODAList))
+				{
+					foreach (FormAnimView form in formODAList)
+					{
+						odaVars += form.ParserVar + ", " + (form.loadedAnimationClip != null
+							? "\"" + (((odfANIMSection)form.loadedAnimationClip.Tag).Name == String.Empty ? "ANIM" : ((odfANIMSection)form.loadedAnimationClip.Tag).Name) + "\""
+							: "null") + ", ";
+					}
+				}
+				if (odaVars.Length > 0)
+				{
+					odaVars = "{ " + odaVars.Substring(0, odaVars.Length - 2) + " }";
+				}
+				else
+				{
+					odaVars = "null";
+				}
+
+				int startKeyframe = -1;
+				Int32.TryParse(textBoxKeyframeRange.Text.Substring(0, textBoxKeyframeRange.Text.LastIndexOf('-')), out startKeyframe);
+				int endKeyframe = 0;
+				Int32.TryParse(textBoxKeyframeRange.Text.Substring(textBoxKeyframeRange.Text.LastIndexOf('-') + 1), out endKeyframe);
+				bool linear = checkBoxInterpolationLinear.Checked;
+				bool EulerFilter = checkBoxEulerFilter.Checked;
+				double filterPrecision = 0.25;
+				Double.TryParse(textBoxEulerFilterPrecision.Text, out filterPrecision);
+
 				Report.ReportLog("Started exporting to " + comboBoxMeshExportFormat.SelectedItem + " format...");
 				Application.DoEvents();
 
@@ -3356,19 +3620,19 @@ namespace ODFPlugin
 					Gui.Scripting.RunScript("ExportMqo(parser=" + ParserVar + ", meshNames=" + meshNames + ", dirPath=\"" + dir.FullName + "\", singleMqo=" + checkBoxMeshExportMqoSingleFile.Checked + ", worldCoords=" + checkBoxMeshExportMqoWorldCoords.Checked + ")");
 					break;
 				case MeshExportFormat.ColladaFbx:
-					Gui.Scripting.RunScript("ExportODFtoFbx(parser=" + ParserVar + ", meshNames=" + meshNames + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".dae") + "\", exportFormat=\".dae\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", _8dot3=" + checkBox8dot3.Checked + ")");
+					Gui.Scripting.RunScript("ExportFbx(parser=" + ParserVar + ", meshNames=" + meshNames + ", animations=" + odaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + EulerFilter + ", filterPrecision=" + filterPrecision + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".dae") + "\", exportFormat=\".dae\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", odaSkeleton=" + checkBoxODAskeleton.Checked + ")");
 					break;
 				case MeshExportFormat.Fbx:
-					Gui.Scripting.RunScript("ExportODFtoFbx(parser=" + ParserVar + ", meshNames=" + meshNames + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".fbx") + "\", exportFormat=\".fbx\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", _8dot3=" + checkBox8dot3.Checked + ")");
+					Gui.Scripting.RunScript("ExportFbx(parser=" + ParserVar + ", meshNames=" + meshNames + ", animations=" + odaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + EulerFilter + ", filterPrecision=" + filterPrecision + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".fbx") + "\", exportFormat=\".fbx\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", odaSkeleton=" + checkBoxODAskeleton.Checked + ")");
 					break;
 				case MeshExportFormat.Dxf:
-					Gui.Scripting.RunScript("ExportODFtoFbx(parser=" + ParserVar + ", meshNames=" + meshNames + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".dxf") + "\", exportFormat=\".dxf\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", _8dot3=" + checkBox8dot3.Checked + ")");
+					Gui.Scripting.RunScript("ExportFbx(parser=" + ParserVar + ", meshNames=" + meshNames + ", animations=" + odaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + EulerFilter + ", filterPrecision=" + filterPrecision + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".dxf") + "\", exportFormat=\".dxf\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", odaSkeleton=" + checkBoxODAskeleton.Checked + ")");
 					break;
 				case MeshExportFormat._3ds:
-					Gui.Scripting.RunScript("ExportODFtoFbx(parser=" + ParserVar + ", meshNames=" + meshNames + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".3ds") + "\", exportFormat=\".3ds\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", _8dot3=" + checkBox8dot3.Checked + ")");
+					Gui.Scripting.RunScript("ExportFbx(parser=" + ParserVar + ", meshNames=" + meshNames + ", animations=" + odaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + EulerFilter + ", filterPrecision=" + filterPrecision + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".3ds") + "\", exportFormat=\".3ds\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", odaSkeleton=" + checkBoxODAskeleton.Checked + ")");
 					break;
 				case MeshExportFormat.Obj:
-					Gui.Scripting.RunScript("ExportODFtoFbx(parser=" + ParserVar + ", meshNames=" + meshNames + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".obj") + "\", exportFormat=\".obj\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", _8dot3=" + checkBox8dot3.Checked + ")");
+					Gui.Scripting.RunScript("ExportFbx(parser=" + ParserVar + ", meshNames=" + meshNames + ", animations=" + odaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + EulerFilter + ", filterPrecision=" + filterPrecision + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".obj") + "\", exportFormat=\".obj\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", odaSkeleton=" + checkBoxODAskeleton.Checked + ")");
 					break;
 				default:
 					throw new Exception("Unexpected ExportFormat");
@@ -4049,7 +4313,7 @@ namespace ODFPlugin
 			try
 			{
 				string opensFileVar = Gui.Scripting.GetNextVariable("opensODF");
-				Gui.Scripting.RunScript(opensFileVar + " = FormMeshView(path=\"" + Editor.Parser.ODFPath + "\", variable=\"" + opensFileVar + "\")", false);
+				Gui.Scripting.RunScript(opensFileVar + " = Form" + (this is FormAnimView ? "Anim" : "Mesh") + "View(path=\"" + Editor.Parser.ODFPath + "\", variable=\"" + opensFileVar + "\")", false);
 			}
 			catch (Exception ex)
 			{
