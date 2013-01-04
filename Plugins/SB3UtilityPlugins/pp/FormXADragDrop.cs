@@ -27,5 +27,23 @@ namespace SB3Utility
 				comboBoxMethod.Items.AddRange(Enum.GetNames(typeof(ReplaceAnimationMethod)));
 			}
 		}
+
+		private void comboBoxMethod_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			if (comboBoxMethod.SelectedIndex == (int)ReplaceAnimationMethod.Append)
+			{
+				if (numericPosition.Value == 0)
+				{
+					numericPosition.Value = 10;
+				}
+			}
+			else
+			{
+				if (numericPosition.Value == 10)
+				{
+					numericPosition.Value = 0;
+				}
+			}
+		}
 	}
 }

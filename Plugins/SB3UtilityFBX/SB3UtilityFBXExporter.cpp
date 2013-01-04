@@ -4,7 +4,7 @@
 
 namespace SB3Utility
 {
-	void Fbx::Exporter::Export(String^ path, xxParser^ xxParser, List<xxFrame^>^ meshParents, List<xaParser^>^ xaSubfileList, int startKeyframe, int endKeyframe, bool linear, String^ exportFormat, bool allFrames, bool skins)
+	void Fbx::Exporter::Export(String^ path, xxParser^ xxParser, List<xxFrame^>^ meshParents, List<xaParser^>^ xaSubfileList, int startKeyframe, int endKeyframe, bool linear, String^ exportFormat, bool allFrames, bool skins, bool embedMedia)
 	{
 		FileInfo^ file = gcnew FileInfo(path);
 		DirectoryInfo^ dir = file->Directory;
@@ -15,14 +15,15 @@ namespace SB3Utility
 		String^ currentDir = Directory::GetCurrentDirectory();
 		Directory::SetCurrentDirectory(dir->FullName);
 
-		Exporter^ exporter = gcnew Exporter(path, xxParser, meshParents, exportFormat, allFrames, skins);
+		Exporter^ exporter = gcnew Exporter(path, xxParser, meshParents, exportFormat, allFrames, skins, embedMedia);
 		exporter->ExportAnimations(xaSubfileList, startKeyframe, endKeyframe, linear);
 		exporter->pExporter->Export(exporter->pScene);
+		delete exporter;
 
 		Directory::SetCurrentDirectory(currentDir);
 	}
 
-	void Fbx::Exporter::ExportMorph(String^ path, xxParser^ xxParser, xxFrame^ meshFrame, xaMorphClip^ morphClip, xaParser^ xaparser, String^ exportFormat)
+	void Fbx::Exporter::ExportMorph(String^ path, xxParser^ xxParser, xxFrame^ meshFrame, xaMorphClip^ morphClip, xaParser^ xaparser, String^ exportFormat, bool oneBlendShape, bool embedMedia)
 	{
 		FileInfo^ file = gcnew FileInfo(path);
 		DirectoryInfo^ dir = file->Directory;
@@ -35,17 +36,19 @@ namespace SB3Utility
 
 		List<xxFrame^>^ meshParents = gcnew List<xxFrame^>(1);
 		meshParents->Add(meshFrame);
-		Exporter^ exporter = gcnew Exporter(path, xxParser, meshParents, exportFormat, false, false);
-		exporter->ExportMorphs(meshFrame, morphClip, xaparser);
+		Exporter^ exporter = gcnew Exporter(path, xxParser, meshParents, exportFormat, false, false, embedMedia);
+		exporter->ExportMorphs(meshFrame, morphClip, xaparser, oneBlendShape);
 		exporter->pExporter->Export(exporter->pScene);
+		delete exporter;
 
 		Directory::SetCurrentDirectory(currentDir);
 	}
 
-	Fbx::Exporter::Exporter(String^ path, xxParser^ xxparser, List<xxFrame^>^ meshParents, String^ exportFormat, bool allFrames, bool skins)
+	Fbx::Exporter::Exporter(String^ path, xxParser^ xxparser, List<xxFrame^>^ meshParents, String^ exportFormat, bool allFrames, bool skins, bool embedMedia)
 	{
 		this->xxparser = xxparser;
 		exportSkins = skins;
+		this->embedMedia = embedMedia;
 		meshNames = gcnew HashSet<String^>();
 		for (int i = 0; i < meshParents->Count; i++)
 		{
@@ -96,7 +99,7 @@ namespace SB3Utility
 
 		IOS_REF.SetBoolProp(EXP_FBX_MATERIAL, true);
 		IOS_REF.SetBoolProp(EXP_FBX_TEXTURE, true);
-		IOS_REF.SetBoolProp(EXP_FBX_EMBEDDED, false);
+		IOS_REF.SetBoolProp(EXP_FBX_EMBEDDED, embedMedia);
 		IOS_REF.SetBoolProp(EXP_FBX_SHAPE, true);
 		IOS_REF.SetBoolProp(EXP_FBX_GOBO, true);
 		IOS_REF.SetBoolProp(EXP_FBX_ANIMATION, true);
@@ -144,6 +147,14 @@ namespace SB3Utility
 		}
 		if (pTextures != NULL)
 		{
+			if (embedMedia)
+			{
+				for (int i = 0; i < pTextures->GetCount(); i++)
+				{
+					KFbxFileTexture* tex = pTextures->GetAt(i);
+					File::Delete(gcnew String(tex->GetFileName()));
+				}
+			}
 			delete pTextures;
 		}
 		if (pExporter != NULL)
@@ -637,24 +648,19 @@ namespace SB3Utility
 			KFbxAnimLayer* lAnimLayer = KFbxAnimLayer::Create(pScene, "Base Layer");
 			lAnimStack->AddMember(lAnimLayer);
 
-			int resampleCount = 0;
-			bool resample = false;
-			for (int j = 0; j < pAnimationList->Count; j++)
-			{
-				int numKeyframes = pAnimationList[j]->KeyframeList->Count;
-				if (numKeyframes > resampleCount)
-				{
-					resampleCount = numKeyframes;
-				}
-				if (numKeyframes != resampleCount)
-				{
-					resample = true;
-				}
-			}
 			InterpolationHelper^ interpolationHelper = nullptr;
-			if (resample)
+			int resampleCount = 0;
+			if (startKeyframe >= 0)
 			{
 				interpolationHelper = gcnew InterpolationHelper(pScene, lAnimLayer, linear ? KFbxAnimCurveDef::eINTERPOLATION_LINEAR : KFbxAnimCurveDef::eINTERPOLATION_CUBIC, &scale, &rotate, &translate);
+				for (int j = 0; j < pAnimationList->Count; j++)
+				{
+					int numKeyframes = pAnimationList[j]->KeyframeList[pAnimationList[j]->KeyframeList->Count - 1]->Index + 1;
+					if (numKeyframes > resampleCount)
+					{
+						resampleCount = numKeyframes;
+					}
+				}
 			}
 
 			for (int j = 0; j < pAnimationList->Count; j++)
@@ -703,16 +709,18 @@ namespace SB3Utility
 					lCurveTZ->KeyModifyBegin();
 
 					List<xaAnimationKeyframe^>^ keyframes = keyframeList->KeyframeList;
-					if (keyframes->Count != resampleCount)
-					{
-						keyframes = interpolationHelper->InterpolateTrack(keyframes, resampleCount);
-					}
+
 					double fps = 1.0 / 24;
 					int startAt, endAt;
 					if (startKeyframe >= 0)
 					{
+						if (keyframes->Count < resampleCount)
+						{
+							keyframes = interpolationHelper->InterpolateTrack(keyframes, resampleCount);
+						}
+
 						startAt = startKeyframe;
-						endAt = endKeyframe < keyframes->Count ? endKeyframe : keyframes->Count - 1;
+						endAt = endKeyframe < resampleCount ? endKeyframe : resampleCount - 1;
 					}
 					else
 					{
@@ -721,7 +729,7 @@ namespace SB3Utility
 					}
 					for (int k = startAt, keySetIndex = 0; k <= endAt; k++, keySetIndex++)
 					{
-						lTime.SetSecondDouble(fps * (k - startAt));
+						lTime.SetSecondDouble(fps * (keyframes[k]->Index - keyframes[startAt]->Index));
 
 						lCurveSX->KeyAdd(lTime);
 						lCurveSY->KeyAdd(lTime);
@@ -768,7 +776,7 @@ namespace SB3Utility
 		}
 	}
 
-	void Fbx::Exporter::ExportMorphs(xxFrame^ baseFrame, xaMorphClip^ morphClip, xaParser^ xaparser)
+	void Fbx::Exporter::ExportMorphs(xxFrame^ baseFrame, xaMorphClip^ morphClip, xaParser^ xaparser, bool oneBlendShape)
 	{
 		KFbxNode* pBaseNode = pMeshNodes->GetAt(0);
 		xaMorphSection^ morphSection = xaparser->MorphSection;
@@ -816,6 +824,16 @@ namespace SB3Utility
 			pVertexColorLayer->GetDirectArray().SetAt(meshIndices[i], KFbxColor(0, 0, 1));
 		}
 
+		KFbxBlendShape* lBlendShape;
+		if (oneBlendShape)
+		{
+			WITH_MARSHALLED_STRING
+			(
+				pShapeName, morphClip->Name + "_BlendShape",
+				lBlendShape = KFbxBlendShape::Create(pScene, pShapeName);
+			);
+			pBaseNode->GetChild(meshObjIdx)->GetMesh()->AddDeformer(lBlendShape);
+		}
 		List<xaMorphKeyframeRef^>^ refList = morphClip->KeyframeRefList;
 		List<String^>^ morphNames = gcnew List<String^>(refList->Count);
 		for (int i = 0; i < refList->Count; i++)
@@ -824,7 +842,25 @@ namespace SB3Utility
 			{
 				xaMorphKeyframe^ keyframe = xa::FindMorphKeyFrame(refList[i]->Name, morphSection);
 
-				KFbxShape* pShape = KFbxShape::Create(pScene, "");
+				if (!oneBlendShape)
+				{
+					WITH_MARSHALLED_STRING
+					(
+						pShapeName, morphClip->Name + "_BlendShape",
+						lBlendShape = KFbxBlendShape::Create(pScene, pShapeName);
+					);
+					pBaseNode->GetChild(meshObjIdx)->GetMesh()->AddDeformer(lBlendShape);
+				}
+				KFbxBlendShapeChannel* lBlendShapeChannel = KFbxBlendShapeChannel::Create(pScene, "");
+				KFbxShape* pShape;
+				WITH_MARSHALLED_STRING
+				(
+					pMorphShapeName, keyframe->Name, \
+					pShape = KFbxShape::Create(pScene, pMorphShapeName);
+				);
+				lBlendShapeChannel->AddTargetShape(pShape);
+				lBlendShape->AddBlendShapeChannel(lBlendShapeChannel);
+
 				pShape->InitControlPoints(vertList->Count);
 				KFbxVector4* pControlPoints = pShape->GetControlPoints();
 
@@ -854,17 +890,6 @@ namespace SB3Utility
 					pControlPoints[meshIndices[j]] = KFbxVector4(coords.X, coords.Y, coords.Z);
 					Vector3 normal = keyframe->NormalList[morphIndices[j]];
 					pLayerElementNormal->GetDirectArray().SetAt(meshIndices[j], KFbxVector4(normal.X, normal.Y, normal.Z));
-				}
-
-				char* pMorphShapeName = NULL;
-				try
-				{
-					pMorphShapeName = StringToCharArray(keyframe->Name);
-					pBaseNode->GetChild(meshObjIdx)->GetMesh()->AddShape(pShape, pMorphShapeName);
-				}
-				finally
-				{
-					Marshal::FreeHGlobal((IntPtr)pMorphShapeName);
 				}
 			}
 		}

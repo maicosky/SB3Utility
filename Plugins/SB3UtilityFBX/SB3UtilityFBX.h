@@ -13,6 +13,20 @@ using namespace System::IO;
 using namespace System::Runtime::InteropServices;
 using namespace SlimDX;
 
+#define WITH_MARSHALLED_STRING(name,str,block)\
+	{ \
+		char* name; \
+		try \
+		{ \
+			name = StringToCharArray(str); \
+			block \
+		} \
+		finally \
+		{ \
+			Marshal::FreeHGlobal((IntPtr)name); \
+		} \
+	}
+
 namespace SB3Utility {
 
 	public ref class Fbx
@@ -78,8 +92,8 @@ namespace SB3Utility {
 		ref class Exporter
 		{
 		public:
-			static void Export(String^ path, xxParser^ xxParser, List<xxFrame^>^ meshParents, List<xaParser^>^ xaSubfileList, int startKeyframe, int endKeyframe, bool linear, String^ exportFormat, bool allFrames, bool skins);
-			static void ExportMorph(String^ path, xxParser^ xxParser, xxFrame^ meshFrame, xaMorphClip^ morphClip, xaParser^ xaparser, String^ exportFormat);
+			static void Export(String^ path, xxParser^ xxParser, List<xxFrame^>^ meshParents, List<xaParser^>^ xaSubfileList, int startKeyframe, int endKeyframe, bool linear, String^ exportFormat, bool allFrames, bool skins, bool embedMedia);
+			static void ExportMorph(String^ path, xxParser^ xxParser, xxFrame^ meshFrame, xaMorphClip^ morphClip, xaParser^ xaparser, String^ exportFormat, bool oneBlendShape, bool embedMedia);
 
 			static void Export(String^ path, IImported^ imported, int startKeyframe, int endKeyframe, bool linear, bool EulerFilter, float filterPrecision, String^ exportFormat, bool allFrames, bool skins);
 
@@ -88,6 +102,7 @@ namespace SB3Utility {
 			HashSet<String^>^ meshNames;
 			List<xxFrame^>^ meshFrames;
 			bool exportSkins;
+			bool embedMedia;
 			xxParser^ xxparser;
 
 			IImported^ imported;
@@ -101,7 +116,7 @@ namespace SB3Utility {
 			KArrayTemplate<KFbxFileTexture*>* pTextures;
 			KArrayTemplate<KFbxNode*>* pMeshNodes;
 
-			Exporter(String^ path, xxParser^ xxparser, List<xxFrame^>^ meshParents, String^ exportFormat, bool allFrames, bool skins);
+			Exporter(String^ path, xxParser^ xxparser, List<xxFrame^>^ meshParents, String^ exportFormat, bool allFrames, bool skins, bool embedMedia);
 			~Exporter();
 			!Exporter();
 			void ExportFrame(KFbxNode* pParentNode, xxFrame^ frame);
@@ -110,7 +125,7 @@ namespace SB3Utility {
 			void ExportAnimations(List<xaParser^>^ xaSubfileList, int startKeyframe, int endKeyframe, bool linear);
 			void SetJoints();
 			void SetJointsNode(KFbxNode* pNode, HashSet<String^>^ boneNames);
-			void ExportMorphs(xxFrame^ baseFrame, xaMorphClip^ morphClip, xaParser^ xaparser);
+			void ExportMorphs(xxFrame^ baseFrame, xaMorphClip^ morphClip, xaParser^ xaparser, bool oneBlendShape);
 
 			Exporter(String^ path, IImported^ imported, String^ exportFormat, bool allFrames, bool skins);
 			HashSet<String^>^ SearchHierarchy();

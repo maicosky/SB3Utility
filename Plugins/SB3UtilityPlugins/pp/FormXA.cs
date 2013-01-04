@@ -22,8 +22,7 @@ namespace SB3Utility
 		public string FormVar { get; protected set; }
 
 		private TextBox[][] xaMaterialMatrixText = new TextBox[6][];
-		private TreeNode[] prevMorphKeyframeNodes = null;
-		private ListViewItem loadedAnimationClip = null;
+		private DataGridViewRow loadedAnimationClip = null;
 
 		private int animationId;
 		private KeyframedAnimationSet animationSet = null;
@@ -237,43 +236,8 @@ namespace SB3Utility
 
 			if (Editor.Parser.MorphSection != null)
 			{
-				listViewMorphKeyframe.Items.Clear();
-				List<xaMorphKeyframe> morphKeyframeList = Editor.Parser.MorphSection.KeyframeList;
-				for (int i = 0; i < morphKeyframeList.Count; i++)
-				{
-					xaMorphKeyframe morphKeyframe = morphKeyframeList[i];
-					ListViewItem item = new ListViewItem(new string[] { morphKeyframe.Name, morphKeyframe.PositionList.Count.ToString() });
-					item.Tag = morphKeyframe;
-					//*section3bItem.viewItems.Add(item);
-					listViewMorphKeyframe.Items.Add(item);
-				}
-				columnHeaderMorphKeyframeName.AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
-
-				treeViewMorphClip.Nodes.Clear();
-				List<xaMorphClip> morphClipList = Editor.Parser.MorphSection.ClipList;
-				for (int i = 0; i < morphClipList.Count; i++)
-				{
-					xaMorphClip morphClip = morphClipList[i];
-					TreeNode morphClipNode = new TreeNode(morphClip.Name + " [" + morphClip.MeshName + "]");
-					morphClipNode.Checked = true;
-					morphClipNode.Tag = morphClip;
-					//*section3cItem.viewItems.Add(animationSetNode);
-					treeViewMorphClip.Nodes.Add(morphClipNode);
-
-					List<xaMorphKeyframeRef> morphKeyframeRefList = morphClip.KeyframeRefList;
-					for (int j = 0; j < morphKeyframeRefList.Count; j++)
-					{
-						xaMorphKeyframeRef morphKeyframeRef = morphKeyframeRefList[j];
-						TreeNode morphKeyframeRefNode = new TreeNode(morphKeyframeRef.Name);
-						morphKeyframeRefNode.Tag = morphKeyframeRef;
-						//*animation.viewItems.Add(animationNode);
-						morphClipNode.Nodes.Add(morphKeyframeRefNode);
-					}
-				}
-				prevMorphKeyframeNodes = new TreeNode[morphClipList.Count];
-				tabPageMorph.Text = "Morph [" + morphClipList.Count + "]";
-
-				tabControlXA.SelectedTab = tabPageMorph;
+				LoadMorphs();
+				tabControlXA.SelectTabWithoutLoosingFocus(tabPageMorph);
 			}
 
 			if (Editor.Parser.AnimationSection != null)
@@ -288,21 +252,107 @@ namespace SB3Utility
 					Play();
 				}
 
-				List<xaAnimationClip> animationClipList = Editor.Parser.AnimationSection.ClipList;
-				createAnimationClipListView(animationClipList, listViewAnimationClip);
-				tabPageAnimation.Text = "Animation [" + listViewAnimationClip.Items.Count + "]";
+				createAnimationClipDataGridView();
+				tabPageAnimation.Text = "Animation [" + dataGridViewAnimationClip.Rows.Count + "]";
 
 				List<xaAnimationTrack> animationTrackList = Editor.Parser.AnimationSection.TrackList;
 				createAnimationTrackListView(animationTrackList);
 				animationSetMaxKeyframes(animationTrackList);
 
-				tabControlXA.SelectedTab = tabPageAnimation;
+				dataGridViewAnimationClip.SelectionChanged -= dataGridViewAnimationClip_SelectionChanged;
+				tabControlXA.SelectTabWithoutLoosingFocus(tabPageAnimation);
+				while (dataGridViewAnimationClip.SelectedRows.Count > 0)
+				{
+					dataGridViewAnimationClip.SelectedRows[0].Selected = false;
+				}
+				dataGridViewAnimationClip.SelectionChanged += dataGridViewAnimationClip_SelectionChanged;
+
 				Gui.Renderer.RenderObjectAdded += new EventHandler(Renderer_RenderObjectAdded);
 			}
 			else
 			{
 				animationSetMaxKeyframes(null);
 			}
+		}
+
+		private void LoadMorphs()
+		{
+			listViewMorphKeyframe.Items.Clear();
+			List<xaMorphKeyframe> morphKeyframeList = Editor.Parser.MorphSection.KeyframeList;
+			for (int i = 0; i < morphKeyframeList.Count; i++)
+			{
+				xaMorphKeyframe morphKeyframe = morphKeyframeList[i];
+				ListViewItem item = new ListViewItem(new string[] { morphKeyframe.Name, morphKeyframe.PositionList.Count.ToString() });
+				item.Tag = morphKeyframe;
+				//*section3bItem.viewItems.Add(item);
+				listViewMorphKeyframe.Items.Add(item);
+			}
+			columnHeaderMorphKeyframeName.AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
+
+			treeViewMorphClip.BeginUpdate();
+			treeViewMorphClip.Nodes.Clear();
+			List<xaMorphClip> morphClipList = Editor.Parser.MorphSection.ClipList;
+			for (int i = 0; i < morphClipList.Count; i++)
+			{
+				xaMorphClip morphClip = morphClipList[i];
+				TreeNode morphClipNode = new TreeNode(morphClip.Name + " [" + morphClip.MeshName + "]");
+				morphClipNode.Checked = true;
+				morphClipNode.Tag = morphClip;
+				//*section3cItem.viewItems.Add(animationSetNode);
+				treeViewMorphClip.Nodes.Add(morphClipNode);
+
+				List<xaMorphKeyframeRef> morphKeyframeRefList = morphClip.KeyframeRefList;
+				for (int j = 0; j < morphKeyframeRefList.Count; j++)
+				{
+					xaMorphKeyframeRef morphKeyframeRef = morphKeyframeRefList[j];
+					string refIdStr = morphKeyframeRef.Index.ToString("D3");
+					TreeNode morphKeyframeRefNode = new TreeNode(refIdStr + " : " + morphKeyframeRef.Name);
+					morphKeyframeRefNode.Tag = morphKeyframeRef;
+					//*animation.viewItems.Add(animationNode);
+					morphClipNode.Nodes.Add(morphKeyframeRefNode);
+				}
+			}
+			treeViewMorphClip.EndUpdate();
+			tabPageMorph.Text = "Morph [" + morphClipList.Count + "]";
+		}
+
+		private TreeNode FindMorphClipTreeNode(string name, TreeNodeCollection nodes)
+		{
+			foreach (TreeNode node in nodes)
+			{
+				if (node.Tag is xaMorphClip)
+				{
+					xaMorphClip clip = (xaMorphClip)node.Tag;
+					if (clip.Name == name)
+						return node;
+				}
+
+				TreeNode found = FindMorphClipTreeNode(name, node.Nodes);
+				if (found != null)
+					return found;
+			}
+
+			return null;
+		}
+
+		private TreeNode FindMorphKeyframeRefTreeNode(string morphClip, int refId, TreeNodeCollection nodes)
+		{
+			foreach (TreeNode node in nodes)
+			{
+				if (node.Tag is xaMorphKeyframeRef)
+				{
+					xaMorphClip clip = (xaMorphClip)node.Parent.Tag;
+					xaMorphKeyframeRef morphRef = (xaMorphKeyframeRef)node.Tag;
+					if (clip.Name == morphClip && morphRef.Index == refId)
+						return node;
+				}
+
+				TreeNode found = FindMorphKeyframeRefTreeNode(morphClip, refId, node.Nodes);
+				if (found != null)
+					return found;
+			}
+
+			return null;
 		}
 
 		private void UnloadXA()
@@ -314,8 +364,10 @@ namespace SB3Utility
 					if (animationSet != null)
 					{
 						Pause();
+						renderTimer.Tick -= renderTimer_Tick;
 						Gui.Renderer.RemoveAnimationSet(animationId);
 						animationSet.Dispose();
+						animationSet = null;
 					}
 
 					Gui.Renderer.RenderObjectAdded -= new EventHandler(Renderer_RenderObjectAdded);
@@ -368,7 +420,7 @@ namespace SB3Utility
 				for (int i = 0; i < animationTrackList.Count; i++)
 				{
 					xaAnimationTrack track = animationTrackList[i];
-					ListViewItem item = new ListViewItem(new string[] { track.Name, track.KeyframeList.Count.ToString() });
+					ListViewItem item = new ListViewItem(new string[] { track.Name, track.KeyframeList.Count.ToString(), (track.KeyframeList[track.KeyframeList.Count - 1].Index + 1).ToString() });
 					item.Tag = track;
 					listViewAnimationTrack.Items.Add(item);
 				}
@@ -376,8 +428,10 @@ namespace SB3Utility
 			}
 		}
 
-		public static void createAnimationClipListView(List<xaAnimationClip> clipList, ListView clipListView)
+		public void createAnimationClipDataGridView()
 		{
+			List<xaAnimationClip> clipList = Editor.Parser.AnimationSection.ClipList;
+
 			int clipMax = -1;
 			for (int i = 0; i < clipList.Count; i++)
 			{
@@ -395,16 +449,39 @@ namespace SB3Utility
 				}
 			}
 
-			clipListView.BeginUpdate();
-			clipListView.Items.Clear();
+			object rowTag = null;
+			while (dataGridViewAnimationClip.SelectedRows.Count > 0)
+			{
+				rowTag = dataGridViewAnimationClip.SelectedRows[0].Tag;
+				dataGridViewAnimationClip.SelectedRows[0].Selected = false;
+			}
+			dataGridViewAnimationClip.SelectionChanged -= dataGridViewAnimationClip_SelectionChanged;
+			dataGridViewAnimationClip.CellValueChanged -= dataGridViewAnimationClip_CellValueChanged;
+			dataGridViewAnimationClip.Rows.Clear();
 			for (int i = 0; i <= clipMax; i++)
 			{
 				xaAnimationClip clip = clipList[i];
-				ListViewItem item = new ListViewItem(new string[] { i.ToString(), clip.Name, clip.Start.ToString(), clip.End.ToString(), clip.Next.ToString(), clip.Speed.ToString() });
-				item.Tag = clip;
-				clipListView.Items.Add(item);
+				dataGridViewAnimationClip.Rows.Add(new string[] { i.ToString(), clip.Name, clip.Start.ToString(), clip.End.ToString(), clip.Next.ToString(), clip.Speed.ToString() });
+				DataGridViewRow row = dataGridViewAnimationClip.Rows[i];
+				row.Tag = clip;
 			}
-			clipListView.EndUpdate();
+			dataGridViewAnimationClip.CellValueChanged += dataGridViewAnimationClip_CellValueChanged;
+			dataGridViewAnimationClip.SelectionChanged += dataGridViewAnimationClip_SelectionChanged;
+			while (dataGridViewAnimationClip.SelectedRows.Count > 0)
+			{
+				dataGridViewAnimationClip.SelectedRows[0].Selected = false;
+			}
+			if (rowTag != null)
+			{
+				foreach (DataGridViewRow row in dataGridViewAnimationClip.Rows)
+				{
+					if (row.Tag == rowTag)
+					{
+						row.Selected = true;
+						break;
+					}
+				}
+			}
 		}
 
 		KeyframedAnimationSet CreateAnimationSet()
@@ -495,9 +572,9 @@ namespace SB3Utility
 
 			if (loadedAnimationClip != null)
 			{
-				listViewAnimationClip.ItemSelectionChanged -= new ListViewItemSelectionChangedEventHandler(listViewAnimationClip_ItemSelectionChanged);
+				dataGridViewAnimationClip.SelectionChanged -= dataGridViewAnimationClip_SelectionChanged;
 				loadedAnimationClip.Selected = false;
-				listViewAnimationClip.ItemSelectionChanged += new ListViewItemSelectionChangedEventHandler(listViewAnimationClip_ItemSelectionChanged);
+				dataGridViewAnimationClip.SelectionChanged += dataGridViewAnimationClip_SelectionChanged;
 			}
 
 			if (idx < 0)
@@ -507,16 +584,15 @@ namespace SB3Utility
 			}
 			else
 			{
-				loadedAnimationClip = listViewAnimationClip.Items[idx];
+				loadedAnimationClip = dataGridViewAnimationClip.Rows[idx];
 				var clip = (xaAnimationClip)loadedAnimationClip.Tag;
 				EnableTrack();
 				SetTrackPosition(clip.Start);
 				AdvanceTime(0);
 
-				listViewAnimationClip.ItemSelectionChanged -= new ListViewItemSelectionChangedEventHandler(listViewAnimationClip_ItemSelectionChanged);
+				dataGridViewAnimationClip.SelectionChanged -= dataGridViewAnimationClip_SelectionChanged;
 				loadedAnimationClip.Selected = true;
-				loadedAnimationClip.EnsureVisible();
-				listViewAnimationClip.ItemSelectionChanged += new ListViewItemSelectionChangedEventHandler(listViewAnimationClip_ItemSelectionChanged);
+				dataGridViewAnimationClip.SelectionChanged += dataGridViewAnimationClip_SelectionChanged;
 
 				SetKeyframeNum((int)clip.Start);
 			}
@@ -550,15 +626,15 @@ namespace SB3Utility
 			}
 		}
 
-		private void listViewAnimationClip_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
+		private void dataGridViewAnimationClip_SelectionChanged(object sender, EventArgs e)
 		{
-			if (e.IsSelected)
+			if (dataGridViewAnimationClip.SelectedRows.Count > 0)
 			{
-				AnimationSetClip(e.Item.Index);
+				AnimationSetClip(dataGridViewAnimationClip.SelectedRows[0].Index);
 			}
 			else
 			{
-				if (loadedAnimationClip == e.Item)
+				if (loadedAnimationClip != null)
 				{
 					AnimationSetClip(-1);
 				}
@@ -577,6 +653,103 @@ namespace SB3Utility
 				{
 					form.textBoxKeyframeRange.Text = clipRange;
 				}
+			}
+		}
+
+		private void dataGridViewAnimationClip_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+		{
+			try
+			{
+				if (e.RowIndex < 0)
+					return;
+
+				DataGridViewRow row = dataGridViewAnimationClip.Rows[e.RowIndex];
+				xaAnimationClip clip = (xaAnimationClip)row.Tag;
+				string name = row.Cells[1].Value.ToString();
+				int start = Int32.Parse(row.Cells[2].Value.ToString());
+				int end = Int32.Parse(row.Cells[3].Value.ToString());
+				int next = Int32.Parse(row.Cells[4].Value.ToString());
+				float speed = Single.Parse(row.Cells[5].Value.ToString());
+				Gui.Scripting.RunScript(EditorVar + ".SetAnimationClip(clip=" + EditorVar + ".Parser.AnimationSection.ClipList[" + e.RowIndex + "], name=\"" + name + "\", start=" + start + ", end=" + end + ", next=" + next + ", speed=" + speed + ")");
+
+				createAnimationClipDataGridView();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonAnimationClipMoveUp_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedAnimationClip == null || loadedAnimationClip.Index <= 0)
+					return;
+
+				xaAnimationClip clip = (xaAnimationClip)loadedAnimationClip.Tag;
+				Gui.Scripting.RunScript(EditorVar + ".MoveAnimationClip(clip=" + EditorVar + ".Parser.AnimationSection.ClipList[" + loadedAnimationClip.Index + "], position=" + (loadedAnimationClip.Index - 1) + ")");
+
+				createAnimationClipDataGridView();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonAnimationClipMoveDown_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedAnimationClip == null || loadedAnimationClip.Index >= dataGridViewAnimationClip.Rows.Count - 1)
+					return;
+
+				xaAnimationClip clip = (xaAnimationClip)loadedAnimationClip.Tag;
+				Gui.Scripting.RunScript(EditorVar + ".MoveAnimationClip(clip=" + EditorVar + ".Parser.AnimationSection.ClipList[" + loadedAnimationClip.Index + "], position=" + (loadedAnimationClip.Index + 1) + ")");
+
+				createAnimationClipDataGridView();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonAnimationClipCopy_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedAnimationClip == null)
+					return;
+
+				xaAnimationClip clip = (xaAnimationClip)loadedAnimationClip.Tag;
+				Gui.Scripting.RunScript(EditorVar + ".CopyAnimationClip(clip=" + EditorVar + ".Parser.AnimationSection.ClipList[" + loadedAnimationClip.Index + "], position=" + dataGridViewAnimationClip.Rows.Count + ")");
+
+				createAnimationClipDataGridView();
+				dataGridViewAnimationClip.Rows[dataGridViewAnimationClip.Rows.Count - 1].Selected = true;
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonAnimationClipDelete_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedAnimationClip == null)
+					return;
+
+				xaAnimationClip clip = (xaAnimationClip)loadedAnimationClip.Tag;
+				Gui.Scripting.RunScript(EditorVar + ".DeleteAnimationClip(clip=" + EditorVar + ".Parser.AnimationSection.ClipList[" + loadedAnimationClip.Index + "])");
+
+				createAnimationClipDataGridView();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
 			}
 		}
 
@@ -672,6 +845,76 @@ namespace SB3Utility
 			}
 		}
 
+		private void treeViewMorphClip_AfterSelect(object sender, TreeViewEventArgs e)
+		{
+			try
+			{
+				textBoxFrameNameRefID.AfterEditTextChanged -= textBoxFrameNameRefID_AfterEditTextChanged;
+				editTextBoxMorphClipName.AfterEditTextChanged -= editTextBoxMorphClipName_AfterEditTextChanged;
+				editTextBoxMorphClipMesh.AfterEditTextChanged -= editTextBoxMorphClipMesh_AfterEditTextChanged;
+				if (e.Node.Tag is xaMorphKeyframeRef)
+				{
+					xaMorphKeyframeRef keyframeRef = (xaMorphKeyframeRef)e.Node.Tag;
+					textBoxFrameNameRefID.Text = keyframeRef.Index.ToString();
+					textBoxFrameNameRefID.Enabled = true;
+
+					UpdateComboBoxRefKeyframe(keyframeRef.Name);
+
+					xaMorphClip clip = (xaMorphClip)e.Node.Parent.Tag;
+					editTextBoxMorphClipName.Text = clip.Name;
+					editTextBoxMorphClipMesh.Text = clip.MeshName;
+				}
+				else
+				{
+					textBoxFrameNameRefID.Text = String.Empty;
+					textBoxFrameNameRefID.Enabled = false;
+
+					comboBoxRefKeyframe.Items.Clear();
+					comboBoxRefKeyframe.Enabled = false;
+
+					xaMorphClip clip = (xaMorphClip)e.Node.Tag;
+					editTextBoxMorphClipName.Text = clip.Name;
+					editTextBoxMorphClipMesh.Text = clip.MeshName;
+				}
+				textBoxFrameNameRefID.AfterEditTextChanged += textBoxFrameNameRefID_AfterEditTextChanged;
+				editTextBoxMorphClipName.AfterEditTextChanged += editTextBoxMorphClipName_AfterEditTextChanged;
+				editTextBoxMorphClipMesh.AfterEditTextChanged += editTextBoxMorphClipMesh_AfterEditTextChanged;
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void UpdateComboBoxRefKeyframe(string keyframeName)
+		{
+			xaMorphKeyframe keyframe = xa.FindMorphKeyFrame(keyframeName, Editor.Parser.MorphSection);
+			comboBoxRefKeyframe.BeginUpdate();
+			comboBoxRefKeyframe.SelectedIndexChanged -= comboBoxRefKeyframe_SelectedIndexChanged;
+			comboBoxRefKeyframe.Items.Clear();
+			foreach (xaMorphKeyframe i in Editor.Parser.MorphSection.KeyframeList)
+			{
+				if (!checkBoxOnlyValidKeyframes.Checked || i.PositionList.Count == keyframe.PositionList.Count)
+				{
+					comboBoxRefKeyframe.Items.Add(i.Name);
+				}
+			}
+			comboBoxRefKeyframe.SelectedItem = keyframe.Name;
+			comboBoxRefKeyframe.SelectedIndexChanged += comboBoxRefKeyframe_SelectedIndexChanged;
+			comboBoxRefKeyframe.EndUpdate();
+			comboBoxRefKeyframe.Enabled = true;
+
+			foreach (ListViewItem item in listViewMorphKeyframe.Items)
+			{
+				if (item.Text == keyframe.Name)
+				{
+					listViewMorphKeyframe.SelectedItems.Clear();
+					item.Selected = true;
+					item.EnsureVisible();
+				}
+			}
+		}
+
 		private void treeViewMorphClip_ItemDrag(object sender, ItemDragEventArgs e)
 		{
 			try
@@ -764,9 +1007,19 @@ namespace SB3Utility
 									Gui.Scripting.RunScript(source.Variable + ".setMorphKeyframeEnabled(morphId=" + (int)source.Id + ", id=" + wsMorph.KeyframeList.IndexOf(keyframe) + ", enabled=false)");
 								}
 							}
+							int numKeyframes = Editor.Parser.MorphSection.KeyframeList.Count;
 							Gui.Scripting.RunScript(EditorVar + ".ReplaceMorph(morph=" + source.Variable + ".Morphs[" + (int)source.Id + "], destMorphName=\"" + dragOptions.textBoxName.Text + "\", newName=\"" + dragOptions.textBoxNewName.Text + "\", replaceNormals=" + dragOptions.radioButtonReplaceNormalsYes.Checked + ", minSquaredDistance=" + dragOptions.numericUpDownMinimumDistanceSquared.Value + ")");
 							UnloadXA();
 							LoadXA();
+							TreeNode clipNode = FindMorphClipTreeNode(dragOptions.textBoxName.Text, treeViewMorphClip.Nodes);
+							if (clipNode != null)
+							{
+								clipNode.Expand();
+							}
+							if (numKeyframes != Editor.Parser.MorphSection.KeyframeList.Count)
+							{
+								listViewMorphKeyframe.Items[listViewMorphKeyframe.Items.Count - 1].EnsureVisible();
+							}
 							tabControlXA.SelectedTab = tabPageMorph;
 						}
 					}
@@ -799,6 +1052,205 @@ namespace SB3Utility
 			else
 			{
 				e.Effect = e.AllowedEffect & DragDropEffects.Copy;
+			}
+		}
+
+		private void editTextBoxMorphClipName_AfterEditTextChanged(object sender, EventArgs e)
+		{
+			if (treeViewMorphClip.SelectedNode == null)
+				return;
+
+			try
+			{
+				TreeNode clipNode = treeViewMorphClip.SelectedNode.Tag is xaMorphClip ? treeViewMorphClip.SelectedNode : treeViewMorphClip.SelectedNode.Parent;
+				xaMorphClip clip = (xaMorphClip)clipNode.Tag;
+				Gui.Scripting.RunScript(EditorVar + ".SetMorphClipName(position=" + Editor.Parser.MorphSection.ClipList.IndexOf(clip) + ", newName=\"" + editTextBoxMorphClipName.Text + "\")");
+
+				clipNode.Text = clip.Name + " [" + clip.MeshName + "]";
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void editTextBoxMorphClipMesh_AfterEditTextChanged(object sender, EventArgs e)
+		{
+			if (treeViewMorphClip.SelectedNode == null)
+				return;
+
+			try
+			{
+				TreeNode clipNode = treeViewMorphClip.SelectedNode.Tag is xaMorphClip ? treeViewMorphClip.SelectedNode : treeViewMorphClip.SelectedNode.Parent;
+				xaMorphClip clip = (xaMorphClip)clipNode.Tag;
+				Gui.Scripting.RunScript(EditorVar + ".SetMorphClipMesh(position=" + Editor.Parser.MorphSection.ClipList.IndexOf(clip) + ", mesh=\"" + editTextBoxMorphClipMesh.Text + "\")");
+
+				clipNode.Text = clip.Name + " [" + clip.MeshName + "]";
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void textBoxFrameNameRefID_AfterEditTextChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				if (treeViewMorphClip.SelectedNode.Tag is xaMorphKeyframeRef)
+				{
+					TreeNode keyframeRefNode = treeViewMorphClip.SelectedNode;
+					xaMorphKeyframeRef keyframeRef = (xaMorphKeyframeRef)keyframeRefNode.Tag;
+					xaMorphClip clip = (xaMorphClip)keyframeRefNode.Parent.Tag;
+					int refId = Int32.Parse(textBoxFrameNameRefID.Text);
+					Gui.Scripting.RunScript(EditorVar + ".SetMorphKeyframeRefIndex(morphClip=\"" + clip.Name + "\", position=" + clip.KeyframeRefList.IndexOf(keyframeRef) + ", id=" + refId + ")");
+
+					keyframeRefNode.Text = keyframeRef.Index.ToString("D3") + " : " + keyframeRef.Name;
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void comboBoxRefKeyframe_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				TreeNode keyframeRefNode = treeViewMorphClip.SelectedNode;
+				xaMorphKeyframeRef keyframeRef = (xaMorphKeyframeRef)keyframeRefNode.Tag;
+				xaMorphClip clip = (xaMorphClip)keyframeRefNode.Parent.Tag;
+				Gui.Scripting.RunScript(EditorVar + ".SetMorphKeyframeRefKeyframe(morphClip=\"" + clip.Name + "\", position=" + clip.KeyframeRefList.IndexOf(keyframeRef) + ", keyframe=\"" + comboBoxRefKeyframe.Items[comboBoxRefKeyframe.SelectedIndex] + "\")");
+
+				keyframeRefNode.Text = keyframeRef.Index.ToString("D3") + " : " + keyframeRef.Name;
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void checkBoxOnlyValidKeyframes_CheckedChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				if (treeViewMorphClip.SelectedNode != null)
+				{
+					xaMorphKeyframeRef morphRef = treeViewMorphClip.SelectedNode.Tag as xaMorphKeyframeRef;
+					if (morphRef != null)
+					{
+						UpdateComboBoxRefKeyframe(morphRef.Name);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonNewRef_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (treeViewMorphClip.SelectedNode == null)
+				{
+					Report.ReportLog("Select a predecessor first.");
+					return;
+				}
+				xaMorphClip clip;
+				int pos;
+				xaMorphKeyframeRef morphRef = treeViewMorphClip.SelectedNode.Tag as xaMorphKeyframeRef;
+				if (morphRef != null)
+				{
+					clip = (xaMorphClip)treeViewMorphClip.SelectedNode.Parent.Tag;
+					pos = clip.KeyframeRefList.IndexOf(morphRef) + 1;
+				}
+				else
+				{
+					clip = (xaMorphClip)treeViewMorphClip.SelectedNode.Tag;
+					pos = 0;
+				}
+				Gui.Scripting.RunScript(EditorVar + ".CreateMorphKeyframeRef(morphClip=\"" + clip.Name + "\", position=" + pos + ", keyframe=\"" + clip.KeyframeRefList[0].Name + "\")");
+
+				RefreshMorphs();
+				treeViewMorphClip.SelectedNode = treeViewMorphClip.SelectedNode.Tag is xaMorphClip
+					? treeViewMorphClip.SelectedNode.Nodes[0]
+					: treeViewMorphClip.SelectedNode.NextNode;
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonDeleteRef_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (treeViewMorphClip.SelectedNode == null || !(treeViewMorphClip.SelectedNode.Tag is xaMorphKeyframeRef))
+				{
+					return;
+				}
+				xaMorphClip clip = (xaMorphClip)treeViewMorphClip.SelectedNode.Parent.Tag;
+				xaMorphKeyframeRef morphRef = (xaMorphKeyframeRef)treeViewMorphClip.SelectedNode.Tag;
+				int pos = clip.KeyframeRefList.IndexOf(morphRef);
+				Gui.Scripting.RunScript(EditorVar + ".RemoveMorphKeyframeRef(morphClip=\"" + clip.Name + "\", position=" + pos + ")");
+
+				RefreshMorphs();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonRefUp_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (treeViewMorphClip.SelectedNode == null || !(treeViewMorphClip.SelectedNode.Tag is xaMorphKeyframeRef))
+				{
+					return;
+				}
+				xaMorphClip clip = (xaMorphClip)treeViewMorphClip.SelectedNode.Parent.Tag;
+				xaMorphKeyframeRef morphRef = (xaMorphKeyframeRef)treeViewMorphClip.SelectedNode.Tag;
+				int pos = clip.KeyframeRefList.IndexOf(morphRef);
+				if (pos > 0)
+				{
+					Gui.Scripting.RunScript(EditorVar + ".MoveMorphKeyframeRef(morphClip=\"" + clip.Name + "\", fromPos=" + pos + ", toPos=" + (pos - 1) + ")");
+
+					RefreshMorphs();
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonRefDown_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (treeViewMorphClip.SelectedNode == null || !(treeViewMorphClip.SelectedNode.Tag is xaMorphKeyframeRef))
+				{
+					return;
+				}
+				xaMorphClip clip = (xaMorphClip)treeViewMorphClip.SelectedNode.Parent.Tag;
+				xaMorphKeyframeRef morphRef = (xaMorphKeyframeRef)treeViewMorphClip.SelectedNode.Tag;
+				int pos = clip.KeyframeRefList.IndexOf(morphRef);
+				if (pos < clip.KeyframeRefList.Count - 1)
+				{
+					Gui.Scripting.RunScript(EditorVar + ".MoveMorphKeyframeRef(morphClip=\"" + clip.Name + "\", fromPos=" + pos + ", toPos=" + (pos + 1) + ")");
+
+					RefreshMorphs();
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
 			}
 		}
 
@@ -851,8 +1303,191 @@ namespace SB3Utility
 				{
 					DirectoryInfo dir = new DirectoryInfo(path);
 					path = Utility.GetDestFile(dir, clip.MeshName + "-" + clip.Name + "-", ".fbx");
-					Gui.Scripting.RunScript("ExportMorphFbx(xxparser=" + xxParserVar + ", path=\"" + path + "\", meshFrame=" + xxEditorVar + ".Frames[" + meshFrameId + "], xaparser=" + this.ParserVar + ", morphClip=" + this.ParserVar + ".MorphSection.ClipList[" + clipIdx + "], exportFormat=\"" + ".fbx" + "\")");
+					Gui.Scripting.RunScript("ExportMorphFbx(xxparser=" + xxParserVar + ", path=\"" + path + "\", meshFrame=" + xxEditorVar + ".Frames[" + meshFrameId + "], xaparser=" + this.ParserVar + ", morphClip=" + this.ParserVar + ".MorphSection.ClipList[" + clipIdx + "], exportFormat=\"" + ".fbx" + "\", oneBlendShape=" + checkBoxFbxOptionOneBlendshape.Checked + ", embedMedia=" + checkBoxFbxOptionEmbedMedia.Checked + ")");
 				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void listViewMorphKeyframe_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
+		{
+			editTextBoxNewKeyframeName.AfterEditTextChanged -= editTextBoxNewKeyframeName_AfterEditTextChanged;
+			editTextBoxNewKeyframeName.Text = e.IsSelected ? ((xaMorphKeyframe)e.Item.Tag).Name : String.Empty;
+			editTextBoxNewKeyframeName.AfterEditTextChanged += editTextBoxNewKeyframeName_AfterEditTextChanged;
+		}
+
+		private void editTextBoxNewKeyframeName_AfterEditTextChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				if (listViewMorphKeyframe.SelectedIndices.Count < 1 || editTextBoxNewKeyframeName.Text == String.Empty)
+					return;
+				if (xa.FindMorphKeyFrame(editTextBoxNewKeyframeName.Text, Editor.Parser.MorphSection) != null)
+				{
+					Report.ReportLog("Keyframe " + editTextBoxNewKeyframeName.Text + " already exists.");
+					return;
+				}
+
+				Gui.Scripting.RunScript(EditorVar + ".RenameMorphKeyframe(position=" + listViewMorphKeyframe.SelectedIndices[0] + ", newName=\"" + editTextBoxNewKeyframeName.Text + "\")");
+
+				RefreshMorphs();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void RefreshMorphs()
+		{
+			string morphClip = null;
+			int pos = -2;
+			if (treeViewMorphClip.SelectedNode != null)
+			{
+				TreeNode node = treeViewMorphClip.SelectedNode;
+				if (node.Tag is xaMorphClip)
+				{
+					morphClip = ((xaMorphClip)node.Tag).Name;
+					if (node.IsExpanded)
+					{
+						pos = -1;
+					}
+				}
+				else if (node.Tag is xaMorphKeyframeRef)
+				{
+					xaMorphKeyframeRef morphRef = (xaMorphKeyframeRef)node.Tag;
+					xaMorphClip clip = (xaMorphClip)node.Parent.Tag;
+					morphClip = clip.Name;
+					pos = clip.KeyframeRefList.IndexOf(morphRef);
+				}
+			}
+			LoadMorphs();
+			if (morphClip != null)
+			{
+				TreeNode node = FindMorphClipTreeNode(morphClip, treeViewMorphClip.Nodes);
+				if (pos != -2)
+				{
+					node.Expand();
+					if (pos != -1 && node.Nodes.Count > pos)
+					{
+						node = node.Nodes[pos];
+					}
+				}
+				if (node != null)
+				{
+					treeViewMorphClip.SelectedNode = node;
+					node.EnsureVisible();
+				}
+			}
+		}
+
+		private void checkBoxStartEndKeyframe_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				CheckBox origin = (CheckBox)sender;
+				if (!origin.Checked)
+				{
+					Tuple<RenderObjectXX, xxFrame, xaMorphIndexSet> tuple = (Tuple<RenderObjectXX, xxFrame, xaMorphIndexSet>)origin.Tag;
+					if (tuple != null)
+					{
+						float morphFactor = tuple.Item1.UnsetMorphKeyframe(tuple.Item2, tuple.Item3, sender == checkBoxStartKeyframe);
+						Gui.Renderer.Render();
+						trackBarMorphFactor.ValueChanged -= trackBarMorphFactor_ValueChanged;
+						trackBarMorphFactor.Value = (int)(trackBarMorphFactor.Maximum * morphFactor);
+						trackBarMorphFactor.ValueChanged += trackBarMorphFactor_ValueChanged;
+					}
+					origin.Text = sender == checkBoxStartKeyframe ? "Start" : "End";
+					return;
+				}
+
+				if (treeViewMorphClip.SelectedNode == null || !(treeViewMorphClip.SelectedNode.Tag is xaMorphKeyframeRef))
+					return;
+
+				xaMorphClip clip = (xaMorphClip)treeViewMorphClip.SelectedNode.Parent.Tag;
+				xaMorphKeyframeRef morphRef = (xaMorphKeyframeRef)treeViewMorphClip.SelectedNode.Tag;
+				List<DockContent> formXXList;
+				if (Gui.Docking.DockContents.TryGetValue(typeof(FormXX), out formXXList))
+				{
+					foreach (FormXX form in formXXList)
+					{
+						for (int i = 0; i < form.renderObjectMeshes.Count; i++)
+						{
+							RenderObjectXX renderObj = form.renderObjectMeshes[i];
+							if (renderObj != null && clip.MeshName == form.Editor.Meshes[i].Name)
+							{
+								xaMorphIndexSet idxSet = xa.FindMorphIndexSet(clip.Name, Editor.Parser.MorphSection);
+								xaMorphKeyframe keyframe = xa.FindMorphKeyFrame(morphRef.Name, Editor.Parser.MorphSection);
+								float morphFactor = renderObj.SetMorphKeyframe(form.Editor.Meshes[i], idxSet, keyframe, sender == checkBoxStartKeyframe);
+								origin.Tag = new Tuple<RenderObjectXX, xxFrame, xaMorphIndexSet>(renderObj, form.Editor.Meshes[i], idxSet);
+								Gui.Renderer.Render();
+								trackBarMorphFactor.ValueChanged -= trackBarMorphFactor_ValueChanged;
+								trackBarMorphFactor.Value = (int)(trackBarMorphFactor.Maximum * morphFactor);
+								trackBarMorphFactor.ValueChanged += trackBarMorphFactor_ValueChanged;
+								origin.Text = keyframe.Name;
+								return;
+							}
+						}
+					}
+				}
+				Report.ReportLog("Mesh " + clip.MeshName + " not found.");
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void trackBarMorphFactor_ValueChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				Tuple<RenderObjectXX, xxFrame, xaMorphIndexSet> tuple = (Tuple<RenderObjectXX, xxFrame, xaMorphIndexSet>)checkBoxStartKeyframe.Tag;
+				if (tuple != null)
+				{
+					tuple.Item1.SetTweenFactor(tuple.Item2, tuple.Item3, trackBarMorphFactor.Value / (float)trackBarMorphFactor.Maximum);
+					Gui.Renderer.Render();
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonDeleteKeyframe_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (listViewMorphKeyframe.SelectedItems.Count < 1)
+				{
+					return;
+				}
+				xaMorphKeyframe keyframe = (xaMorphKeyframe)listViewMorphKeyframe.SelectedItems[0].Tag;
+				string refInClip = String.Empty;
+				foreach (xaMorphClip clip in Editor.Parser.MorphSection.ClipList)
+				{
+					foreach (xaMorphKeyframeRef morphRef in clip.KeyframeRefList)
+					{
+						if (morphRef.Name == keyframe.Name)
+						{
+							refInClip += clip.Name + ", ";
+							break;
+						}
+					}
+				}
+				if (refInClip.Length > 0)
+				{
+					Report.ReportLog("Keyframe " + keyframe.Name + " is referenced in morph clips : " + refInClip.Substring(0, refInClip.Length - 2));
+					return;
+				}
+
+				Gui.Scripting.RunScript(EditorVar + ".RemoveMorphKeyframe(name=\"" + keyframe.Name + "\")");
+
+				RefreshMorphs();
 			}
 			catch (Exception ex)
 			{
@@ -934,8 +1569,25 @@ namespace SB3Utility
 					using (var dragOptions = new FormXADragDrop(Editor, false))
 					{
 						var srcEditor = (ImportedEditor)Gui.Scripting.Variables[source.Variable];
-						dragOptions.numericResample.Value = srcEditor.Animations[(int)source.Id].TrackList[0].Keyframes.Length;
-						dragOptions.comboBoxMethod.SelectedIndex = (int)ReplaceAnimationMethod.Replace;
+						int resampleCount = srcEditor.Animations[(int)source.Id].TrackList[0].Keyframes.Length;
+						for (int i = 0; i < srcEditor.Animations[(int)source.Id].TrackList.Count; i++)
+						{
+							ImportedAnimationTrack track = srcEditor.Animations[(int)source.Id].TrackList[i];
+							int numKeyframes = 0;
+							for (int j = 0; j < track.Keyframes.Length; j++)
+							{
+								if (track.Keyframes[j] == null)
+									continue;
+								numKeyframes++;
+							}
+							if (numKeyframes != resampleCount)
+							{
+								resampleCount = -1;
+								break;
+							}
+						}
+						dragOptions.numericResample.Value = resampleCount;
+						dragOptions.comboBoxMethod.SelectedIndex = (int)ReplaceAnimationMethod.ReplacePresent;
 						if (dragOptions.ShowDialog() == DialogResult.OK)
 						{
 							// repeating only final choices for repeatability of the script

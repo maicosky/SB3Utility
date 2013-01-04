@@ -9,6 +9,7 @@ namespace SB3Utility
 	public enum ReplaceAnimationMethod
 	{
 		Replace,
+		ReplacePresent,
 		Merge,
 		Insert,
 		Append
@@ -111,23 +112,36 @@ namespace SB3Utility
 				{
 					if (!wsMorphList.isMorphKeyframeEnabled(wsMorph))
 						continue;
+
+					List<ImportedVertex> vertList = wsMorph.VertexList;
 					xaMorphKeyframe keyframe = FindMorphKeyFrame(wsMorph.Name, morphSection);
 					if (keyframe == null)
 					{
-						Report.ReportLog("Warning: Couldn't find morph keyframe " + wsMorph.Name + ". Skipping this morph");
-						continue;
-					}
-
-					List<ImportedVertex> vertList = wsMorph.VertexList;
-					for (int i = 0; i < meshIndices.Length; i++)
-					{
-						Vector3 orgPos = new Vector3(keyframe.PositionList[morphIndices[i]].X, keyframe.PositionList[morphIndices[i]].Y, keyframe.PositionList[morphIndices[i]].Z),
-							newPos = new Vector3(vertList[meshIndices[i]].Position.X, vertList[meshIndices[i]].Position.Y, vertList[meshIndices[i]].Position.Z);
-						if ((orgPos - newPos).LengthSquared() >= minSquaredDistance)
-							keyframe.PositionList[morphIndices[i]] = vertList[meshIndices[i]].Position;
-						if (replaceNormals)
+						keyframe = new xaMorphKeyframe();
+						keyframe.Name = wsMorph.Name;
+						keyframe.PositionList = new List<Vector3>(new Vector3[wsMorph.VertexList.Count]);
+						keyframe.NormalList = new List<Vector3>(new Vector3[wsMorph.VertexList.Count]);
+						for (int i = 0; i < meshIndices.Length; i++)
 						{
+							keyframe.PositionList[morphIndices[i]] = vertList[meshIndices[i]].Position;
 							keyframe.NormalList[morphIndices[i]] = vertList[meshIndices[i]].Normal;
+						}
+						morphSection.KeyframeList.Add(keyframe);
+					}
+					else
+					{
+						for (int i = 0; i < meshIndices.Length; i++)
+						{
+							Vector3 orgPos = new Vector3(keyframe.PositionList[morphIndices[i]].X, keyframe.PositionList[morphIndices[i]].Y, keyframe.PositionList[morphIndices[i]].Z),
+								newPos = new Vector3(vertList[meshIndices[i]].Position.X, vertList[meshIndices[i]].Position.Y, vertList[meshIndices[i]].Position.Z);
+							if ((orgPos - newPos).LengthSquared() >= minSquaredDistance)
+							{
+								keyframe.PositionList[morphIndices[i]] = vertList[meshIndices[i]].Position;
+								if (replaceNormals)
+								{
+									keyframe.NormalList[morphIndices[i]] = vertList[meshIndices[i]].Normal;
+								}
+							}
 						}
 					}
 
@@ -167,25 +181,105 @@ namespace SB3Utility
 			}
 		}
 
+		public static void CalculateNormals(xaParser parser, xxFrame meshFrame, string morphClip, string keyframe, float threshold)
+		{
+			HashSet<Tuple<xaMorphClip, xaMorphKeyframe>> keyframes = new HashSet<Tuple<xaMorphClip, xaMorphKeyframe>>();
+			foreach (xaMorphClip clip in parser.MorphSection.ClipList)
+			{
+				if (morphClip != null && clip.Name != morphClip)
+					continue;
+
+				if (keyframe != null)
+				{
+					xaMorphKeyframe xaKeyframe = FindMorphKeyFrame(keyframe, parser.MorphSection);
+					if (xaKeyframe == null)
+					{
+						throw new Exception("keyframe " + keyframe + " not found in morph clip " + morphClip);
+					}
+					keyframes.Add(new Tuple<xaMorphClip, xaMorphKeyframe>(clip, xaKeyframe));
+					break;
+				}
+				else
+				{
+					foreach (xaMorphKeyframeRef morphRef in clip.KeyframeRefList)
+					{
+						xaMorphKeyframe xaKeyframe = FindMorphKeyFrame(morphRef.Name, parser.MorphSection);
+						keyframes.Add(new Tuple<xaMorphClip, xaMorphKeyframe>(clip, xaKeyframe));
+					}
+				}
+			}
+			if (keyframes.Count == 0)
+			{
+				Report.ReportLog("No keyframe for mesh " + meshFrame.Name + " to calculate normals for found.");
+				return;
+			}
+
+			foreach (var tup in keyframes)
+			{
+				xaMorphIndexSet set = FindMorphIndexSet(tup.Item1.Name, parser.MorphSection);
+				CalculateNormals(parser, meshFrame, tup.Item2, set, threshold);
+			}
+		}
+
+		private static void CalculateNormals(xaParser parser, xxFrame meshFrame, xaMorphKeyframe keyframe, xaMorphIndexSet set, float threshold)
+		{
+			xxMesh mesh = meshFrame.Mesh;
+			ushort[] meshIndices = set.MeshIndices;
+			ushort[] morphIndices = set.MorphIndices;
+			int morphSubmeshIdx = MorphMeshObjIdx(meshIndices, mesh);
+			if (morphSubmeshIdx < 0)
+			{
+				throw new Exception("no valid mesh object was found for the morph " + set.Name);
+			}
+			xxSubmesh submesh = mesh.SubmeshList[morphSubmeshIdx];
+			List<xxVertex> morphedVertices = new List<xxVertex>(submesh.VertexList.Count);
+			for (ushort i = 0; i < submesh.VertexList.Count; i++)
+			{
+				xxVertex vert = new xxVertexUShort();
+				vert.Index = i;
+				vert.Position = submesh.VertexList[i].Position;
+				vert.Normal = submesh.VertexList[i].Normal;
+				morphedVertices.Add(vert);
+			}
+			for (int i = 0; i < meshIndices.Length; i++)
+			{
+				morphedVertices[meshIndices[i]].Position = keyframe.PositionList[morphIndices[i]];
+			}
+
+			var pairList = new List<Tuple<List<xxFace>, List<xxVertex>>>(1);
+			pairList.Add(new Tuple<List<xxFace>, List<xxVertex>>(submesh.FaceList, morphedVertices));
+			xx.CalculateNormals(pairList, threshold);
+
+			for (int i = 0; i < meshIndices.Length; i++)
+			{
+				keyframe.NormalList[morphIndices[i]] = morphedVertices[meshIndices[i]].Normal;
+			}
+		}
+
 		public static void animationNormalizeTrack(xaAnimationKeyframe[] origKeyframes, xaAnimationKeyframe[] destKeyframes, int count)
 		{
-			xaAnimationKeyframe keyframeCopy;
+			xaAnimationKeyframe keyframeToCopy;
 			if (origKeyframes.Length > 0)
 			{
-				keyframeCopy = origKeyframes[origKeyframes.Length - 1];
+				keyframeToCopy = origKeyframes[origKeyframes.Length - 1];
 			}
 			else
 			{
-				keyframeCopy = new xaAnimationKeyframe();
-				keyframeCopy.Rotation = Quaternion.Identity;
-				keyframeCopy.Scaling = new Vector3(1, 1, 1);
-				keyframeCopy.Translation = new Vector3(0, 0, 0);
-				CreateUnknowns(keyframeCopy);
+				keyframeToCopy = new xaAnimationKeyframe();
+				keyframeToCopy.Rotation = Quaternion.Identity;
+				keyframeToCopy.Scaling = new Vector3(1, 1, 1);
+				keyframeToCopy.Translation = new Vector3(0, 0, 0);
+				CreateUnknowns(keyframeToCopy);
 			}
 			for (int j = origKeyframes.Length; j < count; j++)
 			{
-				keyframeCopy.Index = j;
-				destKeyframes[j] = keyframeCopy;
+				xaAnimationKeyframe copy = new xaAnimationKeyframe();
+				copy.Index = j;
+				copy.Rotation = keyframeToCopy.Rotation;
+				copy.Scaling = keyframeToCopy.Scaling;
+				copy.Translation = keyframeToCopy.Translation;
+				CreateUnknowns(copy);
+				destKeyframes[j] = copy;
 			}
 		}
 
@@ -199,6 +293,34 @@ namespace SB3Utility
 			track.Unknown1 = new byte[4];
 		}
 
+		public static void CreateUnknowns(xaMorphKeyframeRef morphRef)
+		{
+			morphRef.Unknown1 = new byte[1];
+			morphRef.Unknown2 = new byte[1];
+		}
+
+		public static void CreateUnknowns(xaAnimationClip clip)
+		{
+			clip.Unknown1 = new byte[4];
+			clip.Unknown2 = new byte[1];
+			clip.Unknown3 = new byte[1];
+			clip.Unknown4 = new byte[1];
+			clip.Unknown5 = new byte[1];
+			clip.Unknown6 = new byte[4];
+			clip.Unknown7 = new byte[16];
+		}
+
+		public static void CopyUnknowns(xaAnimationClip src, xaAnimationClip dest)
+		{
+			dest.Unknown1 = (byte[])src.Unknown1.Clone();
+			dest.Unknown2 = (byte[])src.Unknown2.Clone();
+			dest.Unknown3 = (byte[])src.Unknown3.Clone();
+			dest.Unknown4 = (byte[])src.Unknown4.Clone();
+			dest.Unknown5 = (byte[])src.Unknown5.Clone();
+			dest.Unknown6 = (byte[])src.Unknown6.Clone();
+			dest.Unknown7 = (byte[])src.Unknown7.Clone();
+		}
+
 		public static void animationCopyKeyframeTransformArray(xaAnimationKeyframe[] src, int srcIdx, xaAnimationKeyframe[] dest, int destIdx, int count)
 		{
 			for (int i = 0; i < count; i++)
@@ -209,19 +331,39 @@ namespace SB3Utility
 			}
 		}
 
-		public static xaAnimationKeyframe[] animationGetOriginalKeyframes(Dictionary<string, xaAnimationTrack> animationNodeDic, string trackName, List<xaAnimationTrack> animationNodeList, out xaAnimationTrack animationNode)
+		public static void animationCopyKeyframeTransformArray(xaAnimationKeyframe[] src, xaAnimationKeyframe[] dest, int destOffset)
 		{
-			xaAnimationKeyframe[] origKeyframes;
-			if (animationNodeDic.TryGetValue(trackName, out animationNode))
+			for (int i = 0; i < src.Length; i++)
 			{
-				origKeyframes = animationNode.KeyframeList.ToArray();
+				xaAnimationKeyframe keyframe = src[i];
+				keyframe.Index += destOffset;
+				dest[keyframe.Index] = keyframe;
 			}
-			else
+		}
+
+		public static xaAnimationTrack animationGetOriginalKeyframes(Dictionary<string, xaAnimationTrack> animationNodeDic, string trackName, List<xaAnimationTrack> animationNodeList)
+		{
+			xaAnimationTrack animationNode;
+			if (!animationNodeDic.TryGetValue(trackName, out animationNode))
 			{
 				animationNode = new xaAnimationTrack();
 				animationNodeList.Add(animationNode);
 				animationNode.Name = trackName;
 				CreateUnknowns(animationNode);
+			}
+			return animationNode;
+		}
+
+		public static xaAnimationKeyframe[] animationGetOriginalKeyframes(Dictionary<string, xaAnimationTrack> animationNodeDic, string trackName, List<xaAnimationTrack> animationNodeList, out xaAnimationTrack animationNode)
+		{
+			animationNode = animationGetOriginalKeyframes(animationNodeDic, trackName, animationNodeList);
+			xaAnimationKeyframe[] origKeyframes;
+			if (animationNode.KeyframeList != null)
+			{
+				origKeyframes = animationNode.KeyframeList.ToArray();
+			}
+			else
+			{
 				origKeyframes = new xaAnimationKeyframe[0];
 			}
 			return origKeyframes;

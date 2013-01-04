@@ -21,9 +21,126 @@ namespace SB3Utility
 		}
 
 		[Plugin]
+		public void SetMorphClipName(int position, string newName)
+		{
+			string oldName = Parser.MorphSection.ClipList[position].Name;
+			xaMorphIndexSet set = xa.FindMorphIndexSet(oldName, Parser.MorphSection);
+			set.Name = newName;
+			Parser.MorphSection.ClipList[position].Name = newName;
+		}
+
+		[Plugin]
+		public void SetMorphClipMesh(int position, string mesh)
+		{
+			Parser.MorphSection.ClipList[position].MeshName = mesh;
+		}
+
+		[Plugin]
 		public void ReplaceMorph(WorkspaceMorph morph, string destMorphName, string newName, bool replaceNormals, double minSquaredDistance)
 		{
 			xa.ReplaceMorph(destMorphName, Parser, morph, newName, replaceNormals, (float)minSquaredDistance);
+		}
+
+		[Plugin]
+		public void CalculateNormals(xxFrame meshFrame, string morphClip, string keyframe, double threshold)
+		{
+			xa.CalculateNormals(Parser, meshFrame, morphClip, keyframe, (float)threshold);
+		}
+
+		[Plugin]
+		public void CreateMorphKeyframeRef(string morphClip, int position, string keyframe)
+		{
+			foreach (xaMorphClip clip in Parser.MorphSection.ClipList)
+			{
+				if (clip.Name == morphClip)
+				{
+					xaMorphKeyframeRef morphRef = new xaMorphKeyframeRef();
+					xa.CreateUnknowns(morphRef);
+					morphRef.Index = -1;
+					morphRef.Name = keyframe;
+					clip.KeyframeRefList.Insert(position, morphRef);
+					return;
+				}
+			}
+		}
+
+		[Plugin]
+		public void RemoveMorphKeyframeRef(string morphClip, int position)
+		{
+			foreach (xaMorphClip clip in Parser.MorphSection.ClipList)
+			{
+				if (clip.Name == morphClip)
+				{
+					clip.KeyframeRefList.RemoveAt(position);
+					return;
+				}
+			}
+		}
+
+		[Plugin]
+		public void MoveMorphKeyframeRef(string morphClip, int fromPos, int toPos)
+		{
+			foreach (xaMorphClip clip in Parser.MorphSection.ClipList)
+			{
+				if (clip.Name == morphClip)
+				{
+					xaMorphKeyframeRef morphRef = clip.KeyframeRefList[fromPos];
+					clip.KeyframeRefList.RemoveAt(fromPos);
+					clip.KeyframeRefList.Insert(toPos, morphRef);
+					return;
+				}
+			}
+		}
+
+		[Plugin]
+		public void RemoveMorphKeyframe(string name)
+		{
+			xaMorphKeyframe keyframe = xa.FindMorphKeyFrame(name, Parser.MorphSection);
+			Parser.MorphSection.KeyframeList.Remove(keyframe);
+		}
+
+		[Plugin]
+		public void SetMorphKeyframeRefKeyframe(string morphClip, int position, string keyframe)
+		{
+			foreach (xaMorphClip clip in Parser.MorphSection.ClipList)
+			{
+				if (clip.Name == morphClip)
+				{
+					clip.KeyframeRefList[position].Name = keyframe;
+					return;
+				}
+			}
+		}
+
+		[Plugin]
+		public void SetMorphKeyframeRefIndex(string morphClip, int position, int id)
+		{
+			foreach (xaMorphClip clip in Parser.MorphSection.ClipList)
+			{
+				if (clip.Name == morphClip)
+				{
+					clip.KeyframeRefList[position].Index = id;
+					return;
+				}
+			}
+		}
+
+		[Plugin]
+		public void RenameMorphKeyframe(int position, string newName)
+		{
+			xaMorphKeyframe keyframe = Parser.MorphSection.KeyframeList[position];
+			string oldName = keyframe.Name;
+			foreach (xaMorphClip clip in Parser.MorphSection.ClipList)
+			{
+				foreach (xaMorphKeyframeRef morphRef in clip.KeyframeRefList)
+				{
+					if (morphRef.Name == oldName)
+					{
+						morphRef.Name = newName;
+					}
+				}
+			}
+			keyframe.Name = newName;
 		}
 
 		[Plugin]
@@ -48,31 +165,35 @@ namespace SB3Utility
 			{
 				if (!wsAnimation.isTrackEnabled(wsTrack))
 					continue;
-				xaAnimationKeyframe[] newKeyframes = new xaAnimationKeyframe[resampleCount];
+				xaAnimationKeyframe[] newKeyframes = null;
 				int wsTrackKeyframesLength = 0;
 				for (int i = 0; i < wsTrack.Keyframes.Length; i++)
 				{
 					if (wsTrack.Keyframes[i] != null)
 						wsTrackKeyframesLength++;
 				}
-				if (wsTrackKeyframesLength == resampleCount)
+				if (resampleCount < 0 || wsTrackKeyframesLength == resampleCount)
 				{
+					newKeyframes = new xaAnimationKeyframe[wsTrackKeyframesLength];
+					int keyframeIdx = 0;
 					for (int i = 0; i < wsTrack.Keyframes.Length; i++)
 					{
 						ImportedAnimationKeyframe keyframe = wsTrack.Keyframes[i];
 						if (keyframe == null)
 							continue;
 
-						newKeyframes[i] = new xaAnimationKeyframe();
-						newKeyframes[i].Index = i;
-						newKeyframes[i].Rotation = keyframe.Rotation;
-						xa.CreateUnknowns(newKeyframes[i]);
-						newKeyframes[i].Translation = keyframe.Translation;
-						newKeyframes[i].Scaling = keyframe.Scaling;
+						newKeyframes[keyframeIdx] = new xaAnimationKeyframe();
+						newKeyframes[keyframeIdx].Index = i;
+						newKeyframes[keyframeIdx].Rotation = keyframe.Rotation;
+						xa.CreateUnknowns(newKeyframes[keyframeIdx]);
+						newKeyframes[keyframeIdx].Translation = keyframe.Translation;
+						newKeyframes[keyframeIdx].Scaling = keyframe.Scaling;
+						keyframeIdx++;
 					}
 				}
 				else
 				{
+					newKeyframes = new xaAnimationKeyframe[resampleCount];
 					if (wsTrackKeyframesLength < 1)
 					{
 						xaAnimationKeyframe keyframe = new xaAnimationKeyframe();
@@ -95,7 +216,10 @@ namespace SB3Utility
 
 				newTrackList.Add(new KeyValuePair<string, xaAnimationKeyframe[]>(wsTrack.Name, newKeyframes));
 			}
-			Fbx.InterpolateKeyframes(interpolateTracks, resampleCount);
+			if (interpolateTracks.Count > 0)
+			{
+				Fbx.InterpolateKeyframes(interpolateTracks, resampleCount);
+			}
 
 			List<xaAnimationTrack> animationNodeList = parser.AnimationSection.TrackList;
 			Dictionary<string, xaAnimationTrack> animationNodeDic = null;
@@ -118,6 +242,14 @@ namespace SB3Utility
 					animationNode.KeyframeList = new List<xaAnimationKeyframe>(newTrack.Value);
 					animationNode.Name = newTrack.Key;
 					xa.CreateUnknowns(animationNode);
+				}
+			}
+			else if (replaceMethod == ReplaceAnimationMethod.ReplacePresent)
+			{
+				foreach (var newTrack in newTrackList)
+				{
+					xaAnimationTrack animationNode = xa.animationGetOriginalKeyframes(animationNodeDic, newTrack.Key, animationNodeList);
+					animationNode.KeyframeList = new List<xaAnimationKeyframe>(newTrack.Value);
 				}
 			}
 			else if (replaceMethod == ReplaceAnimationMethod.Merge)
@@ -182,7 +314,7 @@ namespace SB3Utility
 				int maxKeyframes = 0;
 				foreach (xaAnimationTrack animationNode in animationNodeList)
 				{
-					int numKeyframes = animationNode.KeyframeList.Count;
+					int numKeyframes = animationNode.KeyframeList[animationNode.KeyframeList.Count - 1].Index;
 					if (numKeyframes > maxKeyframes)
 					{
 						maxKeyframes = numKeyframes;
@@ -193,15 +325,21 @@ namespace SB3Utility
 				{
 					xaAnimationTrack animationNode;
 					xaAnimationKeyframe[] origKeyframes = xa.animationGetOriginalKeyframes(animationNodeDic, newTrack.Key, animationNodeList, out animationNode);
-					xaAnimationKeyframe[] destKeyframes = new xaAnimationKeyframe[maxKeyframes + newTrack.Value.Length];
-					xa.animationCopyKeyframeTransformArray(origKeyframes, 0, destKeyframes, 0, origKeyframes.Length);
-					if (origKeyframes.Length < maxKeyframes)
+					xaAnimationKeyframe[] destKeyframes = new xaAnimationKeyframe[maxKeyframes + insertPos + newTrack.Value[newTrack.Value.Length - 1].Index + 1];
+					xa.animationCopyKeyframeTransformArray(origKeyframes, destKeyframes, 0);
+					if (origKeyframes.Length > 0 && origKeyframes.Length == origKeyframes[origKeyframes.Length - 1].Index + 1)
 					{
-						xa.animationNormalizeTrack(origKeyframes, destKeyframes, maxKeyframes);
+						xa.animationNormalizeTrack(origKeyframes, destKeyframes, origKeyframes.Length + insertPos);
 					}
+					xa.animationCopyKeyframeTransformArray(newTrack.Value, destKeyframes, maxKeyframes + insertPos);
+					animationNode.KeyframeList = new List<xaAnimationKeyframe>(origKeyframes.Length + insertPos + newTrack.Value.Length);
+					for (int i = 0; i < destKeyframes.Length; i++)
+					{
+						if (destKeyframes[i] == null)
+							continue;
 
-					xa.animationCopyKeyframeTransformArray(newTrack.Value, 0, destKeyframes, maxKeyframes, newTrack.Value.Length);
-					animationNode.KeyframeList = new List<xaAnimationKeyframe>(destKeyframes);
+						animationNode.KeyframeList.Add(destKeyframes[i]);
+					}
 				}
 			}
 			else
@@ -209,6 +347,46 @@ namespace SB3Utility
 				Report.ReportLog("Error: Unexpected animation replace method " + replaceMethod + ". Skipping this animation");
 				return;
 			}
+		}
+
+		[Plugin]
+		public void SetAnimationClip(xaAnimationClip clip, string name, int start, int end, int next, double speed)
+		{
+			clip.Name = name;
+			clip.Start = start;
+			clip.End = end;
+			clip.Next = next;
+			clip.Speed = (float)speed;
+		}
+
+		[Plugin]
+		public void MoveAnimationClip(xaAnimationClip clip, int position)
+		{
+			Parser.AnimationSection.ClipList.Remove(clip);
+			Parser.AnimationSection.ClipList.Insert(position, clip);
+		}
+
+		[Plugin]
+		public void CopyAnimationClip(xaAnimationClip clip, int position)
+		{
+			xaAnimationClip newClip = Parser.AnimationSection.ClipList[position];
+			newClip.Name = clip.Name;
+			newClip.Start = clip.Start;
+			newClip.End = clip.End;
+			newClip.Next = clip.Next;
+			newClip.Speed = clip.Speed;
+			xa.CopyUnknowns(clip, newClip);
+		}
+
+		[Plugin]
+		public void DeleteAnimationClip(xaAnimationClip clip)
+		{
+			clip.Name = String.Empty;
+			clip.Start = 0;
+			clip.End = 0;
+			clip.Next = 0;
+			clip.Speed = 0;
+			xa.CreateUnknowns(clip);
 		}
 	}
 }

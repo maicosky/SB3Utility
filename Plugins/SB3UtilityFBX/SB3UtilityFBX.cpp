@@ -126,6 +126,9 @@ namespace SB3Utility
 			for (int i = 0; i < wsTrack->Keyframes->Length; i++)
 			{
 				ImportedAnimationKeyframe^ wsKeyframe = wsTrack->Keyframes[i];
+				if (wsKeyframe == nullptr)
+					continue;
+
 				float timePos = i * animationLen / (wsTrack->Keyframes->Length - 1);
 				time.SetSecondDouble(timePos);
 

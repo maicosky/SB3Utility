@@ -116,7 +116,7 @@
             1,
             0,
             0,
-            0});
+            -2147483648});
 			this.numericResample.Name = "numericResample";
 			this.numericResample.Size = new System.Drawing.Size(104, 20);
 			this.numericResample.TabIndex = 5;
@@ -124,7 +124,7 @@
             1,
             0,
             0,
-            0});
+            -2147483648});
 			// 
 			// label1
 			// 
@@ -140,9 +140,9 @@
 			this.label2.AutoSize = true;
 			this.label2.Location = new System.Drawing.Point(6, 64);
 			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(168, 13);
+			this.label2.Size = new System.Drawing.Size(209, 13);
 			this.label2.TabIndex = 3;
-			this.label2.Text = "Merge/Insert At Keyframe Position";
+			this.label2.Text = "Merge/Insert At Position, Append Distance";
 			// 
 			// label4
 			// 
@@ -155,14 +155,14 @@
 			// 
 			// numericPosition
 			// 
-			this.numericPosition.Location = new System.Drawing.Point(179, 61);
+			this.numericPosition.Location = new System.Drawing.Point(221, 61);
 			this.numericPosition.Maximum = new decimal(new int[] {
             1000000,
             0,
             0,
             0});
 			this.numericPosition.Name = "numericPosition";
-			this.numericPosition.Size = new System.Drawing.Size(104, 20);
+			this.numericPosition.Size = new System.Drawing.Size(62, 20);
 			this.numericPosition.TabIndex = 1;
 			// 
 			// comboBoxMethod
@@ -173,6 +173,7 @@
 			this.comboBoxMethod.Name = "comboBoxMethod";
 			this.comboBoxMethod.Size = new System.Drawing.Size(84, 21);
 			this.comboBoxMethod.TabIndex = 0;
+			this.comboBoxMethod.SelectedIndexChanged += new System.EventHandler(this.comboBoxMethod_SelectedIndexChanged);
 			// 
 			// panelMorphList
 			// 

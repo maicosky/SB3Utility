@@ -1,4 +1,45 @@
-﻿[0.4.42.25]
+﻿[0.4.42.30]
+  - XA morph clip name and mesh can be edited
+  - XX: Added option to search the whole mesh for nearest vertices
+
+[0.4.42.29]
+  - XX mesh FBX exports allow to embed media. Fbx imports try to read textures from {filename}.fbm.
+  - XX mesh export supports non-FBX Collada DAE format. The GUI always uses the FBX SDK for importing DAE files.
+    Fixed bone matrices and extended nodes with "sid" (required by Maya).
+    The script function ImportDAE(path) can be used by Plugin Writers only.
+  - Keyframe interpolation fixed for variably set keyframes in tracks of XAs. Interpolation is optional now.
+  - DirectX import animation keyframe rotation fixed and imports keyframe indices.
+  - Added animation "Replace Present" method which doesn't delete tracks not present in the workspace.
+  - Fixed animation "Merge" and "Insert" method : animationNormalizeTracks() produced constant keyframe indices.
+  - Added "Animation Clip Editor" by making all elements of clips editable.
+  - Added appending keyframes to tracks with variably set keyframes.
+
+[0.4.42.28]
+  - XA Morphs preview
+  - Scrolling to newly added morph keyframes after import of morphs. Also scrolling to imported morph clip.
+  - DirectX export/import integrated and fixed
+  - DAE Collada (FBX SDK) export/import integrated
+
+[0.4.42.27]
+  - Saving a pp file caused crashes on subsequent openings of subfiles (XX and XA). (No data corruption in the pp file.)
+  - XX ReplaceMesh corrupted XX unit when replacing a mesh with NumVector2PerVertex==0 or when inserting a new mesh.
+  - PP saving failed in the same session after deletion of last backup file.
+  - XX deleting last bone crashed (hightlighting).
+
+  - FBX morph export can apply keyframes as channels of only one blendshape.
+  - FBX import reads old and newly organized files, but not mixed.
+  - New keyframes can be imported.
+  - Added calculation of normals for morphs in XAs.
+  - Added editing of xaMorphKeyframeRef components and names of xaMorphKeyframes.
+  - Change: "fixed" size of the renderer's cursor
+  - Added fine grained zoom in renderer. Activated by ALT-RMB
+  - Both zoom functions are taking Sensitivity into account.
+
+[0.4.42.26]
+  - FBX morph imports didn't show the morph names. Export fixed, but the files cant be imported by the old SB3U.
+  - MQO morph export set wrong material index.
+
+[0.4.42.25]
   - XX format conversion fixed
 
 [0.4.42.24]

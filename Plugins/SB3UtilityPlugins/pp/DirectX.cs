@@ -6,6 +6,41 @@ using SlimDX;
 
 namespace SB3Utility
 {
+	public static partial class Plugins
+	{
+		[Plugin]
+		[PluginOpensFile(".x")]
+		public static void WorkspaceDirectX(string path, string variable)
+		{
+			string importVar = Gui.Scripting.GetNextVariable("importDirectX");
+			var importer = (DirectX.Importer)Gui.Scripting.RunScript(importVar + " = ImportDirectX(\"" + path + "\")");
+
+			string editorVar = Gui.Scripting.GetNextVariable("importedEditor");
+			var editor = (ImportedEditor)Gui.Scripting.RunScript(editorVar + " = ImportedEditor(" + importVar + ")");
+
+			new FormWorkspace(path, importer, editorVar, editor);
+		}
+
+		[Plugin]
+		public static void ExportDirectX(string path, xxParser xxParser, object[] meshNames, object[] xaParsers, int ticksPerSecond, int keyframeLength)
+		{
+			List<xaParser> xaParserList = null;
+			if (xaParsers != null)
+			{
+				xaParserList = new List<xaParser>(Utility.Convert<xaParser>(xaParsers));
+			}
+
+			List<xxFrame> meshParents = xx.FindMeshFrames(xxParser.Frame, new List<string>(Utility.Convert<string>(meshNames)));
+			DirectX.Exporter.Export(path, xxParser, meshParents.ToArray(), xaParserList, ticksPerSecond, keyframeLength);
+		}
+
+		[Plugin]
+		public static DirectX.Importer ImportDirectX([DefaultVar]string path)
+		{
+			return new DirectX.Importer(path);
+		}
+	}
+
 	public class DirectX
 	{
 		private const ushort TOKEN_NAME = 1;
@@ -96,7 +131,7 @@ namespace SB3Utility
 							xx.ExportTexture(tex, dir.FullName + @"\" + Path.GetFileName(tex.Name));
 						}
 					}
-					if (xaParsers.Count > 0)
+					if (xaParsers != null && xaParsers.Count > 0)
 					{
 						writer.WriteLine("AnimTicksPerSecond {");
 						writer.WriteLine(" " + ticksPerSecond + ";");
@@ -859,6 +894,7 @@ namespace SB3Utility
 			private ImportedFrame ImportFrame(Section section)
 			{
 				ImportedFrame frame = new ImportedFrame();
+				frame.InitChildren(0);
 
 				if (section.name == null)
 				{
@@ -902,7 +938,7 @@ namespace SB3Utility
 						ImportedFrame childFrame = ImportFrame(child);
 						if (childFrame != null)
 						{
-							childFrame.AddChild(childFrame);
+							frame.AddChild(childFrame);
 						}
 					}
 					else
@@ -1304,15 +1340,22 @@ namespace SB3Utility
 			private string ImportTexture(Section section)
 			{
 				string texName = String.Empty;
-				if (section.data.First != null)
+				try
 				{
-					texName = Path.GetFileName(ConvertString(section.data.First.Value));
-					if (texList.Add(texName))
+					if (section.data.First != null)
 					{
-						string texPath = Path.GetDirectoryName(path) + Path.DirectorySeparatorChar + texName;
-						ImportedTexture tex = new ImportedTexture(texPath);
-						TextureList.Add(tex);
+						texName = Path.GetFileName(ConvertString(section.data.First.Value));
+						if (texList.Add(texName))
+						{
+							string texPath = Path.GetDirectoryName(path) + Path.DirectorySeparatorChar + texName;
+							ImportedTexture tex = new ImportedTexture(texPath);
+							TextureList.Add(tex);
+						}
 					}
+				}
+				catch (Exception ex)
+				{
+					Utility.ReportException(ex);
 				}
 				return texName;
 			}
@@ -1328,6 +1371,7 @@ namespace SB3Utility
 					{
 						string trackName = null;
 						float[][][] keyDataArray = new float[5][][];
+						int[][] keyIndexArray = new int[5][];
 						foreach (Section keySection in animSection.children)
 						{
 							if (keySection.type == "AnimationKey")
@@ -1338,9 +1382,11 @@ namespace SB3Utility
 								int numKeys = ConvertInt32(keyNode.Value);
 								keyNode = keyNode.Next;
 								float[][] keyData = new float[numKeys][];
+								int[] keyIndices = new int[numKeys];
 								for (int i = 0; i < numKeys; i++)
 								{
 									int keyIdx = ConvertInt32(keyNode.Value);
+									keyIndices[i] = keyIdx;
 									keyNode = keyNode.Next;
 									int numFloats = ConvertInt32(keyNode.Value);
 									keyNode = keyNode.Next;
@@ -1352,6 +1398,7 @@ namespace SB3Utility
 									}
 								}
 								keyDataArray[keyType] = keyData;
+								keyIndexArray[keyType] = keyIndices;
 							}
 							else if (keySection.type == "ref")
 							{
@@ -1384,16 +1431,18 @@ namespace SB3Utility
 							throw new Exception("animation " + trackName + " doesn't have the same number of keys for each type");
 						}
 
-						ImportedAnimationKeyframe[] keyframes = new ImportedAnimationKeyframe[keyDataArray[0].Length];
-						for (int i = 0; i < keyframes.Length; i++)
+						int length = keyIndexArray[0][keyIndexArray[0].Length - 1] + 1;
+						ImportedAnimationKeyframe[] keyframes = new ImportedAnimationKeyframe[length];
+						for (int i = 0; i < keyIndexArray[0].Length; i++)
 						{
+							int idx = keyIndexArray[0][i];
 							float[] rotation = keyDataArray[0][i];
 							float[] scaling = keyDataArray[1][i];
 							float[] translation = keyDataArray[2][i];
-							keyframes[i] = new ImportedAnimationKeyframe();
-							keyframes[i].Rotation = new Quaternion(rotation[0], rotation[1], rotation[2], -rotation[3]);
-							keyframes[i].Scaling = new Vector3(scaling[0], scaling[1], scaling[2]);
-							keyframes[i].Translation = new Vector3(translation[0], translation[1], -translation[2]);
+							keyframes[idx] = new ImportedAnimationKeyframe();
+							keyframes[idx].Rotation = new Quaternion(rotation[1], rotation[2], -rotation[3], rotation[0]);
+							keyframes[idx].Scaling = new Vector3(scaling[0], scaling[1], scaling[2]);
+							keyframes[idx].Translation = new Vector3(translation[0], translation[1], -translation[2]);
 						}
 						if (keyframes.Length > 0)
 						{

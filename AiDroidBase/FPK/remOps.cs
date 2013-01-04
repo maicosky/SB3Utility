@@ -12,12 +12,16 @@ namespace AiDroidPlugin
 	{
 		public static ImportedTexture ImportedTexture(remId texture, string remPath, bool diffuse_else_ambient)
 		{
+			Report.ReportLog("tex=" + texture);
+			Report.ReportLog("path=" + remPath);
+
 			String texh_folder = TexturePathFromREM(remPath);
 			if (texh_folder == null)
 			{
 				Report.ReportLog("TEXH folder could not be located.");
 				return null;
 			}
+			Report.ReportLog("okay");
 
 			string matTexName = texture.ToString();
 			String body = texture.ToString().Substring(0, matTexName.LastIndexOf('.'));
@@ -60,6 +64,10 @@ namespace AiDroidPlugin
 			for (int i = 0; i < 3; i++)
 			{
 				dir = Path.GetDirectoryName(dir);
+				if (dir == null)
+				{
+					break;
+				}
 				Directory.SetCurrentDirectory(dir);
 				if (Directory.Exists("TEXH"))
 				{

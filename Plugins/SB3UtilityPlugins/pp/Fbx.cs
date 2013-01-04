@@ -9,6 +9,7 @@ namespace SB3Utility
 	{
 		[Plugin]
 		[PluginOpensFile(".fbx")]
+		[PluginOpensFile(".dae")]
 		public static void WorkspaceFbx(string path, string variable)
 		{
 			string importVar = Gui.Scripting.GetNextVariable("importFbx");
@@ -21,7 +22,7 @@ namespace SB3Utility
 		}
 
 		[Plugin]
-		public static void ExportFbx([DefaultVar]xxParser xxParser, object[] meshNames, object[] xaParsers, int startKeyframe, int endKeyframe, bool linear, string path, string exportFormat, bool allFrames, bool skins)
+		public static void ExportFbx([DefaultVar]xxParser xxParser, object[] meshNames, object[] xaParsers, int startKeyframe, int endKeyframe, bool linear, string path, string exportFormat, bool allFrames, bool skins, bool embedMedia)
 		{
 			List<xaParser> xaParserList = null;
 			if (xaParsers != null)
@@ -30,13 +31,13 @@ namespace SB3Utility
 			}
 
 			List<xxFrame> meshFrames = xx.FindMeshFrames(xxParser.Frame, new List<string>(Utility.Convert<string>(meshNames)));
-			Fbx.Exporter.Export(path, xxParser, meshFrames, xaParserList, startKeyframe, endKeyframe, linear, exportFormat, allFrames, skins);
+			Fbx.Exporter.Export(path, xxParser, meshFrames, xaParserList, startKeyframe, endKeyframe, linear, exportFormat, allFrames, skins, embedMedia);
 		}
 
 		[Plugin]
-		public static void ExportMorphFbx([DefaultVar]xxParser xxparser, string path, xxFrame meshFrame, xaParser xaparser, xaMorphClip morphClip, string exportFormat)
+		public static void ExportMorphFbx([DefaultVar]xxParser xxparser, string path, xxFrame meshFrame, xaParser xaparser, xaMorphClip morphClip, string exportFormat, bool oneBlendShape, bool embedMedia)
 		{
-			Fbx.Exporter.ExportMorph(path, xxparser, meshFrame, morphClip, xaparser, exportFormat);
+			Fbx.Exporter.ExportMorph(path, xxparser, meshFrame, morphClip, xaparser, exportFormat, oneBlendShape, embedMedia);
 		}
 
 		[Plugin]

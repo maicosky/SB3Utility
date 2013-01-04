@@ -13,9 +13,16 @@ namespace SB3Utility
 	public static partial class Plugins
 	{
 		[Plugin]
-		public static void ExportDae([DefaultVar]string path, xxParser xxparser, List<xxFrame> meshFrames, List<xaParser> xaparsers, bool allFrames)
+		public static void ExportDae([DefaultVar]string path, xxParser xxParser, object[] meshNames, object[] xaParsers, bool allFrames)
 		{
-			Collada.Exporter.Export(path, xxparser, meshFrames, xaparsers, allFrames);
+			List<xaParser> xaParserList = null;
+			if (xaParsers != null)
+			{
+				xaParserList = new List<xaParser>(Utility.Convert<xaParser>(xaParsers));
+			}
+
+			List<xxFrame> meshFrames = xx.FindMeshFrames(xxParser.Frame, new List<string>(Utility.Convert<string>(meshNames)));
+			Collada.Exporter.Export(path, xxParser, meshFrames, xaParserList, allFrames);
 		}
 
 		[Plugin]
@@ -89,7 +96,7 @@ namespace SB3Utility
 					asset.AppendChild(doc.CreateElement("modified", uri)).InnerText = creationTimeString;
 					asset.AppendChild(doc.CreateElement("up_axis", uri)).InnerText = "Y_UP";
 
-					if (xaSubfileList.Count > 0)
+					if (xaSubfileList != null && xaSubfileList.Count > 0)
 					{
 						libraries[(int)LibraryIdx.Animations] = doc.CreateElement("library_animations", uri);
 						Dictionary<string, int> animationNameDic = new Dictionary<string, int>();
@@ -249,6 +256,7 @@ namespace SB3Utility
 					string frameNameCleaned = EncodeName(frameName);
 					XmlElement node = doc.CreateElement("node", uri);
 					node.SetAttribute("id", frameNameCleaned);
+					node.SetAttribute("sid", frameNameCleaned);
 					node.SetAttribute("name", frameNameCleaned);
 					parentNode.AppendChild(node);
 
@@ -472,6 +480,7 @@ namespace SB3Utility
 					// mesh binding
 					XmlElement meshNode = doc.CreateElement("node", uri);
 					meshNode.SetAttribute("id", meshName);
+					meshNode.SetAttribute("sid", meshName);
 					meshNode.SetAttribute("name", meshName);
 					parent.AppendChild(meshNode);
 
@@ -631,7 +640,7 @@ namespace SB3Utility
 							{
 								for (int n = 0; n < 4; n++)
 								{
-									bindPosesArrayText.Append(boneMatrix[m, n].ToFloatString() + " ");
+									bindPosesArrayText.Append(boneMatrix[n, m].ToFloatString() + " ");
 								}
 							}
 							usedBoneNames.Add(boneName);
@@ -899,15 +908,15 @@ namespace SB3Utility
 					XmlElement scaleXArray;
 					XmlElement scaleYArray;
 					XmlElement scaleZArray;
-					animationName.AppendChild(XmlAnimationTransform(usedFrame, "animation", "translate", "X", keyframes.Count, keyframes.Count, new string[] { "X" }, new string[] { "float" }, out translateXArray));
-					animationName.AppendChild(XmlAnimationTransform(usedFrame, "animation", "translate", "Y", keyframes.Count, keyframes.Count, new string[] { "Y" }, new string[] { "float" }, out translateYArray));
-					animationName.AppendChild(XmlAnimationTransform(usedFrame, "animation", "translate", "Z", keyframes.Count, keyframes.Count, new string[] { "Z" }, new string[] { "float" }, out translateZArray));
-					animationName.AppendChild(XmlAnimationTransform(usedFrame, "animation", "rotateX", "ANGLE", keyframes.Count, keyframes.Count, new string[] { "ANGLE" }, new string[] { "float" }, out rotateXArray));
-					animationName.AppendChild(XmlAnimationTransform(usedFrame, "animation", "rotateY", "ANGLE", keyframes.Count, keyframes.Count, new string[] { "ANGLE" }, new string[] { "float" }, out rotateYArray));
-					animationName.AppendChild(XmlAnimationTransform(usedFrame, "animation", "rotateZ", "ANGLE", keyframes.Count, keyframes.Count, new string[] { "ANGLE" }, new string[] { "float" }, out rotateZArray));
-					animationName.AppendChild(XmlAnimationTransform(usedFrame, "animation", "scale", "X", keyframes.Count, keyframes.Count, new string[] { "X" }, new string[] { "float" }, out scaleXArray));
-					animationName.AppendChild(XmlAnimationTransform(usedFrame, "animation", "scale", "Y", keyframes.Count, keyframes.Count, new string[] { "Y" }, new string[] { "float" }, out scaleYArray));
-					animationName.AppendChild(XmlAnimationTransform(usedFrame, "animation", "scale", "Z", keyframes.Count, keyframes.Count, new string[] { "Z" }, new string[] { "float" }, out scaleZArray));
+					animationName.AppendChild(XmlAnimationTransform(usedFrame, "animation", "translate", "X", keyframes, keyframes.Count, new string[] { "X" }, new string[] { "float" }, out translateXArray));
+					animationName.AppendChild(XmlAnimationTransform(usedFrame, "animation", "translate", "Y", keyframes, keyframes.Count, new string[] { "Y" }, new string[] { "float" }, out translateYArray));
+					animationName.AppendChild(XmlAnimationTransform(usedFrame, "animation", "translate", "Z", keyframes, keyframes.Count, new string[] { "Z" }, new string[] { "float" }, out translateZArray));
+					animationName.AppendChild(XmlAnimationTransform(usedFrame, "animation", "rotateX", "ANGLE", keyframes, keyframes.Count, new string[] { "ANGLE" }, new string[] { "float" }, out rotateXArray));
+					animationName.AppendChild(XmlAnimationTransform(usedFrame, "animation", "rotateY", "ANGLE", keyframes, keyframes.Count, new string[] { "ANGLE" }, new string[] { "float" }, out rotateYArray));
+					animationName.AppendChild(XmlAnimationTransform(usedFrame, "animation", "rotateZ", "ANGLE", keyframes, keyframes.Count, new string[] { "ANGLE" }, new string[] { "float" }, out rotateZArray));
+					animationName.AppendChild(XmlAnimationTransform(usedFrame, "animation", "scale", "X", keyframes, keyframes.Count, new string[] { "X" }, new string[] { "float" }, out scaleXArray));
+					animationName.AppendChild(XmlAnimationTransform(usedFrame, "animation", "scale", "Y", keyframes, keyframes.Count, new string[] { "Y" }, new string[] { "float" }, out scaleYArray));
+					animationName.AppendChild(XmlAnimationTransform(usedFrame, "animation", "scale", "Z", keyframes, keyframes.Count, new string[] { "Z" }, new string[] { "float" }, out scaleZArray));
 
 					StringBuilder translateXString = new StringBuilder(12 * keyframes.Count);
 					StringBuilder translateYString = new StringBuilder(12 * keyframes.Count);
@@ -963,7 +972,7 @@ namespace SB3Utility
 				return technique;
 			}
 
-			private XmlElement XmlAnimationTransform(string name, string midName, string transform, string transformExt, int count, int outCount, string[] outNames, string[] outTypes, out XmlElement outputArray)
+			private XmlElement XmlAnimationTransform(string name, string midName, string transform, string transformExt, List<xaAnimationKeyframe> keyframes, int outCount, string[] outNames, string[] outTypes, out XmlElement outputArray)
 			{
 				string animationId = name + "-" + transform + "-" + midName;
 
@@ -975,9 +984,9 @@ namespace SB3Utility
 				animation.AppendChild(animationInput);
 				XmlElement animationInputArray = doc.CreateElement("float_array", uri);
 				animationInputArray.SetAttribute("id", animationId + "-input" + transformExt + "-array");
-				animationInputArray.SetAttribute("count", count.ToString());
+				animationInputArray.SetAttribute("count", keyframes.Count.ToString());
 				animationInput.AppendChild(animationInputArray);
-				animationInput.AppendChild(XmlTechnique(animationId + "-input" + transformExt + "-array", count, new string[] { "TIME" }, new string[] { "float" }));
+				animationInput.AppendChild(XmlTechnique(animationId + "-input" + transformExt + "-array", keyframes.Count, new string[] { "TIME" }, new string[] { "float" }));
 
 				XmlElement animationOutput = doc.CreateElement("source", uri);
 				animationOutput.SetAttribute("id", animationId + "-output" + transformExt);
@@ -986,16 +995,16 @@ namespace SB3Utility
 				animationOutputArray.SetAttribute("id", animationId + "-output" + transformExt + "-array");
 				animationOutputArray.SetAttribute("count", outCount.ToString());
 				animationOutput.AppendChild(animationOutputArray);
-				animationOutput.AppendChild(XmlTechnique(animationId + "-output" + transformExt + "-array", count, outNames, outTypes));
+				animationOutput.AppendChild(XmlTechnique(animationId + "-output" + transformExt + "-array", keyframes.Count, outNames, outTypes));
 
 				XmlElement animationInterpolation = doc.CreateElement("source", uri);
 				animationInterpolation.SetAttribute("id", animationId + "-interpolation" + transformExt);
 				animation.AppendChild(animationInterpolation);
 				XmlElement animationInterpolationArray = doc.CreateElement("Name_array", uri);
 				animationInterpolationArray.SetAttribute("id", animationId + "-interpolation" + transformExt + "-array");
-				animationInterpolationArray.SetAttribute("count", count.ToString());
+				animationInterpolationArray.SetAttribute("count", keyframes.Count.ToString());
 				animationInterpolation.AppendChild(animationInterpolationArray);
-				animationInterpolation.AppendChild(XmlTechnique(animationId + "-interpolation" + transformExt + "-array", count, new string[] { "INTERPOLATION" }, new string[] { "Name" }));
+				animationInterpolation.AppendChild(XmlTechnique(animationId + "-interpolation" + transformExt + "-array", keyframes.Count, new string[] { "INTERPOLATION" }, new string[] { "Name" }));
 
 				XmlElement animationSampler = doc.CreateElement("sampler", uri);
 				animationSampler.SetAttribute("id", animationId + transformExt);
@@ -1018,11 +1027,11 @@ namespace SB3Utility
 				animationChannel.SetAttribute("target", name + "/" + transform + "." + transformExt);
 				animation.AppendChild(animationChannel);
 
-				StringBuilder inputString = new StringBuilder(12 * count);
-				StringBuilder interpolationString = new StringBuilder(7 * count);
-				for (int i = 0; i < count; i++)
+				StringBuilder inputString = new StringBuilder(12 * keyframes.Count);
+				StringBuilder interpolationString = new StringBuilder(7 * keyframes.Count);
+				for (int i = 0; i < keyframes.Count; i++)
 				{
-					inputString.Append((i / FPS).ToFloatString() + " ");
+					inputString.Append((keyframes[i].Index / FPS).ToFloatString() + " ");
 					interpolationString.Append("LINEAR ");
 				}
 				animationInputArray.InnerText = inputString.ToString(0, inputString.Length - 1);

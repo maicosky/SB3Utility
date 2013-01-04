@@ -43,9 +43,11 @@
 			this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.keepBackupToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+			this.checkBoxMeshExportEmbedMedia = new System.Windows.Forms.CheckBox();
 			this.groupBoxInterpolation = new System.Windows.Forms.GroupBox();
 			this.radioButtonLinear = new System.Windows.Forms.RadioButton();
 			this.radioButtonCubic = new System.Windows.Forms.RadioButton();
+			this.textBoxKeyframeRange = new SB3Utility.EditTextBox();
 			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
 			this.textBoxFormat = new SB3Utility.EditTextBox();
 			this.buttonConvert = new System.Windows.Forms.Button();
@@ -163,7 +165,6 @@
 			this.checkBoxMeshExportMqoWorldCoords = new System.Windows.Forms.CheckBox();
 			this.panelMeshExportOptionsFbx = new System.Windows.Forms.Panel();
 			this.label13 = new System.Windows.Forms.Label();
-			this.textBoxKeyframeRange = new SB3Utility.EditTextBox();
 			this.checkBoxMeshExportFbxSkins = new System.Windows.Forms.CheckBox();
 			this.checkBoxMeshExportFbxAllFrames = new System.Windows.Forms.CheckBox();
 			this.checkBoxMeshSkinned = new System.Windows.Forms.CheckBox();
@@ -382,6 +383,19 @@
 			this.keepBackupToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
 			this.keepBackupToolStripMenuItem.Text = "Keep &Backup";
 			// 
+			// checkBoxMeshExportEmbedMedia
+			// 
+			this.checkBoxMeshExportEmbedMedia.AutoSize = true;
+			this.checkBoxMeshExportEmbedMedia.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
+			this.checkBoxMeshExportEmbedMedia.Location = new System.Drawing.Point(78, 22);
+			this.checkBoxMeshExportEmbedMedia.Name = "checkBoxMeshExportEmbedMedia";
+			this.checkBoxMeshExportEmbedMedia.Size = new System.Drawing.Size(91, 17);
+			this.checkBoxMeshExportEmbedMedia.TabIndex = 266;
+			this.checkBoxMeshExportEmbedMedia.TabStop = false;
+			this.checkBoxMeshExportEmbedMedia.Text = "Embed Media";
+			this.toolTip1.SetToolTip(this.checkBoxMeshExportEmbedMedia, "Textures are stored inside the output file.");
+			this.checkBoxMeshExportEmbedMedia.UseVisualStyleBackColor = true;
+			// 
 			// groupBoxInterpolation
 			// 
 			this.groupBoxInterpolation.Controls.Add(this.radioButtonLinear);
@@ -390,7 +404,7 @@
 			this.groupBoxInterpolation.Margin = new System.Windows.Forms.Padding(0);
 			this.groupBoxInterpolation.Name = "groupBoxInterpolation";
 			this.groupBoxInterpolation.Padding = new System.Windows.Forms.Padding(0);
-			this.groupBoxInterpolation.Size = new System.Drawing.Size(60, 42);
+			this.groupBoxInterpolation.Size = new System.Drawing.Size(60, 43);
 			this.groupBoxInterpolation.TabIndex = 271;
 			this.groupBoxInterpolation.TabStop = false;
 			this.toolTip1.SetToolTip(this.groupBoxInterpolation, "Interpolation type - used for export of compressed animations");
@@ -399,7 +413,7 @@
 			// 
 			this.radioButtonLinear.AutoSize = true;
 			this.radioButtonLinear.Checked = true;
-			this.radioButtonLinear.Location = new System.Drawing.Point(3, 7);
+			this.radioButtonLinear.Location = new System.Drawing.Point(3, 8);
 			this.radioButtonLinear.Name = "radioButtonLinear";
 			this.radioButtonLinear.Size = new System.Drawing.Size(54, 17);
 			this.radioButtonLinear.TabIndex = 269;
@@ -411,13 +425,25 @@
 			// radioButtonCubic
 			// 
 			this.radioButtonCubic.AutoSize = true;
-			this.radioButtonCubic.Location = new System.Drawing.Point(3, 22);
+			this.radioButtonCubic.Location = new System.Drawing.Point(3, 24);
 			this.radioButtonCubic.Name = "radioButtonCubic";
 			this.radioButtonCubic.Size = new System.Drawing.Size(52, 17);
 			this.radioButtonCubic.TabIndex = 270;
 			this.radioButtonCubic.Text = "Cubic";
 			this.toolTip1.SetToolTip(this.radioButtonCubic, "Keyframes are cubic interpolated");
 			this.radioButtonCubic.UseVisualStyleBackColor = true;
+			// 
+			// textBoxKeyframeRange
+			// 
+			this.textBoxKeyframeRange.Location = new System.Drawing.Point(136, 2);
+			this.textBoxKeyframeRange.MaxLength = 10;
+			this.textBoxKeyframeRange.Name = "textBoxKeyframeRange";
+			this.textBoxKeyframeRange.Size = new System.Drawing.Size(45, 20);
+			this.textBoxKeyframeRange.TabIndex = 268;
+			this.textBoxKeyframeRange.TabStop = false;
+			this.textBoxKeyframeRange.Text = "-1-0";
+			this.toolTip1.SetToolTip(this.textBoxKeyframeRange, "Starting with -1 exports all keyframes without interpolation.\r\nStarting with 0 or" +
+        " higher also interpolates.");
 			// 
 			// splitContainer1
 			// 
@@ -1633,11 +1659,11 @@
 			this.groupBox2.Controls.Add(this.label28);
 			this.groupBox2.Controls.Add(this.comboBoxMeshExportFormat);
 			this.groupBox2.Controls.Add(this.buttonMeshExport);
-			this.groupBox2.Controls.Add(this.panelMeshExportOptionsFbx);
 			this.groupBox2.Controls.Add(this.panelMeshExportOptionsDefault);
 			this.groupBox2.Controls.Add(this.panelMeshExportOptionsDirectX);
 			this.groupBox2.Controls.Add(this.panelMeshExportOptionsCollada);
 			this.groupBox2.Controls.Add(this.panelMeshExportOptionsMqo);
+			this.groupBox2.Controls.Add(this.panelMeshExportOptionsFbx);
 			this.groupBox2.Location = new System.Drawing.Point(0, 42);
 			this.groupBox2.Name = "groupBox2";
 			this.groupBox2.Size = new System.Drawing.Size(253, 84);
@@ -1788,6 +1814,8 @@
 			// 
 			this.checkBoxMeshExportMqoSingleFile.AutoSize = true;
 			this.checkBoxMeshExportMqoSingleFile.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
+			this.checkBoxMeshExportMqoSingleFile.Checked = true;
+			this.checkBoxMeshExportMqoSingleFile.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.checkBoxMeshExportMqoSingleFile.Location = new System.Drawing.Point(37, 2);
 			this.checkBoxMeshExportMqoSingleFile.Name = "checkBoxMeshExportMqoSingleFile";
 			this.checkBoxMeshExportMqoSingleFile.Size = new System.Drawing.Size(79, 17);
@@ -1810,6 +1838,7 @@
 			// 
 			// panelMeshExportOptionsFbx
 			// 
+			this.panelMeshExportOptionsFbx.Controls.Add(this.checkBoxMeshExportEmbedMedia);
 			this.panelMeshExportOptionsFbx.Controls.Add(this.groupBoxInterpolation);
 			this.panelMeshExportOptionsFbx.Controls.Add(this.label13);
 			this.panelMeshExportOptionsFbx.Controls.Add(this.textBoxKeyframeRange);
@@ -1829,23 +1858,13 @@
 			this.label13.TabIndex = 268;
 			this.label13.Text = "Keyframes";
 			// 
-			// textBoxKeyframeRange
-			// 
-			this.textBoxKeyframeRange.Location = new System.Drawing.Point(136, 2);
-			this.textBoxKeyframeRange.MaxLength = 10;
-			this.textBoxKeyframeRange.Name = "textBoxKeyframeRange";
-			this.textBoxKeyframeRange.Size = new System.Drawing.Size(45, 20);
-			this.textBoxKeyframeRange.TabIndex = 268;
-			this.textBoxKeyframeRange.TabStop = false;
-			this.textBoxKeyframeRange.Text = "-1-0";
-			// 
 			// checkBoxMeshExportFbxSkins
 			// 
 			this.checkBoxMeshExportFbxSkins.AutoSize = true;
 			this.checkBoxMeshExportFbxSkins.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
 			this.checkBoxMeshExportFbxSkins.Checked = true;
 			this.checkBoxMeshExportFbxSkins.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.checkBoxMeshExportFbxSkins.Location = new System.Drawing.Point(20, 19);
+			this.checkBoxMeshExportFbxSkins.Location = new System.Drawing.Point(20, 22);
 			this.checkBoxMeshExportFbxSkins.Name = "checkBoxMeshExportFbxSkins";
 			this.checkBoxMeshExportFbxSkins.Size = new System.Drawing.Size(52, 17);
 			this.checkBoxMeshExportFbxSkins.TabIndex = 264;
@@ -2743,5 +2762,6 @@
 		private System.Windows.Forms.RadioButton radioButtonLinear;
 		private System.Windows.Forms.GroupBox groupBoxInterpolation;
 		private System.Windows.Forms.ToolTip toolTip1;
+		private System.Windows.Forms.CheckBox checkBoxMeshExportEmbedMedia;
 	}
 }

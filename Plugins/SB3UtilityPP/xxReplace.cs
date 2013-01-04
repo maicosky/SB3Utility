@@ -112,6 +112,7 @@ namespace SB3Utility
 					if (xxFormat >= 4)
 					{
 						xxVertex = new xxVertexUShort();
+						CreateUnknown(xxVertex);
 					}
 					else
 					{
@@ -144,7 +145,20 @@ namespace SB3Utility
 			return xxMesh;
 		}
 
-		public static void ReplaceMesh(xxFrame frame, xxParser parser, WorkspaceMesh mesh, bool merge, CopyMeshMethod normalsMethod, CopyMeshMethod bonesMethod)
+		private class VertexPositionComparer : IEqualityComparer<Vector3>
+		{
+			public bool Equals(Vector3 p1, Vector3 p2)
+			{
+				return p1 == p2;
+			}
+
+			public int GetHashCode(Vector3 v)
+			{
+				return v.GetHashCode();
+			}
+		}
+
+		public static void ReplaceMesh(xxFrame frame, xxParser parser, WorkspaceMesh mesh, bool merge, CopyMeshMethod normalsMethod, CopyMeshMethod bonesMethod, bool targetFullMesh)
 		{
 			Matrix transform = Matrix.Identity;
 			xxFrame transformFrame = frame;
@@ -161,6 +175,7 @@ namespace SB3Utility
 			bool[] replaceSubmeshesOption;
 			xxMesh xxMesh = CreateMesh(mesh, parser.Format, out materialNames, out indices, out worldCoords, out replaceSubmeshesOption);
 
+			List<xxVertex> allVertices = null;
 			if (frame.Mesh == null)
 			{
 				CreateUnknowns(xxMesh);
@@ -175,6 +190,24 @@ namespace SB3Utility
 					for (int i = 0; i < frame.Mesh.BoneList.Count; i++)
 					{
 						xxMesh.BoneList.Add(frame.Mesh.BoneList[i].Clone());
+					}
+				}
+
+				if (targetFullMesh && (normalsMethod == CopyMeshMethod.CopyNear || bonesMethod == CopyMeshMethod.CopyNear))
+				{
+					allVertices = new List<xxVertex>();
+					HashSet<Vector3> posSet = new HashSet<Vector3>(new VertexPositionComparer());
+					foreach (xxSubmesh submesh in frame.Mesh.SubmeshList)
+					{
+						allVertices.Capacity = allVertices.Count + submesh.VertexList.Count;
+						foreach (xxVertex vertex in submesh.VertexList)
+						{
+							if (!posSet.Contains(vertex.Position))
+							{
+								posSet.Add(vertex.Position);
+								allVertices.Add(vertex);
+							}
+						}
 					}
 				}
 			}
@@ -222,7 +255,7 @@ namespace SB3Utility
 					}
 					else if (normalsMethod == CopyMeshMethod.CopyNear)
 					{
-						xx.CopyNormalsNear(baseSubmesh.VertexList, xxSubmesh.VertexList);
+						xx.CopyNormalsNear(targetFullMesh ? allVertices : baseSubmesh.VertexList, xxSubmesh.VertexList);
 					}
 
 					if (bonesMethod == CopyMeshMethod.CopyOrder)
@@ -231,7 +264,7 @@ namespace SB3Utility
 					}
 					else if (bonesMethod == CopyMeshMethod.CopyNear)
 					{
-						xx.CopyBonesNear(baseSubmesh.VertexList, xxSubmesh.VertexList);
+						xx.CopyBonesNear(targetFullMesh ? allVertices : baseSubmesh.VertexList, xxSubmesh.VertexList);
 					}
 				}
 

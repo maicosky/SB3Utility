@@ -583,6 +583,10 @@ namespace SB3Utility
 				pTextures->Add(pTexture);
 
 				String^ texPath = Path::GetDirectoryName(gcnew String(cPath)) + Path::DirectorySeparatorChar + texName;
+				if (!File::Exists(texPath))
+				{
+					texPath = gcnew String(pTexture->GetFileName());
+				}
 				try
 				{
 					ImportedTexture^ tex = gcnew ImportedTexture(texPath);
@@ -779,9 +783,20 @@ namespace SB3Utility
 		{
 			KFbxNode* pNode = pMeshArray->GetAt(i);
 			KFbxMesh* pMesh = pNode->GetMesh();
-			int numShapes = pMesh->GetShapeCount();
+			int numShapes = pMesh->GetDeformerCount(KFbxDeformer::eBLENDSHAPE);
+			bool channelOrganized = false;
 			if (numShapes > 0)
 			{
+				KFbxBlendShape* lBlendShape = NULL;
+				if (numShapes == 1)
+				{
+					lBlendShape = (KFbxBlendShape*)pMesh->GetDeformer(0, KFbxDeformer::eBLENDSHAPE);
+					if (lBlendShape->GetBlendShapeChannelCount() > 1)
+					{
+						numShapes = lBlendShape->GetBlendShapeChannelCount();
+						channelOrganized = true;
+					}
+				}
 				ImportedMorph^ morphList = gcnew ImportedMorph();
 				morphList->KeyframeList = gcnew List<ImportedMorphKeyframe^>(numShapes);
 				MorphList->Add(morphList);
@@ -796,11 +811,29 @@ namespace SB3Utility
 
 				for (int j = 0; j < numShapes; j++)
 				{
-					KFbxShape* pShape = pMesh->GetShape(j);
+					KFbxBlendShapeChannel* lChannel;
+					if (channelOrganized)
+					{
+						lChannel = lBlendShape->GetBlendShapeChannel(j);
+					}
+					else
+					{
+						lBlendShape = (KFbxBlendShape*)pMesh->GetDeformer(j, KFbxDeformer::eBLENDSHAPE);
+						if (lBlendShape->GetBlendShapeChannelCount() != 1)
+						{
+							Report::ReportLog("Warning! " + clipName + "'s blendShape " + j + " has " + lBlendShape->GetBlendShapeChannelCount() + " channels. Channels beyond the first are ignored.");
+						}
+						lChannel = lBlendShape->GetBlendShapeChannel(0);
+					}
+					if (lChannel->GetTargetShapeCount() != 1)
+					{
+						Report::ReportLog("Warning! " + clipName + "'s has a blendChannel with " + lChannel->GetTargetShapeCount() + " shapes. Shapes beyond the first are ignored.");
+					}
+					KFbxShape* pShape = lChannel->GetTargetShape(0);
 					ImportedMorphKeyframe^ morph = gcnew ImportedMorphKeyframe();
 					morphList->KeyframeList->Add(morph);
 
-					String^ shapeName = gcnew String(pMesh->GetShapeName(j));
+					String^ shapeName = gcnew String(pShape->GetName());
 					int shapeNameStartIdx = shapeName->LastIndexOf(".");
 					if (shapeNameStartIdx >= 0)
 					{

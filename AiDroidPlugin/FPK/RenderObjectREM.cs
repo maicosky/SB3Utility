@@ -374,6 +374,11 @@ namespace AiDroidPlugin
 							if (!ImportedTextures.TryGetValue(mat.texture.ToString(), out importedTex))
 							{
 								importedTex = rem.ImportedTexture(mat.texture, parser.RemPath, true);
+								if (importedTex == null)
+								{
+									Report.ReportLog("Export textures of TEXH.FPK!");
+									continue;
+								}
 								ImportedTextures.Add(mat.texture.ToString(), importedTex);
 							}
 							Texture memTex = Texture.FromMemory(device, importedTex.Data);

@@ -33,12 +33,17 @@
 			this.numericFrameMeshMatOffset = new System.Windows.Forms.NumericUpDown();
 			this.label4 = new System.Windows.Forms.Label();
 			this.panelFrame = new System.Windows.Forms.Panel();
+			this.numericFrameId = new System.Windows.Forms.NumericUpDown();
 			this.panel2 = new System.Windows.Forms.Panel();
 			this.radioButtonFrameReplace = new System.Windows.Forms.RadioButton();
 			this.radioButtonFrameMerge = new System.Windows.Forms.RadioButton();
 			this.radioButtonFrameAdd = new System.Windows.Forms.RadioButton();
+			this.label1 = new System.Windows.Forms.Label();
+			this.textBoxFrameName = new System.Windows.Forms.TextBox();
 			this.label2 = new System.Windows.Forms.Label();
 			this.panelMesh = new System.Windows.Forms.Panel();
+			this.numericMeshId = new System.Windows.Forms.NumericUpDown();
+			this.textBoxMeshName = new System.Windows.Forms.TextBox();
 			this.panel4 = new System.Windows.Forms.Panel();
 			this.radioButtonBonesCopyNear = new System.Windows.Forms.RadioButton();
 			this.radioButtonBonesReplace = new System.Windows.Forms.RadioButton();
@@ -52,41 +57,41 @@
 			this.radioButtonMeshMerge = new System.Windows.Forms.RadioButton();
 			this.label5 = new System.Windows.Forms.Label();
 			this.label3 = new System.Windows.Forms.Label();
-			this.label7 = new System.Windows.Forms.Label();
 			this.label6 = new System.Windows.Forms.Label();
-			this.textBoxFrameName = new System.Windows.Forms.TextBox();
-			this.label1 = new System.Windows.Forms.Label();
-			this.numericFrameId = new System.Windows.Forms.NumericUpDown();
-			this.numericMeshId = new System.Windows.Forms.NumericUpDown();
-			this.textBoxMeshName = new System.Windows.Forms.TextBox();
+			this.label7 = new System.Windows.Forms.Label();
+			this.panel5 = new System.Windows.Forms.Panel();
+			this.radioButtonNearestMesh = new System.Windows.Forms.RadioButton();
+			this.radioButtonNearestSubmesh = new System.Windows.Forms.RadioButton();
+			this.label8 = new System.Windows.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this.numericFrameMeshMatOffset)).BeginInit();
 			this.panelFrame.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.numericFrameId)).BeginInit();
 			this.panel2.SuspendLayout();
 			this.panelMesh.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.numericMeshId)).BeginInit();
 			this.panel4.SuspendLayout();
 			this.panel3.SuspendLayout();
 			this.panel1.SuspendLayout();
-			((System.ComponentModel.ISupportInitialize)(this.numericFrameId)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.numericMeshId)).BeginInit();
+			this.panel5.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// buttonOK
 			// 
 			this.buttonOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.buttonOK.Location = new System.Drawing.Point(87, 152);
+			this.buttonOK.Location = new System.Drawing.Point(87, 157);
 			this.buttonOK.Name = "buttonOK";
 			this.buttonOK.Size = new System.Drawing.Size(75, 23);
-			this.buttonOK.TabIndex = 9;
+			this.buttonOK.TabIndex = 90;
 			this.buttonOK.Text = "OK";
 			this.buttonOK.UseVisualStyleBackColor = true;
 			// 
 			// buttonCancel
 			// 
 			this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.buttonCancel.Location = new System.Drawing.Point(225, 152);
+			this.buttonCancel.Location = new System.Drawing.Point(225, 157);
 			this.buttonCancel.Name = "buttonCancel";
 			this.buttonCancel.Size = new System.Drawing.Size(75, 23);
-			this.buttonCancel.TabIndex = 10;
+			this.buttonCancel.TabIndex = 92;
 			this.buttonCancel.Text = "Cancel";
 			this.buttonCancel.UseVisualStyleBackColor = true;
 			// 
@@ -105,7 +110,7 @@
             -2147483648});
 			this.numericFrameMeshMatOffset.Name = "numericFrameMeshMatOffset";
 			this.numericFrameMeshMatOffset.Size = new System.Drawing.Size(58, 20);
-			this.numericFrameMeshMatOffset.TabIndex = 14;
+			this.numericFrameMeshMatOffset.TabIndex = 45;
 			// 
 			// label4
 			// 
@@ -127,252 +132,8 @@
 			this.panelFrame.Controls.Add(this.label2);
 			this.panelFrame.Location = new System.Drawing.Point(12, 12);
 			this.panelFrame.Name = "panelFrame";
-			this.panelFrame.Size = new System.Drawing.Size(367, 121);
+			this.panelFrame.Size = new System.Drawing.Size(367, 139);
 			this.panelFrame.TabIndex = 15;
-			// 
-			// panel2
-			// 
-			this.panel2.Controls.Add(this.radioButtonFrameReplace);
-			this.panel2.Controls.Add(this.radioButtonFrameMerge);
-			this.panel2.Controls.Add(this.radioButtonFrameAdd);
-			this.panel2.Location = new System.Drawing.Point(66, 39);
-			this.panel2.Name = "panel2";
-			this.panel2.Size = new System.Drawing.Size(232, 21);
-			this.panel2.TabIndex = 15;
-			// 
-			// radioButtonFrameReplace
-			// 
-			this.radioButtonFrameReplace.AutoSize = true;
-			this.radioButtonFrameReplace.Location = new System.Drawing.Point(120, 2);
-			this.radioButtonFrameReplace.Name = "radioButtonFrameReplace";
-			this.radioButtonFrameReplace.Size = new System.Drawing.Size(65, 17);
-			this.radioButtonFrameReplace.TabIndex = 2;
-			this.radioButtonFrameReplace.Text = "Replace";
-			this.radioButtonFrameReplace.UseVisualStyleBackColor = true;
-			this.radioButtonFrameReplace.CheckedChanged += new System.EventHandler(this.radioButtonFrameReplace_CheckedChanged);
-			// 
-			// radioButtonFrameMerge
-			// 
-			this.radioButtonFrameMerge.AutoSize = true;
-			this.radioButtonFrameMerge.Checked = true;
-			this.radioButtonFrameMerge.Location = new System.Drawing.Point(9, 2);
-			this.radioButtonFrameMerge.Name = "radioButtonFrameMerge";
-			this.radioButtonFrameMerge.Size = new System.Drawing.Size(55, 17);
-			this.radioButtonFrameMerge.TabIndex = 0;
-			this.radioButtonFrameMerge.TabStop = true;
-			this.radioButtonFrameMerge.Text = "Merge";
-			this.radioButtonFrameMerge.UseVisualStyleBackColor = true;
-			this.radioButtonFrameMerge.CheckedChanged += new System.EventHandler(this.radioButtonFrameMerge_CheckedChanged);
-			// 
-			// radioButtonFrameAdd
-			// 
-			this.radioButtonFrameAdd.AutoSize = true;
-			this.radioButtonFrameAdd.Location = new System.Drawing.Point(70, 2);
-			this.radioButtonFrameAdd.Name = "radioButtonFrameAdd";
-			this.radioButtonFrameAdd.Size = new System.Drawing.Size(44, 17);
-			this.radioButtonFrameAdd.TabIndex = 1;
-			this.radioButtonFrameAdd.Text = "Add";
-			this.radioButtonFrameAdd.UseVisualStyleBackColor = true;
-			this.radioButtonFrameAdd.CheckedChanged += new System.EventHandler(this.radioButtonFrameAdd_CheckedChanged);
-			// 
-			// label2
-			// 
-			this.label2.AutoSize = true;
-			this.label2.Location = new System.Drawing.Point(17, 43);
-			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(43, 13);
-			this.label2.TabIndex = 11;
-			this.label2.Text = "Method";
-			// 
-			// panelMesh
-			// 
-			this.panelMesh.Controls.Add(this.numericMeshId);
-			this.panelMesh.Controls.Add(this.textBoxMeshName);
-			this.panelMesh.Controls.Add(this.panel4);
-			this.panelMesh.Controls.Add(this.panel3);
-			this.panelMesh.Controls.Add(this.panel1);
-			this.panelMesh.Controls.Add(this.label5);
-			this.panelMesh.Controls.Add(this.label3);
-			this.panelMesh.Controls.Add(this.label6);
-			this.panelMesh.Controls.Add(this.label7);
-			this.panelMesh.Location = new System.Drawing.Point(12, 12);
-			this.panelMesh.Name = "panelMesh";
-			this.panelMesh.Size = new System.Drawing.Size(367, 121);
-			this.panelMesh.TabIndex = 16;
-			// 
-			// panel4
-			// 
-			this.panel4.Controls.Add(this.radioButtonBonesCopyNear);
-			this.panel4.Controls.Add(this.radioButtonBonesReplace);
-			this.panel4.Controls.Add(this.radioButtonBonesCopyOrder);
-			this.panel4.Location = new System.Drawing.Point(66, 89);
-			this.panel4.Name = "panel4";
-			this.panel4.Size = new System.Drawing.Size(280, 21);
-			this.panel4.TabIndex = 22;
-			// 
-			// radioButtonBonesCopyNear
-			// 
-			this.radioButtonBonesCopyNear.AutoSize = true;
-			this.radioButtonBonesCopyNear.Location = new System.Drawing.Point(77, 2);
-			this.radioButtonBonesCopyNear.Name = "radioButtonBonesCopyNear";
-			this.radioButtonBonesCopyNear.Size = new System.Drawing.Size(89, 17);
-			this.radioButtonBonesCopyNear.TabIndex = 5;
-			this.radioButtonBonesCopyNear.Text = "Copy Nearest";
-			this.radioButtonBonesCopyNear.UseVisualStyleBackColor = true;
-			this.radioButtonBonesCopyNear.CheckedChanged += new System.EventHandler(this.radioButtonBonesCopyNear_CheckedChanged);
-			// 
-			// radioButtonBonesReplace
-			// 
-			this.radioButtonBonesReplace.AutoSize = true;
-			this.radioButtonBonesReplace.Checked = true;
-			this.radioButtonBonesReplace.Location = new System.Drawing.Point(6, 2);
-			this.radioButtonBonesReplace.Name = "radioButtonBonesReplace";
-			this.radioButtonBonesReplace.Size = new System.Drawing.Size(65, 17);
-			this.radioButtonBonesReplace.TabIndex = 3;
-			this.radioButtonBonesReplace.TabStop = true;
-			this.radioButtonBonesReplace.Text = "Replace";
-			this.radioButtonBonesReplace.UseVisualStyleBackColor = true;
-			this.radioButtonBonesReplace.CheckedChanged += new System.EventHandler(this.radioButtonBonesReplace_CheckedChanged);
-			// 
-			// radioButtonBonesCopyOrder
-			// 
-			this.radioButtonBonesCopyOrder.AutoSize = true;
-			this.radioButtonBonesCopyOrder.Location = new System.Drawing.Point(173, 2);
-			this.radioButtonBonesCopyOrder.Name = "radioButtonBonesCopyOrder";
-			this.radioButtonBonesCopyOrder.Size = new System.Drawing.Size(90, 17);
-			this.radioButtonBonesCopyOrder.TabIndex = 4;
-			this.radioButtonBonesCopyOrder.Text = "Copy In Order";
-			this.radioButtonBonesCopyOrder.UseVisualStyleBackColor = true;
-			this.radioButtonBonesCopyOrder.CheckedChanged += new System.EventHandler(this.radioButtonBonesCopyOrder_CheckedChanged);
-			// 
-			// panel3
-			// 
-			this.panel3.Controls.Add(this.radioButtonNormalsCopyNear);
-			this.panel3.Controls.Add(this.radioButtonNormalsReplace);
-			this.panel3.Controls.Add(this.radioButtonNormalsCopyOrder);
-			this.panel3.Location = new System.Drawing.Point(66, 62);
-			this.panel3.Name = "panel3";
-			this.panel3.Size = new System.Drawing.Size(280, 21);
-			this.panel3.TabIndex = 21;
-			// 
-			// radioButtonNormalsCopyNear
-			// 
-			this.radioButtonNormalsCopyNear.AutoSize = true;
-			this.radioButtonNormalsCopyNear.Location = new System.Drawing.Point(77, 2);
-			this.radioButtonNormalsCopyNear.Name = "radioButtonNormalsCopyNear";
-			this.radioButtonNormalsCopyNear.Size = new System.Drawing.Size(89, 17);
-			this.radioButtonNormalsCopyNear.TabIndex = 5;
-			this.radioButtonNormalsCopyNear.Text = "Copy Nearest";
-			this.radioButtonNormalsCopyNear.UseVisualStyleBackColor = true;
-			this.radioButtonNormalsCopyNear.CheckedChanged += new System.EventHandler(this.radioButtonNormalsCopyNear_CheckedChanged);
-			// 
-			// radioButtonNormalsReplace
-			// 
-			this.radioButtonNormalsReplace.AutoSize = true;
-			this.radioButtonNormalsReplace.Checked = true;
-			this.radioButtonNormalsReplace.Location = new System.Drawing.Point(6, 2);
-			this.radioButtonNormalsReplace.Name = "radioButtonNormalsReplace";
-			this.radioButtonNormalsReplace.Size = new System.Drawing.Size(65, 17);
-			this.radioButtonNormalsReplace.TabIndex = 3;
-			this.radioButtonNormalsReplace.TabStop = true;
-			this.radioButtonNormalsReplace.Text = "Replace";
-			this.radioButtonNormalsReplace.UseVisualStyleBackColor = true;
-			this.radioButtonNormalsReplace.CheckedChanged += new System.EventHandler(this.radioButtonNormalsReplace_CheckedChanged);
-			// 
-			// radioButtonNormalsCopyOrder
-			// 
-			this.radioButtonNormalsCopyOrder.AutoSize = true;
-			this.radioButtonNormalsCopyOrder.Location = new System.Drawing.Point(173, 2);
-			this.radioButtonNormalsCopyOrder.Name = "radioButtonNormalsCopyOrder";
-			this.radioButtonNormalsCopyOrder.Size = new System.Drawing.Size(90, 17);
-			this.radioButtonNormalsCopyOrder.TabIndex = 4;
-			this.radioButtonNormalsCopyOrder.Text = "Copy In Order";
-			this.radioButtonNormalsCopyOrder.UseVisualStyleBackColor = true;
-			this.radioButtonNormalsCopyOrder.CheckedChanged += new System.EventHandler(this.radioButtonNormalsCopyOrder_CheckedChanged);
-			// 
-			// panel1
-			// 
-			this.panel1.Controls.Add(this.radioButtonMeshReplace);
-			this.panel1.Controls.Add(this.radioButtonMeshMerge);
-			this.panel1.Location = new System.Drawing.Point(66, 35);
-			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(149, 21);
-			this.panel1.TabIndex = 20;
-			// 
-			// radioButtonMeshReplace
-			// 
-			this.radioButtonMeshReplace.AutoSize = true;
-			this.radioButtonMeshReplace.Checked = true;
-			this.radioButtonMeshReplace.Location = new System.Drawing.Point(6, 2);
-			this.radioButtonMeshReplace.Name = "radioButtonMeshReplace";
-			this.radioButtonMeshReplace.Size = new System.Drawing.Size(65, 17);
-			this.radioButtonMeshReplace.TabIndex = 1;
-			this.radioButtonMeshReplace.TabStop = true;
-			this.radioButtonMeshReplace.Text = "Replace";
-			this.radioButtonMeshReplace.UseVisualStyleBackColor = true;
-			// 
-			// radioButtonMeshMerge
-			// 
-			this.radioButtonMeshMerge.AutoSize = true;
-			this.radioButtonMeshMerge.Location = new System.Drawing.Point(77, 2);
-			this.radioButtonMeshMerge.Name = "radioButtonMeshMerge";
-			this.radioButtonMeshMerge.Size = new System.Drawing.Size(55, 17);
-			this.radioButtonMeshMerge.TabIndex = 0;
-			this.radioButtonMeshMerge.Text = "Merge";
-			this.radioButtonMeshMerge.UseVisualStyleBackColor = true;
-			// 
-			// label5
-			// 
-			this.label5.AutoSize = true;
-			this.label5.Location = new System.Drawing.Point(17, 93);
-			this.label5.Name = "label5";
-			this.label5.Size = new System.Drawing.Size(37, 13);
-			this.label5.TabIndex = 18;
-			this.label5.Text = "Bones";
-			// 
-			// label3
-			// 
-			this.label3.AutoSize = true;
-			this.label3.Location = new System.Drawing.Point(17, 66);
-			this.label3.Name = "label3";
-			this.label3.Size = new System.Drawing.Size(45, 13);
-			this.label3.TabIndex = 17;
-			this.label3.Text = "Normals";
-			// 
-			// label7
-			// 
-			this.label7.AutoSize = true;
-			this.label7.Location = new System.Drawing.Point(17, 39);
-			this.label7.Name = "label7";
-			this.label7.Size = new System.Drawing.Size(43, 13);
-			this.label7.TabIndex = 16;
-			this.label7.Text = "Method";
-			// 
-			// label6
-			// 
-			this.label6.AutoSize = true;
-			this.label6.Location = new System.Drawing.Point(17, 13);
-			this.label6.Name = "label6";
-			this.label6.Size = new System.Drawing.Size(92, 13);
-			this.label6.TabIndex = 15;
-			this.label6.Text = "Destination Frame";
-			// 
-			// textBoxFrameName
-			// 
-			this.textBoxFrameName.Location = new System.Drawing.Point(213, 13);
-			this.textBoxFrameName.Name = "textBoxFrameName";
-			this.textBoxFrameName.ReadOnly = true;
-			this.textBoxFrameName.Size = new System.Drawing.Size(135, 20);
-			this.textBoxFrameName.TabIndex = 8;
-			// 
-			// label1
-			// 
-			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(17, 17);
-			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(126, 13);
-			this.label1.TabIndex = 7;
-			this.label1.Text = "Destination Parent Frame";
 			// 
 			// numericFrameId
 			// 
@@ -397,6 +158,95 @@
             -2147483648});
 			this.numericFrameId.ValueChanged += new System.EventHandler(this.numericFrameId_ValueChanged);
 			// 
+			// panel2
+			// 
+			this.panel2.Controls.Add(this.radioButtonFrameReplace);
+			this.panel2.Controls.Add(this.radioButtonFrameMerge);
+			this.panel2.Controls.Add(this.radioButtonFrameAdd);
+			this.panel2.Location = new System.Drawing.Point(66, 39);
+			this.panel2.Name = "panel2";
+			this.panel2.Size = new System.Drawing.Size(232, 21);
+			this.panel2.TabIndex = 15;
+			// 
+			// radioButtonFrameReplace
+			// 
+			this.radioButtonFrameReplace.AutoSize = true;
+			this.radioButtonFrameReplace.Location = new System.Drawing.Point(120, 2);
+			this.radioButtonFrameReplace.Name = "radioButtonFrameReplace";
+			this.radioButtonFrameReplace.Size = new System.Drawing.Size(65, 17);
+			this.radioButtonFrameReplace.TabIndex = 37;
+			this.radioButtonFrameReplace.Text = "Replace";
+			this.radioButtonFrameReplace.UseVisualStyleBackColor = true;
+			this.radioButtonFrameReplace.CheckedChanged += new System.EventHandler(this.radioButtonFrameReplace_CheckedChanged);
+			// 
+			// radioButtonFrameMerge
+			// 
+			this.radioButtonFrameMerge.AutoSize = true;
+			this.radioButtonFrameMerge.Checked = true;
+			this.radioButtonFrameMerge.Location = new System.Drawing.Point(9, 2);
+			this.radioButtonFrameMerge.Name = "radioButtonFrameMerge";
+			this.radioButtonFrameMerge.Size = new System.Drawing.Size(55, 17);
+			this.radioButtonFrameMerge.TabIndex = 33;
+			this.radioButtonFrameMerge.TabStop = true;
+			this.radioButtonFrameMerge.Text = "Merge";
+			this.radioButtonFrameMerge.UseVisualStyleBackColor = true;
+			this.radioButtonFrameMerge.CheckedChanged += new System.EventHandler(this.radioButtonFrameMerge_CheckedChanged);
+			// 
+			// radioButtonFrameAdd
+			// 
+			this.radioButtonFrameAdd.AutoSize = true;
+			this.radioButtonFrameAdd.Location = new System.Drawing.Point(70, 2);
+			this.radioButtonFrameAdd.Name = "radioButtonFrameAdd";
+			this.radioButtonFrameAdd.Size = new System.Drawing.Size(44, 17);
+			this.radioButtonFrameAdd.TabIndex = 35;
+			this.radioButtonFrameAdd.Text = "Add";
+			this.radioButtonFrameAdd.UseVisualStyleBackColor = true;
+			this.radioButtonFrameAdd.CheckedChanged += new System.EventHandler(this.radioButtonFrameAdd_CheckedChanged);
+			// 
+			// label1
+			// 
+			this.label1.AutoSize = true;
+			this.label1.Location = new System.Drawing.Point(17, 17);
+			this.label1.Name = "label1";
+			this.label1.Size = new System.Drawing.Size(126, 13);
+			this.label1.TabIndex = 7;
+			this.label1.Text = "Destination Parent Frame";
+			// 
+			// textBoxFrameName
+			// 
+			this.textBoxFrameName.Location = new System.Drawing.Point(213, 13);
+			this.textBoxFrameName.Name = "textBoxFrameName";
+			this.textBoxFrameName.ReadOnly = true;
+			this.textBoxFrameName.Size = new System.Drawing.Size(135, 20);
+			this.textBoxFrameName.TabIndex = 18;
+			// 
+			// label2
+			// 
+			this.label2.AutoSize = true;
+			this.label2.Location = new System.Drawing.Point(17, 43);
+			this.label2.Name = "label2";
+			this.label2.Size = new System.Drawing.Size(43, 13);
+			this.label2.TabIndex = 11;
+			this.label2.Text = "Method";
+			// 
+			// panelMesh
+			// 
+			this.panelMesh.Controls.Add(this.panel5);
+			this.panelMesh.Controls.Add(this.label8);
+			this.panelMesh.Controls.Add(this.numericMeshId);
+			this.panelMesh.Controls.Add(this.textBoxMeshName);
+			this.panelMesh.Controls.Add(this.panel4);
+			this.panelMesh.Controls.Add(this.panel3);
+			this.panelMesh.Controls.Add(this.panel1);
+			this.panelMesh.Controls.Add(this.label5);
+			this.panelMesh.Controls.Add(this.label3);
+			this.panelMesh.Controls.Add(this.label6);
+			this.panelMesh.Controls.Add(this.label7);
+			this.panelMesh.Location = new System.Drawing.Point(12, 12);
+			this.panelMesh.Name = "panelMesh";
+			this.panelMesh.Size = new System.Drawing.Size(367, 139);
+			this.panelMesh.TabIndex = 16;
+			// 
 			// numericMeshId
 			// 
 			this.numericMeshId.Location = new System.Drawing.Point(115, 9);
@@ -416,17 +266,214 @@
 			this.textBoxMeshName.Name = "textBoxMeshName";
 			this.textBoxMeshName.ReadOnly = true;
 			this.textBoxMeshName.Size = new System.Drawing.Size(169, 20);
-			this.textBoxMeshName.TabIndex = 23;
+			this.textBoxMeshName.TabIndex = 25;
+			// 
+			// panel4
+			// 
+			this.panel4.Controls.Add(this.radioButtonBonesCopyNear);
+			this.panel4.Controls.Add(this.radioButtonBonesReplace);
+			this.panel4.Controls.Add(this.radioButtonBonesCopyOrder);
+			this.panel4.Location = new System.Drawing.Point(66, 89);
+			this.panel4.Name = "panel4";
+			this.panel4.Size = new System.Drawing.Size(280, 21);
+			this.panel4.TabIndex = 22;
+			// 
+			// radioButtonBonesCopyNear
+			// 
+			this.radioButtonBonesCopyNear.AutoSize = true;
+			this.radioButtonBonesCopyNear.Location = new System.Drawing.Point(77, 2);
+			this.radioButtonBonesCopyNear.Name = "radioButtonBonesCopyNear";
+			this.radioButtonBonesCopyNear.Size = new System.Drawing.Size(89, 17);
+			this.radioButtonBonesCopyNear.TabIndex = 52;
+			this.radioButtonBonesCopyNear.Text = "Copy Nearest";
+			this.radioButtonBonesCopyNear.UseVisualStyleBackColor = true;
+			this.radioButtonBonesCopyNear.CheckedChanged += new System.EventHandler(this.radioButtonBonesCopyNear_CheckedChanged);
+			// 
+			// radioButtonBonesReplace
+			// 
+			this.radioButtonBonesReplace.AutoSize = true;
+			this.radioButtonBonesReplace.Checked = true;
+			this.radioButtonBonesReplace.Location = new System.Drawing.Point(6, 2);
+			this.radioButtonBonesReplace.Name = "radioButtonBonesReplace";
+			this.radioButtonBonesReplace.Size = new System.Drawing.Size(65, 17);
+			this.radioButtonBonesReplace.TabIndex = 50;
+			this.radioButtonBonesReplace.TabStop = true;
+			this.radioButtonBonesReplace.Text = "Replace";
+			this.radioButtonBonesReplace.UseVisualStyleBackColor = true;
+			this.radioButtonBonesReplace.CheckedChanged += new System.EventHandler(this.radioButtonBonesReplace_CheckedChanged);
+			// 
+			// radioButtonBonesCopyOrder
+			// 
+			this.radioButtonBonesCopyOrder.AutoSize = true;
+			this.radioButtonBonesCopyOrder.Location = new System.Drawing.Point(173, 2);
+			this.radioButtonBonesCopyOrder.Name = "radioButtonBonesCopyOrder";
+			this.radioButtonBonesCopyOrder.Size = new System.Drawing.Size(90, 17);
+			this.radioButtonBonesCopyOrder.TabIndex = 54;
+			this.radioButtonBonesCopyOrder.Text = "Copy In Order";
+			this.radioButtonBonesCopyOrder.UseVisualStyleBackColor = true;
+			this.radioButtonBonesCopyOrder.CheckedChanged += new System.EventHandler(this.radioButtonBonesCopyOrder_CheckedChanged);
+			// 
+			// panel3
+			// 
+			this.panel3.Controls.Add(this.radioButtonNormalsCopyNear);
+			this.panel3.Controls.Add(this.radioButtonNormalsReplace);
+			this.panel3.Controls.Add(this.radioButtonNormalsCopyOrder);
+			this.panel3.Location = new System.Drawing.Point(66, 62);
+			this.panel3.Name = "panel3";
+			this.panel3.Size = new System.Drawing.Size(280, 21);
+			this.panel3.TabIndex = 21;
+			// 
+			// radioButtonNormalsCopyNear
+			// 
+			this.radioButtonNormalsCopyNear.AutoSize = true;
+			this.radioButtonNormalsCopyNear.Location = new System.Drawing.Point(77, 2);
+			this.radioButtonNormalsCopyNear.Name = "radioButtonNormalsCopyNear";
+			this.radioButtonNormalsCopyNear.Size = new System.Drawing.Size(89, 17);
+			this.radioButtonNormalsCopyNear.TabIndex = 42;
+			this.radioButtonNormalsCopyNear.Text = "Copy Nearest";
+			this.radioButtonNormalsCopyNear.UseVisualStyleBackColor = true;
+			this.radioButtonNormalsCopyNear.CheckedChanged += new System.EventHandler(this.radioButtonNormalsCopyNear_CheckedChanged);
+			// 
+			// radioButtonNormalsReplace
+			// 
+			this.radioButtonNormalsReplace.AutoSize = true;
+			this.radioButtonNormalsReplace.Checked = true;
+			this.radioButtonNormalsReplace.Location = new System.Drawing.Point(6, 2);
+			this.radioButtonNormalsReplace.Name = "radioButtonNormalsReplace";
+			this.radioButtonNormalsReplace.Size = new System.Drawing.Size(65, 17);
+			this.radioButtonNormalsReplace.TabIndex = 40;
+			this.radioButtonNormalsReplace.TabStop = true;
+			this.radioButtonNormalsReplace.Text = "Replace";
+			this.radioButtonNormalsReplace.UseVisualStyleBackColor = true;
+			this.radioButtonNormalsReplace.CheckedChanged += new System.EventHandler(this.radioButtonNormalsReplace_CheckedChanged);
+			// 
+			// radioButtonNormalsCopyOrder
+			// 
+			this.radioButtonNormalsCopyOrder.AutoSize = true;
+			this.radioButtonNormalsCopyOrder.Location = new System.Drawing.Point(173, 2);
+			this.radioButtonNormalsCopyOrder.Name = "radioButtonNormalsCopyOrder";
+			this.radioButtonNormalsCopyOrder.Size = new System.Drawing.Size(90, 17);
+			this.radioButtonNormalsCopyOrder.TabIndex = 44;
+			this.radioButtonNormalsCopyOrder.Text = "Copy In Order";
+			this.radioButtonNormalsCopyOrder.UseVisualStyleBackColor = true;
+			this.radioButtonNormalsCopyOrder.CheckedChanged += new System.EventHandler(this.radioButtonNormalsCopyOrder_CheckedChanged);
+			// 
+			// panel1
+			// 
+			this.panel1.Controls.Add(this.radioButtonMeshReplace);
+			this.panel1.Controls.Add(this.radioButtonMeshMerge);
+			this.panel1.Location = new System.Drawing.Point(66, 35);
+			this.panel1.Name = "panel1";
+			this.panel1.Size = new System.Drawing.Size(149, 21);
+			this.panel1.TabIndex = 20;
+			// 
+			// radioButtonMeshReplace
+			// 
+			this.radioButtonMeshReplace.AutoSize = true;
+			this.radioButtonMeshReplace.Checked = true;
+			this.radioButtonMeshReplace.Location = new System.Drawing.Point(6, 2);
+			this.radioButtonMeshReplace.Name = "radioButtonMeshReplace";
+			this.radioButtonMeshReplace.Size = new System.Drawing.Size(65, 17);
+			this.radioButtonMeshReplace.TabIndex = 30;
+			this.radioButtonMeshReplace.TabStop = true;
+			this.radioButtonMeshReplace.Text = "Replace";
+			this.radioButtonMeshReplace.UseVisualStyleBackColor = true;
+			// 
+			// radioButtonMeshMerge
+			// 
+			this.radioButtonMeshMerge.AutoSize = true;
+			this.radioButtonMeshMerge.Location = new System.Drawing.Point(77, 2);
+			this.radioButtonMeshMerge.Name = "radioButtonMeshMerge";
+			this.radioButtonMeshMerge.Size = new System.Drawing.Size(55, 17);
+			this.radioButtonMeshMerge.TabIndex = 32;
+			this.radioButtonMeshMerge.Text = "Merge";
+			this.radioButtonMeshMerge.UseVisualStyleBackColor = true;
+			// 
+			// label5
+			// 
+			this.label5.AutoSize = true;
+			this.label5.Location = new System.Drawing.Point(17, 93);
+			this.label5.Name = "label5";
+			this.label5.Size = new System.Drawing.Size(37, 13);
+			this.label5.TabIndex = 18;
+			this.label5.Text = "Bones";
+			// 
+			// label3
+			// 
+			this.label3.AutoSize = true;
+			this.label3.Location = new System.Drawing.Point(17, 66);
+			this.label3.Name = "label3";
+			this.label3.Size = new System.Drawing.Size(45, 13);
+			this.label3.TabIndex = 17;
+			this.label3.Text = "Normals";
+			// 
+			// label6
+			// 
+			this.label6.AutoSize = true;
+			this.label6.Location = new System.Drawing.Point(17, 13);
+			this.label6.Name = "label6";
+			this.label6.Size = new System.Drawing.Size(92, 13);
+			this.label6.TabIndex = 15;
+			this.label6.Text = "Destination Frame";
+			// 
+			// label7
+			// 
+			this.label7.AutoSize = true;
+			this.label7.Location = new System.Drawing.Point(17, 39);
+			this.label7.Name = "label7";
+			this.label7.Size = new System.Drawing.Size(43, 13);
+			this.label7.TabIndex = 16;
+			this.label7.Text = "Method";
+			// 
+			// panel5
+			// 
+			this.panel5.Controls.Add(this.radioButtonNearestMesh);
+			this.panel5.Controls.Add(this.radioButtonNearestSubmesh);
+			this.panel5.Location = new System.Drawing.Point(66, 114);
+			this.panel5.Name = "panel5";
+			this.panel5.Size = new System.Drawing.Size(149, 21);
+			this.panel5.TabIndex = 26;
+			// 
+			// radioButtonNearestMesh
+			// 
+			this.radioButtonNearestMesh.AutoSize = true;
+			this.radioButtonNearestMesh.Location = new System.Drawing.Point(77, 2);
+			this.radioButtonNearestMesh.Name = "radioButtonNearestMesh";
+			this.radioButtonNearestMesh.Size = new System.Drawing.Size(51, 17);
+			this.radioButtonNearestMesh.TabIndex = 62;
+			this.radioButtonNearestMesh.Text = "Mesh";
+			this.radioButtonNearestMesh.UseVisualStyleBackColor = true;
+			// 
+			// radioButtonNearestSubmesh
+			// 
+			this.radioButtonNearestSubmesh.AutoSize = true;
+			this.radioButtonNearestSubmesh.Checked = true;
+			this.radioButtonNearestSubmesh.Location = new System.Drawing.Point(6, 2);
+			this.radioButtonNearestSubmesh.Name = "radioButtonNearestSubmesh";
+			this.radioButtonNearestSubmesh.Size = new System.Drawing.Size(69, 17);
+			this.radioButtonNearestSubmesh.TabIndex = 60;
+			this.radioButtonNearestSubmesh.TabStop = true;
+			this.radioButtonNearestSubmesh.Text = "Submesh";
+			this.radioButtonNearestSubmesh.UseVisualStyleBackColor = true;
+			// 
+			// label8
+			// 
+			this.label8.AutoSize = true;
+			this.label8.Location = new System.Drawing.Point(17, 118);
+			this.label8.Name = "label8";
+			this.label8.Size = new System.Drawing.Size(44, 13);
+			this.label8.TabIndex = 25;
+			this.label8.Text = "Nearest";
 			// 
 			// FormXXDragDrop
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(390, 192);
-			this.Controls.Add(this.panelMesh);
-			this.Controls.Add(this.panelFrame);
 			this.Controls.Add(this.buttonCancel);
 			this.Controls.Add(this.buttonOK);
+			this.Controls.Add(this.panelMesh);
+			this.Controls.Add(this.panelFrame);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.Name = "FormXXDragDrop";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -434,18 +481,20 @@
 			((System.ComponentModel.ISupportInitialize)(this.numericFrameMeshMatOffset)).EndInit();
 			this.panelFrame.ResumeLayout(false);
 			this.panelFrame.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.numericFrameId)).EndInit();
 			this.panel2.ResumeLayout(false);
 			this.panel2.PerformLayout();
 			this.panelMesh.ResumeLayout(false);
 			this.panelMesh.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.numericMeshId)).EndInit();
 			this.panel4.ResumeLayout(false);
 			this.panel4.PerformLayout();
 			this.panel3.ResumeLayout(false);
 			this.panel3.PerformLayout();
 			this.panel1.ResumeLayout(false);
 			this.panel1.PerformLayout();
-			((System.ComponentModel.ISupportInitialize)(this.numericFrameId)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.numericMeshId)).EndInit();
+			this.panel5.ResumeLayout(false);
+			this.panel5.PerformLayout();
 			this.ResumeLayout(false);
 
 		}
@@ -483,5 +532,9 @@
 		private System.Windows.Forms.TextBox textBoxFrameName;
 		public System.Windows.Forms.NumericUpDown numericMeshId;
 		private System.Windows.Forms.TextBox textBoxMeshName;
+		private System.Windows.Forms.Panel panel5;
+		public System.Windows.Forms.RadioButton radioButtonNearestMesh;
+		public System.Windows.Forms.RadioButton radioButtonNearestSubmesh;
+		private System.Windows.Forms.Label label8;
 	}
 }

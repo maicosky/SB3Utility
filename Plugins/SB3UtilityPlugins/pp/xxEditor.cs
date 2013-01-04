@@ -440,11 +440,11 @@ namespace SB3Utility
 		}
 
 		[Plugin]
-		public void ReplaceMesh(WorkspaceMesh mesh, int frameId, bool merge, string normals, string bones)
+		public void ReplaceMesh(WorkspaceMesh mesh, int frameId, bool merge, string normals, string bones, bool targetFullMesh)
 		{
 			var normalsMethod = (CopyMeshMethod)Enum.Parse(typeof(CopyMeshMethod), normals);
 			var bonesMethod = (CopyMeshMethod)Enum.Parse(typeof(CopyMeshMethod), bones);
-			xx.ReplaceMesh(Frames[frameId], Parser, mesh, merge, normalsMethod, bonesMethod);
+			xx.ReplaceMesh(Frames[frameId], Parser, mesh, merge, normalsMethod, bonesMethod, targetFullMesh);
 
 			Frames.Clear();
 			Meshes.Clear();
