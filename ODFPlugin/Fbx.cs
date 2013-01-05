@@ -133,7 +133,7 @@ namespace ODFPlugin
 						if (mat != null)
 						{
 							iSubmesh.Material = mat.Name;
-							ImportedMaterial iMat = ImportedHelpers.FindMaterial(iSubmesh.Material, this);
+							ImportedMaterial iMat = ImportedHelpers.FindMaterial(iSubmesh.Material, MaterialList);
 							if (iMat == null)
 							{
 								iMat = new ImportedMaterial();
@@ -152,7 +152,7 @@ namespace ODFPlugin
 									{
 										odfTexture tex = odf.FindTextureInfo(submesh.TextureIds[i], parser.TextureSection);
 										iMat.Textures[i] =  tex.Name;
-										if (ImportedHelpers.FindTexture(iMat.Textures[i], this) == null)
+										if (ImportedHelpers.FindTexture(iMat.Textures[i], TextureList) == null)
 										{
 											try
 											{

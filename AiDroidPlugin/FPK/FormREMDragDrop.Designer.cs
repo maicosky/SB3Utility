@@ -29,6 +29,9 @@
 		private void InitializeComponent()
 		{
 			this.panelMesh = new System.Windows.Forms.Panel();
+			this.groupBox2 = new System.Windows.Forms.GroupBox();
+			this.label8 = new System.Windows.Forms.Label();
+			this.checkBoxMeshFrameCorrection = new System.Windows.Forms.CheckBox();
 			this.numericMeshId = new System.Windows.Forms.NumericUpDown();
 			this.textBoxMeshName = new System.Windows.Forms.TextBox();
 			this.panel4 = new System.Windows.Forms.Panel();
@@ -57,7 +60,11 @@
 			this.label1 = new System.Windows.Forms.Label();
 			this.textBoxFrameName = new System.Windows.Forms.TextBox();
 			this.label2 = new System.Windows.Forms.Label();
+			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.checkBoxFrameRescale = new System.Windows.Forms.CheckBox();
+			this.label4 = new System.Windows.Forms.Label();
 			this.panelMesh.SuspendLayout();
+			this.groupBox2.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericMeshId)).BeginInit();
 			this.panel4.SuspendLayout();
 			this.panel3.SuspendLayout();
@@ -65,10 +72,12 @@
 			this.panelFrame.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericFrameId)).BeginInit();
 			this.panel2.SuspendLayout();
+			this.groupBox1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// panelMesh
 			// 
+			this.panelMesh.Controls.Add(this.groupBox2);
 			this.panelMesh.Controls.Add(this.numericMeshId);
 			this.panelMesh.Controls.Add(this.textBoxMeshName);
 			this.panelMesh.Controls.Add(this.panel4);
@@ -78,27 +87,70 @@
 			this.panelMesh.Controls.Add(this.label3);
 			this.panelMesh.Controls.Add(this.label6);
 			this.panelMesh.Controls.Add(this.label7);
-			this.panelMesh.Location = new System.Drawing.Point(12, 12);
+			this.panelMesh.Location = new System.Drawing.Point(12, 6);
 			this.panelMesh.Name = "panelMesh";
-			this.panelMesh.Size = new System.Drawing.Size(367, 121);
+			this.panelMesh.Size = new System.Drawing.Size(367, 146);
 			this.panelMesh.TabIndex = 17;
+			// 
+			// groupBox2
+			// 
+			this.groupBox2.Controls.Add(this.label8);
+			this.groupBox2.Controls.Add(this.checkBoxMeshFrameCorrection);
+			this.groupBox2.Location = new System.Drawing.Point(20, 108);
+			this.groupBox2.Name = "groupBox2";
+			this.groupBox2.Size = new System.Drawing.Size(328, 37);
+			this.groupBox2.TabIndex = 26;
+			this.groupBox2.TabStop = false;
+			this.groupBox2.Text = "Mesh Frame Correction";
+			// 
+			// label8
+			// 
+			this.label8.AutoSize = true;
+			this.label8.Location = new System.Drawing.Point(60, 17);
+			this.label8.Name = "label8";
+			this.label8.Size = new System.Drawing.Size(249, 13);
+			this.label8.TabIndex = 26;
+			this.label8.Text = "Bone matrices include the matrix of the mesh frame.";
+			// 
+			// checkBoxMeshFrameCorrection
+			// 
+			this.checkBoxMeshFrameCorrection.AutoSize = true;
+			this.checkBoxMeshFrameCorrection.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
+			this.checkBoxMeshFrameCorrection.Checked = true;
+			this.checkBoxMeshFrameCorrection.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.checkBoxMeshFrameCorrection.Location = new System.Drawing.Point(6, 15);
+			this.checkBoxMeshFrameCorrection.Name = "checkBoxMeshFrameCorrection";
+			this.checkBoxMeshFrameCorrection.Size = new System.Drawing.Size(48, 17);
+			this.checkBoxMeshFrameCorrection.TabIndex = 25;
+			this.checkBoxMeshFrameCorrection.Text = "Auto";
+			this.checkBoxMeshFrameCorrection.UseVisualStyleBackColor = true;
 			// 
 			// numericMeshId
 			// 
-			this.numericMeshId.Location = new System.Drawing.Point(115, 9);
+			this.numericMeshId.Location = new System.Drawing.Point(115, 3);
 			this.numericMeshId.Maximum = new decimal(new int[] {
             1000000,
             0,
             0,
             0});
+			this.numericMeshId.Minimum = new decimal(new int[] {
+            2,
+            0,
+            0,
+            -2147483648});
 			this.numericMeshId.Name = "numericMeshId";
 			this.numericMeshId.Size = new System.Drawing.Size(58, 20);
 			this.numericMeshId.TabIndex = 24;
+			this.numericMeshId.Value = new decimal(new int[] {
+            2,
+            0,
+            0,
+            -2147483648});
 			this.numericMeshId.ValueChanged += new System.EventHandler(this.numericMeshId_ValueChanged);
 			// 
 			// textBoxMeshName
 			// 
-			this.textBoxMeshName.Location = new System.Drawing.Point(179, 9);
+			this.textBoxMeshName.Location = new System.Drawing.Point(179, 3);
 			this.textBoxMeshName.Name = "textBoxMeshName";
 			this.textBoxMeshName.ReadOnly = true;
 			this.textBoxMeshName.Size = new System.Drawing.Size(169, 20);
@@ -109,7 +161,7 @@
 			this.panel4.Controls.Add(this.radioButtonBonesCopyNear);
 			this.panel4.Controls.Add(this.radioButtonBonesReplace);
 			this.panel4.Controls.Add(this.radioButtonBonesCopyOrder);
-			this.panel4.Location = new System.Drawing.Point(66, 89);
+			this.panel4.Location = new System.Drawing.Point(66, 83);
 			this.panel4.Name = "panel4";
 			this.panel4.Size = new System.Drawing.Size(280, 21);
 			this.panel4.TabIndex = 22;
@@ -154,7 +206,7 @@
 			this.panel3.Controls.Add(this.radioButtonNormalsCopyNear);
 			this.panel3.Controls.Add(this.radioButtonNormalsReplace);
 			this.panel3.Controls.Add(this.radioButtonNormalsCopyOrder);
-			this.panel3.Location = new System.Drawing.Point(66, 62);
+			this.panel3.Location = new System.Drawing.Point(66, 56);
 			this.panel3.Name = "panel3";
 			this.panel3.Size = new System.Drawing.Size(280, 21);
 			this.panel3.TabIndex = 21;
@@ -198,7 +250,7 @@
 			// 
 			this.panel1.Controls.Add(this.radioButtonMeshReplace);
 			this.panel1.Controls.Add(this.radioButtonMeshMerge);
-			this.panel1.Location = new System.Drawing.Point(66, 35);
+			this.panel1.Location = new System.Drawing.Point(66, 29);
 			this.panel1.Name = "panel1";
 			this.panel1.Size = new System.Drawing.Size(149, 21);
 			this.panel1.TabIndex = 20;
@@ -228,7 +280,7 @@
 			// label5
 			// 
 			this.label5.AutoSize = true;
-			this.label5.Location = new System.Drawing.Point(17, 93);
+			this.label5.Location = new System.Drawing.Point(17, 87);
 			this.label5.Name = "label5";
 			this.label5.Size = new System.Drawing.Size(37, 13);
 			this.label5.TabIndex = 18;
@@ -237,7 +289,7 @@
 			// label3
 			// 
 			this.label3.AutoSize = true;
-			this.label3.Location = new System.Drawing.Point(17, 66);
+			this.label3.Location = new System.Drawing.Point(17, 60);
 			this.label3.Name = "label3";
 			this.label3.Size = new System.Drawing.Size(45, 13);
 			this.label3.TabIndex = 17;
@@ -246,7 +298,7 @@
 			// label6
 			// 
 			this.label6.AutoSize = true;
-			this.label6.Location = new System.Drawing.Point(17, 13);
+			this.label6.Location = new System.Drawing.Point(17, 7);
 			this.label6.Name = "label6";
 			this.label6.Size = new System.Drawing.Size(92, 13);
 			this.label6.TabIndex = 15;
@@ -255,7 +307,7 @@
 			// label7
 			// 
 			this.label7.AutoSize = true;
-			this.label7.Location = new System.Drawing.Point(17, 39);
+			this.label7.Location = new System.Drawing.Point(17, 33);
 			this.label7.Name = "label7";
 			this.label7.Size = new System.Drawing.Size(43, 13);
 			this.label7.TabIndex = 16;
@@ -264,7 +316,7 @@
 			// buttonCancel
 			// 
 			this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.buttonCancel.Location = new System.Drawing.Point(225, 152);
+			this.buttonCancel.Location = new System.Drawing.Point(225, 164);
 			this.buttonCancel.Name = "buttonCancel";
 			this.buttonCancel.Size = new System.Drawing.Size(75, 23);
 			this.buttonCancel.TabIndex = 19;
@@ -274,7 +326,7 @@
 			// buttonOK
 			// 
 			this.buttonOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.buttonOK.Location = new System.Drawing.Point(87, 152);
+			this.buttonOK.Location = new System.Drawing.Point(87, 164);
 			this.buttonOK.Name = "buttonOK";
 			this.buttonOK.Size = new System.Drawing.Size(75, 23);
 			this.buttonOK.TabIndex = 18;
@@ -288,9 +340,10 @@
 			this.panelFrame.Controls.Add(this.label1);
 			this.panelFrame.Controls.Add(this.textBoxFrameName);
 			this.panelFrame.Controls.Add(this.label2);
-			this.panelFrame.Location = new System.Drawing.Point(12, 12);
+			this.panelFrame.Controls.Add(this.groupBox1);
+			this.panelFrame.Location = new System.Drawing.Point(12, 6);
 			this.panelFrame.Name = "panelFrame";
-			this.panelFrame.Size = new System.Drawing.Size(367, 121);
+			this.panelFrame.Size = new System.Drawing.Size(367, 146);
 			this.panelFrame.TabIndex = 20;
 			// 
 			// numericFrameId
@@ -302,7 +355,7 @@
             0,
             0});
 			this.numericFrameId.Minimum = new decimal(new int[] {
-            1,
+            2,
             0,
             0,
             -2147483648});
@@ -310,7 +363,7 @@
 			this.numericFrameId.Size = new System.Drawing.Size(58, 20);
 			this.numericFrameId.TabIndex = 16;
 			this.numericFrameId.Value = new decimal(new int[] {
-            1,
+            2,
             0,
             0,
             -2147483648});
@@ -387,21 +440,54 @@
 			this.label2.TabIndex = 11;
 			this.label2.Text = "Method";
 			// 
+			// groupBox1
+			// 
+			this.groupBox1.Controls.Add(this.checkBoxFrameRescale);
+			this.groupBox1.Controls.Add(this.label4);
+			this.groupBox1.Location = new System.Drawing.Point(20, 65);
+			this.groupBox1.Name = "groupBox1";
+			this.groupBox1.Size = new System.Drawing.Size(328, 60);
+			this.groupBox1.TabIndex = 90;
+			this.groupBox1.TabStop = false;
+			this.groupBox1.Text = "Top Frame Rescaling";
+			// 
+			// checkBoxFrameRescale
+			// 
+			this.checkBoxFrameRescale.AutoSize = true;
+			this.checkBoxFrameRescale.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
+			this.checkBoxFrameRescale.Location = new System.Drawing.Point(9, 18);
+			this.checkBoxFrameRescale.Name = "checkBoxFrameRescale";
+			this.checkBoxFrameRescale.Size = new System.Drawing.Size(65, 17);
+			this.checkBoxFrameRescale.TabIndex = 89;
+			this.checkBoxFrameRescale.Text = "Rescale";
+			this.checkBoxFrameRescale.UseVisualStyleBackColor = true;
+			// 
+			// label4
+			// 
+			this.label4.AutoSize = true;
+			this.label4.Location = new System.Drawing.Point(20, 38);
+			this.label4.Name = "label4";
+			this.label4.Size = new System.Drawing.Size(289, 13);
+			this.label4.TabIndex = 88;
+			this.label4.Text = "Imported skeletons can be adapted by setting Scale Y to -1.";
+			// 
 			// FormREMDragDrop
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(390, 192);
+			this.ClientSize = new System.Drawing.Size(390, 198);
 			this.Controls.Add(this.buttonCancel);
 			this.Controls.Add(this.buttonOK);
-			this.Controls.Add(this.panelFrame);
 			this.Controls.Add(this.panelMesh);
+			this.Controls.Add(this.panelFrame);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.Name = "FormREMDragDrop";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.Text = "Options";
 			this.panelMesh.ResumeLayout(false);
 			this.panelMesh.PerformLayout();
+			this.groupBox2.ResumeLayout(false);
+			this.groupBox2.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericMeshId)).EndInit();
 			this.panel4.ResumeLayout(false);
 			this.panel4.PerformLayout();
@@ -414,6 +500,8 @@
 			((System.ComponentModel.ISupportInitialize)(this.numericFrameId)).EndInit();
 			this.panel2.ResumeLayout(false);
 			this.panel2.PerformLayout();
+			this.groupBox1.ResumeLayout(false);
+			this.groupBox1.PerformLayout();
 			this.ResumeLayout(false);
 
 		}
@@ -449,5 +537,11 @@
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.TextBox textBoxFrameName;
 		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.Label label4;
+		private System.Windows.Forms.GroupBox groupBox1;
+		public System.Windows.Forms.CheckBox checkBoxFrameRescale;
+		private System.Windows.Forms.GroupBox groupBox2;
+		private System.Windows.Forms.Label label8;
+		public System.Windows.Forms.CheckBox checkBoxMeshFrameCorrection;
 	}
 }

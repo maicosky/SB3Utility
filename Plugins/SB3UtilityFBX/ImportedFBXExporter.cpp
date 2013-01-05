@@ -92,9 +92,11 @@ namespace SB3Utility
 
 		SetJointsFromImportedMeshes();
 
-		for (int i = 0; i < imported->MeshList->Count; i++)
+		for (int i = 0; i < pMeshNodes->GetCount(); i++)
 		{
-			ExportMesh(pMeshNodes->GetAt(i), imported->MeshList[i]);
+			KFbxNode* meshNode = pMeshNodes->GetAt(i);
+			ImportedMesh^ mesh = ImportedHelpers::FindMesh(gcnew String(meshNode->GetName()), imported->MeshList);
+			ExportMesh(meshNode, mesh);
 		}
 	}
 
@@ -107,7 +109,7 @@ namespace SB3Utility
 
 	void Fbx::Exporter::SearchHierarchy(ImportedFrame^ frame, HashSet<String^>^ exportFrames)
 	{
-		ImportedMesh^ meshListSome = ImportedHelpers::FindMesh(frame->Name, imported);
+		ImportedMesh^ meshListSome = ImportedHelpers::FindMesh(frame->Name, imported->MeshList);
 		if (meshListSome != nullptr)
 		{
 			ImportedFrame^ parent = frame;
@@ -182,7 +184,7 @@ namespace SB3Utility
 			pFrameNode->LclTranslation.Set(KFbxVector4(translate.X, translate.Y, translate.Z));
 			pParentNode->AddChild(pFrameNode);
 
-			if (ImportedHelpers::FindMesh(frameName, imported) != nullptr)
+			if (ImportedHelpers::FindMesh(frameName, imported->MeshList) != nullptr)
 			{
 				pMeshNodes->Add(pFrameNode);
 			}
@@ -290,7 +292,7 @@ namespace SB3Utility
 					pMeshNode->SetNodeAttribute(pMesh);
 					pFrameNode->AddChild(pMeshNode);
 
-					ImportedMaterial^ mat = ImportedHelpers::FindMaterial(meshObj->Material, imported);
+					ImportedMaterial^ mat = ImportedHelpers::FindMaterial(meshObj->Material, imported->MaterialList);
 					if (mat != nullptr)
 					{
 						KFbxLayerElementMaterial* pMaterialLayer = KFbxLayerElementMaterial::Create(pMesh, "");
@@ -346,7 +348,7 @@ namespace SB3Utility
 
 							bool hasTexture = false;
 							KFbxLayerElementTexture* pTextureLayerDiffuse = NULL;
-							KFbxFileTexture* pTextureDiffuse = ExportTexture(ImportedHelpers::FindTexture(mat->Textures[0], imported), pTextureLayerDiffuse, pMesh);
+							KFbxFileTexture* pTextureDiffuse = ExportTexture(ImportedHelpers::FindTexture(mat->Textures[0], imported->TextureList), pTextureLayerDiffuse, pMesh);
 							if (pTextureDiffuse != NULL)
 							{
 								pLayer->SetTextures(KFbxLayerElement::eDIFFUSE_TEXTURES, pTextureLayerDiffuse);
@@ -355,7 +357,7 @@ namespace SB3Utility
 							}
 
 							KFbxLayerElementTexture* pTextureLayerAmbient = NULL;
-							KFbxFileTexture* pTextureAmbient = ExportTexture(ImportedHelpers::FindTexture(mat->Textures[1], imported), pTextureLayerAmbient, pMesh);
+							KFbxFileTexture* pTextureAmbient = ExportTexture(ImportedHelpers::FindTexture(mat->Textures[1], imported->TextureList), pTextureLayerAmbient, pMesh);
 							if (pTextureAmbient != NULL)
 							{
 								pLayer->SetTextures(KFbxLayerElement::eAMBIENT_TEXTURES, pTextureLayerAmbient);
@@ -364,7 +366,7 @@ namespace SB3Utility
 							}
 
 							KFbxLayerElementTexture* pTextureLayerEmissive = NULL;
-							KFbxFileTexture* pTextureEmissive = ExportTexture(ImportedHelpers::FindTexture(mat->Textures[2], imported), pTextureLayerEmissive, pMesh);
+							KFbxFileTexture* pTextureEmissive = ExportTexture(ImportedHelpers::FindTexture(mat->Textures[2], imported->TextureList), pTextureLayerEmissive, pMesh);
 							if (pTextureEmissive != NULL)
 							{
 								pLayer->SetTextures(KFbxLayerElement::eEMISSIVE_TEXTURES, pTextureLayerEmissive);
@@ -373,7 +375,7 @@ namespace SB3Utility
 							}
 
 							KFbxLayerElementTexture* pTextureLayerSpecular = NULL;
-							KFbxFileTexture* pTextureSpecular = ExportTexture(ImportedHelpers::FindTexture(mat->Textures[3], imported), pTextureLayerSpecular, pMesh);
+							KFbxFileTexture* pTextureSpecular = ExportTexture(ImportedHelpers::FindTexture(mat->Textures[3], imported->TextureList), pTextureLayerSpecular, pMesh);
 							if (pTextureSpecular != NULL)
 							{
 								pLayer->SetTextures(KFbxLayerElement::eSPECULAR_TEXTURES, pTextureLayerSpecular);

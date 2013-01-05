@@ -220,6 +220,16 @@ namespace SB3Utility
 			{
 				ImportedMesh meshList = new ImportedMesh();
 				meshList.Name = mqoObjects[0].name;
+				float scale = 1f;
+				if (!mqoObjects[0].worldCoords)
+				{
+					int startPos = meshList.Name.IndexOf("(Scale=");
+					if (startPos > 0)
+					{
+						int endPos = meshList.Name.IndexOf(')');
+						scale = 1f / Single.Parse(meshList.Name.Substring(startPos + 7, endPos - startPos - 7));
+					}
+				}
 				meshList.BoneList = new List<ImportedBone>(0);
 				meshList.SubmeshList = new List<ImportedSubmesh>(mqoObjects.Count);
 
@@ -251,7 +261,7 @@ namespace SB3Utility
 								vert.Weights = new float[4];
 								vert.Normal = new Vector3();
 								vert.UV = mqoFace.UVs[i];
-								vert.Position = mqoObject.vertices[mqoFace.vertexIndices[i]].coords;
+								vert.Position = mqoObject.vertices[mqoFace.vertexIndices[i]].coords * scale;
 
 								vertMap = new VertexMap { mqoIdx = mqoFace.vertexIndices[i], vert = vert };
 								vertexMapDic[mqoFaceMatIdxOffset].Add(mqoFace.vertexIndices[i], vertMap);

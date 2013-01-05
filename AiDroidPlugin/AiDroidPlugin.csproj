@@ -48,6 +48,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FPK\Fbx.cs" />
     <Compile Include="FPK\FormFPK.cs">
       <SubType>Form</SubType>
     </Compile>

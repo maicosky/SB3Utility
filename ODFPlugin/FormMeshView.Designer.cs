@@ -31,13 +31,13 @@
 		private void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle14 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMeshView));
 			this.buttonBoneRemove = new System.Windows.Forms.Button();
 			this.buttonBoneCopy = new System.Windows.Forms.Button();
@@ -51,10 +51,12 @@
 			this.splitContainer3 = new System.Windows.Forms.SplitContainer();
 			this.label53 = new System.Windows.Forms.Label();
 			this.buttonTextureAdd = new System.Windows.Forms.Button();
+			this.textBoxTexName = new SB3Utility.EditTextBox();
 			this.buttonTextureReplace = new System.Windows.Forms.Button();
 			this.buttonTextureRemove = new System.Windows.Forms.Button();
 			this.label55 = new System.Windows.Forms.Label();
 			this.buttonTextureDecrypt = new System.Windows.Forms.Button();
+			this.textBoxTexID = new SB3Utility.EditTextBox();
 			this.textBoxTexSize = new System.Windows.Forms.TextBox();
 			this.panelTexturePic = new System.Windows.Forms.Panel();
 			this.pictureBoxTexture = new System.Windows.Forms.PictureBox();
@@ -150,6 +152,8 @@
 			this.listViewAnimationTrack = new System.Windows.Forms.ListView();
 			this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.dataGridViewAnimationClip = new System.Windows.Forms.DataGridView();
 			this.ColumnIdx = new System.Windows.Forms.DataGridViewTextBoxColumn();
 			this.ColumnName = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -170,7 +174,9 @@
 			this.buttonFrameMatrixLocalize = new System.Windows.Forms.Button();
 			this.tabControlFrameMatrix = new System.Windows.Forms.TabControl();
 			this.tabPageFrameSRT = new System.Windows.Forms.TabPage();
+			this.dataGridViewFrameSRT = new SB3Utility.DataGridViewEditor();
 			this.tabPageFrameMatrix = new System.Windows.Forms.TabPage();
+			this.dataGridViewFrameMatrix = new SB3Utility.DataGridViewEditor();
 			this.groupBoxTXPT = new System.Windows.Forms.GroupBox();
 			this.listViewTXPTinfos = new System.Windows.Forms.ListView();
 			this.columnHeaderTXPTindex = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -196,7 +202,9 @@
 			this.buttonFrameMatrixInverse = new System.Windows.Forms.Button();
 			this.buttonFrameMatrixCombined = new System.Windows.Forms.Button();
 			this.label24 = new System.Windows.Forms.Label();
+			this.textBoxFrameID = new SB3Utility.EditTextBox();
 			this.label12 = new System.Windows.Forms.Label();
+			this.textBoxFrameName = new SB3Utility.EditTextBox();
 			this.groupBoxFrameUnknowns = new System.Windows.Forms.GroupBox();
 			this.textBoxFrameUnk2_5 = new System.Windows.Forms.TextBox();
 			this.label52 = new System.Windows.Forms.Label();
@@ -218,13 +226,20 @@
 			this.tabPageBoneView = new System.Windows.Forms.TabPage();
 			this.tabControlBoneMatrix = new System.Windows.Forms.TabControl();
 			this.tabPageBoneSRT = new System.Windows.Forms.TabPage();
+			this.dataGridViewBoneSRT = new SB3Utility.DataGridViewEditor();
 			this.tabPageBoneMatrix = new System.Windows.Forms.TabPage();
+			this.dataGridViewBoneMatrix = new SB3Utility.DataGridViewEditor();
 			this.label26 = new System.Windows.Forms.Label();
+			this.textBoxBoneFrameID = new SB3Utility.EditTextBox();
+			this.textBoxBoneFrameName = new SB3Utility.EditTextBox();
 			this.tabPageMeshView = new System.Windows.Forms.TabPage();
 			this.splitContainer2 = new System.Windows.Forms.SplitContainer();
 			this.buttonMeshNormals = new System.Windows.Forms.Button();
 			this.label9 = new System.Windows.Forms.Label();
+			this.textBoxMeshInfo = new SB3Utility.EditTextBox();
+			this.textBoxMeshName = new SB3Utility.EditTextBox();
 			this.label13 = new System.Windows.Forms.Label();
+			this.textBoxMeshID = new SB3Utility.EditTextBox();
 			this.groupBoxExportOptions = new System.Windows.Forms.GroupBox();
 			this.label28 = new System.Windows.Forms.Label();
 			this.comboBoxMeshExportFormat = new System.Windows.Forms.ComboBox();
@@ -258,7 +273,10 @@
 			this.ColumnSubmeshFaces = new System.Windows.Forms.DataGridViewTextBoxColumn();
 			this.ColumnSubmeshMaterial = new System.Windows.Forms.DataGridViewComboBoxColumn();
 			this.ColumnSubmeshUnknowns = new System.Windows.Forms.DataGridViewTextBoxColumn();
+			this.textBoxMeshObjInfo = new SB3Utility.EditTextBox();
 			this.label15 = new System.Windows.Forms.Label();
+			this.textBoxMeshObjID = new SB3Utility.EditTextBox();
+			this.textBoxMeshObjName = new SB3Utility.EditTextBox();
 			this.checkBoxMeshObjSkinned = new System.Windows.Forms.CheckBox();
 			this.label14 = new System.Windows.Forms.Label();
 			this.buttonMeshObjEdit = new System.Windows.Forms.Button();
@@ -276,14 +294,34 @@
 			this.comboBoxMatTex1 = new System.Windows.Forms.ComboBox();
 			this.comboBoxMatTex2 = new System.Windows.Forms.ComboBox();
 			this.groupBoxMaterialProperties = new System.Windows.Forms.GroupBox();
+			this.textBoxMatSpecularG = new SB3Utility.EditTextBox();
+			this.textBoxMatUnknown1 = new SB3Utility.EditTextBox();
 			this.label22 = new System.Windows.Forms.Label();
 			this.label1 = new System.Windows.Forms.Label();
 			this.label2 = new System.Windows.Forms.Label();
+			this.textBoxMatSpecularR = new SB3Utility.EditTextBox();
+			this.textBoxMatSpecularB = new SB3Utility.EditTextBox();
 			this.label7 = new System.Windows.Forms.Label();
+			this.textBoxMatSpecularA = new SB3Utility.EditTextBox();
+			this.textBoxMatSpecularPower = new SB3Utility.EditTextBox();
 			this.label10 = new System.Windows.Forms.Label();
+			this.textBoxMatEmissiveA = new SB3Utility.EditTextBox();
 			this.label11 = new System.Windows.Forms.Label();
+			this.textBoxMatEmissiveB = new SB3Utility.EditTextBox();
+			this.textBoxMatDiffuseR = new SB3Utility.EditTextBox();
+			this.textBoxMatEmissiveG = new SB3Utility.EditTextBox();
+			this.textBoxMatDiffuseG = new SB3Utility.EditTextBox();
+			this.textBoxMatEmissiveR = new SB3Utility.EditTextBox();
+			this.textBoxMatDiffuseB = new SB3Utility.EditTextBox();
+			this.textBoxMatDiffuseA = new SB3Utility.EditTextBox();
+			this.textBoxMatAmbientR = new SB3Utility.EditTextBox();
+			this.textBoxMatAmbientG = new SB3Utility.EditTextBox();
+			this.textBoxMatAmbientB = new SB3Utility.EditTextBox();
+			this.textBoxMatAmbientA = new SB3Utility.EditTextBox();
 			this.groupBoxMaterialExtraSetsUnknowns = new System.Windows.Forms.GroupBox();
 			this.textBoxMatMataUnknown1 = new System.Windows.Forms.TextBox();
+			this.textBoxMatID = new SB3Utility.EditTextBox();
+			this.textBoxMatName = new SB3Utility.EditTextBox();
 			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
 			this.menuStrip1 = new System.Windows.Forms.MenuStrip();
 			this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -299,44 +337,6 @@
 			this.keepBackupToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.deleteMorphsAutomaticallyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
-			this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this.dataGridViewFrameSRT = new SB3Utility.DataGridViewEditor();
-			this.dataGridViewFrameMatrix = new SB3Utility.DataGridViewEditor();
-			this.textBoxFrameID = new SB3Utility.EditTextBox();
-			this.textBoxFrameName = new SB3Utility.EditTextBox();
-			this.dataGridViewBoneSRT = new SB3Utility.DataGridViewEditor();
-			this.dataGridViewBoneMatrix = new SB3Utility.DataGridViewEditor();
-			this.textBoxBoneFrameID = new SB3Utility.EditTextBox();
-			this.textBoxBoneFrameName = new SB3Utility.EditTextBox();
-			this.textBoxMeshInfo = new SB3Utility.EditTextBox();
-			this.textBoxMeshName = new SB3Utility.EditTextBox();
-			this.textBoxMeshID = new SB3Utility.EditTextBox();
-			this.textBoxMeshObjInfo = new SB3Utility.EditTextBox();
-			this.textBoxMeshObjID = new SB3Utility.EditTextBox();
-			this.textBoxMeshObjName = new SB3Utility.EditTextBox();
-			this.textBoxMatSpecularG = new SB3Utility.EditTextBox();
-			this.textBoxMatUnknown1 = new SB3Utility.EditTextBox();
-			this.textBoxMatSpecularR = new SB3Utility.EditTextBox();
-			this.textBoxMatSpecularB = new SB3Utility.EditTextBox();
-			this.textBoxMatSpecularA = new SB3Utility.EditTextBox();
-			this.textBoxMatSpecularPower = new SB3Utility.EditTextBox();
-			this.textBoxMatEmissiveA = new SB3Utility.EditTextBox();
-			this.textBoxMatEmissiveB = new SB3Utility.EditTextBox();
-			this.textBoxMatDiffuseR = new SB3Utility.EditTextBox();
-			this.textBoxMatEmissiveG = new SB3Utility.EditTextBox();
-			this.textBoxMatDiffuseG = new SB3Utility.EditTextBox();
-			this.textBoxMatEmissiveR = new SB3Utility.EditTextBox();
-			this.textBoxMatDiffuseB = new SB3Utility.EditTextBox();
-			this.textBoxMatDiffuseA = new SB3Utility.EditTextBox();
-			this.textBoxMatAmbientR = new SB3Utility.EditTextBox();
-			this.textBoxMatAmbientG = new SB3Utility.EditTextBox();
-			this.textBoxMatAmbientB = new SB3Utility.EditTextBox();
-			this.textBoxMatAmbientA = new SB3Utility.EditTextBox();
-			this.textBoxMatID = new SB3Utility.EditTextBox();
-			this.textBoxMatName = new SB3Utility.EditTextBox();
-			this.textBoxTexName = new SB3Utility.EditTextBox();
-			this.textBoxTexID = new SB3Utility.EditTextBox();
 			this.tabPageTextureView.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer3)).BeginInit();
 			this.splitContainer3.Panel1.SuspendLayout();
@@ -406,13 +406,17 @@
 			this.tabPageFrameView.SuspendLayout();
 			this.tabControlFrameMatrix.SuspendLayout();
 			this.tabPageFrameSRT.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.dataGridViewFrameSRT)).BeginInit();
 			this.tabPageFrameMatrix.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.dataGridViewFrameMatrix)).BeginInit();
 			this.groupBoxTXPT.SuspendLayout();
 			this.groupBoxFrameUnknowns.SuspendLayout();
 			this.tabPageBoneView.SuspendLayout();
 			this.tabControlBoneMatrix.SuspendLayout();
 			this.tabPageBoneSRT.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.dataGridViewBoneSRT)).BeginInit();
 			this.tabPageBoneMatrix.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.dataGridViewBoneMatrix)).BeginInit();
 			this.tabPageMeshView.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
 			this.splitContainer2.Panel1.SuspendLayout();
@@ -432,10 +436,6 @@
 			this.groupBoxMaterialProperties.SuspendLayout();
 			this.groupBoxMaterialExtraSetsUnknowns.SuspendLayout();
 			this.menuStrip1.SuspendLayout();
-			((System.ComponentModel.ISupportInitialize)(this.dataGridViewFrameSRT)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.dataGridViewFrameMatrix)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.dataGridViewBoneSRT)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.dataGridViewBoneMatrix)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// buttonBoneRemove
@@ -568,6 +568,13 @@
 			this.buttonTextureAdd.UseVisualStyleBackColor = true;
 			this.buttonTextureAdd.Click += new System.EventHandler(this.buttonTextureAdd_Click);
 			// 
+			// textBoxTexName
+			// 
+			this.textBoxTexName.Location = new System.Drawing.Point(2, 17);
+			this.textBoxTexName.Name = "textBoxTexName";
+			this.textBoxTexName.Size = new System.Drawing.Size(168, 20);
+			this.textBoxTexName.TabIndex = 108;
+			// 
 			// buttonTextureReplace
 			// 
 			this.buttonTextureReplace.Location = new System.Drawing.Point(93, 72);
@@ -607,6 +614,13 @@
 			this.buttonTextureDecrypt.Text = "Decrypt";
 			this.buttonTextureDecrypt.UseVisualStyleBackColor = true;
 			this.buttonTextureDecrypt.Click += new System.EventHandler(this.buttonTextureDecrypt_Click);
+			// 
+			// textBoxTexID
+			// 
+			this.textBoxTexID.Location = new System.Drawing.Point(176, 17);
+			this.textBoxTexID.Name = "textBoxTexID";
+			this.textBoxTexID.Size = new System.Drawing.Size(73, 20);
+			this.textBoxTexID.TabIndex = 110;
 			// 
 			// textBoxTexSize
 			// 
@@ -1705,14 +1719,26 @@
 			this.columnHeader4.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
 			this.columnHeader4.Width = 64;
 			// 
+			// columnHeader1
+			// 
+			this.columnHeader1.Text = "First";
+			this.columnHeader1.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+			this.columnHeader1.Width = 35;
+			// 
+			// columnHeader2
+			// 
+			this.columnHeader2.Text = "Last";
+			this.columnHeader2.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+			this.columnHeader2.Width = 40;
+			// 
 			// dataGridViewAnimationClip
 			// 
 			this.dataGridViewAnimationClip.AllowDrop = true;
 			this.dataGridViewAnimationClip.AllowUserToAddRows = false;
 			this.dataGridViewAnimationClip.AllowUserToDeleteRows = false;
 			this.dataGridViewAnimationClip.AllowUserToResizeRows = false;
-			dataGridViewCellStyle8.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-			this.dataGridViewAnimationClip.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle8;
+			dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+			this.dataGridViewAnimationClip.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
 			this.dataGridViewAnimationClip.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
@@ -1727,22 +1753,22 @@
 			this.dataGridViewAnimationClip.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
 			this.dataGridViewAnimationClip.Location = new System.Drawing.Point(0, 17);
 			this.dataGridViewAnimationClip.Name = "dataGridViewAnimationClip";
-			dataGridViewCellStyle13.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-			dataGridViewCellStyle13.BackColor = System.Drawing.SystemColors.Control;
-			dataGridViewCellStyle13.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			dataGridViewCellStyle13.ForeColor = System.Drawing.SystemColors.WindowText;
-			dataGridViewCellStyle13.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-			dataGridViewCellStyle13.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-			dataGridViewCellStyle13.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-			this.dataGridViewAnimationClip.RowHeadersDefaultCellStyle = dataGridViewCellStyle13;
+			dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+			dataGridViewCellStyle6.BackColor = System.Drawing.SystemColors.Control;
+			dataGridViewCellStyle6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			dataGridViewCellStyle6.ForeColor = System.Drawing.SystemColors.WindowText;
+			dataGridViewCellStyle6.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+			dataGridViewCellStyle6.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+			dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+			this.dataGridViewAnimationClip.RowHeadersDefaultCellStyle = dataGridViewCellStyle6;
 			this.dataGridViewAnimationClip.RowHeadersVisible = false;
-			dataGridViewCellStyle14.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-			this.dataGridViewAnimationClip.RowsDefaultCellStyle = dataGridViewCellStyle14;
+			dataGridViewCellStyle7.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+			this.dataGridViewAnimationClip.RowsDefaultCellStyle = dataGridViewCellStyle7;
 			this.dataGridViewAnimationClip.RowTemplate.Resizable = System.Windows.Forms.DataGridViewTriState.False;
 			this.dataGridViewAnimationClip.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
 			this.dataGridViewAnimationClip.ShowCellErrors = false;
 			this.dataGridViewAnimationClip.ShowRowErrors = false;
-			this.dataGridViewAnimationClip.Size = new System.Drawing.Size(463, 174);
+			this.dataGridViewAnimationClip.Size = new System.Drawing.Size(463, 173);
 			this.dataGridViewAnimationClip.TabIndex = 2;
 			this.dataGridViewAnimationClip.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewAnimationClip_CellDoubleClick);
 			this.dataGridViewAnimationClip.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewAnimationClip_CellEndEdit);
@@ -1757,10 +1783,10 @@
 			// ColumnIdx
 			// 
 			this.ColumnIdx.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-			dataGridViewCellStyle9.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-			dataGridViewCellStyle9.Format = "N0";
-			dataGridViewCellStyle9.NullValue = null;
-			this.ColumnIdx.DefaultCellStyle = dataGridViewCellStyle9;
+			dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+			dataGridViewCellStyle2.Format = "N0";
+			dataGridViewCellStyle2.NullValue = null;
+			this.ColumnIdx.DefaultCellStyle = dataGridViewCellStyle2;
 			this.ColumnIdx.HeaderText = "Idx";
 			this.ColumnIdx.Name = "ColumnIdx";
 			this.ColumnIdx.ReadOnly = true;
@@ -1778,10 +1804,10 @@
 			// ColumnStart
 			// 
 			this.ColumnStart.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-			dataGridViewCellStyle10.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-			dataGridViewCellStyle10.Format = "N0";
-			dataGridViewCellStyle10.NullValue = null;
-			this.ColumnStart.DefaultCellStyle = dataGridViewCellStyle10;
+			dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+			dataGridViewCellStyle3.Format = "N0";
+			dataGridViewCellStyle3.NullValue = null;
+			this.ColumnStart.DefaultCellStyle = dataGridViewCellStyle3;
 			this.ColumnStart.HeaderText = "Start";
 			this.ColumnStart.Name = "ColumnStart";
 			this.ColumnStart.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
@@ -1790,10 +1816,10 @@
 			// ColumnEnd
 			// 
 			this.ColumnEnd.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-			dataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-			dataGridViewCellStyle11.Format = "N0";
-			dataGridViewCellStyle11.NullValue = null;
-			this.ColumnEnd.DefaultCellStyle = dataGridViewCellStyle11;
+			dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+			dataGridViewCellStyle4.Format = "N0";
+			dataGridViewCellStyle4.NullValue = null;
+			this.ColumnEnd.DefaultCellStyle = dataGridViewCellStyle4;
 			this.ColumnEnd.HeaderText = "End";
 			this.ColumnEnd.Name = "ColumnEnd";
 			this.ColumnEnd.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
@@ -1802,10 +1828,10 @@
 			// ColumnTracks
 			// 
 			this.ColumnTracks.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-			dataGridViewCellStyle12.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-			dataGridViewCellStyle12.Format = "N0";
-			dataGridViewCellStyle12.NullValue = null;
-			this.ColumnTracks.DefaultCellStyle = dataGridViewCellStyle12;
+			dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+			dataGridViewCellStyle5.Format = "N0";
+			dataGridViewCellStyle5.NullValue = null;
+			this.ColumnTracks.DefaultCellStyle = dataGridViewCellStyle5;
 			this.ColumnTracks.HeaderText = "Tracks";
 			this.ColumnTracks.Name = "ColumnTracks";
 			this.ColumnTracks.ReadOnly = true;
@@ -1823,7 +1849,7 @@
 			this.groupBox1.Controls.Add(this.numericAnimationClipKeyframe);
 			this.groupBox1.Controls.Add(this.labelSkeletalRender);
 			this.groupBox1.Controls.Add(this.label30);
-			this.groupBox1.Location = new System.Drawing.Point(0, 191);
+			this.groupBox1.Location = new System.Drawing.Point(0, 190);
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.Size = new System.Drawing.Size(463, 40);
 			this.groupBox1.TabIndex = 155;
@@ -1993,6 +2019,29 @@
 			this.tabPageFrameSRT.Text = "SRT";
 			this.tabPageFrameSRT.UseVisualStyleBackColor = true;
 			// 
+			// dataGridViewFrameSRT
+			// 
+			this.dataGridViewFrameSRT.AllowUserToAddRows = false;
+			this.dataGridViewFrameSRT.AllowUserToDeleteRows = false;
+			this.dataGridViewFrameSRT.AllowUserToResizeColumns = false;
+			this.dataGridViewFrameSRT.AllowUserToResizeRows = false;
+			this.dataGridViewFrameSRT.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+			this.dataGridViewFrameSRT.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
+			this.dataGridViewFrameSRT.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.Disable;
+			this.dataGridViewFrameSRT.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
+			this.dataGridViewFrameSRT.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+			this.dataGridViewFrameSRT.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.dataGridViewFrameSRT.Location = new System.Drawing.Point(3, 3);
+			this.dataGridViewFrameSRT.Name = "dataGridViewFrameSRT";
+			this.dataGridViewFrameSRT.RowHeadersVisible = false;
+			this.dataGridViewFrameSRT.ScrollBars = System.Windows.Forms.ScrollBars.None;
+			this.dataGridViewFrameSRT.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
+			this.dataGridViewFrameSRT.ShowRowIndex = false;
+			this.dataGridViewFrameSRT.Size = new System.Drawing.Size(239, 80);
+			this.dataGridViewFrameSRT.TabIndex = 201;
+			this.dataGridViewFrameSRT.TabStop = false;
+			this.dataGridViewFrameSRT.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewFrameSRT_CellValueChanged);
+			// 
 			// tabPageFrameMatrix
 			// 
 			this.tabPageFrameMatrix.Controls.Add(this.dataGridViewFrameMatrix);
@@ -2003,6 +2052,30 @@
 			this.tabPageFrameMatrix.TabIndex = 0;
 			this.tabPageFrameMatrix.Text = "Matrix";
 			this.tabPageFrameMatrix.UseVisualStyleBackColor = true;
+			// 
+			// dataGridViewFrameMatrix
+			// 
+			this.dataGridViewFrameMatrix.AllowUserToAddRows = false;
+			this.dataGridViewFrameMatrix.AllowUserToDeleteRows = false;
+			this.dataGridViewFrameMatrix.AllowUserToResizeColumns = false;
+			this.dataGridViewFrameMatrix.AllowUserToResizeRows = false;
+			this.dataGridViewFrameMatrix.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+			this.dataGridViewFrameMatrix.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
+			this.dataGridViewFrameMatrix.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.Disable;
+			this.dataGridViewFrameMatrix.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
+			this.dataGridViewFrameMatrix.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+			this.dataGridViewFrameMatrix.ColumnHeadersVisible = false;
+			this.dataGridViewFrameMatrix.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.dataGridViewFrameMatrix.Location = new System.Drawing.Point(3, 3);
+			this.dataGridViewFrameMatrix.Name = "dataGridViewFrameMatrix";
+			this.dataGridViewFrameMatrix.RowHeadersVisible = false;
+			this.dataGridViewFrameMatrix.ScrollBars = System.Windows.Forms.ScrollBars.None;
+			this.dataGridViewFrameMatrix.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
+			this.dataGridViewFrameMatrix.ShowRowIndex = false;
+			this.dataGridViewFrameMatrix.Size = new System.Drawing.Size(239, 80);
+			this.dataGridViewFrameMatrix.TabIndex = 202;
+			this.dataGridViewFrameMatrix.TabStop = false;
+			this.dataGridViewFrameMatrix.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewFrameMatrix_CellValueChanged);
 			// 
 			// groupBoxTXPT
 			// 
@@ -2229,6 +2302,14 @@
 			this.label24.TabIndex = 14;
 			this.label24.Text = "ID";
 			// 
+			// textBoxFrameID
+			// 
+			this.textBoxFrameID.BackColor = System.Drawing.SystemColors.ControlLightLight;
+			this.textBoxFrameID.Location = new System.Drawing.Point(176, 17);
+			this.textBoxFrameID.Name = "textBoxFrameID";
+			this.textBoxFrameID.Size = new System.Drawing.Size(73, 20);
+			this.textBoxFrameID.TabIndex = 16;
+			// 
 			// label12
 			// 
 			this.label12.AutoSize = true;
@@ -2237,6 +2318,14 @@
 			this.label12.Size = new System.Drawing.Size(35, 13);
 			this.label12.TabIndex = 10;
 			this.label12.Text = "Name";
+			// 
+			// textBoxFrameName
+			// 
+			this.textBoxFrameName.BackColor = System.Drawing.SystemColors.ControlLightLight;
+			this.textBoxFrameName.Location = new System.Drawing.Point(2, 17);
+			this.textBoxFrameName.Name = "textBoxFrameName";
+			this.textBoxFrameName.Size = new System.Drawing.Size(168, 20);
+			this.textBoxFrameName.TabIndex = 12;
 			// 
 			// groupBoxFrameUnknowns
 			// 
@@ -2444,6 +2533,29 @@
 			this.tabPageBoneSRT.Text = "SRT";
 			this.tabPageBoneSRT.UseVisualStyleBackColor = true;
 			// 
+			// dataGridViewBoneSRT
+			// 
+			this.dataGridViewBoneSRT.AllowUserToAddRows = false;
+			this.dataGridViewBoneSRT.AllowUserToDeleteRows = false;
+			this.dataGridViewBoneSRT.AllowUserToResizeColumns = false;
+			this.dataGridViewBoneSRT.AllowUserToResizeRows = false;
+			this.dataGridViewBoneSRT.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+			this.dataGridViewBoneSRT.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
+			this.dataGridViewBoneSRT.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.Disable;
+			this.dataGridViewBoneSRT.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
+			this.dataGridViewBoneSRT.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+			this.dataGridViewBoneSRT.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.dataGridViewBoneSRT.Location = new System.Drawing.Point(3, 3);
+			this.dataGridViewBoneSRT.Name = "dataGridViewBoneSRT";
+			this.dataGridViewBoneSRT.RowHeadersVisible = false;
+			this.dataGridViewBoneSRT.ScrollBars = System.Windows.Forms.ScrollBars.None;
+			this.dataGridViewBoneSRT.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
+			this.dataGridViewBoneSRT.ShowRowIndex = false;
+			this.dataGridViewBoneSRT.Size = new System.Drawing.Size(239, 80);
+			this.dataGridViewBoneSRT.TabIndex = 1;
+			this.dataGridViewBoneSRT.TabStop = false;
+			this.dataGridViewBoneSRT.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewBoneSRT_CellValueChanged);
+			// 
 			// tabPageBoneMatrix
 			// 
 			this.tabPageBoneMatrix.Controls.Add(this.dataGridViewBoneMatrix);
@@ -2455,6 +2567,30 @@
 			this.tabPageBoneMatrix.Text = "Matrix";
 			this.tabPageBoneMatrix.UseVisualStyleBackColor = true;
 			// 
+			// dataGridViewBoneMatrix
+			// 
+			this.dataGridViewBoneMatrix.AllowUserToAddRows = false;
+			this.dataGridViewBoneMatrix.AllowUserToDeleteRows = false;
+			this.dataGridViewBoneMatrix.AllowUserToResizeColumns = false;
+			this.dataGridViewBoneMatrix.AllowUserToResizeRows = false;
+			this.dataGridViewBoneMatrix.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+			this.dataGridViewBoneMatrix.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
+			this.dataGridViewBoneMatrix.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.Disable;
+			this.dataGridViewBoneMatrix.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
+			this.dataGridViewBoneMatrix.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+			this.dataGridViewBoneMatrix.ColumnHeadersVisible = false;
+			this.dataGridViewBoneMatrix.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.dataGridViewBoneMatrix.Location = new System.Drawing.Point(3, 3);
+			this.dataGridViewBoneMatrix.Name = "dataGridViewBoneMatrix";
+			this.dataGridViewBoneMatrix.RowHeadersVisible = false;
+			this.dataGridViewBoneMatrix.ScrollBars = System.Windows.Forms.ScrollBars.None;
+			this.dataGridViewBoneMatrix.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
+			this.dataGridViewBoneMatrix.ShowRowIndex = false;
+			this.dataGridViewBoneMatrix.Size = new System.Drawing.Size(239, 80);
+			this.dataGridViewBoneMatrix.TabIndex = 1;
+			this.dataGridViewBoneMatrix.TabStop = false;
+			this.dataGridViewBoneMatrix.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewBoneMatrix_CellValueChanged);
+			// 
 			// label26
 			// 
 			this.label26.AutoSize = true;
@@ -2463,6 +2599,22 @@
 			this.label26.Size = new System.Drawing.Size(67, 13);
 			this.label26.TabIndex = 10;
 			this.label26.Text = "Frame Name";
+			// 
+			// textBoxBoneFrameID
+			// 
+			this.textBoxBoneFrameID.BackColor = System.Drawing.SystemColors.ControlLightLight;
+			this.textBoxBoneFrameID.Location = new System.Drawing.Point(176, 17);
+			this.textBoxBoneFrameID.Name = "textBoxBoneFrameID";
+			this.textBoxBoneFrameID.Size = new System.Drawing.Size(73, 20);
+			this.textBoxBoneFrameID.TabIndex = 16;
+			// 
+			// textBoxBoneFrameName
+			// 
+			this.textBoxBoneFrameName.Location = new System.Drawing.Point(2, 17);
+			this.textBoxBoneFrameName.Name = "textBoxBoneFrameName";
+			this.textBoxBoneFrameName.ReadOnly = true;
+			this.textBoxBoneFrameName.Size = new System.Drawing.Size(168, 20);
+			this.textBoxBoneFrameName.TabIndex = 12;
 			// 
 			// tabPageMeshView
 			// 
@@ -2521,6 +2673,20 @@
 			this.label9.TabIndex = 134;
 			this.label9.Text = "Name";
 			// 
+			// textBoxMeshInfo
+			// 
+			this.textBoxMeshInfo.Location = new System.Drawing.Point(2, 43);
+			this.textBoxMeshInfo.Name = "textBoxMeshInfo";
+			this.textBoxMeshInfo.Size = new System.Drawing.Size(247, 20);
+			this.textBoxMeshInfo.TabIndex = 41;
+			// 
+			// textBoxMeshName
+			// 
+			this.textBoxMeshName.Location = new System.Drawing.Point(2, 17);
+			this.textBoxMeshName.Name = "textBoxMeshName";
+			this.textBoxMeshName.Size = new System.Drawing.Size(168, 20);
+			this.textBoxMeshName.TabIndex = 35;
+			// 
 			// label13
 			// 
 			this.label13.AutoSize = true;
@@ -2529,6 +2695,13 @@
 			this.label13.Size = new System.Drawing.Size(18, 13);
 			this.label13.TabIndex = 140;
 			this.label13.Text = "ID";
+			// 
+			// textBoxMeshID
+			// 
+			this.textBoxMeshID.Location = new System.Drawing.Point(176, 17);
+			this.textBoxMeshID.Name = "textBoxMeshID";
+			this.textBoxMeshID.Size = new System.Drawing.Size(73, 20);
+			this.textBoxMeshID.TabIndex = 36;
 			// 
 			// groupBoxExportOptions
 			// 
@@ -2592,7 +2765,7 @@
 			// 
 			// textBoxEulerFilterPrecision
 			// 
-			this.textBoxEulerFilterPrecision.Location = new System.Drawing.Point(214, 3);
+			this.textBoxEulerFilterPrecision.Location = new System.Drawing.Point(214, 1);
 			this.textBoxEulerFilterPrecision.Name = "textBoxEulerFilterPrecision";
 			this.textBoxEulerFilterPrecision.Size = new System.Drawing.Size(28, 20);
 			this.textBoxEulerFilterPrecision.TabIndex = 142;
@@ -2630,7 +2803,7 @@
 			this.checkBoxEulerFilter.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
 			this.checkBoxEulerFilter.Checked = true;
 			this.checkBoxEulerFilter.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.checkBoxEulerFilter.Location = new System.Drawing.Point(136, 4);
+			this.checkBoxEulerFilter.Location = new System.Drawing.Point(136, 2);
 			this.checkBoxEulerFilter.Name = "checkBoxEulerFilter";
 			this.checkBoxEulerFilter.Size = new System.Drawing.Size(75, 17);
 			this.checkBoxEulerFilter.TabIndex = 142;
@@ -2941,6 +3114,15 @@
 			this.ColumnSubmeshUnknowns.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
 			this.ColumnSubmeshUnknowns.Width = 64;
 			// 
+			// textBoxMeshObjInfo
+			// 
+			this.textBoxMeshObjInfo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.textBoxMeshObjInfo.Location = new System.Drawing.Point(4, 55);
+			this.textBoxMeshObjInfo.Name = "textBoxMeshObjInfo";
+			this.textBoxMeshObjInfo.Size = new System.Drawing.Size(466, 20);
+			this.textBoxMeshObjInfo.TabIndex = 148;
+			// 
 			// label15
 			// 
 			this.label15.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -2950,6 +3132,23 @@
 			this.label15.Size = new System.Drawing.Size(18, 13);
 			this.label15.TabIndex = 146;
 			this.label15.Text = "ID";
+			// 
+			// textBoxMeshObjID
+			// 
+			this.textBoxMeshObjID.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.textBoxMeshObjID.Location = new System.Drawing.Point(397, 31);
+			this.textBoxMeshObjID.Name = "textBoxMeshObjID";
+			this.textBoxMeshObjID.Size = new System.Drawing.Size(73, 20);
+			this.textBoxMeshObjID.TabIndex = 146;
+			// 
+			// textBoxMeshObjName
+			// 
+			this.textBoxMeshObjName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.textBoxMeshObjName.Location = new System.Drawing.Point(4, 31);
+			this.textBoxMeshObjName.Name = "textBoxMeshObjName";
+			this.textBoxMeshObjName.Size = new System.Drawing.Size(389, 20);
+			this.textBoxMeshObjName.TabIndex = 144;
 			// 
 			// checkBoxMeshObjSkinned
 			// 
@@ -3172,6 +3371,20 @@
 			this.groupBoxMaterialProperties.TabStop = false;
 			this.toolTip1.SetToolTip(this.groupBoxMaterialProperties, "Apply changes for every Origin separately");
 			// 
+			// textBoxMatSpecularG
+			// 
+			this.textBoxMatSpecularG.Location = new System.Drawing.Point(104, 145);
+			this.textBoxMatSpecularG.Name = "textBoxMatSpecularG";
+			this.textBoxMatSpecularG.Size = new System.Drawing.Size(47, 20);
+			this.textBoxMatSpecularG.TabIndex = 89;
+			// 
+			// textBoxMatUnknown1
+			// 
+			this.textBoxMatUnknown1.Location = new System.Drawing.Point(202, 193);
+			this.textBoxMatUnknown1.Name = "textBoxMatUnknown1";
+			this.textBoxMatUnknown1.Size = new System.Drawing.Size(47, 20);
+			this.textBoxMatUnknown1.TabIndex = 100;
+			// 
 			// label22
 			// 
 			this.label22.AutoSize = true;
@@ -3199,6 +3412,20 @@
 			this.label2.TabIndex = 93;
 			this.label2.Text = "R";
 			// 
+			// textBoxMatSpecularR
+			// 
+			this.textBoxMatSpecularR.Location = new System.Drawing.Point(55, 145);
+			this.textBoxMatSpecularR.Name = "textBoxMatSpecularR";
+			this.textBoxMatSpecularR.Size = new System.Drawing.Size(47, 20);
+			this.textBoxMatSpecularR.TabIndex = 88;
+			// 
+			// textBoxMatSpecularB
+			// 
+			this.textBoxMatSpecularB.Location = new System.Drawing.Point(153, 145);
+			this.textBoxMatSpecularB.Name = "textBoxMatSpecularB";
+			this.textBoxMatSpecularB.Size = new System.Drawing.Size(47, 20);
+			this.textBoxMatSpecularB.TabIndex = 90;
+			// 
 			// label7
 			// 
 			this.label7.AutoSize = true;
@@ -3207,6 +3434,20 @@
 			this.label7.Size = new System.Drawing.Size(15, 13);
 			this.label7.TabIndex = 94;
 			this.label7.Text = "G";
+			// 
+			// textBoxMatSpecularA
+			// 
+			this.textBoxMatSpecularA.Location = new System.Drawing.Point(202, 145);
+			this.textBoxMatSpecularA.Name = "textBoxMatSpecularA";
+			this.textBoxMatSpecularA.Size = new System.Drawing.Size(47, 20);
+			this.textBoxMatSpecularA.TabIndex = 91;
+			// 
+			// textBoxMatSpecularPower
+			// 
+			this.textBoxMatSpecularPower.Location = new System.Drawing.Point(55, 193);
+			this.textBoxMatSpecularPower.Name = "textBoxMatSpecularPower";
+			this.textBoxMatSpecularPower.Size = new System.Drawing.Size(47, 20);
+			this.textBoxMatSpecularPower.TabIndex = 99;
 			// 
 			// label10
 			// 
@@ -3217,6 +3458,13 @@
 			this.label10.TabIndex = 95;
 			this.label10.Text = "B";
 			// 
+			// textBoxMatEmissiveA
+			// 
+			this.textBoxMatEmissiveA.Location = new System.Drawing.Point(202, 169);
+			this.textBoxMatEmissiveA.Name = "textBoxMatEmissiveA";
+			this.textBoxMatEmissiveA.Size = new System.Drawing.Size(47, 20);
+			this.textBoxMatEmissiveA.TabIndex = 97;
+			// 
 			// label11
 			// 
 			this.label11.AutoSize = true;
@@ -3225,6 +3473,83 @@
 			this.label11.Size = new System.Drawing.Size(14, 13);
 			this.label11.TabIndex = 96;
 			this.label11.Text = "A";
+			// 
+			// textBoxMatEmissiveB
+			// 
+			this.textBoxMatEmissiveB.Location = new System.Drawing.Point(153, 169);
+			this.textBoxMatEmissiveB.Name = "textBoxMatEmissiveB";
+			this.textBoxMatEmissiveB.Size = new System.Drawing.Size(47, 20);
+			this.textBoxMatEmissiveB.TabIndex = 96;
+			// 
+			// textBoxMatDiffuseR
+			// 
+			this.textBoxMatDiffuseR.Location = new System.Drawing.Point(55, 97);
+			this.textBoxMatDiffuseR.Name = "textBoxMatDiffuseR";
+			this.textBoxMatDiffuseR.Size = new System.Drawing.Size(47, 20);
+			this.textBoxMatDiffuseR.TabIndex = 76;
+			// 
+			// textBoxMatEmissiveG
+			// 
+			this.textBoxMatEmissiveG.Location = new System.Drawing.Point(104, 169);
+			this.textBoxMatEmissiveG.Name = "textBoxMatEmissiveG";
+			this.textBoxMatEmissiveG.Size = new System.Drawing.Size(47, 20);
+			this.textBoxMatEmissiveG.TabIndex = 95;
+			// 
+			// textBoxMatDiffuseG
+			// 
+			this.textBoxMatDiffuseG.Location = new System.Drawing.Point(104, 97);
+			this.textBoxMatDiffuseG.Name = "textBoxMatDiffuseG";
+			this.textBoxMatDiffuseG.Size = new System.Drawing.Size(47, 20);
+			this.textBoxMatDiffuseG.TabIndex = 77;
+			// 
+			// textBoxMatEmissiveR
+			// 
+			this.textBoxMatEmissiveR.Location = new System.Drawing.Point(55, 169);
+			this.textBoxMatEmissiveR.Name = "textBoxMatEmissiveR";
+			this.textBoxMatEmissiveR.Size = new System.Drawing.Size(47, 20);
+			this.textBoxMatEmissiveR.TabIndex = 94;
+			// 
+			// textBoxMatDiffuseB
+			// 
+			this.textBoxMatDiffuseB.Location = new System.Drawing.Point(153, 97);
+			this.textBoxMatDiffuseB.Name = "textBoxMatDiffuseB";
+			this.textBoxMatDiffuseB.Size = new System.Drawing.Size(47, 20);
+			this.textBoxMatDiffuseB.TabIndex = 78;
+			// 
+			// textBoxMatDiffuseA
+			// 
+			this.textBoxMatDiffuseA.Location = new System.Drawing.Point(202, 97);
+			this.textBoxMatDiffuseA.Name = "textBoxMatDiffuseA";
+			this.textBoxMatDiffuseA.Size = new System.Drawing.Size(47, 20);
+			this.textBoxMatDiffuseA.TabIndex = 79;
+			// 
+			// textBoxMatAmbientR
+			// 
+			this.textBoxMatAmbientR.Location = new System.Drawing.Point(55, 121);
+			this.textBoxMatAmbientR.Name = "textBoxMatAmbientR";
+			this.textBoxMatAmbientR.Size = new System.Drawing.Size(47, 20);
+			this.textBoxMatAmbientR.TabIndex = 80;
+			// 
+			// textBoxMatAmbientG
+			// 
+			this.textBoxMatAmbientG.Location = new System.Drawing.Point(104, 121);
+			this.textBoxMatAmbientG.Name = "textBoxMatAmbientG";
+			this.textBoxMatAmbientG.Size = new System.Drawing.Size(47, 20);
+			this.textBoxMatAmbientG.TabIndex = 81;
+			// 
+			// textBoxMatAmbientB
+			// 
+			this.textBoxMatAmbientB.Location = new System.Drawing.Point(153, 121);
+			this.textBoxMatAmbientB.Name = "textBoxMatAmbientB";
+			this.textBoxMatAmbientB.Size = new System.Drawing.Size(47, 20);
+			this.textBoxMatAmbientB.TabIndex = 82;
+			// 
+			// textBoxMatAmbientA
+			// 
+			this.textBoxMatAmbientA.Location = new System.Drawing.Point(202, 121);
+			this.textBoxMatAmbientA.Name = "textBoxMatAmbientA";
+			this.textBoxMatAmbientA.Size = new System.Drawing.Size(47, 20);
+			this.textBoxMatAmbientA.TabIndex = 83;
 			// 
 			// groupBoxMaterialExtraSetsUnknowns
 			// 
@@ -3244,6 +3569,20 @@
 			this.textBoxMatMataUnknown1.Size = new System.Drawing.Size(47, 20);
 			this.textBoxMatMataUnknown1.TabIndex = 55;
 			this.toolTip1.SetToolTip(this.textBoxMatMataUnknown1, "float");
+			// 
+			// textBoxMatID
+			// 
+			this.textBoxMatID.Location = new System.Drawing.Point(176, 17);
+			this.textBoxMatID.Name = "textBoxMatID";
+			this.textBoxMatID.Size = new System.Drawing.Size(73, 20);
+			this.textBoxMatID.TabIndex = 15;
+			// 
+			// textBoxMatName
+			// 
+			this.textBoxMatName.Location = new System.Drawing.Point(2, 17);
+			this.textBoxMatName.Name = "textBoxMatName";
+			this.textBoxMatName.Size = new System.Drawing.Size(168, 20);
+			this.textBoxMatName.TabIndex = 10;
 			// 
 			// menuStrip1
 			// 
@@ -3364,345 +3703,6 @@
 			this.saveFileDialog1.Filter = "ODF files|*.ODF|All files|*.*";
 			this.saveFileDialog1.RestoreDirectory = true;
 			// 
-			// columnHeader1
-			// 
-			this.columnHeader1.Text = "First";
-			this.columnHeader1.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-			this.columnHeader1.Width = 35;
-			// 
-			// columnHeader2
-			// 
-			this.columnHeader2.Text = "Last";
-			this.columnHeader2.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-			this.columnHeader2.Width = 40;
-			// 
-			// dataGridViewFrameSRT
-			// 
-			this.dataGridViewFrameSRT.AllowUserToAddRows = false;
-			this.dataGridViewFrameSRT.AllowUserToDeleteRows = false;
-			this.dataGridViewFrameSRT.AllowUserToResizeColumns = false;
-			this.dataGridViewFrameSRT.AllowUserToResizeRows = false;
-			this.dataGridViewFrameSRT.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-			this.dataGridViewFrameSRT.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
-			this.dataGridViewFrameSRT.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.Disable;
-			this.dataGridViewFrameSRT.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
-			this.dataGridViewFrameSRT.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-			this.dataGridViewFrameSRT.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.dataGridViewFrameSRT.Location = new System.Drawing.Point(3, 3);
-			this.dataGridViewFrameSRT.Name = "dataGridViewFrameSRT";
-			this.dataGridViewFrameSRT.RowHeadersVisible = false;
-			this.dataGridViewFrameSRT.ScrollBars = System.Windows.Forms.ScrollBars.None;
-			this.dataGridViewFrameSRT.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
-			this.dataGridViewFrameSRT.ShowRowIndex = false;
-			this.dataGridViewFrameSRT.Size = new System.Drawing.Size(239, 80);
-			this.dataGridViewFrameSRT.TabIndex = 201;
-			this.dataGridViewFrameSRT.TabStop = false;
-			this.dataGridViewFrameSRT.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewFrameSRT_CellValueChanged);
-			// 
-			// dataGridViewFrameMatrix
-			// 
-			this.dataGridViewFrameMatrix.AllowUserToAddRows = false;
-			this.dataGridViewFrameMatrix.AllowUserToDeleteRows = false;
-			this.dataGridViewFrameMatrix.AllowUserToResizeColumns = false;
-			this.dataGridViewFrameMatrix.AllowUserToResizeRows = false;
-			this.dataGridViewFrameMatrix.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-			this.dataGridViewFrameMatrix.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
-			this.dataGridViewFrameMatrix.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.Disable;
-			this.dataGridViewFrameMatrix.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
-			this.dataGridViewFrameMatrix.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-			this.dataGridViewFrameMatrix.ColumnHeadersVisible = false;
-			this.dataGridViewFrameMatrix.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.dataGridViewFrameMatrix.Location = new System.Drawing.Point(3, 3);
-			this.dataGridViewFrameMatrix.Name = "dataGridViewFrameMatrix";
-			this.dataGridViewFrameMatrix.RowHeadersVisible = false;
-			this.dataGridViewFrameMatrix.ScrollBars = System.Windows.Forms.ScrollBars.None;
-			this.dataGridViewFrameMatrix.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
-			this.dataGridViewFrameMatrix.ShowRowIndex = false;
-			this.dataGridViewFrameMatrix.Size = new System.Drawing.Size(239, 80);
-			this.dataGridViewFrameMatrix.TabIndex = 202;
-			this.dataGridViewFrameMatrix.TabStop = false;
-			this.dataGridViewFrameMatrix.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewFrameMatrix_CellValueChanged);
-			// 
-			// textBoxFrameID
-			// 
-			this.textBoxFrameID.BackColor = System.Drawing.SystemColors.ControlLightLight;
-			this.textBoxFrameID.Location = new System.Drawing.Point(176, 17);
-			this.textBoxFrameID.Name = "textBoxFrameID";
-			this.textBoxFrameID.Size = new System.Drawing.Size(73, 20);
-			this.textBoxFrameID.TabIndex = 16;
-			// 
-			// textBoxFrameName
-			// 
-			this.textBoxFrameName.BackColor = System.Drawing.SystemColors.ControlLightLight;
-			this.textBoxFrameName.Location = new System.Drawing.Point(2, 17);
-			this.textBoxFrameName.Name = "textBoxFrameName";
-			this.textBoxFrameName.Size = new System.Drawing.Size(168, 20);
-			this.textBoxFrameName.TabIndex = 12;
-			// 
-			// dataGridViewBoneSRT
-			// 
-			this.dataGridViewBoneSRT.AllowUserToAddRows = false;
-			this.dataGridViewBoneSRT.AllowUserToDeleteRows = false;
-			this.dataGridViewBoneSRT.AllowUserToResizeColumns = false;
-			this.dataGridViewBoneSRT.AllowUserToResizeRows = false;
-			this.dataGridViewBoneSRT.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-			this.dataGridViewBoneSRT.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
-			this.dataGridViewBoneSRT.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.Disable;
-			this.dataGridViewBoneSRT.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
-			this.dataGridViewBoneSRT.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-			this.dataGridViewBoneSRT.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.dataGridViewBoneSRT.Location = new System.Drawing.Point(3, 3);
-			this.dataGridViewBoneSRT.Name = "dataGridViewBoneSRT";
-			this.dataGridViewBoneSRT.RowHeadersVisible = false;
-			this.dataGridViewBoneSRT.ScrollBars = System.Windows.Forms.ScrollBars.None;
-			this.dataGridViewBoneSRT.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
-			this.dataGridViewBoneSRT.ShowRowIndex = false;
-			this.dataGridViewBoneSRT.Size = new System.Drawing.Size(239, 80);
-			this.dataGridViewBoneSRT.TabIndex = 1;
-			this.dataGridViewBoneSRT.TabStop = false;
-			this.dataGridViewBoneSRT.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewBoneSRT_CellValueChanged);
-			// 
-			// dataGridViewBoneMatrix
-			// 
-			this.dataGridViewBoneMatrix.AllowUserToAddRows = false;
-			this.dataGridViewBoneMatrix.AllowUserToDeleteRows = false;
-			this.dataGridViewBoneMatrix.AllowUserToResizeColumns = false;
-			this.dataGridViewBoneMatrix.AllowUserToResizeRows = false;
-			this.dataGridViewBoneMatrix.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-			this.dataGridViewBoneMatrix.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
-			this.dataGridViewBoneMatrix.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.Disable;
-			this.dataGridViewBoneMatrix.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
-			this.dataGridViewBoneMatrix.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-			this.dataGridViewBoneMatrix.ColumnHeadersVisible = false;
-			this.dataGridViewBoneMatrix.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.dataGridViewBoneMatrix.Location = new System.Drawing.Point(3, 3);
-			this.dataGridViewBoneMatrix.Name = "dataGridViewBoneMatrix";
-			this.dataGridViewBoneMatrix.RowHeadersVisible = false;
-			this.dataGridViewBoneMatrix.ScrollBars = System.Windows.Forms.ScrollBars.None;
-			this.dataGridViewBoneMatrix.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
-			this.dataGridViewBoneMatrix.ShowRowIndex = false;
-			this.dataGridViewBoneMatrix.Size = new System.Drawing.Size(239, 80);
-			this.dataGridViewBoneMatrix.TabIndex = 1;
-			this.dataGridViewBoneMatrix.TabStop = false;
-			this.dataGridViewBoneMatrix.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewBoneMatrix_CellValueChanged);
-			// 
-			// textBoxBoneFrameID
-			// 
-			this.textBoxBoneFrameID.BackColor = System.Drawing.SystemColors.ControlLightLight;
-			this.textBoxBoneFrameID.Location = new System.Drawing.Point(176, 17);
-			this.textBoxBoneFrameID.Name = "textBoxBoneFrameID";
-			this.textBoxBoneFrameID.Size = new System.Drawing.Size(73, 20);
-			this.textBoxBoneFrameID.TabIndex = 16;
-			// 
-			// textBoxBoneFrameName
-			// 
-			this.textBoxBoneFrameName.Location = new System.Drawing.Point(2, 17);
-			this.textBoxBoneFrameName.Name = "textBoxBoneFrameName";
-			this.textBoxBoneFrameName.ReadOnly = true;
-			this.textBoxBoneFrameName.Size = new System.Drawing.Size(168, 20);
-			this.textBoxBoneFrameName.TabIndex = 12;
-			// 
-			// textBoxMeshInfo
-			// 
-			this.textBoxMeshInfo.Location = new System.Drawing.Point(2, 43);
-			this.textBoxMeshInfo.Name = "textBoxMeshInfo";
-			this.textBoxMeshInfo.Size = new System.Drawing.Size(247, 20);
-			this.textBoxMeshInfo.TabIndex = 41;
-			// 
-			// textBoxMeshName
-			// 
-			this.textBoxMeshName.Location = new System.Drawing.Point(2, 17);
-			this.textBoxMeshName.Name = "textBoxMeshName";
-			this.textBoxMeshName.Size = new System.Drawing.Size(168, 20);
-			this.textBoxMeshName.TabIndex = 35;
-			// 
-			// textBoxMeshID
-			// 
-			this.textBoxMeshID.Location = new System.Drawing.Point(176, 17);
-			this.textBoxMeshID.Name = "textBoxMeshID";
-			this.textBoxMeshID.Size = new System.Drawing.Size(73, 20);
-			this.textBoxMeshID.TabIndex = 36;
-			// 
-			// textBoxMeshObjInfo
-			// 
-			this.textBoxMeshObjInfo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.textBoxMeshObjInfo.Location = new System.Drawing.Point(4, 55);
-			this.textBoxMeshObjInfo.Name = "textBoxMeshObjInfo";
-			this.textBoxMeshObjInfo.Size = new System.Drawing.Size(466, 20);
-			this.textBoxMeshObjInfo.TabIndex = 148;
-			// 
-			// textBoxMeshObjID
-			// 
-			this.textBoxMeshObjID.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.textBoxMeshObjID.Location = new System.Drawing.Point(397, 31);
-			this.textBoxMeshObjID.Name = "textBoxMeshObjID";
-			this.textBoxMeshObjID.Size = new System.Drawing.Size(73, 20);
-			this.textBoxMeshObjID.TabIndex = 146;
-			// 
-			// textBoxMeshObjName
-			// 
-			this.textBoxMeshObjName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.textBoxMeshObjName.Location = new System.Drawing.Point(4, 31);
-			this.textBoxMeshObjName.Name = "textBoxMeshObjName";
-			this.textBoxMeshObjName.Size = new System.Drawing.Size(389, 20);
-			this.textBoxMeshObjName.TabIndex = 144;
-			// 
-			// textBoxMatSpecularG
-			// 
-			this.textBoxMatSpecularG.Location = new System.Drawing.Point(104, 145);
-			this.textBoxMatSpecularG.Name = "textBoxMatSpecularG";
-			this.textBoxMatSpecularG.Size = new System.Drawing.Size(47, 20);
-			this.textBoxMatSpecularG.TabIndex = 89;
-			// 
-			// textBoxMatUnknown1
-			// 
-			this.textBoxMatUnknown1.Location = new System.Drawing.Point(202, 193);
-			this.textBoxMatUnknown1.Name = "textBoxMatUnknown1";
-			this.textBoxMatUnknown1.Size = new System.Drawing.Size(47, 20);
-			this.textBoxMatUnknown1.TabIndex = 100;
-			// 
-			// textBoxMatSpecularR
-			// 
-			this.textBoxMatSpecularR.Location = new System.Drawing.Point(55, 145);
-			this.textBoxMatSpecularR.Name = "textBoxMatSpecularR";
-			this.textBoxMatSpecularR.Size = new System.Drawing.Size(47, 20);
-			this.textBoxMatSpecularR.TabIndex = 88;
-			// 
-			// textBoxMatSpecularB
-			// 
-			this.textBoxMatSpecularB.Location = new System.Drawing.Point(153, 145);
-			this.textBoxMatSpecularB.Name = "textBoxMatSpecularB";
-			this.textBoxMatSpecularB.Size = new System.Drawing.Size(47, 20);
-			this.textBoxMatSpecularB.TabIndex = 90;
-			// 
-			// textBoxMatSpecularA
-			// 
-			this.textBoxMatSpecularA.Location = new System.Drawing.Point(202, 145);
-			this.textBoxMatSpecularA.Name = "textBoxMatSpecularA";
-			this.textBoxMatSpecularA.Size = new System.Drawing.Size(47, 20);
-			this.textBoxMatSpecularA.TabIndex = 91;
-			// 
-			// textBoxMatSpecularPower
-			// 
-			this.textBoxMatSpecularPower.Location = new System.Drawing.Point(55, 193);
-			this.textBoxMatSpecularPower.Name = "textBoxMatSpecularPower";
-			this.textBoxMatSpecularPower.Size = new System.Drawing.Size(47, 20);
-			this.textBoxMatSpecularPower.TabIndex = 99;
-			// 
-			// textBoxMatEmissiveA
-			// 
-			this.textBoxMatEmissiveA.Location = new System.Drawing.Point(202, 169);
-			this.textBoxMatEmissiveA.Name = "textBoxMatEmissiveA";
-			this.textBoxMatEmissiveA.Size = new System.Drawing.Size(47, 20);
-			this.textBoxMatEmissiveA.TabIndex = 97;
-			// 
-			// textBoxMatEmissiveB
-			// 
-			this.textBoxMatEmissiveB.Location = new System.Drawing.Point(153, 169);
-			this.textBoxMatEmissiveB.Name = "textBoxMatEmissiveB";
-			this.textBoxMatEmissiveB.Size = new System.Drawing.Size(47, 20);
-			this.textBoxMatEmissiveB.TabIndex = 96;
-			// 
-			// textBoxMatDiffuseR
-			// 
-			this.textBoxMatDiffuseR.Location = new System.Drawing.Point(55, 97);
-			this.textBoxMatDiffuseR.Name = "textBoxMatDiffuseR";
-			this.textBoxMatDiffuseR.Size = new System.Drawing.Size(47, 20);
-			this.textBoxMatDiffuseR.TabIndex = 76;
-			// 
-			// textBoxMatEmissiveG
-			// 
-			this.textBoxMatEmissiveG.Location = new System.Drawing.Point(104, 169);
-			this.textBoxMatEmissiveG.Name = "textBoxMatEmissiveG";
-			this.textBoxMatEmissiveG.Size = new System.Drawing.Size(47, 20);
-			this.textBoxMatEmissiveG.TabIndex = 95;
-			// 
-			// textBoxMatDiffuseG
-			// 
-			this.textBoxMatDiffuseG.Location = new System.Drawing.Point(104, 97);
-			this.textBoxMatDiffuseG.Name = "textBoxMatDiffuseG";
-			this.textBoxMatDiffuseG.Size = new System.Drawing.Size(47, 20);
-			this.textBoxMatDiffuseG.TabIndex = 77;
-			// 
-			// textBoxMatEmissiveR
-			// 
-			this.textBoxMatEmissiveR.Location = new System.Drawing.Point(55, 169);
-			this.textBoxMatEmissiveR.Name = "textBoxMatEmissiveR";
-			this.textBoxMatEmissiveR.Size = new System.Drawing.Size(47, 20);
-			this.textBoxMatEmissiveR.TabIndex = 94;
-			// 
-			// textBoxMatDiffuseB
-			// 
-			this.textBoxMatDiffuseB.Location = new System.Drawing.Point(153, 97);
-			this.textBoxMatDiffuseB.Name = "textBoxMatDiffuseB";
-			this.textBoxMatDiffuseB.Size = new System.Drawing.Size(47, 20);
-			this.textBoxMatDiffuseB.TabIndex = 78;
-			// 
-			// textBoxMatDiffuseA
-			// 
-			this.textBoxMatDiffuseA.Location = new System.Drawing.Point(202, 97);
-			this.textBoxMatDiffuseA.Name = "textBoxMatDiffuseA";
-			this.textBoxMatDiffuseA.Size = new System.Drawing.Size(47, 20);
-			this.textBoxMatDiffuseA.TabIndex = 79;
-			// 
-			// textBoxMatAmbientR
-			// 
-			this.textBoxMatAmbientR.Location = new System.Drawing.Point(55, 121);
-			this.textBoxMatAmbientR.Name = "textBoxMatAmbientR";
-			this.textBoxMatAmbientR.Size = new System.Drawing.Size(47, 20);
-			this.textBoxMatAmbientR.TabIndex = 80;
-			// 
-			// textBoxMatAmbientG
-			// 
-			this.textBoxMatAmbientG.Location = new System.Drawing.Point(104, 121);
-			this.textBoxMatAmbientG.Name = "textBoxMatAmbientG";
-			this.textBoxMatAmbientG.Size = new System.Drawing.Size(47, 20);
-			this.textBoxMatAmbientG.TabIndex = 81;
-			// 
-			// textBoxMatAmbientB
-			// 
-			this.textBoxMatAmbientB.Location = new System.Drawing.Point(153, 121);
-			this.textBoxMatAmbientB.Name = "textBoxMatAmbientB";
-			this.textBoxMatAmbientB.Size = new System.Drawing.Size(47, 20);
-			this.textBoxMatAmbientB.TabIndex = 82;
-			// 
-			// textBoxMatAmbientA
-			// 
-			this.textBoxMatAmbientA.Location = new System.Drawing.Point(202, 121);
-			this.textBoxMatAmbientA.Name = "textBoxMatAmbientA";
-			this.textBoxMatAmbientA.Size = new System.Drawing.Size(47, 20);
-			this.textBoxMatAmbientA.TabIndex = 83;
-			// 
-			// textBoxMatID
-			// 
-			this.textBoxMatID.Location = new System.Drawing.Point(176, 17);
-			this.textBoxMatID.Name = "textBoxMatID";
-			this.textBoxMatID.Size = new System.Drawing.Size(73, 20);
-			this.textBoxMatID.TabIndex = 15;
-			// 
-			// textBoxMatName
-			// 
-			this.textBoxMatName.Location = new System.Drawing.Point(2, 17);
-			this.textBoxMatName.Name = "textBoxMatName";
-			this.textBoxMatName.Size = new System.Drawing.Size(168, 20);
-			this.textBoxMatName.TabIndex = 10;
-			// 
-			// textBoxTexName
-			// 
-			this.textBoxTexName.Location = new System.Drawing.Point(2, 17);
-			this.textBoxTexName.Name = "textBoxTexName";
-			this.textBoxTexName.Size = new System.Drawing.Size(168, 20);
-			this.textBoxTexName.TabIndex = 108;
-			// 
-			// textBoxTexID
-			// 
-			this.textBoxTexID.Location = new System.Drawing.Point(176, 17);
-			this.textBoxTexID.Name = "textBoxTexID";
-			this.textBoxTexID.Size = new System.Drawing.Size(73, 20);
-			this.textBoxTexID.TabIndex = 110;
-			// 
 			// FormMeshView
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -3798,7 +3798,9 @@
 			this.tabPageFrameView.PerformLayout();
 			this.tabControlFrameMatrix.ResumeLayout(false);
 			this.tabPageFrameSRT.ResumeLayout(false);
+			((System.ComponentModel.ISupportInitialize)(this.dataGridViewFrameSRT)).EndInit();
 			this.tabPageFrameMatrix.ResumeLayout(false);
+			((System.ComponentModel.ISupportInitialize)(this.dataGridViewFrameMatrix)).EndInit();
 			this.groupBoxTXPT.ResumeLayout(false);
 			this.groupBoxTXPT.PerformLayout();
 			this.groupBoxFrameUnknowns.ResumeLayout(false);
@@ -3807,7 +3809,9 @@
 			this.tabPageBoneView.PerformLayout();
 			this.tabControlBoneMatrix.ResumeLayout(false);
 			this.tabPageBoneSRT.ResumeLayout(false);
+			((System.ComponentModel.ISupportInitialize)(this.dataGridViewBoneSRT)).EndInit();
 			this.tabPageBoneMatrix.ResumeLayout(false);
+			((System.ComponentModel.ISupportInitialize)(this.dataGridViewBoneMatrix)).EndInit();
 			this.tabPageMeshView.ResumeLayout(false);
 			this.splitContainer2.Panel1.ResumeLayout(false);
 			this.splitContainer2.Panel1.PerformLayout();
@@ -3839,10 +3843,6 @@
 			this.groupBoxMaterialExtraSetsUnknowns.PerformLayout();
 			this.menuStrip1.ResumeLayout(false);
 			this.menuStrip1.PerformLayout();
-			((System.ComponentModel.ISupportInitialize)(this.dataGridViewFrameSRT)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.dataGridViewFrameMatrix)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.dataGridViewBoneSRT)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.dataGridViewBoneMatrix)).EndInit();
 			this.ResumeLayout(false);
 
 		}

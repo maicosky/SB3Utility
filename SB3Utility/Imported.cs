@@ -156,9 +156,9 @@ namespace SB3Utility
 			return null;
 		}
 
-		public static ImportedMesh FindMesh(String frameName, IImported imported)
+		public static ImportedMesh FindMesh(String frameName, List<ImportedMesh> importedMeshList)
 		{
-			foreach (ImportedMesh mesh in imported.MeshList)
+			foreach (ImportedMesh mesh in importedMeshList)
 			{
 				if (mesh.Name == frameName)
 				{
@@ -169,9 +169,9 @@ namespace SB3Utility
 			return null;
 		}
 
-		public static ImportedMaterial FindMaterial(String name, IImported imported)
+		public static ImportedMaterial FindMaterial(String name, List<ImportedMaterial> importedMats)
 		{
-			foreach (ImportedMaterial mat in imported.MaterialList)
+			foreach (ImportedMaterial mat in importedMats)
 			{
 				if (mat.Name == name)
 				{
@@ -182,14 +182,14 @@ namespace SB3Utility
 			return null;
 		}
 
-		public static ImportedTexture FindTexture(String name, IImported imported)
+		public static ImportedTexture FindTexture(String name, List<ImportedTexture> importedTextureList)
 		{
 			if (name == null || name == String.Empty)
 			{
 				return null;
 			}
 
-			foreach (ImportedTexture tex in imported.TextureList)
+			foreach (ImportedTexture tex in importedTextureList)
 			{
 				if (tex.Name == name)
 				{

@@ -296,7 +296,7 @@ namespace AiDroidPlugin
 
 				remSkin boneList = rem.FindSkin(mesh.name, parser.SKIC);
 				bool skinned = boneList != null;
-				int numBones = skinned ? boneList.Count: 0;
+				int numBones = skinned ? boneList.Count : 0;
 				string[] boneNames = new string[numBones];
 				Matrix[] boneOffsets = new Matrix[numBones];
 				for (int boneIdx = 0; boneIdx < numBones; boneIdx++)

@@ -454,7 +454,13 @@ namespace SB3Utility
 		[Plugin]
 		public void SetBoneName(int meshId, int boneId, string name)
 		{
-			xxBone bone = Meshes[meshId].Mesh.BoneList[boneId];
+			List<xxBone> boneList = Meshes[meshId].Mesh.BoneList;
+			xxBone bone = xx.FindBone(boneList, name);
+			if (bone != null)
+			{
+				throw new Exception("Bone with this name is already in the bonelist");
+			}
+			bone = boneList[boneId];
 			bone.Name = name;
 		}
 
@@ -503,6 +509,32 @@ namespace SB3Utility
 		{
 			xxFrame frame = Meshes[meshId];
 			frame.Mesh.BoneList.RemoveAt(boneId);
+
+			foreach (xxSubmesh submesh in frame.Mesh.SubmeshList)
+			{
+				foreach (xxVertex vertex in submesh.VertexList)
+				{
+					for (int i = 0; i < vertex.BoneIndices.Length; i++)
+					{
+						byte boneIdx = vertex.BoneIndices[i];
+						if (boneIdx == boneId)
+						{
+							float[] w4 = vertex.Weights4(true);
+							for (int j = i + 1; j < vertex.BoneIndices.Length; j++)
+							{
+								vertex.BoneIndices[j - 1] = vertex.BoneIndices[j];
+								vertex.Weights3[j - 1] = w4[j];
+							}
+							vertex.BoneIndices[vertex.BoneIndices.Length - 1] = 0xFF;
+							i--;
+						}
+						else if (boneIdx > boneId)
+						{
+							vertex.BoneIndices[i]--;
+						}
+					}
+				}
+			}
 		}
 
 		[Plugin]

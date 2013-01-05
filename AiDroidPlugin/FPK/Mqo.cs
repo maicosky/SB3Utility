@@ -153,10 +153,11 @@ namespace AiDroidPlugin
 					Random rand = new Random();
 					for (int i = 0; i < meshes.Count; i++)
 					{
-						Matrix transform = Matrix.Identity * Matrix.Scaling(-1f, 1f, 1f);
+						remBone parent = rem.FindFrame(meshes[i].frame, parser.BONC.rootFrame);
+						float scale = Math.Abs(parent.matrix.M11);
+						Matrix transform = Matrix.Scaling(-1f, 1f, 1f);
 						if (worldCoords)
 						{
-							remBone parent = rem.FindFrame(meshes[i].frame, parser.BONC.rootFrame);
 							while (parent != parser.BONC.rootFrame)
 							{
 								transform *= parent.matrix;
@@ -165,6 +166,10 @@ namespace AiDroidPlugin
 						}
 
 						string meshName = meshes[i].name;
+						if (scale != 1f)
+						{
+							meshName += "(Scale=" + scale.ToString() + ")";
+						}
 						rem.Mesh meshListSome = convertedMeshes[i];
 						for (int j = 0; j < meshListSome.Count; j++)
 						{
@@ -192,15 +197,11 @@ namespace AiDroidPlugin
 							writer.WriteLine("\tcolor " + color[0].ToFloatString() + " " + color[1].ToFloatString() + " " + color[2].ToFloatString());
 							writer.WriteLine("\tcolor_type 1");
 
-							List<ImportedVertex> vertList = rem.ImportedVertexListUnskinned(meshObj.VertexList);
+							List<ImportedVertex> vertList = worldCoords ?
+								rem.ImportedVertexListUnskinnedWorld(meshObj.VertexList, transform)
+								:
+								rem.ImportedVertexListUnskinned(meshObj.VertexList, scale);
 							List<ImportedFace> faceList = rem.ImportedFaceList(meshObj.FaceList);
-							if (worldCoords)
-							{
-								for (int k = 0; k < vertList.Count; k++)
-								{
-									vertList[k].Position = Vector3.TransformCoordinate(vertList[k].Position, transform);
-								}
-							}
 
 							SB3Utility.Mqo.ExporterCommon.WriteMeshObject(writer, vertList, faceList, mqoMatIdx, null);
 							writer.WriteLine("}");

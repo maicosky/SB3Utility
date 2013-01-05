@@ -1,4 +1,10 @@
-﻿[0.4.42.30]
+﻿[0.4.42.31]
+  - XX: fixed removal of bones - removing any other bone than the last shifted the weights
+    and corrupted the mesh if the last bone had weights for that bone
+  - Added check to prevent several bones targetting the same frame
+  - Fixed Fbx importer producing wrong names for textures located in other directories, like "file 18"
+
+[0.4.42.30]
   - XA morph clip name and mesh can be edited
   - XX: Added option to search the whole mesh for nearest vertices
 

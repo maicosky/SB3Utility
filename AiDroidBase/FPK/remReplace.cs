@@ -34,6 +34,7 @@ namespace AiDroidPlugin
 			{
 				boneDic[i] = new Dictionary<int, float>();
 			}
+			int vertexOffset = 0;
 			foreach (ImportedSubmesh submesh in mesh.SubmeshList)
 			{
 				List<ImportedVertex> vertices = submesh.VertexList;
@@ -45,19 +46,27 @@ namespace AiDroidPlugin
 						if (vert.BoneIndices[j] == 0xFF)
 							continue;
 
-						boneDic[vert.BoneIndices[j]].Add(i, vert.Weights[j]);
+						boneDic[vert.BoneIndices[j]].Add(vertexOffset + i, vert.Weights[j]);
 					}
 				}
+				vertexOffset += vertices.Count;
 			}
 
 			remSkin remBoneList = new remSkin(mesh.BoneList.Count);
 			remBoneList.mesh = new remId(mesh.Name);
+			Vector3 scale, translate;
+			Quaternion rotate;
+			lMeshMatrixInv.Decompose(out scale, out rotate, out translate);
+			scale.X = Math.Abs(scale.X);
+			scale.Y = Math.Abs(scale.Y);
+			scale.Z = Math.Abs(scale.Z);
+			Matrix combinedCorrection = Matrix.Scaling(-1f / scale.X, 1f / scale.Y, -1f / scale.Z) * lMeshMatrixInv;
 			for (int i = 0; i < mesh.BoneList.Count; i++)
 			{
 				remBoneWeights boneWeights = new remBoneWeights();
 				boneWeights.bone = new remId(mesh.BoneList[i].Name);
 				Matrix lMatrix = Matrix.Invert(mesh.BoneList[i].Matrix);
-				boneWeights.matrix = Matrix.Invert(lMatrix * lMeshMatrixInv);
+				boneWeights.matrix = Matrix.Invert(lMatrix * combinedCorrection);
 				boneWeights.vertexIndices = new int[boneDic[i].Count];
 				boneDic[i].Keys.CopyTo(boneWeights.vertexIndices, 0);
 				boneWeights.vertexWeights = new float[boneDic[i].Count];
@@ -82,6 +91,7 @@ namespace AiDroidPlugin
 			replaceSubmeshesOption = new bool[numSubmeshes];
 
 			remMesh newMesh = new remMesh(numSubmeshes);
+			newMesh.name = new remId(mesh.Name);
 
 			List<remVertex> newVertices = new List<remVertex>();
 			List<int> newFaces = new List<int>();
@@ -97,7 +107,7 @@ namespace AiDroidPlugin
 				materialNames[i] = submesh.Material;
 				indices[i] = submesh.Index;
 				worldCoords[i] = submesh.WorldCoords;
-				replaceSubmeshesOption[i] = mesh.isSubmeshReplacingOriginal(mesh.SubmeshList[submeshIdx]);
+				replaceSubmeshesOption[i] = mesh.isSubmeshReplacingOriginal(submesh);
 
 				List<ImportedFace> faceList = submesh.FaceList;
 				newFaces.Capacity += faceList.Count * 3;
@@ -120,9 +130,17 @@ namespace AiDroidPlugin
 					ImportedVertex vert = vertexList[j];
 					remVertex newVertex = new remVertex();
 
-					newVertex.Normal = vert.Normal;
+					if (submesh.WorldCoords)
+					{
+						newVertex.Position = vert.Position;
+						newVertex.Normal = vert.Normal;
+					}
+					else
+					{
+						newVertex.Position = new Vector3(vert.Position.X, -vert.Position.Z, vert.Position.Y);
+						newVertex.Normal = new Vector3(vert.Normal.X, -vert.Normal.Z, vert.Normal.Y);
+					}
 					newVertex.UV = new Vector2(vert.UV[0], vert.UV[1]);
-					newVertex.Position = vert.Position;
 					newVertices.Add(newVertex);
 				}
 			}
@@ -133,9 +151,42 @@ namespace AiDroidPlugin
 			return newMesh;
 		}
 
-		public static void ReplaceMesh(remBone frame, remParser parser, WorkspaceMesh mesh, List<ImportedMaterial> materials, List<ImportedTexture> textures, bool merge, CopyMeshMethod normalsMethod, CopyMeshMethod bonesMethod)
+		public static void ReplaceMesh(remBone frame, remParser parser, WorkspaceMesh mesh, List<ImportedMaterial> materials, List<ImportedTexture> textures, bool merge, CopyMeshMethod normalsMethod, CopyMeshMethod bonesMethod, bool meshFrameCorrection)
 		{
-			Matrix transform = Matrix.Identity * Matrix.Scaling(-1f, 1f, 1f);
+			remMesh frameREMMesh = rem.FindMesh(frame, parser.MESC);
+
+			int startPos = 0;
+			if (meshFrameCorrection)
+			{
+				// frame.matrix = Matrix.Scaling(-1f, 1f, 1f) * Matrix.RotationYawPitchRoll(0f, (float)(Math.PI / 2), (float)Math.PI);
+				frame.matrix = Matrix.Identity;
+				frame.matrix.M22 = frame.matrix.M33 = 0f;
+				frame.matrix.M23 = frame.matrix.M32 = 1f;
+				startPos = mesh.Name.IndexOf("(Scale");
+				if (startPos > 0)
+				{
+					int endPos = mesh.Name.IndexOf(')');
+					float scale;
+					if (Single.TryParse(mesh.Name.Substring(startPos + 7, endPos - startPos - 7), out scale))
+					{
+						frame.matrix *= Matrix.Scaling(new Vector3(scale));
+					}
+					remId newFrameName = new remId(mesh.Name.Substring(0, startPos));
+					if (newFrameName != frame.name)
+					{
+						if (rem.FindFrame(newFrameName, parser.BONC.rootFrame) == null)
+						{
+							frame.name = newFrameName;
+						}
+						else
+						{
+							Report.ReportLog("Warning! Cant rename frame (and mesh) " + mesh.Name + " automatically to " + newFrameName + ".");
+						}
+					}
+				}
+			}
+
+			Matrix transform = Matrix.Scaling(-1f, 1f, 1f);
 			remBone transformFrame = frame;
 			while (transformFrame != parser.BONC.rootFrame)
 			{
@@ -149,9 +200,12 @@ namespace AiDroidPlugin
 			bool[] worldCoords;
 			bool[] replaceSubmeshesOption;
 			remMesh newREMMesh = CreateMesh(mesh, out materialNames, out indices, out worldCoords, out replaceSubmeshesOption);
+			if (startPos > 0)
+			{
+				newREMMesh.name = frame.name;
+			}
 			Mesh newMesh = new Mesh(newREMMesh, CreateBoneList(mesh, transform));
 
-			remMesh frameREMMesh = rem.FindMesh(frame, parser.MESC);
 			remSkin frameMeshSkin = null;
 			Mesh frameMesh = null;
 			if (frameREMMesh != null)
@@ -170,10 +224,10 @@ namespace AiDroidPlugin
 				{
 					if (mat == null)
 					{
-						mat = CreateMaterial(materials[i]);
+						mat = CreateMaterial(ImportedHelpers.FindMaterial(materialNames[i], materials));
 						parser.MATC.AddChild(mat);
 					}
-					if (textures != null)
+/*					if (textures != null)
 					{
 						string texName = materials[i].Textures[0];
 						remMaterial texMat = rem.FindMaterial(parser.MATC, new remId(texName));
@@ -188,7 +242,7 @@ namespace AiDroidPlugin
 								}
 							}
 						}
-					}
+					}*/
 				}
 
 				Submesh newSubmesh = newMesh[i];

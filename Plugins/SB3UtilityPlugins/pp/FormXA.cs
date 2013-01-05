@@ -1428,6 +1428,7 @@ namespace SB3Utility
 								trackBarMorphFactor.Value = (int)(trackBarMorphFactor.Maximum * morphFactor);
 								trackBarMorphFactor.ValueChanged += trackBarMorphFactor_ValueChanged;
 								origin.Text = keyframe.Name;
+								toolTip1.SetToolTip(origin, Graphics.FromHwnd(Handle).MeasureString(origin.Text, origin.Font).Width >= origin.Width - 6 ? origin.Text : null);
 								return;
 							}
 						}

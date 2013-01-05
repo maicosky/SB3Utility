@@ -47,12 +47,12 @@ namespace AiDroidPlugin
 
 		private void numericFrameId_ValueChanged(object sender, EventArgs e)
 		{
-			textBoxFrameName.Text = (numericFrameId.Value < 0) ? String.Empty : editor.Parser.BONC[Decimal.ToInt32(numericFrameId.Value)].name;
+			textBoxFrameName.Text = (numericFrameId.Value < 0) ? editor.Parser.BONC.rootFrame.name : editor.Parser.BONC[Decimal.ToInt32(numericFrameId.Value)].name;
 		}
 
 		private void numericMeshId_ValueChanged(object sender, EventArgs e)
 		{
-			textBoxMeshName.Text = (numericMeshId.Value < 0) ? String.Empty : editor.Parser.BONC[Decimal.ToInt32(numericMeshId.Value)].name;
+			textBoxMeshName.Text = (numericMeshId.Value < 0) ? editor.Parser.BONC.rootFrame.name : editor.Parser.BONC[Decimal.ToInt32(numericMeshId.Value)].name;
 		}
 
 		private void radioButtonNormalsReplace_CheckedChanged(object sender, EventArgs e)

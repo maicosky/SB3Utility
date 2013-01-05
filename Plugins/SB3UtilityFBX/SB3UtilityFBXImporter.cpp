@@ -575,16 +575,16 @@ namespace SB3Utility
 
 		if (pTexture != NULL)
 		{
-			texName = Path::GetFileName(gcnew String(pTexture->GetName()));
-
 			int pTexIdx = pTextures->Find(pTexture);
 			if (pTexIdx < 0)
 			{
 				pTextures->Add(pTexture);
 
+				texName = Path::GetFileName(gcnew String(pTexture->GetName()));
 				String^ texPath = Path::GetDirectoryName(gcnew String(cPath)) + Path::DirectorySeparatorChar + texName;
 				if (!File::Exists(texPath))
 				{
+					texName = Path::GetFileName(gcnew String(pTexture->GetFileName()));
 					texPath = gcnew String(pTexture->GetFileName());
 				}
 				try
@@ -596,6 +596,10 @@ namespace SB3Utility
 				{
 					Report::ReportLog("Import of texture " + texPath + " failed.");
 				}
+			}
+			else
+			{
+				texName = TextureList[pTexIdx]->Name;
 			}
 		}
 

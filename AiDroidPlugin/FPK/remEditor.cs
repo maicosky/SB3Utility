@@ -69,6 +69,11 @@ namespace AiDroidPlugin
 		[Plugin]
 		public int GetFrameIdx(string name)
 		{
+			int scalePos = name.IndexOf("(Scale=");
+			if (scalePos > 0)
+			{
+				name = name.Substring(0, scalePos);
+			}
 			for (int i = 0; i < Parser.BONC.Count; i++)
 			{
 				if (Parser.BONC[i].name == name)
@@ -146,6 +151,7 @@ namespace AiDroidPlugin
 			var destParent = parent >= 0 ? Parser.BONC[parent] : Parser.BONC.rootFrame;
 			srcParent.RemoveChild(srcFrame);
 			destParent.InsertChild(parentDestination, srcFrame);
+			RebuildBONC();
 		}
 
 		[Plugin]
@@ -161,6 +167,7 @@ namespace AiDroidPlugin
 			DeleteMeshesInSubframes(frame);
 			DeleteReferringBones(frame);
 			parent.RemoveChild(frame);
+			RebuildBONC();
 		}
 
 		void DeleteMeshesInSubframes(remBone frame)
@@ -239,9 +246,16 @@ namespace AiDroidPlugin
 		}
 
 		[Plugin]
-		public void AddFrame(ImportedFrame srcFrame, int destParentIdx)
+		public void AddFrame(ImportedFrame srcFrame, int destParentIdx, bool topFrameRescaling)
 		{
 			remBone newFrame = rem.CreateFrame(srcFrame);
+			if (topFrameRescaling)
+			{
+				if (srcFrame.Parent != null && destParentIdx < 0)
+				{
+					newFrame.matrix *= Matrix.Scaling(1f, 1f, -1f);
+				}
+			}
 
 			AddFrame(newFrame, destParentIdx);
 		}
@@ -265,6 +279,23 @@ namespace AiDroidPlugin
 
 		void AddFrame(remBone newFrame, int destParentIdx)
 		{
+			List<string> duplicates = new List<string>();
+			FindFrames(newFrame, duplicates);
+			if (duplicates.Count > 0)
+			{
+				StringBuilder builder = new StringBuilder(1000);
+				for (int i = 0; i < duplicates.Count; i++)
+				{
+					string s = duplicates[i];
+					builder.AppendFormat(" {0}", s);
+					if (i < duplicates.Count - 1)
+					{
+						builder.Append(',');
+					}
+				}
+				throw new Exception("New hierarchy includes frames with names already present.\n   " + builder.ToString());
+			}
+
 			if (destParentIdx < 0)
 			{
 				Parser.BONC.rootFrame.AddChild(newFrame);
@@ -273,12 +304,39 @@ namespace AiDroidPlugin
 			{
 				Parser.BONC[destParentIdx].AddChild(newFrame);
 			}
+			RebuildBONC();
+		}
+
+		void FindFrames(remBone frame, List<string> duplicates)
+		{
+			foreach (remBone remFrame in Parser.BONC)
+			{
+				if (remFrame.name == frame.name)
+				{
+					duplicates.Add(frame.name);
+				}
+			}
+
+			foreach (remBone child in frame)
+			{
+				FindFrames(child, duplicates);
+			}
 		}
 
 		[Plugin]
-		public void ReplaceFrame(ImportedFrame srcFrame, int destParentIdx)
+		public void ReplaceFrame(ImportedFrame srcFrame, int destParentIdx, bool topFrameRescaling)
 		{
 			remBone newFrame = rem.CreateFrame(srcFrame);
+			if (topFrameRescaling)
+			{
+				if (destParentIdx < 0)
+				{
+					foreach (remBone child in newFrame)
+					{
+						child.matrix *= Matrix.Scaling(1f, 1f, -1f);
+					}
+				}
+			}
 
 			ReplaceFrame(newFrame, destParentIdx);
 		}
@@ -304,7 +362,11 @@ namespace AiDroidPlugin
 		{
 			if (destParentIdx < 0)
 			{
-				Parser.BONC.rootFrame = newFrame;
+				Parser.BONC.rootFrame.ChildList.Clear();
+				foreach (remBone child in newFrame)
+				{
+					Parser.BONC.rootFrame.AddChild(child);
+				}
 				Parser.MESC.ChildList.Clear();
 				Parser.SKIC.ChildList.Clear();
 			}
@@ -334,14 +396,39 @@ namespace AiDroidPlugin
 					destParent.AddChild(newFrame);
 				}
 			}
+			RebuildBONC();
 		}
 
 		[Plugin]
-		public void MergeFrame(ImportedFrame srcFrame, int destParentIdx)
+		public void MergeFrame(ImportedFrame srcFrame, int destParentIdx, bool topFrameRescaling)
 		{
 			remBone newFrame = rem.CreateFrame(srcFrame);
+			if (topFrameRescaling)
+			{
+				if (srcFrame.Parent != null)
+				{
+					newFrame.matrix *= Matrix.Scaling(1f, 1f, -1f);
+				}
+				else
+				{
+					foreach (remBone child in newFrame)
+					{
+						child.matrix *= Matrix.Scaling(1f, 1f, -1f);
+					}
+				}
+			}
 
-			MergeFrame(newFrame, destParentIdx);
+			if (srcFrame.Parent != null)
+			{
+				MergeFrame(newFrame, destParentIdx);
+			}
+			else
+			{
+				foreach (remBone child in newFrame)
+				{
+					MergeFrame(child, destParentIdx);
+				}
+			}
 		}
 
 		[Plugin]
@@ -377,6 +464,7 @@ namespace AiDroidPlugin
 			}
 
 			MergeFrame(srcParent, destParent);
+			RebuildBONC();
 		}
 
 		void MergeFrame(remBone srcParent, remBone destParent)
@@ -427,6 +515,23 @@ namespace AiDroidPlugin
 					destParent.AddChild(src);
 				}
 			}
+		}
+
+		void RebuildBONC()
+		{
+			Parser.BONC.ChildList.Clear();
+			ChildsFirst(Parser.BONC.rootFrame);
+			Parser.BONC.RemoveChild(Parser.BONC.rootFrame);
+		}
+
+		void ChildsFirst(remBone frame)
+		{
+			foreach (remBone child in frame)
+			{
+				ChildsFirst(child);
+			}
+
+			Parser.BONC.ChildList.Add(frame);
 		}
 
 		[Plugin]
@@ -627,13 +732,12 @@ namespace AiDroidPlugin
 		}
 
 		[Plugin]
-		public void ReplaceMesh(WorkspaceMesh mesh, List<ImportedMaterial> materials, List<ImportedTexture> textures, int frameIdx, bool merge, string normals, string bones)
+		public void ReplaceMesh(WorkspaceMesh mesh, List<ImportedMaterial> materials, List<ImportedTexture> textures, int frameIdx, bool merge, string normals, string bones, bool meshFrameCorrection)
 		{
 			var normalsMethod = (CopyMeshMethod)Enum.Parse(typeof(CopyMeshMethod), normals);
 			var bonesMethod = (CopyMeshMethod)Enum.Parse(typeof(CopyMeshMethod), bones);
-			rem.ReplaceMesh(Parser.BONC[frameIdx], Parser, mesh, materials, textures, merge, normalsMethod, bonesMethod);
+			rem.ReplaceMesh(Parser.BONC[frameIdx], Parser, mesh, materials, textures, merge, normalsMethod, bonesMethod, meshFrameCorrection);
 
-			Textures.Clear();
 			InitTextures(false, false);
 		}
 

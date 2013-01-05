@@ -204,10 +204,7 @@ namespace AiDroidPlugin
 
 		void DisposeRenderObjects()
 		{
-			foreach (ListViewItem item in listViewMesh.SelectedItems)
-			{
-				Gui.Renderer.RemoveRenderObject(renderObjectIds[(int)item.Tag]);
-			}
+			listViewMesh.SelectedItems.Clear();
 
 			if (renderObjectMeshes != null)
 			{
@@ -304,7 +301,7 @@ namespace AiDroidPlugin
 				descriptions[i] = values[i].GetDescription();
 			}
 			comboBoxMeshExportFormat.Items.AddRange(descriptions);
-			comboBoxMeshExportFormat.SelectedIndex = 0;
+			comboBoxMeshExportFormat.SelectedIndex = 2;
 
 			Gui.Docking.ShowDockContent(this, Gui.Docking.DockEditors);
 
@@ -1393,11 +1390,16 @@ namespace AiDroidPlugin
 					using (var dragOptions = new FormREMDragDrop(Editor, true))
 					{
 						var srcEditor = (ImportedEditor)Gui.Scripting.Variables[source.Variable];
-						var srcFrameName = srcEditor.Frames[(int)source.Id].Name;
+						var srcFrame = srcEditor.Frames[(int)source.Id];
+						var srcFrameName = srcFrame.Name;
+						if (srcFrame.Parent != null && ((ImportedFrame)srcFrame.Parent).Parent == null)
+						{
+							dragOptions.checkBoxFrameRescale.Checked = true;
+						}
 						dragOptions.numericFrameId.Value = GetDestParentIdx(srcFrameName, dest);
 						if (dragOptions.ShowDialog() == DialogResult.OK)
 						{
-							Gui.Scripting.RunScript(EditorVar + "." + dragOptions.FrameMethod.GetName() + "(srcFrame=" + source.Variable + ".Frames[" + (int)source.Id + "], destParentIdx=" + dragOptions.numericFrameId.Value + ")");
+							Gui.Scripting.RunScript(EditorVar + "." + dragOptions.FrameMethod.GetName() + "(srcFrame=" + source.Variable + ".Frames[" + (int)source.Id + "], destParentIdx=" + dragOptions.numericFrameId.Value + ", topFrameRescaling=" + dragOptions.checkBoxFrameRescale.Checked + ")");
 							RecreateFrames();
 						}
 					}
@@ -1464,7 +1466,8 @@ namespace AiDroidPlugin
 								}
 							}
 							Gui.Scripting.RunScript(EditorVar + ".ReplaceMesh(mesh=" + source.Variable + ".Meshes[" + (int)source.Id + "], frameIdx=" + dragOptions.numericMeshId.Value +
-								", materials=" + source.Variable + ".Imported.MaterialList, textures=" + source.Variable + ".Imported.TextureList, merge=" + dragOptions.radioButtonMeshMerge.Checked + ", normals=\"" + dragOptions.NormalsMethod.GetName() + "\", bones=\"" + dragOptions.BonesMethod.GetName() + "\")");
+								", materials=" + source.Variable + ".Imported.MaterialList, textures=" + source.Variable + ".Imported.TextureList, merge=" + dragOptions.radioButtonMeshMerge.Checked +
+								", normals=\"" + dragOptions.NormalsMethod.GetName() + "\", bones=\"" + dragOptions.BonesMethod.GetName() + "\", meshFrameCorrection=" + dragOptions.checkBoxMeshFrameCorrection.Checked + ")");
 							RecreateMeshes();
 						}
 					}
@@ -1764,8 +1767,6 @@ namespace AiDroidPlugin
 					return;
 
 				remBone frame = Editor.Parser.BONC[loadedFrame];
-				if (frame.Parent == null)
-					return;
 				remBone parentFrame = (remBone)frame.Parent;
 				int pos = parentFrame.IndexOf(frame);
 				if (pos < 1)
@@ -1801,8 +1802,6 @@ namespace AiDroidPlugin
 					return;
 
 				remBone frame = Editor.Parser.BONC[loadedFrame];
-				if (frame.Parent == null)
-					return;
 				remBone parentFrame = (remBone)frame.Parent;
 				int pos = parentFrame.IndexOf(frame);
 				if (pos == parentFrame.Count - 1)
@@ -2180,6 +2179,36 @@ namespace AiDroidPlugin
 			}
 		}
 
+		private void buttonBoneRestPose_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedBone == null)
+				{
+					return;
+				}
+
+				remMesh mesh = Editor.Parser.MESC[loadedBone[0]];
+				remSkin skin = rem.FindSkin(mesh.name, Editor.Parser.SKIC);
+				remBoneWeights boneWeights = skin[loadedBone[1]];
+				remBone boneFrame = rem.FindFrame(boneWeights.bone, Editor.Parser.BONC.rootFrame);
+				Matrix transform = Matrix.Identity;
+				while (boneFrame != null)
+				{
+					transform *= boneFrame.matrix;
+					boneFrame = (remBone)boneFrame.Parent;
+				}
+				remBone meshFrame = rem.FindFrame(mesh.frame, Editor.Parser.BONC.rootFrame);
+				transform = meshFrame.matrix * Matrix.Invert(transform);
+				LoadMatrix(transform, dataGridViewBoneSRT, dataGridViewBoneMatrix);
+				BoneMatrixApply(transform);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
 		#endregion Bone
 
 		#region Mesh
@@ -2270,27 +2299,37 @@ namespace AiDroidPlugin
 				Report.ReportLog("Started exporting to " + comboBoxMeshExportFormat.SelectedItem + " format...");
 				Application.DoEvents();
 
+				string reaVars = "null";
+
+				int startKeyframe = -1;
+				Int32.TryParse(textBoxKeyframeRange.Text.Substring(0, textBoxKeyframeRange.Text.LastIndexOf('-')), out startKeyframe);
+				int endKeyframe = 0;
+				Int32.TryParse(textBoxKeyframeRange.Text.Substring(textBoxKeyframeRange.Text.LastIndexOf('-') + 1), out endKeyframe);
+				bool linear = checkBoxInterpolationLinear.Checked;
+				bool EulerFilter = checkBoxEulerFilter.Checked;
+				double filterPrecision = 0.25;
+				Double.TryParse(textBoxEulerFilterPrecision.Text, out filterPrecision);
+
 				switch ((MeshExportFormat)comboBoxMeshExportFormat.SelectedIndex)
 				{
 					case MeshExportFormat.Mqo:
 						Gui.Scripting.RunScript("ExportMqo(parser=" + ParserVar + ", meshNames=" + meshNames + ", dirPath=\"" + dir.FullName + "\", singleMqo=" + checkBoxMeshExportMqoSingleFile.Checked + ", worldCoords=" + checkBoxMeshExportMqoWorldCoords.Checked + ")");
 						break;
-/*					case MeshExportFormat.ColladaFbx:
-						Report.ReportLog("not implemented");
-						//Fbx.Exporter.Export(Utility.GetDestFile(dir, "meshes", ".dae"), parser, meshParents, xaSubfileList, checkBoxMeshExportFbxAllFrames.Checked, checkBoxMeshExportFbxSkins.Checked, ".dae");
+					case MeshExportFormat.ColladaFbx:
+						Gui.Scripting.RunScript("ExportFbx(parser=" + ParserVar + ", meshNames=" + meshNames + ", animations=" + reaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + EulerFilter + ", filterPrecision=" + filterPrecision + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".dae") + "\", exportFormat=\".dae\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ")");
 						break;
 					case MeshExportFormat.Fbx:
-						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".fbx") + "\", exportFormat=\".fbx\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ")");
+						Gui.Scripting.RunScript("ExportFbx(parser=" + ParserVar + ", meshNames=" + meshNames + ", animations=" + reaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + EulerFilter + ", filterPrecision=" + filterPrecision + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".fbx") + "\", exportFormat=\".fbx\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ")");
 						break;
 					case MeshExportFormat.Dxf:
-						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".dxf") + "\", exportFormat=\".dxf\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ")");
+						Gui.Scripting.RunScript("ExportFbx(parser=" + ParserVar + ", meshNames=" + meshNames + ", animations=" + reaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + EulerFilter + ", filterPrecision=" + filterPrecision + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".dxf") + "\", exportFormat=\".dxf\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ")");
 						break;
 					case MeshExportFormat._3ds:
-						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".3ds") + "\", exportFormat=\".3ds\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ")");
+						Gui.Scripting.RunScript("ExportFbx(parser=" + ParserVar + ", meshNames=" + meshNames + ", animations=" + reaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + EulerFilter + ", filterPrecision=" + filterPrecision + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".3ds") + "\", exportFormat=\".3ds\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ")");
 						break;
 					case MeshExportFormat.Obj:
-						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".obj") + "\", exportFormat=\".obj\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ")");
-						break;*/
+						Gui.Scripting.RunScript("ExportFbx(parser=" + ParserVar + ", meshNames=" + meshNames + ", animations=" + reaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + EulerFilter + ", filterPrecision=" + filterPrecision + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".obj") + "\", exportFormat=\".obj\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ")");
+						break;
 					default:
 						throw new Exception("Unexpected ExportFormat");
 				}

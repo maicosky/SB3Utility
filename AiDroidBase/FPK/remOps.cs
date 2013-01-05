@@ -12,20 +12,22 @@ namespace AiDroidPlugin
 	{
 		public static ImportedTexture ImportedTexture(remId texture, string remPath, bool diffuse_else_ambient)
 		{
-			Report.ReportLog("tex=" + texture);
-			Report.ReportLog("path=" + remPath);
-
 			String texh_folder = TexturePathFromREM(remPath);
 			if (texh_folder == null)
 			{
 				Report.ReportLog("TEXH folder could not be located.");
 				return null;
 			}
-			Report.ReportLog("okay");
 
 			string matTexName = texture.ToString();
-			String body = texture.ToString().Substring(0, matTexName.LastIndexOf('.'));
-			String ext =  texture.ToString().Substring(matTexName.LastIndexOf('.'));
+			int lastDotPos = matTexName.LastIndexOf('.');
+			if (lastDotPos < 0)
+			{
+				Report.ReportLog("bad texture " + matTexName);
+				return null;
+			}
+			String body = texture.ToString().Substring(0, lastDotPos);
+			String ext =  texture.ToString().Substring(lastDotPos);
 			String pattern = body + (diffuse_else_ambient ? "" : "_mask01") + ext;
 			String[] files = null;
 			try
@@ -108,14 +110,28 @@ namespace AiDroidPlugin
 			}
 		}
 
-		public static List<ImportedVertex> ImportedVertexListUnskinned(List<remVertex> vertList)
+		public static List<ImportedVertex> ImportedVertexListUnskinned(List<remVertex> vertList, float scale)
 		{
 			List<ImportedVertex> importedList = new List<ImportedVertex>(vertList.Count);
 			for (int i = 0; i < vertList.Count; i++)
 			{
 				ImportedVertex importedVert = new ImportedVertex();
 				importedList.Add(importedVert);
-				importedVert.Position = vertList[i].Position;
+				importedVert.Position = new Vector3(vertList[i].Position.X, vertList[i].Position.Z, -vertList[i].Position.Y) * scale;
+				importedVert.Normal = new Vector3(vertList[i].Normal.X, vertList[i].Position.Z, -vertList[i].Position.Y);
+				importedVert.UV = new float[] { vertList[i].UV[0], vertList[i].UV[1] };
+			}
+			return importedList;
+		}
+
+		public static List<ImportedVertex> ImportedVertexListUnskinnedWorld(List<remVertex> vertList, Matrix transform)
+		{
+			List<ImportedVertex> importedList = new List<ImportedVertex>(vertList.Count);
+			for (int i = 0; i < vertList.Count; i++)
+			{
+				ImportedVertex importedVert = new ImportedVertex();
+				importedList.Add(importedVert);
+				importedVert.Position = Vector3.TransformCoordinate(vertList[i].Position, transform);
 				importedVert.Normal = vertList[i].Normal;
 				importedVert.UV = new float[] { vertList[i].UV[0], vertList[i].UV[1] };
 			}
@@ -151,9 +167,13 @@ namespace AiDroidPlugin
 					if (!exportFrames.Contains(boneList[i].bone.ToString()))
 					{
 						remBone boneParent = FindFrame(boneList[i].bone, parser.BONC.rootFrame);
-						while (boneParent.Parent != null)
+						if (boneParent == null)
 						{
-							exportFrames.Add(boneParent.name.ToString());
+							Report.ReportLog("Missing bone frame " + boneList[i].bone);
+							continue;
+						}
+						while (boneParent.Parent != null && exportFrames.Add(boneParent.name.ToString()))
+						{
 							boneParent = (remBone)boneParent.Parent;
 						}
 					}

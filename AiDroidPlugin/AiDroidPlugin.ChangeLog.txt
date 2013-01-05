@@ -1,4 +1,13 @@
-﻿[0.4.42.30]
+﻿[0.4.42.31]
+  - Added Fbx import/export (also DAE, DXF, 3DS, OBJ)
+  - Added bone matrix calculation for Rest Pose
+  - Fixed taking wrong materials when replacing meshes
+  - Fixed crash when displaying meshes with missing bones or textures
+  - Fixed workspace functions for Frames : Move, Remove, Add, Replace, Merge
+  - Fixed common Fbx exports putting meshes into wrong frames (common means ODF and REM)
+  - Fixed Mqo exports with local coordinates
+
+[0.4.42.30]
   - Added hint when textures are not found to export TEXH.fpk
   - Fixed crash when textures were not found
 
