@@ -169,6 +169,11 @@
     <Compile Include="Example.cs" />
     <Compile Include="pp\xa.cs" />
     <Compile Include="pp\xx.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="ScriptHelper.cs" />
     <Compile Include="SetProperty.cs" />
     <Compile Include="TriStateTreeView.cs">
@@ -250,6 +255,10 @@
     </EmbeddedResource>
     <EmbeddedResource Include="pp\FormXXNormals.resx">
       <DependentUpon>FormXXNormals.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

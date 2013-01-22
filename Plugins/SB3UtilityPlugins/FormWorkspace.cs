@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 using WeifenLuo.WinFormsUI.Docking;
 using System.IO;
+using SlimDX;
 
 namespace SB3Utility
 {
@@ -20,7 +21,7 @@ namespace SB3Utility
 			{
 				InitializeComponent();
 
-				Gui.Docking.ShowDockContent(this, Gui.Docking.DockFiles);
+				Gui.Docking.ShowDockContent(this, Gui.Docking.DockFiles, ContentCategory.Others);
 			}
 			catch (Exception ex)
 			{
@@ -29,11 +30,14 @@ namespace SB3Utility
 		}
 
 		public FormWorkspace(string path, IImported importer, string editorVar, ImportedEditor editor)
-			: this()
 		{
 			try
 			{
+				InitializeComponent();
+
 				InitWorkspace(path, importer, editorVar, editor);
+
+				Gui.Docking.ShowDockContent(this, Gui.Docking.DockFiles, ContentCategory.Others);
 			}
 			catch (Exception ex)
 			{
@@ -96,7 +100,10 @@ namespace SB3Utility
 				for (int i = 0; i < list.Count; i++)
 				{
 					dynamic item = list[i];
-					TreeNode node = new TreeNode(item is WorkspaceAnimation ? "Animation" + i : item.Name);
+					TreeNode node = new TreeNode(item is WorkspaceAnimation
+						? ((WorkspaceAnimation)item).importedAnimation is ImportedKeyframedAnimation
+							? "Animation" + i : "Animation(Reduced Keys)" + i
+						: item.Name);
 					node.Checked = true;
 					node.Tag = new DragSource(editorVar, typeof(T), i);
 					this.treeView.AddChild(root, node);
@@ -131,20 +138,55 @@ namespace SB3Utility
 					else if (item is WorkspaceAnimation)
 					{
 						WorkspaceAnimation animation = item;
-						for (int j = 0; j < animation.TrackList.Count; j++)
+						if (animation.importedAnimation is ImportedKeyframedAnimation)
 						{
-							ImportedAnimationTrack track = animation.TrackList[j];
-							TreeNode trackNode = new TreeNode();
-							trackNode.Checked = animation.isTrackEnabled(track);
-							trackNode.Tag = track;
-							int numKeyframes = 0;
-							foreach (ImportedAnimationKeyframe keyframe in track.Keyframes)
+							List<ImportedAnimationKeyframedTrack> trackList = ((ImportedKeyframedAnimation)animation.importedAnimation).TrackList;
+							for (int j = 0; j < trackList.Count; j++)
 							{
-								if (keyframe != null)
-									numKeyframes++;
+								ImportedAnimationKeyframedTrack track = trackList[j];
+								TreeNode trackNode = new TreeNode();
+								trackNode.Checked = animation.isTrackEnabled(track);
+								trackNode.Tag = track;
+								int numKeyframes = 0;
+								foreach (ImportedAnimationKeyframe keyframe in track.Keyframes)
+								{
+									if (keyframe != null)
+										numKeyframes++;
+								}
+								trackNode.Text = "Track: " + track.Name + ", Keyframes: " + numKeyframes;
+								this.treeView.AddChild(node, trackNode);
 							}
-							trackNode.Text = "Track: " + track.Name + ", Keyframes: " + numKeyframes;
-							this.treeView.AddChild(node, trackNode);
+						}
+						else if (animation.importedAnimation is ImportedSampledAnimation)
+						{
+							List<ImportedAnimationSampledTrack> trackList = ((ImportedSampledAnimation)animation.importedAnimation).TrackList;
+							for (int j = 0; j < trackList.Count; j++)
+							{
+								ImportedAnimationSampledTrack track = trackList[j];
+								TreeNode trackNode = new TreeNode();
+								trackNode.Checked = animation.isTrackEnabled(track);
+								trackNode.Tag = track;
+								int numScalings = 0;
+								for (int k = 0; k < track.Scalings.Length; k++)
+								{
+									if (track.Scalings[k] != null)
+										numScalings++;
+								}
+								int numRotations = 0;
+								for (int k = 0; k < track.Rotations.Length; k++)
+								{
+									if (track.Rotations[k] != null)
+										numRotations++;
+								}
+								int numTranslations = 0;
+								for (int k = 0; k < track.Translations.Length; k++)
+								{
+									if (track.Translations[k] != null)
+										numTranslations++;
+								}
+								trackNode.Text = "Track: " + track.Name + ", Length: " + track.Scalings.Length + ", Scalings: " + numScalings + ", Rotations: " + numRotations + ", Translations: " + numTranslations;
+								this.treeView.AddChild(node, trackNode);
+							}
 						}
 					}
 				}
@@ -204,13 +246,15 @@ namespace SB3Utility
 				var srcEditor = (ImportedEditor)Gui.Scripting.Variables[dragSrc.Variable];
 				srcEditor.Morphs[(int)dragSrc.Id].setMorphKeyframeEnabled(keyframe, keyframeNode.Checked);
 			}
-			else if (e.Node.Tag is ImportedAnimationTrack)
+			else if (e.Node.Tag is ImportedAnimationKeyframedTrack)
 			{
 				TreeNode trackNode = e.Node;
-				ImportedAnimationTrack track = (ImportedAnimationTrack)trackNode.Tag;
+				ImportedAnimationKeyframedTrack track = (ImportedAnimationKeyframedTrack)trackNode.Tag;
 				TreeNode animationNode = trackNode.Parent;
 				DragSource dragSrc = (DragSource)animationNode.Tag;
 				var srcEditor = (ImportedEditor)Gui.Scripting.Variables[dragSrc.Variable];
+//				ImportedKeyframedAnimation anim = (ImportedKeyframedAnimation)srcEditor.Animations[(int)dragSrc.Id].importedAnimation;
+//				List<ImportedAnimationKeyframedTrack> trackList = anim.TrackList;
 				srcEditor.Animations[(int)dragSrc.Id].setTrackEnabled(track, trackNode.Checked);
 			}
 		}

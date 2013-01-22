@@ -2,6 +2,8 @@
 #include <fbxfilesdk/kfbxio/kfbxiosettings.h>
 #include "SB3UtilityFBX.h"
 
+using namespace System::Reflection;
+
 namespace SB3Utility
 {
 	Fbx::Importer::Importer(String^ path, bool EulerFilter, float filterPrecision)
@@ -624,18 +626,80 @@ namespace SB3Utility
 			}
 			if (numLayers > 0)
 			{
-				ImportedAnimation^ wsAnimation = gcnew ImportedAnimation();
-				wsAnimation->TrackList = gcnew List<ImportedAnimationTrack^>(pScene->GetNodeCount());
-				ImportAnimation(pAnimStack->GetMember(FBX_TYPE(KFbxAnimLayer), 0), pScene->GetRootNode(), wsAnimation);
-				if (wsAnimation->TrackList->Count > 0)
+				Type^ animType = GetAnimationType(pAnimStack->GetMember(FBX_TYPE(KFbxAnimLayer), 0), pScene->GetRootNode());
+				ConstructorInfo^ ctor = animType->GetConstructor(Type::EmptyTypes);
+				if (animType == ImportedKeyframedAnimation::typeid)
 				{
-					AnimationList->Add(wsAnimation);
+					ImportedKeyframedAnimation^ wsAnimation = (ImportedKeyframedAnimation^)ctor->Invoke(Type::EmptyTypes);
+					wsAnimation->TrackList = gcnew List<ImportedAnimationKeyframedTrack^>(pScene->GetNodeCount());
+					ImportAnimation(pAnimStack->GetMember(FBX_TYPE(KFbxAnimLayer), 0), pScene->GetRootNode(), wsAnimation);
+					if (wsAnimation->TrackList->Count > 0)
+					{
+						AnimationList->Add(wsAnimation);
+					}
+				}
+				else
+				{
+					ImportedSampledAnimation^ wsAnimation = (ImportedSampledAnimation^)ctor->Invoke(Type::EmptyTypes);
+					wsAnimation->TrackList = gcnew List<ImportedAnimationSampledTrack^>(pScene->GetNodeCount());
+					ImportAnimation(pAnimStack->GetMember(FBX_TYPE(KFbxAnimLayer), 0), pScene->GetRootNode(), wsAnimation);
+					if (wsAnimation->TrackList->Count > 0)
+					{
+						AnimationList->Add(wsAnimation);
+					}
 				}
 			}
 		}
 	}
 
-	void Fbx::Importer::ImportAnimation(KFbxAnimLayer* pAnimLayer, KFbxNode* pNode, ImportedAnimation^ wsAnimation)
+	Type^ Fbx::Importer::GetAnimationType(KFbxAnimLayer* pAnimLayer, KFbxNode* pNode)
+	{
+		KFbxAnimCurve* pAnimCurveTX = pNode->LclTranslation.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_T_X);
+		KFbxAnimCurve* pAnimCurveTY = pNode->LclTranslation.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_T_Y);
+		KFbxAnimCurve* pAnimCurveTZ = pNode->LclTranslation.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_T_Z);
+		KFbxAnimCurve* pAnimCurveRX = pNode->LclRotation.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_R_X);
+		KFbxAnimCurve* pAnimCurveRY = pNode->LclRotation.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_R_Y);
+		KFbxAnimCurve* pAnimCurveRZ = pNode->LclRotation.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_R_Z);
+		KFbxAnimCurve* pAnimCurveSX = pNode->LclScaling.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_S_X);
+		KFbxAnimCurve* pAnimCurveSY = pNode->LclScaling.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_S_Y);
+		KFbxAnimCurve* pAnimCurveSZ = pNode->LclScaling.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_S_Z);
+
+		if ((pAnimCurveTX != NULL) && (pAnimCurveTY != NULL) && (pAnimCurveTZ != NULL) &&
+			(pAnimCurveRX != NULL) && (pAnimCurveRY != NULL) && (pAnimCurveRZ != NULL) &&
+			(pAnimCurveSX != NULL) && (pAnimCurveSY != NULL) && (pAnimCurveSZ != NULL))
+		{
+			if (pAnimCurveSX->KeyGetCount() != pAnimCurveSY->KeyGetCount() || pAnimCurveSX->KeyGetCount() != pAnimCurveSZ->KeyGetCount())
+			{
+				throw gcnew Exception(gcnew String(pNode->GetName()) + "'s scaling needs to be resampled. It needs the same number of keys for X, Y and Z.");
+			}
+			if (pAnimCurveRX->KeyGetCount() != pAnimCurveRY->KeyGetCount() || pAnimCurveRX->KeyGetCount() != pAnimCurveRZ->KeyGetCount())
+			{
+				throw gcnew Exception(gcnew String(pNode->GetName()) + "'s rotation needs to be resampled. It needs the same number of keys for X, Y and Z.");
+			}
+			if (pAnimCurveTX->KeyGetCount() != pAnimCurveTY->KeyGetCount() || pAnimCurveTX->KeyGetCount() != pAnimCurveTZ->KeyGetCount())
+			{
+				throw gcnew Exception(gcnew String(pNode->GetName()) + "'s translation needs to be resampled. It needs the same number of keys for X, Y and Z.");
+			}
+
+			if (pAnimCurveSX->KeyGetCount() != pAnimCurveRX->KeyGetCount() || pAnimCurveSX->KeyGetCount() != pAnimCurveTX->KeyGetCount())
+			{
+				return ImportedSampledAnimation::typeid;
+			}
+		}
+
+		for (int i = 0; i < pNode->GetChildCount(); i++)
+		{
+			Type^ animType = GetAnimationType(pAnimLayer, pNode->GetChild(i));
+			if (animType != ImportedKeyframedAnimation::typeid)
+			{
+				return animType;
+			}
+		}
+
+		return ImportedKeyframedAnimation::typeid;
+	}
+
+	void Fbx::Importer::ImportAnimation(KFbxAnimLayer* pAnimLayer, KFbxNode* pNode, ImportedKeyframedAnimation^ wsAnimation)
 	{
 		KFbxAnimCurve* pAnimCurveTX = pNode->LclTranslation.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_T_X);
 		KFbxAnimCurve* pAnimCurveTY = pNode->LclTranslation.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_T_Y);
@@ -663,22 +727,11 @@ namespace SB3Utility
 				lFilter->Apply((KFbxAnimCurve**)lCurve, 3);
 			}
 
-			array<int>^ keyCount = gcnew array<int>(9) {
-				pAnimCurveSX->KeyGetCount(), pAnimCurveSY->KeyGetCount(), pAnimCurveSZ->KeyGetCount(),
-				pAnimCurveRX->KeyGetCount(), pAnimCurveRY->KeyGetCount(), pAnimCurveRZ->KeyGetCount(),
-				pAnimCurveTX->KeyGetCount(), pAnimCurveTY->KeyGetCount(), pAnimCurveTZ->KeyGetCount() };
-			for (int i = 1; i < keyCount->Length; i++)
-			{
-				if (keyCount[0] != keyCount[i])
-				{
-					throw gcnew Exception(gcnew String(pNode->GetName()) + " doesn't have the same number of keys for each SRT track");
-				}
-			}
-
-			KTime kTime = pAnimCurveSX->KeyGetTime(keyCount[0] - 1);
+			int numKeys = pAnimCurveSX->KeyGetCount();
+			KTime kTime = pAnimCurveSX->KeyGetTime(numKeys - 1);
 			int keyIndex = (int)Math::Round((double)(kTime.GetSecondDouble() * 24.0), 0);
 			array<ImportedAnimationKeyframe^>^ keyArray = gcnew array<ImportedAnimationKeyframe^>(keyIndex + 1);
-			for (int i = 0; i < keyCount[0]; i++)
+			for (int i = 0; i < numKeys; i++)
 			{
 				kTime = pAnimCurveSX->KeyGetTime(i);
 				keyIndex = (int)Math::Round((double)(kTime.GetSecondDouble() * 24.0), 0);
@@ -689,10 +742,86 @@ namespace SB3Utility
 				keyArray[keyIndex]->Translation = Vector3(pAnimCurveTX->KeyGetValue(i), pAnimCurveTY->KeyGetValue(i), pAnimCurveTZ->KeyGetValue(i));
 			}
 
-			ImportedAnimationTrack^ track = gcnew ImportedAnimationTrack();
+			ImportedAnimationKeyframedTrack^ track = gcnew ImportedAnimationKeyframedTrack();
 			wsAnimation->TrackList->Add(track);
 			track->Name = gcnew String(pNode->GetName());
 			track->Keyframes = keyArray;
+		}
+
+		for (int i = 0; i < pNode->GetChildCount(); i++)
+		{
+			ImportAnimation(pAnimLayer, pNode->GetChild(i), wsAnimation);
+		}
+	}
+
+	void Fbx::Importer::ImportAnimation(KFbxAnimLayer* pAnimLayer, KFbxNode* pNode, ImportedSampledAnimation^ wsAnimation)
+	{
+		KFbxAnimCurve* pAnimCurveTX = pNode->LclTranslation.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_T_X);
+		KFbxAnimCurve* pAnimCurveTY = pNode->LclTranslation.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_T_Y);
+		KFbxAnimCurve* pAnimCurveTZ = pNode->LclTranslation.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_T_Z);
+		KFbxAnimCurve* pAnimCurveRX = pNode->LclRotation.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_R_X);
+		KFbxAnimCurve* pAnimCurveRY = pNode->LclRotation.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_R_Y);
+		KFbxAnimCurve* pAnimCurveRZ = pNode->LclRotation.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_R_Z);
+		KFbxAnimCurve* pAnimCurveSX = pNode->LclScaling.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_S_X);
+		KFbxAnimCurve* pAnimCurveSY = pNode->LclScaling.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_S_Y);
+		KFbxAnimCurve* pAnimCurveSZ = pNode->LclScaling.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_S_Z);
+
+		if ((pAnimCurveTX != NULL) && (pAnimCurveTY != NULL) && (pAnimCurveTZ != NULL) &&
+			(pAnimCurveRX != NULL) && (pAnimCurveRY != NULL) && (pAnimCurveRZ != NULL) &&
+			(pAnimCurveSX != NULL) && (pAnimCurveSY != NULL) && (pAnimCurveSZ != NULL))
+		{
+			if (EulerFilter)
+			{
+				KFbxAnimCurve* lCurve [3];
+				lCurve[0] = pAnimCurveRX;
+				lCurve[1] = pAnimCurveRY;
+				lCurve[2] = pAnimCurveRZ;
+				lFilter->Reset();
+				lFilter->SetTestForPath(true);
+				lFilter->SetQualityTolerance(filterPrecision);
+				lFilter->Apply((KFbxAnimCurve**)lCurve, 3);
+			}
+
+			int numKeys = pAnimCurveSX->KeyGetCount();
+			KTime kTime = pAnimCurveSX->KeyGetTime(numKeys - 1);
+			int keyIndex = (int)Math::Round((double)(kTime.GetSecondDouble() * 24.0), 0);
+			array<Nullable<Vector3>>^ scalings = gcnew array<Nullable<Vector3>>(keyIndex + 1);
+			for (int i = 0; i < numKeys; i++)
+			{
+				kTime = pAnimCurveSX->KeyGetTime(i);
+				keyIndex = (int)Math::Round((double)(kTime.GetSecondDouble() * 24.0), 0);
+				scalings[keyIndex] = Vector3(pAnimCurveSX->KeyGetValue(i), pAnimCurveSY->KeyGetValue(i), pAnimCurveSZ->KeyGetValue(i));
+			}
+
+			numKeys = pAnimCurveRX->KeyGetCount();
+			kTime = pAnimCurveRX->KeyGetTime(numKeys - 1);
+			keyIndex = (int)Math::Round((double)(kTime.GetSecondDouble() * 24.0), 0);
+			array<Nullable<Quaternion>>^ rotations = gcnew array<Nullable<Quaternion>>(keyIndex + 1);
+			for (int i = 0; i < numKeys; i++)
+			{
+				kTime = pAnimCurveRX->KeyGetTime(i);
+				keyIndex = (int)Math::Round((double)(kTime.GetSecondDouble() * 24.0), 0);
+				Vector3 rotation = Vector3(pAnimCurveRX->KeyGetValue(i), pAnimCurveRY->KeyGetValue(i), pAnimCurveRZ->KeyGetValue(i));
+				rotations[keyIndex] = Fbx::EulerToQuaternion(rotation);
+			}
+
+			numKeys = pAnimCurveTX->KeyGetCount();
+			kTime = pAnimCurveTX->KeyGetTime(numKeys - 1);
+			keyIndex = (int)Math::Round((double)(kTime.GetSecondDouble() * 24.0), 0);
+			array<Nullable<Vector3>>^ translations = gcnew array<Nullable<Vector3>>(keyIndex + 1);
+			for (int i = 0; i < numKeys; i++)
+			{
+				kTime = pAnimCurveTX->KeyGetTime(i);
+				keyIndex = (int)Math::Round((double)(kTime.GetSecondDouble() * 24.0), 0);
+				translations[keyIndex] = Vector3(pAnimCurveTX->KeyGetValue(i), pAnimCurveTY->KeyGetValue(i), pAnimCurveTZ->KeyGetValue(i));
+			}
+
+			ImportedAnimationSampledTrack^ track = gcnew ImportedAnimationSampledTrack();
+			wsAnimation->TrackList->Add(track);
+			track->Name = gcnew String(pNode->GetName());
+			track->Scalings = scalings;
+			track->Rotations = rotations;
+			track->Translations = translations;
 		}
 
 		for (int i = 0; i < pNode->GetChildCount(); i++)

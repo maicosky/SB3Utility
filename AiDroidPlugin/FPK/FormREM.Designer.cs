@@ -1300,7 +1300,6 @@
 			// 
 			// textBoxKeyframeRange
 			// 
-			this.textBoxKeyframeRange.Enabled = false;
 			this.textBoxKeyframeRange.Location = new System.Drawing.Point(143, 24);
 			this.textBoxKeyframeRange.Name = "textBoxKeyframeRange";
 			this.textBoxKeyframeRange.Size = new System.Drawing.Size(45, 20);
@@ -1314,7 +1313,6 @@
 			this.checkBoxInterpolationLinear.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
 			this.checkBoxInterpolationLinear.Checked = true;
 			this.checkBoxInterpolationLinear.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.checkBoxInterpolationLinear.Enabled = false;
 			this.checkBoxInterpolationLinear.Location = new System.Drawing.Point(189, 26);
 			this.checkBoxInterpolationLinear.Name = "checkBoxInterpolationLinear";
 			this.checkBoxInterpolationLinear.Size = new System.Drawing.Size(55, 17);
@@ -1334,7 +1332,6 @@
 			// 
 			// textBoxEulerFilterPrecision
 			// 
-			this.textBoxEulerFilterPrecision.Enabled = false;
 			this.textBoxEulerFilterPrecision.Location = new System.Drawing.Point(214, 1);
 			this.textBoxEulerFilterPrecision.Name = "textBoxEulerFilterPrecision";
 			this.textBoxEulerFilterPrecision.Size = new System.Drawing.Size(28, 20);
@@ -1347,7 +1344,6 @@
 			this.checkBoxEulerFilter.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
 			this.checkBoxEulerFilter.Checked = true;
 			this.checkBoxEulerFilter.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.checkBoxEulerFilter.Enabled = false;
 			this.checkBoxEulerFilter.Location = new System.Drawing.Point(136, 2);
 			this.checkBoxEulerFilter.Name = "checkBoxEulerFilter";
 			this.checkBoxEulerFilter.Size = new System.Drawing.Size(75, 17);

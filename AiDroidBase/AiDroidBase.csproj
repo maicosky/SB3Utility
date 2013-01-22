@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
@@ -30,6 +31,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="SlimDX, Version=4.0.13.43, Culture=neutral, PublicKeyToken=b1b0c32fd1ffe4f9, processorArchitecture=x86">
@@ -42,6 +44,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FPK\fpkParser.cs" />
+    <Compile Include="FPK\reaOps.cs" />
+    <Compile Include="FPK\REAParser.cs" />
+    <Compile Include="FPK\REAStructures.cs" />
     <Compile Include="FPK\remOps.cs" />
     <Compile Include="FPK\REMParser.cs" />
     <Compile Include="FPK\remReplace.cs" />

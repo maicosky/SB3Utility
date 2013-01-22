@@ -75,6 +75,12 @@
     <Compile Include="FormLog.Designer.cs">
       <DependentUpon>FormLog.cs</DependentUpon>
     </Compile>
+    <Compile Include="FormQuickAccess.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormQuickAccess.Designer.cs">
+      <DependentUpon>FormQuickAccess.cs</DependentUpon>
+    </Compile>
     <Compile Include="FormPlugins.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -117,6 +123,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FormLog.resx">
       <DependentUpon>FormLog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormQuickAccess.resx">
+      <DependentUpon>FormQuickAccess.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FormPlugins.resx">
       <DependentUpon>FormPlugins.cs</DependentUpon>
@@ -163,7 +172,12 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>if not exist irrKlang.NET4.dll copy ..\SB3UtilityIrrKlang\irrKlang.NET4.dll</PostBuildEvent>
+    <PostBuildEvent>REM if not exist msvcp100.dll copy "$(DevEnvDir)..\..\VC\redist\x64\Microsoft.VC100.CRT\*.*"
+if not exist irrKlang.NET4.dll copy ..\SB3UtilityIrrKlang\irrKlang.NET4.dll
+if not exist Jolt.dll (echo Jolt.dll missing! &amp;&amp; set errorlevel=-1)
+if not exist Jolt.Testing.GeneratedTypes.dll (echo Jolt.Testing.GeneratedTypes.dll missing! &amp;&amp; set errorlevel=-1)
+if not exist WeifenLuo.WinFormsUI.Docking.dll (echo WeifenLuo.WinFormsUI.Docking.dll missing! &amp;&amp; set errorlevel=-1)
+if not exist plugins\fbxsdk-2012.2.dll (echo plugins\fbxsdk-2012.2.dll missing! &amp;&amp; set errorlevel=-1)</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

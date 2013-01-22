@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using SlimDX;
-using System.Drawing;
 
 using SB3Utility;
 

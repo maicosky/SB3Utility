@@ -1139,8 +1139,8 @@ namespace SB3Utility
 						}
 					}
 
-					ImportedAnimation wsAnimation = new ImportedAnimation();
-					wsAnimation.TrackList = new List<ImportedAnimationTrack>();
+					ImportedKeyframedAnimation wsAnimation = new ImportedKeyframedAnimation();
+					wsAnimation.TrackList = new List<ImportedAnimationKeyframedTrack>();
 					ImportAnimationSet(colladaDoc.animations, wsAnimation);
 					if (wsAnimation.TrackList.Count > 0)
 					{
@@ -1167,7 +1167,7 @@ namespace SB3Utility
 				return decoded;
 			}
 
-			private void ImportAnimationSet(List<Document.Animation> animations, ImportedAnimation wsAnimation)
+			private void ImportAnimationSet(List<Document.Animation> animations, ImportedKeyframedAnimation wsAnimation)
 			{
 				try
 				{
@@ -1195,7 +1195,7 @@ namespace SB3Utility
 				}
 			}
 
-			private void ImportAnimation(List<Document.Animation> animations, ImportedAnimation wsAnimation)
+			private void ImportAnimation(List<Document.Animation> animations, ImportedKeyframedAnimation wsAnimation)
 			{
 				Dictionary<string, List<KeyValuePair<string, Document.Source>>> trackList = new Dictionary<string, List<KeyValuePair<string, Document.Source>>>();
 				for (int i = 0; i < animations.Count; i++)
@@ -1345,7 +1345,7 @@ namespace SB3Utility
 						keyframes[i].Translation = translate;
 					}
 
-					ImportedAnimationTrack importedTrack = new ImportedAnimationTrack();
+					ImportedAnimationKeyframedTrack importedTrack = new ImportedAnimationKeyframedTrack();
 					importedTrack.Name = track.Key;
 					importedTrack.Keyframes = keyframes;
 					wsAnimation.TrackList.Add(importedTrack);

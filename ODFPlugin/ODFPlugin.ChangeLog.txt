@@ -1,4 +1,8 @@
-﻿[0.4.42.24]
+﻿[0.4.42.32]
+  - fixed crashes for Renai+H : Replacing meshes from workspace (imported and from open ODFs)
+  - removed misleading error message having a mesh id twice during replacing meshes
+
+[0.4.42.24]
   - removed 8.3 filename export option for FBX
   - changed FBX export to common FBX exporter
   - added animation export/import

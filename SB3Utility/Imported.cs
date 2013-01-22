@@ -99,14 +99,27 @@ namespace SB3Utility
 		}
 	}
 
-	public class ImportedAnimation
+	public interface ImportedAnimation
 	{
-		public List<ImportedAnimationTrack> TrackList { get; set; }
+		// List<dynamic : ImportedAnimationTrack> TrackList { get; set; }
 	}
 
-	public class ImportedAnimationTrack
+	public abstract class ImportedAnimationTrackContainer<TrackType> : ImportedAnimation where TrackType : ImportedAnimationTrack
+	{
+		public List<TrackType> TrackList { get; set; }
+	}
+
+	public class ImportedKeyframedAnimation : ImportedAnimationTrackContainer<ImportedAnimationKeyframedTrack> { }
+
+	public class ImportedSampledAnimation : ImportedAnimationTrackContainer<ImportedAnimationSampledTrack> { }
+
+	public abstract class ImportedAnimationTrack
 	{
 		public string Name { get; set; }
+	}
+
+	public class ImportedAnimationKeyframedTrack : ImportedAnimationTrack
+	{
 		public ImportedAnimationKeyframe[] Keyframes { get; set; }
 	}
 
@@ -115,6 +128,13 @@ namespace SB3Utility
 		public Vector3 Scaling { get; set; }
 		public Quaternion Rotation { get; set; }
 		public Vector3 Translation { get; set; }
+	}
+
+	public class ImportedAnimationSampledTrack : ImportedAnimationTrack
+	{
+		public Vector3?[] Scalings;
+		public Quaternion?[] Rotations;
+		public Vector3?[] Translations;
 	}
 
 	public class ImportedMorph

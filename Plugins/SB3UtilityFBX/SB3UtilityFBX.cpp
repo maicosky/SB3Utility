@@ -122,7 +122,7 @@ namespace SB3Utility
 		float animationLen = (float)(resampleCount - 1);
 		for each (Tuple<ImportedAnimationTrack^, array<xaAnimationKeyframe^>^>^ tuple in extendedTrackList)
 		{
-			ImportedAnimationTrack^ wsTrack = tuple->Item1;
+			ImportedAnimationKeyframedTrack^ wsTrack = (ImportedAnimationKeyframedTrack^)tuple->Item1;
 			for (int i = 0; i < wsTrack->Keyframes->Length; i++)
 			{
 				ImportedAnimationKeyframe^ wsKeyframe = wsTrack->Keyframes[i];
@@ -194,7 +194,7 @@ namespace SB3Utility
 		float animationLen = (float)(resampleCount - 1);
 		for each (Tuple<ImportedAnimationTrack^, array<ImportedAnimationKeyframe^>^>^ tuple in extendedTrackList)
 		{
-			ImportedAnimationTrack^ wsTrack = tuple->Item1;
+			ImportedAnimationKeyframedTrack^ wsTrack = (ImportedAnimationKeyframedTrack^)tuple->Item1;
 			array<ImportedAnimationKeyframe^>^ interpolatedKeyframes = interpolationHelper->InterpolateTrack(wsTrack->Keyframes, resampleCount);
 			array<ImportedAnimationKeyframe^>^ newKeyframes = tuple->Item2;
 			interpolatedKeyframes->CopyTo(newKeyframes, 0);

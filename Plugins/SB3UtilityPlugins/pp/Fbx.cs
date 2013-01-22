@@ -13,7 +13,7 @@ namespace SB3Utility
 		public static void WorkspaceFbx(string path, string variable)
 		{
 			string importVar = Gui.Scripting.GetNextVariable("importFbx");
-			var importer = (Fbx.Importer)Gui.Scripting.RunScript(importVar + " = ImportFbx(path=\"" + path + "\", EulerFilter=" + (bool)Gui.Config["FbxImportAnimationEulerFilter"] + ", filterPrecision=" + (float)Gui.Config["FbxImportAnimationFilterPrecision"]+ ")");
+			var importer = (Fbx.Importer)Gui.Scripting.RunScript(importVar + " = ImportFbx(path=\"" + path + "\", EulerFilter=" + (bool)Gui.Config["FbxImportAnimationEulerFilter"] + ", filterPrecision=" + ((float)Gui.Config["FbxImportAnimationFilterPrecision"]).ToFloatString() + ")");
 
 			string editorVar = Gui.Scripting.GetNextVariable("importedEditor");
 			var editor = (ImportedEditor)Gui.Scripting.RunScript(editorVar + " = ImportedEditor(" + importVar + ")");
@@ -80,19 +80,21 @@ namespace SB3Utility
 
 		public static List<KeyValuePair<string, ImportedAnimationKeyframe[]>> CopyAnimation(WorkspaceAnimation wsAnimation, int resampleCount, bool linear)
 		{
-			List<KeyValuePair<string, ImportedAnimationKeyframe[]>> newTrackList = new List<KeyValuePair<string, ImportedAnimationKeyframe[]>>(wsAnimation.TrackList.Count);
+			List<ImportedAnimationKeyframedTrack> trackList = ((ImportedKeyframedAnimation)wsAnimation.importedAnimation).TrackList;
+			List<KeyValuePair<string, ImportedAnimationKeyframe[]>> newTrackList = new List<KeyValuePair<string, ImportedAnimationKeyframe[]>>(trackList.Count);
 			List<Tuple<ImportedAnimationTrack, ImportedAnimationKeyframe[]>> interpolateTracks = new List<Tuple<ImportedAnimationTrack, ImportedAnimationKeyframe[]>>();
-			foreach (var wsTrack in wsAnimation.TrackList)
+			foreach (var wsTrack in trackList)
 			{
 				if (!wsAnimation.isTrackEnabled(wsTrack))
 					continue;
+				ImportedAnimationKeyframe[] keyframes = ((ImportedAnimationKeyframedTrack)wsTrack).Keyframes;
 				ImportedAnimationKeyframe[] newKeyframes;
-				if (resampleCount < 0 || wsTrack.Keyframes.Length == resampleCount)
+				if (resampleCount < 0 || keyframes.Length == resampleCount)
 				{
-					newKeyframes = new ImportedAnimationKeyframe[wsTrack.Keyframes.Length];
-					for (int i = 0; i < wsTrack.Keyframes.Length; i++)
+					newKeyframes = new ImportedAnimationKeyframe[keyframes.Length];
+					for (int i = 0; i < keyframes.Length; i++)
 					{
-						ImportedAnimationKeyframe keyframe = wsTrack.Keyframes[i];
+						ImportedAnimationKeyframe keyframe = keyframes[i];
 						if (keyframe == null)
 							continue;
 
@@ -105,7 +107,7 @@ namespace SB3Utility
 				else
 				{
 					newKeyframes = new ImportedAnimationKeyframe[resampleCount];
-					if (wsTrack.Keyframes.Length < 1)
+					if (keyframes.Length < 1)
 					{
 						ImportedAnimationKeyframe keyframe = new ImportedAnimationKeyframe();
 						keyframe.Rotation = Quaternion.Identity;
@@ -132,13 +134,13 @@ namespace SB3Utility
 			return newTrackList;
 		}
 
-		public static void ReplaceAnimation(ReplaceAnimationMethod replaceMethod, int insertPos, List<KeyValuePair<string, ImportedAnimationKeyframe[]>> newTrackList, ImportedAnimation iAnim, Dictionary<string, ImportedAnimationTrack> animationNodeDic, bool negateQuaternionFlips)
+		public static void ReplaceAnimation(ReplaceAnimationMethod replaceMethod, int insertPos, List<KeyValuePair<string, ImportedAnimationKeyframe[]>> newTrackList, ImportedKeyframedAnimation iAnim, Dictionary<string, ImportedAnimationKeyframedTrack> animationNodeDic, bool negateQuaternionFlips)
 		{
 			if (replaceMethod == ReplaceAnimationMethod.Replace)
 			{
 				foreach (var newTrack in newTrackList)
 				{
-					ImportedAnimationTrack iTrack = new ImportedAnimationTrack();
+					ImportedAnimationKeyframedTrack iTrack = new ImportedAnimationKeyframedTrack();
 					iAnim.TrackList.Add(iTrack);
 					iTrack.Name = newTrack.Key;
 					iTrack.Keyframes = newTrack.Value;
@@ -148,7 +150,7 @@ namespace SB3Utility
 			{
 				foreach (var newTrack in newTrackList)
 				{
-					ImportedAnimationTrack animationNode;
+					ImportedAnimationKeyframedTrack animationNode;
 					ImportedAnimationKeyframe[] origKeyframes = FbxUtility.animationGetOriginalKeyframes(animationNodeDic, newTrack.Key, iAnim, out animationNode);
 					ImportedAnimationKeyframe[] destKeyframes;
 					int newEnd = insertPos + newTrack.Value.Length;
@@ -180,7 +182,7 @@ namespace SB3Utility
 			{
 				foreach (var newTrack in newTrackList)
 				{
-					ImportedAnimationTrack animationNode;
+					ImportedAnimationKeyframedTrack animationNode;
 					ImportedAnimationKeyframe[] origKeyframes = FbxUtility.animationGetOriginalKeyframes(animationNodeDic, newTrack.Key, iAnim, out animationNode);
 					ImportedAnimationKeyframe[] destKeyframes;
 					int newEnd = insertPos + newTrack.Value.Length;
@@ -205,7 +207,7 @@ namespace SB3Utility
 			{
 				foreach (var newTrack in newTrackList)
 				{
-					ImportedAnimationTrack animationNode;
+					ImportedAnimationKeyframedTrack animationNode;
 					ImportedAnimationKeyframe[] origKeyframes = FbxUtility.animationGetOriginalKeyframes(animationNodeDic, newTrack.Key, iAnim, out animationNode);
 					ImportedAnimationKeyframe[] destKeyframes = new ImportedAnimationKeyframe[origKeyframes.Length + newTrack.Value.Length];
 					FbxUtility.animationCopyKeyframeTransformArray(origKeyframes, 0, destKeyframes, 0, origKeyframes.Length);
@@ -222,10 +224,11 @@ namespace SB3Utility
 			{
 				foreach (var newTrack in iAnim.TrackList)
 				{
+					ImportedAnimationKeyframe[] keyframes = ((ImportedAnimationKeyframedTrack)newTrack).Keyframes;
 					Quaternion lastQ = Quaternion.Identity;
-					for (int i = 0, lastUsed_keyIndex = -1; i < newTrack.Keyframes.Length; i++)
+					for (int i = 0, lastUsed_keyIndex = -1; i < keyframes.Length; i++)
 					{
-						ImportedAnimationKeyframe iKeyframe = newTrack.Keyframes[i];
+						ImportedAnimationKeyframe iKeyframe = keyframes[i];
 						if (iKeyframe == null)
 							continue;
 
@@ -282,7 +285,7 @@ namespace SB3Utility
 			}
 		}
 
-		public static ImportedAnimationKeyframe[] animationGetOriginalKeyframes(Dictionary<string, ImportedAnimationTrack> animationNodeDic, string trackName, ImportedAnimation anim, out ImportedAnimationTrack animationNode)
+		public static ImportedAnimationKeyframe[] animationGetOriginalKeyframes(Dictionary<string, ImportedAnimationKeyframedTrack> animationNodeDic, string trackName, ImportedKeyframedAnimation anim, out ImportedAnimationKeyframedTrack animationNode)
 		{
 			ImportedAnimationKeyframe[] origKeyframes;
 			if (animationNodeDic.TryGetValue(trackName, out animationNode))
@@ -291,7 +294,7 @@ namespace SB3Utility
 			}
 			else
 			{
-				animationNode = new ImportedAnimationTrack();
+				animationNode = new ImportedAnimationKeyframedTrack();
 				anim.TrackList.Add(animationNode);
 				animationNode.Name = trackName;
 				origKeyframes = new ImportedAnimationKeyframe[0];

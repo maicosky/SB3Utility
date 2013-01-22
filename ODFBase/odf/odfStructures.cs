@@ -747,7 +747,10 @@ namespace ODFPlugin
 			odfBoneList boneList = new odfBoneList(Name, Id, Count);
 			boneList.MeshFrameId = new ObjectID(MeshFrameId);
 			boneList.SubmeshId = new ObjectID(SubmeshId);
-			boneList.AlwaysZero4 = (byte[])AlwaysZero4.Clone();
+			if (AlwaysZero4 != null)
+			{
+				boneList.AlwaysZero4 = (byte[])AlwaysZero4.Clone();
+			}
 			foreach (odfBone bone in this)
 			{
 				odfBone newBone = bone.Clone();

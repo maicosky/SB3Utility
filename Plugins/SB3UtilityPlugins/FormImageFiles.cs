@@ -116,7 +116,7 @@ namespace SB3Utility
 				if (Singleton == null)
 				{
 					Singleton = new FormImageFiles();
-					Gui.Docking.ShowDockContent(Singleton, Gui.Docking.DockFiles);
+					Gui.Docking.ShowDockContent(Singleton, Gui.Docking.DockFiles, ContentCategory.Others);
 				}
 
 				Singleton.AddImageFile(path);

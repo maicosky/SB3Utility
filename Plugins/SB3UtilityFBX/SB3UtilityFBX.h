@@ -69,7 +69,9 @@ namespace SB3Utility {
 			ImportedMaterial^ ImportMaterial(KFbxMesh* pMesh);
 			String^ ImportTexture(KFbxFileTexture* pTexture);
 			void ImportAnimation();
-			void ImportAnimation(KFbxAnimLayer* pAnimLayer, KFbxNode* pNode, ImportedAnimation^ wsAnimation);
+			void ImportAnimation(KFbxAnimLayer* pAnimLayer, KFbxNode* pNode, ImportedKeyframedAnimation^ wsAnimation);
+			void ImportAnimation(KFbxAnimLayer* pAnimLayer, KFbxNode* pNode, ImportedSampledAnimation^ wsAnimation);
+			Type^ GetAnimationType(KFbxAnimLayer* pAnimLayer, KFbxNode* pNode);
 			template <class T> void GetVector(KFbxLayerElementTemplate<T>* pLayerElement, T& pVector, int controlPointIdx, int vertexIdx);
 			void ImportMorph(KArrayTemplate<KFbxNode*>* pMeshArray);
 
@@ -135,6 +137,10 @@ namespace SB3Utility {
 			void ExportMesh(KFbxNode* pFrameNode, ImportedMesh^ meshList);
 			KFbxFileTexture* ExportTexture(ImportedTexture^ matTex, KFbxLayerElementTexture*& pTextureLayer, KFbxMesh* pMesh);
 			void ExportAnimations(int startKeyframe, int endKeyframe, bool linear, bool EulerFilter, float filterValue);
+			void ExportKeyframedAnimation(ImportedKeyframedAnimation^ parser, KString& kTakeName, int startKeyframe, int endKeyframe, bool linear, KFbxAnimCurveFilterUnroll* EulerFilter, float filterPrecision,
+					KFbxTypedProperty<fbxDouble3>& scale, KFbxTypedProperty<fbxDouble3>& rotate, KFbxTypedProperty<fbxDouble3>& translate, List<String^>^ pNotFound);
+			void ExportSampledAnimation(ImportedSampledAnimation^ parser, KString& kTakeName, int startKeyframe, int endKeyframe, bool linear, KFbxAnimCurveFilterUnroll* EulerFilter, float filterPrecision,
+					KFbxTypedProperty<fbxDouble3>& scale, KFbxTypedProperty<fbxDouble3>& rotate, KFbxTypedProperty<fbxDouble3>& translate, List<String^>^ pNotFound);
 		};
 
 	private:

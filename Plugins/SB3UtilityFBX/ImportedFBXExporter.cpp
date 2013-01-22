@@ -568,170 +568,21 @@ namespace SB3Utility
 		KFbxTypedProperty<fbxDouble3> rotate = KFbxProperty::Create(pScene, DTDouble3, InterpolationHelper::pRotateName);
 		KFbxTypedProperty<fbxDouble3> translate = KFbxProperty::Create(pScene, DTDouble3, InterpolationHelper::pTranslateName);
 
-		KFbxAnimCurveFilterUnroll* lFilter;
-		if (EulerFilter)
-		{
-			lFilter = new KFbxAnimCurveFilterUnroll();
-		}
+		KFbxAnimCurveFilterUnroll* lFilter = EulerFilter ? new KFbxAnimCurveFilterUnroll() : NULL;
 
 		for (int i = 0; i < importedAnimationList->Count; i++)
 		{
-			ImportedAnimation^ parser = importedAnimationList[i];
-			List<ImportedAnimationTrack^>^ pAnimationList = parser->TrackList;
-
 			KString kTakeName = KString("Take") + KString(i);
-			char* lTakeName = kTakeName.Buffer();
-
-			KTime lTime;
-			KFbxAnimStack* lAnimStack = KFbxAnimStack::Create(pScene, lTakeName);
-			KFbxAnimLayer* lAnimLayer = KFbxAnimLayer::Create(pScene, "Base Layer");
-			lAnimStack->AddMember(lAnimLayer);
-			InterpolationHelper^ interpolationHelper;
-			int resampleCount = 0;
-			if (startKeyframe >= 0)
+			bool keyframed = dynamic_cast<ImportedKeyframedAnimation^>(importedAnimationList[i]) != nullptr;
+			if (keyframed)
 			{
-				interpolationHelper = gcnew InterpolationHelper(pScene, lAnimLayer, linear ? KFbxAnimCurveDef::eINTERPOLATION_LINEAR : KFbxAnimCurveDef::eINTERPOLATION_CUBIC, &scale, &rotate, &translate);
-				for each (ImportedAnimationTrack^ track in pAnimationList)
-				{
-					if (track->Keyframes->Length > resampleCount)
-					{
-						resampleCount = track->Keyframes->Length;
-					}
-				}
+				ImportedKeyframedAnimation^ parser = (ImportedKeyframedAnimation^)importedAnimationList[i];
+				ExportKeyframedAnimation(parser, kTakeName, startKeyframe, endKeyframe, linear, lFilter, filterPrecision, scale, rotate, translate, pNotFound);
 			}
-
-			for (int j = 0; j < pAnimationList->Count; j++)
+			else
 			{
-				ImportedAnimationTrack^ keyframeList = pAnimationList[j];
-				String^ name = keyframeList->Name;
-				KFbxNode* pNode = NULL;
-				char* pName = NULL;
-				try
-				{
-					pName = Fbx::StringToCharArray(name);
-					pNode = pScene->GetRootNode()->FindChild(pName);
-				}
-				finally
-				{
-					Marshal::FreeHGlobal((IntPtr)pName);
-				}
-
-				if (pNode == NULL)
-				{
-					if (!pNotFound->Contains(name))
-					{
-						pNotFound->Add(name);
-					}
-				}
-				else
-				{
-					KFbxAnimCurve* lCurveSX = pNode->LclScaling.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_S_X, true);
-					KFbxAnimCurve* lCurveSY = pNode->LclScaling.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_S_Y, true);
-					KFbxAnimCurve* lCurveSZ = pNode->LclScaling.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_S_Z, true);
-					KFbxAnimCurve* lCurveRX = pNode->LclRotation.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_R_X, true);
-					KFbxAnimCurve* lCurveRY = pNode->LclRotation.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_R_Y, true);
-					KFbxAnimCurve* lCurveRZ = pNode->LclRotation.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_R_Z, true);
-					KFbxAnimCurve* lCurveTX = pNode->LclTranslation.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_T_X, true);
-					KFbxAnimCurve* lCurveTY = pNode->LclTranslation.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_T_Y, true);
-					KFbxAnimCurve* lCurveTZ = pNode->LclTranslation.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_T_Z, true);
-
-					lCurveSX->KeyModifyBegin();
-					lCurveSY->KeyModifyBegin();
-					lCurveSZ->KeyModifyBegin();
-					lCurveRX->KeyModifyBegin();
-					lCurveRY->KeyModifyBegin();
-					lCurveRZ->KeyModifyBegin();
-					lCurveTX->KeyModifyBegin();
-					lCurveTY->KeyModifyBegin();
-					lCurveTZ->KeyModifyBegin();
-
-					array<ImportedAnimationKeyframe^>^ keyframes = keyframeList->Keyframes;
-
-					double fps = 1.0 / 24;
-					int startAt, endAt;
-					if (startKeyframe >= 0)
-					{
-						bool resample = false;
-						if (keyframes->Length < resampleCount)
-						{
-							resample = true;
-						}
-						else
-						{
-							for (int k = 0; k < resampleCount; k++)
-							{
-								if (keyframes[k] == nullptr)
-								{
-									resample = true;
-									break;
-								}
-							}
-						}
-						if (resample)
-						{
-							keyframes = interpolationHelper->InterpolateTrack(keyframes, resampleCount);
-						}
-
-						startAt = startKeyframe;
-						endAt = endKeyframe < resampleCount ? endKeyframe : resampleCount - 1;
-					}
-					else
-					{
-						startAt = 0;
-						endAt = keyframes->Length - 1;
-					}
-
-					for (int k = startAt, keySetIndex = 0; k <= endAt; k++)
-					{
-						if (keyframes[k] == nullptr)
-							continue;
-
-						lTime.SetSecondDouble(fps * (k - startAt));
-
-						lCurveSX->KeyAdd(lTime);
-						lCurveSY->KeyAdd(lTime);
-						lCurveSZ->KeyAdd(lTime);
-						lCurveRX->KeyAdd(lTime);
-						lCurveRY->KeyAdd(lTime);
-						lCurveRZ->KeyAdd(lTime);
-						lCurveTX->KeyAdd(lTime);
-						lCurveTY->KeyAdd(lTime);
-						lCurveTZ->KeyAdd(lTime);
-
-						Vector3 rotation = Fbx::QuaternionToEuler(keyframes[k]->Rotation);
-						lCurveSX->KeySet(keySetIndex, lTime, keyframes[k]->Scaling.X);
-						lCurveSY->KeySet(keySetIndex, lTime, keyframes[k]->Scaling.Y);
-						lCurveSZ->KeySet(keySetIndex, lTime, keyframes[k]->Scaling.Z);
-						lCurveRX->KeySet(keySetIndex, lTime, rotation.X);
-						lCurveRY->KeySet(keySetIndex, lTime, rotation.Y);
-						lCurveRZ->KeySet(keySetIndex, lTime, rotation.Z);
-						lCurveTX->KeySet(keySetIndex, lTime, keyframes[k]->Translation.X);
-						lCurveTY->KeySet(keySetIndex, lTime, keyframes[k]->Translation.Y);
-						lCurveTZ->KeySet(keySetIndex, lTime, keyframes[k]->Translation.Z);
-						keySetIndex++;
-					}
-					lCurveSX->KeyModifyEnd();
-					lCurveSY->KeyModifyEnd();
-					lCurveSZ->KeyModifyEnd();
-					lCurveRX->KeyModifyEnd();
-					lCurveRY->KeyModifyEnd();
-					lCurveRZ->KeyModifyEnd();
-					lCurveTX->KeyModifyEnd();
-					lCurveTY->KeyModifyEnd();
-					lCurveTZ->KeyModifyEnd();
-
-					if (EulerFilter)
-					{
-						KFbxAnimCurve* lCurve [3];
-						lCurve[0] = lCurveRX;
-						lCurve[1] = lCurveRY;
-						lCurve[2] = lCurveRZ;
-						lFilter->Reset();
-						lFilter->SetTestForPath(true);
-						lFilter->SetQualityTolerance(filterPrecision);
-						lFilter->Apply((KFbxAnimCurve**)lCurve, 3);
-					}
-				}
+				ImportedSampledAnimation^ parser = (ImportedSampledAnimation^)importedAnimationList[i];
+				ExportSampledAnimation(parser, kTakeName, startKeyframe, endKeyframe, linear, lFilter, filterPrecision, scale, rotate, translate, pNotFound);
 			}
 		}
 
@@ -743,6 +594,352 @@ namespace SB3Utility
 				pNotFoundString += pNotFound[i] + ", ";
 			}
 			Report::ReportLog(pNotFoundString->Substring(0, pNotFoundString->Length - 2));
+		}
+	}
+
+	void Fbx::Exporter::ExportKeyframedAnimation(ImportedKeyframedAnimation^ parser, KString& kTakeName, int startKeyframe, int endKeyframe, bool linear, KFbxAnimCurveFilterUnroll* EulerFilter, float filterPrecision,
+			KFbxTypedProperty<fbxDouble3>& scale, KFbxTypedProperty<fbxDouble3>& rotate, KFbxTypedProperty<fbxDouble3>& translate, List<String^>^ pNotFound)
+	{
+		List<ImportedAnimationKeyframedTrack^>^ pAnimationList = parser->TrackList;
+
+		char* lTakeName = kTakeName.Buffer();
+
+		KTime lTime;
+		KFbxAnimStack* lAnimStack = KFbxAnimStack::Create(pScene, lTakeName);
+		KFbxAnimLayer* lAnimLayer = KFbxAnimLayer::Create(pScene, "Base Layer");
+		lAnimStack->AddMember(lAnimLayer);
+		InterpolationHelper^ interpolationHelper;
+		int resampleCount = 0;
+		if (startKeyframe >= 0)
+		{
+			interpolationHelper = gcnew InterpolationHelper(pScene, lAnimLayer, linear ? KFbxAnimCurveDef::eINTERPOLATION_LINEAR : KFbxAnimCurveDef::eINTERPOLATION_CUBIC, &scale, &rotate, &translate);
+			for each (ImportedAnimationKeyframedTrack^ track in pAnimationList)
+			{
+				if (track->Keyframes->Length > resampleCount)
+				{
+					resampleCount = track->Keyframes->Length;
+				}
+			}
+		}
+
+		for (int j = 0; j < pAnimationList->Count; j++)
+		{
+			ImportedAnimationKeyframedTrack^ keyframeList = pAnimationList[j];
+			String^ name = keyframeList->Name;
+			KFbxNode* pNode = NULL;
+			char* pName = NULL;
+			try
+			{
+				pName = Fbx::StringToCharArray(name);
+				pNode = pScene->GetRootNode()->FindChild(pName);
+			}
+			finally
+			{
+				Marshal::FreeHGlobal((IntPtr)pName);
+			}
+
+			if (pNode == NULL)
+			{
+				if (!pNotFound->Contains(name))
+				{
+					pNotFound->Add(name);
+				}
+			}
+			else
+			{
+				KFbxAnimCurve* lCurveSX = pNode->LclScaling.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_S_X, true);
+				KFbxAnimCurve* lCurveSY = pNode->LclScaling.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_S_Y, true);
+				KFbxAnimCurve* lCurveSZ = pNode->LclScaling.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_S_Z, true);
+				KFbxAnimCurve* lCurveRX = pNode->LclRotation.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_R_X, true);
+				KFbxAnimCurve* lCurveRY = pNode->LclRotation.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_R_Y, true);
+				KFbxAnimCurve* lCurveRZ = pNode->LclRotation.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_R_Z, true);
+				KFbxAnimCurve* lCurveTX = pNode->LclTranslation.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_T_X, true);
+				KFbxAnimCurve* lCurveTY = pNode->LclTranslation.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_T_Y, true);
+				KFbxAnimCurve* lCurveTZ = pNode->LclTranslation.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_T_Z, true);
+
+				lCurveSX->KeyModifyBegin();
+				lCurveSY->KeyModifyBegin();
+				lCurveSZ->KeyModifyBegin();
+				lCurveRX->KeyModifyBegin();
+				lCurveRY->KeyModifyBegin();
+				lCurveRZ->KeyModifyBegin();
+				lCurveTX->KeyModifyBegin();
+				lCurveTY->KeyModifyBegin();
+				lCurveTZ->KeyModifyBegin();
+
+				array<ImportedAnimationKeyframe^>^ keyframes = keyframeList->Keyframes;
+
+				double fps = 1.0 / 24;
+				int startAt, endAt;
+				if (startKeyframe >= 0)
+				{
+					bool resample = false;
+					if (keyframes->Length < resampleCount)
+					{
+						resample = true;
+					}
+					else
+					{
+						for (int k = 0; k < resampleCount; k++)
+						{
+							if (keyframes[k] == nullptr)
+							{
+								resample = true;
+								break;
+							}
+						}
+					}
+					if (resample)
+					{
+						keyframes = interpolationHelper->InterpolateTrack(keyframes, resampleCount);
+					}
+
+					startAt = startKeyframe;
+					endAt = endKeyframe < resampleCount ? endKeyframe : resampleCount - 1;
+				}
+				else
+				{
+					startAt = 0;
+					endAt = keyframes->Length - 1;
+				}
+
+				for (int k = startAt, keySetIndex = 0; k <= endAt; k++)
+				{
+					if (keyframes[k] == nullptr)
+						continue;
+
+					lTime.SetSecondDouble(fps * (k - startAt));
+
+					lCurveSX->KeyAdd(lTime);
+					lCurveSY->KeyAdd(lTime);
+					lCurveSZ->KeyAdd(lTime);
+					lCurveRX->KeyAdd(lTime);
+					lCurveRY->KeyAdd(lTime);
+					lCurveRZ->KeyAdd(lTime);
+					lCurveTX->KeyAdd(lTime);
+					lCurveTY->KeyAdd(lTime);
+					lCurveTZ->KeyAdd(lTime);
+
+					Vector3 rotation = Fbx::QuaternionToEuler(keyframes[k]->Rotation);
+					lCurveSX->KeySet(keySetIndex, lTime, keyframes[k]->Scaling.X);
+					lCurveSY->KeySet(keySetIndex, lTime, keyframes[k]->Scaling.Y);
+					lCurveSZ->KeySet(keySetIndex, lTime, keyframes[k]->Scaling.Z);
+					lCurveRX->KeySet(keySetIndex, lTime, rotation.X);
+					lCurveRY->KeySet(keySetIndex, lTime, rotation.Y);
+					lCurveRZ->KeySet(keySetIndex, lTime, rotation.Z);
+					lCurveTX->KeySet(keySetIndex, lTime, keyframes[k]->Translation.X);
+					lCurveTY->KeySet(keySetIndex, lTime, keyframes[k]->Translation.Y);
+					lCurveTZ->KeySet(keySetIndex, lTime, keyframes[k]->Translation.Z);
+					keySetIndex++;
+				}
+				lCurveSX->KeyModifyEnd();
+				lCurveSY->KeyModifyEnd();
+				lCurveSZ->KeyModifyEnd();
+				lCurveRX->KeyModifyEnd();
+				lCurveRY->KeyModifyEnd();
+				lCurveRZ->KeyModifyEnd();
+				lCurveTX->KeyModifyEnd();
+				lCurveTY->KeyModifyEnd();
+				lCurveTZ->KeyModifyEnd();
+
+				if (EulerFilter)
+				{
+					KFbxAnimCurve* lCurve [3];
+					lCurve[0] = lCurveRX;
+					lCurve[1] = lCurveRY;
+					lCurve[2] = lCurveRZ;
+					EulerFilter->Reset();
+					EulerFilter->SetTestForPath(true);
+					EulerFilter->SetQualityTolerance(filterPrecision);
+					EulerFilter->Apply((KFbxAnimCurve**)lCurve, 3);
+				}
+			}
+		}
+	}
+
+	void Fbx::Exporter::ExportSampledAnimation(ImportedSampledAnimation^ parser, KString& kTakeName, int startKeyframe, int endKeyframe, bool linear, KFbxAnimCurveFilterUnroll* EulerFilter, float filterPrecision,
+			KFbxTypedProperty<fbxDouble3>& scale, KFbxTypedProperty<fbxDouble3>& rotate, KFbxTypedProperty<fbxDouble3>& translate, List<String^>^ pNotFound)
+	{
+		List<ImportedAnimationSampledTrack^>^ pAnimationList = parser->TrackList;
+
+		char* lTakeName = kTakeName.Buffer();
+
+		KTime lTime;
+		KFbxAnimStack* lAnimStack = KFbxAnimStack::Create(pScene, lTakeName);
+		KFbxAnimLayer* lAnimLayer = KFbxAnimLayer::Create(pScene, "Base Layer");
+		lAnimStack->AddMember(lAnimLayer);
+		InterpolationHelper^ interpolationHelper;
+		int resampleCount = 0;
+		if (startKeyframe >= 0)
+		{
+			interpolationHelper = gcnew InterpolationHelper(pScene, lAnimLayer, linear ? KFbxAnimCurveDef::eINTERPOLATION_LINEAR : KFbxAnimCurveDef::eINTERPOLATION_CUBIC, &scale, &rotate, &translate);
+			for each (ImportedAnimationSampledTrack^ track in pAnimationList)
+			{
+				if (track->Scalings->Length > resampleCount)
+				{
+					resampleCount = track->Scalings->Length;
+				}
+				if (track->Rotations->Length > resampleCount)
+				{
+					resampleCount = track->Rotations->Length;
+				}
+				if (track->Translations->Length > resampleCount)
+				{
+					resampleCount = track->Translations->Length;
+				}
+			}
+		}
+
+		for (int j = 0; j < pAnimationList->Count; j++)
+		{
+			ImportedAnimationSampledTrack^ sampleList = pAnimationList[j];
+			String^ name = sampleList->Name;
+			KFbxNode* pNode = NULL;
+			char* pName = NULL;
+			try
+			{
+				pName = Fbx::StringToCharArray(name);
+				pNode = pScene->GetRootNode()->FindChild(pName);
+			}
+			finally
+			{
+				Marshal::FreeHGlobal((IntPtr)pName);
+			}
+
+			if (pNode == NULL)
+			{
+				if (!pNotFound->Contains(name))
+				{
+					pNotFound->Add(name);
+				}
+			}
+			else
+			{
+				KFbxAnimCurve* lCurveSX = pNode->LclScaling.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_S_X, true);
+				KFbxAnimCurve* lCurveSY = pNode->LclScaling.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_S_Y, true);
+				KFbxAnimCurve* lCurveSZ = pNode->LclScaling.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_S_Z, true);
+				KFbxAnimCurve* lCurveRX = pNode->LclRotation.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_R_X, true);
+				KFbxAnimCurve* lCurveRY = pNode->LclRotation.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_R_Y, true);
+				KFbxAnimCurve* lCurveRZ = pNode->LclRotation.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_R_Z, true);
+				KFbxAnimCurve* lCurveTX = pNode->LclTranslation.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_T_X, true);
+				KFbxAnimCurve* lCurveTY = pNode->LclTranslation.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_T_Y, true);
+				KFbxAnimCurve* lCurveTZ = pNode->LclTranslation.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_T_Z, true);
+
+				lCurveSX->KeyModifyBegin();
+				lCurveSY->KeyModifyBegin();
+				lCurveSZ->KeyModifyBegin();
+				lCurveRX->KeyModifyBegin();
+				lCurveRY->KeyModifyBegin();
+				lCurveRZ->KeyModifyBegin();
+				lCurveTX->KeyModifyBegin();
+				lCurveTY->KeyModifyBegin();
+				lCurveTZ->KeyModifyBegin();
+
+				double fps = 1.0 / 24;
+				int startAt, endAt;
+				if (startKeyframe >= 0)
+				{
+/*					bool resample = false;
+					if (keyframes->Length < resampleCount)
+					{
+						resample = true;
+					}
+					else
+					{
+						for (int k = 0; k < resampleCount; k++)
+						{
+							if (keyframes[k] == nullptr)
+							{
+								resample = true;
+								break;
+							}
+						}
+					}
+					if (resample)
+					{
+						keyframes = interpolationHelper->InterpolateTrack(keyframes, resampleCount);
+					}*/
+
+					startAt = startKeyframe;
+					endAt = endKeyframe < resampleCount ? endKeyframe : resampleCount - 1;
+				}
+				else
+				{
+					startAt = 0;
+					endAt = sampleList->Scalings->Length - 1;
+				}
+
+				for (int k = startAt, keySetIndex = 0; k <= endAt; k++)
+				{
+					if (!sampleList->Scalings[k].HasValue)
+						continue;
+
+					lTime.SetSecondDouble(fps * (k - startAt));
+
+					lCurveSX->KeyAdd(lTime);
+					lCurveSY->KeyAdd(lTime);
+					lCurveSZ->KeyAdd(lTime);
+
+					lCurveSX->KeySet(keySetIndex, lTime, sampleList->Scalings[k].Value.X);
+					lCurveSY->KeySet(keySetIndex, lTime, sampleList->Scalings[k].Value.Y);
+					lCurveSZ->KeySet(keySetIndex, lTime, sampleList->Scalings[k].Value.Z);
+					keySetIndex++;
+				}
+				for (int k = startAt, keySetIndex = 0; k <= endAt; k++)
+				{
+					if (!sampleList->Rotations[k].HasValue)
+						continue;
+
+					lTime.SetSecondDouble(fps * (k - startAt));
+
+					lCurveRX->KeyAdd(lTime);
+					lCurveRY->KeyAdd(lTime);
+					lCurveRZ->KeyAdd(lTime);
+
+					Vector3 rotation = Fbx::QuaternionToEuler(sampleList->Rotations[k].Value);
+					lCurveRX->KeySet(keySetIndex, lTime, rotation.X);
+					lCurveRY->KeySet(keySetIndex, lTime, rotation.Y);
+					lCurveRZ->KeySet(keySetIndex, lTime, rotation.Z);
+					keySetIndex++;
+				}
+				for (int k = startAt, keySetIndex = 0; k <= endAt; k++)
+				{
+					if (!sampleList->Translations[k].HasValue)
+						continue;
+
+					lTime.SetSecondDouble(fps * (k - startAt));
+
+					lCurveTX->KeyAdd(lTime);
+					lCurveTY->KeyAdd(lTime);
+					lCurveTZ->KeyAdd(lTime);
+
+					lCurveTX->KeySet(keySetIndex, lTime, sampleList->Translations[k].Value.X);
+					lCurveTY->KeySet(keySetIndex, lTime, sampleList->Translations[k].Value.Y);
+					lCurveTZ->KeySet(keySetIndex, lTime, sampleList->Translations[k].Value.Z);
+					keySetIndex++;
+				}
+				lCurveSX->KeyModifyEnd();
+				lCurveSY->KeyModifyEnd();
+				lCurveSZ->KeyModifyEnd();
+				lCurveRX->KeyModifyEnd();
+				lCurveRY->KeyModifyEnd();
+				lCurveRZ->KeyModifyEnd();
+				lCurveTX->KeyModifyEnd();
+				lCurveTY->KeyModifyEnd();
+				lCurveTZ->KeyModifyEnd();
+
+				if (EulerFilter)
+				{
+					KFbxAnimCurve* lCurve [3];
+					lCurve[0] = lCurveRX;
+					lCurve[1] = lCurveRY;
+					lCurve[2] = lCurveRZ;
+					EulerFilter->Reset();
+					EulerFilter->SetTestForPath(true);
+					EulerFilter->SetQualityTolerance(filterPrecision);
+					EulerFilter->Apply((KFbxAnimCurve**)lCurve, 3);
+				}
+			}
 		}
 	}
 }

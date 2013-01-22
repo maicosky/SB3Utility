@@ -256,6 +256,19 @@ namespace SB3Utility
 			}
 		}
 
+		public static xaAnimationTrack FindTrack(string name, xaParser parser)
+		{
+			foreach (xaAnimationTrack track in parser.AnimationSection.TrackList)
+			{
+				if (track.Name == name)
+				{
+					return track;
+				}
+			}
+
+			return null;
+		}
+
 		public static void animationNormalizeTrack(xaAnimationKeyframe[] origKeyframes, xaAnimationKeyframe[] destKeyframes, int count)
 		{
 			xaAnimationKeyframe keyframeToCopy;

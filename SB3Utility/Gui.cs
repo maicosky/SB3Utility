@@ -11,7 +11,7 @@ namespace SB3Utility
 {
 	public static class Gui
 	{
-		public static string Version = "0.4.42.31";
+		public static string Version = "0.4.42.32alpha6";
 
 		public static IScripting Scripting { get; set; }
 		public static IDocking Docking { get; set; }
@@ -42,9 +42,17 @@ namespace SB3Utility
 		DockContent DockScript { get; }
 		Dictionary<Type, List<DockContent>> DockContents { get; }
 
-		void ShowDockContent(DockContent content, DockContent defaultDock);
+		void ShowDockContent(DockContent content, DockContent defaultDock, ContentCategory category);
 		void DockDragEnter(object sender, DragEventArgs e);
 		void DockDragDrop(object sender, DragEventArgs e);
+	}
+
+	public enum ContentCategory
+	{
+		Archives,
+		Meshes,
+		Animations,
+		Others
 	}
 
 	public interface IImageControl

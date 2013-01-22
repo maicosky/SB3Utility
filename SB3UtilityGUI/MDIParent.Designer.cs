@@ -50,6 +50,7 @@
 			this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
 			this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.viewQuickAccessToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.viewFilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.viewEditorsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.viewImageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -59,6 +60,10 @@
 			this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.pluginsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.fbxImportAnimationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.eulerFilterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.filterPrecisionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripEditTextBoxFilterPrecision = new SB3Utility.ToolStripEditTextBox();
 			this.windowsMenu = new System.Windows.Forms.ToolStripMenuItem();
 			this.helpMenu = new System.Windows.Forms.ToolStripMenuItem();
 			this.contentsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -68,10 +73,6 @@
 			this.toolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
 			this.dockPanel = new WeifenLuo.WinFormsUI.Docking.DockPanel();
 			this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-			this.fbxImportAnimationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.filterPrecisionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.eulerFilterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripEditTextBoxFilterPrecision = new SB3Utility.ToolStripEditTextBox();
 			this.menuStrip.SuspendLayout();
 			this.statusStrip.SuspendLayout();
 			this.SuspendLayout();
@@ -109,26 +110,27 @@
 			this.openToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Black;
 			this.openToolStripMenuItem.Name = "openToolStripMenuItem";
 			this.openToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-			this.openToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
+			this.openToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
 			this.openToolStripMenuItem.Text = "&Open";
 			this.openToolStripMenuItem.Click += new System.EventHandler(this.OpenFile);
 			// 
 			// toolStripSeparator3
 			// 
 			this.toolStripSeparator3.Name = "toolStripSeparator3";
-			this.toolStripSeparator3.Size = new System.Drawing.Size(137, 6);
+			this.toolStripSeparator3.Size = new System.Drawing.Size(149, 6);
 			// 
 			// exitToolStripMenuItem
 			// 
 			this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
 			this.exitToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F4)));
-			this.exitToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
+			this.exitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
 			this.exitToolStripMenuItem.Text = "E&xit";
 			this.exitToolStripMenuItem.Click += new System.EventHandler(this.ExitToolsStripMenuItem_Click);
 			// 
 			// viewToolStripMenuItem
 			// 
 			this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.viewQuickAccessToolStripMenuItem,
             this.viewFilesToolStripMenuItem,
             this.viewEditorsToolStripMenuItem,
             this.viewImageToolStripMenuItem,
@@ -139,46 +141,53 @@
 			this.viewToolStripMenuItem.Size = new System.Drawing.Size(41, 20);
 			this.viewToolStripMenuItem.Text = "&View";
 			// 
+			// viewQuickAccessToolStripMenuItem
+			// 
+			this.viewQuickAccessToolStripMenuItem.CheckOnClick = true;
+			this.viewQuickAccessToolStripMenuItem.Name = "viewQuickAccessToolStripMenuItem";
+			this.viewQuickAccessToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.viewQuickAccessToolStripMenuItem.Text = "&Quick Access";
+			// 
 			// viewFilesToolStripMenuItem
 			// 
 			this.viewFilesToolStripMenuItem.CheckOnClick = true;
 			this.viewFilesToolStripMenuItem.Name = "viewFilesToolStripMenuItem";
-			this.viewFilesToolStripMenuItem.Size = new System.Drawing.Size(119, 22);
+			this.viewFilesToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
 			this.viewFilesToolStripMenuItem.Text = "&Files";
 			// 
 			// viewEditorsToolStripMenuItem
 			// 
 			this.viewEditorsToolStripMenuItem.CheckOnClick = true;
 			this.viewEditorsToolStripMenuItem.Name = "viewEditorsToolStripMenuItem";
-			this.viewEditorsToolStripMenuItem.Size = new System.Drawing.Size(119, 22);
+			this.viewEditorsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
 			this.viewEditorsToolStripMenuItem.Text = "&Editors";
 			// 
 			// viewImageToolStripMenuItem
 			// 
 			this.viewImageToolStripMenuItem.CheckOnClick = true;
 			this.viewImageToolStripMenuItem.Name = "viewImageToolStripMenuItem";
-			this.viewImageToolStripMenuItem.Size = new System.Drawing.Size(119, 22);
+			this.viewImageToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
 			this.viewImageToolStripMenuItem.Text = "&Image";
 			// 
 			// viewRendererToolStripMenuItem
 			// 
 			this.viewRendererToolStripMenuItem.CheckOnClick = true;
 			this.viewRendererToolStripMenuItem.Name = "viewRendererToolStripMenuItem";
-			this.viewRendererToolStripMenuItem.Size = new System.Drawing.Size(119, 22);
+			this.viewRendererToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
 			this.viewRendererToolStripMenuItem.Text = "&Renderer";
 			// 
 			// viewLogToolStripMenuItem
 			// 
 			this.viewLogToolStripMenuItem.CheckOnClick = true;
 			this.viewLogToolStripMenuItem.Name = "viewLogToolStripMenuItem";
-			this.viewLogToolStripMenuItem.Size = new System.Drawing.Size(119, 22);
+			this.viewLogToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
 			this.viewLogToolStripMenuItem.Text = "&Log";
 			// 
 			// viewScriptToolStripMenuItem
 			// 
 			this.viewScriptToolStripMenuItem.CheckOnClick = true;
 			this.viewScriptToolStripMenuItem.Name = "viewScriptToolStripMenuItem";
-			this.viewScriptToolStripMenuItem.Size = new System.Drawing.Size(119, 22);
+			this.viewScriptToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
 			this.viewScriptToolStripMenuItem.Text = "&Script";
 			// 
 			// toolsToolStripMenuItem
@@ -202,6 +211,37 @@
 			this.pluginsToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
 			this.pluginsToolStripMenuItem.Text = "&Plugins";
 			this.pluginsToolStripMenuItem.Click += new System.EventHandler(this.settingsPluginsToolStripMenuItem_Click);
+			// 
+			// fbxImportAnimationToolStripMenuItem
+			// 
+			this.fbxImportAnimationToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.eulerFilterToolStripMenuItem,
+            this.filterPrecisionToolStripMenuItem});
+			this.fbxImportAnimationToolStripMenuItem.Name = "fbxImportAnimationToolStripMenuItem";
+			this.fbxImportAnimationToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
+			this.fbxImportAnimationToolStripMenuItem.Text = "Fbx Import Animation";
+			// 
+			// eulerFilterToolStripMenuItem
+			// 
+			this.eulerFilterToolStripMenuItem.Checked = global::SB3Utility.Properties.Settings.Default.FbxImportAnimationEulerFilter;
+			this.eulerFilterToolStripMenuItem.CheckOnClick = true;
+			this.eulerFilterToolStripMenuItem.Name = "eulerFilterToolStripMenuItem";
+			this.eulerFilterToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+			this.eulerFilterToolStripMenuItem.Text = "Euler Filter";
+			// 
+			// filterPrecisionToolStripMenuItem
+			// 
+			this.filterPrecisionToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripEditTextBoxFilterPrecision});
+			this.filterPrecisionToolStripMenuItem.Name = "filterPrecisionToolStripMenuItem";
+			this.filterPrecisionToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+			this.filterPrecisionToolStripMenuItem.Text = "Filter Precision";
+			// 
+			// toolStripEditTextBoxFilterPrecision
+			// 
+			this.toolStripEditTextBoxFilterPrecision.Name = "toolStripEditTextBoxFilterPrecision";
+			this.toolStripEditTextBoxFilterPrecision.Size = new System.Drawing.Size(100, 21);
+			this.toolStripEditTextBoxFilterPrecision.Text = "0.25";
 			// 
 			// windowsMenu
 			// 
@@ -317,37 +357,6 @@
 			this.openFileDialog1.Multiselect = true;
 			this.openFileDialog1.RestoreDirectory = true;
 			// 
-			// fbxImportAnimationToolStripMenuItem
-			// 
-			this.fbxImportAnimationToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.eulerFilterToolStripMenuItem,
-            this.filterPrecisionToolStripMenuItem});
-			this.fbxImportAnimationToolStripMenuItem.Name = "fbxImportAnimationToolStripMenuItem";
-			this.fbxImportAnimationToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
-			this.fbxImportAnimationToolStripMenuItem.Text = "Fbx Import Animation";
-			// 
-			// filterPrecisionToolStripMenuItem
-			// 
-			this.filterPrecisionToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripEditTextBoxFilterPrecision});
-			this.filterPrecisionToolStripMenuItem.Name = "filterPrecisionToolStripMenuItem";
-			this.filterPrecisionToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-			this.filterPrecisionToolStripMenuItem.Text = "Filter Precision";
-			// 
-			// eulerFilterToolStripMenuItem
-			// 
-			this.eulerFilterToolStripMenuItem.Checked = global::SB3Utility.Properties.Settings.Default.FbxImportAnimationEulerFilter;
-			this.eulerFilterToolStripMenuItem.CheckOnClick = true;
-			this.eulerFilterToolStripMenuItem.Name = "eulerFilterToolStripMenuItem";
-			this.eulerFilterToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-			this.eulerFilterToolStripMenuItem.Text = "Euler Filter";
-			// 
-			// toolStripEditTextBoxFilterPrecision
-			// 
-			this.toolStripEditTextBoxFilterPrecision.Name = "toolStripEditTextBoxFilterPrecision";
-			this.toolStripEditTextBoxFilterPrecision.Size = new System.Drawing.Size(100, 21);
-			this.toolStripEditTextBoxFilterPrecision.Text = "0.25";
-			// 
 			// MDIParent
 			// 
 			this.AllowDrop = true;
@@ -405,6 +414,7 @@
 		private System.Windows.Forms.ToolStripMenuItem eulerFilterToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem filterPrecisionToolStripMenuItem;
 		private ToolStripEditTextBox toolStripEditTextBoxFilterPrecision;
+		private System.Windows.Forms.ToolStripMenuItem viewQuickAccessToolStripMenuItem;
 	}
 }
 

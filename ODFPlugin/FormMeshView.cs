@@ -231,7 +231,7 @@ namespace ODFPlugin
 				Gui.Docking.DockFiles.Hide();
 				Gui.Docking.DockEditors.Show(panel, DockState.Document);
 			}
-			Gui.Docking.ShowDockContent(this, Gui.Docking.DockEditors);
+			Gui.Docking.ShowDockContent(this, Gui.Docking.DockEditors, this is FormAnimView ? ContentCategory.Animations : ContentCategory.Meshes);
 
 			List<DockContent> formList;
 			if (Gui.Docking.DockContents.TryGetValue(this is FormAnimView ? typeof(FormAnimView) : typeof(FormMeshView), out formList))
@@ -2273,7 +2273,7 @@ namespace ODFPlugin
 									Gui.Scripting.RunScript(source.Variable + ".setMorphKeyframeEnabled(morphId=" + (int)source.Id + ", id=" + wsMorph.KeyframeList.IndexOf(keyframe) + ", enabled=false)");
 								}
 							}
-							Gui.Scripting.RunScript(EditorVar + ".ReplaceMorph(morph=" + source.Variable + ".Morphs[" + (int)source.Id + "], destMorphName=\"" + dragOptions.textBoxName.Text + "\", newName=\"" + dragOptions.textBoxNewName.Text + "\", replaceNormals=" + dragOptions.radioButtonReplaceNormalsYes.Checked + ", minSquaredDistance=" + dragOptions.numericUpDownMinimumDistanceSquared.Value + ")");
+							Gui.Scripting.RunScript(EditorVar + ".ReplaceMorph(morph=" + source.Variable + ".Morphs[" + (int)source.Id + "], destMorphName=\"" + dragOptions.textBoxName.Text + "\", newName=\"" + dragOptions.textBoxNewName.Text + "\", replaceNormals=" + dragOptions.radioButtonReplaceNormalsYes.Checked + ", minSquaredDistance=" + ((float)dragOptions.numericUpDownMinimumDistanceSquared.Value).ToFloatString() + ")");
 //							UnloadMorphs();
 							InitMorphs();
 						}
@@ -2892,22 +2892,28 @@ namespace ODFPlugin
 				DragSource source = (DragSource)node.Tag;
 				if (source.Type == typeof(WorkspaceAnimation))
 				{
+					var srcEditor = (ImportedEditor)Gui.Scripting.Variables[source.Variable];
+					WorkspaceAnimation wsAnimation = srcEditor.Animations[(int)source.Id];
+					if (!(wsAnimation.importedAnimation is ImportedKeyframedAnimation))
+					{
+						Report.ReportLog("The animation has incompatible keyframes.");
+						return;
+					}
 					using (var dragOptions = new FormAnimViewDragDrop(Editor, false))
 					{
 						odfANIMSection anim = (odfANIMSection)dataGridViewAnimationClip.SelectedRows[0].Tag;
 						dragOptions.textBoxTargetAnimationClip.Text = anim.Name == String.Empty ? "ANIM" : anim.Name;
-						var srcEditor = (ImportedEditor)Gui.Scripting.Variables[source.Variable];
 						dragOptions.numericResample.Value = -1;
 						dragOptions.comboBoxMethod.SelectedIndex = (int)ReplaceAnimationMethod.Replace;
 						if (dragOptions.ShowDialog() == DialogResult.OK)
 						{
 							// repeating only final choices for repeatability of the script
-							WorkspaceAnimation wsAnimation = srcEditor.Animations[(int)source.Id];
-							foreach (ImportedAnimationTrack track in wsAnimation.TrackList)
+							List<ImportedAnimationKeyframedTrack> trackList = ((ImportedKeyframedAnimation)wsAnimation.importedAnimation).TrackList;
+							foreach (ImportedAnimationKeyframedTrack track in trackList)
 							{
 								if (!wsAnimation.isTrackEnabled(track))
 								{
-									Gui.Scripting.RunScript(source.Variable + ".setTrackEnabled(animationId=" + (int)source.Id + ", id=" + wsAnimation.TrackList.IndexOf(track) + ", enabled=false)");
+									Gui.Scripting.RunScript(source.Variable + ".setTrackEnabled(animationId=" + (int)source.Id + ", id=" + trackList.IndexOf(track) + ", enabled=false)");
 								}
 							}
 							Gui.Scripting.RunScript(EditorVar + ".ReplaceAnimation(animation=" + source.Variable + ".Animations[" + (int)source.Id + "], resampleCount=" + dragOptions.numericResample.Value + ", linear=" + dragOptions.radioButtonInterpolationLinear.Checked + ", method=\"" + dragOptions.comboBoxMethod.SelectedItem + "\", clip=\"" + dragOptions.textBoxTargetAnimationClip.Text + "\", insertPos=" + dragOptions.numericPosition.Value + ", negateQuaternionFlips=" + dragOptions.checkBoxNegateQuaternionFlips.Checked + ")");
@@ -3608,8 +3614,8 @@ namespace ODFPlugin
 				Int32.TryParse(textBoxKeyframeRange.Text.Substring(textBoxKeyframeRange.Text.LastIndexOf('-') + 1), out endKeyframe);
 				bool linear = checkBoxInterpolationLinear.Checked;
 				bool EulerFilter = checkBoxEulerFilter.Checked;
-				double filterPrecision = 0.25;
-				Double.TryParse(textBoxEulerFilterPrecision.Text, out filterPrecision);
+				float filterPrecision = 0.25f;
+				Single.TryParse(textBoxEulerFilterPrecision.Text, out filterPrecision);
 
 				Report.ReportLog("Started exporting to " + comboBoxMeshExportFormat.SelectedItem + " format...");
 				Application.DoEvents();
@@ -3620,19 +3626,19 @@ namespace ODFPlugin
 					Gui.Scripting.RunScript("ExportMqo(parser=" + ParserVar + ", meshNames=" + meshNames + ", dirPath=\"" + dir.FullName + "\", singleMqo=" + checkBoxMeshExportMqoSingleFile.Checked + ", worldCoords=" + checkBoxMeshExportMqoWorldCoords.Checked + ")");
 					break;
 				case MeshExportFormat.ColladaFbx:
-					Gui.Scripting.RunScript("ExportFbx(parser=" + ParserVar + ", meshNames=" + meshNames + ", animations=" + odaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + EulerFilter + ", filterPrecision=" + filterPrecision + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".dae") + "\", exportFormat=\".dae\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", odaSkeleton=" + checkBoxODAskeleton.Checked + ")");
+					Gui.Scripting.RunScript("ExportFbx(parser=" + ParserVar + ", meshNames=" + meshNames + ", animations=" + odaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + EulerFilter + ", filterPrecision=" + filterPrecision.ToFloatString() + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".dae") + "\", exportFormat=\".dae\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", odaSkeleton=" + checkBoxODAskeleton.Checked + ")");
 					break;
 				case MeshExportFormat.Fbx:
-					Gui.Scripting.RunScript("ExportFbx(parser=" + ParserVar + ", meshNames=" + meshNames + ", animations=" + odaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + EulerFilter + ", filterPrecision=" + filterPrecision + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".fbx") + "\", exportFormat=\".fbx\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", odaSkeleton=" + checkBoxODAskeleton.Checked + ")");
+					Gui.Scripting.RunScript("ExportFbx(parser=" + ParserVar + ", meshNames=" + meshNames + ", animations=" + odaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + EulerFilter + ", filterPrecision=" + filterPrecision.ToFloatString() + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".fbx") + "\", exportFormat=\".fbx\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", odaSkeleton=" + checkBoxODAskeleton.Checked + ")");
 					break;
 				case MeshExportFormat.Dxf:
-					Gui.Scripting.RunScript("ExportFbx(parser=" + ParserVar + ", meshNames=" + meshNames + ", animations=" + odaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + EulerFilter + ", filterPrecision=" + filterPrecision + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".dxf") + "\", exportFormat=\".dxf\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", odaSkeleton=" + checkBoxODAskeleton.Checked + ")");
+					Gui.Scripting.RunScript("ExportFbx(parser=" + ParserVar + ", meshNames=" + meshNames + ", animations=" + odaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + EulerFilter + ", filterPrecision=" + filterPrecision.ToFloatString() + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".dxf") + "\", exportFormat=\".dxf\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", odaSkeleton=" + checkBoxODAskeleton.Checked + ")");
 					break;
 				case MeshExportFormat._3ds:
-					Gui.Scripting.RunScript("ExportFbx(parser=" + ParserVar + ", meshNames=" + meshNames + ", animations=" + odaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + EulerFilter + ", filterPrecision=" + filterPrecision + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".3ds") + "\", exportFormat=\".3ds\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", odaSkeleton=" + checkBoxODAskeleton.Checked + ")");
+					Gui.Scripting.RunScript("ExportFbx(parser=" + ParserVar + ", meshNames=" + meshNames + ", animations=" + odaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + EulerFilter + ", filterPrecision=" + filterPrecision.ToFloatString() + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".3ds") + "\", exportFormat=\".3ds\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", odaSkeleton=" + checkBoxODAskeleton.Checked + ")");
 					break;
 				case MeshExportFormat.Obj:
-					Gui.Scripting.RunScript("ExportFbx(parser=" + ParserVar + ", meshNames=" + meshNames + ", animations=" + odaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + EulerFilter + ", filterPrecision=" + filterPrecision + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".obj") + "\", exportFormat=\".obj\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", odaSkeleton=" + checkBoxODAskeleton.Checked + ")");
+					Gui.Scripting.RunScript("ExportFbx(parser=" + ParserVar + ", meshNames=" + meshNames + ", animations=" + odaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + EulerFilter + ", filterPrecision=" + filterPrecision.ToFloatString() + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".obj") + "\", exportFormat=\".obj\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", odaSkeleton=" + checkBoxODAskeleton.Checked + ")");
 					break;
 				default:
 					throw new Exception("Unexpected ExportFormat");
@@ -3728,7 +3734,7 @@ namespace ODFPlugin
 				{
 					if (normals.ShowDialog() == DialogResult.OK)
 					{
-						Gui.Scripting.RunScript(EditorVar + ".CalculateNormals(idx=" + loadedMesh + ", threshold=" + normals.numericThreshold.Value + ")");
+						Gui.Scripting.RunScript(EditorVar + ".CalculateNormals(idx=" + loadedMesh + ", threshold=" + ((float)normals.numericThreshold.Value).ToFloatString() + ")");
 
 						RecreateRenderObjects();
 					}

@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Configuration;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 using System.IO;
 using System.Reflection;
-using System.Xml;
+using System.Threading;
 using WeifenLuo.WinFormsUI.Docking;
 
 namespace SB3Utility
@@ -28,6 +23,7 @@ namespace SB3Utility
 		public event EventHandler<DockContentEventArgs> DockContentAdded;
 		public event EventHandler<DockContentEventArgs> DockContentRemoved;
 
+		public DockContent DockQuickAccess { get; protected set; }
 		public DockContent DockFiles { get; protected set; }
 		public DockContent DockEditors { get; protected set; }
 		public DockContent DockImage { get { return dockImage; } }
@@ -40,6 +36,8 @@ namespace SB3Utility
 		{
 			try
 			{
+				Thread.CurrentThread.CurrentCulture = Utility.CultureUS;
+
 				InitializeComponent();
 				this.Text += Gui.Version;
 
@@ -47,6 +45,7 @@ namespace SB3Utility
 
 				openFileDialog1.Filter = "All Files (*.*)|*.*";
 
+				DockQuickAccess = new FormQuickAccess();
 				DockFiles = new DockContent();
 				DockEditors = new DockContent();
 				DockContents = new Dictionary<Type, List<DockContent>>();
@@ -110,6 +109,9 @@ namespace SB3Utility
 				SetDockDefault(DockEditors, "Editors");
 				DockEditors.Show(DockFiles.Pane, DockAlignment.Right, 0.7);
 
+				SetDockDefault(DockQuickAccess, "Quick Access");
+				DockQuickAccess.Show(DockFiles.Pane, DockAlignment.Top, 0.3);
+
 				SetDockDefault(DockRenderer, "Renderer");
 				DockRenderer.Show(dockPanel, DockState.DockRight);
 
@@ -131,6 +133,10 @@ namespace SB3Utility
 					new Tuple<DockContent, ToolStripMenuItem>(DockLog, viewLogToolStripMenuItem),
 					new Tuple<DockContent, ToolStripMenuItem>(DockScript, viewScriptToolStripMenuItem) };
 
+				if (!(viewQuickAccessToolStripMenuItem.Checked = (bool)Gui.Config["QuickAccess"]))
+				{
+					DockQuickAccess.Hide();
+				}
 				viewFilesToolStripMenuItem.Checked = true;
 				viewEditorsToolStripMenuItem.Checked = true;
 				viewRendererToolStripMenuItem.Checked = true;
@@ -138,6 +144,7 @@ namespace SB3Utility
 				viewLogToolStripMenuItem.Checked = true;
 				viewScriptToolStripMenuItem.Checked = true;
 
+				viewQuickAccessToolStripMenuItem.CheckedChanged += viewQuickAccessToolStripMenuItem_CheckedChanged;
 				viewFilesToolStripMenuItem.CheckedChanged += new EventHandler(viewFilesToolStripMenuItem_CheckedChanged);
 				viewEditorsToolStripMenuItem.CheckedChanged += new EventHandler(viewEditorsToolStripMenuItem_CheckedChanged);
 				viewRendererToolStripMenuItem.CheckedChanged += new EventHandler(viewRendererToolStripMenuItem_CheckedChanged);
@@ -153,6 +160,7 @@ namespace SB3Utility
 					item.ShortcutKeys = (Keys)conv.ConvertFromString(tool[2]);
 					toolsToolStripMenuItem.DropDownItems.Add(item);
 				}
+
 #if DEBUG
 				Test();
 #endif
@@ -287,7 +295,7 @@ namespace SB3Utility
 			}
 		}
 
-		public void ShowDockContent(DockContent content, DockContent defaultDock)
+		public void ShowDockContent(DockContent content, DockContent defaultDock, ContentCategory category)
 		{
 			try
 			{
@@ -321,6 +329,8 @@ namespace SB3Utility
 						defaultDock.Hide();
 					}
 				}
+
+				((FormQuickAccess)DockQuickAccess).RegisterOpenFile(content, category);
 			}
 			catch (Exception ex)
 			{
@@ -475,6 +485,26 @@ namespace SB3Utility
 				else
 				{
 					Report.ReportLog("Couldn't find help file: " + path);
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		void viewQuickAccessToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				Gui.Config["QuickAccess"] = viewQuickAccessToolStripMenuItem.Checked;
+				if (viewQuickAccessToolStripMenuItem.Checked)
+				{
+					DockQuickAccess.Show();
+				}
+				else
+				{
+					DockQuickAccess.Hide();
 				}
 			}
 			catch (Exception ex)

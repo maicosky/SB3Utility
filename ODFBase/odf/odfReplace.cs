@@ -199,6 +199,10 @@ namespace ODFPlugin
 			odfMesh frameMesh = odf.FindMeshListSome(frame.MeshId, parser.MeshSection);
 			if (frameMesh != null)
 			{
+				if (parser.UsedIDs == null) // prevent misleading error message
+				{
+					parser.CollectObjectIDs();
+				}
 				newMesh.Id = frameMesh.Id;
 				newMesh.Name = frameMesh.Name;
 				parser.MeshSection.InsertChild(parser.MeshSection.IndexOf(frameMesh), newMesh);

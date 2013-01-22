@@ -157,28 +157,35 @@ namespace SB3Utility
 				Report.ReportLog("The .xa file doesn't have an animation section. Skipping this animation");
 				return;
 			}
+			if (!(wsAnimation.importedAnimation is ImportedKeyframedAnimation))
+			{
+				Report.ReportLog("The animation has incompatible keyframes.");
+				return;
+			}
 
 			Report.ReportLog("Replacing animation ...");
-			List<KeyValuePair<string, xaAnimationKeyframe[]>> newTrackList = new List<KeyValuePair<string, xaAnimationKeyframe[]>>(wsAnimation.TrackList.Count);
+			List<ImportedAnimationKeyframedTrack> trackList = ((ImportedKeyframedAnimation)wsAnimation.importedAnimation).TrackList;
+			List<KeyValuePair<string, xaAnimationKeyframe[]>> newTrackList = new List<KeyValuePair<string, xaAnimationKeyframe[]>>(trackList.Count);
 			List<Tuple<ImportedAnimationTrack, xaAnimationKeyframe[]>> interpolateTracks = new List<Tuple<ImportedAnimationTrack,xaAnimationKeyframe[]>>();
-			foreach (var wsTrack in wsAnimation.TrackList)
+			foreach (var wsTrack in trackList)
 			{
 				if (!wsAnimation.isTrackEnabled(wsTrack))
 					continue;
+				ImportedAnimationKeyframe[] keyframes = ((ImportedAnimationKeyframedTrack)wsTrack).Keyframes;
 				xaAnimationKeyframe[] newKeyframes = null;
 				int wsTrackKeyframesLength = 0;
-				for (int i = 0; i < wsTrack.Keyframes.Length; i++)
+				for (int i = 0; i < keyframes.Length; i++)
 				{
-					if (wsTrack.Keyframes[i] != null)
+					if (keyframes[i] != null)
 						wsTrackKeyframesLength++;
 				}
 				if (resampleCount < 0 || wsTrackKeyframesLength == resampleCount)
 				{
 					newKeyframes = new xaAnimationKeyframe[wsTrackKeyframesLength];
 					int keyframeIdx = 0;
-					for (int i = 0; i < wsTrack.Keyframes.Length; i++)
+					for (int i = 0; i < keyframes.Length; i++)
 					{
-						ImportedAnimationKeyframe keyframe = wsTrack.Keyframes[i];
+						ImportedAnimationKeyframe keyframe = keyframes[i];
 						if (keyframe == null)
 							continue;
 
@@ -347,6 +354,20 @@ namespace SB3Utility
 				Report.ReportLog("Error: Unexpected animation replace method " + replaceMethod + ". Skipping this animation");
 				return;
 			}
+		}
+
+		[Plugin]
+		public void RenameTrack(string track, string newName)
+		{
+			xaAnimationTrack xaTrack = xa.FindTrack(track, Parser);
+			xaTrack.Name = newName;
+		}
+
+		[Plugin]
+		public void RemoveTrack(string track)
+		{
+			xaAnimationTrack xaTrack = xa.FindTrack(track, Parser);
+			Parser.AnimationSection.TrackList.Remove(xaTrack);
 		}
 
 		[Plugin]

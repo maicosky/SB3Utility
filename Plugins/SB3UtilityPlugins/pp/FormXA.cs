@@ -22,6 +22,8 @@ namespace SB3Utility
 		public string FormVar { get; protected set; }
 
 		private TextBox[][] xaMaterialMatrixText = new TextBox[6][];
+		private int loadedSection1Material = -1;
+		private int loadedSection1MaterialConfig = -1;
 		private DataGridViewRow loadedAnimationClip = null;
 
 		private int animationId;
@@ -168,7 +170,7 @@ namespace SB3Utility
 			AnimationSpeed = Decimal.ToSingle(numericAnimationClipSpeed.Value);
 			FollowSequence = checkBoxAnimationClipLoadNextClip.Checked;
 
-			Gui.Docking.ShowDockContent(this, Gui.Docking.DockEditors);
+			Gui.Docking.ShowDockContent(this, Gui.Docking.DockEditors, ContentCategory.Animations);
 		}
 
 		void DockContentAdded(object sender, DockContentEventArgs e)
@@ -371,6 +373,119 @@ namespace SB3Utility
 					}
 
 					Gui.Renderer.RenderObjectAdded -= new EventHandler(Renderer_RenderObjectAdded);
+				}
+				setType1View(-1);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void listViewType1_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
+		{
+			try
+			{
+				if (e.IsSelected)
+				{
+					setType1View(e.Item.Index);
+				}
+				else
+				{
+					setType1View(-1);
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void setType1View(int matIdx)
+		{
+			try
+			{
+				if (matIdx < 0)
+				{
+					setType1ConfigView(-1);
+					labelType1ConfigPositionMax.Text = "/ 0";
+					xaMatNameText.Text = String.Empty;
+					loadedSection1Material = -1;
+				}
+				else
+				{
+					loadedSection1Material = matIdx;
+					numericType1ConfigPosition.Maximum = Editor.Parser.MaterialSection.MaterialList[matIdx].ColorList.Count;
+					labelType1ConfigPositionMax.Text = "/ " + Editor.Parser.MaterialSection.MaterialList[matIdx].ColorList.Count;
+					xaMatNameText.Text = Editor.Parser.MaterialSection.MaterialList[matIdx].Name;
+					setType1ConfigView(Decimal.ToInt32(numericType1ConfigPosition.Value) - 1);
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void setType1ConfigView(int position)
+		{
+			try
+			{
+				if (position < 0)
+				{
+					loadedSection1MaterialConfig = -1;
+
+					for (int i = 0; i < xaMaterialMatrixText.Length; i++)
+					{
+						for (int j = 0; j < xaMaterialMatrixText[i].Length; j++)
+						{
+							xaMaterialMatrixText[i][j].Text = String.Empty;
+						}
+					}
+				}
+				else
+				{
+					loadedSection1MaterialConfig = position;
+
+					Color4 diffuse = Editor.Parser.MaterialSection.MaterialList[loadedSection1Material].ColorList[position].Diffuse;
+					for (int i = 0; i < 4; i++)
+					{
+						xaMaterialMatrixText[0][i].Text = diffuse.ToVector4()[i].ToString();
+					}
+					Color4 ambient = Editor.Parser.MaterialSection.MaterialList[loadedSection1Material].ColorList[position].Ambient;
+					for (int i = 0; i < 4; i++)
+					{
+						xaMaterialMatrixText[1][i].Text = ambient.ToVector4()[i].ToString();
+					}
+					Color4 specular = Editor.Parser.MaterialSection.MaterialList[loadedSection1Material].ColorList[position].Specular;
+					for (int i = 0; i < 4; i++)
+					{
+						xaMaterialMatrixText[2][i].Text = specular.ToVector4()[i].ToString();
+					}
+					Color4 emissive = Editor.Parser.MaterialSection.MaterialList[loadedSection1Material].ColorList[position].Emissive;
+					for (int i = 0; i < 4; i++)
+					{
+						xaMaterialMatrixText[3][i].Text = emissive.ToVector4()[i].ToString();
+					}
+					xaMaterialMatrixText[4][0].Text = Editor.Parser.MaterialSection.MaterialList[loadedSection1Material].ColorList[position].Power.ToString();
+
+					int unknown1 = BitConverter.ToInt32(Editor.Parser.MaterialSection.MaterialList[loadedSection1Material].ColorList[position].Unknown1, 0);
+					xaMaterialMatrixText[5][0].Text = unknown1.ToString();
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void numericType1ConfigPosition_ValueChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedSection1Material >= 0)
+				{
+					setType1ConfigView(Decimal.ToInt32(numericType1ConfigPosition.Value) - 1);
 				}
 			}
 			catch (Exception ex)
@@ -670,7 +785,7 @@ namespace SB3Utility
 				int end = Int32.Parse(row.Cells[3].Value.ToString());
 				int next = Int32.Parse(row.Cells[4].Value.ToString());
 				float speed = Single.Parse(row.Cells[5].Value.ToString());
-				Gui.Scripting.RunScript(EditorVar + ".SetAnimationClip(clip=" + EditorVar + ".Parser.AnimationSection.ClipList[" + e.RowIndex + "], name=\"" + name + "\", start=" + start + ", end=" + end + ", next=" + next + ", speed=" + speed + ")");
+				Gui.Scripting.RunScript(EditorVar + ".SetAnimationClip(clip=" + EditorVar + ".Parser.AnimationSection.ClipList[" + e.RowIndex + "], name=\"" + name + "\", start=" + start + ", end=" + end + ", next=" + next + ", speed=" + speed.ToFloatString() + ")");
 
 				createAnimationClipDataGridView();
 			}
@@ -1008,7 +1123,7 @@ namespace SB3Utility
 								}
 							}
 							int numKeyframes = Editor.Parser.MorphSection.KeyframeList.Count;
-							Gui.Scripting.RunScript(EditorVar + ".ReplaceMorph(morph=" + source.Variable + ".Morphs[" + (int)source.Id + "], destMorphName=\"" + dragOptions.textBoxName.Text + "\", newName=\"" + dragOptions.textBoxNewName.Text + "\", replaceNormals=" + dragOptions.radioButtonReplaceNormalsYes.Checked + ", minSquaredDistance=" + dragOptions.numericUpDownMinimumDistanceSquared.Value + ")");
+							Gui.Scripting.RunScript(EditorVar + ".ReplaceMorph(morph=" + source.Variable + ".Morphs[" + (int)source.Id + "], destMorphName=\"" + dragOptions.textBoxName.Text + "\", newName=\"" + dragOptions.textBoxNewName.Text + "\", replaceNormals=" + dragOptions.radioButtonReplaceNormalsYes.Checked + ", minSquaredDistance=" + ((float)dragOptions.numericUpDownMinimumDistanceSquared.Value).ToFloatString() + ")");
 							UnloadXA();
 							LoadXA();
 							TreeNode clipNode = FindMorphClipTreeNode(dragOptions.textBoxName.Text, treeViewMorphClip.Nodes);
@@ -1567,13 +1682,20 @@ namespace SB3Utility
 				DragSource source = (DragSource)node.Tag;
 				if (source.Type == typeof(WorkspaceAnimation))
 				{
+					var srcEditor = (ImportedEditor)Gui.Scripting.Variables[source.Variable];
+					WorkspaceAnimation wsAnimation = srcEditor.Animations[(int)source.Id];
+					if (!(wsAnimation.importedAnimation is ImportedKeyframedAnimation))
+					{
+						Report.ReportLog("The animation has incompatible keyframes.");
+						return;
+					}
 					using (var dragOptions = new FormXADragDrop(Editor, false))
 					{
-						var srcEditor = (ImportedEditor)Gui.Scripting.Variables[source.Variable];
-						int resampleCount = srcEditor.Animations[(int)source.Id].TrackList[0].Keyframes.Length;
-						for (int i = 0; i < srcEditor.Animations[(int)source.Id].TrackList.Count; i++)
+						List<ImportedAnimationKeyframedTrack> trackList = ((ImportedKeyframedAnimation)wsAnimation.importedAnimation).TrackList;
+						int resampleCount = trackList[0].Keyframes.Length;
+						for (int i = 0; i < trackList.Count; i++)
 						{
-							ImportedAnimationTrack track = srcEditor.Animations[(int)source.Id].TrackList[i];
+							ImportedAnimationKeyframedTrack track = trackList[i];
 							int numKeyframes = 0;
 							for (int j = 0; j < track.Keyframes.Length; j++)
 							{
@@ -1592,12 +1714,11 @@ namespace SB3Utility
 						if (dragOptions.ShowDialog() == DialogResult.OK)
 						{
 							// repeating only final choices for repeatability of the script
-							WorkspaceAnimation wsAnimation = srcEditor.Animations[(int)source.Id];
-							foreach (ImportedAnimationTrack track in wsAnimation.TrackList)
+							foreach (ImportedAnimationKeyframedTrack track in trackList)
 							{
 								if (!wsAnimation.isTrackEnabled(track))
 								{
-									Gui.Scripting.RunScript(source.Variable + ".setTrackEnabled(animationId=" + (int)source.Id + ", id=" + wsAnimation.TrackList.IndexOf(track) + ", enabled=false)");
+									Gui.Scripting.RunScript(source.Variable + ".setTrackEnabled(animationId=" + (int)source.Id + ", id=" + trackList.IndexOf(track) + ", enabled=false)");
 								}
 							}
 							Gui.Scripting.RunScript(EditorVar + ".ReplaceAnimation(animation=" + source.Variable + ".Animations[" + (int)source.Id + "], resampleCount=" + dragOptions.numericResample.Value + ", method=\"" + dragOptions.comboBoxMethod.SelectedItem + "\", insertPos=" + dragOptions.numericPosition.Value + ")");
@@ -1632,6 +1753,57 @@ namespace SB3Utility
 			else
 			{
 				e.Effect = e.AllowedEffect & DragDropEffects.Copy;
+			}
+		}
+
+		private void listViewAnimationTrack_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
+		{
+
+		}
+
+		private void listViewAnimationTrack_AfterLabelEdit(object sender, LabelEditEventArgs e)
+		{
+			try
+			{
+				if (e.Label != null)
+				{
+					string name = e.Label.Trim();
+					if (name == String.Empty)
+					{
+						e.CancelEdit = true;
+					}
+					else
+					{
+						xaAnimationTrack keyframeList = (xaAnimationTrack)listViewAnimationTrack.Items[e.Item].Tag;
+						Gui.Scripting.RunScript(EditorVar + ".RenameTrack(track=\"" + keyframeList.Name + "\", newName=\"" + e.Label.Trim() + "\")");
+						UnloadXA();
+						LoadXA();
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonAnimationTrackRemove_Click(object sender, EventArgs e)
+		{
+			if (listViewAnimationTrack.SelectedItems.Count <= 0)
+				return;
+
+			try
+			{
+				foreach (ListViewItem item in listViewAnimationTrack.SelectedItems)
+				{
+					Gui.Scripting.RunScript(EditorVar + ".RemoveTrack(track=\"" + ((xaAnimationTrack)item.Tag).Name + "\")");
+				}
+				UnloadXA();
+				LoadXA();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
 			}
 		}
 	}

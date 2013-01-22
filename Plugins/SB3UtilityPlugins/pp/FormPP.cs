@@ -58,7 +58,7 @@ namespace SB3Utility
 				comboBoxFormat.SelectedIndex = (int)ppParser.Format.ppFormatIdx;
 				comboBoxFormat.SelectedIndexChanged += new EventHandler(comboBoxFormat_SelectedIndexChanged);
 
-				Gui.Docking.ShowDockContent(this, Gui.Docking.DockFiles);
+				Gui.Docking.ShowDockContent(this, Gui.Docking.DockFiles, ContentCategory.Archives);
 				this.FormClosing += new FormClosingEventHandler(FormPP_FormClosing);
 
 				List<DockContent> formPPList;

@@ -56,7 +56,7 @@ namespace AiDroidPlugin
 
 				InitSubfileLists();
 
-				Gui.Docking.ShowDockContent(this, Gui.Docking.DockFiles);
+				Gui.Docking.ShowDockContent(this, Gui.Docking.DockFiles, ContentCategory.Archives);
 				this.FormClosing += new FormClosingEventHandler(FormFPK_FormClosing);
 
 				List<DockContent> formFPKList;
@@ -692,6 +692,92 @@ namespace AiDroidPlugin
 				}
 
 				return child as FormREM;
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+				return null;
+			}
+		}
+
+		private void reaSubfilesList_DoubleClick(object sender, EventArgs e)
+		{
+			try
+			{
+				OpenREASubfilesList();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void reaSubfilesList_KeyPress(object sender, KeyPressEventArgs e)
+		{
+			try
+			{
+				if (e.KeyChar == '\r')
+				{
+					OpenREASubfilesList();
+					e.Handled = true;
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		public List<FormREA> OpenREASubfilesList()
+		{
+			List<FormREA> list = new List<FormREA>(remSubfilesList.SelectedItems.Count);
+			foreach (ListViewItem item in reaSubfilesList.SelectedItems)
+			{
+				IWriteFile writeFile = (IWriteFile)item.Tag;
+				FormREA formREA = (FormREA)Gui.Scripting.RunScript(FormVariable + ".OpenREASubfile(name=\"" + writeFile.Name + "\")", false);
+				if (formREA != null)
+				{
+					formREA.Activate();
+					list.Add(formREA);
+				}
+			}
+			return list;
+		}
+
+		[Plugin]
+		public FormREA OpenREASubfile(string name)
+		{
+			try
+			{
+				DockContent child;
+				if (!ChildForms.TryGetValue(name, out child))
+				{
+					string childParserVar;
+					if (!ChildParserVars.TryGetValue(name, out childParserVar))
+					{
+						childParserVar = Gui.Scripting.GetNextVariable("reaParser");
+						Gui.Scripting.RunScript(childParserVar + " = OpenREA(parser=" + ParserVar + ", name=\"" + name + "\")");
+						Gui.Scripting.RunScript(EditorVar + ".ReplaceSubfile(file=" + childParserVar + ")");
+						ChildParserVars.Add(name, childParserVar);
+
+						foreach (ListViewItem item in reaSubfilesList.Items)
+						{
+							if (((IWriteFile)item.Tag).Name.Equals(name, StringComparison.InvariantCultureIgnoreCase))
+							{
+								item.Font = new Font(item.Font, FontStyle.Bold);
+								reaSubfilesList.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+								break;
+							}
+						}
+					}
+
+					child = new FormREA(Editor.Parser, childParserVar);
+					child.FormClosing += new FormClosingEventHandler(ChildForms_FormClosing);
+					child.Tag = name;
+					ChildForms.Add(name, child);
+				}
+
+				return child as FormREA;
 			}
 			catch (Exception ex)
 			{

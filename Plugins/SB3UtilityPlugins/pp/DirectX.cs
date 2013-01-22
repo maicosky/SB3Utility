@@ -1362,8 +1362,8 @@ namespace SB3Utility
 
 			private void ImportAnimation(Section section)
 			{
-				ImportedAnimation workspaceAnimation = new ImportedAnimation();
-				workspaceAnimation.TrackList = new List<ImportedAnimationTrack>(section.children.Count);
+				ImportedKeyframedAnimation workspaceAnimation = new ImportedKeyframedAnimation();
+				workspaceAnimation.TrackList = new List<ImportedAnimationKeyframedTrack>(section.children.Count);
 
 				foreach (Section animSection in section.children)
 				{
@@ -1446,7 +1446,7 @@ namespace SB3Utility
 						}
 						if (keyframes.Length > 0)
 						{
-							ImportedAnimationTrack track = new ImportedAnimationTrack();
+							ImportedAnimationKeyframedTrack track = new ImportedAnimationKeyframedTrack();
 							track.Name = trackName;
 							track.Keyframes = keyframes;
 							workspaceAnimation.TrackList.Add(track);

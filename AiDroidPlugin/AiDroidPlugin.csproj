@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
@@ -30,6 +31,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <UseVSHostingProcess>false</UseVSHostingProcess>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="SlimDX, Version=4.0.13.43, Culture=neutral, PublicKeyToken=b1b0c32fd1ffe4f9, processorArchitecture=x86" />
@@ -55,6 +57,12 @@
     <Compile Include="FPK\FormFPK.Designer.cs">
       <DependentUpon>FormFPK.cs</DependentUpon>
     </Compile>
+    <Compile Include="FPK\FormREA.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FPK\FormREA.Designer.cs">
+      <DependentUpon>FormREA.cs</DependentUpon>
+    </Compile>
     <Compile Include="FPK\FormREM.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -70,11 +78,18 @@
     <Compile Include="FPK\fpk.cs" />
     <Compile Include="FPK\fpkEditor.cs" />
     <Compile Include="FPK\Mqo.cs" />
+    <Compile Include="FPK\REA.cs" />
+    <Compile Include="FPK\reaEditor.cs" />
     <Compile Include="FPK\REM.cs" />
     <Compile Include="FPK\remEditor.cs" />
     <Compile Include="PortableSettingsProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="FPK\RenderObjectREM.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
@@ -107,11 +122,18 @@
     <EmbeddedResource Include="FPK\FormFPK.resx">
       <DependentUpon>FormFPK.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="FPK\FormREA.resx">
+      <DependentUpon>FormREA.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FPK\FormREM.resx">
       <DependentUpon>FormREM.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FPK\FormREMDragDrop.resx">
       <DependentUpon>FormREMDragDrop.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

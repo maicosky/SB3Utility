@@ -272,9 +272,9 @@ namespace ODFPlugin
 					ConvertFrames(odaParser.FrameSection.RootFrame);
 				}
 
-				ImportedAnimation iAnim = new ImportedAnimation();
+				ImportedKeyframedAnimation iAnim = new ImportedKeyframedAnimation();
 				AnimationList.Add(iAnim);
-				iAnim.TrackList = new List<ImportedAnimationTrack>(anim.Count);
+				iAnim.TrackList = new List<ImportedAnimationKeyframedTrack>(anim.Count);
 				string notFound = String.Empty;
 				foreach (odfTrack track in anim)
 				{
@@ -285,7 +285,7 @@ namespace ODFPlugin
 						continue;
 					}
 
-					ImportedAnimationTrack iTrack = new ImportedAnimationTrack();
+					ImportedAnimationKeyframedTrack iTrack = new ImportedAnimationKeyframedTrack();
 					iAnim.TrackList.Add(iTrack);
 					iTrack.Name = boneFrame.Name;
 					iTrack.Keyframes = ConvertTrack(track.KeyframeList);

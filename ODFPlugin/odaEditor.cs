@@ -30,20 +30,25 @@ namespace ODFPlugin
 				Report.ReportLog(Path.GetFileName(parser.ODFPath) + " doesn't have an animation section. Skipping this animation");
 				return;
 			}
+			if (!(wsAnimation.importedAnimation is ImportedKeyframedAnimation))
+			{
+				Report.ReportLog("The animation has incompatible keyframes.");
+				return;
+			}
 
 			Report.ReportLog("Replacing animation ...");
 			List<KeyValuePair<string, ImportedAnimationKeyframe[]>> newTrackList = FbxUtility.CopyAnimation(wsAnimation, resampleCount, linear);
 
 			List<odfTrack> animationNodeList = odf.FindClip(clip, parser).ChildList;
-			ImportedAnimation iAnim = new ImportedAnimation();
-			iAnim.TrackList = new List<ImportedAnimationTrack>(animationNodeList.Count);
-			Dictionary<string, ImportedAnimationTrack> animationNodeDic = null;
+			ImportedKeyframedAnimation iAnim = new ImportedKeyframedAnimation();
+			iAnim.TrackList = new List<ImportedAnimationKeyframedTrack>(animationNodeList.Count);
+			Dictionary<string, ImportedAnimationKeyframedTrack> animationNodeDic = null;
 			if (replaceMethod != ReplaceAnimationMethod.Replace)
 			{
-				animationNodeDic = new Dictionary<string, ImportedAnimationTrack>();
+				animationNodeDic = new Dictionary<string, ImportedAnimationKeyframedTrack>();
 				foreach (odfTrack animationNode in animationNodeList)
 				{
-					ImportedAnimationTrack iTrack = new ImportedAnimationTrack();
+					ImportedAnimationKeyframedTrack iTrack = new ImportedAnimationKeyframedTrack();
 					iTrack.Name = odf.FindFrame(animationNode.BoneFrameId, parser.FrameSection.RootFrame).Name;
 					iTrack.Keyframes = Plugins.ODFConverter.ConvertTrack(animationNode.KeyframeList);
 					animationNodeDic.Add(odf.FindFrame(animationNode.BoneFrameId, parser.FrameSection.RootFrame).Name, iTrack);
@@ -56,10 +61,11 @@ namespace ODFPlugin
 			animationNodeList.Clear();
 			foreach (var newTrack in iAnim.TrackList)
 			{
-				odfTrack animationNode = new odfTrack(newTrack.Keyframes.Length);
+				ImportedAnimationKeyframe[] keyframes = ((ImportedAnimationKeyframedTrack)newTrack).Keyframes;
+				odfTrack animationNode = new odfTrack(keyframes.Length);
 				odf.CreateUnknowns(animationNode);
 				animationNodeList.Add(animationNode);
-				animationNode.KeyframeList = Plugins.ODFConverter.ConvertTrack(newTrack.Keyframes);
+				animationNode.KeyframeList = Plugins.ODFConverter.ConvertTrack(keyframes);
 				animationNode.BoneFrameId = odf.FindFrame(newTrack.Name, parser.FrameSection.RootFrame).Id;
 			}
 		}

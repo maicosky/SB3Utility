@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Threading;
 
 namespace SB3Utility
 {
@@ -10,6 +9,8 @@ namespace SB3Utility
 		{
 			try
 			{
+				Thread.CurrentThread.CurrentCulture = Utility.CultureUS;
+
 				if (args.Length <= 0)
 				{
 					Console.WriteLine("Usage: SB3UtilityScript \"scriptPath.txt\"");

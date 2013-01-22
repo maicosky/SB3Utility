@@ -98,7 +98,16 @@ namespace SB3Utility
 		[Plugin]
 		public void setTrackEnabled(int animationId, int id, bool enabled)
 		{
-			ImportedAnimationTrack track = this.Animations[animationId].TrackList[id];
+			WorkspaceAnimation wsAnim = this.Animations[animationId];
+			ImportedAnimationTrack track = null;
+			if (wsAnim.importedAnimation is ImportedKeyframedAnimation)
+			{
+				track = ((ImportedKeyframedAnimation)wsAnim.importedAnimation).TrackList[id];
+			}
+			else if (wsAnim.importedAnimation is ImportedSampledAnimation)
+			{
+				track = ((ImportedSampledAnimation)wsAnim.importedAnimation).TrackList[id];
+			}
 			this.Animations[animationId].setTrackEnabled(track, enabled);
 		}
 	}

@@ -53,5 +53,8 @@
     <Setting Name="FbxImportAnimationFilterPrecision" Provider="PortableSettingsProvider" Type="System.Single" Scope="Application">
       <Value Profile="(Default)">0.25</Value>
     </Setting>
+    <Setting Name="QuickAccess" Provider="PortableSettingsProvider" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

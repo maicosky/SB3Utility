@@ -192,5 +192,15 @@ namespace SB3Utility.Properties {
                 return ((float)(this["FbxImportAnimationFilterPrecision"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(PortableSettingsProvider))]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool QuickAccess {
+            get {
+                return ((bool)(this["QuickAccess"]));
+            }
+        }
     }
 }

@@ -136,8 +136,10 @@ namespace SB3Utility
 		}
 	}
 
-	public class WorkspaceAnimation : ImportedAnimation
+	public class WorkspaceAnimation
 	{
+		public ImportedAnimation importedAnimation { get; set; }
+
 		protected class AdditionalTrackOptions
 		{
 			public bool Enabled = true;
@@ -147,13 +149,29 @@ namespace SB3Utility
 		public WorkspaceAnimation(ImportedAnimation importedAnimation) :
 			base()
 		{
-			this.TrackList = importedAnimation.TrackList;
+			this.importedAnimation = importedAnimation;
 
-			this.TrackOptions = new Dictionary<ImportedAnimationTrack, AdditionalTrackOptions>(importedAnimation.TrackList.Count);
-			foreach (ImportedAnimationTrack track in importedAnimation.TrackList)
+			if (importedAnimation is ImportedKeyframedAnimation)
 			{
-				AdditionalTrackOptions options = new AdditionalTrackOptions();
-				this.TrackOptions.Add(track, options);
+				List<ImportedAnimationKeyframedTrack> importedTrackList = ((ImportedKeyframedAnimation)importedAnimation).TrackList;
+				this.TrackOptions = new Dictionary<ImportedAnimationTrack, AdditionalTrackOptions>(importedTrackList.Count);
+				for (int i = 0; i < importedTrackList.Count; i++)
+				{
+					ImportedAnimationTrack track = importedTrackList[i];
+					AdditionalTrackOptions options = new AdditionalTrackOptions();
+					this.TrackOptions.Add(track, options);
+				}
+			}
+			else if (importedAnimation is ImportedSampledAnimation)
+			{
+				List<ImportedAnimationSampledTrack> importedTrackList = ((ImportedSampledAnimation)importedAnimation).TrackList;
+				this.TrackOptions = new Dictionary<ImportedAnimationTrack, AdditionalTrackOptions>(importedTrackList.Count);
+				for (int i = 0; i < importedTrackList.Count; i++)
+				{
+					ImportedAnimationTrack track = importedTrackList[i];
+					AdditionalTrackOptions options = new AdditionalTrackOptions();
+					this.TrackOptions.Add(track, options);
+				}
 			}
 		}
 

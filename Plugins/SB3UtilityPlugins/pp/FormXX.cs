@@ -281,7 +281,7 @@ namespace SB3Utility
 			comboBoxMeshExportFormat.Items.AddRange(descriptions);
 			comboBoxMeshExportFormat.SelectedIndex = 4;
 
-			Gui.Docking.ShowDockContent(this, Gui.Docking.DockEditors);
+			Gui.Docking.ShowDockContent(this, Gui.Docking.DockEditors, ContentCategory.Meshes);
 
 			keepBackupToolStripMenuItem.Checked = (bool)Gui.Config["KeepBackupOfXX"];
 			keepBackupToolStripMenuItem.CheckedChanged += keepBackupToolStripMenuItem_CheckedChanged;
@@ -718,7 +718,7 @@ namespace SB3Utility
 
 				if (frame.Mesh.BoneList.Count > 0)
 				{
-					TreeNode boneListNode = new TreeNode("Bones");
+					TreeNode boneListNode = new TreeNode(frame.Mesh.BoneList.Count + " Bones");
 					meshNode.Nodes.Add(boneListNode);
 					for (int i = 0; i < frame.Mesh.BoneList.Count; i++)
 					{
@@ -2598,7 +2598,7 @@ namespace SB3Utility
 					{
 						if (normals.checkBoxNewNormalsForMesh.Checked)
 						{
-							Gui.Scripting.RunScript(EditorVar + ".CalculateNormals(id=" + loadedMesh + ", threshold=" + normals.numericThreshold.Value + ")");
+							Gui.Scripting.RunScript(EditorVar + ".CalculateNormals(id=" + loadedMesh + ", threshold=" + ((float)normals.numericThreshold.Value).ToFloatString() + ")");
 						}
 						if (normals.checkBoxCalculateNormalsInXAs.Checked || normals.checkBoxSelectedItemsOnly.Checked)
 						{
@@ -2636,7 +2636,7 @@ namespace SB3Utility
 										if (keyframeName == null && morphClipName == null)
 											continue;
 									}
-									Gui.Scripting.RunScript(form.EditorVar + ".CalculateNormals(meshFrame=" + EditorVar + ".Meshes[" + loadedMesh + "], morphClip=" + (morphClipName != null ? "\"" + morphClipName + "\"" : "null") + ", keyframe=" + (keyframeName != null ? "\"" + keyframeName + "\"" : "null") + ", threshold=" + normals.numericThreshold.Value + ")");
+									Gui.Scripting.RunScript(form.EditorVar + ".CalculateNormals(meshFrame=" + EditorVar + ".Meshes[" + loadedMesh + "], morphClip=" + (morphClipName != null ? "\"" + morphClipName + "\"" : "null") + ", keyframe=" + (keyframeName != null ? "\"" + keyframeName + "\"" : "null") + ", threshold=" + ((float)normals.numericThreshold.Value).ToFloatString() + ")");
 								}
 							}
 						}

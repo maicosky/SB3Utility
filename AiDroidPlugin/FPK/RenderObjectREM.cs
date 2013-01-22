@@ -24,9 +24,10 @@ namespace AiDroidPlugin
 		public AnimationController AnimationController { get; protected set; }
 		public bool IsDisposed { get; protected set; }
 		public HashSet<int> HighlightSubmesh { get; protected set; }
+		private const int BoneObjSize = 16;
 
-		private Texture[] Textures;
-		private Dictionary<string, int> TextureDic;
+		private static List<Texture> Textures = new List<Texture>();
+		private static Dictionary<string, int> TextureDic = new Dictionary<string,int>();
 		private Material[] Materials;
 
 		private static Dictionary<string, ImportedTexture> ImportedTextures = new Dictionary<string, ImportedTexture>();
@@ -40,8 +41,10 @@ namespace AiDroidPlugin
 
 			this.device = Gui.Renderer.Device;
 
-			Textures = new Texture[parser.MATC.Count];
-			TextureDic = new Dictionary<string, int>(parser.MATC.Count);
+			if (Textures.Count + parser.MATC.Count > Textures.Capacity)
+			{
+				Textures.Capacity += parser.MATC.Count;
+			}
 			Materials = new Material[parser.MATC.Count];
 
 			rootFrame = CreateHierarchy(parser, mesh, device, out meshFrames);
@@ -79,14 +82,14 @@ namespace AiDroidPlugin
 						mesh.MeshData.Mesh.Dispose();
 					}
 
-					for (int j = 0; j < Textures.Length; j++)
+/*					for (int j = 0; j < Textures.Length; j++)
 					{
 						Texture tex = Textures[j];
 						if ((tex != null) && !tex.Disposed)
 						{
 							tex.Dispose();
 						}
-					}
+					}*/
 
 					mesh = (AnimationMeshContainer)mesh.NextMeshContainer;
 				}
@@ -143,8 +146,7 @@ namespace AiDroidPlugin
 			{
 				device.SetRenderState(RenderState.VertexBlend, VertexBlend.Weights3);
 				device.SetRenderState(RenderState.IndexedVertexBlendEnable, true);
-//				device.SetRenderState(RenderState.ColorVertex, true);
-//				device.SetRenderState(RenderState.DiffuseMaterialSource, ColorSource.Color1);
+				device.SetRenderState(RenderState.DiffuseMaterialSource, ColorSource.Color1);
 				device.SetRenderState(RenderState.AmbientMaterialSource, ColorSource.Color1);
 
 				for (int i = 0; i < meshContainer.BoneNames.Length; i++)
@@ -165,44 +167,72 @@ namespace AiDroidPlugin
 #endif
 			}
 
-			int matIdx = meshContainer.MaterialIndex;
-			device.Material = ((matIdx >= 0) && (matIdx < Materials.Length)) ? Materials[matIdx] : nullMaterial;
+			try
+			{
+				int matIdx = meshContainer.MaterialIndex;
+				device.Material = ((matIdx >= 0) && (matIdx < Materials.Length)) ? Materials[matIdx] : nullMaterial;
 
-			int texIdx = meshContainer.TextureIndex;
-			Texture tex = ((texIdx >= 0) && (texIdx < Textures.Length)) ? Textures[texIdx] : null;
-			device.SetTexture(0, tex);
+				int texIdx = meshContainer.TextureIndex;
+				Texture tex = ((texIdx >= 0) && (texIdx < Textures.Count)) ? Textures[texIdx] : null;
+				device.SetTexture(0, tex);
 
-			meshContainer.MeshData.Mesh.DrawSubset(0);
+				meshContainer.MeshData.Mesh.DrawSubset(0);
+			}
+			catch (Exception ex)
+			{
+				Report.ReportLog("Drawing mesh crashed with " + ex.ToString());
+			}
 
 			if (HighlightSubmesh.Contains(submeshNum))
 			{
-				device.SetRenderState(RenderState.ZEnable, ZBufferType.DontUseZBuffer);
-				device.SetRenderState(RenderState.FillMode, FillMode.Wireframe);
-				device.Material = highlightMaterial;
-				device.SetTexture(0, null);
-				meshContainer.MeshData.Mesh.DrawSubset(0);
+				try
+				{
+					device.SetRenderState(RenderState.ZEnable, ZBufferType.DontUseZBuffer);
+					device.SetRenderState(RenderState.FillMode, FillMode.Wireframe);
+					device.Material = highlightMaterial;
+					device.SetTexture(0, null);
+					meshContainer.MeshData.Mesh.DrawSubset(0);
+				}
+				catch (Exception ex)
+				{
+					Report.ReportLog("Drawing highlighting crashed with " + ex.ToString());
+				}
 			}
 
 			if (Gui.Renderer.ShowNormals)
 			{
-				device.SetRenderState(RenderState.ZEnable, ZBufferType.UseZBuffer);
-				device.SetRenderState(RenderState.Lighting, false);
-				device.Material = nullMaterial;
-				device.SetTexture(0, null);
-				device.VertexFormat = PositionBlendWeightsIndexedColored.Format;
-				device.DrawUserPrimitives(PrimitiveType.LineList, meshContainer.NormalLines.Length / 2, meshContainer.NormalLines);
+				try
+				{
+					device.SetRenderState(RenderState.ZEnable, ZBufferType.UseZBuffer);
+					device.SetRenderState(RenderState.Lighting, false);
+					device.Material = nullMaterial;
+					device.SetTexture(0, null);
+					device.VertexFormat = PositionBlendWeightsIndexedColored.Format;
+					device.DrawUserPrimitives(PrimitiveType.LineList, meshContainer.NormalLines.Length / 2, meshContainer.NormalLines);
+				}
+				catch (Exception ex)
+				{
+					Report.ReportLog("Drawing normals crashed with " + ex.ToString());
+				}
 			}
 
 			if (Gui.Renderer.ShowBones && (meshContainer.BoneLines != null))
 			{
-				device.SetRenderState(RenderState.ZEnable, ZBufferType.DontUseZBuffer);
-				device.SetRenderState(RenderState.VertexBlend, VertexBlend.Weights1);
-				device.SetRenderState(RenderState.IndexedVertexBlendEnable, true);
-				device.SetRenderState(RenderState.Lighting, false);
-				device.Material = nullMaterial;
-				device.SetTexture(0, null);
-				device.VertexFormat = PositionBlendWeightIndexedColored.Format;
-				device.DrawUserPrimitives(PrimitiveType.LineList, meshContainer.BoneLines.Length / 2, meshContainer.BoneLines);
+				try
+				{
+					device.SetRenderState(RenderState.ZEnable, ZBufferType.DontUseZBuffer);
+					device.SetRenderState(RenderState.VertexBlend, VertexBlend.Weights1);
+					device.SetRenderState(RenderState.IndexedVertexBlendEnable, true);
+					device.SetRenderState(RenderState.Lighting, false);
+					device.Material = nullMaterial;
+					device.SetTexture(0, null);
+					device.VertexFormat = PositionBlendWeightIndexedColored.Format;
+					device.DrawUserPrimitives(PrimitiveType.LineList, meshContainer.BoneLines.Length / 2, meshContainer.BoneLines);
+				}
+				catch (Exception ex)
+				{
+					Report.ReportLog("Drawing bones crashed with " + ex.ToString());
+				}
 			}
 		}
 
@@ -267,43 +297,35 @@ namespace AiDroidPlugin
 				List<List<remVertex>> submeshVertLists = new List<List<remVertex>>(mesh.numMats);
 				List<List<ushort>> submeshFaceLists = new List<List<ushort>>(mesh.numMats);
 				List<int[]> submeshVertIndices = new List<int[]>(mesh.numMats);
-				for (int i = 0; i < mesh.numFaces; i++)
-				{
-					while (mesh.faceMarks[i] >= submeshFaceLists.Count)
-					{
-						List<ushort> newFaceList = new List<ushort>(mesh.numFaces);
-						submeshFaceLists.Add(newFaceList);
-						List<remVertex> newVertList = new List<remVertex>(mesh.numVertices);
-						submeshVertLists.Add(newVertList);
-						int[] newVertIndices = new int[mesh.numVertices];
-						for (int j = 0; j < mesh.numVertices; j++)
-							newVertIndices[j] = -1;
-						submeshVertIndices.Add(newVertIndices);
-					}
-
-					int submesh = mesh.faceMarks[i];
-					for (int j = 0; j < 3; j++)
-					{
-						int vertIdx = mesh.faces[i * 3 + j];
-						if (submeshVertIndices[submesh][vertIdx] < 0)
-						{
-							submeshVertIndices[submesh][vertIdx] = submeshVertLists[submesh].Count;
-							submeshVertLists[submesh].Add(mesh.vertices[vertIdx]);
-						}
-						submeshFaceLists[submesh].Add((ushort)submeshVertIndices[submesh][vertIdx]);
-					}
-				}
+				SplitMesh(mesh, submeshVertLists, submeshFaceLists, submeshVertIndices);
 
 				remSkin boneList = rem.FindSkin(mesh.name, parser.SKIC);
 				bool skinned = boneList != null;
 				int numBones = skinned ? boneList.Count : 0;
-				string[] boneNames = new string[numBones];
-				Matrix[] boneOffsets = new Matrix[numBones];
+				List<string> boneNamesList = new List<string>(numBones);
+				List<Matrix> boneOffsetsList = new List<Matrix>(numBones);
 				for (int boneIdx = 0; boneIdx < numBones; boneIdx++)
 				{
-					boneNames[boneIdx] = boneList[boneIdx].bone.ToString();
-					boneOffsets[boneIdx] = boneList[boneIdx].matrix;
+					boneNamesList.Add(boneList[boneIdx].bone.ToString());
+					boneOffsetsList.Add(boneList[boneIdx].matrix);
 				}
+				List<string> boneFrameParentNames = new List<string>(numBones);
+				List<Matrix> boneFrameParentMatrices = new List<Matrix>(numBones);
+				for (int boneIdx = 0; boneIdx < numBones; boneIdx++)
+				{
+					remBone boneFrame = rem.FindFrame(boneList[boneIdx].bone, parser.BONC.rootFrame);
+					remBone boneFrameParent = boneFrame.Parent;
+					if (!boneNamesList.Contains(boneFrameParent.name) && !boneFrameParentNames.Contains(boneFrameParent.name))
+					{
+						boneFrameParentNames.Add(boneFrameParent.name);
+						Matrix incompleteMeshFrameCorrection = Matrix.Invert(frame.matrix);
+						boneFrameParentMatrices.Add(incompleteMeshFrameCorrection * Matrix.Invert(boneFrame.matrix) * boneList[boneIdx].matrix);
+					}
+				}
+				boneNamesList.AddRange(boneFrameParentNames);
+				string[] boneNames = boneNamesList.ToArray();
+				boneOffsetsList.AddRange(boneFrameParentMatrices);
+				Matrix[] boneOffsets = boneOffsetsList.ToArray();
 
 				AnimationMeshContainer[] meshContainers = new AnimationMeshContainer[submeshFaceLists.Count];
 				Vector3 min = new Vector3(Single.MaxValue);
@@ -384,7 +406,7 @@ namespace AiDroidPlugin
 							Texture memTex = Texture.FromMemory(device, importedTex.Data);
 							texIdx = TextureDic.Count;
 							TextureDic.Add(mat.texture.ToString(), texIdx);
-							Textures[texIdx] = memTex;
+							Textures.Add(memTex);
 						}
 						meshContainer.TextureIndex = texIdx;
 					}
@@ -415,6 +437,36 @@ namespace AiDroidPlugin
 
 			numFrames++;
 			return animationFrame;
+		}
+
+		private static void SplitMesh(remMesh mesh, List<List<remVertex>> submeshVertLists, List<List<ushort>> submeshFaceLists, List<int[]> submeshVertIndices)
+		{
+			for (int i = 0; i < mesh.numFaces; i++)
+			{
+				while (mesh.faceMarks[i] >= submeshFaceLists.Count)
+				{
+					List<ushort> newFaceList = new List<ushort>(mesh.numFaces);
+					submeshFaceLists.Add(newFaceList);
+					List<remVertex> newVertList = new List<remVertex>(mesh.numVertices);
+					submeshVertLists.Add(newVertList);
+					int[] newVertIndices = new int[mesh.numVertices];
+					for (int j = 0; j < mesh.numVertices; j++)
+						newVertIndices[j] = -1;
+					submeshVertIndices.Add(newVertIndices);
+				}
+
+				int submesh = mesh.faceMarks[i];
+				for (int j = 0; j < 3; j++)
+				{
+					int vertIdx = mesh.faces[i * 3 + j];
+					if (submeshVertIndices[submesh][vertIdx] < 0)
+					{
+						submeshVertIndices[submesh][vertIdx] = submeshVertLists[submesh].Count;
+						submeshVertLists[submesh].Add(mesh.vertices[vertIdx]);
+					}
+					submeshFaceLists[submesh].Add((ushort)submeshVertIndices[submesh][vertIdx]);
+				}
+			}
 		}
 
 		private float[][] ConvertVertexWeights(List<remVertex> vertexList, int[] vertexIndices, remSkin boneList, out byte[][] vertexBoneIndices)
@@ -506,11 +558,11 @@ namespace AiDroidPlugin
 /*								switch (cols)
 								{
 								case WeightsColourPreset.Greyscale:
-									col.r = col.g = col.b = boneWeights[k];
+									col.Red = col.Green = col.Blue = boneWeights[k];
 									break;
 								case WeightsColourPreset.Metal:
-									col.r = boneWeights[k] > 0.666f ? 1f : boneWeights[k] * 1.5f;
-									col.g = boneWeights[k] * boneWeights[k] * boneWeights[k];
+									col.Red = boneWeights[k] > 0.666f ? 1f : boneWeights[k] * 1.5f;
+									col.Green = boneWeights[k] * boneWeights[k] * boneWeights[k];
 									break;
 								case WeightsColourPreset.Rainbow:*/
 									if (boneWeights[k] > 0.75f)
@@ -568,10 +620,9 @@ namespace AiDroidPlugin
 				}
 				mesh.BoneFrames = boneFrames;
 
-				int boneObjSize = 16;
 				float boneWidth = 0.1f;
 				int boneColor = Color.CornflowerBlue.ToArgb();
-				PositionBlendWeightIndexedColored[] boneLines = new PositionBlendWeightIndexedColored[numBones * boneObjSize];
+				PositionBlendWeightIndexedColored[] boneLines = new PositionBlendWeightIndexedColored[numBones * BoneObjSize];
 				for (byte i = 0; i < numBones; i++)
 				{
 					AnimationFrame bone = boneFrames[i];
@@ -608,23 +659,23 @@ namespace AiDroidPlugin
 						Vector3 topLeft = perpendicular + -cross + boneParentPos;
 						Vector3 topRight = perpendicular + cross + boneParentPos;
 
-						boneLines[i * boneObjSize] = new PositionBlendWeightIndexedColored(bottomLeft, parentBoneIdx, boneColor);
-						boneLines[(i * boneObjSize) + 1] = new PositionBlendWeightIndexedColored(bottomRight, parentBoneIdx, boneColor);
-						boneLines[(i * boneObjSize) + 2] = new PositionBlendWeightIndexedColored(bottomRight, parentBoneIdx, boneColor);
-						boneLines[(i * boneObjSize) + 3] = new PositionBlendWeightIndexedColored(topRight, parentBoneIdx, boneColor);
-						boneLines[(i * boneObjSize) + 4] = new PositionBlendWeightIndexedColored(topRight, parentBoneIdx, boneColor);
-						boneLines[(i * boneObjSize) + 5] = new PositionBlendWeightIndexedColored(topLeft, parentBoneIdx, boneColor);
-						boneLines[(i * boneObjSize) + 6] = new PositionBlendWeightIndexedColored(topLeft, parentBoneIdx, boneColor);
-						boneLines[(i * boneObjSize) + 7] = new PositionBlendWeightIndexedColored(bottomLeft, parentBoneIdx, boneColor);
+						boneLines[i * BoneObjSize] = new PositionBlendWeightIndexedColored(bottomLeft, parentBoneIdx, boneColor);
+						boneLines[(i * BoneObjSize) + 1] = new PositionBlendWeightIndexedColored(bottomRight, parentBoneIdx, boneColor);
+						boneLines[(i * BoneObjSize) + 2] = new PositionBlendWeightIndexedColored(bottomRight, parentBoneIdx, boneColor);
+						boneLines[(i * BoneObjSize) + 3] = new PositionBlendWeightIndexedColored(topRight, parentBoneIdx, boneColor);
+						boneLines[(i * BoneObjSize) + 4] = new PositionBlendWeightIndexedColored(topRight, parentBoneIdx, boneColor);
+						boneLines[(i * BoneObjSize) + 5] = new PositionBlendWeightIndexedColored(topLeft, parentBoneIdx, boneColor);
+						boneLines[(i * BoneObjSize) + 6] = new PositionBlendWeightIndexedColored(topLeft, parentBoneIdx, boneColor);
+						boneLines[(i * BoneObjSize) + 7] = new PositionBlendWeightIndexedColored(bottomLeft, parentBoneIdx, boneColor);
 
-						boneLines[(i * boneObjSize) + 8] = new PositionBlendWeightIndexedColored(bottomLeft, parentBoneIdx, boneColor);
-						boneLines[(i * boneObjSize) + 9] = new PositionBlendWeightIndexedColored(bonePos, i, boneColor);
-						boneLines[(i * boneObjSize) + 10] = new PositionBlendWeightIndexedColored(bottomRight, parentBoneIdx, boneColor);
-						boneLines[(i * boneObjSize) + 11] = new PositionBlendWeightIndexedColored(bonePos, i, boneColor);
-						boneLines[(i * boneObjSize) + 12] = new PositionBlendWeightIndexedColored(topLeft, parentBoneIdx, boneColor);
-						boneLines[(i * boneObjSize) + 13] = new PositionBlendWeightIndexedColored(bonePos, i, boneColor);
-						boneLines[(i * boneObjSize) + 14] = new PositionBlendWeightIndexedColored(topRight, parentBoneIdx, boneColor);
-						boneLines[(i * boneObjSize) + 15] = new PositionBlendWeightIndexedColored(bonePos, i, boneColor);
+						boneLines[(i * BoneObjSize) + 8] = new PositionBlendWeightIndexedColored(bottomLeft, parentBoneIdx, boneColor);
+						boneLines[(i * BoneObjSize) + 9] = new PositionBlendWeightIndexedColored(bonePos, i, boneColor);
+						boneLines[(i * BoneObjSize) + 10] = new PositionBlendWeightIndexedColored(bottomRight, parentBoneIdx, boneColor);
+						boneLines[(i * BoneObjSize) + 11] = new PositionBlendWeightIndexedColored(bonePos, i, boneColor);
+						boneLines[(i * BoneObjSize) + 12] = new PositionBlendWeightIndexedColored(topLeft, parentBoneIdx, boneColor);
+						boneLines[(i * BoneObjSize) + 13] = new PositionBlendWeightIndexedColored(bonePos, i, boneColor);
+						boneLines[(i * BoneObjSize) + 14] = new PositionBlendWeightIndexedColored(topRight, parentBoneIdx, boneColor);
+						boneLines[(i * BoneObjSize) + 15] = new PositionBlendWeightIndexedColored(bonePos, i, boneColor);
 					}
 				}
 
@@ -642,55 +693,34 @@ namespace AiDroidPlugin
 			}
 		}
 
-/*		public void HighlightBone(odfParser parser, int meshIdx, int submeshIdx, int boneIdx)
+		public void HighlightBone(remParser parser, remMesh remMesh, int boneIdx, bool show)
 		{
-			const int boneObjSize = 16;
+			List<List<remVertex>> submeshVertLists = new List<List<remVertex>>(remMesh.numMats);
+			List<List<ushort>> submeshFaceLists = new List<List<ushort>>(remMesh.numMats);
+			List<int[]> submeshVertIndices = new List<int[]>(remMesh.numMats);
+			SplitMesh(remMesh, submeshVertLists, submeshFaceLists, submeshVertIndices);
+			remSkin boneList = rem.FindSkin(remMesh.name, parser.SKIC);
 
-			odfSubmesh submesh = parser.MeshSection[meshIdx][submeshIdx];
-			odfBoneList boneList = odf.FindBoneList(submesh.Id, parser.EnvelopeSection);
-			string boneFrameName = null;
-			if (boneIdx >= 0)
+			int submeshIdx = 0;
+			for (AnimationMeshContainer mesh = (AnimationMeshContainer)meshFrames[0].MeshContainer;
+				 mesh != null;
+				 mesh = (AnimationMeshContainer)mesh.NextMeshContainer, submeshIdx++)
 			{
-				odfBone bone = boneList[boneIdx];
-				boneFrameName = odf.FindFrame(bone.FrameId, parser.FrameSection.RootFrame).Name;
-			}
-
-			AnimationMeshContainer mesh = (AnimationMeshContainer)meshFrames[0].MeshContainer;
-			for (int i = 0; mesh != null; i++)
-			{
-				if (i == submeshIdx && (mesh.MeshData != null) && (mesh.MeshData.Mesh != null))
+				if (mesh.MeshData != null && mesh.MeshData.Mesh != null)
 				{
-					List<odfVertex> vertexList = submesh.VertexList;
-					float[][] vertexWeights = ConvertVertexWeights(vertexList, boneList);
-					FillVertexBuffer(mesh.MeshData.Mesh, vertexList, vertexWeights, boneIdx);
-//					break;
+					List<remVertex> vertexList = submeshVertLists[submeshIdx];
+					byte[][] vertexBoneIndices = null;
+					float[][] vertexWeights = ConvertVertexWeights(vertexList, submeshVertIndices[submeshIdx], boneList, out vertexBoneIndices);
+					FillVertexBuffer(mesh.MeshData.Mesh, vertexList, vertexWeights, vertexBoneIndices, show ? boneIdx : -1);
 				}
-				if (boneIdx >= 0)
+				if (mesh.BoneLines != null)
 				{
-					for (int idx = 0; idx < mesh.BoneLines.Length / boneObjSize; idx++)
+					for (int j = 0; j < BoneObjSize; j++)
 					{
-						if (mesh.BoneNames[idx] == boneFrameName)
-						{
-							for (int j = 0; j < boneObjSize; j++)
-							{
-								mesh.BoneLines[idx * boneObjSize + j].Color = Color.Crimson.ToArgb();
-							}
-							break;
-						}
+						mesh.BoneLines[boneIdx * BoneObjSize + j].Color = show ? Color.Crimson.ToArgb(): Color.CornflowerBlue.ToArgb();
 					}
 				}
-				else
-				{
-					for (int idx = 0; idx < mesh.BoneLines.Length / boneObjSize; idx++)
-					{
-						for (int j = 0; j < boneObjSize; j++)
-						{
-							mesh.BoneLines[idx * boneObjSize + j].Color = Color.CornflowerBlue.ToArgb();
-						}
-					}
-				}
-				mesh = (AnimationMeshContainer)mesh.NextMeshContainer;
 			}
-		}*/
+		}
 	}
 }

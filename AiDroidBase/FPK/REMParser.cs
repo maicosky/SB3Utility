@@ -71,7 +71,7 @@ namespace AiDroidPlugin
 			SKIC.WriteTo(stream);
 		}
 
-		private static remId GetIdentifier(byte[] buffer, int startIdx, int lengthInBuffer)
+		public static remId GetIdentifier(byte[] buffer, int startIdx, int lengthInBuffer)
 		{
 			char[] ca = Encoding.ASCII.GetChars(buffer, startIdx, lengthInBuffer);
 			int length = 0;
@@ -85,7 +85,7 @@ namespace AiDroidPlugin
 			return GetIdentifier(buffer, startIdx, 256);
 		}
 
-		private static bool TypeCheck(byte[] t1, byte[] t2)
+		public static bool TypeCheck(byte[] t1, byte[] t2)
 		{
 			return t1[0] == t2[0] && t1[1] == t2[1] && t1[2] == t2[2] && t1[3] == t2[3];
 		}

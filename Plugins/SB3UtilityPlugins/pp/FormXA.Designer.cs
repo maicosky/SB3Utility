@@ -78,16 +78,13 @@
 			this.label8 = new System.Windows.Forms.Label();
 			this.buttonRefUp = new System.Windows.Forms.Button();
 			this.buttonDeleteRef = new System.Windows.Forms.Button();
-			this.textBoxFrameNameRefID = new SB3Utility.EditTextBox();
 			this.buttonNewRef = new System.Windows.Forms.Button();
 			this.checkBoxOnlyValidKeyframes = new System.Windows.Forms.CheckBox();
 			this.comboBoxRefKeyframe = new System.Windows.Forms.ComboBox();
 			this.label6 = new System.Windows.Forms.Label();
 			this.groupBox9 = new System.Windows.Forms.GroupBox();
-			this.editTextBoxMorphClipMesh = new SB3Utility.EditTextBox();
 			this.label10 = new System.Windows.Forms.Label();
 			this.label11 = new System.Windows.Forms.Label();
-			this.editTextBoxMorphClipName = new SB3Utility.EditTextBox();
 			this.groupBox5 = new System.Windows.Forms.GroupBox();
 			this.buttonMorphClipExport = new System.Windows.Forms.Button();
 			this.label5 = new System.Windows.Forms.Label();
@@ -107,7 +104,6 @@
 			this.checkBoxStartKeyframe = new System.Windows.Forms.CheckBox();
 			this.buttonDeleteKeyframe = new System.Windows.Forms.Button();
 			this.label9 = new System.Windows.Forms.Label();
-			this.editTextBoxNewKeyframeName = new SB3Utility.EditTextBox();
 			this.label3 = new System.Windows.Forms.Label();
 			this.listViewMorphKeyframe = new System.Windows.Forms.ListView();
 			this.columnHeaderMorphKeyframeName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -155,6 +151,14 @@
 			this.labelSkeletalRender = new System.Windows.Forms.Label();
 			this.label30 = new System.Windows.Forms.Label();
 			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+			this.label13 = new System.Windows.Forms.Label();
+			this.label14 = new System.Windows.Forms.Label();
+			this.label17 = new System.Windows.Forms.Label();
+			this.label18 = new System.Windows.Forms.Label();
+			this.textBoxFrameNameRefID = new SB3Utility.EditTextBox();
+			this.editTextBoxMorphClipMesh = new SB3Utility.EditTextBox();
+			this.editTextBoxMorphClipName = new SB3Utility.EditTextBox();
+			this.editTextBoxNewKeyframeName = new SB3Utility.EditTextBox();
 			this.tabControlXA.SuspendLayout();
 			this.tabPageXAObjectView.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer7)).BeginInit();
@@ -270,6 +274,10 @@
 			// 
 			// tabPageMaterial
 			// 
+			this.tabPageMaterial.Controls.Add(this.label13);
+			this.tabPageMaterial.Controls.Add(this.label14);
+			this.tabPageMaterial.Controls.Add(this.label17);
+			this.tabPageMaterial.Controls.Add(this.label18);
 			this.tabPageMaterial.Controls.Add(this.xaMatNameText);
 			this.tabPageMaterial.Controls.Add(this.label29);
 			this.tabPageMaterial.Controls.Add(this.labelType1ConfigPositionMax);
@@ -309,15 +317,15 @@
 			// 
 			// xaMatNameText
 			// 
-			this.xaMatNameText.Location = new System.Drawing.Point(207, 45);
+			this.xaMatNameText.Location = new System.Drawing.Point(251, 26);
 			this.xaMatNameText.Name = "xaMatNameText";
-			this.xaMatNameText.Size = new System.Drawing.Size(339, 20);
+			this.xaMatNameText.Size = new System.Drawing.Size(257, 20);
 			this.xaMatNameText.TabIndex = 67;
 			// 
 			// label29
 			// 
 			this.label29.AutoSize = true;
-			this.label29.Location = new System.Drawing.Point(204, 29);
+			this.label29.Location = new System.Drawing.Point(189, 29);
 			this.label29.Name = "label29";
 			this.label29.Size = new System.Drawing.Size(35, 13);
 			this.label29.TabIndex = 68;
@@ -326,7 +334,7 @@
 			// labelType1ConfigPositionMax
 			// 
 			this.labelType1ConfigPositionMax.AutoSize = true;
-			this.labelType1ConfigPositionMax.Location = new System.Drawing.Point(267, 155);
+			this.labelType1ConfigPositionMax.Location = new System.Drawing.Point(332, 124);
 			this.labelType1ConfigPositionMax.Name = "labelType1ConfigPositionMax";
 			this.labelType1ConfigPositionMax.Size = new System.Drawing.Size(21, 13);
 			this.labelType1ConfigPositionMax.TabIndex = 66;
@@ -335,7 +343,7 @@
 			// label28
 			// 
 			this.label28.AutoSize = true;
-			this.label28.Location = new System.Drawing.Point(204, 135);
+			this.label28.Location = new System.Drawing.Point(189, 122);
 			this.label28.Name = "label28";
 			this.label28.Size = new System.Drawing.Size(77, 13);
 			this.label28.TabIndex = 65;
@@ -343,7 +351,7 @@
 			// 
 			// numericType1ConfigPosition
 			// 
-			this.numericType1ConfigPosition.Location = new System.Drawing.Point(207, 151);
+			this.numericType1ConfigPosition.Location = new System.Drawing.Point(272, 120);
 			this.numericType1ConfigPosition.Maximum = new decimal(new int[] {
             1,
             0,
@@ -362,6 +370,7 @@
             0,
             0,
             0});
+			this.numericType1ConfigPosition.ValueChanged += new System.EventHandler(this.numericType1ConfigPosition_ValueChanged);
 			// 
 			// listViewType1
 			// 
@@ -380,138 +389,139 @@
 			this.listViewType1.TabIndex = 63;
 			this.listViewType1.UseCompatibleStateImageBehavior = false;
 			this.listViewType1.View = System.Windows.Forms.View.Details;
+			this.listViewType1.ItemSelectionChanged += new System.Windows.Forms.ListViewItemSelectionChangedEventHandler(this.listViewType1_ItemSelectionChanged);
 			// 
 			// label27
 			// 
 			this.label27.AutoSize = true;
-			this.label27.Location = new System.Drawing.Point(216, 317);
+			this.label27.Location = new System.Drawing.Point(189, 296);
 			this.label27.Name = "label27";
-			this.label27.Size = new System.Drawing.Size(68, 13);
+			this.label27.Size = new System.Drawing.Size(53, 13);
 			this.label27.TabIndex = 62;
-			this.label27.Text = "Unknown Int";
+			this.label27.Text = "Unknown";
 			// 
 			// xaMatUnknown
 			// 
-			this.xaMatUnknown.Location = new System.Drawing.Point(290, 314);
+			this.xaMatUnknown.Location = new System.Drawing.Point(251, 293);
 			this.xaMatUnknown.Name = "xaMatUnknown";
 			this.xaMatUnknown.Size = new System.Drawing.Size(62, 20);
 			this.xaMatUnknown.TabIndex = 61;
 			// 
 			// xaMatSpecularPower
 			// 
-			this.xaMatSpecularPower.Location = new System.Drawing.Point(290, 290);
+			this.xaMatSpecularPower.Location = new System.Drawing.Point(251, 269);
 			this.xaMatSpecularPower.Name = "xaMatSpecularPower";
 			this.xaMatSpecularPower.Size = new System.Drawing.Size(62, 20);
 			this.xaMatSpecularPower.TabIndex = 60;
 			// 
 			// xaMatEmissiveA
 			// 
-			this.xaMatEmissiveA.Location = new System.Drawing.Point(485, 242);
+			this.xaMatEmissiveA.Location = new System.Drawing.Point(446, 221);
 			this.xaMatEmissiveA.Name = "xaMatEmissiveA";
 			this.xaMatEmissiveA.Size = new System.Drawing.Size(62, 20);
 			this.xaMatEmissiveA.TabIndex = 59;
 			// 
 			// xaMatEmissiveB
 			// 
-			this.xaMatEmissiveB.Location = new System.Drawing.Point(420, 242);
+			this.xaMatEmissiveB.Location = new System.Drawing.Point(381, 221);
 			this.xaMatEmissiveB.Name = "xaMatEmissiveB";
 			this.xaMatEmissiveB.Size = new System.Drawing.Size(62, 20);
 			this.xaMatEmissiveB.TabIndex = 58;
 			// 
 			// xaMatEmissiveG
 			// 
-			this.xaMatEmissiveG.Location = new System.Drawing.Point(355, 242);
+			this.xaMatEmissiveG.Location = new System.Drawing.Point(316, 221);
 			this.xaMatEmissiveG.Name = "xaMatEmissiveG";
 			this.xaMatEmissiveG.Size = new System.Drawing.Size(62, 20);
 			this.xaMatEmissiveG.TabIndex = 57;
 			// 
 			// xaMatEmissiveR
 			// 
-			this.xaMatEmissiveR.Location = new System.Drawing.Point(290, 242);
+			this.xaMatEmissiveR.Location = new System.Drawing.Point(251, 221);
 			this.xaMatEmissiveR.Name = "xaMatEmissiveR";
 			this.xaMatEmissiveR.Size = new System.Drawing.Size(62, 20);
 			this.xaMatEmissiveR.TabIndex = 56;
 			// 
 			// xaMatSpecularA
 			// 
-			this.xaMatSpecularA.Location = new System.Drawing.Point(485, 266);
+			this.xaMatSpecularA.Location = new System.Drawing.Point(446, 245);
 			this.xaMatSpecularA.Name = "xaMatSpecularA";
 			this.xaMatSpecularA.Size = new System.Drawing.Size(62, 20);
 			this.xaMatSpecularA.TabIndex = 55;
 			// 
 			// xaMatSpecularB
 			// 
-			this.xaMatSpecularB.Location = new System.Drawing.Point(420, 266);
+			this.xaMatSpecularB.Location = new System.Drawing.Point(381, 245);
 			this.xaMatSpecularB.Name = "xaMatSpecularB";
 			this.xaMatSpecularB.Size = new System.Drawing.Size(62, 20);
 			this.xaMatSpecularB.TabIndex = 54;
 			// 
 			// xaMatSpecularG
 			// 
-			this.xaMatSpecularG.Location = new System.Drawing.Point(355, 266);
+			this.xaMatSpecularG.Location = new System.Drawing.Point(316, 245);
 			this.xaMatSpecularG.Name = "xaMatSpecularG";
 			this.xaMatSpecularG.Size = new System.Drawing.Size(62, 20);
 			this.xaMatSpecularG.TabIndex = 53;
 			// 
 			// xaMatSpecularR
 			// 
-			this.xaMatSpecularR.Location = new System.Drawing.Point(290, 266);
+			this.xaMatSpecularR.Location = new System.Drawing.Point(251, 245);
 			this.xaMatSpecularR.Name = "xaMatSpecularR";
 			this.xaMatSpecularR.Size = new System.Drawing.Size(62, 20);
 			this.xaMatSpecularR.TabIndex = 52;
 			// 
 			// xaMatAmbientA
 			// 
-			this.xaMatAmbientA.Location = new System.Drawing.Point(485, 218);
+			this.xaMatAmbientA.Location = new System.Drawing.Point(446, 197);
 			this.xaMatAmbientA.Name = "xaMatAmbientA";
 			this.xaMatAmbientA.Size = new System.Drawing.Size(62, 20);
 			this.xaMatAmbientA.TabIndex = 51;
 			// 
 			// xaMatAmbientB
 			// 
-			this.xaMatAmbientB.Location = new System.Drawing.Point(420, 218);
+			this.xaMatAmbientB.Location = new System.Drawing.Point(381, 197);
 			this.xaMatAmbientB.Name = "xaMatAmbientB";
 			this.xaMatAmbientB.Size = new System.Drawing.Size(62, 20);
 			this.xaMatAmbientB.TabIndex = 50;
 			// 
 			// xaMatAmbientG
 			// 
-			this.xaMatAmbientG.Location = new System.Drawing.Point(355, 218);
+			this.xaMatAmbientG.Location = new System.Drawing.Point(316, 197);
 			this.xaMatAmbientG.Name = "xaMatAmbientG";
 			this.xaMatAmbientG.Size = new System.Drawing.Size(62, 20);
 			this.xaMatAmbientG.TabIndex = 49;
 			// 
 			// xaMatAmbientR
 			// 
-			this.xaMatAmbientR.Location = new System.Drawing.Point(290, 218);
+			this.xaMatAmbientR.Location = new System.Drawing.Point(251, 197);
 			this.xaMatAmbientR.Name = "xaMatAmbientR";
 			this.xaMatAmbientR.Size = new System.Drawing.Size(62, 20);
 			this.xaMatAmbientR.TabIndex = 48;
 			// 
 			// xaMatDiffuseA
 			// 
-			this.xaMatDiffuseA.Location = new System.Drawing.Point(485, 194);
+			this.xaMatDiffuseA.Location = new System.Drawing.Point(446, 173);
 			this.xaMatDiffuseA.Name = "xaMatDiffuseA";
 			this.xaMatDiffuseA.Size = new System.Drawing.Size(62, 20);
 			this.xaMatDiffuseA.TabIndex = 47;
 			// 
 			// xaMatDiffuseB
 			// 
-			this.xaMatDiffuseB.Location = new System.Drawing.Point(420, 194);
+			this.xaMatDiffuseB.Location = new System.Drawing.Point(381, 173);
 			this.xaMatDiffuseB.Name = "xaMatDiffuseB";
 			this.xaMatDiffuseB.Size = new System.Drawing.Size(62, 20);
 			this.xaMatDiffuseB.TabIndex = 46;
 			// 
 			// xaMatDiffuseG
 			// 
-			this.xaMatDiffuseG.Location = new System.Drawing.Point(355, 194);
+			this.xaMatDiffuseG.Location = new System.Drawing.Point(316, 173);
 			this.xaMatDiffuseG.Name = "xaMatDiffuseG";
 			this.xaMatDiffuseG.Size = new System.Drawing.Size(62, 20);
 			this.xaMatDiffuseG.TabIndex = 45;
 			// 
 			// xaMatDiffuseR
 			// 
-			this.xaMatDiffuseR.Location = new System.Drawing.Point(290, 194);
+			this.xaMatDiffuseR.Location = new System.Drawing.Point(251, 173);
 			this.xaMatDiffuseR.Name = "xaMatDiffuseR";
 			this.xaMatDiffuseR.Size = new System.Drawing.Size(62, 20);
 			this.xaMatDiffuseR.TabIndex = 44;
@@ -519,47 +529,47 @@
 			// label2
 			// 
 			this.label2.AutoSize = true;
-			this.label2.Location = new System.Drawing.Point(204, 246);
+			this.label2.Location = new System.Drawing.Point(189, 225);
 			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(81, 13);
+			this.label2.Size = new System.Drawing.Size(48, 13);
 			this.label2.TabIndex = 43;
-			this.label2.Text = "Emissive RGBA";
+			this.label2.Text = "Emissive";
 			// 
 			// label7
 			// 
 			this.label7.AutoSize = true;
-			this.label7.Location = new System.Drawing.Point(204, 293);
+			this.label7.Location = new System.Drawing.Point(189, 272);
 			this.label7.Name = "label7";
-			this.label7.Size = new System.Drawing.Size(82, 13);
+			this.label7.Size = new System.Drawing.Size(49, 13);
 			this.label7.TabIndex = 42;
-			this.label7.Text = "Specular Power";
+			this.label7.Text = "Specular";
 			// 
 			// label12
 			// 
 			this.label12.AutoSize = true;
-			this.label12.Location = new System.Drawing.Point(204, 269);
+			this.label12.Location = new System.Drawing.Point(189, 248);
 			this.label12.Name = "label12";
-			this.label12.Size = new System.Drawing.Size(82, 13);
+			this.label12.Size = new System.Drawing.Size(49, 13);
 			this.label12.TabIndex = 41;
-			this.label12.Text = "Specular RGBA";
+			this.label12.Text = "Specular";
 			// 
 			// label15
 			// 
 			this.label15.AutoSize = true;
-			this.label15.Location = new System.Drawing.Point(205, 221);
+			this.label15.Location = new System.Drawing.Point(190, 200);
 			this.label15.Name = "label15";
-			this.label15.Size = new System.Drawing.Size(78, 13);
+			this.label15.Size = new System.Drawing.Size(45, 13);
 			this.label15.TabIndex = 40;
-			this.label15.Text = "Ambient RGBA";
+			this.label15.Text = "Ambient";
 			// 
 			// label16
 			// 
 			this.label16.AutoSize = true;
-			this.label16.Location = new System.Drawing.Point(205, 197);
+			this.label16.Location = new System.Drawing.Point(190, 176);
 			this.label16.Name = "label16";
-			this.label16.Size = new System.Drawing.Size(73, 13);
+			this.label16.Size = new System.Drawing.Size(40, 13);
 			this.label16.TabIndex = 39;
-			this.label16.Text = "Diffuse RGBA";
+			this.label16.Text = "Diffuse";
 			// 
 			// tabPageType2
 			// 
@@ -667,15 +677,6 @@
 			this.buttonDeleteRef.UseVisualStyleBackColor = true;
 			this.buttonDeleteRef.Click += new System.EventHandler(this.buttonDeleteRef_Click);
 			// 
-			// textBoxFrameNameRefID
-			// 
-			this.textBoxFrameNameRefID.Enabled = false;
-			this.textBoxFrameNameRefID.Location = new System.Drawing.Point(80, 13);
-			this.textBoxFrameNameRefID.Name = "textBoxFrameNameRefID";
-			this.textBoxFrameNameRefID.Size = new System.Drawing.Size(36, 20);
-			this.textBoxFrameNameRefID.TabIndex = 110;
-			this.textBoxFrameNameRefID.AfterEditTextChanged += new System.EventHandler(this.textBoxFrameNameRefID_AfterEditTextChanged);
-			// 
 			// buttonNewRef
 			// 
 			this.buttonNewRef.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -736,14 +737,6 @@
 			this.groupBox9.TabStop = false;
 			this.groupBox9.Text = "Morph Clip";
 			// 
-			// editTextBoxMorphClipMesh
-			// 
-			this.editTextBoxMorphClipMesh.Location = new System.Drawing.Point(48, 42);
-			this.editTextBoxMorphClipMesh.Name = "editTextBoxMorphClipMesh";
-			this.editTextBoxMorphClipMesh.Size = new System.Drawing.Size(134, 20);
-			this.editTextBoxMorphClipMesh.TabIndex = 94;
-			this.editTextBoxMorphClipMesh.AfterEditTextChanged += new System.EventHandler(this.editTextBoxMorphClipMesh_AfterEditTextChanged);
-			// 
 			// label10
 			// 
 			this.label10.AutoSize = true;
@@ -761,14 +754,6 @@
 			this.label11.Size = new System.Drawing.Size(33, 13);
 			this.label11.TabIndex = 140;
 			this.label11.Text = "Mesh";
-			// 
-			// editTextBoxMorphClipName
-			// 
-			this.editTextBoxMorphClipName.Location = new System.Drawing.Point(48, 16);
-			this.editTextBoxMorphClipName.Name = "editTextBoxMorphClipName";
-			this.editTextBoxMorphClipName.Size = new System.Drawing.Size(134, 20);
-			this.editTextBoxMorphClipName.TabIndex = 92;
-			this.editTextBoxMorphClipName.AfterEditTextChanged += new System.EventHandler(this.editTextBoxMorphClipName_AfterEditTextChanged);
 			// 
 			// groupBox5
 			// 
@@ -1000,15 +985,6 @@
 			this.label9.TabIndex = 136;
 			this.label9.Text = "Rename To";
 			// 
-			// editTextBoxNewKeyframeName
-			// 
-			this.editTextBoxNewKeyframeName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.editTextBoxNewKeyframeName.Location = new System.Drawing.Point(364, 33);
-			this.editTextBoxNewKeyframeName.Name = "editTextBoxNewKeyframeName";
-			this.editTextBoxNewKeyframeName.Size = new System.Drawing.Size(139, 20);
-			this.editTextBoxNewKeyframeName.TabIndex = 164;
-			this.editTextBoxNewKeyframeName.AfterEditTextChanged += new System.EventHandler(this.editTextBoxNewKeyframeName_AfterEditTextChanged);
-			// 
 			// label3
 			// 
 			this.label3.AutoSize = true;
@@ -1111,13 +1087,13 @@
 			// buttonAnimationTrackRemove
 			// 
 			this.buttonAnimationTrackRemove.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.buttonAnimationTrackRemove.Enabled = false;
 			this.buttonAnimationTrackRemove.Location = new System.Drawing.Point(409, 121);
 			this.buttonAnimationTrackRemove.Name = "buttonAnimationTrackRemove";
 			this.buttonAnimationTrackRemove.Size = new System.Drawing.Size(100, 23);
 			this.buttonAnimationTrackRemove.TabIndex = 152;
 			this.buttonAnimationTrackRemove.Text = "Remove Tracks";
 			this.buttonAnimationTrackRemove.UseVisualStyleBackColor = true;
+			this.buttonAnimationTrackRemove.Click += new System.EventHandler(this.buttonAnimationTrackRemove_Click);
 			// 
 			// listViewAnimationTrack
 			// 
@@ -1144,7 +1120,9 @@
 			this.listViewAnimationTrack.TabIndex = 137;
 			this.listViewAnimationTrack.UseCompatibleStateImageBehavior = false;
 			this.listViewAnimationTrack.View = System.Windows.Forms.View.Details;
+			this.listViewAnimationTrack.AfterLabelEdit += new System.Windows.Forms.LabelEditEventHandler(this.listViewAnimationTrack_AfterLabelEdit);
 			this.listViewAnimationTrack.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.listViewAnimationTrack_ItemDrag);
+			this.listViewAnimationTrack.ItemSelectionChanged += new System.Windows.Forms.ListViewItemSelectionChangedEventHandler(this.listViewAnimationTrack_ItemSelectionChanged);
 			this.listViewAnimationTrack.DragDrop += new System.Windows.Forms.DragEventHandler(this.listViewAnimationTrack_DragDrop);
 			this.listViewAnimationTrack.DragEnter += new System.Windows.Forms.DragEventHandler(this.listViewAnimationTrack_DragEnter);
 			this.listViewAnimationTrack.DragOver += new System.Windows.Forms.DragEventHandler(this.listViewAnimationTrack_DragOver);
@@ -1533,6 +1511,76 @@
 			this.label30.TabIndex = 146;
 			this.label30.Text = "Speed";
 			// 
+			// label13
+			// 
+			this.label13.AutoSize = true;
+			this.label13.Location = new System.Drawing.Point(471, 157);
+			this.label13.Name = "label13";
+			this.label13.Size = new System.Drawing.Size(14, 13);
+			this.label13.TabIndex = 73;
+			this.label13.Text = "A";
+			// 
+			// label14
+			// 
+			this.label14.AutoSize = true;
+			this.label14.Location = new System.Drawing.Point(406, 157);
+			this.label14.Name = "label14";
+			this.label14.Size = new System.Drawing.Size(14, 13);
+			this.label14.TabIndex = 72;
+			this.label14.Text = "B";
+			// 
+			// label17
+			// 
+			this.label17.AutoSize = true;
+			this.label17.Location = new System.Drawing.Point(344, 157);
+			this.label17.Name = "label17";
+			this.label17.Size = new System.Drawing.Size(15, 13);
+			this.label17.TabIndex = 71;
+			this.label17.Text = "G";
+			// 
+			// label18
+			// 
+			this.label18.AutoSize = true;
+			this.label18.Location = new System.Drawing.Point(276, 157);
+			this.label18.Name = "label18";
+			this.label18.Size = new System.Drawing.Size(15, 13);
+			this.label18.TabIndex = 70;
+			this.label18.Text = "R";
+			// 
+			// textBoxFrameNameRefID
+			// 
+			this.textBoxFrameNameRefID.Enabled = false;
+			this.textBoxFrameNameRefID.Location = new System.Drawing.Point(80, 13);
+			this.textBoxFrameNameRefID.Name = "textBoxFrameNameRefID";
+			this.textBoxFrameNameRefID.Size = new System.Drawing.Size(36, 20);
+			this.textBoxFrameNameRefID.TabIndex = 110;
+			this.textBoxFrameNameRefID.AfterEditTextChanged += new System.EventHandler(this.textBoxFrameNameRefID_AfterEditTextChanged);
+			// 
+			// editTextBoxMorphClipMesh
+			// 
+			this.editTextBoxMorphClipMesh.Location = new System.Drawing.Point(48, 42);
+			this.editTextBoxMorphClipMesh.Name = "editTextBoxMorphClipMesh";
+			this.editTextBoxMorphClipMesh.Size = new System.Drawing.Size(134, 20);
+			this.editTextBoxMorphClipMesh.TabIndex = 94;
+			this.editTextBoxMorphClipMesh.AfterEditTextChanged += new System.EventHandler(this.editTextBoxMorphClipMesh_AfterEditTextChanged);
+			// 
+			// editTextBoxMorphClipName
+			// 
+			this.editTextBoxMorphClipName.Location = new System.Drawing.Point(48, 16);
+			this.editTextBoxMorphClipName.Name = "editTextBoxMorphClipName";
+			this.editTextBoxMorphClipName.Size = new System.Drawing.Size(134, 20);
+			this.editTextBoxMorphClipName.TabIndex = 92;
+			this.editTextBoxMorphClipName.AfterEditTextChanged += new System.EventHandler(this.editTextBoxMorphClipName_AfterEditTextChanged);
+			// 
+			// editTextBoxNewKeyframeName
+			// 
+			this.editTextBoxNewKeyframeName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.editTextBoxNewKeyframeName.Location = new System.Drawing.Point(364, 33);
+			this.editTextBoxNewKeyframeName.Name = "editTextBoxNewKeyframeName";
+			this.editTextBoxNewKeyframeName.Size = new System.Drawing.Size(139, 20);
+			this.editTextBoxNewKeyframeName.TabIndex = 164;
+			this.editTextBoxNewKeyframeName.AfterEditTextChanged += new System.EventHandler(this.editTextBoxNewKeyframeName_AfterEditTextChanged);
+			// 
 			// FormXA
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1718,5 +1766,9 @@
 		private System.Windows.Forms.Label label10;
 		private System.Windows.Forms.Label label11;
 		private EditTextBox editTextBoxMorphClipName;
+		private System.Windows.Forms.Label label13;
+		private System.Windows.Forms.Label label14;
+		private System.Windows.Forms.Label label17;
+		private System.Windows.Forms.Label label18;
 	}
 }

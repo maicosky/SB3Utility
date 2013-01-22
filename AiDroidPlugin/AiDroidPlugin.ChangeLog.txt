@@ -1,4 +1,7 @@
-﻿[0.4.42.31]
+﻿[0.4.42.32]
+  - changed display of used bones to use the bone frame parents as root
+
+[0.4.42.31]
   - Added Fbx import/export (also DAE, DXF, 3DS, OBJ)
   - Added bone matrix calculation for Rest Pose
   - Fixed taking wrong materials when replacing meshes
