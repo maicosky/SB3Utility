@@ -34,7 +34,9 @@ namespace SB3Utility
 			[Description("3D Studio 3DS")]
 			_3ds,
 			[Description("Alias OBJ")]
-			Obj
+			Obj,
+			[Description("FBX 2006")]
+			Fbx_2006
 		}
 
 		private class KeyList<T>
@@ -3020,19 +3022,22 @@ namespace SB3Utility
 						Gui.Scripting.RunScript("ExportDae(path=\"" + Utility.GetDestFile(dir, "meshes", ".dae") + "\", xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", allFrames=" + checkBoxMeshExportColladaAllFrames.Checked + ")");
 						break;
 					case MeshExportFormat.ColladaFbx:
-						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".dae") + "\", exportFormat=\".dae\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", embedMedia=" + checkBoxMeshExportEmbedMedia.Checked + ")");
+						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".dae") + "\", exportFormat=\".dae\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", embedMedia=" + checkBoxMeshExportEmbedMedia.Checked + ", compatibility=" + false + ")");
 						break;
 					case MeshExportFormat.Fbx:
-						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".fbx") + "\", exportFormat=\".fbx\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", embedMedia=" + checkBoxMeshExportEmbedMedia.Checked + ")");
+						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".fbx") + "\", exportFormat=\".fbx\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", embedMedia=" + checkBoxMeshExportEmbedMedia.Checked + ", compatibility=" + false + ")");
+						break;
+					case MeshExportFormat.Fbx_2006:
+						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".fbx") + "\", exportFormat=\".fbx\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", embedMedia=" + checkBoxMeshExportEmbedMedia.Checked + ", compatibility=" + true + ")");
 						break;
 					case MeshExportFormat.Dxf:
-						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".dxf") + "\", exportFormat=\".dxf\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", embedMedia=" + checkBoxMeshExportEmbedMedia.Checked + ")");
+						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".dxf") + "\", exportFormat=\".dxf\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", embedMedia=" + checkBoxMeshExportEmbedMedia.Checked + ", compatibility=" + false + ")");
 						break;
 					case MeshExportFormat._3ds:
-						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".3ds") + "\", exportFormat=\".3ds\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", embedMedia=" + checkBoxMeshExportEmbedMedia.Checked + ")");
+						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".3ds") + "\", exportFormat=\".3ds\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", embedMedia=" + checkBoxMeshExportEmbedMedia.Checked + ", compatibility=" + false + ")");
 						break;
 					case MeshExportFormat.Obj:
-						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".obj") + "\", exportFormat=\".obj\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", embedMedia=" + checkBoxMeshExportEmbedMedia.Checked + ")");
+						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".obj") + "\", exportFormat=\".obj\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", embedMedia=" + checkBoxMeshExportEmbedMedia.Checked + ", compatibility=" + false + ")");
 						break;
 					default:
 						throw new Exception("Unexpected ExportFormat");
@@ -3129,6 +3134,7 @@ namespace SB3Utility
 						panelMeshExportOptionsCollada.BringToFront();
 						break;
 					case MeshExportFormat.Fbx:
+					case MeshExportFormat.Fbx_2006:
 					case MeshExportFormat.ColladaFbx:
 					case MeshExportFormat.Dxf:
 					case MeshExportFormat._3ds:

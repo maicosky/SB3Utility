@@ -138,7 +138,7 @@ namespace SB3Utility
 
 	public class WorkspaceAnimation
 	{
-		public ImportedAnimation importedAnimation { get; set; }
+		public ImportedAnimation importedAnimation { get; protected set; }
 
 		protected class AdditionalTrackOptions
 		{
@@ -175,6 +175,60 @@ namespace SB3Utility
 			}
 		}
 
+		public void SetAnimation(ImportedAnimation importedAnimation)
+		{
+			if (importedAnimation is ImportedKeyframedAnimation)
+			{
+				List<ImportedAnimationKeyframedTrack> importedTrackList = ((ImportedKeyframedAnimation)importedAnimation).TrackList;
+				for (int i = 0; i < importedTrackList.Count; i++)
+				{
+					ImportedAnimationTrack track = importedTrackList[i];
+					
+					foreach (KeyValuePair<ImportedAnimationTrack, AdditionalTrackOptions> pair in this.TrackOptions)
+					{
+						if (pair.Key.Name == track.Name)
+						{
+							this.TrackOptions.Remove(pair.Key);
+							this.TrackOptions.Add(track, pair.Value);
+							track = null;
+							break;
+						}
+					}
+					if (track != null)
+					{
+						AdditionalTrackOptions options = new AdditionalTrackOptions();
+						this.TrackOptions.Add(track, options);
+					}
+				}
+			}
+			else if (importedAnimation is ImportedSampledAnimation)
+			{
+				List<ImportedAnimationSampledTrack> importedTrackList = ((ImportedSampledAnimation)importedAnimation).TrackList;
+				for (int i = 0; i < importedTrackList.Count; i++)
+				{
+					ImportedAnimationTrack track = importedTrackList[i];
+
+					foreach (KeyValuePair<ImportedAnimationTrack, AdditionalTrackOptions> pair in this.TrackOptions)
+					{
+						if (pair.Key.Name == track.Name)
+						{
+							this.TrackOptions.Remove(pair.Key);
+							this.TrackOptions.Add(track, pair.Value);
+							track = null;
+							break;
+						}
+					}
+					if (track != null)
+					{
+						AdditionalTrackOptions options = new AdditionalTrackOptions();
+						this.TrackOptions.Add(track, options);
+					}
+				}
+			}
+
+			this.importedAnimation = importedAnimation;
+		}
+
 		public bool isTrackEnabled(ImportedAnimationTrack track)
 		{
 			AdditionalTrackOptions options;
@@ -182,7 +236,7 @@ namespace SB3Utility
 			{
 				return options.Enabled;
 			}
-			throw new Exception("Track not found");
+			throw new Exception("Track " + track.Name + " not found");
 		}
 
 		public void setTrackEnabled(ImportedAnimationTrack track, bool enabled)
@@ -193,7 +247,7 @@ namespace SB3Utility
 				options.Enabled = enabled;
 				return;
 			}
-			throw new Exception("Track not found");
+			throw new Exception("Track " + track.Name + " not found");
 		}
 	}
 }

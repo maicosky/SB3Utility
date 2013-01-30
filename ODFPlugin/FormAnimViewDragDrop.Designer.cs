@@ -28,6 +28,7 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
+			this.components = new System.ComponentModel.Container();
 			this.buttonCancel = new System.Windows.Forms.Button();
 			this.buttonOK = new System.Windows.Forms.Button();
 			this.panelAnimation = new System.Windows.Forms.Panel();
@@ -57,6 +58,7 @@
 			this.radioButtonReplaceNormalsYes = new System.Windows.Forms.RadioButton();
 			this.label6 = new System.Windows.Forms.Label();
 			this.label7 = new System.Windows.Forms.Label();
+			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
 			this.panelAnimation.SuspendLayout();
 			this.groupBox1.SuspendLayout();
 			this.groupBox3.SuspendLayout();
@@ -91,7 +93,7 @@
 			// panelAnimation
 			// 
 			this.panelAnimation.Controls.Add(this.groupBox1);
-			this.panelAnimation.Location = new System.Drawing.Point(12, 0);
+			this.panelAnimation.Location = new System.Drawing.Point(8, 0);
 			this.panelAnimation.Name = "panelAnimation";
 			this.panelAnimation.Size = new System.Drawing.Size(375, 153);
 			this.panelAnimation.TabIndex = 18;
@@ -144,7 +146,7 @@
 			// label9
 			// 
 			this.label9.AutoSize = true;
-			this.label9.Location = new System.Drawing.Point(2, 35);
+			this.label9.Location = new System.Drawing.Point(2, 33);
 			this.label9.Name = "label9";
 			this.label9.Size = new System.Drawing.Size(177, 13);
 			this.label9.TabIndex = 8;
@@ -189,7 +191,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.groupBox2.Controls.Add(this.radioButtonInterpolationCubic);
 			this.groupBox2.Controls.Add(this.radioButtonInterpolationLinear);
-			this.groupBox2.Location = new System.Drawing.Point(192, 26);
+			this.groupBox2.Location = new System.Drawing.Point(192, 24);
 			this.groupBox2.Name = "groupBox2";
 			this.groupBox2.Size = new System.Drawing.Size(138, 27);
 			this.groupBox2.TabIndex = 9;
@@ -277,6 +279,7 @@
 			this.comboBoxMethod.Name = "comboBoxMethod";
 			this.comboBoxMethod.Size = new System.Drawing.Size(87, 21);
 			this.comboBoxMethod.TabIndex = 0;
+			this.toolTip1.SetToolTip(this.comboBoxMethod, "Merge and Insert dont operate on key-reduced tracks!");
 			// 
 			// panelMorphList
 			// 
@@ -459,5 +462,6 @@
 		public System.Windows.Forms.RadioButton radioButtonInterpolationCubic;
 		public System.Windows.Forms.RadioButton radioButtonInterpolationLinear;
 		public System.Windows.Forms.CheckBox checkBoxNegateQuaternionFlips;
+		private System.Windows.Forms.ToolTip toolTip1;
 	}
 }

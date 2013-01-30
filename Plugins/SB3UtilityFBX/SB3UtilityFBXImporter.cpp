@@ -597,11 +597,16 @@ namespace SB3Utility
 				catch (Exception^)
 				{
 					Report::ReportLog("Import of texture " + texPath + " failed.");
+					texName = String::Empty;
 				}
 			}
 			else
 			{
-				texName = TextureList[pTexIdx]->Name;
+				String^ name = gcnew String(pTexture->GetName());
+				if (ImportedHelpers::FindTexture(name, TextureList) != nullptr)
+				{
+					texName = Path::GetFileName(name);
+				}
 			}
 		}
 

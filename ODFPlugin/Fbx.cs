@@ -11,7 +11,7 @@ namespace ODFPlugin
 	public static partial class Plugins
 	{
 		[Plugin]
-		public static void ExportFbx([DefaultVar]odfParser parser, object[] meshNames, object[] animations, int startKeyframe, int endKeyframe, bool linear, bool EulerFilter, double filterPrecision, string path, string exportFormat, bool allFrames, bool skins, bool odaSkeleton)
+		public static void ExportFbx([DefaultVar]odfParser parser, object[] meshNames, object[] animations, int startKeyframe, int endKeyframe, bool linear, bool EulerFilter, double filterPrecision, string path, string exportFormat, bool allFrames, bool skins, bool odaSkeleton, bool compatibility)
 		{
 			List<string> meshStrList = new List<string>(Utility.Convert<string>(meshNames));
 			List<odfMesh> meshes = new List<odfMesh>(meshStrList.Count);
@@ -74,7 +74,7 @@ namespace ODFPlugin
 				}
 			}
 
-			FbxUtility.Export(path, imp, startKeyframe, endKeyframe, linear, EulerFilter, (float)filterPrecision, exportFormat, allFrames, skins);
+			FbxUtility.Export(path, imp, startKeyframe, endKeyframe, linear, EulerFilter, (float)filterPrecision, exportFormat, allFrames, skins, compatibility);
 		}
 
 		public class ODFConverter : IImported

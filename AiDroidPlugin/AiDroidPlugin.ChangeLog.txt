@@ -1,5 +1,8 @@
 ﻿[0.4.42.32]
-  - changed display of used bones to use the bone frame parents as root
+  - Changed display of used bones to use the bone frame parents as root
+  - Added display of animations
+  - Change: textures are cached and are never released
+  - Added Fbx animation export/import
 
 [0.4.42.31]
   - Added Fbx import/export (also DAE, DXF, 3DS, OBJ)

@@ -37,7 +37,7 @@ namespace ODFPlugin
 			}
 
 			Report.ReportLog("Replacing animation ...");
-			List<KeyValuePair<string, ImportedAnimationKeyframe[]>> newTrackList = FbxUtility.CopyAnimation(wsAnimation, resampleCount, linear);
+			List<KeyValuePair<string, ImportedAnimationKeyframe[]>> newTrackList = FbxUtility.CopyKeyframedAnimation(wsAnimation, resampleCount, linear);
 
 			List<odfTrack> animationNodeList = odf.FindClip(clip, parser).ChildList;
 			ImportedKeyframedAnimation iAnim = new ImportedKeyframedAnimation();

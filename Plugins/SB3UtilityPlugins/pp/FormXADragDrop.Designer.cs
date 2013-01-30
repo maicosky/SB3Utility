@@ -28,6 +28,7 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
+			this.components = new System.ComponentModel.Container();
 			this.buttonOK = new System.Windows.Forms.Button();
 			this.buttonCancel = new System.Windows.Forms.Button();
 			this.panelAnimation = new System.Windows.Forms.Panel();
@@ -49,6 +50,7 @@
 			this.radioButtonReplaceNormalsYes = new System.Windows.Forms.RadioButton();
 			this.label6 = new System.Windows.Forms.Label();
 			this.label7 = new System.Windows.Forms.Label();
+			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
 			this.panelAnimation.SuspendLayout();
 			this.groupBox1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericResample)).BeginInit();
@@ -120,6 +122,7 @@
 			this.numericResample.Name = "numericResample";
 			this.numericResample.Size = new System.Drawing.Size(104, 20);
 			this.numericResample.TabIndex = 5;
+			this.toolTip1.SetToolTip(this.numericResample, "-1 doesn\'t resample");
 			this.numericResample.Value = new decimal(new int[] {
             1,
             0,
@@ -173,6 +176,7 @@
 			this.comboBoxMethod.Name = "comboBoxMethod";
 			this.comboBoxMethod.Size = new System.Drawing.Size(84, 21);
 			this.comboBoxMethod.TabIndex = 0;
+			this.toolTip1.SetToolTip(this.comboBoxMethod, "Merge and Insert dont operate on key-reduced tracks!");
 			this.comboBoxMethod.SelectedIndexChanged += new System.EventHandler(this.comboBoxMethod_SelectedIndexChanged);
 			// 
 			// panelMorphList
@@ -344,5 +348,6 @@
 		public System.Windows.Forms.NumericUpDown numericResample;
 		public System.Windows.Forms.ComboBox comboBoxMethod;
 		public System.Windows.Forms.NumericUpDown numericPosition;
+		private System.Windows.Forms.ToolTip toolTip1;
 	}
 }

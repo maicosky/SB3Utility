@@ -75,6 +75,12 @@
     <Compile Include="FPK\FormREMDragDrop.Designer.cs">
       <DependentUpon>FormREMDragDrop.cs</DependentUpon>
     </Compile>
+    <Compile Include="FPK\FormREADragDrop.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FPK\FormREADragDrop.Designer.cs">
+      <DependentUpon>FormREADragDrop.cs</DependentUpon>
+    </Compile>
     <Compile Include="FPK\fpk.cs" />
     <Compile Include="FPK\fpkEditor.cs" />
     <Compile Include="FPK\Mqo.cs" />
@@ -130,6 +136,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FPK\FormREMDragDrop.resx">
       <DependentUpon>FormREMDragDrop.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FPK\FormREADragDrop.resx">
+      <DependentUpon>FormREADragDrop.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

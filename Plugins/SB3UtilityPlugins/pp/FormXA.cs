@@ -16,6 +16,16 @@ namespace SB3Utility
 	[PluginOpensFile(".xa")]
 	public partial class FormXA : DockContent
 	{
+		private enum MorphExportFormat
+		{
+			[Description("Metasequoia")]
+			Mqo,
+			[Description("FBX 2012.2")]
+			Fbx,
+			[Description("FBX 2006")]
+			Fbx_2006
+		}
+
 		public xaEditor Editor { get; protected set; }
 		public string EditorVar { get; protected set; }
 		public string ParserVar { get; protected set; }
@@ -164,6 +174,15 @@ namespace SB3Utility
 			}
 			Gui.Docking.DockContentAdded += DockContentAdded;
 			Gui.Docking.DockContentRemoved += DockContentRemoved;
+
+			MorphExportFormat[] values = Enum.GetValues(typeof(MorphExportFormat)) as MorphExportFormat[];
+			string[] descriptions = new string[values.Length];
+			for (int i = 0; i < descriptions.Length; i++)
+			{
+				descriptions[i] = values[i].GetDescription();
+			}
+			comboBoxMorphExportFormat.Items.AddRange(descriptions);
+			comboBoxMorphExportFormat.SelectedIndex = 1;
 
 			tabControlXA.TabPages.Remove(tabPageXAObjectView);
 
@@ -1410,15 +1429,20 @@ namespace SB3Utility
 					path = path.Substring(0, path.Length - 3);
 				}
 				path += @"\" + Path.GetFileNameWithoutExtension(this.ToolTipText);
-				if (radioButtonMorphExportFormatMqo.Checked)
+				DirectoryInfo dir = new DirectoryInfo(path);
+				switch ((MorphExportFormat)comboBoxMorphExportFormat.SelectedIndex)
 				{
+				case MorphExportFormat.Mqo:
 					Gui.Scripting.RunScript("ExportMorphMqo(dirPath=\"" + path + "\", xxparser=" + xxParserVar + ", meshFrame=" + xxEditorVar + ".Frames[" + meshFrameId + "], xaparser=" + this.ParserVar + ", clip="+ this.ParserVar + ".MorphSection.ClipList[" + clipIdx + "])");
-				}
-				else
-				{
-					DirectoryInfo dir = new DirectoryInfo(path);
+					break;
+				case MorphExportFormat.Fbx:
 					path = Utility.GetDestFile(dir, clip.MeshName + "-" + clip.Name + "-", ".fbx");
-					Gui.Scripting.RunScript("ExportMorphFbx(xxparser=" + xxParserVar + ", path=\"" + path + "\", meshFrame=" + xxEditorVar + ".Frames[" + meshFrameId + "], xaparser=" + this.ParserVar + ", morphClip=" + this.ParserVar + ".MorphSection.ClipList[" + clipIdx + "], exportFormat=\"" + ".fbx" + "\", oneBlendShape=" + checkBoxFbxOptionOneBlendshape.Checked + ", embedMedia=" + checkBoxFbxOptionEmbedMedia.Checked + ")");
+					Gui.Scripting.RunScript("ExportMorphFbx(xxparser=" + xxParserVar + ", path=\"" + path + "\", meshFrame=" + xxEditorVar + ".Frames[" + meshFrameId + "], xaparser=" + this.ParserVar + ", morphClip=" + this.ParserVar + ".MorphSection.ClipList[" + clipIdx + "], exportFormat=\"" + ".fbx" + "\", oneBlendShape=" + checkBoxFbxOptionOneBlendshape.Checked + ", embedMedia=" + checkBoxFbxOptionEmbedMedia.Checked + ", compatibility=" + false + ")");
+					break;
+				case MorphExportFormat.Fbx_2006:
+					path = Utility.GetDestFile(dir, clip.MeshName + "-" + clip.Name + "-", ".fbx");
+					Gui.Scripting.RunScript("ExportMorphFbx(xxparser=" + xxParserVar + ", path=\"" + path + "\", meshFrame=" + xxEditorVar + ".Frames[" + meshFrameId + "], xaparser=" + this.ParserVar + ", morphClip=" + this.ParserVar + ".MorphSection.ClipList[" + clipIdx + "], exportFormat=\"" + ".fbx" + "\", oneBlendShape=" + checkBoxFbxOptionOneBlendshape.Checked + ", embedMedia=" + checkBoxFbxOptionEmbedMedia.Checked + ", compatibility=" + true + ")");
+					break;
 				}
 			}
 			catch (Exception ex)

@@ -10,6 +10,9 @@ namespace SB3Utility
 		[Plugin]
 		[PluginOpensFile(".fbx")]
 		[PluginOpensFile(".dae")]
+		[PluginOpensFile(".dxf")]
+		[PluginOpensFile(".3ds")]
+		[PluginOpensFile(".obj")]
 		public static void WorkspaceFbx(string path, string variable)
 		{
 			string importVar = Gui.Scripting.GetNextVariable("importFbx");
@@ -22,7 +25,7 @@ namespace SB3Utility
 		}
 
 		[Plugin]
-		public static void ExportFbx([DefaultVar]xxParser xxParser, object[] meshNames, object[] xaParsers, int startKeyframe, int endKeyframe, bool linear, string path, string exportFormat, bool allFrames, bool skins, bool embedMedia)
+		public static void ExportFbx([DefaultVar]xxParser xxParser, object[] meshNames, object[] xaParsers, int startKeyframe, int endKeyframe, bool linear, string path, string exportFormat, bool allFrames, bool skins, bool embedMedia, bool compatibility)
 		{
 			List<xaParser> xaParserList = null;
 			if (xaParsers != null)
@@ -31,13 +34,13 @@ namespace SB3Utility
 			}
 
 			List<xxFrame> meshFrames = xx.FindMeshFrames(xxParser.Frame, new List<string>(Utility.Convert<string>(meshNames)));
-			Fbx.Exporter.Export(path, xxParser, meshFrames, xaParserList, startKeyframe, endKeyframe, linear, exportFormat, allFrames, skins, embedMedia);
+			Fbx.Exporter.Export(path, xxParser, meshFrames, xaParserList, startKeyframe, endKeyframe, linear, exportFormat, allFrames, skins, embedMedia, compatibility);
 		}
 
 		[Plugin]
-		public static void ExportMorphFbx([DefaultVar]xxParser xxparser, string path, xxFrame meshFrame, xaParser xaparser, xaMorphClip morphClip, string exportFormat, bool oneBlendShape, bool embedMedia)
+		public static void ExportMorphFbx([DefaultVar]xxParser xxparser, string path, xxFrame meshFrame, xaParser xaparser, xaMorphClip morphClip, string exportFormat, bool oneBlendShape, bool embedMedia, bool compatibility)
 		{
-			Fbx.Exporter.ExportMorph(path, xxparser, meshFrame, morphClip, xaparser, exportFormat, oneBlendShape, embedMedia);
+			Fbx.Exporter.ExportMorph(path, xxparser, meshFrame, morphClip, xaparser, exportFormat, oneBlendShape, embedMedia, compatibility);
 		}
 
 		[Plugin]
@@ -73,12 +76,12 @@ namespace SB3Utility
 			return srt;
 		}
 
-		public static void Export(String path, IImported imp, int startKeyframe, int endKeyframe, bool linear, bool EulerFilter, float filterPrecision, String exportFormat, bool allFrames, bool skins)
+		public static void Export(String path, IImported imp, int startKeyframe, int endKeyframe, bool linear, bool EulerFilter, float filterPrecision, String exportFormat, bool allFrames, bool skins, bool compatibility)
 		{
-			Fbx.Exporter.Export(path, imp, startKeyframe, endKeyframe, linear, EulerFilter, filterPrecision, exportFormat, allFrames, skins);
+			Fbx.Exporter.Export(path, imp, startKeyframe, endKeyframe, linear, EulerFilter, filterPrecision, exportFormat, allFrames, skins, compatibility);
 		}
 
-		public static List<KeyValuePair<string, ImportedAnimationKeyframe[]>> CopyAnimation(WorkspaceAnimation wsAnimation, int resampleCount, bool linear)
+		public static List<KeyValuePair<string, ImportedAnimationKeyframe[]>> CopyKeyframedAnimation(WorkspaceAnimation wsAnimation, int resampleCount, bool linear)
 		{
 			List<ImportedAnimationKeyframedTrack> trackList = ((ImportedKeyframedAnimation)wsAnimation.importedAnimation).TrackList;
 			List<KeyValuePair<string, ImportedAnimationKeyframe[]>> newTrackList = new List<KeyValuePair<string, ImportedAnimationKeyframe[]>>(trackList.Count);
@@ -87,6 +90,7 @@ namespace SB3Utility
 			{
 				if (!wsAnimation.isTrackEnabled(wsTrack))
 					continue;
+
 				ImportedAnimationKeyframe[] keyframes = ((ImportedAnimationKeyframedTrack)wsTrack).Keyframes;
 				ImportedAnimationKeyframe[] newKeyframes;
 				if (resampleCount < 0 || keyframes.Length == resampleCount)
@@ -130,6 +134,125 @@ namespace SB3Utility
 			if (resampleCount >= 0)
 			{
 				Fbx.InterpolateKeyframes(interpolateTracks, resampleCount, linear);
+			}
+			return newTrackList;
+		}
+
+		public static List<KeyValuePair<string, ImportedAnimationSampledTrack>> CopySampledAnimation(WorkspaceAnimation wsAnimation, int resampleCount, bool linear)
+		{
+			List<ImportedAnimationSampledTrack> trackList = ((ImportedSampledAnimation)wsAnimation.importedAnimation).TrackList;
+			List<KeyValuePair<string, ImportedAnimationSampledTrack>> newTrackList = new List<KeyValuePair<string, ImportedAnimationSampledTrack>>(trackList.Count);
+			List<Tuple<ImportedAnimationTrack, ImportedAnimationSampledTrack>> interpolateTracks = new List<Tuple<ImportedAnimationTrack, ImportedAnimationSampledTrack>>();
+			foreach (var wsTrack in trackList)
+			{
+				if (!wsAnimation.isTrackEnabled(wsTrack))
+					continue;
+
+				ImportedAnimationSampledTrack track = new ImportedAnimationSampledTrack();
+				bool interpolateTrack = false;
+
+				Vector3?[] scalings = wsTrack.Scalings;
+				Vector3?[] newScalings = null;
+				if (resampleCount < 0 || scalings.Length == resampleCount)
+				{
+					newScalings = new Vector3?[scalings.Length];
+					for (int i = 0; i < scalings.Length; i++)
+					{
+						Vector3? scale = scalings[i];
+						if (scale == null)
+							continue;
+
+						newScalings[i] = scale.Value;
+					}
+				}
+				else
+				{
+					if (scalings.Length < 1)
+					{
+						newScalings = new Vector3?[resampleCount];
+						for (int i = 0; i < newScalings.Length; i++)
+						{
+							newScalings[i] = new Vector3(1, 1, 1);
+						}
+					}
+					else
+					{
+						interpolateTrack = true;
+					}
+				}
+
+				Quaternion?[] rotations = wsTrack.Rotations;
+				Quaternion?[] newRotations = null;
+				if (resampleCount < 0 || rotations.Length == resampleCount)
+				{
+					newRotations = new Quaternion?[rotations.Length];
+					for (int i = 0; i < rotations.Length; i++)
+					{
+						Quaternion? rotate = rotations[i];
+						if (rotate == null)
+							continue;
+
+						newRotations[i] = rotate.Value;
+					}
+				}
+				else
+				{
+					if (rotations.Length < 1)
+					{
+						newRotations = new Quaternion?[resampleCount];
+						for (int i = 0; i < newRotations.Length; i++)
+						{
+							newRotations[i] = Quaternion.Identity;
+						}
+					}
+					else
+					{
+						interpolateTrack = true;
+					}
+				}
+
+				Vector3?[] translations = wsTrack.Translations;
+				Vector3?[] newTranslations = null;
+				if (resampleCount < 0 || translations.Length == resampleCount)
+				{
+					newTranslations = new Vector3?[translations.Length];
+					for (int i = 0; i < translations.Length; i++)
+					{
+						Vector3? translate = translations[i];
+						if (translate == null)
+							continue;
+
+						newTranslations[i] = translate.Value;
+					}
+				}
+				else
+				{
+					if (translations.Length < 1)
+					{
+						newTranslations = new Vector3?[resampleCount];
+						for (int i = 0; i < newTranslations.Length; i++)
+						{
+							newTranslations[i] = new Vector3(0, 0, 0);
+						}
+					}
+					else
+					{
+						interpolateTrack = true;
+					}
+				}
+
+				if (interpolateTrack)
+				{
+					interpolateTracks.Add(new Tuple<ImportedAnimationTrack, ImportedAnimationSampledTrack>(wsTrack, track));
+				}
+				track.Scalings = newScalings;
+				track.Rotations = newRotations;
+				track.Translations = newTranslations;
+				newTrackList.Add(new KeyValuePair<string, ImportedAnimationSampledTrack>(wsTrack.Name, track));
+			}
+			if (interpolateTracks.Count > 0)
+			{
+				Fbx.InterpolateSampledTracks(interpolateTracks, resampleCount, linear);
 			}
 			return newTrackList;
 		}
@@ -298,6 +421,262 @@ namespace SB3Utility
 				anim.TrackList.Add(animationNode);
 				animationNode.Name = trackName;
 				origKeyframes = new ImportedAnimationKeyframe[0];
+			}
+			return origKeyframes;
+		}
+
+		public static void ReplaceAnimation(ReplaceAnimationMethod replaceMethod, int insertPos, List<KeyValuePair<string, ImportedAnimationSampledTrack>> newTrackList, ImportedSampledAnimation iAnim, Dictionary<string, ImportedAnimationSampledTrack> animationNodeDic, bool negateQuaternionFlips)
+		{
+			if (replaceMethod == ReplaceAnimationMethod.Replace)
+			{
+				foreach (var newTrack in newTrackList)
+				{
+					ImportedAnimationSampledTrack iTrack = new ImportedAnimationSampledTrack();
+					iAnim.TrackList.Add(iTrack);
+					iTrack.Name = newTrack.Key;
+					iTrack.Scalings = newTrack.Value.Scalings;
+					iTrack.Rotations = newTrack.Value.Rotations;
+					iTrack.Translations = newTrack.Value.Translations;
+				}
+			}
+			else if (replaceMethod == ReplaceAnimationMethod.ReplacePresent)
+			{
+				foreach (var newTrack in newTrackList)
+				{
+					ImportedAnimationSampledTrack animationNode = animationGetOriginalSamples(animationNodeDic, newTrack.Key, iAnim.TrackList);
+					animationNode.Scalings = newTrack.Value.Scalings;
+					animationNode.Rotations = newTrack.Value.Rotations;
+					animationNode.Translations = newTrack.Value.Translations;
+				}
+			}
+			else if (replaceMethod == ReplaceAnimationMethod.Merge)
+			{
+				foreach (var newTrack in newTrackList)
+				{
+					ImportedAnimationSampledTrack animationNode;
+					ImportedAnimationSampledTrack origSamples = animationGetOriginalSamples(animationNodeDic, newTrack.Key, iAnim, out animationNode);
+					ImportedAnimationSampledTrack destSamples;
+					int newEnd = insertPos + newTrack.Value.Scalings.Length;
+					if (origSamples.Scalings.Length < insertPos)
+					{
+						destSamples = new ImportedAnimationSampledTrack();
+						destSamples.Scalings = new Vector3?[newEnd];
+						destSamples.Rotations = new Quaternion?[newEnd];
+						destSamples.Translations = new Vector3?[newEnd];
+						animationCopySampleTransformArray(origSamples, 0, destSamples, 0, origSamples.Scalings.Length);
+						animationNormalizeTrack(origSamples, destSamples, insertPos);
+					}
+					else
+					{
+						if (origSamples.Scalings.Length < newEnd)
+						{
+							destSamples = new ImportedAnimationSampledTrack();
+							destSamples.Scalings = new Vector3?[newEnd];
+							destSamples.Rotations = new Quaternion?[newEnd];
+							destSamples.Translations = new Vector3?[newEnd];
+						}
+						else
+						{
+							destSamples = new ImportedAnimationSampledTrack();
+							destSamples.Scalings = new Vector3?[origSamples.Scalings.Length];
+							destSamples.Rotations = new Quaternion?[origSamples.Rotations.Length];
+							destSamples.Translations = new Vector3?[origSamples.Translations.Length];
+							animationCopySampleTransformArray(origSamples, newEnd, destSamples, newEnd, origSamples.Scalings.Length - newEnd);
+						}
+						animationCopySampleTransformArray(origSamples, 0, destSamples, 0, insertPos);
+					}
+
+					animationCopySampleTransformArray(newTrack.Value, 0, destSamples, insertPos, newTrack.Value.Scalings.Length);
+					animationNode.Scalings = destSamples.Scalings;
+					animationNode.Rotations = destSamples.Rotations;
+					animationNode.Translations = destSamples.Translations;
+				}
+			}
+			else if (replaceMethod == ReplaceAnimationMethod.Insert)
+			{
+				foreach (var newTrack in newTrackList)
+				{
+					ImportedAnimationSampledTrack animationNode;
+					ImportedAnimationSampledTrack origSamples = animationGetOriginalSamples(animationNodeDic, newTrack.Key, iAnim, out animationNode);
+					ImportedAnimationSampledTrack destSamples;
+					int newEnd = insertPos + newTrack.Value.Scalings.Length;
+					if (origSamples.Scalings.Length < insertPos)
+					{
+						destSamples = new ImportedAnimationSampledTrack();
+						destSamples.Scalings = new Vector3?[newEnd];
+						destSamples.Rotations = new Quaternion?[newEnd];
+						destSamples.Translations = new Vector3?[newEnd];
+						animationCopySampleTransformArray(origSamples, 0, destSamples, 0, origSamples.Scalings.Length);
+						animationNormalizeTrack(origSamples, destSamples, insertPos);
+					}
+					else
+					{
+						destSamples = new ImportedAnimationSampledTrack();
+						destSamples.Scalings = new Vector3?[origSamples.Scalings.Length + newTrack.Value.Scalings.Length];
+						destSamples.Rotations = new Quaternion?[origSamples.Rotations.Length + newTrack.Value.Rotations.Length];
+						destSamples.Translations = new Vector3?[origSamples.Translations.Length + newTrack.Value.Translations.Length];
+						animationCopySampleTransformArray(origSamples, 0, destSamples, 0, insertPos);
+						animationCopySampleTransformArray(origSamples, insertPos, destSamples, newEnd, origSamples.Scalings.Length - insertPos);
+					}
+
+					animationCopySampleTransformArray(newTrack.Value, 0, destSamples, insertPos, newTrack.Value.Scalings.Length);
+					animationNode.Scalings = destSamples.Scalings;
+					animationNode.Rotations = destSamples.Rotations;
+					animationNode.Translations = destSamples.Translations;
+				}
+			}
+			else if (replaceMethod == ReplaceAnimationMethod.Append)
+			{
+				foreach (var newTrack in newTrackList)
+				{
+					ImportedAnimationSampledTrack animationNode;
+					ImportedAnimationSampledTrack origSamples = animationGetOriginalSamples(animationNodeDic, newTrack.Key, iAnim, out animationNode);
+					ImportedAnimationSampledTrack destSamples = new ImportedAnimationSampledTrack();
+					destSamples.Scalings = new Vector3?[origSamples.Scalings.Length + insertPos + newTrack.Value.Scalings.Length];
+					destSamples.Rotations = new Quaternion?[origSamples.Rotations.Length + insertPos + newTrack.Value.Rotations.Length];
+					destSamples.Translations = new Vector3?[origSamples.Translations.Length + insertPos + newTrack.Value.Translations.Length];
+					animationCopySampleTransformArray(origSamples, destSamples, 0);
+					bool reduced = false;
+					for (int i = 0; i < origSamples.Scalings.Length; i++)
+					{
+						if (origSamples.Scalings[i] == null)
+						{
+							reduced = true;
+							break;
+						}
+					}
+					if (origSamples.Scalings.Length > 0 && !reduced)
+					{
+						animationNormalizeTrack(origSamples, destSamples, origSamples.Scalings.Length + insertPos);
+					}
+					animationCopySampleTransformArray(newTrack.Value, destSamples, origSamples.Scalings.Length + insertPos);
+					animationNode.Scalings = destSamples.Scalings;
+					animationNode.Rotations = destSamples.Rotations;
+					animationNode.Translations = destSamples.Translations;
+				}
+			}
+			else
+			{
+				Report.ReportLog("Error: Unexpected animation replace method " + replaceMethod + ". Skipping this animation");
+				return;
+			}
+
+			if (negateQuaternionFlips)
+			{
+				foreach (var newTrack in iAnim.TrackList)
+				{
+					ImportedAnimationSampledTrack keyframes = newTrack;
+					Quaternion lastQ = Quaternion.Identity;
+					for (int i = 0, lastUsed_keyIndex = -1; i < keyframes.Rotations.Length; i++)
+					{
+						if (keyframes.Rotations[i] == null)
+							continue;
+
+						Quaternion q = keyframes.Rotations[i].Value;
+						if (lastUsed_keyIndex >= 0)
+						{
+							bool diffZ = Math.Sign(lastQ.Z) != Math.Sign(q.Z);
+							bool diffW = Math.Sign(lastQ.W) != Math.Sign(q.W);
+							if (diffZ && diffW)
+							{
+								q.X = -q.X;
+								q.Y = -q.Y;
+								q.Z = -q.Z;
+								q.W = -q.W;
+
+								keyframes.Rotations[i] = q;
+							}
+						}
+						lastQ = q;
+						lastUsed_keyIndex = i;
+					}
+				}
+			}
+		}
+
+		public static void animationNormalizeTrack(ImportedAnimationSampledTrack origSamples, ImportedAnimationSampledTrack destSamples, int count)
+		{
+			Vector3? scaleKeyCopy;
+			Quaternion? rotateKeyCopy;
+			Vector3? translateKeyCopy;
+			if (origSamples.Scalings.Length > 0)
+			{
+				scaleKeyCopy = origSamples.Scalings[origSamples.Scalings.Length - 1];
+				rotateKeyCopy = origSamples.Rotations[origSamples.Rotations.Length - 1];
+				translateKeyCopy = origSamples.Translations[origSamples.Translations.Length - 1];
+			}
+			else
+			{
+				scaleKeyCopy = new Vector3(1, 1, 1);
+				rotateKeyCopy = Quaternion.Identity;
+				translateKeyCopy = new Vector3(0, 0, 0);
+			}
+			for (int j = origSamples.Scalings.Length; j < count; j++)
+			{
+				destSamples.Scalings[j] = scaleKeyCopy;
+				destSamples.Rotations[j] = rotateKeyCopy;
+				destSamples.Translations[j] = translateKeyCopy;
+			}
+		}
+
+		public static void animationCopySampleTransformArray(ImportedAnimationSampledTrack src, int srcIdx, ImportedAnimationSampledTrack dest, int destIdx, int count)
+		{
+			for (int i = 0; i < count; i++)
+			{
+				Vector3? scaleKey = src.Scalings[srcIdx + i];
+				dest.Scalings[destIdx + i] = scaleKey;
+				Quaternion? rotateKey = src.Rotations[srcIdx + i];
+				dest.Rotations[destIdx + i] = rotateKey;
+				Vector3? translateKey = src.Translations[srcIdx + i];
+				dest.Translations[destIdx + i] = translateKey;
+			}
+		}
+
+		public static void animationCopySampleTransformArray(ImportedAnimationSampledTrack src, ImportedAnimationSampledTrack dest, int destOffset)
+		{
+			for (int i = 0; i < src.Scalings.Length; i++)
+			{
+				Vector3? scaleKey = src.Scalings[i];
+				dest.Scalings[i + destOffset] = scaleKey;
+			}
+			for (int i = 0; i < src.Rotations.Length; i++)
+			{
+				Quaternion? rotateKey = src.Rotations[i];
+				dest.Rotations[i + destOffset] = rotateKey;
+			}
+			for (int i = 0; i < src.Translations.Length; i++)
+			{
+				Vector3? translateKey = src.Translations[i];
+				dest.Translations[i + destOffset] = translateKey;
+			}
+		}
+
+		public static ImportedAnimationSampledTrack animationGetOriginalSamples(Dictionary<string, ImportedAnimationSampledTrack> animationNodeDic, string trackName, List<ImportedAnimationSampledTrack> animationNodeList)
+		{
+			ImportedAnimationSampledTrack animationNode;
+			if (!animationNodeDic.TryGetValue(trackName, out animationNode))
+			{
+				animationNode = new ImportedAnimationSampledTrack();
+				animationNodeList.Add(animationNode);
+				animationNode.Name = trackName;
+			}
+			return animationNode;
+		}
+
+		public static ImportedAnimationSampledTrack animationGetOriginalSamples(Dictionary<string, ImportedAnimationSampledTrack> animationNodeDic, string trackName, ImportedSampledAnimation anim, out ImportedAnimationSampledTrack animationNode)
+		{
+			animationNode = animationGetOriginalSamples(animationNodeDic, trackName, anim.TrackList);
+			ImportedAnimationSampledTrack origKeyframes;
+			if (animationNode.Scalings != null)
+			{
+				origKeyframes = animationNode;
+			}
+			else
+			{
+				origKeyframes = new ImportedAnimationSampledTrack();
+				origKeyframes.Scalings = new Vector3?[0];
+				origKeyframes.Rotations = new Quaternion?[0];
+				origKeyframes.Translations = new Vector3?[0];
 			}
 			return origKeyframes;
 		}

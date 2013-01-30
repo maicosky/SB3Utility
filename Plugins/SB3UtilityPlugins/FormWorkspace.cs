@@ -213,6 +213,59 @@ namespace SB3Utility
 			node.Text = "Morph: " + keyframe.Name + (newName != String.Empty ? ", Rename to: " + newName : null);
 		}
 
+		public static void UpdateAnimationNode(TreeNode node, WorkspaceAnimation animation)
+		{
+			int id = (int)((DragSource)node.Tag).Id;
+			if (animation.importedAnimation is ImportedKeyframedAnimation)
+			{
+				node.Text = "Animation" + id;
+				List<ImportedAnimationKeyframedTrack> trackList = ((ImportedKeyframedAnimation)animation.importedAnimation).TrackList;
+				for (int i = 0; i < trackList.Count; i++)
+				{
+					ImportedAnimationKeyframedTrack track = trackList[i];
+					TreeNode trackNode = node.Nodes[i];
+					trackNode.Tag = track;
+					int numKeyframes = 0;
+					foreach (ImportedAnimationKeyframe keyframe in track.Keyframes)
+					{
+						if (keyframe != null)
+							numKeyframes++;
+					}
+					trackNode.Text = "Track: " + track.Name + ", Keyframes: " + numKeyframes;
+				}
+			}
+			else if (animation.importedAnimation is ImportedSampledAnimation)
+			{
+				node.Text = "Animation(Reduced Keys)" + id;
+				List<ImportedAnimationSampledTrack> trackList = ((ImportedSampledAnimation)animation.importedAnimation).TrackList;
+				for (int i = 0; i < trackList.Count; i++)
+				{
+					ImportedAnimationSampledTrack track = trackList[i];
+					TreeNode trackNode = node.Nodes[i];
+					trackNode.Tag = track;
+					int numScalings = 0;
+					for (int k = 0; k < track.Scalings.Length; k++)
+					{
+						if (track.Scalings[k] != null)
+							numScalings++;
+					}
+					int numRotations = 0;
+					for (int k = 0; k < track.Rotations.Length; k++)
+					{
+						if (track.Rotations[k] != null)
+							numRotations++;
+					}
+					int numTranslations = 0;
+					for (int k = 0; k < track.Translations.Length; k++)
+					{
+						if (track.Translations[k] != null)
+							numTranslations++;
+					}
+					trackNode.Text = "Track: " + track.Name + ", Length: " + track.Scalings.Length + ", Scalings: " + numScalings + ", Rotations: " + numRotations + ", Translations: " + numTranslations;
+				}
+			}
+		}
+
 		private void BuildTree(string editorVar, ImportedFrame frame, TreeNode parent, ImportedEditor editor)
 		{
 			TreeNode node = new TreeNode(frame.Name);
@@ -253,8 +306,15 @@ namespace SB3Utility
 				TreeNode animationNode = trackNode.Parent;
 				DragSource dragSrc = (DragSource)animationNode.Tag;
 				var srcEditor = (ImportedEditor)Gui.Scripting.Variables[dragSrc.Variable];
-//				ImportedKeyframedAnimation anim = (ImportedKeyframedAnimation)srcEditor.Animations[(int)dragSrc.Id].importedAnimation;
-//				List<ImportedAnimationKeyframedTrack> trackList = anim.TrackList;
+				srcEditor.Animations[(int)dragSrc.Id].setTrackEnabled(track, trackNode.Checked);
+			}
+			else if (e.Node.Tag is ImportedAnimationSampledTrack)
+			{
+				TreeNode trackNode = e.Node;
+				ImportedAnimationSampledTrack track = (ImportedAnimationSampledTrack)trackNode.Tag;
+				TreeNode animationNode = trackNode.Parent;
+				DragSource dragSrc = (DragSource)animationNode.Tag;
+				var srcEditor = (ImportedEditor)Gui.Scripting.Variables[dragSrc.Variable];
 				srcEditor.Animations[(int)dragSrc.Id].setTrackEnabled(track, trackNode.Checked);
 			}
 		}

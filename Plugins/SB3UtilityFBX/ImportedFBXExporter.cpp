@@ -4,7 +4,7 @@
 
 namespace SB3Utility
 {
-	void Fbx::Exporter::Export(String^ path, IImported^ imported, int startKeyframe, int endKeyframe, bool linear, bool EulerFilter, float filterPrecision, String^ exportFormat, bool allFrames, bool skins)
+	void Fbx::Exporter::Export(String^ path, IImported^ imported, int startKeyframe, int endKeyframe, bool linear, bool EulerFilter, float filterPrecision, String^ exportFormat, bool allFrames, bool skins, bool compatibility)
 	{
 		FileInfo^ file = gcnew FileInfo(path);
 		DirectoryInfo^ dir = file->Directory;
@@ -15,14 +15,14 @@ namespace SB3Utility
 		String^ currentDir = Directory::GetCurrentDirectory();
 		Directory::SetCurrentDirectory(dir->FullName);
 
-		Exporter^ exporter = gcnew Exporter(path, imported, exportFormat, allFrames, skins);
+		Exporter^ exporter = gcnew Exporter(path, imported, exportFormat, allFrames, skins, compatibility);
 		exporter->ExportAnimations(startKeyframe, endKeyframe, linear, EulerFilter, filterPrecision);
 		exporter->pExporter->Export(exporter->pScene);
 
 		Directory::SetCurrentDirectory(currentDir);
 	}
 
-	Fbx::Exporter::Exporter(String^ path, IImported^ imported, String^ exportFormat, bool allFrames, bool skins)
+	Fbx::Exporter::Exporter(String^ path, IImported^ imported, String^ exportFormat, bool allFrames, bool skins, bool compatibility)
 	{
 		this->imported = imported;
 		exportSkins = skins;
@@ -59,7 +59,10 @@ namespace SB3Utility
 				{
 					if (lDesc.Find("binary") >= 0)
 					{
-						break;
+						if (!compatibility || lDesc.Find("6.") >= 0)
+						{
+							break;
+						}
 					}
 				}
 				else
@@ -565,7 +568,7 @@ namespace SB3Utility
 		List<String^>^ pNotFound = gcnew List<String^>();
 
 		KFbxTypedProperty<fbxDouble3> scale = KFbxProperty::Create(pScene, DTDouble3, InterpolationHelper::pScaleName);
-		KFbxTypedProperty<fbxDouble3> rotate = KFbxProperty::Create(pScene, DTDouble3, InterpolationHelper::pRotateName);
+		KFbxTypedProperty<fbxDouble4> rotate = KFbxProperty::Create(pScene, DTDouble4, InterpolationHelper::pRotateName);
 		KFbxTypedProperty<fbxDouble3> translate = KFbxProperty::Create(pScene, DTDouble3, InterpolationHelper::pTranslateName);
 
 		KFbxAnimCurveFilterUnroll* lFilter = EulerFilter ? new KFbxAnimCurveFilterUnroll() : NULL;
@@ -598,7 +601,7 @@ namespace SB3Utility
 	}
 
 	void Fbx::Exporter::ExportKeyframedAnimation(ImportedKeyframedAnimation^ parser, KString& kTakeName, int startKeyframe, int endKeyframe, bool linear, KFbxAnimCurveFilterUnroll* EulerFilter, float filterPrecision,
-			KFbxTypedProperty<fbxDouble3>& scale, KFbxTypedProperty<fbxDouble3>& rotate, KFbxTypedProperty<fbxDouble3>& translate, List<String^>^ pNotFound)
+			KFbxTypedProperty<fbxDouble3>& scale, KFbxTypedProperty<fbxDouble4>& rotate, KFbxTypedProperty<fbxDouble3>& translate, List<String^>^ pNotFound)
 	{
 		List<ImportedAnimationKeyframedTrack^>^ pAnimationList = parser->TrackList;
 
@@ -758,7 +761,7 @@ namespace SB3Utility
 	}
 
 	void Fbx::Exporter::ExportSampledAnimation(ImportedSampledAnimation^ parser, KString& kTakeName, int startKeyframe, int endKeyframe, bool linear, KFbxAnimCurveFilterUnroll* EulerFilter, float filterPrecision,
-			KFbxTypedProperty<fbxDouble3>& scale, KFbxTypedProperty<fbxDouble3>& rotate, KFbxTypedProperty<fbxDouble3>& translate, List<String^>^ pNotFound)
+			KFbxTypedProperty<fbxDouble3>& scale, KFbxTypedProperty<fbxDouble4>& rotate, KFbxTypedProperty<fbxDouble3>& translate, List<String^>^ pNotFound)
 	{
 		List<ImportedAnimationSampledTrack^>^ pAnimationList = parser->TrackList;
 

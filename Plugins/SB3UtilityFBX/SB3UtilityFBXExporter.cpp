@@ -4,7 +4,7 @@
 
 namespace SB3Utility
 {
-	void Fbx::Exporter::Export(String^ path, xxParser^ xxParser, List<xxFrame^>^ meshParents, List<xaParser^>^ xaSubfileList, int startKeyframe, int endKeyframe, bool linear, String^ exportFormat, bool allFrames, bool skins, bool embedMedia)
+	void Fbx::Exporter::Export(String^ path, xxParser^ xxParser, List<xxFrame^>^ meshParents, List<xaParser^>^ xaSubfileList, int startKeyframe, int endKeyframe, bool linear, String^ exportFormat, bool allFrames, bool skins, bool embedMedia, bool compatibility)
 	{
 		FileInfo^ file = gcnew FileInfo(path);
 		DirectoryInfo^ dir = file->Directory;
@@ -15,7 +15,7 @@ namespace SB3Utility
 		String^ currentDir = Directory::GetCurrentDirectory();
 		Directory::SetCurrentDirectory(dir->FullName);
 
-		Exporter^ exporter = gcnew Exporter(path, xxParser, meshParents, exportFormat, allFrames, skins, embedMedia);
+		Exporter^ exporter = gcnew Exporter(path, xxParser, meshParents, exportFormat, allFrames, skins, embedMedia, compatibility);
 		exporter->ExportAnimations(xaSubfileList, startKeyframe, endKeyframe, linear);
 		exporter->pExporter->Export(exporter->pScene);
 		delete exporter;
@@ -23,7 +23,7 @@ namespace SB3Utility
 		Directory::SetCurrentDirectory(currentDir);
 	}
 
-	void Fbx::Exporter::ExportMorph(String^ path, xxParser^ xxParser, xxFrame^ meshFrame, xaMorphClip^ morphClip, xaParser^ xaparser, String^ exportFormat, bool oneBlendShape, bool embedMedia)
+	void Fbx::Exporter::ExportMorph(String^ path, xxParser^ xxParser, xxFrame^ meshFrame, xaMorphClip^ morphClip, xaParser^ xaparser, String^ exportFormat, bool oneBlendShape, bool embedMedia, bool compatibility)
 	{
 		FileInfo^ file = gcnew FileInfo(path);
 		DirectoryInfo^ dir = file->Directory;
@@ -36,7 +36,7 @@ namespace SB3Utility
 
 		List<xxFrame^>^ meshParents = gcnew List<xxFrame^>(1);
 		meshParents->Add(meshFrame);
-		Exporter^ exporter = gcnew Exporter(path, xxParser, meshParents, exportFormat, false, false, embedMedia);
+		Exporter^ exporter = gcnew Exporter(path, xxParser, meshParents, exportFormat, false, false, embedMedia, compatibility);
 		exporter->ExportMorphs(meshFrame, morphClip, xaparser, oneBlendShape);
 		exporter->pExporter->Export(exporter->pScene);
 		delete exporter;
@@ -44,7 +44,7 @@ namespace SB3Utility
 		Directory::SetCurrentDirectory(currentDir);
 	}
 
-	Fbx::Exporter::Exporter(String^ path, xxParser^ xxparser, List<xxFrame^>^ meshParents, String^ exportFormat, bool allFrames, bool skins, bool embedMedia)
+	Fbx::Exporter::Exporter(String^ path, xxParser^ xxparser, List<xxFrame^>^ meshParents, String^ exportFormat, bool allFrames, bool skins, bool embedMedia, bool compatibility)
 	{
 		this->xxparser = xxparser;
 		exportSkins = skins;
@@ -87,7 +87,10 @@ namespace SB3Utility
 				{
 					if (lDesc.Find("binary") >= 0)
 					{
-						break;
+						if (!compatibility || lDesc.Find("6.") >= 0)
+						{
+							break;
+						}
 					}
 				}
 				else
@@ -632,7 +635,7 @@ namespace SB3Utility
 		List<String^>^ pNotFound = gcnew List<String^>();
 
 		KFbxTypedProperty<fbxDouble3> scale = KFbxProperty::Create(pScene, DTDouble3, InterpolationHelper::pScaleName);
-		KFbxTypedProperty<fbxDouble3> rotate = KFbxProperty::Create(pScene, DTDouble3, InterpolationHelper::pRotateName);
+		KFbxTypedProperty<fbxDouble4> rotate = KFbxProperty::Create(pScene, DTDouble4, InterpolationHelper::pRotateName);
 		KFbxTypedProperty<fbxDouble3> translate = KFbxProperty::Create(pScene, DTDouble3, InterpolationHelper::pTranslateName);
 
 		for (int i = 0; i < xaSubfileList->Count; i++)

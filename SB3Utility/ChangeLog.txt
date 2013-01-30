@@ -1,4 +1,18 @@
-﻿[0.4.42.31]
+﻿[0.4.42.32]
+  - Added support for PPD
+  - Added display XA Materials
+  - Added renaming of tracks
+  - Added Quick Access Window
+  - prepared to deploy used VC++ 2010 redist DLLs
+  - Fbx can import incomplete animation keyframes (containing only scaling or rotation or translation)
+  - Fix for regional digit symbol
+  - Fbx import crashed when missing a texture
+  - Added Fbx export format compatible with Fbx 2006
+  - Added Fbx import of .dxf, .3ds,.obj
+  - Changed Plugin Fbx resampling to use Quaternions instead of Vectors (still not used for XAs)
+    (avoids Euler flips, but required Quaternion flip handling)
+
+[0.4.42.31]
   - XX: fixed removal of bones - removing any other bone than the last shifted the weights
     and corrupted the mesh if the last bone had weights for that bone
   - Added check to prevent several bones targetting the same frame

@@ -39,6 +39,10 @@
 			this.tableLayoutXAHex = new System.Windows.Forms.TableLayoutPanel();
 			this.label42 = new System.Windows.Forms.Label();
 			this.tabPageMaterial = new System.Windows.Forms.TabPage();
+			this.label13 = new System.Windows.Forms.Label();
+			this.label14 = new System.Windows.Forms.Label();
+			this.label17 = new System.Windows.Forms.Label();
+			this.label18 = new System.Windows.Forms.Label();
 			this.xaMatNameText = new System.Windows.Forms.TextBox();
 			this.label29 = new System.Windows.Forms.Label();
 			this.labelType1ConfigPositionMax = new System.Windows.Forms.Label();
@@ -90,12 +94,9 @@
 			this.label5 = new System.Windows.Forms.Label();
 			this.comboBoxMorphMesh = new System.Windows.Forms.ComboBox();
 			this.label4 = new System.Windows.Forms.Label();
-			this.groupBox4 = new System.Windows.Forms.GroupBox();
-			this.radioButtonMorphExportFormatMqo = new System.Windows.Forms.RadioButton();
 			this.groupBox8 = new System.Windows.Forms.GroupBox();
 			this.checkBoxFbxOptionEmbedMedia = new System.Windows.Forms.CheckBox();
 			this.checkBoxFbxOptionOneBlendshape = new System.Windows.Forms.CheckBox();
-			this.radioButtonMorphExportFormatFbx = new System.Windows.Forms.RadioButton();
 			this.treeViewMorphClip = new System.Windows.Forms.TreeView();
 			this.label57 = new System.Windows.Forms.Label();
 			this.groupBox7 = new System.Windows.Forms.GroupBox();
@@ -151,10 +152,7 @@
 			this.labelSkeletalRender = new System.Windows.Forms.Label();
 			this.label30 = new System.Windows.Forms.Label();
 			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-			this.label13 = new System.Windows.Forms.Label();
-			this.label14 = new System.Windows.Forms.Label();
-			this.label17 = new System.Windows.Forms.Label();
-			this.label18 = new System.Windows.Forms.Label();
+			this.comboBoxMorphExportFormat = new System.Windows.Forms.ComboBox();
 			this.textBoxFrameNameRefID = new SB3Utility.EditTextBox();
 			this.editTextBoxMorphClipMesh = new SB3Utility.EditTextBox();
 			this.editTextBoxMorphClipName = new SB3Utility.EditTextBox();
@@ -175,7 +173,6 @@
 			this.groupBox10.SuspendLayout();
 			this.groupBox9.SuspendLayout();
 			this.groupBox5.SuspendLayout();
-			this.groupBox4.SuspendLayout();
 			this.groupBox8.SuspendLayout();
 			this.groupBox7.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.trackBarMorphFactor)).BeginInit();
@@ -314,6 +311,42 @@
 			this.tabPageMaterial.TabIndex = 3;
 			this.tabPageMaterial.Text = "Material";
 			this.tabPageMaterial.UseVisualStyleBackColor = true;
+			// 
+			// label13
+			// 
+			this.label13.AutoSize = true;
+			this.label13.Location = new System.Drawing.Point(471, 157);
+			this.label13.Name = "label13";
+			this.label13.Size = new System.Drawing.Size(14, 13);
+			this.label13.TabIndex = 73;
+			this.label13.Text = "A";
+			// 
+			// label14
+			// 
+			this.label14.AutoSize = true;
+			this.label14.Location = new System.Drawing.Point(406, 157);
+			this.label14.Name = "label14";
+			this.label14.Size = new System.Drawing.Size(14, 13);
+			this.label14.TabIndex = 72;
+			this.label14.Text = "B";
+			// 
+			// label17
+			// 
+			this.label17.AutoSize = true;
+			this.label17.Location = new System.Drawing.Point(344, 157);
+			this.label17.Name = "label17";
+			this.label17.Size = new System.Drawing.Size(15, 13);
+			this.label17.TabIndex = 71;
+			this.label17.Text = "G";
+			// 
+			// label18
+			// 
+			this.label18.AutoSize = true;
+			this.label18.Location = new System.Drawing.Point(276, 157);
+			this.label18.Name = "label18";
+			this.label18.Size = new System.Drawing.Size(15, 13);
+			this.label18.TabIndex = 70;
+			this.label18.Text = "R";
 			// 
 			// xaMatNameText
 			// 
@@ -759,14 +792,15 @@
 			// 
 			this.groupBox5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+			this.groupBox5.Controls.Add(this.groupBox8);
+			this.groupBox5.Controls.Add(this.comboBoxMorphExportFormat);
 			this.groupBox5.Controls.Add(this.buttonMorphClipExport);
 			this.groupBox5.Controls.Add(this.label5);
 			this.groupBox5.Controls.Add(this.comboBoxMorphMesh);
 			this.groupBox5.Controls.Add(this.label4);
-			this.groupBox5.Controls.Add(this.groupBox4);
-			this.groupBox5.Location = new System.Drawing.Point(0, 301);
+			this.groupBox5.Location = new System.Drawing.Point(0, 306);
 			this.groupBox5.Name = "groupBox5";
-			this.groupBox5.Size = new System.Drawing.Size(509, 87);
+			this.groupBox5.Size = new System.Drawing.Size(509, 82);
 			this.groupBox5.TabIndex = 140;
 			this.groupBox5.TabStop = false;
 			this.groupBox5.Text = "Export Options";
@@ -818,33 +852,12 @@
 			this.label4.TabIndex = 123;
 			this.label4.Text = ".xx File with Target Mesh";
 			// 
-			// groupBox4
-			// 
-			this.groupBox4.Controls.Add(this.radioButtonMorphExportFormatMqo);
-			this.groupBox4.Controls.Add(this.groupBox8);
-			this.groupBox4.Controls.Add(this.radioButtonMorphExportFormatFbx);
-			this.groupBox4.Location = new System.Drawing.Point(133, 34);
-			this.groupBox4.Name = "groupBox4";
-			this.groupBox4.Size = new System.Drawing.Size(326, 47);
-			this.groupBox4.TabIndex = 140;
-			this.groupBox4.TabStop = false;
-			// 
-			// radioButtonMorphExportFormatMqo
-			// 
-			this.radioButtonMorphExportFormatMqo.AutoSize = true;
-			this.radioButtonMorphExportFormatMqo.Location = new System.Drawing.Point(6, 19);
-			this.radioButtonMorphExportFormatMqo.Name = "radioButtonMorphExportFormatMqo";
-			this.radioButtonMorphExportFormatMqo.Size = new System.Drawing.Size(46, 17);
-			this.radioButtonMorphExportFormatMqo.TabIndex = 142;
-			this.radioButtonMorphExportFormatMqo.TabStop = true;
-			this.radioButtonMorphExportFormatMqo.Text = "Mqo";
-			this.radioButtonMorphExportFormatMqo.UseVisualStyleBackColor = true;
-			// 
 			// groupBox8
 			// 
+			this.groupBox8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this.groupBox8.Controls.Add(this.checkBoxFbxOptionEmbedMedia);
 			this.groupBox8.Controls.Add(this.checkBoxFbxOptionOneBlendshape);
-			this.groupBox8.Location = new System.Drawing.Point(105, 7);
+			this.groupBox8.Location = new System.Drawing.Point(238, 40);
 			this.groupBox8.Name = "groupBox8";
 			this.groupBox8.Size = new System.Drawing.Size(215, 36);
 			this.groupBox8.TabIndex = 143;
@@ -875,18 +888,6 @@
 			this.toolTip1.SetToolTip(this.checkBoxFbxOptionOneBlendshape, "If checked, all morph keyframes appear as channels in one common BlendShape.\r\nIf " +
         "unchecked, each morph keyframe will appear as channel in it\'s own BlendShape.");
 			this.checkBoxFbxOptionOneBlendshape.UseVisualStyleBackColor = true;
-			// 
-			// radioButtonMorphExportFormatFbx
-			// 
-			this.radioButtonMorphExportFormatFbx.AutoSize = true;
-			this.radioButtonMorphExportFormatFbx.Checked = true;
-			this.radioButtonMorphExportFormatFbx.Location = new System.Drawing.Point(57, 19);
-			this.radioButtonMorphExportFormatFbx.Name = "radioButtonMorphExportFormatFbx";
-			this.radioButtonMorphExportFormatFbx.Size = new System.Drawing.Size(42, 17);
-			this.radioButtonMorphExportFormatFbx.TabIndex = 143;
-			this.radioButtonMorphExportFormatFbx.TabStop = true;
-			this.radioButtonMorphExportFormatFbx.Text = "Fbx";
-			this.radioButtonMorphExportFormatFbx.UseVisualStyleBackColor = true;
 			// 
 			// treeViewMorphClip
 			// 
@@ -1511,41 +1512,17 @@
 			this.label30.TabIndex = 146;
 			this.label30.Text = "Speed";
 			// 
-			// label13
+			// comboBoxMorphExportFormat
 			// 
-			this.label13.AutoSize = true;
-			this.label13.Location = new System.Drawing.Point(471, 157);
-			this.label13.Name = "label13";
-			this.label13.Size = new System.Drawing.Size(14, 13);
-			this.label13.TabIndex = 73;
-			this.label13.Text = "A";
-			// 
-			// label14
-			// 
-			this.label14.AutoSize = true;
-			this.label14.Location = new System.Drawing.Point(406, 157);
-			this.label14.Name = "label14";
-			this.label14.Size = new System.Drawing.Size(14, 13);
-			this.label14.TabIndex = 72;
-			this.label14.Text = "B";
-			// 
-			// label17
-			// 
-			this.label17.AutoSize = true;
-			this.label17.Location = new System.Drawing.Point(344, 157);
-			this.label17.Name = "label17";
-			this.label17.Size = new System.Drawing.Size(15, 13);
-			this.label17.TabIndex = 71;
-			this.label17.Text = "G";
-			// 
-			// label18
-			// 
-			this.label18.AutoSize = true;
-			this.label18.Location = new System.Drawing.Point(276, 157);
-			this.label18.Name = "label18";
-			this.label18.Size = new System.Drawing.Size(15, 13);
-			this.label18.TabIndex = 70;
-			this.label18.Text = "R";
+			this.comboBoxMorphExportFormat.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.comboBoxMorphExportFormat.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.comboBoxMorphExportFormat.FormattingEnabled = true;
+			this.comboBoxMorphExportFormat.Location = new System.Drawing.Point(133, 50);
+			this.comboBoxMorphExportFormat.Name = "comboBoxMorphExportFormat";
+			this.comboBoxMorphExportFormat.Size = new System.Drawing.Size(99, 21);
+			this.comboBoxMorphExportFormat.TabIndex = 142;
 			// 
 			// textBoxFrameNameRefID
 			// 
@@ -1612,8 +1589,6 @@
 			this.groupBox9.PerformLayout();
 			this.groupBox5.ResumeLayout(false);
 			this.groupBox5.PerformLayout();
-			this.groupBox4.ResumeLayout(false);
-			this.groupBox4.PerformLayout();
 			this.groupBox8.ResumeLayout(false);
 			this.groupBox8.PerformLayout();
 			this.groupBox7.ResumeLayout(false);
@@ -1687,9 +1662,6 @@
 		private System.Windows.Forms.GroupBox groupBox5;
 		private System.Windows.Forms.Label label5;
 		public System.Windows.Forms.ComboBox comboBoxMorphMesh;
-		private System.Windows.Forms.GroupBox groupBox4;
-		private System.Windows.Forms.RadioButton radioButtonMorphExportFormatFbx;
-		private System.Windows.Forms.RadioButton radioButtonMorphExportFormatMqo;
 		private System.Windows.Forms.Label label4;
 		private System.Windows.Forms.Button buttonMorphClipExport;
 		private System.Windows.Forms.Label label57;
@@ -1770,5 +1742,6 @@
 		private System.Windows.Forms.Label label14;
 		private System.Windows.Forms.Label label17;
 		private System.Windows.Forms.Label label18;
+		private System.Windows.Forms.ComboBox comboBoxMorphExportFormat;
 	}
 }

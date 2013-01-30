@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Windows.Forms;
+using System.Drawing;
 using WeifenLuo.WinFormsUI.Docking;
 using SlimDX;
 using SlimDX.Direct3D9;
@@ -148,7 +149,8 @@ namespace AiDroidPlugin
 
 					renderTimer.Interval = 10;
 					renderTimer.Tick += new EventHandler(renderTimer_Tick);
-					Play();
+
+					AnimationSetClip(0);
 				}
 
 				textBoxANICunk1.Text = Editor.Parser.ANIC.unk1.ToString();
@@ -218,8 +220,6 @@ namespace AiDroidPlugin
 			labelSkeletalRender.Text = "/ " + max;
 			numericAnimationKeyframe.Maximum = max;
 			trackBarAnimationKeyframe.Maximum = max;
-/*			numericAnimationKeyframeStart.Maximum = max;
-			numericAnimationKeyframeEnd.Maximum = max;*/
 		}
 
 		private void createAnimationTrackListView(List<reaAnimationTrack> animationTrackList)
@@ -271,7 +271,7 @@ namespace AiDroidPlugin
 
 					RotationKey rotation = new RotationKey();
 					rotation.Time = time;
-					rotation.Value = /*Quaternion.Invert*/(track.rotations[j].value);
+					rotation.Value = track.rotations[j].value;
 					//rotationKeys[j] = rotation;
 					set.SetRotationKey(i, j, rotation);
 				}
@@ -304,12 +304,6 @@ namespace AiDroidPlugin
 
 		public void Play()
 		{
-			if (loadedAnimationClip)
-			{
-				SetTrackPosition(0);
-				AdvanceTime(0);
-			}
-
 			this.play = true;
 			this.startTime = DateTime.Now;
 			renderTimer.Start();
@@ -380,7 +374,7 @@ namespace AiDroidPlugin
 
 		private void renderTimer_Tick(object sender, EventArgs e)
 		{
-			if (play /*&& loadedAnimationClip*/)
+			if (play)
 			{
 				TimeSpan elapsedTime = DateTime.Now - this.startTime;
 				if (elapsedTime.TotalSeconds > 0)
@@ -456,6 +450,162 @@ namespace AiDroidPlugin
 				trackBarAnimationKeyframe.Value = Decimal.ToInt32(numericAnimationKeyframe.Value);
 				userTrackBar = true;
 			}
+		}
+
+		private void listViewAnimationTrack_ItemDrag(object sender, ItemDragEventArgs e)
+		{
+			try
+			{
+				if (e.Item is TreeNode)
+				{
+					listViewAnimationTrack.DoDragDrop(e.Item, DragDropEffects.Copy);
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void listViewAnimationTrack_DragEnter(object sender, DragEventArgs e)
+		{
+			try
+			{
+				UpdateDragDropAnimations(sender, e);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void listViewAnimationTrack_DragOver(object sender, DragEventArgs e)
+		{
+			try
+			{
+				UpdateDragDropAnimations(sender, e);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void listViewAnimationTrack_DragDrop(object sender, DragEventArgs e)
+		{
+			try
+			{
+				TreeNode node = (TreeNode)e.Data.GetData(typeof(TreeNode));
+				if (node == null)
+				{
+					Gui.Docking.DockDragDrop(sender, e);
+				}
+				else
+				{
+					ProcessDragDropAnimations(node);
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void ProcessDragDropAnimations(TreeNode node)
+		{
+			if (node.Tag is DragSource)
+			{
+				if ((node.Parent != null) && !node.Checked && node.StateImageIndex != (int)CheckState.Indeterminate)
+				{
+					return;
+				}
+
+				DragSource source = (DragSource)node.Tag;
+				if (source.Type == typeof(WorkspaceAnimation))
+				{
+					var srcEditor = (ImportedEditor)Gui.Scripting.Variables[source.Variable];
+					WorkspaceAnimation wsAnimation = srcEditor.Animations[(int)source.Id];
+					using (var dragOptions = new FormREADragDrop(Editor))
+					{
+						int resampleCount = -1;
+						if (wsAnimation.importedAnimation is ImportedKeyframedAnimation)
+						{
+							dragOptions.labelAnimationConvertion.Text = "\"" + node.Text + "\"" + dragOptions.labelAnimationConvertion.Text;
+							dragOptions.labelAnimationConvertion.Visible = true;
+						}
+						else if (wsAnimation.importedAnimation is ImportedSampledAnimation)
+						{
+							List<ImportedAnimationSampledTrack> samTrackList = ((ImportedSampledAnimation)wsAnimation.importedAnimation).TrackList;
+							int normalizeLength = samTrackList[0].Scalings.Length;
+							foreach (ImportedAnimationSampledTrack track in samTrackList)
+							{
+								if (track.Scalings.Length != track.Rotations.Length ||
+									track.Rotations.Length != track.Translations.Length)
+								{
+									dragOptions.labelNormalizationWarning.Text = "\"" + node.Text + "\"" + dragOptions.labelNormalizationWarning.Text;
+									dragOptions.labelNormalizationWarning.Visible = true;
+									break;
+								}
+							}
+						}
+						dragOptions.numericResample.Value = resampleCount;
+						dragOptions.comboBoxMethod.SelectedIndex = (int)ReplaceAnimationMethod.ReplacePresent;
+						if (dragOptions.ShowDialog() == DialogResult.OK)
+						{
+							if (wsAnimation.importedAnimation is ImportedKeyframedAnimation)
+							{
+								Gui.Scripting.RunScript(EditorVar + ".ConvertAnimation(animation=" + source.Variable + ".Animations[" + (int)source.Id + "])");
+								FormWorkspace.UpdateAnimationNode(node, wsAnimation);
+							}
+
+							// repeating only final choices for repeatability of the script
+							List<ImportedAnimationSampledTrack> trackList = ((ImportedSampledAnimation)wsAnimation.importedAnimation).TrackList;
+							for (int i = 0; i < trackList.Count; i++)
+							{
+								ImportedAnimationTrack track = trackList[i];
+								if (!wsAnimation.isTrackEnabled(track))
+								{
+									Gui.Scripting.RunScript(source.Variable + ".setTrackEnabled(animationId=" + (int)source.Id + ", id=" + i + ", enabled=false)");
+								}
+							}
+							Gui.Scripting.RunScript(EditorVar + ".ReplaceAnimation(animation=" + source.Variable + ".Animations[" + (int)source.Id + "], skeleton=" + source.Variable + ".Frames, resampleCount=" + dragOptions.numericResample.Value + ", linear=" + dragOptions.radioButtonInterpolationLinear.Checked + ", method=\"" + dragOptions.comboBoxMethod.SelectedItem + "\", insertPos=" + dragOptions.numericPosition.Value + ", negateQuaternionFlips=" + dragOptions.checkBoxNegateQuaternionFlips.Checked + ")");
+							UnloadREA();
+							LoadREA();
+						}
+					}
+				}
+			}
+			else
+			{
+				foreach (TreeNode child in node.Nodes)
+				{
+					ProcessDragDropAnimations(child);
+				}
+			}
+		}
+
+		private void UpdateDragDropAnimations(object sender, DragEventArgs e)
+		{
+			Point p = listViewAnimationTrack.PointToClient(new Point(e.X, e.Y));
+			ListViewItem target = listViewAnimationTrack.GetItemAt(p.X, p.Y);
+			if ((target != null) && ((p.X < target.Bounds.Left) || (p.X > target.Bounds.Right) || (p.Y < target.Bounds.Top) || (p.Y > target.Bounds.Bottom)))
+			{
+				target = null;
+			}
+
+			if (target == null)
+			{
+				Gui.Docking.DockDragEnter(sender, e);
+			}
+			else
+			{
+				e.Effect = e.AllowedEffect & DragDropEffects.Copy;
+			}
+		}
+
+		private void listViewAnimationTrack_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
+		{
+
 		}
 
 		private void listViewAnimationTrack_AfterLabelEdit(object sender, LabelEditEventArgs e)

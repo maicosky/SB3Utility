@@ -9,7 +9,7 @@ namespace AiDroidPlugin
 	public static partial class Plugins
 	{
 		[Plugin]
-		public static void ExportFbx([DefaultVar]remParser parser, object[] meshNames, object[] reaParsers, int startKeyframe, int endKeyframe, bool linear, bool EulerFilter, double filterPrecision, string path, string exportFormat, bool allFrames, bool skins)
+		public static void ExportFbx([DefaultVar]remParser parser, object[] meshNames, object[] reaParsers, int startKeyframe, int endKeyframe, bool linear, bool EulerFilter, double filterPrecision, string path, string exportFormat, bool allFrames, bool skins, bool compatibility)
 		{
 			List<reaParser> reaParserList = null;
 			if (reaParsers != null)
@@ -39,7 +39,7 @@ namespace AiDroidPlugin
 				}
 			}
 
-			FbxUtility.Export(path, imp, startKeyframe, endKeyframe, linear, EulerFilter, (float)filterPrecision, exportFormat, allFrames, skins);
+			FbxUtility.Export(path, imp, startKeyframe, endKeyframe, linear, EulerFilter, (float)filterPrecision, exportFormat, allFrames, skins, compatibility);
 		}
 
 		public class REMConverter : IImported
@@ -219,44 +219,126 @@ namespace AiDroidPlugin
 				anim.TrackList = new List<ImportedAnimationSampledTrack>(animSection.Count);
 				foreach (reaAnimationTrack track in animSection)
 				{
-					ImportedAnimationSampledTrack iTrack = new ImportedAnimationSampledTrack();
-					iTrack.Name = track.boneFrame;
 					remBone boneFrame = rem.FindFrame(track.boneFrame, parser.BONC.rootFrame);
 					bool isTopFrame = boneFrame != null && boneFrame.Parent == parser.BONC.rootFrame;
-					int animLen = track.scalings[track.scalings.Length - 1].index + 1;
-					iTrack.Scalings = new Vector3?[animLen];
-					if (isTopFrame)
-					{
-						for (int i = 0; i < track.scalings.Length; i++)
-						{
-							Vector3 scale = new Vector3(track.scalings[i].value.X, track.scalings[i].value.Z, -track.scalings[i].value.Y);
-							iTrack.Scalings[track.scalings[i].index] = scale;
-						}
-					}
-					else
-					{
-						for (int i = 0; i < track.scalings.Length; i++)
-						{
-							Vector3 scale = new Vector3(track.scalings[i].value.X, track.scalings[i].value.Z, track.scalings[i].value.Y);
-							iTrack.Scalings[track.scalings[i].index] = scale;
-						}
-					}
-					animLen = track.rotations[track.rotations.Length - 1].index + 1;
-					iTrack.Rotations = new Quaternion?[animLen];
-					for (int i = 0; i < track.rotations.Length; i++)
-					{
-						iTrack.Rotations[track.rotations[i].index] = Quaternion.Invert(track.rotations[i].value);
-					}
-					animLen = track.translations[track.translations.Length - 1].index + 1;
-					iTrack.Translations = new Vector3?[animLen];
-					for (int i = 0; i < track.translations.Length; i++)
-					{
-						Vector3 translation = new Vector3(track.translations[i].value.X, track.translations[i].value.Y, track.translations[i].value.Z);
-						iTrack.Translations[track.translations[i].index] = translation;
-					}
+					ImportedAnimationSampledTrack iTrack = ConvertTrack(track, isTopFrame);
 					anim.TrackList.Add(iTrack);
 				}
 				AnimationList.Add(anim);
+			}
+
+			public static ImportedAnimationSampledTrack ConvertTrack(reaAnimationTrack track, bool isTopFrame)
+			{
+				ImportedAnimationSampledTrack iTrack = new ImportedAnimationSampledTrack();
+				iTrack.Name = track.boneFrame;
+				int animLen = track.scalings[track.scalings.Length - 1].index + 1;
+				iTrack.Scalings = new Vector3?[animLen];
+				if (isTopFrame)
+				{
+					for (int i = 0; i < track.scalings.Length; i++)
+					{
+						Vector3 scale = new Vector3(track.scalings[i].value.X, track.scalings[i].value.Z, -track.scalings[i].value.Y);
+						iTrack.Scalings[track.scalings[i].index] = scale;
+					}
+				}
+				else
+				{
+					for (int i = 0; i < track.scalings.Length; i++)
+					{
+						Vector3 scale = new Vector3(track.scalings[i].value.X, track.scalings[i].value.Z, track.scalings[i].value.Y);
+						iTrack.Scalings[track.scalings[i].index] = scale;
+					}
+				}
+
+				animLen = track.rotations[track.rotations.Length - 1].index + 1;
+				iTrack.Rotations = new Quaternion?[animLen];
+				for (int i = 0; i < track.rotations.Length; i++)
+				{
+					iTrack.Rotations[track.rotations[i].index] = Quaternion.Invert(track.rotations[i].value);
+				}
+
+				animLen = track.translations[track.translations.Length - 1].index + 1;
+				iTrack.Translations = new Vector3?[animLen];
+				for (int i = 0; i < track.translations.Length; i++)
+				{
+					iTrack.Translations[track.translations[i].index] = track.translations[i].value;
+				}
+
+				return iTrack;
+			}
+
+			public static reaAnimationTrack ConvertTrack(ImportedAnimationSampledTrack wsTrack, bool isTopFrame)
+			{
+				reaAnimationTrack track = new reaAnimationTrack();
+				track.boneFrame = new remId(wsTrack.Name);
+
+				List<reaIndexVector> scalings = new List<reaIndexVector>();
+				for (int i = 0; i < wsTrack.Scalings.Length; i++)
+				{
+					Vector3? scale = wsTrack.Scalings[i];
+					if (scale == null)
+						continue;
+
+					reaIndexVector scaleKey = new reaIndexVector();
+					scaleKey.index = i;
+					scaleKey.value = new Vector3(scale.Value.X, isTopFrame ? -scale.Value.Z : scale.Value.Z, scale.Value.Y);
+					scalings.Add(scaleKey);
+				}
+				track.scalings = scalings.ToArray();
+
+				List<reaIndexQuaternion> rotations = new List<reaIndexQuaternion>();
+				for (int i = 0; i < wsTrack.Rotations.Length; i++)
+				{
+					Quaternion? rotate = wsTrack.Rotations[i];
+					if (rotate == null)
+						continue;
+
+					reaIndexQuaternion rotateKey = new reaIndexQuaternion();
+					rotateKey.index = i;
+					rotateKey.value = Quaternion.Invert(rotate.Value);
+					rotations.Add(rotateKey);
+				}
+				track.rotations = rotations.ToArray();
+
+				List<reaIndexVector> translations = new List<reaIndexVector>();
+				for (int i = 0; i < wsTrack.Scalings.Length; i++)
+				{
+					Vector3? translate = wsTrack.Translations[i];
+					if (translate == null)
+						continue;
+
+					reaIndexVector translateKey = new reaIndexVector();
+					translateKey.index = i;
+					translateKey.value = translate.Value;
+					translations.Add(translateKey);
+				}
+				track.translations = translations.ToArray();
+
+				return track;
+			}
+
+			[Plugin]
+			public static ImportedSampledAnimation ConvertAnimation(ImportedKeyframedAnimation keyframedAnim)
+			{
+				ImportedSampledAnimation destAnim = new ImportedSampledAnimation();
+				destAnim.TrackList = new List<ImportedAnimationSampledTrack>(keyframedAnim.TrackList.Count);
+				foreach (ImportedAnimationKeyframedTrack keyframedTrack in keyframedAnim.TrackList)
+				{
+					ImportedAnimationSampledTrack sampledTrack = new ImportedAnimationSampledTrack();
+					sampledTrack.Name = keyframedTrack.Name;
+					sampledTrack.Scalings = new Vector3?[keyframedTrack.Keyframes.Length];
+					sampledTrack.Rotations = new Quaternion?[keyframedTrack.Keyframes.Length];
+					sampledTrack.Translations = new Vector3?[keyframedTrack.Keyframes.Length];
+					for (int i = 0; i < keyframedTrack.Keyframes.Length; i++)
+					{
+						sampledTrack.Scalings[i] = keyframedTrack.Keyframes[i].Scaling;
+						sampledTrack.Rotations[i] = keyframedTrack.Keyframes[i].Rotation;
+						sampledTrack.Translations[i] = keyframedTrack.Keyframes[i].Translation;
+					}
+					destAnim.TrackList.Add(sampledTrack);
+				}
+
+				return destAnim;
 			}
 		}
 	}
