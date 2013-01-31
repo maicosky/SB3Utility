@@ -202,5 +202,15 @@ namespace SB3Utility.Properties {
                 return ((bool)(this["QuickAccess"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(PortableSettingsProvider))]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Strong")]
+        public string ShowBoneWeights {
+            get {
+                return ((string)(this["ShowBoneWeights"]));
+            }
+        }
     }
 }

@@ -11,7 +11,7 @@ namespace SB3Utility
 {
 	public static class Gui
 	{
-		public static string Version = "0.4.42.32";
+		public static string Version = "0.4.42.33";
 
 		public static IScripting Scripting { get; set; }
 		public static IDocking Docking { get; set; }
@@ -72,6 +72,7 @@ namespace SB3Utility
 		bool Wireframe { get; }
 		bool ShowNormals { get; }
 		bool ShowBones { get; }
+		ShowBoneWeights ShowBoneWeights { get; }
 		bool Culling { get; }
 
 		int AddRenderObject(IRenderObject renderObj);
@@ -88,6 +89,8 @@ namespace SB3Utility
 		double GetTime();
 		void Render();
 	}
+
+	public enum ShowBoneWeights { Weak, Strong, Off };
 
 	public struct DragSource
 	{

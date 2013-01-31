@@ -41,6 +41,10 @@
 			this.wireframeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.normalsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.bonesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.boneWeightsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.weakBoneWeightsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.strongBoneWeightsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.offBoneWeightsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.cullingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.centerViewAutomaticallyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.colorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -132,6 +136,7 @@
             this.wireframeToolStripMenuItem,
             this.normalsToolStripMenuItem,
             this.bonesToolStripMenuItem,
+            this.boneWeightsToolStripMenuItem,
             this.cullingToolStripMenuItem,
             this.centerViewAutomaticallyToolStripMenuItem});
 			this.rendererToolStripMenuItem.Name = "rendererToolStripMenuItem";
@@ -143,7 +148,7 @@
 			this.wireframeToolStripMenuItem.CheckOnClick = true;
 			this.wireframeToolStripMenuItem.Name = "wireframeToolStripMenuItem";
 			this.wireframeToolStripMenuItem.Size = new System.Drawing.Size(158, 22);
-			this.wireframeToolStripMenuItem.Text = "&Wireframe";
+			this.wireframeToolStripMenuItem.Text = "Wire&frame";
 			// 
 			// normalsToolStripMenuItem
 			// 
@@ -158,6 +163,37 @@
 			this.bonesToolStripMenuItem.Name = "bonesToolStripMenuItem";
 			this.bonesToolStripMenuItem.Size = new System.Drawing.Size(158, 22);
 			this.bonesToolStripMenuItem.Text = "&Bones";
+			// 
+			// boneWeightsToolStripMenuItem
+			// 
+			this.boneWeightsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.weakBoneWeightsToolStripMenuItem,
+            this.strongBoneWeightsToolStripMenuItem,
+            this.offBoneWeightsToolStripMenuItem});
+			this.boneWeightsToolStripMenuItem.Name = "boneWeightsToolStripMenuItem";
+			this.boneWeightsToolStripMenuItem.Size = new System.Drawing.Size(158, 22);
+			this.boneWeightsToolStripMenuItem.Text = "Bone &Weights";
+			// 
+			// weakBoneWeightsToolStripMenuItem
+			// 
+			this.weakBoneWeightsToolStripMenuItem.Name = "weakBoneWeightsToolStripMenuItem";
+			this.weakBoneWeightsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.weakBoneWeightsToolStripMenuItem.Text = "&Weak";
+			this.weakBoneWeightsToolStripMenuItem.Click += new System.EventHandler(this.allBoneWeightsToolStripMenuItem_Click);
+			// 
+			// strongBoneWeightsToolStripMenuItem
+			// 
+			this.strongBoneWeightsToolStripMenuItem.Name = "strongBoneWeightsToolStripMenuItem";
+			this.strongBoneWeightsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.strongBoneWeightsToolStripMenuItem.Text = "&Strong";
+			this.strongBoneWeightsToolStripMenuItem.Click += new System.EventHandler(this.allBoneWeightsToolStripMenuItem_Click);
+			// 
+			// offBoneWeightsToolStripMenuItem
+			// 
+			this.offBoneWeightsToolStripMenuItem.Name = "offBoneWeightsToolStripMenuItem";
+			this.offBoneWeightsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.offBoneWeightsToolStripMenuItem.Text = "&Off";
+			this.offBoneWeightsToolStripMenuItem.Click += new System.EventHandler(this.allBoneWeightsToolStripMenuItem_Click);
 			// 
 			// cullingToolStripMenuItem
 			// 
@@ -255,5 +291,9 @@
 		private System.Windows.Forms.ToolStripMenuItem specularToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem backgroundToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem centerViewAutomaticallyToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem boneWeightsToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem weakBoneWeightsToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem strongBoneWeightsToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem offBoneWeightsToolStripMenuItem;
 	}
 }

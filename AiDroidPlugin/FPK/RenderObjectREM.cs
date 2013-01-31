@@ -146,8 +146,20 @@ namespace AiDroidPlugin
 			{
 				device.SetRenderState(RenderState.VertexBlend, VertexBlend.Weights3);
 				device.SetRenderState(RenderState.IndexedVertexBlendEnable, true);
-				device.SetRenderState(RenderState.DiffuseMaterialSource, ColorSource.Color1);
-				device.SetRenderState(RenderState.AmbientMaterialSource, ColorSource.Color1);
+				device.SetRenderState(RenderState.DiffuseMaterialSource, ColorSource.Material);
+				device.SetRenderState(RenderState.AmbientMaterialSource, ColorSource.Material);
+				switch (Gui.Renderer.ShowBoneWeights)
+				{
+				case ShowBoneWeights.Weak:
+					device.SetRenderState(RenderState.DiffuseMaterialSource, ColorSource.Color1);
+					break;
+				case ShowBoneWeights.Strong:
+					device.SetRenderState(RenderState.DiffuseMaterialSource, ColorSource.Color1);
+					device.SetRenderState(RenderState.AmbientMaterialSource, ColorSource.Color1);
+					break;
+				case ShowBoneWeights.Off:
+					break;
+				}
 
 				for (int i = 0; i < meshContainer.BoneNames.Length; i++)
 				{

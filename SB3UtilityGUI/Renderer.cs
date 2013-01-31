@@ -39,6 +39,13 @@ namespace SB3Utility
 			set { Gui.Config["ShowBones"] = showBones = value; }
 		}
 
+		ShowBoneWeights showBoneWeights;
+		public ShowBoneWeights ShowBoneWeights
+		{
+			get { return showBoneWeights; }
+			set { Gui.Config["ShowBoneWeights"] = (showBoneWeights = value).ToString(); }
+		}
+
 		bool wireframe;
 		public bool Wireframe
 		{
@@ -193,6 +200,15 @@ namespace SB3Utility
 
 			showNormals = (bool)Gui.Config["ShowNormals"];
 			showBones = (bool)Gui.Config["ShowBones"];
+			string[] mode = Enum.GetNames(typeof(ShowBoneWeights));
+			for (int i = 0; i < mode.Length; i++)
+			{
+				if (mode[i] == (string)Gui.Config["ShowBoneWeights"])
+				{
+					showBoneWeights = (ShowBoneWeights)i;
+					break;
+				}
+			}
 			wireframe = (bool)Gui.Config["Wireframe"];
 			culling = (bool)Gui.Config["Culling"];
 			Background = Color.FromArgb(255, 10, 10, 60);

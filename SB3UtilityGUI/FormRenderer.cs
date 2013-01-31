@@ -40,6 +40,12 @@ namespace SB3Utility
 
 			centerViewAutomaticallyToolStripMenuItem.Checked = (bool)Gui.Config["AutoCenterView"];
 			centerViewAutomaticallyToolStripMenuItem.CheckedChanged += centerViewAutomaticallyToolStripMenuItem_CheckChanged;
+
+			foreach (ToolStripMenuItem item in boneWeightsToolStripMenuItem.DropDownItems)
+			{
+				string itemText = item.Text.Substring(0, item.Text.IndexOf('&')) + item.Text.Substring(item.Text.IndexOf('&') + 1);
+				item.Checked = itemText == Renderer.ShowBoneWeights.ToString();
+			}
 		}
 
 		void CustomDispose()
@@ -129,6 +135,26 @@ namespace SB3Utility
 		private void centerViewAutomaticallyToolStripMenuItem_CheckChanged(object sender, EventArgs e)
 		{
 			Gui.Config["AutoCenterView"] = centerViewAutomaticallyToolStripMenuItem.Checked;
+		}
+
+		private void allBoneWeightsToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			ToolStripMenuItem clickedItem = (ToolStripMenuItem)sender;
+			if (clickedItem.Selected)
+			{
+				return;
+			}
+
+			for (int i = 0; i < boneWeightsToolStripMenuItem.DropDownItems.Count; i++)
+			{
+				ToolStripMenuItem item = (ToolStripMenuItem)boneWeightsToolStripMenuItem.DropDownItems[i];
+				if (item.Checked = item == clickedItem)
+				{
+					Renderer.ShowBoneWeights = (ShowBoneWeights)i;
+				}
+			}
+
+			Renderer.Render();
 		}
 	}
 }

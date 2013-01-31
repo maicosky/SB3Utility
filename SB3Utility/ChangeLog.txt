@@ -1,4 +1,7 @@
-﻿[0.4.42.32]
+﻿[0.4.42.33]
+  - Show bone weights with different modes in the renderer.
+
+[0.4.42.32]
   - Added support for PPD
   - Added display XA Materials
   - Added renaming of tracks
