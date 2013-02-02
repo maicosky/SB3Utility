@@ -59,5 +59,8 @@
     <Setting Name="ShowBoneWeights" Provider="PortableSettingsProvider" Type="System.String" Scope="Application">
       <Value Profile="(Default)">Strong</Value>
     </Setting>
+    <Setting Name="KeepBackupOfXA" Provider="PortableSettingsProvider" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

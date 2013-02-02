@@ -77,8 +77,8 @@ namespace ODFPlugin
 		Dictionary<int, int> crossRefTextureMeshesCount = new Dictionary<int, int>();
 		Dictionary<int, int> crossRefTextureMaterialsCount = new Dictionary<int, int>();
 
-		List<RenderObjectODF> renderObjectMeshes;
-		List<int> renderObjectIds;
+		public List<RenderObjectODF> renderObjectMeshes;
+		public List<int> renderObjectIds;
 
 		private DataGridViewRow loadedAnimationClip = null;
 
@@ -2463,7 +2463,7 @@ namespace ODFPlugin
 
 			#endregion DisableAutomaticSelectionOfFirstRow
 
-		private void listViewAnimationTrack_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
+		public void listViewAnimationTrack_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
 		{
 			try
 			{

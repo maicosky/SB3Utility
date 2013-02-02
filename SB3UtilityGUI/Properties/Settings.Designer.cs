@@ -212,5 +212,15 @@ namespace SB3Utility.Properties {
                 return ((string)(this["ShowBoneWeights"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(PortableSettingsProvider))]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool KeepBackupOfXA {
+            get {
+                return ((bool)(this["KeepBackupOfXA"]));
+            }
+        }
     }
 }

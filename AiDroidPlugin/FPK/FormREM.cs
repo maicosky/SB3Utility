@@ -79,8 +79,8 @@ namespace AiDroidPlugin
 		Dictionary<int, int> crossRefTextureMeshesCount = new Dictionary<int, int>();
 		Dictionary<int, int> crossRefTextureMaterialsCount = new Dictionary<int, int>();
 
-		List<RenderObjectREM> renderObjectMeshes;
-		List<int> renderObjectIds;
+		public List<RenderObjectREM> renderObjectMeshes;
+		public List<int> renderObjectIds;
 
 		private bool listViewItemSyncSelectedSent = false;
 
@@ -1595,6 +1595,7 @@ namespace AiDroidPlugin
 						CrossRefRemoveItem(crossRefMeshTextures[meshIdx], crossRefMeshTexturesCount, listViewMeshTexture);
 
 						Gui.Renderer.RemoveRenderObject(renderObjectIds[meshIdx]);
+						renderObjectIds[meshIdx] = -1;
 					}
 
 					CrossRefSetSelected(e.IsSelected, listViewMesh, meshIdx);

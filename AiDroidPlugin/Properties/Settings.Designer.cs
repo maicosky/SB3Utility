@@ -52,5 +52,15 @@ namespace AiDroidPlugin.Properties {
                 return ((bool)(this["KeepBackupOfREM"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(PortableSettingsProvider))]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool KeepBackupOfREA {
+            get {
+                return ((bool)(this["KeepBackupOfREA"]));
+            }
+        }
     }
 }

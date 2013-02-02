@@ -20,18 +20,17 @@ namespace AiDroidPlugin
 		public string ParserVar { get; protected set; }
 		public string FormVar { get; protected set; }
 
-		private bool loadedAnimationClip = false;
+		private bool propertiesChanged = false;
 
+		private bool loadedAnimationClip = false;
 		private int animationId;
 		private KeyframedAnimationSet animationSet = null;
-
 		private Timer renderTimer = new Timer();
 		private DateTime startTime;
 		private double trackPos = 0;
 		private bool play = false;
 		private bool trackEnabled = false;
 		private bool userTrackBar = true;
-
 		public float AnimationSpeed { get; set; }
 
 		public FormREA(string path, string variable)
@@ -52,10 +51,11 @@ namespace AiDroidPlugin
 				string editorCommand = EditorVar + " = reaEditor(parser=" + ParserVar + ")";
 				Editor = (reaEditor)Gui.Scripting.RunScript(editorCommand);
 
-				FormVar = variable;
-
 				Init();
-				LoadREA();
+				ParserVar = Gui.Scripting.GetNextVariable("reaParser");
+				EditorVar = Gui.Scripting.GetNextVariable("reaEditor");
+				FormVar = variable;
+				ReopenREA();
 
 				List<DockContent> formREAList;
 				if (Gui.Docking.DockContents.TryGetValue(typeof(FormREA), out formREAList))
@@ -84,11 +84,24 @@ namespace AiDroidPlugin
 			}
 		}
 
+		void ReopenREA()
+		{
+			string path = this.ToolTipText;
+			string parserCommand = ParserVar + " = OpenREA(path=\"" + path + "\")";
+			reaParser parser = (reaParser)Gui.Scripting.RunScript(parserCommand);
+
+			string editorCommand = EditorVar + " = reaEditor(parser=" + ParserVar + ")";
+			Editor = (reaEditor)Gui.Scripting.RunScript(editorCommand);
+
+			LoadREA();
+		}
+
 		public FormREA(fpkParser fpkParser, string reaParserVar)
 		{
 			try
 			{
 				InitializeComponent();
+				this.Controls.Remove(this.menuStrip1);
 
 				reaParser parser = (reaParser)Gui.Scripting.Variables[reaParserVar];
 
@@ -114,6 +127,11 @@ namespace AiDroidPlugin
 		{
 			try
 			{
+				if (propertiesChanged)
+				{
+					Properties.Settings.Default.Save();
+					propertiesChanged = false;
+				}
 				UnloadREA();
 
 				if (FormVar != null)
@@ -135,6 +153,7 @@ namespace AiDroidPlugin
 		{
 			AnimationSpeed = Decimal.ToSingle(numericAnimationSpeed.Value);
 
+			keepBackupToolStripMenuItem.Checked = (bool)Properties.Settings.Default["KeepBackupOfREA"];
 			Gui.Docking.ShowDockContent(this, Gui.Docking.DockEditors, ContentCategory.Animations);
 		}
 
@@ -605,7 +624,35 @@ namespace AiDroidPlugin
 
 		private void listViewAnimationTrack_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
 		{
+			List<DockContent> formREMList;
+			if (!Gui.Docking.DockContents.TryGetValue(typeof(FormREM), out formREMList))
+			{
+				return;
+			}
 
+			foreach (FormREM formMesh in formREMList)
+			{
+				for (int i = 0; i < formMesh.renderObjectMeshes.Count; i++)
+				{
+					RenderObjectREM mesh = formMesh.renderObjectMeshes[i];
+					if (mesh != null && formMesh.renderObjectIds[i] > -1)
+					{
+						remMesh remMesh = formMesh.Editor.Parser.MESC[i];
+						remSkin skin = rem.FindSkin(remMesh.name, formMesh.Editor.Parser.SKIC);
+						if (skin == null)
+						{
+							continue;
+						}
+						remBoneWeights boneWeights = rem.FindBoneWeights(skin, new remId(e.Item.Text));
+						if (boneWeights == null)
+						{
+							continue;
+						}
+						mesh.HighlightBone(formMesh.Editor.Parser, remMesh, skin.IndexOf(boneWeights), e.IsSelected);
+						Gui.Renderer.Render();
+					}
+				}
+			}
 		}
 
 		private void listViewAnimationTrack_AfterLabelEdit(object sender, LabelEditEventArgs e)
@@ -634,6 +681,46 @@ namespace AiDroidPlugin
 			}
 		}
 
+		private void textBoxANICunk1_AfterEditTextChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				int unk1;
+				if (Int32.TryParse(textBoxANICunk1.Text, out unk1))
+				{
+					Gui.Scripting.RunScript(EditorVar + ".SetUnknowns(maxKeyframes=" + unk1 + ", fps=" + Editor.Parser.ANIC.unk2.ToFloatString() + ")");
+				}
+				else
+				{
+					textBoxANICunk1.Text = Editor.Parser.ANIC.unk1.ToString();
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void textBoxANICunk2_AfterEditTextChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				float unk2;
+				if (Single.TryParse(textBoxANICunk2.Text, out unk2))
+				{
+					Gui.Scripting.RunScript(EditorVar + ".SetUnknowns(maxKeyframes=" + Editor.Parser.ANIC.unk1 + ", fps=" + unk2.ToFloatString() + ")");
+				}
+				else
+				{
+					textBoxANICunk2.Text = Editor.Parser.ANIC.unk2.ToString();
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
 		private void buttonAnimationTrackRemove_Click(object sender, EventArgs e)
 		{
 			if (listViewAnimationTrack.SelectedItems.Count <= 0)
@@ -647,6 +734,57 @@ namespace AiDroidPlugin
 				}
 				UnloadREA();
 				LoadREA();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void reopenToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			UnloadREA();
+			ReopenREA();
+		}
+
+		private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				Gui.Scripting.RunScript(EditorVar + ".SaveREA(path=\"" + this.ToolTipText + "\", backup=" + keepBackupToolStripMenuItem.Checked + ")");
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+				{
+					Gui.Scripting.RunScript(EditorVar + ".SaveREA(path=\"" + saveFileDialog1.FileName + "\", backup=" + keepBackupToolStripMenuItem.Checked + ")");
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void closeToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			this.Close();
+		}
+
+		private void keepBackupToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				Properties.Settings.Default["KeepBackupOfREA"] = keepBackupToolStripMenuItem.Checked;
+				propertiesChanged = true;
 			}
 			catch (Exception ex)
 			{

@@ -31,6 +31,8 @@ namespace SB3Utility
 		public string ParserVar { get; protected set; }
 		public string FormVar { get; protected set; }
 
+		private bool propertiesChanged = false;
+
 		private TextBox[][] xaMaterialMatrixText = new TextBox[6][];
 		private int loadedSection1Material = -1;
 		private int loadedSection1MaterialConfig = -1;
@@ -58,17 +60,11 @@ namespace SB3Utility
 			this.ToolTipText = path;
 
 			ParserVar = Gui.Scripting.GetNextVariable("xaParser");
-			string parserCommand = ParserVar + " = OpenXA(path=\"" + path + "\")";
-			xaParser parser = (xaParser)Gui.Scripting.RunScript(parserCommand);
-
 			EditorVar = Gui.Scripting.GetNextVariable("xaEditor");
-			string editorCommand = EditorVar + " = xaEditor(parser=" + ParserVar + ")";
-			Editor = (xaEditor)Gui.Scripting.RunScript(editorCommand);
-
 			FormVar = variable;
 
 			Init();
-			LoadXA();
+			ReopenXA();
 
 			List<DockContent> formXAList;
 			if (Gui.Docking.DockContents.TryGetValue(typeof(FormXA), out formXAList))
@@ -92,9 +88,22 @@ namespace SB3Utility
 			}
 		}
 
+		void ReopenXA()
+		{
+			string path = this.ToolTipText;
+			string parserCommand = ParserVar + " = OpenXA(path=\"" + path + "\")";
+			xaParser parser = (xaParser)Gui.Scripting.RunScript(parserCommand);
+
+			string editorCommand = EditorVar + " = xaEditor(parser=" + ParserVar + ")";
+			Editor = (xaEditor)Gui.Scripting.RunScript(editorCommand);
+
+			LoadXA();
+		}
+
 		public FormXA(ppParser ppParser, string xaParserVar)
 		{
 			InitializeComponent();
+			this.Controls.Remove(this.menuStrip1);
 
 			xaParser parser = (xaParser)Gui.Scripting.Variables[xaParserVar];
 
@@ -115,6 +124,11 @@ namespace SB3Utility
 		{
 			try
 			{
+				if (propertiesChanged)
+				{
+					Gui.Config.Save();
+					propertiesChanged = false;
+				}
 				UnloadXA();
 
 				if (FormVar != null)
@@ -189,6 +203,7 @@ namespace SB3Utility
 			AnimationSpeed = Decimal.ToSingle(numericAnimationClipSpeed.Value);
 			FollowSequence = checkBoxAnimationClipLoadNextClip.Checked;
 
+			keepBackupToolStripMenuItem.Checked = (bool)Gui.Config["KeepBackupOfXA"];
 			Gui.Docking.ShowDockContent(this, Gui.Docking.DockEditors, ContentCategory.Animations);
 		}
 
@@ -1824,6 +1839,57 @@ namespace SB3Utility
 				}
 				UnloadXA();
 				LoadXA();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void reopenToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			UnloadXA();
+			ReopenXA();
+		}
+
+		private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				Gui.Scripting.RunScript(EditorVar + ".SaveXA(path=\"" + this.ToolTipText + "\", backup=" + keepBackupToolStripMenuItem.Checked + ")");
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+				{
+					Gui.Scripting.RunScript(EditorVar + ".SaveXA(path=\"" + saveFileDialog1.FileName + "\", backup=" + keepBackupToolStripMenuItem.Checked + ")");
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void closeToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			this.Close();
+		}
+
+		private void keepBackupToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				Gui.Config["KeepBackupOfXA"] = keepBackupToolStripMenuItem.Checked;
+				propertiesChanged = true;
 			}
 			catch (Exception ex)
 			{

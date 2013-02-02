@@ -11,5 +11,8 @@
     <Setting Name="KeepBackupOfREM" Provider="PortableSettingsProvider" Type="System.Boolean" Scope="Application">
       <Value Profile="(Default)">True</Value>
     </Setting>
+    <Setting Name="KeepBackupOfREA" Provider="PortableSettingsProvider" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

@@ -1,4 +1,8 @@
-﻿[0.4.42.33]
+﻿[0.4.42.34]
+  - Added external XA files can be saved and reopened.
+  - Added clicking animation tracks highlights the corresponding bone.
+
+[0.4.42.33]
   - Show bone weights with different modes in the renderer.
 
 [0.4.42.32]

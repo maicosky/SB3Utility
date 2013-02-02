@@ -22,6 +22,19 @@ namespace AiDroidPlugin
 		}
 
 		[Plugin]
+		public void SaveREA(string path, bool backup)
+		{
+			rea.SaveREA(Parser, path, backup);
+		}
+
+		[Plugin]
+		public void SetUnknowns(int maxKeyframes, double fps)
+		{
+			Parser.ANIC.unk1 = maxKeyframes;
+			Parser.ANIC.unk2 = (float)fps;
+		}
+
+		[Plugin]
 		public void RenameTrack(string track, string newName)
 		{
 			reaAnimationTrack reaTrack = rea.FindTrack(new remId(track), Parser);

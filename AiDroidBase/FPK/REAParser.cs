@@ -82,7 +82,10 @@ namespace AiDroidPlugin
 
 		public void WriteTo(Stream stream)
 		{
-			throw new NotImplementedException();
+			if (ANIC != null)
+			{
+				ANIC.WriteTo(stream);
+			}
 		}
 	}
 }

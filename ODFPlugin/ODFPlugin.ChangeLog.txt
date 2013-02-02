@@ -1,4 +1,7 @@
-﻿[0.4.42.32]
+﻿[0.4.42.34]
+  - Added clicking animation tracks highlights the corresponding bone.
+
+[0.4.42.32]
   - fixed crashes for Renai+H : Replacing meshes from workspace (imported and from open ODFs)
   - removed misleading error message having a mesh id twice during replacing meshes
 

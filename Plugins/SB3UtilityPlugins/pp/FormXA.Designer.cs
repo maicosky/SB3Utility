@@ -82,21 +82,25 @@
 			this.label8 = new System.Windows.Forms.Label();
 			this.buttonRefUp = new System.Windows.Forms.Button();
 			this.buttonDeleteRef = new System.Windows.Forms.Button();
+			this.textBoxFrameNameRefID = new SB3Utility.EditTextBox();
 			this.buttonNewRef = new System.Windows.Forms.Button();
 			this.checkBoxOnlyValidKeyframes = new System.Windows.Forms.CheckBox();
 			this.comboBoxRefKeyframe = new System.Windows.Forms.ComboBox();
 			this.label6 = new System.Windows.Forms.Label();
 			this.groupBox9 = new System.Windows.Forms.GroupBox();
+			this.editTextBoxMorphClipMesh = new SB3Utility.EditTextBox();
 			this.label10 = new System.Windows.Forms.Label();
 			this.label11 = new System.Windows.Forms.Label();
+			this.editTextBoxMorphClipName = new SB3Utility.EditTextBox();
 			this.groupBox5 = new System.Windows.Forms.GroupBox();
+			this.groupBox8 = new System.Windows.Forms.GroupBox();
+			this.checkBoxFbxOptionEmbedMedia = new System.Windows.Forms.CheckBox();
+			this.checkBoxFbxOptionOneBlendshape = new System.Windows.Forms.CheckBox();
+			this.comboBoxMorphExportFormat = new System.Windows.Forms.ComboBox();
 			this.buttonMorphClipExport = new System.Windows.Forms.Button();
 			this.label5 = new System.Windows.Forms.Label();
 			this.comboBoxMorphMesh = new System.Windows.Forms.ComboBox();
 			this.label4 = new System.Windows.Forms.Label();
-			this.groupBox8 = new System.Windows.Forms.GroupBox();
-			this.checkBoxFbxOptionEmbedMedia = new System.Windows.Forms.CheckBox();
-			this.checkBoxFbxOptionOneBlendshape = new System.Windows.Forms.CheckBox();
 			this.treeViewMorphClip = new System.Windows.Forms.TreeView();
 			this.label57 = new System.Windows.Forms.Label();
 			this.groupBox7 = new System.Windows.Forms.GroupBox();
@@ -105,6 +109,7 @@
 			this.checkBoxStartKeyframe = new System.Windows.Forms.CheckBox();
 			this.buttonDeleteKeyframe = new System.Windows.Forms.Button();
 			this.label9 = new System.Windows.Forms.Label();
+			this.editTextBoxNewKeyframeName = new SB3Utility.EditTextBox();
 			this.label3 = new System.Windows.Forms.Label();
 			this.listViewMorphKeyframe = new System.Windows.Forms.ListView();
 			this.columnHeaderMorphKeyframeName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -152,11 +157,17 @@
 			this.labelSkeletalRender = new System.Windows.Forms.Label();
 			this.label30 = new System.Windows.Forms.Label();
 			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-			this.comboBoxMorphExportFormat = new System.Windows.Forms.ComboBox();
-			this.textBoxFrameNameRefID = new SB3Utility.EditTextBox();
-			this.editTextBoxMorphClipMesh = new SB3Utility.EditTextBox();
-			this.editTextBoxMorphClipName = new SB3Utility.EditTextBox();
-			this.editTextBoxNewKeyframeName = new SB3Utility.EditTextBox();
+			this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+			this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.reopenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+			this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.saveAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
+			this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.keepBackupToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
 			this.tabControlXA.SuspendLayout();
 			this.tabPageXAObjectView.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer7)).BeginInit();
@@ -191,6 +202,7 @@
 			((System.ComponentModel.ISupportInitialize)(this.trackBarAnimationClipKeyframe)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericAnimationClipSpeed)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericAnimationClipKeyframe)).BeginInit();
+			this.menuStrip1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// tabControlXA
@@ -202,10 +214,10 @@
 			this.tabControlXA.Controls.Add(this.tabPageType4);
 			this.tabControlXA.Controls.Add(this.tabPageAnimation);
 			this.tabControlXA.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.tabControlXA.Location = new System.Drawing.Point(0, 0);
+			this.tabControlXA.Location = new System.Drawing.Point(0, 18);
 			this.tabControlXA.Name = "tabControlXA";
 			this.tabControlXA.SelectedIndex = 0;
-			this.tabControlXA.Size = new System.Drawing.Size(524, 536);
+			this.tabControlXA.Size = new System.Drawing.Size(524, 518);
 			this.tabControlXA.TabIndex = 104;
 			// 
 			// tabPageXAObjectView
@@ -213,7 +225,7 @@
 			this.tabPageXAObjectView.Controls.Add(this.splitContainer7);
 			this.tabPageXAObjectView.Location = new System.Drawing.Point(4, 22);
 			this.tabPageXAObjectView.Name = "tabPageXAObjectView";
-			this.tabPageXAObjectView.Size = new System.Drawing.Size(516, 510);
+			this.tabPageXAObjectView.Size = new System.Drawing.Size(516, 492);
 			this.tabPageXAObjectView.TabIndex = 2;
 			this.tabPageXAObjectView.Text = "Object Tree";
 			this.tabPageXAObjectView.UseVisualStyleBackColor = true;
@@ -232,7 +244,7 @@
 			// 
 			this.splitContainer7.Panel2.Controls.Add(this.tableLayoutXAHex);
 			this.splitContainer7.Panel2.Controls.Add(this.label42);
-			this.splitContainer7.Size = new System.Drawing.Size(516, 510);
+			this.splitContainer7.Size = new System.Drawing.Size(516, 492);
 			this.splitContainer7.SplitterDistance = 227;
 			this.splitContainer7.TabIndex = 0;
 			// 
@@ -242,7 +254,7 @@
 			this.treeViewXA.HideSelection = false;
 			this.treeViewXA.Location = new System.Drawing.Point(0, 0);
 			this.treeViewXA.Name = "treeViewXA";
-			this.treeViewXA.Size = new System.Drawing.Size(227, 510);
+			this.treeViewXA.Size = new System.Drawing.Size(227, 492);
 			this.treeViewXA.TabIndex = 37;
 			// 
 			// tableLayoutXAHex
@@ -255,7 +267,7 @@
 			this.tableLayoutXAHex.Name = "tableLayoutXAHex";
 			this.tableLayoutXAHex.RowCount = 1;
 			this.tableLayoutXAHex.RowStyles.Add(new System.Windows.Forms.RowStyle());
-			this.tableLayoutXAHex.Size = new System.Drawing.Size(285, 490);
+			this.tableLayoutXAHex.Size = new System.Drawing.Size(285, 472);
 			this.tableLayoutXAHex.TabIndex = 92;
 			// 
 			// label42
@@ -710,6 +722,15 @@
 			this.buttonDeleteRef.UseVisualStyleBackColor = true;
 			this.buttonDeleteRef.Click += new System.EventHandler(this.buttonDeleteRef_Click);
 			// 
+			// textBoxFrameNameRefID
+			// 
+			this.textBoxFrameNameRefID.Enabled = false;
+			this.textBoxFrameNameRefID.Location = new System.Drawing.Point(80, 13);
+			this.textBoxFrameNameRefID.Name = "textBoxFrameNameRefID";
+			this.textBoxFrameNameRefID.Size = new System.Drawing.Size(36, 20);
+			this.textBoxFrameNameRefID.TabIndex = 110;
+			this.textBoxFrameNameRefID.AfterEditTextChanged += new System.EventHandler(this.textBoxFrameNameRefID_AfterEditTextChanged);
+			// 
 			// buttonNewRef
 			// 
 			this.buttonNewRef.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -770,6 +791,14 @@
 			this.groupBox9.TabStop = false;
 			this.groupBox9.Text = "Morph Clip";
 			// 
+			// editTextBoxMorphClipMesh
+			// 
+			this.editTextBoxMorphClipMesh.Location = new System.Drawing.Point(48, 42);
+			this.editTextBoxMorphClipMesh.Name = "editTextBoxMorphClipMesh";
+			this.editTextBoxMorphClipMesh.Size = new System.Drawing.Size(134, 20);
+			this.editTextBoxMorphClipMesh.TabIndex = 94;
+			this.editTextBoxMorphClipMesh.AfterEditTextChanged += new System.EventHandler(this.editTextBoxMorphClipMesh_AfterEditTextChanged);
+			// 
 			// label10
 			// 
 			this.label10.AutoSize = true;
@@ -788,6 +817,14 @@
 			this.label11.TabIndex = 140;
 			this.label11.Text = "Mesh";
 			// 
+			// editTextBoxMorphClipName
+			// 
+			this.editTextBoxMorphClipName.Location = new System.Drawing.Point(48, 16);
+			this.editTextBoxMorphClipName.Name = "editTextBoxMorphClipName";
+			this.editTextBoxMorphClipName.Size = new System.Drawing.Size(134, 20);
+			this.editTextBoxMorphClipName.TabIndex = 92;
+			this.editTextBoxMorphClipName.AfterEditTextChanged += new System.EventHandler(this.editTextBoxMorphClipName_AfterEditTextChanged);
+			// 
 			// groupBox5
 			// 
 			this.groupBox5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
@@ -804,6 +841,55 @@
 			this.groupBox5.TabIndex = 140;
 			this.groupBox5.TabStop = false;
 			this.groupBox5.Text = "Export Options";
+			// 
+			// groupBox8
+			// 
+			this.groupBox8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.groupBox8.Controls.Add(this.checkBoxFbxOptionEmbedMedia);
+			this.groupBox8.Controls.Add(this.checkBoxFbxOptionOneBlendshape);
+			this.groupBox8.Location = new System.Drawing.Point(238, 40);
+			this.groupBox8.Name = "groupBox8";
+			this.groupBox8.Size = new System.Drawing.Size(215, 36);
+			this.groupBox8.TabIndex = 143;
+			this.groupBox8.TabStop = false;
+			this.groupBox8.Text = "Fbx Options";
+			// 
+			// checkBoxFbxOptionEmbedMedia
+			// 
+			this.checkBoxFbxOptionEmbedMedia.AutoSize = true;
+			this.checkBoxFbxOptionEmbedMedia.Location = new System.Drawing.Point(119, 15);
+			this.checkBoxFbxOptionEmbedMedia.Name = "checkBoxFbxOptionEmbedMedia";
+			this.checkBoxFbxOptionEmbedMedia.Size = new System.Drawing.Size(91, 17);
+			this.checkBoxFbxOptionEmbedMedia.TabIndex = 145;
+			this.checkBoxFbxOptionEmbedMedia.Text = "Embed Media";
+			this.toolTip1.SetToolTip(this.checkBoxFbxOptionEmbedMedia, "Textures are stored inside the output file.");
+			this.checkBoxFbxOptionEmbedMedia.UseVisualStyleBackColor = true;
+			// 
+			// checkBoxFbxOptionOneBlendshape
+			// 
+			this.checkBoxFbxOptionOneBlendshape.AutoSize = true;
+			this.checkBoxFbxOptionOneBlendshape.Checked = true;
+			this.checkBoxFbxOptionOneBlendshape.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.checkBoxFbxOptionOneBlendshape.Location = new System.Drawing.Point(6, 15);
+			this.checkBoxFbxOptionOneBlendshape.Name = "checkBoxFbxOptionOneBlendshape";
+			this.checkBoxFbxOptionOneBlendshape.Size = new System.Drawing.Size(107, 17);
+			this.checkBoxFbxOptionOneBlendshape.TabIndex = 144;
+			this.checkBoxFbxOptionOneBlendshape.Text = "One BlendShape";
+			this.toolTip1.SetToolTip(this.checkBoxFbxOptionOneBlendshape, "If checked, all morph keyframes appear as channels in one common BlendShape.\r\nIf " +
+        "unchecked, each morph keyframe will appear as channel in it\'s own BlendShape.");
+			this.checkBoxFbxOptionOneBlendshape.UseVisualStyleBackColor = true;
+			// 
+			// comboBoxMorphExportFormat
+			// 
+			this.comboBoxMorphExportFormat.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.comboBoxMorphExportFormat.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.comboBoxMorphExportFormat.FormattingEnabled = true;
+			this.comboBoxMorphExportFormat.Location = new System.Drawing.Point(133, 50);
+			this.comboBoxMorphExportFormat.Name = "comboBoxMorphExportFormat";
+			this.comboBoxMorphExportFormat.Size = new System.Drawing.Size(99, 21);
+			this.comboBoxMorphExportFormat.TabIndex = 142;
 			// 
 			// buttonMorphClipExport
 			// 
@@ -851,43 +937,6 @@
 			this.label4.Size = new System.Drawing.Size(124, 13);
 			this.label4.TabIndex = 123;
 			this.label4.Text = ".xx File with Target Mesh";
-			// 
-			// groupBox8
-			// 
-			this.groupBox8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.groupBox8.Controls.Add(this.checkBoxFbxOptionEmbedMedia);
-			this.groupBox8.Controls.Add(this.checkBoxFbxOptionOneBlendshape);
-			this.groupBox8.Location = new System.Drawing.Point(238, 40);
-			this.groupBox8.Name = "groupBox8";
-			this.groupBox8.Size = new System.Drawing.Size(215, 36);
-			this.groupBox8.TabIndex = 143;
-			this.groupBox8.TabStop = false;
-			this.groupBox8.Text = "Fbx Options";
-			// 
-			// checkBoxFbxOptionEmbedMedia
-			// 
-			this.checkBoxFbxOptionEmbedMedia.AutoSize = true;
-			this.checkBoxFbxOptionEmbedMedia.Location = new System.Drawing.Point(119, 15);
-			this.checkBoxFbxOptionEmbedMedia.Name = "checkBoxFbxOptionEmbedMedia";
-			this.checkBoxFbxOptionEmbedMedia.Size = new System.Drawing.Size(91, 17);
-			this.checkBoxFbxOptionEmbedMedia.TabIndex = 145;
-			this.checkBoxFbxOptionEmbedMedia.Text = "Embed Media";
-			this.toolTip1.SetToolTip(this.checkBoxFbxOptionEmbedMedia, "Textures are stored inside the output file.");
-			this.checkBoxFbxOptionEmbedMedia.UseVisualStyleBackColor = true;
-			// 
-			// checkBoxFbxOptionOneBlendshape
-			// 
-			this.checkBoxFbxOptionOneBlendshape.AutoSize = true;
-			this.checkBoxFbxOptionOneBlendshape.Checked = true;
-			this.checkBoxFbxOptionOneBlendshape.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.checkBoxFbxOptionOneBlendshape.Location = new System.Drawing.Point(6, 15);
-			this.checkBoxFbxOptionOneBlendshape.Name = "checkBoxFbxOptionOneBlendshape";
-			this.checkBoxFbxOptionOneBlendshape.Size = new System.Drawing.Size(107, 17);
-			this.checkBoxFbxOptionOneBlendshape.TabIndex = 144;
-			this.checkBoxFbxOptionOneBlendshape.Text = "One BlendShape";
-			this.toolTip1.SetToolTip(this.checkBoxFbxOptionOneBlendshape, "If checked, all morph keyframes appear as channels in one common BlendShape.\r\nIf " +
-        "unchecked, each morph keyframe will appear as channel in it\'s own BlendShape.");
-			this.checkBoxFbxOptionOneBlendshape.UseVisualStyleBackColor = true;
 			// 
 			// treeViewMorphClip
 			// 
@@ -985,6 +1034,15 @@
 			this.label9.Size = new System.Drawing.Size(63, 13);
 			this.label9.TabIndex = 136;
 			this.label9.Text = "Rename To";
+			// 
+			// editTextBoxNewKeyframeName
+			// 
+			this.editTextBoxNewKeyframeName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.editTextBoxNewKeyframeName.Location = new System.Drawing.Point(364, 33);
+			this.editTextBoxNewKeyframeName.Name = "editTextBoxNewKeyframeName";
+			this.editTextBoxNewKeyframeName.Size = new System.Drawing.Size(139, 20);
+			this.editTextBoxNewKeyframeName.TabIndex = 164;
+			this.editTextBoxNewKeyframeName.AfterEditTextChanged += new System.EventHandler(this.editTextBoxNewKeyframeName_AfterEditTextChanged);
 			// 
 			// label3
 			// 
@@ -1512,51 +1570,96 @@
 			this.label30.TabIndex = 146;
 			this.label30.Text = "Speed";
 			// 
-			// comboBoxMorphExportFormat
+			// menuStrip1
 			// 
-			this.comboBoxMorphExportFormat.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.comboBoxMorphExportFormat.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.comboBoxMorphExportFormat.FormattingEnabled = true;
-			this.comboBoxMorphExportFormat.Location = new System.Drawing.Point(133, 50);
-			this.comboBoxMorphExportFormat.Name = "comboBoxMorphExportFormat";
-			this.comboBoxMorphExportFormat.Size = new System.Drawing.Size(99, 21);
-			this.comboBoxMorphExportFormat.TabIndex = 142;
+			this.menuStrip1.AllowMerge = false;
+			this.menuStrip1.AutoSize = false;
+			this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.fileToolStripMenuItem,
+            this.optionsToolStripMenuItem});
+			this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+			this.menuStrip1.Name = "menuStrip1";
+			this.menuStrip1.Padding = new System.Windows.Forms.Padding(6, 0, 0, 0);
+			this.menuStrip1.Size = new System.Drawing.Size(524, 18);
+			this.menuStrip1.TabIndex = 185;
+			this.menuStrip1.Text = "menuStrip1";
 			// 
-			// textBoxFrameNameRefID
+			// fileToolStripMenuItem
 			// 
-			this.textBoxFrameNameRefID.Enabled = false;
-			this.textBoxFrameNameRefID.Location = new System.Drawing.Point(80, 13);
-			this.textBoxFrameNameRefID.Name = "textBoxFrameNameRefID";
-			this.textBoxFrameNameRefID.Size = new System.Drawing.Size(36, 20);
-			this.textBoxFrameNameRefID.TabIndex = 110;
-			this.textBoxFrameNameRefID.AfterEditTextChanged += new System.EventHandler(this.textBoxFrameNameRefID_AfterEditTextChanged);
+			this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.reopenToolStripMenuItem,
+            this.toolStripSeparator1,
+            this.saveToolStripMenuItem,
+            this.saveAsToolStripMenuItem,
+            this.toolStripSeparator6,
+            this.closeToolStripMenuItem});
+			this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
+			this.fileToolStripMenuItem.Size = new System.Drawing.Size(35, 18);
+			this.fileToolStripMenuItem.Text = "&File";
 			// 
-			// editTextBoxMorphClipMesh
+			// reopenToolStripMenuItem
 			// 
-			this.editTextBoxMorphClipMesh.Location = new System.Drawing.Point(48, 42);
-			this.editTextBoxMorphClipMesh.Name = "editTextBoxMorphClipMesh";
-			this.editTextBoxMorphClipMesh.Size = new System.Drawing.Size(134, 20);
-			this.editTextBoxMorphClipMesh.TabIndex = 94;
-			this.editTextBoxMorphClipMesh.AfterEditTextChanged += new System.EventHandler(this.editTextBoxMorphClipMesh_AfterEditTextChanged);
+			this.reopenToolStripMenuItem.Name = "reopenToolStripMenuItem";
+			this.reopenToolStripMenuItem.ShortcutKeyDisplayString = "";
+			this.reopenToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.R)));
+			this.reopenToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
+			this.reopenToolStripMenuItem.Text = "&Reopen .xa";
+			this.reopenToolStripMenuItem.Click += new System.EventHandler(this.reopenToolStripMenuItem_Click);
 			// 
-			// editTextBoxMorphClipName
+			// toolStripSeparator1
 			// 
-			this.editTextBoxMorphClipName.Location = new System.Drawing.Point(48, 16);
-			this.editTextBoxMorphClipName.Name = "editTextBoxMorphClipName";
-			this.editTextBoxMorphClipName.Size = new System.Drawing.Size(134, 20);
-			this.editTextBoxMorphClipName.TabIndex = 92;
-			this.editTextBoxMorphClipName.AfterEditTextChanged += new System.EventHandler(this.editTextBoxMorphClipName_AfterEditTextChanged);
+			this.toolStripSeparator1.Name = "toolStripSeparator1";
+			this.toolStripSeparator1.Size = new System.Drawing.Size(170, 6);
 			// 
-			// editTextBoxNewKeyframeName
+			// saveToolStripMenuItem
 			// 
-			this.editTextBoxNewKeyframeName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.editTextBoxNewKeyframeName.Location = new System.Drawing.Point(364, 33);
-			this.editTextBoxNewKeyframeName.Name = "editTextBoxNewKeyframeName";
-			this.editTextBoxNewKeyframeName.Size = new System.Drawing.Size(139, 20);
-			this.editTextBoxNewKeyframeName.TabIndex = 164;
-			this.editTextBoxNewKeyframeName.AfterEditTextChanged += new System.EventHandler(this.editTextBoxNewKeyframeName_AfterEditTextChanged);
+			this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
+			this.saveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.T)));
+			this.saveToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
+			this.saveToolStripMenuItem.Text = "&Save .xa";
+			this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
+			// 
+			// saveAsToolStripMenuItem
+			// 
+			this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
+			this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
+			this.saveAsToolStripMenuItem.Text = "Save .xa &As...";
+			this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.saveAsToolStripMenuItem_Click);
+			// 
+			// toolStripSeparator6
+			// 
+			this.toolStripSeparator6.Name = "toolStripSeparator6";
+			this.toolStripSeparator6.Size = new System.Drawing.Size(170, 6);
+			// 
+			// closeToolStripMenuItem
+			// 
+			this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
+			this.closeToolStripMenuItem.ShortcutKeyDisplayString = "Ctrl+F4";
+			this.closeToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
+			this.closeToolStripMenuItem.Text = "&Close";
+			this.closeToolStripMenuItem.Click += new System.EventHandler(this.closeToolStripMenuItem_Click);
+			// 
+			// optionsToolStripMenuItem
+			// 
+			this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.keepBackupToolStripMenuItem});
+			this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
+			this.optionsToolStripMenuItem.Size = new System.Drawing.Size(56, 18);
+			this.optionsToolStripMenuItem.Text = "&Options";
+			// 
+			// keepBackupToolStripMenuItem
+			// 
+			this.keepBackupToolStripMenuItem.Checked = true;
+			this.keepBackupToolStripMenuItem.CheckOnClick = true;
+			this.keepBackupToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.keepBackupToolStripMenuItem.Name = "keepBackupToolStripMenuItem";
+			this.keepBackupToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.keepBackupToolStripMenuItem.Text = "Keep Backup";
+			this.keepBackupToolStripMenuItem.CheckedChanged += new System.EventHandler(this.keepBackupToolStripMenuItem_CheckedChanged);
+			// 
+			// saveFileDialog1
+			// 
+			this.saveFileDialog1.Filter = ".xa Files (*.xa)|*.xa|All Files (*.*)|*.*";
 			// 
 			// FormXA
 			// 
@@ -1564,6 +1667,7 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(524, 536);
 			this.Controls.Add(this.tabControlXA);
+			this.Controls.Add(this.menuStrip1);
 			this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.Name = "FormXA";
 			this.Text = "FormXA";
@@ -1612,6 +1716,8 @@
 			((System.ComponentModel.ISupportInitialize)(this.trackBarAnimationClipKeyframe)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericAnimationClipSpeed)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericAnimationClipKeyframe)).EndInit();
+			this.menuStrip1.ResumeLayout(false);
+			this.menuStrip1.PerformLayout();
 			this.ResumeLayout(false);
 
 		}
@@ -1743,5 +1849,16 @@
 		private System.Windows.Forms.Label label17;
 		private System.Windows.Forms.Label label18;
 		private System.Windows.Forms.ComboBox comboBoxMorphExportFormat;
+		private System.Windows.Forms.MenuStrip menuStrip1;
+		private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem reopenToolStripMenuItem;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+		private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem saveAsToolStripMenuItem;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
+		private System.Windows.Forms.ToolStripMenuItem closeToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem keepBackupToolStripMenuItem;
+		private System.Windows.Forms.SaveFileDialog saveFileDialog1;
 	}
 }

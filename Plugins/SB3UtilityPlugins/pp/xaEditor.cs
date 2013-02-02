@@ -21,6 +21,12 @@ namespace SB3Utility
 		}
 
 		[Plugin]
+		public void SaveXA(string path, bool backup)
+		{
+			xa.SaveXA(Parser, path, backup);
+		}
+
+		[Plugin]
 		public void SetMorphClipName(int position, string newName)
 		{
 			string oldName = Parser.MorphSection.ClipList[position].Name;

@@ -10,7 +10,7 @@ using SB3Utility;
 
 namespace AiDroidPlugin
 {
-	class RenderObjectREM : IDisposable, IRenderObject
+	public class RenderObjectREM : IDisposable, IRenderObject
 	{
 		private AnimationFrame rootFrame;
 		private Device device;

@@ -1,4 +1,10 @@
-﻿[0.4.42.32]
+﻿[0.4.42.34]
+  - Fixed writing REA units. It was incomplete.
+  - Added editing unknowns of REA units.
+  - Added REA menustrip for saving, reopening, etc of REA files not included in FPK files.
+  - Added clicking animation tracks highlights the corresponding bone.
+
+[0.4.42.32]
   - Changed display of used bones to use the bone frame parents as root
   - Added display of animations
   - Change: textures are cached and are never released
