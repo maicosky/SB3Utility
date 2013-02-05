@@ -3118,6 +3118,67 @@ namespace SB3Utility
 			}
 		}
 
+		private void buttonMaterialEditHex_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedMaterial < 0)
+				{
+					return;
+				}
+
+				int frameId = -1;
+				if (loadedMesh >= 0)
+				{
+					for (int i = 0; i < Editor.Frames.Count; i++)
+					{
+						if (Editor.Frames[i] == Editor.Meshes[loadedMesh])
+						{
+							frameId = i;
+							break;
+						}
+					}
+				}
+
+				List<int[]> gotoCells = new List<int[]>();
+				gotoCells.Add(new int[] { 1, frameId });
+				gotoCells.Add(new int[] { 2, loadedMesh });
+				gotoCells.Add(new int[] { 4, loadedMaterial });
+
+				using (var editHex = new FormXXEditHex(this, gotoCells))
+				{
+					editHex.ShowDialog();
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonTextureEditHex_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedTexture < 0)
+				{
+					return;
+				}
+
+				List<int[]> gotoCells = new List<int[]>();
+				gotoCells.Add(new int[] { 5, loadedTexture });
+
+				using (var editHex = new FormXXEditHex(this, gotoCells))
+				{
+					editHex.ShowDialog();
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
 		private void comboBoxMeshExportFormat_SelectedIndexChanged(object sender, EventArgs e)
 		{
 			try

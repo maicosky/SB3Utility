@@ -44,17 +44,10 @@ namespace AiDroidPlugin
 				this.ToolTipText = path;
 
 				ParserVar = Gui.Scripting.GetNextVariable("reaParser");
-				string parserCommand = ParserVar + " = OpenREA(path=\"" + path + "\")";
-				reaParser parser = (reaParser)Gui.Scripting.RunScript(parserCommand);
-
-				EditorVar = Gui.Scripting.GetNextVariable("reaEditor");
-				string editorCommand = EditorVar + " = reaEditor(parser=" + ParserVar + ")";
-				Editor = (reaEditor)Gui.Scripting.RunScript(editorCommand);
-
-				Init();
-				ParserVar = Gui.Scripting.GetNextVariable("reaParser");
 				EditorVar = Gui.Scripting.GetNextVariable("reaEditor");
 				FormVar = variable;
+
+				Init();
 				ReopenREA();
 
 				List<DockContent> formREAList;

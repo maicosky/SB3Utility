@@ -30,10 +30,9 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			this.components = new System.ComponentModel.Container();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormREA));
-			this.imageList1 = new System.Windows.Forms.ImageList(this.components);
-			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+			this.imageList1 = new System.Windows.Forms.ImageList();
+			this.toolTip1 = new System.Windows.Forms.ToolTip();
 			this.textBoxANICunk1 = new SB3Utility.EditTextBox();
 			this.textBoxANICunk2 = new SB3Utility.EditTextBox();
 			this.menuStrip1 = new System.Windows.Forms.MenuStrip();
@@ -271,7 +270,11 @@
 			this.listViewAnimationTrack.UseCompatibleStateImageBehavior = false;
 			this.listViewAnimationTrack.View = System.Windows.Forms.View.Details;
 			this.listViewAnimationTrack.AfterLabelEdit += new System.Windows.Forms.LabelEditEventHandler(this.listViewAnimationTrack_AfterLabelEdit);
+			this.listViewAnimationTrack.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.listViewAnimationTrack_ItemDrag);
 			this.listViewAnimationTrack.ItemSelectionChanged += new System.Windows.Forms.ListViewItemSelectionChangedEventHandler(this.listViewAnimationTrack_ItemSelectionChanged);
+			this.listViewAnimationTrack.DragDrop += new System.Windows.Forms.DragEventHandler(this.listViewAnimationTrack_DragDrop);
+			this.listViewAnimationTrack.DragEnter += new System.Windows.Forms.DragEventHandler(this.listViewAnimationTrack_DragEnter);
+			this.listViewAnimationTrack.DragOver += new System.Windows.Forms.DragEventHandler(this.listViewAnimationTrack_DragOver);
 			// 
 			// columnHeader3
 			// 
@@ -314,6 +317,7 @@
 			this.buttonAnimationPlayPause.Size = new System.Drawing.Size(20, 19);
 			this.buttonAnimationPlayPause.TabIndex = 110;
 			this.buttonAnimationPlayPause.UseVisualStyleBackColor = true;
+			this.buttonAnimationPlayPause.Click += new System.EventHandler(this.buttonAnimationPlayPause_Click);
 			// 
 			// trackBarAnimationKeyframe
 			// 
@@ -325,6 +329,7 @@
 			this.trackBarAnimationKeyframe.Size = new System.Drawing.Size(279, 18);
 			this.trackBarAnimationKeyframe.TabIndex = 112;
 			this.trackBarAnimationKeyframe.TickStyle = System.Windows.Forms.TickStyle.None;
+			this.trackBarAnimationKeyframe.ValueChanged += new System.EventHandler(this.trackBarAnimationKeyframe_ValueChanged);
 			// 
 			// numericAnimationSpeed
 			// 
@@ -344,6 +349,7 @@
             0,
             0,
             0});
+			this.numericAnimationSpeed.ValueChanged += new System.EventHandler(this.numericAnimationSpeed_ValueChanged);
 			// 
 			// numericAnimationKeyframe
 			// 
@@ -352,6 +358,7 @@
 			this.numericAnimationKeyframe.Name = "numericAnimationKeyframe";
 			this.numericAnimationKeyframe.Size = new System.Drawing.Size(55, 20);
 			this.numericAnimationKeyframe.TabIndex = 114;
+			this.numericAnimationKeyframe.ValueChanged += new System.EventHandler(this.numericAnimationKeyframe_ValueChanged);
 			// 
 			// labelSkeletalRender
 			// 

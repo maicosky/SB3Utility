@@ -226,6 +226,8 @@
 			this.buttonTextureRemove = new System.Windows.Forms.Button();
 			this.textBoxTexSize = new SB3Utility.EditTextBox();
 			this.textBoxTexName = new SB3Utility.EditTextBox();
+			this.buttonMaterialEditHex = new System.Windows.Forms.Button();
+			this.buttonTextureEditHex = new System.Windows.Forms.Button();
 			this.menuStrip1.SuspendLayout();
 			this.groupBoxInterpolation.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -2018,6 +2020,7 @@
 			// 
 			// tabPageMaterialView
 			// 
+			this.tabPageMaterialView.Controls.Add(this.buttonMaterialEditHex);
 			this.tabPageMaterialView.Controls.Add(this.buttonTextureExternal);
 			this.tabPageMaterialView.Controls.Add(this.comboBoxMatTex4);
 			this.tabPageMaterialView.Controls.Add(this.comboBoxMatTex3);
@@ -2354,6 +2357,7 @@
 			// 
 			// tabPageTextureView
 			// 
+			this.tabPageTextureView.Controls.Add(this.buttonTextureEditHex);
 			this.tabPageTextureView.Controls.Add(this.buttonTextureAdd);
 			this.tabPageTextureView.Controls.Add(this.panelTexturePic);
 			this.tabPageTextureView.Controls.Add(this.label3);
@@ -2460,6 +2464,26 @@
 			this.textBoxTexName.Name = "textBoxTexName";
 			this.textBoxTexName.Size = new System.Drawing.Size(148, 20);
 			this.textBoxTexName.TabIndex = 5;
+			// 
+			// buttonMaterialEditHex
+			// 
+			this.buttonMaterialEditHex.Location = new System.Drawing.Point(3, 338);
+			this.buttonMaterialEditHex.Name = "buttonMaterialEditHex";
+			this.buttonMaterialEditHex.Size = new System.Drawing.Size(75, 23);
+			this.buttonMaterialEditHex.TabIndex = 155;
+			this.buttonMaterialEditHex.Text = "Edit Hex";
+			this.buttonMaterialEditHex.UseVisualStyleBackColor = true;
+			this.buttonMaterialEditHex.Click += new System.EventHandler(this.buttonMaterialEditHex_Click);
+			// 
+			// buttonTextureEditHex
+			// 
+			this.buttonTextureEditHex.Location = new System.Drawing.Point(176, 36);
+			this.buttonTextureEditHex.Name = "buttonTextureEditHex";
+			this.buttonTextureEditHex.Size = new System.Drawing.Size(75, 23);
+			this.buttonTextureEditHex.TabIndex = 25;
+			this.buttonTextureEditHex.Text = "Edit Hex";
+			this.buttonTextureEditHex.UseVisualStyleBackColor = true;
+			this.buttonTextureEditHex.Click += new System.EventHandler(this.buttonTextureEditHex_Click);
 			// 
 			// FormXX
 			// 
@@ -2763,5 +2787,7 @@
 		private System.Windows.Forms.GroupBox groupBoxInterpolation;
 		private System.Windows.Forms.ToolTip toolTip1;
 		private System.Windows.Forms.CheckBox checkBoxMeshExportEmbedMedia;
+		private System.Windows.Forms.Button buttonMaterialEditHex;
+		private System.Windows.Forms.Button buttonTextureEditHex;
 	}
 }

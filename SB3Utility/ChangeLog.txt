@@ -1,4 +1,7 @@
-﻿[0.4.42.34]
+﻿[0.4.42.35]
+  - Added "Edit Hex" buttons for materials and textures in XX units
+
+[0.4.42.34]
   - Added external XA files can be saved and reopened.
   - Added clicking animation tracks highlights the corresponding bone.
 
