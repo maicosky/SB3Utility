@@ -675,6 +675,15 @@ namespace SB3Utility
 		}
 
 		[Plugin]
+		public void MoveSubmesh(int meshId, int submeshId, int newPosition)
+		{
+			xxMesh mesh = Meshes[meshId].Mesh;
+			xxSubmesh src = mesh.SubmeshList[submeshId];
+			mesh.SubmeshList.Remove(src);
+			mesh.SubmeshList.Insert(newPosition, src);
+		}
+
+		[Plugin]
 		public void SetSubmeshMaterial(int meshId, int submeshId, int material)
 		{
 			xxSubmesh submesh = Meshes[meshId].Mesh.SubmeshList[submeshId];

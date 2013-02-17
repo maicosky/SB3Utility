@@ -1,4 +1,17 @@
-﻿[0.4.42.35]
+﻿[0.4.42.39]
+  - XX Submeshes can be reordered
+  - Added application exception handler : displays an error when missing SlimDX
+
+[0.4.42.38]
+  - XX imported meshes can be easier placed into destination frames
+  - XX all materials or all textures can be dropped together into a workspace by dragging their parent
+  - Meshes in the workspace can be renamed
+
+[0.4.42.37]
+  - Save/restore location and size of main window
+  - XX Reordering submeshes
+
+[0.4.42.35]
   - Added "Edit Hex" buttons for materials and textures in XX units
 
 [0.4.42.34]

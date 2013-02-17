@@ -206,7 +206,10 @@ namespace AiDroidPlugin
 
 		void DisposeRenderObjects()
 		{
-			listViewMesh.SelectedItems.Clear();
+			foreach (ListViewItem item in listViewMesh.SelectedItems)
+			{
+				Gui.Renderer.RemoveRenderObject(renderObjectIds[(int)item.Tag]);
+			}
 
 			if (renderObjectMeshes != null)
 			{
@@ -1412,10 +1415,18 @@ namespace AiDroidPlugin
 					{
 						var srcEditor = (ImportedEditor)Gui.Scripting.Variables[source.Variable];
 
-						var destFrameId = Editor.GetFrameIdx(srcEditor.Imported.MeshList[(int)source.Id].Name);
+						int destFrameId = -1;
+						if (treeViewObjectTree.SelectedNode != null)
+						{
+							destFrameId = GetDestParentIdx(treeViewObjectTree.SelectedNode.Text, dest);
+						}
 						if (destFrameId < 0)
 						{
-							destFrameId = 0;
+							destFrameId = Editor.GetFrameIdx(srcEditor.Imported.MeshList[(int)source.Id].Name);
+							if (destFrameId < 0)
+							{
+								destFrameId = -1;
+							}
 						}
 						dragOptions.numericMeshId.Value = destFrameId;
 

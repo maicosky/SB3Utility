@@ -810,6 +810,7 @@ namespace AiDroidPlugin
 		public void MergeMaterial(ImportedMaterial mat)
 		{
 			rem.ReplaceMaterial(Parser, mat);
+			InitTextures(false, false);
 		}
 
 		[Plugin]
@@ -834,6 +835,7 @@ namespace AiDroidPlugin
 			{
 				Parser.MATC.AddChild(newMat);
 			}
+			InitTextures(false, false);
 		}
 
 		[Plugin]

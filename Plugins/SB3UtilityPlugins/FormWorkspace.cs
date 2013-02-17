@@ -417,6 +417,14 @@ namespace SB3Utility
 
 							treeView.AddChild(type, clone);
 						}
+						else
+						{
+							foreach (TreeNode child in node.Nodes)
+							{
+								e.Data.SetData(child);
+								treeView_DragDrop(sender, e);
+							}
+						}
 
 						foreach (TreeNode root in treeView.Nodes)
 						{
@@ -564,6 +572,26 @@ namespace SB3Utility
 			string newName = toolStripEditTextBoxNewMorphKeyframeName.Text;
 			srcEditor.Morphs[(int)dragSrc.Id].setMorphKeyframeNewName(keyframe, newName != String.Empty ? newName : null);
 			UpdateMorphKeyframeNode(morphKeyframeNode);
+		}
+
+		private void treeView_BeforeLabelEdit(object sender, NodeLabelEditEventArgs e)
+		{
+			if (!(e.Node.Tag is DragSource) || ((DragSource)e.Node.Tag).Type != typeof(WorkspaceMesh))
+			{
+				e.CancelEdit = true;
+			}
+		}
+
+		private void treeView_AfterLabelEdit(object sender, NodeLabelEditEventArgs e)
+		{
+			DragSource source = (DragSource)e.Node.Tag;
+			if (source.Type == typeof(WorkspaceMesh))
+			{
+				var srcEditor = (ImportedEditor)Gui.Scripting.Variables[source.Variable];
+				ImportedMesh iMesh = srcEditor.Imported.MeshList[(int)source.Id];
+				WorkspaceMesh wsMesh = srcEditor.Meshes[(int)source.Id];
+				iMesh.Name = wsMesh.Name = e.Label;
+			}
 		}
 	}
 }

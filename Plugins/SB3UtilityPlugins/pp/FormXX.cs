@@ -1863,10 +1863,18 @@ namespace SB3Utility
 					{
 						var srcEditor = (ImportedEditor)Gui.Scripting.Variables[source.Variable];
 
-						var destFrameId = Editor.GetFrameId(srcEditor.Imported.MeshList[(int)source.Id].Name);
+						int destFrameId = -1;
+						if (treeViewObjectTree.SelectedNode != null)
+						{
+							destFrameId = GetDestParentId(treeViewObjectTree.SelectedNode.Text, dest);
+						}
 						if (destFrameId < 0)
 						{
-							destFrameId = 0;
+							destFrameId = Editor.GetFrameId(srcEditor.Imported.MeshList[(int)source.Id].Name);
+							if (destFrameId < 0)
+							{
+								destFrameId = 0;
+							}
 						}
 						dragOptions.numericMeshId.Value = destFrameId;
 
@@ -2721,6 +2729,33 @@ namespace SB3Utility
 			}
 		}
 
+		private void checkBoxMeshReorderSubmesh_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedMesh < 0 || dataGridViewMesh.SelectedRows.Count <= 0 || dataGridViewMesh.Rows.Count <= 1)
+				{
+					return;
+				}
+
+				if (!checkBoxMeshReorderSubmesh.Checked)
+				{
+					checkBoxMeshReorderSubmesh.Text = "Move To";
+					checkBoxMeshReorderSubmesh.Checked = true;
+					checkBoxMeshReorderSubmesh.Tag = dataGridViewMesh.SelectedRows[0].Index;
+				}
+				else
+				{
+					checkBoxMeshReorderSubmesh.Text = "Reorder";
+					checkBoxMeshReorderSubmesh.Checked = false;
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
 		private void buttonMaterialRemove_Click(object sender, EventArgs e)
 		{
 			try
@@ -2889,7 +2924,22 @@ namespace SB3Utility
 		{
 			try
 			{
-				HighlightSubmeshes();
+				if (!checkBoxMeshReorderSubmesh.Checked)
+				{
+					HighlightSubmeshes();
+				}
+				else
+				{
+					Gui.Scripting.RunScript(EditorVar + ".MoveSubmesh(meshId=" + loadedMesh + ", submeshId=" + (int)checkBoxMeshReorderSubmesh.Tag + ", newPosition=" + dataGridViewMesh.SelectedRows[0].Index + ")");
+
+					int pos = dataGridViewMesh.SelectedRows[0].Index;
+					DataGridViewRow src = dataGridViewMesh.Rows[(int)checkBoxMeshReorderSubmesh.Tag];
+					dataGridViewMesh.Rows.Remove(src);
+					dataGridViewMesh.Rows.Insert(pos, src);
+
+					checkBoxMeshReorderSubmesh.Text = "Reorder";
+					checkBoxMeshReorderSubmesh.Checked = false;
+				}
 			}
 			catch (Exception ex)
 			{

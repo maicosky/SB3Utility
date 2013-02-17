@@ -110,20 +110,20 @@
 			this.openToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Black;
 			this.openToolStripMenuItem.Name = "openToolStripMenuItem";
 			this.openToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-			this.openToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.openToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
 			this.openToolStripMenuItem.Text = "&Open";
 			this.openToolStripMenuItem.Click += new System.EventHandler(this.OpenFile);
 			// 
 			// toolStripSeparator3
 			// 
 			this.toolStripSeparator3.Name = "toolStripSeparator3";
-			this.toolStripSeparator3.Size = new System.Drawing.Size(149, 6);
+			this.toolStripSeparator3.Size = new System.Drawing.Size(137, 6);
 			// 
 			// exitToolStripMenuItem
 			// 
 			this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
 			this.exitToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F4)));
-			this.exitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.exitToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
 			this.exitToolStripMenuItem.Text = "E&xit";
 			this.exitToolStripMenuItem.Click += new System.EventHandler(this.ExitToolsStripMenuItem_Click);
 			// 
@@ -145,49 +145,49 @@
 			// 
 			this.viewQuickAccessToolStripMenuItem.CheckOnClick = true;
 			this.viewQuickAccessToolStripMenuItem.Name = "viewQuickAccessToolStripMenuItem";
-			this.viewQuickAccessToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.viewQuickAccessToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
 			this.viewQuickAccessToolStripMenuItem.Text = "&Quick Access";
 			// 
 			// viewFilesToolStripMenuItem
 			// 
 			this.viewFilesToolStripMenuItem.CheckOnClick = true;
 			this.viewFilesToolStripMenuItem.Name = "viewFilesToolStripMenuItem";
-			this.viewFilesToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.viewFilesToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
 			this.viewFilesToolStripMenuItem.Text = "&Files";
 			// 
 			// viewEditorsToolStripMenuItem
 			// 
 			this.viewEditorsToolStripMenuItem.CheckOnClick = true;
 			this.viewEditorsToolStripMenuItem.Name = "viewEditorsToolStripMenuItem";
-			this.viewEditorsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.viewEditorsToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
 			this.viewEditorsToolStripMenuItem.Text = "&Editors";
 			// 
 			// viewImageToolStripMenuItem
 			// 
 			this.viewImageToolStripMenuItem.CheckOnClick = true;
 			this.viewImageToolStripMenuItem.Name = "viewImageToolStripMenuItem";
-			this.viewImageToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.viewImageToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
 			this.viewImageToolStripMenuItem.Text = "&Image";
 			// 
 			// viewRendererToolStripMenuItem
 			// 
 			this.viewRendererToolStripMenuItem.CheckOnClick = true;
 			this.viewRendererToolStripMenuItem.Name = "viewRendererToolStripMenuItem";
-			this.viewRendererToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.viewRendererToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
 			this.viewRendererToolStripMenuItem.Text = "&Renderer";
 			// 
 			// viewLogToolStripMenuItem
 			// 
 			this.viewLogToolStripMenuItem.CheckOnClick = true;
 			this.viewLogToolStripMenuItem.Name = "viewLogToolStripMenuItem";
-			this.viewLogToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.viewLogToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
 			this.viewLogToolStripMenuItem.Text = "&Log";
 			// 
 			// viewScriptToolStripMenuItem
 			// 
 			this.viewScriptToolStripMenuItem.CheckOnClick = true;
 			this.viewScriptToolStripMenuItem.Name = "viewScriptToolStripMenuItem";
-			this.viewScriptToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.viewScriptToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
 			this.viewScriptToolStripMenuItem.Text = "&Script";
 			// 
 			// toolsToolStripMenuItem
@@ -373,6 +373,7 @@
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.Text = "SB3UtilityGUI ";
 			this.Shown += new System.EventHandler(this.MDIParent_Shown);
+			this.ResizeEnd += new System.EventHandler(this.MDIParent_ResizeEnd);
 			this.DragDrop += new System.Windows.Forms.DragEventHandler(this.DockDragDrop);
 			this.DragEnter += new System.Windows.Forms.DragEventHandler(this.DockDragEnter);
 			this.menuStrip.ResumeLayout(false);

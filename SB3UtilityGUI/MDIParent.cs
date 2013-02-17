@@ -39,6 +39,14 @@ namespace SB3Utility
 				Thread.CurrentThread.CurrentCulture = Utility.CultureUS;
 
 				InitializeComponent();
+				System.Drawing.Point leftTop = (System.Drawing.Point)Properties.Settings.Default["LeftTop"];
+				System.Drawing.Size widthHeight = (System.Drawing.Size)Properties.Settings.Default["WidthHeight"];
+				if (widthHeight.Width >= 200 && widthHeight.Height >= 100)
+				{
+					this.StartPosition = FormStartPosition.Manual;
+					this.Location = leftTop;
+					this.Size = widthHeight;
+				}
 				this.Text += Gui.Version;
 
 				Gui.Config = Properties.Settings.Default;
@@ -330,7 +338,10 @@ namespace SB3Utility
 					}
 				}
 
-				((FormQuickAccess)DockQuickAccess).RegisterOpenFile(content, category);
+				if (category != ContentCategory.None)
+				{
+					((FormQuickAccess)DockQuickAccess).RegisterOpenFile(content, category);
+				}
 			}
 			catch (Exception ex)
 			{
@@ -646,6 +657,12 @@ namespace SB3Utility
 				vars += vars.Length == 0 ? var : ", " + var;
 			}
 			Report.ReportLog("open variables=" + (vars.Length > 0 ? vars : "none"));
+		}
+
+		private void MDIParent_ResizeEnd(object sender, EventArgs e)
+		{
+			Properties.Settings.Default["LeftTop"] = this.Location;
+			Properties.Settings.Default["WidthHeight"] = this.Size;
 		}
 	}
 }

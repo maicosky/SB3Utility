@@ -326,6 +326,10 @@ namespace AiDroidPlugin
 				for (int boneIdx = 0; boneIdx < numBones; boneIdx++)
 				{
 					remBone boneFrame = rem.FindFrame(boneList[boneIdx].bone, parser.BONC.rootFrame);
+					if (boneFrame == null)
+					{
+						continue;
+					}
 					remBone boneFrameParent = boneFrame.Parent;
 					if (!boneNamesList.Contains(boneFrameParent.name) && !boneFrameParentNames.Contains(boneFrameParent.name))
 					{

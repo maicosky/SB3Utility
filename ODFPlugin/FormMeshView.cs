@@ -1788,10 +1788,18 @@ namespace ODFPlugin
 					{
 						var srcEditor = (ImportedEditor)Gui.Scripting.Variables[source.Variable];
 
-						var destFrameIdx = Editor.GetFrameIndex(srcEditor.Imported.MeshList[(int)source.Id].Name);
+						int destFrameIdx = -1;
+						if (treeViewObjectTree.SelectedNode != null)
+						{
+							destFrameIdx = GetDestParentId(treeViewObjectTree.SelectedNode.Text, dest);
+						}
 						if (destFrameIdx < 0)
 						{
-							destFrameIdx = 0;
+							destFrameIdx = Editor.GetFrameIndex(srcEditor.Imported.MeshList[(int)source.Id].Name);
+							if (destFrameIdx < 0)
+							{
+								destFrameIdx = 0;
+							}
 						}
 						dragOptions.numericMeshId.Value = destFrameIdx;
 

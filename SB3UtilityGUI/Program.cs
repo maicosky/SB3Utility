@@ -13,9 +13,16 @@ namespace SB3Utility
 		[STAThread]
 		static void Main()
 		{
-			Application.EnableVisualStyles();
-			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(new MDIParent());
+			try
+			{
+				Application.EnableVisualStyles();
+				Application.SetCompatibleTextRenderingDefault(false);
+				Application.Run(new MDIParent());
+			}
+			catch (Exception ex)
+			{
+				Application.Run(new ApplicationException(ex));
+			}
 		}
 	}
 }

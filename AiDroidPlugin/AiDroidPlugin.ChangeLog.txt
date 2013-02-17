@@ -1,4 +1,9 @@
-﻿[0.4.42.36]
+﻿[0.4.42.39]
+  - imported meshes can be easier placed into destination frames
+  - Fixed that invalid bones crashed the renderer
+  - Fixed importing materials didn't update textures
+
+[0.4.42.36]
   - Fixed REA event handlers were dropped - GUI was responsive
   - Fixed REA double initialization
 

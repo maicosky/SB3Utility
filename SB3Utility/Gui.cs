@@ -11,7 +11,7 @@ namespace SB3Utility
 {
 	public static class Gui
 	{
-		public static string Version = "0.4.42.36";
+		public static string Version = "0.4.42.39";
 
 		public static IScripting Scripting { get; set; }
 		public static IDocking Docking { get; set; }
@@ -34,6 +34,7 @@ namespace SB3Utility
 		event EventHandler<DockContentEventArgs> DockContentAdded;
 		event EventHandler<DockContentEventArgs> DockContentRemoved;
 
+		DockContent DockQuickAccess { get; }
 		DockContent DockFiles { get; }
 		DockContent DockEditors { get; }
 		DockContent DockImage { get; }
@@ -49,6 +50,7 @@ namespace SB3Utility
 
 	public enum ContentCategory
 	{
+		None,
 		Archives,
 		Meshes,
 		Animations,
