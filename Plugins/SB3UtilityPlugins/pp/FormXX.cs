@@ -57,6 +57,7 @@ namespace SB3Utility
 		public string FormVar { get; protected set; }
 
 		string exportDir;
+		FormXXDragDrop dragOptions;
 		EditTextBox[][] matMatrixText = new EditTextBox[5][];
 		ComboBox[] matTexNameCombo;
 		bool SetComboboxEvent = false;
@@ -194,6 +195,7 @@ namespace SB3Utility
 
 		private void UnloadXX()
 		{
+			dragOptions.Dispose();
 			Editor.Dispose();
 			Editor = null;
 			DisposeRenderObjects();
@@ -677,6 +679,8 @@ namespace SB3Utility
 			InitTextures();
 
 			RecreateCrossRefs();
+
+			dragOptions = new FormXXDragDrop(Editor);
 		}
 
 		void InitFormat()
@@ -1795,6 +1799,7 @@ namespace SB3Utility
 				else
 				{
 					ProcessDragDropSources(node);
+					dragOptions.checkBoxOkContinue.Checked = false;
 				}
 			}
 			catch (Exception ex)
@@ -1821,16 +1826,17 @@ namespace SB3Utility
 				DragSource source = (DragSource)node.Tag;
 				if (source.Type == typeof(xxFrame))
 				{
-					using (var dragOptions = new FormXXDragDrop(Editor, true))
+					dragOptions.ShowPanel(true);
+					if (!dragOptions.checkBoxFrameDestinationLock.Checked)
 					{
 						var srcEditor = (xxEditor)Gui.Scripting.Variables[source.Variable];
 						var srcFrameName = srcEditor.Frames[(int)source.Id].Name;
 						dragOptions.numericFrameId.Value = GetDestParentId(srcFrameName, dest);
-						if (dragOptions.ShowDialog() == DialogResult.OK)
-						{
-							Gui.Scripting.RunScript(EditorVar + "." + dragOptions.FrameMethod.GetName() + "(srcFrame=" + source.Variable + ".Frames[" + (int)source.Id + "], srcFormat=" + source.Variable + ".Parser.Format, destParentId=" + dragOptions.numericFrameId.Value + ", meshMatOffset=" + dragOptions.numericFrameMeshMatOffset.Value + ")");
-							RecreateFrames();
-						}
+					}
+					if (dragOptions.checkBoxOkContinue.Checked || dragOptions.ShowDialog() == DialogResult.OK)
+					{
+						Gui.Scripting.RunScript(EditorVar + "." + dragOptions.FrameMethod.GetName() + "(srcFrame=" + source.Variable + ".Frames[" + (int)source.Id + "], srcFormat=" + source.Variable + ".Parser.Format, destParentId=" + dragOptions.numericFrameId.Value + ", meshMatOffset=" + dragOptions.numericFrameMeshMatOffset.Value + ")");
+						RecreateFrames();
 					}
 				}
 				else if (source.Type == typeof(xxMaterial))
@@ -1845,24 +1851,26 @@ namespace SB3Utility
 				}
 				else if (source.Type == typeof(ImportedFrame))
 				{
-					using (var dragOptions = new FormXXDragDrop(Editor, true))
+					dragOptions.ShowPanel(true);
+					if (!dragOptions.checkBoxFrameDestinationLock.Checked)
 					{
 						var srcEditor = (ImportedEditor)Gui.Scripting.Variables[source.Variable];
 						var srcFrameName = srcEditor.Frames[(int)source.Id].Name;
 						dragOptions.numericFrameId.Value = GetDestParentId(srcFrameName, dest);
-						if (dragOptions.ShowDialog() == DialogResult.OK)
-						{
-							Gui.Scripting.RunScript(EditorVar + "." + dragOptions.FrameMethod.GetName() + "(srcFrame=" + source.Variable + ".Frames[" + (int)source.Id + "], destParentId=" + dragOptions.numericFrameId.Value + ", meshMatOffset=" + dragOptions.numericFrameMeshMatOffset.Value + ")");
-							RecreateFrames();
-						}
+					}
+					if (dragOptions.checkBoxOkContinue.Checked || dragOptions.ShowDialog() == DialogResult.OK)
+					{
+						Gui.Scripting.RunScript(EditorVar + "." + dragOptions.FrameMethod.GetName() + "(srcFrame=" + source.Variable + ".Frames[" + (int)source.Id + "], destParentId=" + dragOptions.numericFrameId.Value + ", meshMatOffset=" + dragOptions.numericFrameMeshMatOffset.Value + ")");
+						RecreateFrames();
 					}
 				}
 				else if (source.Type == typeof(WorkspaceMesh))
 				{
-					using (var dragOptions = new FormXXDragDrop(Editor, false))
-					{
-						var srcEditor = (ImportedEditor)Gui.Scripting.Variables[source.Variable];
+					dragOptions.ShowPanel(false);
+					var srcEditor = (ImportedEditor)Gui.Scripting.Variables[source.Variable];
 
+					if (!dragOptions.checkBoxMeshDestinationLock.Checked)
+					{
 						int destFrameId = -1;
 						if (treeViewObjectTree.SelectedNode != null)
 						{
@@ -1877,7 +1885,10 @@ namespace SB3Utility
 							}
 						}
 						dragOptions.numericMeshId.Value = destFrameId;
+					}
 
+					if (!dragOptions.checkBoxMeshNormalsLock.Checked || !dragOptions.checkBoxMeshBonesLock.Checked)
+					{
 						bool normalsCopyNear = false;
 						bool bonesCopyNear = false;
 						if (srcEditor.Meshes != null)
@@ -1903,32 +1914,50 @@ namespace SB3Utility
 								}
 							}
 						}
-						if (normalsCopyNear)
-							dragOptions.radioButtonNormalsCopyNear.Checked = true;
-						if (bonesCopyNear)
-							dragOptions.radioButtonBonesCopyNear.Checked = true;
-
-						if (dragOptions.ShowDialog() == DialogResult.OK)
+						if (!dragOptions.checkBoxMeshNormalsLock.Checked)
 						{
-							// repeating only final choices for repeatability of the script
-							WorkspaceMesh wsMesh = srcEditor.Meshes[(int)source.Id];
-							foreach (ImportedSubmesh submesh in wsMesh.SubmeshList)
+							if (normalsCopyNear)
 							{
-								if (wsMesh.isSubmeshEnabled(submesh))
+								dragOptions.radioButtonNormalsCopyNear.Checked = true;
+							}
+							else
+							{
+								dragOptions.radioButtonNormalsReplace.Checked = true;
+							}
+						}
+						if (!dragOptions.checkBoxMeshBonesLock.Checked)
+						{
+							if (bonesCopyNear)
+							{
+								dragOptions.radioButtonBonesCopyNear.Checked = true;
+							}
+							else
+							{
+								dragOptions.radioButtonBonesReplace.Checked = true;
+							}
+						}
+					}
+
+					if (dragOptions.checkBoxOkContinue.Checked || dragOptions.ShowDialog() == DialogResult.OK)
+					{
+						// repeating only final choices for repeatability of the script
+						WorkspaceMesh wsMesh = srcEditor.Meshes[(int)source.Id];
+						foreach (ImportedSubmesh submesh in wsMesh.SubmeshList)
+						{
+							if (wsMesh.isSubmeshEnabled(submesh))
+							{
+								if (!wsMesh.isSubmeshReplacingOriginal(submesh))
 								{
-									if (!wsMesh.isSubmeshReplacingOriginal(submesh))
-									{
-										Gui.Scripting.RunScript(source.Variable + ".setSubmeshReplacingOriginal(meshId=" + (int)source.Id + ", id=" + wsMesh.SubmeshList.IndexOf(submesh) + ", replaceOriginal=false)");
-									}
-								}
-								else
-								{
-									Gui.Scripting.RunScript(source.Variable + ".setSubmeshEnabled(meshId=" + (int)source.Id + ", id=" + wsMesh.SubmeshList.IndexOf(submesh) + ", enabled=false)");
+									Gui.Scripting.RunScript(source.Variable + ".setSubmeshReplacingOriginal(meshId=" + (int)source.Id + ", id=" + wsMesh.SubmeshList.IndexOf(submesh) + ", replaceOriginal=false)");
 								}
 							}
-							Gui.Scripting.RunScript(EditorVar + ".ReplaceMesh(mesh=" + source.Variable + ".Meshes[" + (int)source.Id + "], frameId=" + dragOptions.numericMeshId.Value + ", merge=" + dragOptions.radioButtonMeshMerge.Checked + ", normals=\"" + dragOptions.NormalsMethod.GetName() + "\", bones=\"" + dragOptions.BonesMethod.GetName() + "\", targetFullMesh=" + dragOptions.radioButtonNearestMesh.Checked + ")");
-							RecreateMeshes();
+							else
+							{
+								Gui.Scripting.RunScript(source.Variable + ".setSubmeshEnabled(meshId=" + (int)source.Id + ", id=" + wsMesh.SubmeshList.IndexOf(submesh) + ", enabled=false)");
+							}
 						}
+						Gui.Scripting.RunScript(EditorVar + ".ReplaceMesh(mesh=" + source.Variable + ".Meshes[" + (int)source.Id + "], frameId=" + dragOptions.numericMeshId.Value + ", merge=" + dragOptions.radioButtonMeshMerge.Checked + ", normals=\"" + dragOptions.NormalsMethod.GetName() + "\", bones=\"" + dragOptions.BonesMethod.GetName() + "\", targetFullMesh=" + dragOptions.radioButtonNearestMesh.Checked + ")");
+						RecreateMeshes();
 					}
 				}
 				else if (source.Type == typeof(ImportedMaterial))
@@ -2606,9 +2635,30 @@ namespace SB3Utility
 				{
 					if (normals.ShowDialog() == DialogResult.OK)
 					{
-						if (normals.checkBoxNewNormalsForMesh.Checked)
+						if (normals.checkBoxNormalsForSelectedMeshes.Checked)
 						{
-							Gui.Scripting.RunScript(EditorVar + ".CalculateNormals(id=" + loadedMesh + ", threshold=" + ((float)normals.numericThreshold.Value).ToFloatString() + ")");
+							string editors = "editors={";
+							string numMeshes = "numMeshes={";
+							string meshes = "meshes={";
+							List<DockContent> xxList = null;
+							Gui.Docking.DockContents.TryGetValue(typeof(FormXX), out xxList);
+							foreach (FormXX xx in xxList)
+							{
+								if (xx.listViewMesh.SelectedItems.Count == 0)
+								{
+									continue;
+								}
+
+								editors += xx.EditorVar + ", ";
+								numMeshes += xx.listViewMesh.SelectedItems.Count + ", ";
+								foreach (ListViewItem item in xx.listViewMesh.SelectedItems)
+								{
+									meshes += (int)item.Tag + ", ";
+								}
+							}
+							string idArgs = editors.Substring(0, editors.Length - 2) + "}, " + numMeshes.Substring(0, numMeshes.Length - 2) + "}, " + meshes.Substring(0, meshes.Length - 2) + "}";
+
+							Gui.Scripting.RunScript(EditorVar + ".CalculateNormals(" + idArgs + ", threshold=" + ((float)normals.numericThreshold.Value).ToFloatString() + ")");
 						}
 						if (normals.checkBoxCalculateNormalsInXAs.Checked || normals.checkBoxSelectedItemsOnly.Checked)
 						{

@@ -703,6 +703,31 @@ namespace SB3Utility
 		}
 
 		[Plugin]
+		public void CalculateNormals(object[] editors, object[] numMeshes, object[] meshes, double threshold)
+		{
+			if (editors == null || numMeshes == null || meshes == null)
+			{
+				return;
+			}
+
+			List<xxSubmesh> submeshList = new List<xxSubmesh>(meshes.Length);
+			xxEditor editor = null;
+			int editorIdx = -1;
+			int i = 1;
+			foreach (object id in meshes)
+			{
+				if (--i == 0)
+				{
+					editorIdx++;
+					i = (int)(double)numMeshes[editorIdx];
+					editor = (xxEditor)editors[editorIdx];
+				}
+				submeshList.AddRange(editor.Meshes[(int)(double)id].Mesh.SubmeshList);
+			}
+			xx.CalculateNormals(submeshList, (float)threshold);
+		}
+
+		[Plugin]
 		public void ExportTexture(int id, string path)
 		{
 			xx.ExportTexture(Parser.TextureList[id], path);

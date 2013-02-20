@@ -16,11 +16,17 @@ namespace SB3Utility
 
 		private xxEditor editor;
 
-		public FormXXDragDrop(xxEditor destEditor, bool frame)
+		public FormXXDragDrop(xxEditor destEditor)
 		{
 			InitializeComponent();
 			editor = destEditor;
 
+			numericFrameId.Maximum = editor.Frames.Count - 1;
+			numericMeshId.Maximum = editor.Frames.Count - 1;
+		}
+
+		public void ShowPanel(bool frame)
+		{
 			if (frame)
 			{
 				panelFrame.BringToFront();
@@ -29,9 +35,6 @@ namespace SB3Utility
 			{
 				panelMesh.BringToFront();
 			}
-
-			numericFrameId.Maximum = editor.Frames.Count - 1;
-			numericMeshId.Maximum = editor.Frames.Count - 1;
 		}
 
 		private void radioButtonFrameMerge_CheckedChanged(object sender, EventArgs e)
@@ -87,6 +90,14 @@ namespace SB3Utility
 		private void radioButtonBonesCopyOrder_CheckedChanged(object sender, EventArgs e)
 		{
 			BonesMethod = CopyMeshMethod.CopyOrder;
+		}
+
+		private void checkBoxOkContinue_Click(object sender, EventArgs e)
+		{
+			if (checkBoxOkContinue.Checked)
+			{
+				this.DialogResult = DialogResult.OK;
+			}
 		}
 	}
 }

@@ -28,6 +28,7 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
+			this.components = new System.ComponentModel.Container();
 			this.buttonOK = new System.Windows.Forms.Button();
 			this.buttonCancel = new System.Windows.Forms.Button();
 			this.numericFrameMeshMatOffset = new System.Windows.Forms.NumericUpDown();
@@ -42,6 +43,10 @@
 			this.textBoxFrameName = new System.Windows.Forms.TextBox();
 			this.label2 = new System.Windows.Forms.Label();
 			this.panelMesh = new System.Windows.Forms.Panel();
+			this.panel5 = new System.Windows.Forms.Panel();
+			this.radioButtonNearestMesh = new System.Windows.Forms.RadioButton();
+			this.radioButtonNearestSubmesh = new System.Windows.Forms.RadioButton();
+			this.label8 = new System.Windows.Forms.Label();
 			this.numericMeshId = new System.Windows.Forms.NumericUpDown();
 			this.textBoxMeshName = new System.Windows.Forms.TextBox();
 			this.panel4 = new System.Windows.Forms.Panel();
@@ -59,26 +64,28 @@
 			this.label3 = new System.Windows.Forms.Label();
 			this.label6 = new System.Windows.Forms.Label();
 			this.label7 = new System.Windows.Forms.Label();
-			this.panel5 = new System.Windows.Forms.Panel();
-			this.radioButtonNearestMesh = new System.Windows.Forms.RadioButton();
-			this.radioButtonNearestSubmesh = new System.Windows.Forms.RadioButton();
-			this.label8 = new System.Windows.Forms.Label();
+			this.checkBoxMeshDestinationLock = new System.Windows.Forms.CheckBox();
+			this.checkBoxMeshNormalsLock = new System.Windows.Forms.CheckBox();
+			this.checkBoxMeshBonesLock = new System.Windows.Forms.CheckBox();
+			this.checkBoxFrameDestinationLock = new System.Windows.Forms.CheckBox();
+			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+			this.checkBoxOkContinue = new System.Windows.Forms.CheckBox();
 			((System.ComponentModel.ISupportInitialize)(this.numericFrameMeshMatOffset)).BeginInit();
 			this.panelFrame.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericFrameId)).BeginInit();
 			this.panel2.SuspendLayout();
 			this.panelMesh.SuspendLayout();
+			this.panel5.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericMeshId)).BeginInit();
 			this.panel4.SuspendLayout();
 			this.panel3.SuspendLayout();
 			this.panel1.SuspendLayout();
-			this.panel5.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// buttonOK
 			// 
 			this.buttonOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.buttonOK.Location = new System.Drawing.Point(87, 157);
+			this.buttonOK.Location = new System.Drawing.Point(44, 157);
 			this.buttonOK.Name = "buttonOK";
 			this.buttonOK.Size = new System.Drawing.Size(75, 23);
 			this.buttonOK.TabIndex = 90;
@@ -88,10 +95,10 @@
 			// buttonCancel
 			// 
 			this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.buttonCancel.Location = new System.Drawing.Point(225, 157);
+			this.buttonCancel.Location = new System.Drawing.Point(328, 157);
 			this.buttonCancel.Name = "buttonCancel";
 			this.buttonCancel.Size = new System.Drawing.Size(75, 23);
-			this.buttonCancel.TabIndex = 92;
+			this.buttonCancel.TabIndex = 98;
 			this.buttonCancel.Text = "Cancel";
 			this.buttonCancel.UseVisualStyleBackColor = true;
 			// 
@@ -123,6 +130,7 @@
 			// 
 			// panelFrame
 			// 
+			this.panelFrame.Controls.Add(this.checkBoxFrameDestinationLock);
 			this.panelFrame.Controls.Add(this.numericFrameId);
 			this.panelFrame.Controls.Add(this.panel2);
 			this.panelFrame.Controls.Add(this.label1);
@@ -132,7 +140,7 @@
 			this.panelFrame.Controls.Add(this.label2);
 			this.panelFrame.Location = new System.Drawing.Point(12, 12);
 			this.panelFrame.Name = "panelFrame";
-			this.panelFrame.Size = new System.Drawing.Size(367, 139);
+			this.panelFrame.Size = new System.Drawing.Size(423, 139);
 			this.panelFrame.TabIndex = 15;
 			// 
 			// numericFrameId
@@ -231,6 +239,9 @@
 			// 
 			// panelMesh
 			// 
+			this.panelMesh.Controls.Add(this.checkBoxMeshBonesLock);
+			this.panelMesh.Controls.Add(this.checkBoxMeshNormalsLock);
+			this.panelMesh.Controls.Add(this.checkBoxMeshDestinationLock);
 			this.panelMesh.Controls.Add(this.panel5);
 			this.panelMesh.Controls.Add(this.label8);
 			this.panelMesh.Controls.Add(this.numericMeshId);
@@ -244,8 +255,48 @@
 			this.panelMesh.Controls.Add(this.label7);
 			this.panelMesh.Location = new System.Drawing.Point(12, 12);
 			this.panelMesh.Name = "panelMesh";
-			this.panelMesh.Size = new System.Drawing.Size(367, 139);
+			this.panelMesh.Size = new System.Drawing.Size(423, 139);
 			this.panelMesh.TabIndex = 16;
+			// 
+			// panel5
+			// 
+			this.panel5.Controls.Add(this.radioButtonNearestMesh);
+			this.panel5.Controls.Add(this.radioButtonNearestSubmesh);
+			this.panel5.Location = new System.Drawing.Point(66, 114);
+			this.panel5.Name = "panel5";
+			this.panel5.Size = new System.Drawing.Size(149, 21);
+			this.panel5.TabIndex = 26;
+			// 
+			// radioButtonNearestMesh
+			// 
+			this.radioButtonNearestMesh.AutoSize = true;
+			this.radioButtonNearestMesh.Location = new System.Drawing.Point(77, 2);
+			this.radioButtonNearestMesh.Name = "radioButtonNearestMesh";
+			this.radioButtonNearestMesh.Size = new System.Drawing.Size(51, 17);
+			this.radioButtonNearestMesh.TabIndex = 62;
+			this.radioButtonNearestMesh.Text = "Mesh";
+			this.radioButtonNearestMesh.UseVisualStyleBackColor = true;
+			// 
+			// radioButtonNearestSubmesh
+			// 
+			this.radioButtonNearestSubmesh.AutoSize = true;
+			this.radioButtonNearestSubmesh.Checked = true;
+			this.radioButtonNearestSubmesh.Location = new System.Drawing.Point(6, 2);
+			this.radioButtonNearestSubmesh.Name = "radioButtonNearestSubmesh";
+			this.radioButtonNearestSubmesh.Size = new System.Drawing.Size(69, 17);
+			this.radioButtonNearestSubmesh.TabIndex = 60;
+			this.radioButtonNearestSubmesh.TabStop = true;
+			this.radioButtonNearestSubmesh.Text = "Submesh";
+			this.radioButtonNearestSubmesh.UseVisualStyleBackColor = true;
+			// 
+			// label8
+			// 
+			this.label8.AutoSize = true;
+			this.label8.Location = new System.Drawing.Point(17, 118);
+			this.label8.Name = "label8";
+			this.label8.Size = new System.Drawing.Size(44, 13);
+			this.label8.TabIndex = 25;
+			this.label8.Text = "Nearest";
 			// 
 			// numericMeshId
 			// 
@@ -425,51 +476,68 @@
 			this.label7.TabIndex = 16;
 			this.label7.Text = "Method";
 			// 
-			// panel5
+			// checkBoxMeshDestinationLock
 			// 
-			this.panel5.Controls.Add(this.radioButtonNearestMesh);
-			this.panel5.Controls.Add(this.radioButtonNearestSubmesh);
-			this.panel5.Location = new System.Drawing.Point(66, 114);
-			this.panel5.Name = "panel5";
-			this.panel5.Size = new System.Drawing.Size(149, 21);
-			this.panel5.TabIndex = 26;
+			this.checkBoxMeshDestinationLock.AutoSize = true;
+			this.checkBoxMeshDestinationLock.Location = new System.Drawing.Point(354, 11);
+			this.checkBoxMeshDestinationLock.Name = "checkBoxMeshDestinationLock";
+			this.checkBoxMeshDestinationLock.Size = new System.Drawing.Size(50, 17);
+			this.checkBoxMeshDestinationLock.TabIndex = 27;
+			this.checkBoxMeshDestinationLock.Text = "Lock";
+			this.toolTip1.SetToolTip(this.checkBoxMeshDestinationLock, "Disables searching for new destination");
+			this.checkBoxMeshDestinationLock.UseVisualStyleBackColor = true;
 			// 
-			// radioButtonNearestMesh
+			// checkBoxMeshNormalsLock
 			// 
-			this.radioButtonNearestMesh.AutoSize = true;
-			this.radioButtonNearestMesh.Location = new System.Drawing.Point(77, 2);
-			this.radioButtonNearestMesh.Name = "radioButtonNearestMesh";
-			this.radioButtonNearestMesh.Size = new System.Drawing.Size(51, 17);
-			this.radioButtonNearestMesh.TabIndex = 62;
-			this.radioButtonNearestMesh.Text = "Mesh";
-			this.radioButtonNearestMesh.UseVisualStyleBackColor = true;
+			this.checkBoxMeshNormalsLock.AutoSize = true;
+			this.checkBoxMeshNormalsLock.Location = new System.Drawing.Point(354, 65);
+			this.checkBoxMeshNormalsLock.Name = "checkBoxMeshNormalsLock";
+			this.checkBoxMeshNormalsLock.Size = new System.Drawing.Size(50, 17);
+			this.checkBoxMeshNormalsLock.TabIndex = 48;
+			this.checkBoxMeshNormalsLock.Text = "Lock";
+			this.toolTip1.SetToolTip(this.checkBoxMeshNormalsLock, "Always use selected option");
+			this.checkBoxMeshNormalsLock.UseVisualStyleBackColor = true;
 			// 
-			// radioButtonNearestSubmesh
+			// checkBoxMeshBonesLock
 			// 
-			this.radioButtonNearestSubmesh.AutoSize = true;
-			this.radioButtonNearestSubmesh.Checked = true;
-			this.radioButtonNearestSubmesh.Location = new System.Drawing.Point(6, 2);
-			this.radioButtonNearestSubmesh.Name = "radioButtonNearestSubmesh";
-			this.radioButtonNearestSubmesh.Size = new System.Drawing.Size(69, 17);
-			this.radioButtonNearestSubmesh.TabIndex = 60;
-			this.radioButtonNearestSubmesh.TabStop = true;
-			this.radioButtonNearestSubmesh.Text = "Submesh";
-			this.radioButtonNearestSubmesh.UseVisualStyleBackColor = true;
+			this.checkBoxMeshBonesLock.AutoSize = true;
+			this.checkBoxMeshBonesLock.Location = new System.Drawing.Point(354, 89);
+			this.checkBoxMeshBonesLock.Name = "checkBoxMeshBonesLock";
+			this.checkBoxMeshBonesLock.Size = new System.Drawing.Size(50, 17);
+			this.checkBoxMeshBonesLock.TabIndex = 58;
+			this.checkBoxMeshBonesLock.Text = "Lock";
+			this.toolTip1.SetToolTip(this.checkBoxMeshBonesLock, "Always use selected option");
+			this.checkBoxMeshBonesLock.UseVisualStyleBackColor = true;
 			// 
-			// label8
+			// checkBoxFrameDestinationLock
 			// 
-			this.label8.AutoSize = true;
-			this.label8.Location = new System.Drawing.Point(17, 118);
-			this.label8.Name = "label8";
-			this.label8.Size = new System.Drawing.Size(44, 13);
-			this.label8.TabIndex = 25;
-			this.label8.Text = "Nearest";
+			this.checkBoxFrameDestinationLock.AutoSize = true;
+			this.checkBoxFrameDestinationLock.Location = new System.Drawing.Point(354, 16);
+			this.checkBoxFrameDestinationLock.Name = "checkBoxFrameDestinationLock";
+			this.checkBoxFrameDestinationLock.Size = new System.Drawing.Size(50, 17);
+			this.checkBoxFrameDestinationLock.TabIndex = 46;
+			this.checkBoxFrameDestinationLock.Text = "Lock";
+			this.checkBoxFrameDestinationLock.UseVisualStyleBackColor = true;
+			// 
+			// checkBoxOkContinue
+			// 
+			this.checkBoxOkContinue.Appearance = System.Windows.Forms.Appearance.Button;
+			this.checkBoxOkContinue.AutoSize = true;
+			this.checkBoxOkContinue.Location = new System.Drawing.Point(148, 157);
+			this.checkBoxOkContinue.Name = "checkBoxOkContinue";
+			this.checkBoxOkContinue.Size = new System.Drawing.Size(151, 23);
+			this.checkBoxOkContinue.TabIndex = 94;
+			this.checkBoxOkContinue.Text = "OK && Continue Automatically";
+			this.toolTip1.SetToolTip(this.checkBoxOkContinue, "Choose Locks before clicking!");
+			this.checkBoxOkContinue.UseVisualStyleBackColor = true;
+			this.checkBoxOkContinue.Click += new System.EventHandler(this.checkBoxOkContinue_Click);
 			// 
 			// FormXXDragDrop
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(390, 192);
+			this.ClientSize = new System.Drawing.Size(446, 192);
+			this.Controls.Add(this.checkBoxOkContinue);
 			this.Controls.Add(this.buttonCancel);
 			this.Controls.Add(this.buttonOK);
 			this.Controls.Add(this.panelMesh);
@@ -486,6 +554,8 @@
 			this.panel2.PerformLayout();
 			this.panelMesh.ResumeLayout(false);
 			this.panelMesh.PerformLayout();
+			this.panel5.ResumeLayout(false);
+			this.panel5.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericMeshId)).EndInit();
 			this.panel4.ResumeLayout(false);
 			this.panel4.PerformLayout();
@@ -493,9 +563,8 @@
 			this.panel3.PerformLayout();
 			this.panel1.ResumeLayout(false);
 			this.panel1.PerformLayout();
-			this.panel5.ResumeLayout(false);
-			this.panel5.PerformLayout();
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 
@@ -536,5 +605,11 @@
 		public System.Windows.Forms.RadioButton radioButtonNearestMesh;
 		public System.Windows.Forms.RadioButton radioButtonNearestSubmesh;
 		private System.Windows.Forms.Label label8;
+		private System.Windows.Forms.ToolTip toolTip1;
+		public System.Windows.Forms.CheckBox checkBoxFrameDestinationLock;
+		public System.Windows.Forms.CheckBox checkBoxMeshBonesLock;
+		public System.Windows.Forms.CheckBox checkBoxMeshNormalsLock;
+		public System.Windows.Forms.CheckBox checkBoxMeshDestinationLock;
+		public System.Windows.Forms.CheckBox checkBoxOkContinue;
 	}
 }
