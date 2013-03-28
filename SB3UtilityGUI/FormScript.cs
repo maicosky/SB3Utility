@@ -254,14 +254,32 @@ namespace SB3Utility
 
 		void InitAutosave()
 		{
-			string path = Assembly.GetExecutingAssembly().Location;
-			path = Path.GetDirectoryName(path) + @"\" + Path.GetFileNameWithoutExtension(path) + ".autosavescript.txt";
+			try
+			{
+				string path = null;
+				FileStream fs = null;
+				for (int i = 0; i < 10 && fs == null; i++)
+				{
+					path = Assembly.GetExecutingAssembly().Location;
+					path = Path.GetDirectoryName(path) + @"\" + Path.GetFileNameWithoutExtension(path)
+						+ (i == 0 ? ".autosavescript.txt" : ".session" + i + ".txt");
+					try
+					{
+						fs = File.Open(path, FileMode.Append, FileAccess.Write, FileShare.Read);
+					}
+					catch {}
+				}
 
-			autosaveScriptWriter = new StreamWriter(File.Open(path, FileMode.Append, FileAccess.Write, FileShare.Read), Encoding.UTF8);
-			autosaveScriptWriter.AutoFlush = true;
-			autosaveScriptWriter.WriteLine("; start session");
+				autosaveScriptWriter = new StreamWriter(fs, Encoding.UTF8);
+				autosaveScriptWriter.AutoFlush = true;
+				autosaveScriptWriter.WriteLine("; start session");
 
-			Report.ReportLog("Autosaving script to " + path);
+				Report.ReportLog("Autosaving script to " + path);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
 		}
 
 		void CloseAutosave()

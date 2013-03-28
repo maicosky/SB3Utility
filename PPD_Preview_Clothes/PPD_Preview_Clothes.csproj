@@ -33,6 +33,7 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="SlimDX, Version=4.0.13.43, Culture=neutral, PublicKeyToken=b1b0c32fd1ffe4f9, processorArchitecture=x86" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -43,6 +44,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FormSVIEX.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormSVIEX.Designer.cs">
+      <DependentUpon>FormSVIEX.cs</DependentUpon>
+    </Compile>
     <Compile Include="PPDPreviewClothes.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -50,6 +57,9 @@
       <DependentUpon>PPDPreviewClothes.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="sviex.cs" />
+    <Compile Include="sviexEditor.cs" />
+    <Compile Include="sviexParser.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Plugins\SB3UtilityPlugins\SB3UtilityPlugins.csproj">
@@ -66,6 +76,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="FormSVIEX.resx">
+      <DependentUpon>FormSVIEX.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="PPDPreviewClothes.resx">
       <DependentUpon>PPDPreviewClothes.cs</DependentUpon>
     </EmbeddedResource>

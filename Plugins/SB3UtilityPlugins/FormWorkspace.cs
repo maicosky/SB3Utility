@@ -15,6 +15,8 @@ namespace SB3Utility
 	[PluginTool("&Workspace", "Ctrl+W")]
 	public partial class FormWorkspace : DockContent
 	{
+		protected Dictionary<DockContent, List<TreeNode>> ChildForms = new Dictionary<DockContent, List<TreeNode>>();
+
 		public FormWorkspace()
 		{
 			try
@@ -416,6 +418,26 @@ namespace SB3Utility
 							}
 
 							treeView.AddChild(type, clone);
+
+							List<DockContent> formXXList = null;
+							if (Gui.Docking.DockContents.TryGetValue(typeof(FormXX), out formXXList))
+							{
+								foreach (FormXX form in formXXList)
+								{
+									if (form.treeViewObjectTree == node.TreeView)
+									{
+										List<TreeNode> treeNodes = null;
+										if (!ChildForms.TryGetValue(form, out treeNodes))
+										{
+											treeNodes = new List<TreeNode>();
+											ChildForms.Add(form, treeNodes);
+										}
+										treeNodes.Add(clone);
+										form.FormClosing += new FormClosingEventHandler(ChildForms_FormClosing);
+										break;
+									}
+								}
+							}
 						}
 						else
 						{
@@ -436,6 +458,34 @@ namespace SB3Utility
 						}
 					}
 				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void ChildForms_FormClosing(object sender, FormClosingEventArgs e)
+		{
+			try
+			{
+				DockContent form = (DockContent)sender;
+				form.FormClosing -= new FormClosingEventHandler(ChildForms_FormClosing);
+
+				List<TreeNode> treeNodes = null;
+				if (ChildForms.TryGetValue(form, out treeNodes))
+				{
+					foreach (TreeNode node in treeNodes)
+					{
+						TreeNode parent = node.Parent;
+						node.Remove();
+						if (parent.Nodes.Count == 0)
+						{
+							parent.Remove();
+						}
+					}
+				}
+				ChildForms.Remove(form);
 			}
 			catch (Exception ex)
 			{

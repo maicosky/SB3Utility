@@ -5,7 +5,7 @@ namespace SB3Utility
 {
 	public class Program
 	{
-		public static void Main(string[] args)
+		public static int Main(string[] args)
 		{
 			try
 			{
@@ -25,6 +25,8 @@ namespace SB3Utility
 						script.RunScript(args[i]);
 					}
 				}
+
+				return 0;
 			}
 			catch (Exception ex)
 			{
@@ -34,6 +36,8 @@ namespace SB3Utility
 					Console.WriteLine(inner.Message);
 					inner = inner.InnerException;
 				}
+
+				return -1;
 			}
 		}
 

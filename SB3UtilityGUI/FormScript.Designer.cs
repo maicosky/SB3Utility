@@ -94,19 +94,19 @@
 			// 
 			this.openToolStripMenuItem.Image = global::SB3Utility.Properties.Resources.openToolStripMenuItem;
 			this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-			this.openToolStripMenuItem.Size = new System.Drawing.Size(125, 22);
+			this.openToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
 			this.openToolStripMenuItem.Text = "&Open...";
 			this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
 			// 
 			// toolStripSeparator1
 			// 
 			this.toolStripSeparator1.Name = "toolStripSeparator1";
-			this.toolStripSeparator1.Size = new System.Drawing.Size(122, 6);
+			this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
 			// 
 			// saveAsToolStripMenuItem
 			// 
 			this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-			this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(125, 22);
+			this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
 			this.saveAsToolStripMenuItem.Text = "Save &As...";
 			this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.saveAsToolStripMenuItem_Click);
 			// 
@@ -130,7 +130,7 @@
 			// runToolStripMenuItem
 			// 
 			this.runToolStripMenuItem.Name = "runToolStripMenuItem";
-			this.runToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+			this.runToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
 			this.runToolStripMenuItem.Text = "&Run";
 			this.runToolStripMenuItem.Click += new System.EventHandler(this.runToolStripMenuItem_Click);
 			// 
@@ -144,26 +144,26 @@
 			// toolStripSeparator2
 			// 
 			this.toolStripSeparator2.Name = "toolStripSeparator2";
-			this.toolStripSeparator2.Size = new System.Drawing.Size(168, 6);
+			this.toolStripSeparator2.Size = new System.Drawing.Size(194, 6);
 			// 
 			// quickSaveSelectedToolStripMenuItem
 			// 
 			this.quickSaveSelectedToolStripMenuItem.Name = "quickSaveSelectedToolStripMenuItem";
-			this.quickSaveSelectedToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+			this.quickSaveSelectedToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
 			this.quickSaveSelectedToolStripMenuItem.Text = "Quick &Save Selected";
 			this.quickSaveSelectedToolStripMenuItem.Click += new System.EventHandler(this.quickSaveSelectedToolStripMenuItem_Click);
 			// 
 			// runQuickSavedToolStripMenuItem
 			// 
 			this.runQuickSavedToolStripMenuItem.Name = "runQuickSavedToolStripMenuItem";
-			this.runQuickSavedToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+			this.runQuickSavedToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
 			this.runQuickSavedToolStripMenuItem.Text = "Run &Quick Saved";
 			this.runQuickSavedToolStripMenuItem.Click += new System.EventHandler(this.runQuickSavedToolStripMenuItem_Click);
 			// 
 			// toolStripSeparator4
 			// 
 			this.toolStripSeparator4.Name = "toolStripSeparator4";
-			this.toolStripSeparator4.Size = new System.Drawing.Size(168, 6);
+			this.toolStripSeparator4.Size = new System.Drawing.Size(194, 6);
 			// 
 			// captureCommandsToolStripMenuItem
 			// 
@@ -171,7 +171,7 @@
 			this.captureCommandsToolStripMenuItem.CheckOnClick = true;
 			this.captureCommandsToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.captureCommandsToolStripMenuItem.Name = "captureCommandsToolStripMenuItem";
-			this.captureCommandsToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+			this.captureCommandsToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
 			this.captureCommandsToolStripMenuItem.Text = "Ca&pture Commands";
 			// 
 			// autosaveToolStripMenuItem
@@ -180,18 +180,18 @@
 			this.autosaveToolStripMenuItem.CheckOnClick = true;
 			this.autosaveToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.autosaveToolStripMenuItem.Name = "autosaveToolStripMenuItem";
-			this.autosaveToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+			this.autosaveToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
 			this.autosaveToolStripMenuItem.Text = "&Autosave";
 			// 
 			// toolStripSeparator3
 			// 
 			this.toolStripSeparator3.Name = "toolStripSeparator3";
-			this.toolStripSeparator3.Size = new System.Drawing.Size(168, 6);
+			this.toolStripSeparator3.Size = new System.Drawing.Size(194, 6);
 			// 
 			// clearToolStripMenuItem
 			// 
 			this.clearToolStripMenuItem.Name = "clearToolStripMenuItem";
-			this.clearToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+			this.clearToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
 			this.clearToolStripMenuItem.Text = "&Clear";
 			this.clearToolStripMenuItem.Click += new System.EventHandler(this.clearToolStripMenuItem_Click);
 			// 

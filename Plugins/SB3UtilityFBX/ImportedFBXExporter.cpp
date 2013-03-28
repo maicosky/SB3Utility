@@ -80,6 +80,10 @@ namespace SB3Utility
 		IOS_REF.SetBoolProp(EXP_FBX_ANIMATION, true);
 		IOS_REF.SetBoolProp(EXP_FBX_GLOBAL_SETTINGS, true);
 
+		KFbxGlobalSettings& globalSettings = pScene->GetGlobalSettings();
+		KTime::ETimeMode pTimeMode = KTime::eCINEMA;
+		globalSettings.SetTimeMode(pTimeMode);
+
 		if (!pExporter->Initialize(cDest, lFormatIndex, pSdkManager->GetIOSettings()))
 		{
 			throw gcnew Exception(gcnew String("Failed to initialize KFbxExporter: ") + gcnew String(pExporter->GetLastErrorString()));

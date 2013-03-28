@@ -703,11 +703,46 @@ namespace SB3Utility
 		{
 			TreeNode objRootNode = CreateFrameTree(Editor.Parser.Frame, null);
 
+			string selectedNodeText = null;
+			Type selectedNodeType = null;
+			if (treeViewObjectTree.SelectedNode != null)
+			{
+				selectedNodeText = treeViewObjectTree.SelectedNode.Text;
+				if (treeViewObjectTree.SelectedNode.Tag != null)
+				{
+					selectedNodeType = ((DragSource)treeViewObjectTree.SelectedNode.Tag).Type;
+				}
+			}
+			HashSet<string> expandedNodes = ExpandedNodes(treeViewObjectTree);
+
 			if (treeViewObjectTree.Nodes.Count > 0)
 			{
 				treeViewObjectTree.Nodes.RemoveAt(0);
 			}
 			treeViewObjectTree.Nodes.Insert(0, objRootNode);
+			if (dragOptions != null)
+			{
+				dragOptions.numericFrameId.Maximum = Editor.Frames.Count;
+			}
+
+			ExpandNodes(treeViewObjectTree, expandedNodes);
+			if (selectedNodeText != null)
+			{
+				TreeNode newNode = FindFrameNode(selectedNodeText, treeViewObjectTree.Nodes);
+				if (newNode != null)
+				{
+					Type newType = null;
+					if (newNode.Tag != null)
+					{
+						newType = ((DragSource)newNode.Tag).Type;
+					}
+					if (selectedNodeType == newType)
+					{
+						newNode.EnsureVisible();
+						treeViewObjectTree.SelectedNode = newNode;
+					}
+				}
+			}
 		}
 
 		private TreeNode CreateFrameTree(xxFrame frame, TreeNode parentNode)
@@ -748,6 +783,70 @@ namespace SB3Utility
 			return newNode;
 		}
 
+		private HashSet<string> ExpandedNodes(TreeView tree)
+		{
+			HashSet<string> nodes = new HashSet<string>();
+			TreeNode root = new TreeNode();
+			while (tree.Nodes.Count > 0)
+			{
+				TreeNode node = tree.Nodes[0];
+				node.Remove();
+				root.Nodes.Add(node);
+			}
+			FindExpandedNodes(root, nodes);
+			while (root.Nodes.Count > 0)
+			{
+				TreeNode node = root.Nodes[0];
+				node.Remove();
+				tree.Nodes.Add(node);
+			}
+			return nodes;
+		}
+
+		private void FindExpandedNodes(TreeNode parent, HashSet<string> result)
+		{
+			foreach (TreeNode node in parent.Nodes)
+			{
+				if (node.IsExpanded)
+				{
+					string parentString = parent.Text == "Mesh" ? parent.Parent.Text : parent.Text;
+					result.Add(parentString + "/" + node.Text);
+				}
+				FindExpandedNodes(node, result);
+			}
+		}
+
+		private void ExpandNodes(TreeView tree, HashSet<string> nodes)
+		{
+			TreeNode root = new TreeNode();
+			while (tree.Nodes.Count > 0)
+			{
+				TreeNode node = tree.Nodes[0];
+				node.Remove();
+				root.Nodes.Add(node);
+			}
+			FindNodesToExpand(root, nodes);
+			while (root.Nodes.Count > 0)
+			{
+				TreeNode node = root.Nodes[0];
+				node.Remove();
+				tree.Nodes.Add(node);
+			}
+		}
+
+		private void FindNodesToExpand(TreeNode parent, HashSet<string> nodes)
+		{
+			foreach (TreeNode node in parent.Nodes)
+			{
+				string parentString = parent.Text == "Mesh" ? parent.Parent.Text : parent.Text;
+				if (nodes.Contains(parentString + "/" + node.Text))
+				{
+					node.Expand();
+				}
+				FindNodesToExpand(node, nodes);
+			}
+		}
+
 		void InitMeshes()
 		{
 			ListViewItem[] meshItems = new ListViewItem[Editor.Meshes.Count];
@@ -760,6 +859,10 @@ namespace SB3Utility
 			listViewMesh.Items.Clear();
 			listViewMesh.Items.AddRange(meshItems);
 			meshlistHeader.AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
+			if (dragOptions != null)
+			{
+				dragOptions.numericMeshId.Maximum = Editor.Meshes.Count;
+			}
 		}
 
 		void InitMaterials()
@@ -1657,20 +1760,23 @@ namespace SB3Utility
 			foreach (TreeNode node in nodes)
 			{
 				var source = node.Tag as DragSource?;
-				if ((source == null) || (source.Value.Type != typeof(xxFrame)))
+				if (source == null)
 				{
 					return null;
 				}
 
-				if (Editor.Frames[(int)source.Value.Id].Equals(frame))
+				if (source.Value.Type == typeof(xxFrame))
 				{
-					return node;
-				}
+					if (Editor.Frames[(int)source.Value.Id].Equals(frame))
+					{
+						return node;
+					}
 
-				TreeNode found = FindFrameNode(frame, node.Nodes);
-				if (found != null)
-				{
-					return found;
+					TreeNode found = FindFrameNode(frame, node.Nodes);
+					if (found != null)
+					{
+						return found;
+					}
 				}
 			}
 
@@ -1682,8 +1788,7 @@ namespace SB3Utility
 			foreach (TreeNode node in nodes)
 			{
 				var source = node.Tag as DragSource?;
-				
-				var tuple = node.Tag as Tuple<xxBone, int[]>;
+
 				if ((source != null) && (source.Value.Type == typeof(xxBone)))
 				{
 					var id = (int[])source.Value.Id;
@@ -3056,27 +3161,34 @@ namespace SB3Utility
 				DirectoryInfo dir = new DirectoryInfo(exportDir);
 
 				string meshNames = String.Empty;
-				if (listViewMesh.SelectedItems.Count > 0)
+				if (!checkBoxMeshExportNoMesh.Checked)
 				{
-					for (int i = 0; i < listViewMesh.SelectedItems.Count; i++)
+					if (listViewMesh.SelectedItems.Count > 0)
 					{
-						meshNames += "\"" + Editor.Meshes[(int)listViewMesh.SelectedItems[i].Tag].Name + "\", ";
+						for (int i = 0; i < listViewMesh.SelectedItems.Count; i++)
+						{
+							meshNames += "\"" + Editor.Meshes[(int)listViewMesh.SelectedItems[i].Tag].Name + "\", ";
+						}
 					}
+					else
+					{
+						if (listViewMesh.Items.Count <= 0)
+						{
+							Report.ReportLog("There are no meshes for exporting");
+							return;
+						}
+
+						for (int i = 0; i < listViewMesh.Items.Count; i++)
+						{
+							meshNames += "\"" + Editor.Meshes[(int)listViewMesh.Items[i].Tag].Name + "\", ";
+						}
+					}
+					meshNames = "{ " + meshNames.Substring(0, meshNames.Length - 2) + " }";
 				}
 				else
 				{
-					if (listViewMesh.Items.Count <= 0)
-					{
-						Report.ReportLog("There are no meshes for exporting");
-						return;
-					}
-
-					for (int i = 0; i < listViewMesh.Items.Count; i++)
-					{
-						meshNames += "\"" + Editor.Meshes[(int)listViewMesh.Items[i].Tag].Name + "\", ";
-					}
+					meshNames = "null";
 				}
-				meshNames = "{ " + meshNames.Substring(0, meshNames.Length - 2) + " }";
 
 				Report.ReportLog("Started exporting to " + comboBoxMeshExportFormat.SelectedItem + " format...");
 				Application.DoEvents();
@@ -3241,8 +3353,11 @@ namespace SB3Utility
 				}
 
 				List<int[]> gotoCells = new List<int[]>();
-				gotoCells.Add(new int[] { 1, frameId });
-				gotoCells.Add(new int[] { 2, loadedMesh });
+				if (loadedMesh >= 0)
+				{
+					gotoCells.Add(new int[] { 1, frameId });
+					gotoCells.Add(new int[] { 2, loadedMesh });
+				}
 				gotoCells.Add(new int[] { 4, loadedMaterial });
 
 				using (var editHex = new FormXXEditHex(this, gotoCells))

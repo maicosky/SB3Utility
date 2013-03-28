@@ -33,7 +33,7 @@ namespace SB3Utility
 				xaParserList = new List<xaParser>(Utility.Convert<xaParser>(xaParsers));
 			}
 
-			List<xxFrame> meshFrames = xx.FindMeshFrames(xxParser.Frame, new List<string>(Utility.Convert<string>(meshNames)));
+			List<xxFrame> meshFrames = meshNames != null ? xx.FindMeshFrames(xxParser.Frame, new List<string>(Utility.Convert<string>(meshNames))) : null;
 			Fbx.Exporter.Export(path, xxParser, meshFrames, xaParserList, startKeyframe, endKeyframe, linear, exportFormat, allFrames, skins, embedMedia, compatibility);
 		}
 

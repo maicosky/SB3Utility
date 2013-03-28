@@ -445,7 +445,7 @@ namespace SB3Utility
 			{
 				if (e.Data.GetDataPresent(DataFormats.FileDrop))
 				{
-					e.Effect = e.AllowedEffect & DragDropEffects.Link;
+					e.Effect = e.AllowedEffect & DragDropEffects.Copy;
 				}
 				else
 				{

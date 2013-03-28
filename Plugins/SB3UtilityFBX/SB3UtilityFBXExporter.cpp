@@ -50,13 +50,16 @@ namespace SB3Utility
 		exportSkins = skins;
 		this->embedMedia = embedMedia;
 		meshNames = gcnew HashSet<String^>();
-		for (int i = 0; i < meshParents->Count; i++)
+		if (meshParents)
 		{
-			meshNames->Add(meshParents[i]->Name);
+			for (int i = 0; i < meshParents->Count; i++)
+			{
+				meshNames->Add(meshParents[i]->Name);
+			}
 		}
 
 		frameNames = nullptr;
-		if (!allFrames)
+		if (!allFrames && meshParents)
 		{
 			frameNames = xx::SearchHierarchy(xxparser->Frame, meshNames);
 		}
@@ -107,6 +110,10 @@ namespace SB3Utility
 		IOS_REF.SetBoolProp(EXP_FBX_GOBO, true);
 		IOS_REF.SetBoolProp(EXP_FBX_ANIMATION, true);
 		IOS_REF.SetBoolProp(EXP_FBX_GLOBAL_SETTINGS, true);
+
+		KFbxGlobalSettings& globalSettings = pScene->GetGlobalSettings();
+		KTime::ETimeMode pTimeMode = KTime::eCINEMA;
+		globalSettings.SetTimeMode(pTimeMode);
 
 		if (!pExporter->Initialize(cDest, lFormatIndex, pSdkManager->GetIOSettings()))
 		{
@@ -608,7 +615,12 @@ namespace SB3Utility
 						String^ hTexName = hTex->Name;
 						if (matTexName == hTexName)
 						{
-							xx::ExportTexture(hTex, Path::GetDirectoryName(gcnew String(pExporter->GetFileName().Buffer())) + Path::DirectorySeparatorChar + Path::GetFileName(hTexName));
+							String^ path = Path::GetDirectoryName(gcnew String(pExporter->GetFileName().Buffer()));
+							if (path == String::Empty)
+							{
+								path = ".";
+							}
+							xx::ExportTexture(hTex, path + Path::DirectorySeparatorChar + Path::GetFileName(hTexName));
 							break;
 						}
 					}

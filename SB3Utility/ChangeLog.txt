@@ -1,4 +1,33 @@
-﻿[0.4.42.40]
+﻿[0.4.42.47]
+  - Fix: some XX meshes in the object tree weren't found (e.g. by "Goto Frame")
+  - Added: XX selected and expanded nodes in the Object Tree are selected/expanded after being changed from editor/workspace
+  - Fix: newly copied xxFrames from the workspace were no valid drop targets
+  - Added: references to objects from XX units are removed from workspaces if the editor for that XX is closed.
+
+[0.4.42.46]
+  - Fix: SB3Utility can be opened several times.
+  - Fix: Files can be dropped into the Log and Script windows.
+
+[0.4.42.45]
+  - Fix: FBX frame rate set to 24.0 1/s
+  - Added: FBX export option to export no mesh (but animations)
+
+[0.4.42.44]
+  - VC++ 2010 Redistributables replaced with versions for x86
+
+[0.4.42.43]
+  - PPD_Clothes_Preview Plugin generates SVIEX units
+
+[0.4.42.42a]
+  - XX : when no mesh was displayed the EditHex button in Material threw exceptions
+  - SlimDX.DLL and VC++ 2010 Redistributables integrated
+  - SB3UtilityScript returns 0 on success and -1 on errors.
+  - Fbx export exported textures to root folder for relative export paths
+
+[0.4.42.41]
+  - Added script command for ppEditor: AddSubfiles(path="{path with wildcards}", replace={true|false})
+
+[0.4.42.40]
   - Extended normals calulation for several XX meshes
   - Added single click drag 'n drop for *multiple* xxFrames, ImportedFrames and ImportedMeshes (WorkspaceMeshes)
   - Added permission to load plugins from UNC paths

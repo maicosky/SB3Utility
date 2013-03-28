@@ -69,6 +69,15 @@ namespace SB3Utility
 		}
 
 		[Plugin]
+		public void AddSubfiles(string path, bool replace)
+		{
+			foreach (string file in Directory.EnumerateFiles(Path.GetDirectoryName(path), Path.GetFileName(path)))
+			{
+				AddSubfile(file, replace);
+			}
+		}
+
+		[Plugin]
 		public void RemoveSubfile(string name)
 		{
 			int index = FindSubfile(name);
