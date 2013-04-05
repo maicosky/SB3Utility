@@ -28,13 +28,15 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
+			this.components = new System.ComponentModel.Container();
 			this.listViewImages = new System.Windows.Forms.ListView();
 			this.imageFilesHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.menuStrip1 = new System.Windows.Forms.MenuStrip();
 			this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.reopenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+			this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.timerShowLastDroppedFile = new System.Windows.Forms.Timer(this.components);
 			this.menuStrip1.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -85,22 +87,27 @@
 			// 
 			this.reopenToolStripMenuItem.Name = "reopenToolStripMenuItem";
 			this.reopenToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.R)));
-			this.reopenToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.reopenToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
 			this.reopenToolStripMenuItem.Text = "&Reopen";
 			this.reopenToolStripMenuItem.Click += new System.EventHandler(this.reopenToolStripMenuItem_Click);
+			// 
+			// toolStripSeparator1
+			// 
+			this.toolStripSeparator1.Name = "toolStripSeparator1";
+			this.toolStripSeparator1.Size = new System.Drawing.Size(147, 6);
 			// 
 			// closeToolStripMenuItem
 			// 
 			this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
 			this.closeToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Delete;
-			this.closeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.closeToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
 			this.closeToolStripMenuItem.Text = "&Close";
 			this.closeToolStripMenuItem.Click += new System.EventHandler(this.closeToolStripMenuItem_Click);
 			// 
-			// toolStripSeparator1
+			// timerShowLastDroppedFile
 			// 
-			this.toolStripSeparator1.Name = "toolStripSeparator1";
-			this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
+			this.timerShowLastDroppedFile.Interval = 1000;
+			this.timerShowLastDroppedFile.Tick += new System.EventHandler(this.timerShowLastDroppedFile_Tick);
 			// 
 			// FormImageFiles
 			// 
@@ -129,5 +136,6 @@
 		private System.Windows.Forms.ToolStripMenuItem reopenToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem closeToolStripMenuItem;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+		private System.Windows.Forms.Timer timerShowLastDroppedFile;
 	}
 }

@@ -25,15 +25,15 @@ namespace SB3Utility
 		}
 
 		[Plugin]
-		public BackgroundWorker SavePP(bool keepBackup, bool background)
+		public BackgroundWorker SavePP(bool keepBackup, string backupExtention, bool background)
 		{
-			return SavePP(Parser.FilePath, keepBackup, background);
+			return SavePP(Parser.FilePath, keepBackup, backupExtention, background);
 		}
 
 		[Plugin]
-		public BackgroundWorker SavePP(string path, bool keepBackup, bool background)
+		public BackgroundWorker SavePP(string path, bool keepBackup, string backupExtention, bool background)
 		{
-			return Parser.WriteArchive(path, keepBackup, background);
+			return Parser.WriteArchive(path, keepBackup, backupExtention, background);
 		}
 
 		[Plugin]

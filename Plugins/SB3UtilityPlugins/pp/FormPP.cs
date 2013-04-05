@@ -85,6 +85,8 @@ namespace SB3Utility
 
 				keepBackupToolStripMenuItem.Checked = (bool)Gui.Config["KeepBackupOfPP"];
 				keepBackupToolStripMenuItem.CheckedChanged += keepBackupToolStripMenuItem_CheckedChanged;
+				backupExtentionToolStripEditTextBox.Text = (string)Gui.Config["BackupExtentionPP"];
+				backupExtentionToolStripEditTextBox.AfterEditTextChanged += backupExtentionToolStripEditTextBox_AfterEditTextChanged;
 			}
 			catch (Exception ex)
 			{
@@ -462,7 +464,7 @@ namespace SB3Utility
 		{
 			try
 			{
-				BackgroundWorker worker = (BackgroundWorker)Gui.Scripting.RunScript(EditorVar + ".SavePP(keepBackup=" + keepBackupToolStripMenuItem.Checked + ", background=True)");
+				BackgroundWorker worker = (BackgroundWorker)Gui.Scripting.RunScript(EditorVar + ".SavePP(keepBackup=" + keepBackupToolStripMenuItem.Checked + ", backupExtention=\"" + (string)Gui.Config["BackupExtentionPP"] + "\", background=True)");
 				ShowBlockingDialog(Editor.Parser.FilePath, worker);
 			}
 			catch (Exception ex)
@@ -477,7 +479,7 @@ namespace SB3Utility
 			{
 				if (saveFileDialog1.ShowDialog() == DialogResult.OK)
 				{
-					BackgroundWorker worker = (BackgroundWorker)Gui.Scripting.RunScript(EditorVar + ".SavePP(path=\"" + saveFileDialog1.FileName + "\", keepBackup=" + keepBackupToolStripMenuItem.Checked + ", background=True)");
+					BackgroundWorker worker = (BackgroundWorker)Gui.Scripting.RunScript(EditorVar + ".SavePP(path=\"" + saveFileDialog1.FileName + "\", keepBackup=" + keepBackupToolStripMenuItem.Checked + ", backupExtention=\"" + (string)Gui.Config["BackupExtentionPP"] + "\", background=True)");
 					ShowBlockingDialog(saveFileDialog1.FileName, worker);
 				}
 			}
@@ -814,6 +816,11 @@ namespace SB3Utility
 		private void keepBackupToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
 		{
 			Gui.Config["KeepBackupOfPP"] = keepBackupToolStripMenuItem.Checked;
+		}
+
+		private void backupExtentionToolStripEditTextBox_AfterEditTextChanged(object sender, EventArgs e)
+		{
+			Gui.Config["BackupExtentionPP"] = backupExtentionToolStripEditTextBox.Text;
 		}
 	}
 }

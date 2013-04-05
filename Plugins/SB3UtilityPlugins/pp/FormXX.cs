@@ -15,7 +15,7 @@ namespace SB3Utility
 {
 	[Plugin]
 	[PluginOpensFile(".xx")]
-	public partial class FormXX : DockContent
+	public partial class FormXX : DockContent, EditorForm
 	{
 		private enum MeshExportFormat
 		{
@@ -61,6 +61,27 @@ namespace SB3Utility
 		EditTextBox[][] matMatrixText = new EditTextBox[5][];
 		ComboBox[] matTexNameCombo;
 		bool SetComboboxEvent = false;
+
+		public string EditorFormVar { get; protected set; }
+		TreeNode draggedNode = null;
+
+		[Plugin]
+		public TreeNode GetDraggedNode()
+		{
+			return draggedNode;
+		}
+
+		[Plugin]
+		public void SetDraggedNode(object[] nodeAddress)
+		{
+			double[] addr = Utility.Convert<double>(nodeAddress);
+			TreeNode node = treeViewObjectTree.Nodes[(int)addr[0]];
+			for (int i = 1; i < addr.Length; i++)
+			{
+				node = node.Nodes[(int)addr[i]];
+			}
+			draggedNode = node;
+		}
 
 		int loadedFrame = -1;
 		int[] loadedBone = null;
@@ -184,6 +205,10 @@ namespace SB3Utility
 					Gui.Scripting.Variables.Remove(FormVar);
 				}
 				Gui.Scripting.Variables.Remove(EditorVar);
+				if (EditorFormVar != null)
+				{
+					Gui.Scripting.Variables.Remove(EditorFormVar);
+				}
 
 				UnloadXX();
 			}
@@ -722,7 +747,8 @@ namespace SB3Utility
 			treeViewObjectTree.Nodes.Insert(0, objRootNode);
 			if (dragOptions != null)
 			{
-				dragOptions.numericFrameId.Maximum = Editor.Frames.Count;
+				dragOptions.numericFrameId.Maximum = Editor.Frames.Count - 1;
+				dragOptions.numericMeshId.Maximum = Editor.Frames.Count - 1;
 			}
 
 			ExpandNodes(treeViewObjectTree, expandedNodes);
@@ -859,10 +885,6 @@ namespace SB3Utility
 			listViewMesh.Items.Clear();
 			listViewMesh.Items.AddRange(meshItems);
 			meshlistHeader.AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
-			if (dragOptions != null)
-			{
-				dragOptions.numericMeshId.Maximum = Editor.Meshes.Count;
-			}
 		}
 
 		void InitMaterials()
@@ -1859,6 +1881,16 @@ namespace SB3Utility
 			{
 				if (e.Item is TreeNode)
 				{
+					if ((bool)Gui.Config["WorkspaceScripting"])
+					{
+						if (EditorFormVar == null)
+						{
+							EditorFormVar = Gui.Scripting.GetNextVariable("EditorFormVar");
+							Gui.Scripting.RunScript(EditorFormVar + " = SearchEditorForm(\"" + this.ToolTipText + "\")");
+						}
+						SetDraggedNode((TreeNode)e.Item);
+					}
+
 					treeViewObjectTree.DoDragDrop(e.Item, DragDropEffects.Copy);
 				}
 			}
@@ -1866,6 +1898,31 @@ namespace SB3Utility
 			{
 				Utility.ReportException(ex);
 			}
+		}
+
+		public void SetDraggedNode(TreeNode node)
+		{
+			StringBuilder nodeAddress = new StringBuilder(100);
+			while (node != null)
+			{
+				string delim;
+				int idx;
+				if (node.Parent != null)
+				{
+					idx = node.Parent.Nodes.IndexOf(node);
+					delim = ", ";
+				}
+				else
+				{
+					idx = treeViewObjectTree.Nodes.IndexOf(node);
+					delim = "{";
+				}
+				nodeAddress.Insert(0, idx);
+				nodeAddress.Insert(0, delim);
+				node = node.Parent;
+			}
+			nodeAddress.Append("}");
+			Gui.Scripting.RunScript(EditorFormVar + ".SetDraggedNode(nodeAddress=" + nodeAddress + ")");
 		}
 
 		private void treeViewObjectTree_DragEnter(object sender, DragEventArgs e)
@@ -2085,7 +2142,7 @@ namespace SB3Utility
 			}
 		}
 
-		private void RecreateFrames()
+		public void RecreateFrames()
 		{
 			CrossRefsClear();
 			DisposeRenderObjects();
@@ -2378,7 +2435,7 @@ namespace SB3Utility
 				xxFrame parent = (xxFrame)frame.Parent;
 				while (parent != null)
 				{
-					m = parent.Matrix * m;
+					m = m * parent.Matrix;
 					parent = parent.Parent;
 				}
 				LoadMatrix(m, dataGridViewFrameSRT, dataGridViewFrameMatrix);
@@ -2696,7 +2753,17 @@ namespace SB3Utility
 					return;
 				}
 
-				Gui.Scripting.RunScript(EditorVar + ".RemoveMesh(id=" + loadedMesh + ")");
+				List<int> descendingIds = new List<int>(listViewMesh.SelectedItems.Count);
+				foreach (ListViewItem item in listViewMesh.SelectedItems)
+				{
+					descendingIds.Add((int)item.Tag);
+				}
+				descendingIds.Sort();
+				descendingIds.Reverse();
+				foreach (int id in descendingIds)
+				{
+					Gui.Scripting.RunScript(EditorVar + ".RemoveMesh(id=" + id + ")");
+				}
 
 				RecreateMeshes();
 			}
@@ -2920,7 +2987,17 @@ namespace SB3Utility
 					return;
 				}
 
-				Gui.Scripting.RunScript(EditorVar + ".RemoveMaterial(id=" + loadedMaterial + ")");
+				List<int> descendingIds = new List<int>(listViewMaterial.SelectedItems.Count);
+				foreach (ListViewItem item in listViewMaterial.SelectedItems)
+				{
+					descendingIds.Add((int)item.Tag);
+				}
+				descendingIds.Sort();
+				descendingIds.Reverse();
+				foreach (int id in descendingIds)
+				{
+					Gui.Scripting.RunScript(EditorVar + ".RemoveMaterial(id=" + id + ")");
+				}
 
 				RecreateRenderObjects();
 				LoadMesh(loadedMesh);
@@ -3004,7 +3081,17 @@ namespace SB3Utility
 					return;
 				}
 
-				Gui.Scripting.RunScript(EditorVar + ".RemoveTexture(id=" + loadedTexture + ")");
+				List<int> descendingIds = new List<int>(listViewTexture.SelectedItems.Count);
+				foreach (ListViewItem item in listViewTexture.SelectedItems)
+				{
+					descendingIds.Add((int)item.Tag);
+				}
+				descendingIds.Sort();
+				descendingIds.Reverse();
+				foreach (int id in descendingIds)
+				{
+					Gui.Scripting.RunScript(EditorVar + ".RemoveTexture(id=" + id + ")");
+				}
 
 				RecreateRenderObjects();
 				InitTextures();
@@ -3027,7 +3114,11 @@ namespace SB3Utility
 					return;
 				}
 
-				Gui.Scripting.RunScript(EditorVar + ".AddTexture(image=" + Gui.ImageControl.ImageScriptVariable + ")");
+				List<string> vars = FormImageFiles.GetSelectedImageVariables();
+				foreach (string var in vars)
+				{
+					Gui.Scripting.RunScript(EditorVar + ".AddTexture(image=" + var + ")");
+				}
 
 				RecreateRenderObjects();
 				InitTextures();

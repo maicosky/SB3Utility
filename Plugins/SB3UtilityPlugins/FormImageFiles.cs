@@ -79,6 +79,7 @@ namespace SB3Utility
 
 			Gui.Scripting.RunScript(variable + " = ImportTexture(path=\"" + path + "\")");
 			item.Tag = new PathVariable() { Path = path, Variable = variable };
+			timerShowLastDroppedFile.Tag = item;
 		}
 
 		private void listViewImages_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
@@ -97,6 +98,21 @@ namespace SB3Utility
 			{
 				Utility.ReportException(ex);
 			}
+		}
+
+		public static List<string> GetSelectedImageVariables()
+		{
+			if (Singleton == null || Singleton.listViewImages.SelectedItems.Count < 1)
+			{
+				return null;
+			}
+
+			List<string> vars = new List<string>(Singleton.listViewImages.SelectedItems.Count);
+			foreach (ListViewItem item in Singleton.listViewImages.SelectedItems)
+			{
+				vars.Add(((PathVariable)item.Tag).Variable);
+			}
+			return vars;
 		}
 
 		[Plugin]
@@ -119,6 +135,8 @@ namespace SB3Utility
 					Gui.Docking.ShowDockContent(Singleton, Gui.Docking.DockFiles, ContentCategory.Others);
 				}
 
+				Singleton.timerShowLastDroppedFile.Start();
+				Singleton.BringToFront();
 				Singleton.AddImageFile(path);
 			}
 			catch (Exception ex)
@@ -159,6 +177,17 @@ namespace SB3Utility
 			catch (Exception ex)
 			{
 				Utility.ReportException(ex);
+			}
+		}
+
+		private void timerShowLastDroppedFile_Tick(object sender, EventArgs e)
+		{
+			timerShowLastDroppedFile.Stop();
+			if (timerShowLastDroppedFile.Tag != null)
+			{
+				ListViewItem item = (ListViewItem)timerShowLastDroppedFile.Tag;
+				item.Selected = true;
+				item.Selected = false;
 			}
 		}
 	}

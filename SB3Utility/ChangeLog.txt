@@ -1,4 +1,18 @@
-﻿[0.4.42.47]
+﻿[0.4.42.50]
+  - Fixed XX Frame calculation of combined transform
+  - Added workspace menu option for log window entries for dropping-into and automatic removals from workspace
+  - Added workspace menu option for scripted dropping of nodes from object trees
+  - Fixed multiple binding of event handler for automatic removals from workspaces
+  - Added all selected images are added with one click
+  - Added all selected textures, materials and meshes are removed with one click
+
+[0.4.42.49]
+  - Fixed a crash when dropping a second imported mesh from the workspace into an XX Object Tree.
+
+[0.4.42.48]
+  - Added: extention for backups of pp files can be edited
+
+[0.4.42.47]
   - Fix: some XX meshes in the object tree weren't found (e.g. by "Goto Frame")
   - Added: XX selected and expanded nodes in the Object Tree are selected/expanded after being changed from editor/workspace
   - Fix: newly copied xxFrames from the workspace were no valid drop targets

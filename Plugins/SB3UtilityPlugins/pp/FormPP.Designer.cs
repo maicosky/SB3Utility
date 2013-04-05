@@ -67,6 +67,8 @@
 			this.renameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.keepBackupToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.backupExtentionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.backupExtentionToolStripEditTextBox = new SB3Utility.ToolStripEditTextBox();
 			this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
 			this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
 			this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
@@ -196,11 +198,11 @@
 			this.imageSubfilesList.View = System.Windows.Forms.View.Details;
 			this.imageSubfilesList.ItemSelectionChanged += new System.Windows.Forms.ListViewItemSelectionChangedEventHandler(this.imageSubfilesList_ItemSelectionChanged);
 			// 
-			// tabPageSoundFiles
+			// tabPageSoundSubfiles
 			// 
 			this.tabPageSoundSubfiles.Controls.Add(this.soundSubfilesList);
 			this.tabPageSoundSubfiles.Location = new System.Drawing.Point(4, 22);
-			this.tabPageSoundSubfiles.Name = "tabPageSoundFiles";
+			this.tabPageSoundSubfiles.Name = "tabPageSoundSubfiles";
 			this.tabPageSoundSubfiles.Size = new System.Drawing.Size(272, 336);
 			this.tabPageSoundSubfiles.TabIndex = 4;
 			this.tabPageSoundSubfiles.Text = "Snd";
@@ -389,50 +391,51 @@
 			// exportSubfilesToolStripMenuItem
 			// 
 			this.exportSubfilesToolStripMenuItem.Name = "exportSubfilesToolStripMenuItem";
-			this.exportSubfilesToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.exportSubfilesToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
 			this.exportSubfilesToolStripMenuItem.Text = "&Export...";
 			this.exportSubfilesToolStripMenuItem.Click += new System.EventHandler(this.exportSubfilesToolStripMenuItem_Click);
 			// 
 			// toolStripSeparator4
 			// 
 			this.toolStripSeparator4.Name = "toolStripSeparator4";
-			this.toolStripSeparator4.Size = new System.Drawing.Size(149, 6);
+			this.toolStripSeparator4.Size = new System.Drawing.Size(126, 6);
 			// 
 			// addFilesToolStripMenuItem
 			// 
 			this.addFilesToolStripMenuItem.Name = "addFilesToolStripMenuItem";
-			this.addFilesToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.addFilesToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
 			this.addFilesToolStripMenuItem.Text = "&Add Files...";
 			this.addFilesToolStripMenuItem.Click += new System.EventHandler(this.addFilesToolStripMenuItem_Click);
 			// 
 			// toolStripSeparator2
 			// 
 			this.toolStripSeparator2.Name = "toolStripSeparator2";
-			this.toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
+			this.toolStripSeparator2.Size = new System.Drawing.Size(126, 6);
 			// 
 			// removeToolStripMenuItem
 			// 
 			this.removeToolStripMenuItem.Name = "removeToolStripMenuItem";
-			this.removeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.removeToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
 			this.removeToolStripMenuItem.Text = "Re&move";
 			this.removeToolStripMenuItem.Click += new System.EventHandler(this.removeToolStripMenuItem_Click);
 			// 
 			// toolStripSeparator3
 			// 
 			this.toolStripSeparator3.Name = "toolStripSeparator3";
-			this.toolStripSeparator3.Size = new System.Drawing.Size(149, 6);
+			this.toolStripSeparator3.Size = new System.Drawing.Size(126, 6);
 			// 
 			// renameToolStripMenuItem
 			// 
 			this.renameToolStripMenuItem.Name = "renameToolStripMenuItem";
-			this.renameToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.renameToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
 			this.renameToolStripMenuItem.Text = "Re&name";
 			this.renameToolStripMenuItem.Click += new System.EventHandler(this.renameToolStripMenuItem_Click);
 			// 
 			// optionsToolStripMenuItem
 			// 
 			this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.keepBackupToolStripMenuItem});
+            this.keepBackupToolStripMenuItem,
+            this.backupExtentionToolStripMenuItem});
 			this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
 			this.optionsToolStripMenuItem.Size = new System.Drawing.Size(56, 20);
 			this.optionsToolStripMenuItem.Text = "&Options";
@@ -441,8 +444,21 @@
 			// 
 			this.keepBackupToolStripMenuItem.CheckOnClick = true;
 			this.keepBackupToolStripMenuItem.Name = "keepBackupToolStripMenuItem";
-			this.keepBackupToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.keepBackupToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
 			this.keepBackupToolStripMenuItem.Text = "Keep &Backup";
+			// 
+			// backupExtentionToolStripMenuItem
+			// 
+			this.backupExtentionToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.backupExtentionToolStripEditTextBox});
+			this.backupExtentionToolStripMenuItem.Name = "backupExtentionToolStripMenuItem";
+			this.backupExtentionToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
+			this.backupExtentionToolStripMenuItem.Text = "Backup &Extention";
+			// 
+			// backupExtentionToolStripEditTextBox
+			// 
+			this.backupExtentionToolStripEditTextBox.Name = "backupExtentionToolStripEditTextBox";
+			this.backupExtentionToolStripEditTextBox.Size = new System.Drawing.Size(50, 21);
 			// 
 			// saveFileDialog1
 			// 
@@ -524,6 +540,8 @@
 		private System.Windows.Forms.TabPage tabPageSoundSubfiles;
 		private System.Windows.Forms.ListView soundSubfilesList;
 		private System.Windows.Forms.ColumnHeader columnHeader1;
+		private System.Windows.Forms.ToolStripMenuItem backupExtentionToolStripMenuItem;
+		private SB3Utility.ToolStripEditTextBox backupExtentionToolStripEditTextBox;
 
 	}
 }

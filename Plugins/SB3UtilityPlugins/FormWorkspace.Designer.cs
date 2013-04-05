@@ -13,6 +13,8 @@
 		/// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
 		protected override void Dispose(bool disposing)
 		{
+			CustomDispose();
+
 			if (disposing && (components != null))
 			{
 				components.Dispose();
@@ -44,6 +46,9 @@
 			this.worldCoordinatesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextMenuStripMorphKeyframe = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.renameToToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.logMessagesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.scriptingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.treeView = new SB3Utility.TriStateTreeView();
 			this.toolStripTextBoxTargetPosition = new SB3Utility.ToolStripEditTextBox();
 			this.toolStripTextBoxMaterialName = new SB3Utility.ToolStripEditTextBox();
@@ -99,7 +104,8 @@
 			// 
 			this.menuStrip1.AllowMerge = false;
 			this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.nodesToolStripMenuItem});
+            this.nodesToolStripMenuItem,
+            this.optionsToolStripMenuItem});
 			this.menuStrip1.Location = new System.Drawing.Point(0, 0);
 			this.menuStrip1.Name = "menuStrip1";
 			this.menuStrip1.Size = new System.Drawing.Size(227, 24);
@@ -188,6 +194,29 @@
 			this.renameToToolStripMenuItem.Size = new System.Drawing.Size(126, 22);
 			this.renameToToolStripMenuItem.Text = "Rename to";
 			// 
+			// optionsToolStripMenuItem
+			// 
+			this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.logMessagesToolStripMenuItem,
+            this.scriptingToolStripMenuItem});
+			this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
+			this.optionsToolStripMenuItem.Size = new System.Drawing.Size(56, 20);
+			this.optionsToolStripMenuItem.Text = "&Options";
+			// 
+			// logMessagesToolStripMenuItem
+			// 
+			this.logMessagesToolStripMenuItem.CheckOnClick = true;
+			this.logMessagesToolStripMenuItem.Name = "logMessagesToolStripMenuItem";
+			this.logMessagesToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.logMessagesToolStripMenuItem.Text = "&Log Messages";
+			// 
+			// scriptingToolStripMenuItem
+			// 
+			this.scriptingToolStripMenuItem.CheckOnClick = true;
+			this.scriptingToolStripMenuItem.Name = "scriptingToolStripMenuItem";
+			this.scriptingToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.scriptingToolStripMenuItem.Text = "&Scripting";
+			// 
 			// treeView
 			// 
 			this.treeView.AllowDrop = true;
@@ -273,6 +302,9 @@
 		private System.Windows.Forms.ContextMenuStrip contextMenuStripMorphKeyframe;
 		private System.Windows.Forms.ToolStripMenuItem renameToToolStripMenuItem;
 		private ToolStripEditTextBox toolStripEditTextBoxNewMorphKeyframeName;
+		private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem logMessagesToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem scriptingToolStripMenuItem;
 
 	}
 }

@@ -43,6 +43,12 @@
 			this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.keepBackupToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+			this.checkBoxMeshExportEmbedMedia = new System.Windows.Forms.CheckBox();
+			this.groupBoxInterpolation = new System.Windows.Forms.GroupBox();
+			this.radioButtonLinear = new System.Windows.Forms.RadioButton();
+			this.radioButtonCubic = new System.Windows.Forms.RadioButton();
+			this.textBoxKeyframeRange = new SB3Utility.EditTextBox();
+			this.checkBoxMeshReorderSubmesh = new System.Windows.Forms.CheckBox();
 			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
 			this.textBoxFormat = new SB3Utility.EditTextBox();
 			this.buttonConvert = new System.Windows.Forms.Button();
@@ -149,13 +155,8 @@
 			this.buttonMeshExport = new System.Windows.Forms.Button();
 			this.panelMeshExportOptionsFbx = new System.Windows.Forms.Panel();
 			this.checkBoxMeshExportNoMesh = new System.Windows.Forms.CheckBox();
-			this.checkBoxMeshExportEmbedMedia = new System.Windows.Forms.CheckBox();
 			this.checkBoxMeshExportFbxSkins = new System.Windows.Forms.CheckBox();
-			this.groupBoxInterpolation = new System.Windows.Forms.GroupBox();
-			this.radioButtonLinear = new System.Windows.Forms.RadioButton();
-			this.radioButtonCubic = new System.Windows.Forms.RadioButton();
 			this.label13 = new System.Windows.Forms.Label();
-			this.textBoxKeyframeRange = new SB3Utility.EditTextBox();
 			this.checkBoxMeshExportFbxAllFrames = new System.Windows.Forms.CheckBox();
 			this.panelMeshExportOptionsDefault = new System.Windows.Forms.Panel();
 			this.panelMeshExportOptionsDirectX = new System.Windows.Forms.Panel();
@@ -173,7 +174,6 @@
 			this.label1 = new System.Windows.Forms.Label();
 			this.buttonMeshRemove = new System.Windows.Forms.Button();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
-			this.checkBoxMeshReorderSubmesh = new System.Windows.Forms.CheckBox();
 			this.dataGridViewMesh = new System.Windows.Forms.DataGridView();
 			this.ColumnSubmeshVerts = new System.Windows.Forms.DataGridViewTextBoxColumn();
 			this.ColumnSubmeshFaces = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -231,6 +231,7 @@
 			this.textBoxTexSize = new SB3Utility.EditTextBox();
 			this.textBoxTexName = new SB3Utility.EditTextBox();
 			this.menuStrip1.SuspendLayout();
+			this.groupBoxInterpolation.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
 			this.splitContainer1.Panel1.SuspendLayout();
 			this.splitContainer1.Panel2.SuspendLayout();
@@ -287,7 +288,6 @@
 			this.tabPageMeshView.SuspendLayout();
 			this.groupBox2.SuspendLayout();
 			this.panelMeshExportOptionsFbx.SuspendLayout();
-			this.groupBoxInterpolation.SuspendLayout();
 			this.panelMeshExportOptionsDirectX.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericMeshExportDirectXTicksPerSecond)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericMeshExportDirectXKeyframeLength)).BeginInit();
@@ -386,6 +386,83 @@
 			this.keepBackupToolStripMenuItem.Name = "keepBackupToolStripMenuItem";
 			this.keepBackupToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
 			this.keepBackupToolStripMenuItem.Text = "Keep &Backup";
+			// 
+			// checkBoxMeshExportEmbedMedia
+			// 
+			this.checkBoxMeshExportEmbedMedia.AutoSize = true;
+			this.checkBoxMeshExportEmbedMedia.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
+			this.checkBoxMeshExportEmbedMedia.Location = new System.Drawing.Point(136, 2);
+			this.checkBoxMeshExportEmbedMedia.Name = "checkBoxMeshExportEmbedMedia";
+			this.checkBoxMeshExportEmbedMedia.Size = new System.Drawing.Size(91, 17);
+			this.checkBoxMeshExportEmbedMedia.TabIndex = 266;
+			this.checkBoxMeshExportEmbedMedia.TabStop = false;
+			this.checkBoxMeshExportEmbedMedia.Text = "Embed Media";
+			this.toolTip1.SetToolTip(this.checkBoxMeshExportEmbedMedia, "Textures are stored inside the output file.");
+			this.checkBoxMeshExportEmbedMedia.UseVisualStyleBackColor = true;
+			// 
+			// groupBoxInterpolation
+			// 
+			this.groupBoxInterpolation.Controls.Add(this.radioButtonLinear);
+			this.groupBoxInterpolation.Controls.Add(this.radioButtonCubic);
+			this.groupBoxInterpolation.Location = new System.Drawing.Point(119, 38);
+			this.groupBoxInterpolation.Margin = new System.Windows.Forms.Padding(0);
+			this.groupBoxInterpolation.Name = "groupBoxInterpolation";
+			this.groupBoxInterpolation.Padding = new System.Windows.Forms.Padding(0);
+			this.groupBoxInterpolation.Size = new System.Drawing.Size(118, 27);
+			this.groupBoxInterpolation.TabIndex = 271;
+			this.groupBoxInterpolation.TabStop = false;
+			this.toolTip1.SetToolTip(this.groupBoxInterpolation, "Interpolation type - used for export of compressed animations");
+			// 
+			// radioButtonLinear
+			// 
+			this.radioButtonLinear.AutoSize = true;
+			this.radioButtonLinear.Checked = true;
+			this.radioButtonLinear.Location = new System.Drawing.Point(5, 8);
+			this.radioButtonLinear.Name = "radioButtonLinear";
+			this.radioButtonLinear.Size = new System.Drawing.Size(54, 17);
+			this.radioButtonLinear.TabIndex = 269;
+			this.radioButtonLinear.TabStop = true;
+			this.radioButtonLinear.Text = "Linear";
+			this.toolTip1.SetToolTip(this.radioButtonLinear, "Keyframes are linear interpolated");
+			this.radioButtonLinear.UseVisualStyleBackColor = true;
+			// 
+			// radioButtonCubic
+			// 
+			this.radioButtonCubic.AutoSize = true;
+			this.radioButtonCubic.Location = new System.Drawing.Point(64, 8);
+			this.radioButtonCubic.Name = "radioButtonCubic";
+			this.radioButtonCubic.Size = new System.Drawing.Size(52, 17);
+			this.radioButtonCubic.TabIndex = 270;
+			this.radioButtonCubic.Text = "Cubic";
+			this.toolTip1.SetToolTip(this.radioButtonCubic, "Keyframes are cubic interpolated");
+			this.radioButtonCubic.UseVisualStyleBackColor = true;
+			// 
+			// textBoxKeyframeRange
+			// 
+			this.textBoxKeyframeRange.Location = new System.Drawing.Point(67, 44);
+			this.textBoxKeyframeRange.MaxLength = 10;
+			this.textBoxKeyframeRange.Name = "textBoxKeyframeRange";
+			this.textBoxKeyframeRange.Size = new System.Drawing.Size(45, 20);
+			this.textBoxKeyframeRange.TabIndex = 268;
+			this.textBoxKeyframeRange.TabStop = false;
+			this.textBoxKeyframeRange.Text = "-1-0";
+			this.toolTip1.SetToolTip(this.textBoxKeyframeRange, "Starting with -1 exports all keyframes without interpolation.\r\nStarting with 0 or" +
+        " higher also interpolates.");
+			// 
+			// checkBoxMeshReorderSubmesh
+			// 
+			this.checkBoxMeshReorderSubmesh.Appearance = System.Windows.Forms.Appearance.Button;
+			this.checkBoxMeshReorderSubmesh.AutoCheck = false;
+			this.checkBoxMeshReorderSubmesh.AutoSize = true;
+			this.checkBoxMeshReorderSubmesh.Location = new System.Drawing.Point(174, 18);
+			this.checkBoxMeshReorderSubmesh.Name = "checkBoxMeshReorderSubmesh";
+			this.checkBoxMeshReorderSubmesh.Size = new System.Drawing.Size(55, 23);
+			this.checkBoxMeshReorderSubmesh.TabIndex = 144;
+			this.checkBoxMeshReorderSubmesh.Text = "Reorder";
+			this.toolTip1.SetToolTip(this.checkBoxMeshReorderSubmesh, "1. Select the submesh to move.\r\n2. Click this button.\r\n3. Click on a row to which" +
+        " the submesh should be moved to.");
+			this.checkBoxMeshReorderSubmesh.UseVisualStyleBackColor = true;
+			this.checkBoxMeshReorderSubmesh.Click += new System.EventHandler(this.checkBoxMeshReorderSubmesh_Click);
 			// 
 			// splitContainer1
 			// 
@@ -1667,19 +1744,6 @@
 			this.checkBoxMeshExportNoMesh.Text = "No Mesh";
 			this.checkBoxMeshExportNoMesh.UseVisualStyleBackColor = true;
 			// 
-			// checkBoxMeshExportEmbedMedia
-			// 
-			this.checkBoxMeshExportEmbedMedia.AutoSize = true;
-			this.checkBoxMeshExportEmbedMedia.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
-			this.checkBoxMeshExportEmbedMedia.Location = new System.Drawing.Point(136, 2);
-			this.checkBoxMeshExportEmbedMedia.Name = "checkBoxMeshExportEmbedMedia";
-			this.checkBoxMeshExportEmbedMedia.Size = new System.Drawing.Size(91, 17);
-			this.checkBoxMeshExportEmbedMedia.TabIndex = 266;
-			this.checkBoxMeshExportEmbedMedia.TabStop = false;
-			this.checkBoxMeshExportEmbedMedia.Text = "Embed Media";
-			this.toolTip1.SetToolTip(this.checkBoxMeshExportEmbedMedia, "Textures are stored inside the output file.");
-			this.checkBoxMeshExportEmbedMedia.UseVisualStyleBackColor = true;
-			// 
 			// checkBoxMeshExportFbxSkins
 			// 
 			this.checkBoxMeshExportFbxSkins.AutoSize = true;
@@ -1694,43 +1758,6 @@
 			this.checkBoxMeshExportFbxSkins.Text = "Skins";
 			this.checkBoxMeshExportFbxSkins.UseVisualStyleBackColor = true;
 			// 
-			// groupBoxInterpolation
-			// 
-			this.groupBoxInterpolation.Controls.Add(this.radioButtonLinear);
-			this.groupBoxInterpolation.Controls.Add(this.radioButtonCubic);
-			this.groupBoxInterpolation.Location = new System.Drawing.Point(119, 38);
-			this.groupBoxInterpolation.Margin = new System.Windows.Forms.Padding(0);
-			this.groupBoxInterpolation.Name = "groupBoxInterpolation";
-			this.groupBoxInterpolation.Padding = new System.Windows.Forms.Padding(0);
-			this.groupBoxInterpolation.Size = new System.Drawing.Size(118, 27);
-			this.groupBoxInterpolation.TabIndex = 271;
-			this.groupBoxInterpolation.TabStop = false;
-			this.toolTip1.SetToolTip(this.groupBoxInterpolation, "Interpolation type - used for export of compressed animations");
-			// 
-			// radioButtonLinear
-			// 
-			this.radioButtonLinear.AutoSize = true;
-			this.radioButtonLinear.Checked = true;
-			this.radioButtonLinear.Location = new System.Drawing.Point(5, 8);
-			this.radioButtonLinear.Name = "radioButtonLinear";
-			this.radioButtonLinear.Size = new System.Drawing.Size(54, 17);
-			this.radioButtonLinear.TabIndex = 269;
-			this.radioButtonLinear.TabStop = true;
-			this.radioButtonLinear.Text = "Linear";
-			this.toolTip1.SetToolTip(this.radioButtonLinear, "Keyframes are linear interpolated");
-			this.radioButtonLinear.UseVisualStyleBackColor = true;
-			// 
-			// radioButtonCubic
-			// 
-			this.radioButtonCubic.AutoSize = true;
-			this.radioButtonCubic.Location = new System.Drawing.Point(64, 8);
-			this.radioButtonCubic.Name = "radioButtonCubic";
-			this.radioButtonCubic.Size = new System.Drawing.Size(52, 17);
-			this.radioButtonCubic.TabIndex = 270;
-			this.radioButtonCubic.Text = "Cubic";
-			this.toolTip1.SetToolTip(this.radioButtonCubic, "Keyframes are cubic interpolated");
-			this.radioButtonCubic.UseVisualStyleBackColor = true;
-			// 
 			// label13
 			// 
 			this.label13.AutoSize = true;
@@ -1739,18 +1766,6 @@
 			this.label13.Size = new System.Drawing.Size(56, 13);
 			this.label13.TabIndex = 268;
 			this.label13.Text = "Keyframes";
-			// 
-			// textBoxKeyframeRange
-			// 
-			this.textBoxKeyframeRange.Location = new System.Drawing.Point(67, 44);
-			this.textBoxKeyframeRange.MaxLength = 10;
-			this.textBoxKeyframeRange.Name = "textBoxKeyframeRange";
-			this.textBoxKeyframeRange.Size = new System.Drawing.Size(45, 20);
-			this.textBoxKeyframeRange.TabIndex = 268;
-			this.textBoxKeyframeRange.TabStop = false;
-			this.textBoxKeyframeRange.Text = "-1-0";
-			this.toolTip1.SetToolTip(this.textBoxKeyframeRange, "Starting with -1 exports all keyframes without interpolation.\r\nStarting with 0 or" +
-        " higher also interpolates.");
 			// 
 			// checkBoxMeshExportFbxAllFrames
 			// 
@@ -1954,21 +1969,6 @@
 			this.groupBox1.TabIndex = 139;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Submeshes";
-			// 
-			// checkBoxMeshReorderSubmesh
-			// 
-			this.checkBoxMeshReorderSubmesh.Appearance = System.Windows.Forms.Appearance.Button;
-			this.checkBoxMeshReorderSubmesh.AutoCheck = false;
-			this.checkBoxMeshReorderSubmesh.AutoSize = true;
-			this.checkBoxMeshReorderSubmesh.Location = new System.Drawing.Point(174, 18);
-			this.checkBoxMeshReorderSubmesh.Name = "checkBoxMeshReorderSubmesh";
-			this.checkBoxMeshReorderSubmesh.Size = new System.Drawing.Size(55, 23);
-			this.checkBoxMeshReorderSubmesh.TabIndex = 144;
-			this.checkBoxMeshReorderSubmesh.Text = "Reorder";
-			this.toolTip1.SetToolTip(this.checkBoxMeshReorderSubmesh, "1. Select the submesh to move.\r\n2. Click this button.\r\n3. Click on a row to which" +
-        " the submesh should be moved to.");
-			this.checkBoxMeshReorderSubmesh.UseVisualStyleBackColor = true;
-			this.checkBoxMeshReorderSubmesh.Click += new System.EventHandler(this.checkBoxMeshReorderSubmesh_Click);
 			// 
 			// dataGridViewMesh
 			// 
@@ -2529,6 +2529,8 @@
 			this.Text = "FormXX";
 			this.menuStrip1.ResumeLayout(false);
 			this.menuStrip1.PerformLayout();
+			this.groupBoxInterpolation.ResumeLayout(false);
+			this.groupBoxInterpolation.PerformLayout();
 			this.splitContainer1.Panel1.ResumeLayout(false);
 			this.splitContainer1.Panel1.PerformLayout();
 			this.splitContainer1.Panel2.ResumeLayout(false);
@@ -2599,8 +2601,6 @@
 			this.groupBox2.PerformLayout();
 			this.panelMeshExportOptionsFbx.ResumeLayout(false);
 			this.panelMeshExportOptionsFbx.PerformLayout();
-			this.groupBoxInterpolation.ResumeLayout(false);
-			this.groupBoxInterpolation.PerformLayout();
 			this.panelMeshExportOptionsDirectX.ResumeLayout(false);
 			this.panelMeshExportOptionsDirectX.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericMeshExportDirectXTicksPerSecond)).EndInit();

@@ -11,17 +11,29 @@ using SlimDX;
 
 namespace SB3Utility
 {
+	public interface EditorForm
+	{
+		string EditorFormVar { get; }
+
+		[Plugin]
+		TreeNode GetDraggedNode();
+
+		void SetDraggedNode(TreeNode node);
+	}
+
 	[Plugin]
 	[PluginTool("&Workspace", "Ctrl+W")]
 	public partial class FormWorkspace : DockContent
 	{
 		protected Dictionary<DockContent, List<TreeNode>> ChildForms = new Dictionary<DockContent, List<TreeNode>>();
+		protected string FormVar;
 
 		public FormWorkspace()
 		{
 			try
 			{
 				InitializeComponent();
+				Init();
 
 				Gui.Docking.ShowDockContent(this, Gui.Docking.DockFiles, ContentCategory.Others);
 			}
@@ -31,11 +43,20 @@ namespace SB3Utility
 			}
 		}
 
+		private void Init()
+		{
+			logMessagesToolStripMenuItem.Checked = (bool)Gui.Config["WorkspaceLogMessages"];
+			logMessagesToolStripMenuItem.CheckedChanged += logMessagesToolStripMenuItem_CheckedChanged;
+			scriptingToolStripMenuItem.Checked = (bool)Gui.Config["WorkspaceScripting"];
+			scriptingToolStripMenuItem.CheckedChanged += scriptingToolStripMenuItem_CheckedChanged;
+		}
+
 		public FormWorkspace(string path, IImported importer, string editorVar, ImportedEditor editor)
 		{
 			try
 			{
 				InitializeComponent();
+				Init();
 
 				InitWorkspace(path, importer, editorVar, editor);
 
@@ -281,6 +302,16 @@ namespace SB3Utility
 			}
 		}
 
+		void CustomDispose()
+		{
+			ChildForms.Clear();
+			if (FormVar != null)
+			{
+				Gui.Scripting.Variables.Remove(FormVar);
+				FormVar = null;
+			}
+		}
+
 		private void treeView_AfterCheck(object sender, TreeViewEventArgs e)
 		{
 			if (e.Node.Tag is ImportedSubmesh)
@@ -394,68 +425,13 @@ namespace SB3Utility
 				{
 					if (node.TreeView != treeView)
 					{
-						DragSource? source = node.Tag as DragSource?;
-						if (source != null)
+						if (FormVar == null && scriptingToolStripMenuItem.Checked)
 						{
-							TreeNode clone = (TreeNode)node.Clone();
-							clone.Checked = true;
-
-							TreeNode type = null;
-							foreach (TreeNode root in treeView.Nodes)
-							{
-								if (root.Text == source.Value.Type.Name)
-								{
-									type = root;
-									break;
-								}
-							}
-
-							if (type == null)
-							{
-								type = new TreeNode(source.Value.Type.Name);
-								type.Checked = true;
-								treeView.AddChild(type);
-							}
-
-							treeView.AddChild(type, clone);
-
-							List<DockContent> formXXList = null;
-							if (Gui.Docking.DockContents.TryGetValue(typeof(FormXX), out formXXList))
-							{
-								foreach (FormXX form in formXXList)
-								{
-									if (form.treeViewObjectTree == node.TreeView)
-									{
-										List<TreeNode> treeNodes = null;
-										if (!ChildForms.TryGetValue(form, out treeNodes))
-										{
-											treeNodes = new List<TreeNode>();
-											ChildForms.Add(form, treeNodes);
-										}
-										treeNodes.Add(clone);
-										form.FormClosing += new FormClosingEventHandler(ChildForms_FormClosing);
-										break;
-									}
-								}
-							}
-						}
-						else
-						{
-							foreach (TreeNode child in node.Nodes)
-							{
-								e.Data.SetData(child);
-								treeView_DragDrop(sender, e);
-							}
+							FormVar = Gui.Scripting.GetNextVariable("workspace");
+							Gui.Scripting.RunScript(FormVar + " = SearchWorkspace(formVar=\"" + FormVar + "\")");
 						}
 
-						foreach (TreeNode root in treeView.Nodes)
-						{
-							root.Expand();
-						}
-						if (treeView.Nodes.Count > 0)
-						{
-							treeView.Nodes[0].EnsureVisible();
-						}
+						treeViewDragDrop(sender, e);
 					}
 				}
 			}
@@ -463,6 +439,93 @@ namespace SB3Utility
 			{
 				Utility.ReportException(ex);
 			}
+		}
+
+		private void treeViewDragDrop(object sender, DragEventArgs e)
+		{
+			TreeNode node = (TreeNode)e.Data.GetData(typeof(TreeNode));
+			DragSource? source = node.Tag as DragSource?;
+			if (source != null)
+			{
+				DockContent form = (DockContent)node.TreeView.FindForm();
+				if (form is EditorForm && scriptingToolStripMenuItem.Checked)
+				{
+					EditorForm editor = (EditorForm)form;
+					TreeNode clone = (TreeNode)Gui.Scripting.RunScript(FormVar + ".AddNode(" + editor.EditorFormVar + ".GetDraggedNode())");
+				}
+				else
+				{
+					AddNode(node);
+				}
+				if (logMessagesToolStripMenuItem.Checked)
+				{
+					Report.ReportLog("Dropped into Workspace: " + form.ToolTipText + " -> " + node.Text);
+				}
+			}
+			else
+			{
+				foreach (TreeNode child in node.Nodes)
+				{
+					if (scriptingToolStripMenuItem.Checked)
+					{
+						EditorForm editor = node.TreeView.FindForm() as EditorForm;
+						if (editor != null)
+						{
+							editor.SetDraggedNode(child);
+						}
+					}
+					e.Data.SetData(child);
+					treeViewDragDrop(sender, e);
+				}
+			}
+
+			foreach (TreeNode root in treeView.Nodes)
+			{
+				root.Expand();
+			}
+			if (treeView.Nodes.Count > 0)
+			{
+				treeView.Nodes[0].EnsureVisible();
+			}
+		}
+
+		[Plugin]
+		public TreeNode AddNode(TreeNode node)
+		{
+			DragSource? source = node.Tag as DragSource?;
+			TreeNode clone = (TreeNode)node.Clone();
+			clone.Checked = true;
+
+			TreeNode type = null;
+			foreach (TreeNode root in treeView.Nodes)
+			{
+				if (root.Text == source.Value.Type.Name)
+				{
+					type = root;
+					break;
+				}
+			}
+
+			if (type == null)
+			{
+				type = new TreeNode(source.Value.Type.Name);
+				type.Checked = true;
+				treeView.AddChild(type);
+			}
+
+			treeView.AddChild(type, clone);
+
+			List<TreeNode> treeNodes = null;
+			DockContent form = (DockContent)node.TreeView.FindForm();
+			if (!ChildForms.TryGetValue(form, out treeNodes))
+			{
+				treeNodes = new List<TreeNode>();
+				ChildForms.Add(form, treeNodes);
+				form.FormClosing += new FormClosingEventHandler(ChildForms_FormClosing);
+			}
+			treeNodes.Add(clone);
+
+			return clone;
 		}
 
 		private void ChildForms_FormClosing(object sender, FormClosingEventArgs e)
@@ -479,18 +542,81 @@ namespace SB3Utility
 					{
 						TreeNode parent = node.Parent;
 						node.Remove();
+						if (logMessagesToolStripMenuItem.Checked)
+						{
+							Report.ReportLog("Removed from Workspace: " + form.ToolTipText + " -> " + node.Text);
+						}
 						if (parent.Nodes.Count == 0)
 						{
 							parent.Remove();
 						}
 					}
+					ChildForms.Remove(form);
 				}
-				ChildForms.Remove(form);
 			}
 			catch (Exception ex)
 			{
 				Utility.ReportException(ex);
 			}
+		}
+
+		[Plugin]
+		public static FormWorkspace SearchWorkspace(DockContent dockedForm)
+		{
+			List<DockContent> formWorkspaceList = null;
+			if (Gui.Docking.DockContents.TryGetValue(typeof(FormWorkspace), out formWorkspaceList))
+			{
+				foreach (FormWorkspace workspace in formWorkspaceList)
+				{
+					if (workspace.ChildForms.ContainsKey(dockedForm))
+					{
+						return workspace;
+					}
+				}
+				return (FormWorkspace)formWorkspaceList[0];
+			}
+			return null;
+		}
+
+		[Plugin]
+		public static FormWorkspace SearchWorkspace(string formVar)
+		{
+			List<DockContent> formWorkspaceList = null;
+			if (Gui.Docking.DockContents.TryGetValue(typeof(FormWorkspace), out formWorkspaceList))
+			{
+				foreach (FormWorkspace workspace in formWorkspaceList)
+				{
+					if (workspace.FormVar == formVar)
+					{
+						return workspace;
+					}
+				}
+				foreach (FormWorkspace workspace in formWorkspaceList)
+				{
+					if (workspace.FormVar == null)
+					{
+						workspace.FormVar = formVar;
+						return workspace;
+					}
+				}
+			}
+			return null;
+		}
+
+		[Plugin]
+		public static EditorForm SearchEditorForm(string toolTipText)
+		{
+			foreach (List<DockContent> formEditorList in Gui.Docking.DockContents.Values)
+			{
+				foreach (DockContent dockEditor in formEditorList)
+				{
+					if (dockEditor.ToolTipText == toolTipText)
+					{
+						return dockEditor as EditorForm;
+					}
+				}
+			}
+			return null;
 		}
 
 		private void buttonRemove_Click(object sender, EventArgs e)
@@ -500,20 +626,38 @@ namespace SB3Utility
 				TreeNode parent = treeView.SelectedNode.Parent;
 				if (parent == null)
 				{
-					treeView.RemoveChild(treeView.SelectedNode);
+					RemoveNode(treeView.SelectedNode);
 				}
 				else if (parent.Parent == null)
 				{
 					if (parent.Nodes.Count <= 1)
 					{
-						treeView.RemoveChild(parent);
+						RemoveNode(parent);
 					}
 					else
 					{
-						treeView.RemoveChild(treeView.SelectedNode);
+						RemoveNode(treeView.SelectedNode);
 					}
 				}
 			}
+		}
+
+		private void RemoveNode(TreeNode node)
+		{
+			while (node.Nodes.Count > 0)
+			{
+				RemoveNode(node.Nodes[0]);
+			}
+
+			foreach (var formNodeList in ChildForms)
+			{
+				if (formNodeList.Value.Remove(node))
+				{
+					break;
+				}
+			}
+
+			treeView.RemoveChild(node);
 		}
 
 		private void expandAllToolStripMenuItem_Click(object sender, EventArgs e)
@@ -642,6 +786,16 @@ namespace SB3Utility
 				WorkspaceMesh wsMesh = srcEditor.Meshes[(int)source.Id];
 				iMesh.Name = wsMesh.Name = e.Label;
 			}
+		}
+
+		private void logMessagesToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+		{
+			Gui.Config["WorkspaceLogMessages"] = logMessagesToolStripMenuItem.Checked;
+		}
+
+		private void scriptingToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+		{
+			Gui.Config["WorkspaceScripting"] = scriptingToolStripMenuItem.Checked;
 		}
 	}
 }

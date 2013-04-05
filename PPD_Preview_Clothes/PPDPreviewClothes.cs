@@ -23,7 +23,8 @@ namespace PPD_Preview_Clothes
 			{
 				if (theInstance != null)
 				{
-					theInstance.BringToFront();
+					theInstance.Close();
+					theInstance = null;
 					return;
 				}
 				theInstance = this;
@@ -120,7 +121,7 @@ namespace PPD_Preview_Clothes
 			baseEditor.RemoveSubfile("sample_body.xx");
 			baseEditor.AddSubfile(clothPreviewPath);
 			baseEditor.RenameSubfile(Path.GetFileName(clothPreviewPath), "sample_body.xx");
-			baseEditor.SavePP(false, false);
+			baseEditor.SavePP(false, (string)Gui.Config["BackupExtentionPP"], false);
 			File.Delete(clothPreviewPath);
 			lastPreviewed = item;
 
@@ -152,7 +153,7 @@ namespace PPD_Preview_Clothes
 				baseEditor.RemoveSubfile("sample_body.xx");
 				baseEditor.AddSubfile(sampleBodyPath);
 				baseEditor.RenameSubfile(Path.GetFileName(sampleBodyPath), "sample_body.xx");
-				baseEditor.SavePP(false, false);
+				baseEditor.SavePP(false, (string)Gui.Config["BackupExtentionPP"], false);
 
 				File.Delete(sampleBodyPath);
 			}

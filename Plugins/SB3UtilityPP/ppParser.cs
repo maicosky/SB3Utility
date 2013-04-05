@@ -14,6 +14,7 @@ namespace SB3Utility
 
 		private string destPath;
 		private bool keepBackup;
+		private string backupExt;
 
 		public ppParser(string path, ppFormat format)
 		{
@@ -22,10 +23,11 @@ namespace SB3Utility
 			this.Subfiles = format.ppHeader.ReadHeader(path, format);
 		}
 
-		public BackgroundWorker WriteArchive(string destPath, bool keepBackup, bool background)
+		public BackgroundWorker WriteArchive(string destPath, bool keepBackup, string backupExtention, bool background)
 		{
 			this.destPath = destPath;
 			this.keepBackup = keepBackup;
+			this.backupExt = backupExtention;
 
 			BackgroundWorker worker = new BackgroundWorker();
 			worker.WorkerSupportsCancellation = true;
@@ -59,7 +61,7 @@ namespace SB3Utility
 
 			if (File.Exists(destPath))
 			{
-				backup = Utility.GetDestFile(dir, Path.GetFileNameWithoutExtension(destPath) + ".bak", Path.GetExtension(destPath));
+				backup = Utility.GetDestFile(dir, Path.GetFileNameWithoutExtension(destPath) + ".bak", backupExt);
 				File.Move(destPath, backup);
 
 				if (destPath.Equals(this.FilePath, StringComparison.InvariantCultureIgnoreCase))
