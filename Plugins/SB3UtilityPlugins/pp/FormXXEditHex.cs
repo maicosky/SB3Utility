@@ -25,6 +25,7 @@ namespace SB3Utility
 		public FormXXEditHex(FormXX formXX, List<int[]> gotoCells)
 		{
 			InitializeComponent();
+			this.Text += " of " + formXX.ToolTipText;
 			this.formXX = formXX;
 			this.editor = formXX.Editor;
 			this.parser = editor.Parser;
@@ -572,6 +573,7 @@ namespace SB3Utility
 
 		private void buttonCancel_Click(object sender, EventArgs e)
 		{
+			Close();
 		}
 
 		private void copyToolStripMenuItem_Click(object sender, EventArgs e)
@@ -582,6 +584,26 @@ namespace SB3Utility
 		private void pasteToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			OnKeyDown(new KeyEventArgs(Keys.Control | Keys.V));
+		}
+
+		private void buttonReadOnly_Click(object sender, EventArgs e)
+		{
+			buttonOK.Enabled = false;
+			buttonCancel.Click += new EventHandler(buttonCancel_Click);
+			buttonReadOnly.Enabled = false;
+
+			this.Text += " - READ ONLY";
+			foreach (TabPage page in tabControl1.TabPages)
+			{
+				foreach (Control control in page.Controls)
+				{
+					if (control is DataGridViewEditor)
+					{
+						((DataGridViewEditor)control).ReadOnly = true;
+						break;
+					}
+				}
+			}
 		}
 	}
 }

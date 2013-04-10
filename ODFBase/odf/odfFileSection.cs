@@ -29,7 +29,8 @@ namespace ODFPlugin
 		[Description("ENVL")] ENVL,
 		[Description("BANM")] BANM,
 		[Description("SOUN")] SOUN,
-		[Description("THOS")] THOS
+		[Description("THOS")] THOS,
+		[Description("TEXA")] TEXA,
 	}
 
 	public class odfFileSection : IWriteFile

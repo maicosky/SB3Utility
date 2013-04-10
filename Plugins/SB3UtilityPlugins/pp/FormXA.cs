@@ -649,28 +649,48 @@ namespace SB3Utility
 				ScaleKey[] scaleKeys = new ScaleKey[keyframes.Count];
 				RotationKey[] rotationKeys = new RotationKey[keyframes.Count];
 				TranslationKey[] translationKeys = new TranslationKey[keyframes.Count];
-				set.RegisterAnimationKeys(track.Name, scaleKeys, rotationKeys, translationKeys);
-				for (int j = 0; j < keyframes.Count; j++)
+				for (int k = 0; k < 10; k++)
 				{
-					float time = keyframes[j].Index;
+					try
+					{
+						set.RegisterAnimationKeys(k == 0 ? track.Name : track.Name + "_error" + k, scaleKeys, rotationKeys, translationKeys);
+						for (int j = 0; j < keyframes.Count; j++)
+						{
+							float time = keyframes[j].Index;
 
-					ScaleKey scale = new ScaleKey();
-					scale.Time = time;
-					scale.Value = keyframes[j].Scaling;
-					//scaleKeys[j] = scale;
-					set.SetScaleKey(i, j, scale);
+							ScaleKey scale = new ScaleKey();
+							scale.Time = time;
+							scale.Value = keyframes[j].Scaling;
+							//scaleKeys[j] = scale;
+							set.SetScaleKey(i, j, scale);
 
-					RotationKey rotation = new RotationKey();
-					rotation.Time = time;
-					rotation.Value = Quaternion.Invert(keyframes[j].Rotation);
-					//rotationKeys[j] = rotation;
-					set.SetRotationKey(i, j, rotation);
+							RotationKey rotation = new RotationKey();
+							rotation.Time = time;
+							rotation.Value = Quaternion.Invert(keyframes[j].Rotation);
+							//rotationKeys[j] = rotation;
+							set.SetRotationKey(i, j, rotation);
 
-					TranslationKey translation = new TranslationKey();
-					translation.Time = time;
-					translation.Value = keyframes[j].Translation;
-					//translationKeys[j] = translation;
-					set.SetTranslationKey(i, j, translation);
+							TranslationKey translation = new TranslationKey();
+							translation.Time = time;
+							translation.Value = keyframes[j].Translation;
+							//translationKeys[j] = translation;
+							set.SetTranslationKey(i, j, translation);
+						}
+						break;
+					}
+					catch (Exception ex)
+					{
+						switch (k)
+						{
+						case 0:
+							Report.ReportLog("Error in Track: " + track.Name);
+							Utility.ReportException(ex);
+							break;
+						case 9:
+							Report.ReportLog("Aborting to register with different name. Animation will not be displayed.");
+							break;
+						}
+					}
 				}
 			}
 
@@ -1797,7 +1817,6 @@ namespace SB3Utility
 
 		private void listViewAnimationTrack_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
 		{
-
 		}
 
 		private void listViewAnimationTrack_AfterLabelEdit(object sender, LabelEditEventArgs e)

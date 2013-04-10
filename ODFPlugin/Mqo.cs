@@ -26,7 +26,7 @@ namespace ODFPlugin
 			foreach (string meshName in Utility.Convert<string>(meshNames))
 			{
 				odfMesh mesh = odf.FindMeshListSome(meshName, parser.MeshSection);
-				if (mesh != null)
+				if (mesh != null || (mesh = odf.FindMeshListSome(new ObjectID(meshName), parser.MeshSection)) != null)
 				{
 					meshes.Add(mesh);
 				}

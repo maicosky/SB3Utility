@@ -182,6 +182,11 @@ namespace SB3Utility
 			Device.SetRenderState(RenderState.SourceBlend, Blend.SourceAlpha);
 			Device.SetRenderState(RenderState.DestinationBlend, Blend.InverseSourceAlpha);
 
+			Device.SetSamplerState(0, SamplerState.MaxAnisotropy, 4);
+			Device.SetSamplerState(0, SamplerState.MagFilter, TextureFilter.Anisotropic);
+			Device.SetSamplerState(0, SamplerState.MinFilter, TextureFilter.Anisotropic);
+			Device.SetSamplerState(0, SamplerState.MipFilter, TextureFilter.Linear);
+
 			Light light = new Light();
 			light.Type = LightType.Directional;
 			light.Ambient = new Color4(int.Parse((string)Gui.Config["LightAmbientARGB"], System.Globalization.NumberStyles.AllowHexSpecifier));

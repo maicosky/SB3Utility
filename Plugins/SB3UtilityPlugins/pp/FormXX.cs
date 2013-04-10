@@ -110,6 +110,8 @@ namespace SB3Utility
 
 		private bool listViewItemSyncSelectedSent = false;
 
+		private HashSet<FormXXEditHex> OpenEditHexForms = new HashSet<FormXXEditHex>();
+
 		public FormXX(string path, string variable)
 		{
 			try
@@ -199,6 +201,11 @@ namespace SB3Utility
 		{
 			try
 			{
+				foreach (FormXXEditHex editHex in OpenEditHexForms)
+				{
+					editHex.Close();
+				}
+
 				if (FormVar != null)
 				{
 					Gui.Scripting.Variables.Remove(ParserVar);
@@ -2290,9 +2297,15 @@ namespace SB3Utility
 		{
 			try
 			{
-				using (var editHex = new FormXXEditHex(this, null))
+				var editHex = new FormXXEditHex(this, null);
+				if (editHex.ShowDialog() == DialogResult.Retry)
 				{
-					editHex.ShowDialog();
+					editHex.Show();
+					OpenEditHexForms.Add(editHex);
+				}
+				else
+				{
+					editHex.Dispose();
 				}
 			}
 			catch (Exception ex)
@@ -3376,9 +3389,15 @@ namespace SB3Utility
 				}
 				gotoCells.Add(new int[] { 1, loadedFrame });
 
-				using (var editHex = new FormXXEditHex(this, gotoCells))
+				var editHex = new FormXXEditHex(this, gotoCells);
+				if (editHex.ShowDialog() == DialogResult.Retry)
 				{
-					editHex.ShowDialog();
+					editHex.Show();
+					OpenEditHexForms.Add(editHex);
+				}
+				else
+				{
+					editHex.Dispose();
 				}
 			}
 			catch (Exception ex)
@@ -3410,9 +3429,15 @@ namespace SB3Utility
 				gotoCells.Add(new int[] { 1, frameId });
 				gotoCells.Add(new int[] { 2, loadedMesh });
 
-				using (var editHex = new FormXXEditHex(this, gotoCells))
+				var editHex = new FormXXEditHex(this, gotoCells);
+				if (editHex.ShowDialog() == DialogResult.Retry)
 				{
-					editHex.ShowDialog();
+					editHex.Show();
+					OpenEditHexForms.Add(editHex);
+				}
+				else
+				{
+					editHex.Dispose();
 				}
 			}
 			catch (Exception ex)
@@ -3451,9 +3476,15 @@ namespace SB3Utility
 				}
 				gotoCells.Add(new int[] { 4, loadedMaterial });
 
-				using (var editHex = new FormXXEditHex(this, gotoCells))
+				var editHex = new FormXXEditHex(this, gotoCells);
+				if (editHex.ShowDialog() == DialogResult.Retry)
 				{
-					editHex.ShowDialog();
+					editHex.Show();
+					OpenEditHexForms.Add(editHex);
+				}
+				else
+				{
+					editHex.Dispose();
 				}
 			}
 			catch (Exception ex)
@@ -3474,9 +3505,15 @@ namespace SB3Utility
 				List<int[]> gotoCells = new List<int[]>();
 				gotoCells.Add(new int[] { 5, loadedTexture });
 
-				using (var editHex = new FormXXEditHex(this, gotoCells))
+				var editHex = new FormXXEditHex(this, gotoCells);
+				if (editHex.ShowDialog() == DialogResult.Retry)
 				{
-					editHex.ShowDialog();
+					editHex.Show();
+					OpenEditHexForms.Add(editHex);
+				}
+				else
+				{
+					editHex.Dispose();
 				}
 			}
 			catch (Exception ex)
@@ -3544,6 +3581,26 @@ namespace SB3Utility
 		private void keepBackupToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
 		{
 			Gui.Config["KeepBackupOfXX"] = keepBackupToolStripMenuItem.Checked;
+		}
+
+		private void buttonZeroWeights_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedBone == null)
+				{
+					return;
+				}
+
+				Gui.Scripting.RunScript(EditorVar + ".ZeroWeights(meshId=" + loadedBone[0] + ", boneId=" + loadedBone[1] + ")");
+
+				LoadBone(null);
+				RecreateRenderObjects();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
 		}
 	}
 }

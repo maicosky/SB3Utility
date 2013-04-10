@@ -122,6 +122,7 @@
 			this.label4 = new System.Windows.Forms.Label();
 			this.textBoxFrameName = new SB3Utility.EditTextBox();
 			this.tabPageBoneView = new System.Windows.Forms.TabPage();
+			this.buttonZeroWeights = new System.Windows.Forms.Button();
 			this.groupBox4 = new System.Windows.Forms.GroupBox();
 			this.buttonBoneMatrixApply = new System.Windows.Forms.Button();
 			this.numericBoneMatrixRatio = new System.Windows.Forms.NumericUpDown();
@@ -1325,6 +1326,7 @@
 			// 
 			// tabPageBoneView
 			// 
+			this.tabPageBoneView.Controls.Add(this.buttonZeroWeights);
 			this.tabPageBoneView.Controls.Add(this.groupBox4);
 			this.tabPageBoneView.Controls.Add(this.tabControlBoneMatrix);
 			this.tabPageBoneView.Controls.Add(this.buttonBoneRemove);
@@ -1338,6 +1340,16 @@
 			this.tabPageBoneView.TabIndex = 8;
 			this.tabPageBoneView.Text = "Bone";
 			this.tabPageBoneView.UseVisualStyleBackColor = true;
+			// 
+			// buttonZeroWeights
+			// 
+			this.buttonZeroWeights.Location = new System.Drawing.Point(67, 361);
+			this.buttonZeroWeights.Name = "buttonZeroWeights";
+			this.buttonZeroWeights.Size = new System.Drawing.Size(112, 23);
+			this.buttonZeroWeights.TabIndex = 107;
+			this.buttonZeroWeights.Text = "Zero Weights";
+			this.buttonZeroWeights.UseVisualStyleBackColor = true;
+			this.buttonZeroWeights.Click += new System.EventHandler(this.buttonZeroWeights_Click);
 			// 
 			// groupBox4
 			// 
@@ -2823,5 +2835,6 @@
 		private System.Windows.Forms.CheckBox checkBoxMeshReorderSubmesh;
 		public System.Windows.Forms.DataGridView dataGridViewMesh;
 		private System.Windows.Forms.CheckBox checkBoxMeshExportNoMesh;
+		private System.Windows.Forms.Button buttonZeroWeights;
 	}
 }

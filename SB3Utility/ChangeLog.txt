@@ -1,10 +1,16 @@
 ﻿[0.4.42.50]
   - Fixed XX Frame calculation of combined transform
-  - Added workspace menu option for log window entries for dropping-into and automatic removals from workspace
-  - Added workspace menu option for scripted dropping of nodes from object trees
+  - Added log window entries for dropping-into and automatic removals from workspace. Must be enabled in workspace menu.
+  - Added scripted dropping of nodes from object trees. Must be enabled in workspace menu.
   - Fixed multiple binding of event handler for automatic removals from workspaces
   - Added all selected images are added with one click
   - Added all selected textures, materials and meshes are removed with one click
+  - Added EditHex can be reopened read only but non-modal
+  - Fixed crash when XA animations had two tracks with the same name.
+  - Default texture filter set to anisotropic. MaxAnisotropy=4
+  - Added XX bones can be zero weighted
+  - Fixed XX removing bones produced illegal bone indices
+  - Added XX removing bones normalizes weights of effected vertices
 
 [0.4.42.49]
   - Fixed a crash when dropping a second imported mesh from the workspace into an XX Object Tree.

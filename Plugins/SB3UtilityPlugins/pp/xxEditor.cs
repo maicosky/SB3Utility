@@ -508,7 +508,10 @@ namespace SB3Utility
 		public void RemoveBone(int meshId, int boneId)
 		{
 			xxFrame frame = Meshes[meshId];
+			xxFrame parentFrame = xx.FindFrame(frame.Mesh.BoneList[boneId].Name, Parser.Frame).Parent;
+			xxBone parentBone = xx.FindBone(frame.Mesh.BoneList, parentFrame.Name);
 			frame.Mesh.BoneList.RemoveAt(boneId);
+			byte parentBoneIdx = (byte)frame.Mesh.BoneList.IndexOf(parentBone);
 
 			foreach (xxSubmesh submesh in frame.Mesh.SubmeshList)
 			{
@@ -526,14 +529,34 @@ namespace SB3Utility
 								vertex.Weights3[j - 1] = w4[j];
 							}
 							vertex.BoneIndices[vertex.BoneIndices.Length - 1] = 0xFF;
+
+							w4 = vertex.Weights4(true);
+							float normalize = 1f / (w4[0] + w4[1] + w4[2] + w4[3]);
+							if (w4[3] != 1f)
+							{
+								for (int j = 0; vertex.BoneIndices[j] != 0xFF; j++)
+								{
+									vertex.Weights3[j] *= normalize;
+								}
+							}
+							else if (parentBoneIdx >= 0)
+							{
+								vertex.BoneIndices[0] = parentBoneIdx;
+								vertex.Weights3[0] = 1f;
+							}
+
 							i--;
 						}
-						else if (boneIdx > boneId)
+						else if (boneIdx != 0xFF && boneIdx > boneId)
 						{
 							vertex.BoneIndices[i]--;
 						}
 					}
 				}
+			}
+			if (frame.Mesh.VertexListDuplicate.Count > 0)
+			{
+				frame.Mesh.VertexListDuplicate = xx.CreateVertexListDup(frame.Mesh.SubmeshList);
 			}
 		}
 
@@ -548,6 +571,51 @@ namespace SB3Utility
 			xxBone copy = boneList[boneId].Clone();
 			copy.Name = Frames[0].Name;
 			boneList.Add(copy);
+		}
+
+		[Plugin]
+		public void ZeroWeights(int meshId, int boneId)
+		{
+			xxMesh mesh = Meshes[meshId].Mesh;
+			xxBone bone = mesh.BoneList[boneId];
+			xxFrame parentFrame = xx.FindFrame(bone.Name, Parser.Frame).Parent;
+			xxBone parentBone = xx.FindBone(mesh.BoneList, parentFrame.Name);
+			byte parentBoneIdx = (byte)mesh.BoneList.IndexOf(parentBone);
+			foreach (xxSubmesh submesh in mesh.SubmeshList)
+			{
+				foreach (xxVertex vertex in submesh.VertexList)
+				{
+					int parentIdx = -1;
+					for (int i = 0; i < vertex.BoneIndices.Length; i++)
+					{
+						if (vertex.BoneIndices[i] == parentBoneIdx)
+						{
+							parentIdx = i;
+							break;
+						}
+					}
+					for (int i = 0; i < vertex.BoneIndices.Length; i++)
+					{
+						if (vertex.BoneIndices[i] == boneId)
+						{
+							if (parentIdx >= 0)
+							{
+								float[] w4 = vertex.Weights4(true);
+								w4[parentIdx] += w4[i];
+								w4[i] = 0;
+								vertex.Weights3[0] = w4[0];
+								vertex.Weights3[1] = w4[1];
+								vertex.Weights3[2] = w4[2];
+							}
+							else
+							{
+								vertex.BoneIndices[i] = parentBoneIdx;
+							}
+							break;
+						}
+					}
+				}
+			}
 		}
 
 		[Plugin]

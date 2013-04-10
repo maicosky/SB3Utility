@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -3576,12 +3577,10 @@ namespace ODFPlugin
 				DirectoryInfo dir = new DirectoryInfo(exportDir);
 
 				string meshNames = String.Empty;
+				IList items;
 				if (listViewMesh.SelectedItems.Count > 0)
 				{
-					for (int i = 0; i < listViewMesh.SelectedItems.Count; i++)
-					{
-						meshNames += "\"" + Editor.Parser.MeshSection[(int)listViewMesh.SelectedItems[i].Tag].Name + "\", ";
-					}
+					items = listViewMesh.SelectedItems;
 				}
 				else
 				{
@@ -3591,10 +3590,12 @@ namespace ODFPlugin
 						return;
 					}
 
-					for (int i = 0; i < listViewMesh.Items.Count; i++)
-					{
-						meshNames += "\"" + Editor.Parser.MeshSection[(int)listViewMesh.Items[i].Tag].Name + "\", ";
-					}
+					items = listViewMesh.Items;
+				}
+				foreach (ListViewItem item in items)
+				{
+					String name = Editor.Parser.MeshSection[(int)item.Tag].ToString();
+					meshNames += "\"" + name + "\", ";
 				}
 				meshNames = "{ " + meshNames.Substring(0, meshNames.Length - 2) + " }";
 

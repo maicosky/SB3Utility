@@ -319,7 +319,7 @@
 			this.tabPageMaterial.Controls.Add(this.label16);
 			this.tabPageMaterial.Location = new System.Drawing.Point(4, 22);
 			this.tabPageMaterial.Name = "tabPageMaterial";
-			this.tabPageMaterial.Size = new System.Drawing.Size(516, 510);
+			this.tabPageMaterial.Size = new System.Drawing.Size(516, 492);
 			this.tabPageMaterial.TabIndex = 3;
 			this.tabPageMaterial.Text = "Material";
 			this.tabPageMaterial.UseVisualStyleBackColor = true;
@@ -620,7 +620,7 @@
 			// 
 			this.tabPageType2.Location = new System.Drawing.Point(4, 22);
 			this.tabPageType2.Name = "tabPageType2";
-			this.tabPageType2.Size = new System.Drawing.Size(516, 510);
+			this.tabPageType2.Size = new System.Drawing.Size(516, 492);
 			this.tabPageType2.TabIndex = 4;
 			this.tabPageType2.Text = "Type2";
 			this.tabPageType2.UseVisualStyleBackColor = true;
@@ -631,7 +631,7 @@
 			this.tabPageMorph.Location = new System.Drawing.Point(4, 22);
 			this.tabPageMorph.Name = "tabPageMorph";
 			this.tabPageMorph.Padding = new System.Windows.Forms.Padding(3);
-			this.tabPageMorph.Size = new System.Drawing.Size(516, 510);
+			this.tabPageMorph.Size = new System.Drawing.Size(516, 492);
 			this.tabPageMorph.TabIndex = 0;
 			this.tabPageMorph.Text = "Morph";
 			this.tabPageMorph.UseVisualStyleBackColor = true;
@@ -659,8 +659,8 @@
 			this.splitContainerMorph.Panel2.Controls.Add(this.editTextBoxNewKeyframeName);
 			this.splitContainerMorph.Panel2.Controls.Add(this.label3);
 			this.splitContainerMorph.Panel2.Controls.Add(this.listViewMorphKeyframe);
-			this.splitContainerMorph.Size = new System.Drawing.Size(510, 504);
-			this.splitContainerMorph.SplitterDistance = 388;
+			this.splitContainerMorph.Size = new System.Drawing.Size(510, 486);
+			this.splitContainerMorph.SplitterDistance = 374;
 			this.splitContainerMorph.TabIndex = 123;
 			// 
 			// groupBox10
@@ -835,7 +835,7 @@
 			this.groupBox5.Controls.Add(this.label5);
 			this.groupBox5.Controls.Add(this.comboBoxMorphMesh);
 			this.groupBox5.Controls.Add(this.label4);
-			this.groupBox5.Location = new System.Drawing.Point(0, 306);
+			this.groupBox5.Location = new System.Drawing.Point(0, 292);
 			this.groupBox5.Name = "groupBox5";
 			this.groupBox5.Size = new System.Drawing.Size(509, 82);
 			this.groupBox5.TabIndex = 140;
@@ -947,7 +947,7 @@
 			this.treeViewMorphClip.HideSelection = false;
 			this.treeViewMorphClip.Location = new System.Drawing.Point(0, 18);
 			this.treeViewMorphClip.Name = "treeViewMorphClip";
-			this.treeViewMorphClip.Size = new System.Drawing.Size(315, 277);
+			this.treeViewMorphClip.Size = new System.Drawing.Size(315, 263);
 			this.treeViewMorphClip.TabIndex = 80;
 			this.treeViewMorphClip.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.treeViewMorphClip_ItemDrag);
 			this.treeViewMorphClip.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewMorphClip_AfterSelect);
@@ -1071,7 +1071,7 @@
 			this.listViewMorphKeyframe.Name = "listViewMorphKeyframe";
 			this.listViewMorphKeyframe.ShowGroups = false;
 			this.listViewMorphKeyframe.ShowItemToolTips = true;
-			this.listViewMorphKeyframe.Size = new System.Drawing.Size(358, 95);
+			this.listViewMorphKeyframe.Size = new System.Drawing.Size(358, 91);
 			this.listViewMorphKeyframe.TabIndex = 160;
 			this.listViewMorphKeyframe.UseCompatibleStateImageBehavior = false;
 			this.listViewMorphKeyframe.View = System.Windows.Forms.View.Details;
@@ -1091,7 +1091,7 @@
 			// 
 			this.tabPageType4.Location = new System.Drawing.Point(4, 22);
 			this.tabPageType4.Name = "tabPageType4";
-			this.tabPageType4.Size = new System.Drawing.Size(516, 510);
+			this.tabPageType4.Size = new System.Drawing.Size(516, 492);
 			this.tabPageType4.TabIndex = 5;
 			this.tabPageType4.Text = "Type4";
 			this.tabPageType4.UseVisualStyleBackColor = true;
@@ -1102,7 +1102,7 @@
 			this.tabPageAnimation.Location = new System.Drawing.Point(4, 22);
 			this.tabPageAnimation.Name = "tabPageAnimation";
 			this.tabPageAnimation.Padding = new System.Windows.Forms.Padding(3);
-			this.tabPageAnimation.Size = new System.Drawing.Size(516, 510);
+			this.tabPageAnimation.Size = new System.Drawing.Size(516, 492);
 			this.tabPageAnimation.TabIndex = 1;
 			this.tabPageAnimation.Text = "Animation";
 			this.tabPageAnimation.UseVisualStyleBackColor = true;
@@ -1130,8 +1130,8 @@
 			this.splitContainerAnimation.Panel2.Controls.Add(this.groupBox3);
 			this.splitContainerAnimation.Panel2.Controls.Add(this.groupBox2);
 			this.splitContainerAnimation.Panel2.Controls.Add(this.groupBox1);
-			this.splitContainerAnimation.Size = new System.Drawing.Size(510, 504);
-			this.splitContainerAnimation.SplitterDistance = 205;
+			this.splitContainerAnimation.Size = new System.Drawing.Size(510, 486);
+			this.splitContainerAnimation.SplitterDistance = 197;
 			this.splitContainerAnimation.TabIndex = 159;
 			// 
 			// label1
@@ -1174,7 +1174,7 @@
 			this.listViewAnimationTrack.Name = "listViewAnimationTrack";
 			this.listViewAnimationTrack.ShowGroups = false;
 			this.listViewAnimationTrack.ShowItemToolTips = true;
-			this.listViewAnimationTrack.Size = new System.Drawing.Size(403, 188);
+			this.listViewAnimationTrack.Size = new System.Drawing.Size(403, 180);
 			this.listViewAnimationTrack.Sorting = System.Windows.Forms.SortOrder.Ascending;
 			this.listViewAnimationTrack.TabIndex = 137;
 			this.listViewAnimationTrack.UseCompatibleStateImageBehavior = false;
@@ -1283,7 +1283,7 @@
 			// 
 			this.buttonAnimationClipEditHex.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.buttonAnimationClipEditHex.Enabled = false;
-			this.buttonAnimationClipEditHex.Location = new System.Drawing.Point(436, 268);
+			this.buttonAnimationClipEditHex.Location = new System.Drawing.Point(436, 258);
 			this.buttonAnimationClipEditHex.Name = "buttonAnimationClipEditHex";
 			this.buttonAnimationClipEditHex.Size = new System.Drawing.Size(73, 23);
 			this.buttonAnimationClipEditHex.TabIndex = 212;
@@ -1320,7 +1320,7 @@
 			this.dataGridViewAnimationClip.RowTemplate.Height = 18;
 			this.dataGridViewAnimationClip.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
 			this.dataGridViewAnimationClip.ShowCellToolTips = false;
-			this.dataGridViewAnimationClip.Size = new System.Drawing.Size(509, 213);
+			this.dataGridViewAnimationClip.Size = new System.Drawing.Size(509, 203);
 			this.dataGridViewAnimationClip.StandardTab = true;
 			this.dataGridViewAnimationClip.TabIndex = 170;
 			this.dataGridViewAnimationClip.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewAnimationClip_CellValueChanged);
@@ -1404,7 +1404,7 @@
 			this.groupBox3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.groupBox3.Controls.Add(this.buttonAnimationClipDelete);
 			this.groupBox3.Controls.Add(this.buttonAnimationClipCopy);
-			this.groupBox3.Location = new System.Drawing.Point(346, 230);
+			this.groupBox3.Location = new System.Drawing.Point(346, 220);
 			this.groupBox3.Name = "groupBox3";
 			this.groupBox3.Size = new System.Drawing.Size(75, 65);
 			this.groupBox3.TabIndex = 200;
@@ -1435,7 +1435,7 @@
 			this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.groupBox2.Controls.Add(this.buttonAnimationClipMoveUp);
 			this.groupBox2.Controls.Add(this.buttonAnimationClipMoveDown);
-			this.groupBox2.Location = new System.Drawing.Point(280, 230);
+			this.groupBox2.Location = new System.Drawing.Point(280, 220);
 			this.groupBox2.Name = "groupBox2";
 			this.groupBox2.Size = new System.Drawing.Size(63, 65);
 			this.groupBox2.TabIndex = 190;
@@ -1471,7 +1471,7 @@
 			this.groupBox1.Controls.Add(this.numericAnimationClipKeyframe);
 			this.groupBox1.Controls.Add(this.labelSkeletalRender);
 			this.groupBox1.Controls.Add(this.label30);
-			this.groupBox1.Location = new System.Drawing.Point(0, 230);
+			this.groupBox1.Location = new System.Drawing.Point(0, 220);
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.Size = new System.Drawing.Size(277, 65);
 			this.groupBox1.TabIndex = 180;
@@ -1609,7 +1609,7 @@
 			// toolStripSeparator1
 			// 
 			this.toolStripSeparator1.Name = "toolStripSeparator1";
-			this.toolStripSeparator1.Size = new System.Drawing.Size(170, 6);
+			this.toolStripSeparator1.Size = new System.Drawing.Size(166, 6);
 			// 
 			// saveToolStripMenuItem
 			// 
@@ -1629,7 +1629,7 @@
 			// toolStripSeparator6
 			// 
 			this.toolStripSeparator6.Name = "toolStripSeparator6";
-			this.toolStripSeparator6.Size = new System.Drawing.Size(170, 6);
+			this.toolStripSeparator6.Size = new System.Drawing.Size(166, 6);
 			// 
 			// closeToolStripMenuItem
 			// 
@@ -1653,7 +1653,7 @@
 			this.keepBackupToolStripMenuItem.CheckOnClick = true;
 			this.keepBackupToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.keepBackupToolStripMenuItem.Name = "keepBackupToolStripMenuItem";
-			this.keepBackupToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.keepBackupToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
 			this.keepBackupToolStripMenuItem.Text = "Keep Backup";
 			this.keepBackupToolStripMenuItem.CheckedChanged += new System.EventHandler(this.keepBackupToolStripMenuItem_CheckedChanged);
 			// 

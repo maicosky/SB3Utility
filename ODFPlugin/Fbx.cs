@@ -18,12 +18,14 @@ namespace ODFPlugin
 			foreach (string meshName in meshStrList)
 			{
 				odfMesh mesh = odf.FindMeshListSome(meshName, parser.MeshSection);
-				if (mesh != null)
+				if (mesh != null || (mesh = odf.FindMeshListSome(new ObjectID(meshName), parser.MeshSection)) != null)
 				{
 					meshes.Add(mesh);
 				}
 				else
+				{
 					Report.ReportLog("Mesh " + meshName + " not found.");
+				}
 			}
 
 			ODFConverter imp = new ODFConverter(parser, meshes);

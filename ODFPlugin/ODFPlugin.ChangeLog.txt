@@ -1,4 +1,7 @@
-﻿[0.4.42.39]
+﻿[0.4.42.50]
+  - Nameless meshes are exported using their id as name
+
+[0.4.42.39]
   - imported meshes can be easier placed into destination frames
 
 [0.4.42.34]
