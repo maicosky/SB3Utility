@@ -88,7 +88,7 @@ namespace SB3Utility
 
 				if (reader.ReadBytes(1).Length > 0)
 				{
-					throw new Exception("Parsing " + Name + " finished before the end of the file");
+					Report.ReportLog("Parsing " + Name + " finished before the end of the file - ignoring the rest");
 				}
 
 				this.reader = null;

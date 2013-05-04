@@ -77,5 +77,11 @@
     <Setting Name="WorkspaceScripting" Provider="PortableSettingsProvider" Type="System.Boolean" Scope="Application">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="MeshExportFormat" Provider="PortableSettingsProvider" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">FBX 2012.2</Value>
+    </Setting>
+    <Setting Name="WorkspaceAutomaticReopen" Provider="PortableSettingsProvider" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

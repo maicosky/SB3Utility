@@ -88,6 +88,12 @@
     <Compile Include="pp\Collada.cs" />
     <Compile Include="pp\ColladaConditioner.cs" />
     <Compile Include="pp\ColladaDocument.cs" />
+    <Compile Include="pp\FormLST.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="pp\FormLST.Designer.cs">
+      <DependentUpon>FormLST.cs</DependentUpon>
+    </Compile>
     <Compile Include="pp\FormXADragDrop.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -145,6 +151,7 @@
     <Compile Include="pp\FormXXNormals.Designer.cs">
       <DependentUpon>FormXXNormals.cs</DependentUpon>
     </Compile>
+    <Compile Include="pp\lst.cs" />
     <Compile Include="pp\Mqo.cs" />
     <Compile Include="pp\ppEditor.cs" />
     <Compile Include="pp\RenderObjectXX.cs" />
@@ -169,6 +176,11 @@
     <Compile Include="Example.cs" />
     <Compile Include="pp\xa.cs" />
     <Compile Include="pp\xx.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="ScriptHelper.cs" />
     <Compile Include="SetProperty.cs" />
     <Compile Include="TriStateTreeView.cs">
@@ -190,6 +202,10 @@
       <Project>{5647B104-8F58-4867-B849-DAC65D5243BD}</Project>
       <Name>SB3UtilityPP</Name>
       <Private>False</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\SyntaxHighlightingTextBox\SyntaxHighlightingTextBox.csproj">
+      <Project>{93EC5C55-84BB-4FA4-8599-A6C85841E982}</Project>
+      <Name>SyntaxHighlightingTextBox</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -221,6 +237,9 @@
     <EmbeddedResource Include="FormWorkspace.resx">
       <DependentUpon>FormWorkspace.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="pp\FormLST.resx">
+      <DependentUpon>FormLST.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="pp\FormXADragDrop.resx">
       <DependentUpon>FormXADragDrop.cs</DependentUpon>
     </EmbeddedResource>
@@ -251,7 +270,12 @@
     <EmbeddedResource Include="pp\FormXXNormals.resx">
       <DependentUpon>FormXXNormals.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

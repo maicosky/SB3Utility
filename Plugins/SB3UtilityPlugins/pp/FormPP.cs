@@ -822,5 +822,80 @@ namespace SB3Utility
 		{
 			Gui.Config["BackupExtentionPP"] = backupExtentionToolStripEditTextBox.Text;
 		}
+
+		private void otherSubfilesList_DoubleClick(object sender, EventArgs e)
+		{
+			try
+			{
+				OpenOtherSubfilesList();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void otherSubfilesList_KeyPress(object sender, KeyPressEventArgs e)
+		{
+			try
+			{
+				if (e.KeyChar == '\r')
+				{
+					OpenOtherSubfilesList();
+					e.Handled = true;
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void OpenOtherSubfilesList()
+		{
+			foreach (ListViewItem item in otherSubfilesList.SelectedItems)
+			{
+				IWriteFile writeFile = (IWriteFile)item.Tag;
+				if (writeFile.Name.ToUpper().EndsWith(".LST"))
+				{
+					FormLST formLST = (FormLST)Gui.Scripting.RunScript(FormVariable + ".OpenLSTSubfile(name=\"" + writeFile.Name + "\")", false);
+					formLST.Activate();
+				}
+			}
+		}
+
+		[Plugin]
+		public FormLST OpenLSTSubfile(string name)
+		{
+			DockContent child;
+			if (!ChildForms.TryGetValue(name, out child))
+			{
+				string childParserVar = null;
+				if (!ChildParserVars.TryGetValue(name, out childParserVar))
+				{
+					childParserVar = Gui.Scripting.GetNextVariable("lstParser");
+					Gui.Scripting.RunScript(childParserVar + " = OpenLST(parser=" + ParserVar + ", name=\"" + name + "\")");
+					Gui.Scripting.RunScript(EditorVar + ".ReplaceSubfile(file=" + childParserVar + ")");
+					ChildParserVars.Add(name, childParserVar);
+
+					foreach (ListViewItem item in otherSubfilesList.Items)
+					{
+						if (((IWriteFile)item.Tag).Name.Equals(name, StringComparison.InvariantCultureIgnoreCase))
+						{
+							item.Font = new Font(item.Font, FontStyle.Bold);
+							otherSubfilesList.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+							break;
+						}
+					}
+				}
+
+				child = new FormLST(Editor.Parser, childParserVar);
+				child.FormClosing += new FormClosingEventHandler(ChildForms_FormClosing);
+				child.Tag = name;
+				ChildForms.Add(name, child);
+			}
+
+			return child as FormLST;
+		}
 	}
 }

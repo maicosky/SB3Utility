@@ -28,6 +28,9 @@ namespace SB3Utility
 		protected Dictionary<DockContent, List<TreeNode>> ChildForms = new Dictionary<DockContent, List<TreeNode>>();
 		protected string FormVar;
 
+		private FileSystemWatcher Watcher;
+		private bool Reopen = false;
+
 		public FormWorkspace()
 		{
 			try
@@ -49,6 +52,8 @@ namespace SB3Utility
 			logMessagesToolStripMenuItem.CheckedChanged += logMessagesToolStripMenuItem_CheckedChanged;
 			scriptingToolStripMenuItem.Checked = (bool)Gui.Config["WorkspaceScripting"];
 			scriptingToolStripMenuItem.CheckedChanged += scriptingToolStripMenuItem_CheckedChanged;
+			automaticReopenToolStripMenuItem.Checked = (bool)Gui.Config["WorkspaceAutomaticReopen"];
+			automaticReopenToolStripMenuItem.CheckedChanged += automaticReopenToolStripMenuItem_CheckedChanged;
 		}
 
 		public FormWorkspace(string path, IImported importer, string editorVar, ImportedEditor editor)
@@ -72,6 +77,14 @@ namespace SB3Utility
 		{
 			this.Text = Path.GetFileName(path);
 			this.ToolTipText = path;
+
+			Watcher = new FileSystemWatcher();
+			Watcher.Path = Path.GetDirectoryName(path);
+			Watcher.Filter = Path.GetFileName(path);
+			Watcher.Changed += new FileSystemEventHandler(watcher_Changed);
+			Watcher.Deleted += new FileSystemEventHandler(watcher_Changed);
+			Watcher.Renamed += new RenamedEventHandler(watcher_Changed);
+			Watcher.EnableRaisingEvents = automaticReopenToolStripMenuItem.Checked;
 
 			if (editor.Frames != null)
 			{
@@ -110,6 +123,26 @@ namespace SB3Utility
 			}
 
 			this.treeView.AfterCheck += treeView_AfterCheck;
+		}
+
+		void watcher_Changed(object sender, FileSystemEventArgs e)
+		{
+			try
+			{
+				FileInfo fi = new FileInfo(ToolTipText);
+				using (FileStream fs = fi.OpenRead())
+				{
+				}
+				Reopen = true;
+				Close();
+			}
+			catch (FileNotFoundException)
+			{
+				// file deleted or renamed, shall the workspace be destroyed?
+			}
+			catch (Exception)
+			{
+			}
 		}
 
 		private void AddList<T>(List<T> list, string rootName, string editorVar)
@@ -309,6 +342,28 @@ namespace SB3Utility
 			{
 				Gui.Scripting.Variables.Remove(FormVar);
 				FormVar = null;
+			}
+			TreeNode firstRoot = treeView.Nodes[0];
+			TreeNode firstChild = firstRoot.Nodes[0];
+			if (firstChild != null && firstChild.Tag != null && firstChild.Tag is DragSource)
+			{
+				DragSource ds = (DragSource)firstChild.Tag;
+				ImportedEditor importedEditor = Gui.Scripting.Variables[ds.Variable] as ImportedEditor;
+				if (importedEditor != null)
+				{
+					importedEditor.Dispose();
+					Gui.Scripting.Variables.Remove(ds.Variable);
+				}
+			}
+			if (Watcher != null)
+			{
+				if (Reopen)
+				{
+					Gui.Scripting.RunScript("OpenFile(path=\"" + ToolTipText + "\")", false);
+				}
+
+				Watcher.EnableRaisingEvents = false;
+				Watcher = null;
 			}
 		}
 
@@ -796,6 +851,15 @@ namespace SB3Utility
 		private void scriptingToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
 		{
 			Gui.Config["WorkspaceScripting"] = scriptingToolStripMenuItem.Checked;
+		}
+
+		private void automaticReopenToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+		{
+			Gui.Config["WorkspaceAutomaticReopen"] = automaticReopenToolStripMenuItem.Checked;
+			if (Watcher != null)
+			{
+				Watcher.EnableRaisingEvents = automaticReopenToolStripMenuItem.Checked;
+			}
 		}
 	}
 }

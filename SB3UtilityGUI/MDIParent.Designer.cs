@@ -58,6 +58,7 @@
 			this.viewLogToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.viewScriptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.definedVariablesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.pluginsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.fbxImportAnimationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -192,9 +193,20 @@
 			// 
 			// toolsToolStripMenuItem
 			// 
+			this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.definedVariablesToolStripMenuItem});
 			this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
 			this.toolsToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
 			this.toolsToolStripMenuItem.Text = "&Tools";
+			// 
+			// definedVariablesToolStripMenuItem
+			// 
+			this.definedVariablesToolStripMenuItem.Enabled = false;
+			this.definedVariablesToolStripMenuItem.Name = "definedVariablesToolStripMenuItem";
+			this.definedVariablesToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
+			this.definedVariablesToolStripMenuItem.Text = "Defined &Variables";
+			this.definedVariablesToolStripMenuItem.Visible = false;
+			this.definedVariablesToolStripMenuItem.Click += new System.EventHandler(this.definedVariablesToolStripMenuItem_Click);
 			// 
 			// optionsToolStripMenuItem
 			// 
@@ -416,6 +428,7 @@
 		private System.Windows.Forms.ToolStripMenuItem filterPrecisionToolStripMenuItem;
 		private ToolStripEditTextBox toolStripEditTextBoxFilterPrecision;
 		private System.Windows.Forms.ToolStripMenuItem viewQuickAccessToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem definedVariablesToolStripMenuItem;
 	}
 }
 

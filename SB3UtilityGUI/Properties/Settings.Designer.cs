@@ -272,5 +272,25 @@ namespace SB3Utility.Properties {
                 return ((bool)(this["WorkspaceScripting"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(PortableSettingsProvider))]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("FBX 2012.2")]
+        public string MeshExportFormat {
+            get {
+                return ((string)(this["MeshExportFormat"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(PortableSettingsProvider))]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool WorkspaceAutomaticReopen {
+            get {
+                return ((bool)(this["WorkspaceAutomaticReopen"]));
+            }
+        }
     }
 }

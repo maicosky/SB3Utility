@@ -260,6 +260,8 @@
 			this.otherSubfilesList.TabStop = false;
 			this.otherSubfilesList.UseCompatibleStateImageBehavior = false;
 			this.otherSubfilesList.View = System.Windows.Forms.View.Details;
+			this.otherSubfilesList.DoubleClick += new System.EventHandler(this.otherSubfilesList_DoubleClick);
+			this.otherSubfilesList.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.otherSubfilesList_KeyPress);
 			// 
 			// comboBoxFormat
 			// 

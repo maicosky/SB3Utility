@@ -11,7 +11,7 @@ namespace SB3Utility
 	}
 
 	#region .xx
-	public class xxFrame : ObjChildren<xxFrame>, IObjChild, IObjInfo
+	public class xxFrame : ObjChildren<xxFrame>, IObjChild, IObjInfo, IComparable
 	{
 		public string Name { get; set; }
 		public Matrix Matrix { get; set; }
@@ -91,6 +91,16 @@ namespace SB3Utility
 		public override string ToString()
 		{
 			return Name;
+		}
+
+		public int CompareTo(object obj)
+		{
+			xxFrame otherFrame = obj as xxFrame;
+			if (otherFrame == null)
+			{
+				return -100;
+			}
+			return Name.CompareTo(otherFrame.Name);
 		}
 	}
 

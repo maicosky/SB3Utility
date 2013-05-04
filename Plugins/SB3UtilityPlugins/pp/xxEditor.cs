@@ -508,9 +508,19 @@ namespace SB3Utility
 		public void RemoveBone(int meshId, int boneId)
 		{
 			xxFrame frame = Meshes[meshId];
-			xxFrame parentFrame = xx.FindFrame(frame.Mesh.BoneList[boneId].Name, Parser.Frame).Parent;
-			xxBone parentBone = xx.FindBone(frame.Mesh.BoneList, parentFrame.Name);
+			xxFrame boneFrame = xx.FindFrame(frame.Mesh.BoneList[boneId].Name, Parser.Frame);
+			xxBone parentBone = null;
+			if (boneFrame != null)
+			{
+				xxFrame parentFrame = boneFrame.Parent;
+				parentBone = xx.FindBone(frame.Mesh.BoneList, parentFrame.Name);
+			}
 			frame.Mesh.BoneList.RemoveAt(boneId);
+			for (int i = boneId; i < frame.Mesh.BoneList.Count; i++)
+			{
+				xxBone bone = frame.Mesh.BoneList[i];
+				bone.Index--;
+			}
 			byte parentBoneIdx = (byte)frame.Mesh.BoneList.IndexOf(parentBone);
 
 			foreach (xxSubmesh submesh in frame.Mesh.SubmeshList)
@@ -570,6 +580,7 @@ namespace SB3Utility
 				throw new Exception("One bone already targets the root frame.");
 			xxBone copy = boneList[boneId].Clone();
 			copy.Name = Frames[0].Name;
+			copy.Index = boneList.Count;
 			boneList.Add(copy);
 		}
 
@@ -793,6 +804,18 @@ namespace SB3Utility
 				submeshList.AddRange(editor.Meshes[(int)(double)id].Mesh.SubmeshList);
 			}
 			xx.CalculateNormals(submeshList, (float)threshold);
+		}
+
+		[Plugin]
+		public void CreateSkin(int meshId, object[] skeletons)
+		{
+			string[] rootNames = Utility.Convert<string>(skeletons);
+			List<xxFrame> skeletonFrames = new List<xxFrame>(rootNames.Length);
+			foreach (string root in rootNames)
+			{
+				skeletonFrames.Add(Frames[GetFrameId(root)]);
+			}
+			xx.CreateSkin(Meshes[meshId], skeletonFrames);
 		}
 
 		[Plugin]

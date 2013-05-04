@@ -243,7 +243,7 @@ namespace SB3Utility
 		}
 
 		[Plugin]
-		public List<object> OpenFile(string path)
+		public static List<object> OpenFile(string path)
 		{
 			List<object> results = new List<object>();
 			try
@@ -257,7 +257,7 @@ namespace SB3Utility
 			return results;
 		}
 
-		void OpenFile(string path, List<object> results)
+		static void OpenFile(string path, List<object> results)
 		{
 			for (int extIdx = 0; (extIdx = path.IndexOf('.', extIdx)) > 0; extIdx++)
 			{
@@ -649,14 +649,14 @@ namespace SB3Utility
 			Properties.Settings.Default["FbxImportAnimationFilterPrecision"] = Single.Parse(toolStripEditTextBoxFilterPrecision.Text);
 		}
 
-		private void toolStripMenuItem1_Click(object sender, EventArgs e)
+		private void definedVariablesToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			string vars = string.Empty;
 			foreach (string var in Gui.Scripting.Variables.Keys)
 			{
 				vars += vars.Length == 0 ? var : ", " + var;
 			}
-			Report.ReportLog("open variables=" + (vars.Length > 0 ? vars : "none"));
+			Report.ReportLog("defined variables=" + (vars.Length > 0 ? vars : "none"));
 		}
 
 		private void MDIParent_ResizeEnd(object sender, EventArgs e)

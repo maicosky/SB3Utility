@@ -39,20 +39,21 @@
 			this.nodesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.expandAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.collapseAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.contextMenuStripSubmesh = new System.Windows.Forms.ContextMenuStrip(this.components);
-			this.targetPositionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.replaceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.materialNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.worldCoordinatesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.contextMenuStripMorphKeyframe = new System.Windows.Forms.ContextMenuStrip(this.components);
-			this.renameToToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.logMessagesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.scriptingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.treeView = new SB3Utility.TriStateTreeView();
+			this.contextMenuStripSubmesh = new System.Windows.Forms.ContextMenuStrip(this.components);
+			this.targetPositionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripTextBoxTargetPosition = new SB3Utility.ToolStripEditTextBox();
+			this.replaceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.materialNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripTextBoxMaterialName = new SB3Utility.ToolStripEditTextBox();
+			this.worldCoordinatesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.contextMenuStripMorphKeyframe = new System.Windows.Forms.ContextMenuStrip(this.components);
+			this.renameToToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripEditTextBoxNewMorphKeyframeName = new SB3Utility.ToolStripEditTextBox();
+			this.treeView = new SB3Utility.TriStateTreeView();
+			this.automaticReopenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.panel1.SuspendLayout();
 			this.panel2.SuspendLayout();
 			this.menuStrip1.SuspendLayout();
@@ -135,6 +136,30 @@
 			this.collapseAllToolStripMenuItem.Text = "&Collapse All";
 			this.collapseAllToolStripMenuItem.Click += new System.EventHandler(this.collapseAllToolStripMenuItem_Click);
 			// 
+			// optionsToolStripMenuItem
+			// 
+			this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.logMessagesToolStripMenuItem,
+            this.scriptingToolStripMenuItem,
+            this.automaticReopenToolStripMenuItem});
+			this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
+			this.optionsToolStripMenuItem.Size = new System.Drawing.Size(56, 20);
+			this.optionsToolStripMenuItem.Text = "&Options";
+			// 
+			// logMessagesToolStripMenuItem
+			// 
+			this.logMessagesToolStripMenuItem.CheckOnClick = true;
+			this.logMessagesToolStripMenuItem.Name = "logMessagesToolStripMenuItem";
+			this.logMessagesToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
+			this.logMessagesToolStripMenuItem.Text = "&Log Messages";
+			// 
+			// scriptingToolStripMenuItem
+			// 
+			this.scriptingToolStripMenuItem.CheckOnClick = true;
+			this.scriptingToolStripMenuItem.Name = "scriptingToolStripMenuItem";
+			this.scriptingToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
+			this.scriptingToolStripMenuItem.Text = "&Scripting";
+			// 
 			// contextMenuStripSubmesh
 			// 
 			this.contextMenuStripSubmesh.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -154,6 +179,12 @@
 			this.targetPositionToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
 			this.targetPositionToolStripMenuItem.Text = "Target Position";
 			// 
+			// toolStripTextBoxTargetPosition
+			// 
+			this.toolStripTextBoxTargetPosition.Name = "toolStripTextBoxTargetPosition";
+			this.toolStripTextBoxTargetPosition.Size = new System.Drawing.Size(22, 21);
+			this.toolStripTextBoxTargetPosition.AfterEditTextChanged += new System.EventHandler(this.toolStripTextBoxTargetPosition_AfterEditTextChanged);
+			// 
 			// replaceToolStripMenuItem
 			// 
 			this.replaceToolStripMenuItem.Checked = true;
@@ -170,6 +201,14 @@
 			this.materialNameToolStripMenuItem.Name = "materialNameToolStripMenuItem";
 			this.materialNameToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
 			this.materialNameToolStripMenuItem.Text = "Material Name";
+			// 
+			// toolStripTextBoxMaterialName
+			// 
+			this.toolStripTextBoxMaterialName.AcceptsReturn = true;
+			this.toolStripTextBoxMaterialName.MaxLength = 64;
+			this.toolStripTextBoxMaterialName.Name = "toolStripTextBoxMaterialName";
+			this.toolStripTextBoxMaterialName.Size = new System.Drawing.Size(120, 21);
+			this.toolStripTextBoxMaterialName.AfterEditTextChanged += new System.EventHandler(this.toolStripTextBoxMaterialName_AfterEditTextChanged);
 			// 
 			// worldCoordinatesToolStripMenuItem
 			// 
@@ -194,28 +233,13 @@
 			this.renameToToolStripMenuItem.Size = new System.Drawing.Size(126, 22);
 			this.renameToToolStripMenuItem.Text = "Rename to";
 			// 
-			// optionsToolStripMenuItem
+			// toolStripEditTextBoxNewMorphKeyframeName
 			// 
-			this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.logMessagesToolStripMenuItem,
-            this.scriptingToolStripMenuItem});
-			this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-			this.optionsToolStripMenuItem.Size = new System.Drawing.Size(56, 20);
-			this.optionsToolStripMenuItem.Text = "&Options";
-			// 
-			// logMessagesToolStripMenuItem
-			// 
-			this.logMessagesToolStripMenuItem.CheckOnClick = true;
-			this.logMessagesToolStripMenuItem.Name = "logMessagesToolStripMenuItem";
-			this.logMessagesToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-			this.logMessagesToolStripMenuItem.Text = "&Log Messages";
-			// 
-			// scriptingToolStripMenuItem
-			// 
-			this.scriptingToolStripMenuItem.CheckOnClick = true;
-			this.scriptingToolStripMenuItem.Name = "scriptingToolStripMenuItem";
-			this.scriptingToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-			this.scriptingToolStripMenuItem.Text = "&Scripting";
+			this.toolStripEditTextBoxNewMorphKeyframeName.AcceptsReturn = true;
+			this.toolStripEditTextBoxNewMorphKeyframeName.MaxLength = 64;
+			this.toolStripEditTextBoxNewMorphKeyframeName.Name = "toolStripEditTextBoxNewMorphKeyframeName";
+			this.toolStripEditTextBoxNewMorphKeyframeName.Size = new System.Drawing.Size(120, 21);
+			this.toolStripEditTextBoxNewMorphKeyframeName.AfterEditTextChanged += new System.EventHandler(this.toolStripEditTextBoxNewMorphKeyframeName_AfterEditTextChanged);
 			// 
 			// treeView
 			// 
@@ -235,27 +259,14 @@
 			this.treeView.DragEnter += new System.Windows.Forms.DragEventHandler(this.treeView_DragEnter);
 			this.treeView.DragOver += new System.Windows.Forms.DragEventHandler(this.treeView_DragOver);
 			// 
-			// toolStripTextBoxTargetPosition
+			// automaticReopenToolStripMenuItem
 			// 
-			this.toolStripTextBoxTargetPosition.Name = "toolStripTextBoxTargetPosition";
-			this.toolStripTextBoxTargetPosition.Size = new System.Drawing.Size(22, 21);
-			this.toolStripTextBoxTargetPosition.AfterEditTextChanged += new System.EventHandler(this.toolStripTextBoxTargetPosition_AfterEditTextChanged);
-			// 
-			// toolStripTextBoxMaterialName
-			// 
-			this.toolStripTextBoxMaterialName.AcceptsReturn = true;
-			this.toolStripTextBoxMaterialName.MaxLength = 64;
-			this.toolStripTextBoxMaterialName.Name = "toolStripTextBoxMaterialName";
-			this.toolStripTextBoxMaterialName.Size = new System.Drawing.Size(120, 21);
-			this.toolStripTextBoxMaterialName.AfterEditTextChanged += new System.EventHandler(this.toolStripTextBoxMaterialName_AfterEditTextChanged);
-			// 
-			// toolStripEditTextBoxNewMorphKeyframeName
-			// 
-			this.toolStripEditTextBoxNewMorphKeyframeName.AcceptsReturn = true;
-			this.toolStripEditTextBoxNewMorphKeyframeName.MaxLength = 64;
-			this.toolStripEditTextBoxNewMorphKeyframeName.Name = "toolStripEditTextBoxNewMorphKeyframeName";
-			this.toolStripEditTextBoxNewMorphKeyframeName.Size = new System.Drawing.Size(120, 21);
-			this.toolStripEditTextBoxNewMorphKeyframeName.AfterEditTextChanged += new System.EventHandler(this.toolStripEditTextBoxNewMorphKeyframeName_AfterEditTextChanged);
+			this.automaticReopenToolStripMenuItem.Checked = true;
+			this.automaticReopenToolStripMenuItem.CheckOnClick = true;
+			this.automaticReopenToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.automaticReopenToolStripMenuItem.Name = "automaticReopenToolStripMenuItem";
+			this.automaticReopenToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
+			this.automaticReopenToolStripMenuItem.Text = "Automatic &Reopen";
 			// 
 			// FormWorkspace
 			// 
@@ -305,6 +316,7 @@
 		private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem logMessagesToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem scriptingToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem automaticReopenToolStripMenuItem;
 
 	}
 }

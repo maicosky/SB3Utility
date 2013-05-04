@@ -5,7 +5,7 @@ using System.Text;
 namespace SB3Utility
 {
 	[Plugin]
-	public class ImportedEditor
+	public class ImportedEditor : IDisposable
 	{
 		public IImported Imported { get; protected set; }
 		public List<ImportedFrame> Frames { get; protected set; }
@@ -64,6 +64,23 @@ namespace SB3Utility
 			foreach (var child in frame)
 			{
 				InitFrames(child);
+			}
+		}
+
+		public void Dispose()
+		{
+			HashSet<string> importedRefs = new HashSet<string>();
+			foreach (KeyValuePair<string, object> var in Gui.Scripting.Variables)
+			{
+				IImported imp = var.Value as IImported;
+				if (imp == Imported)
+				{
+					importedRefs.Add(var.Key);
+				}
+			}
+			foreach (string var in importedRefs)
+			{
+				Gui.Scripting.Variables.Remove(var);
 			}
 		}
 

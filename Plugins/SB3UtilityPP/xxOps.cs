@@ -1325,6 +1325,140 @@ namespace SB3Utility
 			}
 		}
 
+		public static void CreateSkin(xxFrame meshFrame, List<xxFrame> skeletons)
+		{
+			xxMesh mesh = meshFrame.Mesh;
+			Matrix meshWorldTransform = meshFrame.WorldTransform();
+			Dictionary<xxFrame, Matrix> boneFrames = new Dictionary<xxFrame, Matrix>(skeletons.Count);
+			Dictionary<xxFrame, Vector3> origins = new Dictionary<xxFrame, Vector3>(skeletons.Count);
+			foreach (xxFrame frame in skeletons)
+			{
+				AddBones(frame, frame.WorldTransform(), boneFrames, origins);
+			}
+
+			int numVertices = 0;
+			foreach (xxSubmesh submesh in mesh.SubmeshList)
+			{
+				numVertices += submesh.VertexList.Count;
+			}
+			SortedList<float, xxFrame>[] vertexDistances = new SortedList<float, xxFrame>[numVertices];
+			for (int i = 0; i < numVertices; i++)
+			{
+				vertexDistances[i] = new SortedList<float, xxFrame>(4);
+			}
+
+			int vertexIndex = 0;
+			foreach (xxSubmesh submesh in mesh.SubmeshList)
+			{
+				for (int i = 0; i < submesh.VertexList.Count; i++)
+				{
+					xxVertex v = submesh.VertexList[i];
+					SortedList<float, xxFrame> distances = vertexDistances[vertexIndex + i];
+					foreach (KeyValuePair<xxFrame, Vector3> keyVal in origins)
+					{
+						Vector3 origin = keyVal.Value;
+						while (true)
+						{
+							try
+							{
+								distances.Add((origin - Vector3.TransformCoordinate(v.Position, meshWorldTransform)).LengthSquared(), keyVal.Key);
+								break;
+							}
+							catch (ArgumentException)
+							{
+								origin.X -= (float)0.0000001;
+								origin.Y -= (float)0.0000001;
+								origin.Z -= (float)0.0000001;
+							}
+						}
+						if (distances.Count > 4)
+						{
+							distances.RemoveAt(4);
+						}
+					}
+				}
+				vertexIndex += submesh.VertexList.Count;
+			}
+
+			mesh.BoneList.Clear();
+			SortedDictionary<xxFrame, byte> boneDic = new SortedDictionary<xxFrame, byte>();
+			byte boneIdx = 0;
+			foreach (KeyValuePair<xxFrame, Matrix> boneFrame in boneFrames)
+			{
+				xxBone bone = new xxBone();
+				bone.Name = boneFrame.Key.Name;
+				bone.Index = boneIdx++;
+				bone.Matrix = Matrix.Invert(boneFrame.Value) * meshWorldTransform;
+				mesh.BoneList.Add(bone);
+				boneDic.Add(boneFrame.Key, (byte)bone.Index);
+			}
+			vertexIndex = 0;
+			foreach (xxSubmesh submesh in mesh.SubmeshList)
+			{
+				for (int i = 0; i < submesh.VertexList.Count; i++)
+				{
+					xxVertex v = submesh.VertexList[i];
+					SortedList<float, xxFrame> distances = vertexDistances[vertexIndex + i];
+					int index = 0;
+					float weightFactor = 0f;
+					float[] weights = new float[4];
+					foreach (KeyValuePair<float, xxFrame> dist in distances)
+					{
+						if (dist.Key == 0)
+						{
+							weights[0] = weightFactor = 1;
+							break;
+						}
+
+						weights[index] = (float)(1 / Math.Sqrt(dist.Key));
+						weightFactor += weights[index];
+						index++;
+					}
+					index = 0;
+					foreach (KeyValuePair<float, xxFrame> dist in distances)
+					{
+						boneIdx = 0xFF;
+						boneDic.TryGetValue(dist.Value, out boneIdx);
+						v.BoneIndices[index] = boneIdx;
+						if (index < 3)
+						{
+							v.Weights3[index] = weights[index] / weightFactor;
+							if (v.Weights3[0] == 1)
+							{
+								v.Weights3[1] = v.Weights3[2] = 0;
+								v.BoneIndices[1] = v.BoneIndices[2] = v.BoneIndices[3] = 0xFF;
+								break;
+							}
+						}
+						index++;
+					}
+				}
+				vertexIndex += submesh.VertexList.Count;
+			}
+		}
+
+		public static Matrix WorldTransform(this xxFrame frame)
+		{
+			Matrix m = frame.Matrix;
+			xxFrame parent = (xxFrame)frame.Parent;
+			while (parent != null)
+			{
+				m = m * parent.Matrix;
+				parent = parent.Parent;
+			}
+			return m;
+		}
+
+		private static void AddBones(xxFrame frame, Matrix worldTransform, Dictionary<xxFrame, Matrix> boneFrames, Dictionary<xxFrame, Vector3> origins)
+		{
+			boneFrames.Add(frame, worldTransform);
+			origins.Add(frame, Vector3.TransformCoordinate(Vector3.Zero, worldTransform));
+			foreach (xxFrame child in frame)
+			{
+				AddBones(child, child.Matrix * worldTransform, boneFrames, origins);
+			}
+		}
+
 		public static void SaveXX(xxParser parser, string destPath, bool keepBackup)
 		{
 			DirectoryInfo dir = new DirectoryInfo(Path.GetDirectoryName(destPath));
@@ -1341,6 +1475,7 @@ namespace SB3Utility
 				using (BufferedStream bufStr = new BufferedStream(File.OpenWrite(destPath)))
 				{
 					parser.WriteTo(bufStr);
+					bufStr.SetLength(bufStr.Position);
 				}
 			}
 			catch

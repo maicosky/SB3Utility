@@ -112,6 +112,8 @@ namespace SB3Utility
 
 		private HashSet<FormXXEditHex> OpenEditHexForms = new HashSet<FormXXEditHex>();
 
+		private HashSet<string> SkinFrames = new HashSet<string>();
+
 		public FormXX(string path, string variable)
 		{
 			try
@@ -315,7 +317,7 @@ namespace SB3Utility
 				descriptions[i] = values[i].GetDescription();
 			}
 			comboBoxMeshExportFormat.Items.AddRange(descriptions);
-			comboBoxMeshExportFormat.SelectedIndex = 4;
+			comboBoxMeshExportFormat.SelectedItem = Gui.Config["MeshExportFormat"];
 
 			Gui.Docking.ShowDockContent(this, Gui.Docking.DockEditors, ContentCategory.Meshes);
 
@@ -1506,6 +1508,10 @@ namespace SB3Utility
 					{
 						tabControlViews.SelectTabWithoutLoosingFocus(tabPageFrameView);
 						LoadFrame((int)tag.Id);
+						if (buttonAddToSkin.Enabled)
+						{
+							buttonAddToSkin.Text = SkinFrames.Contains(Editor.Frames[loadedFrame].Name) ? "Remove From Skin" : "Add To Skin";
+						}
 					}
 					else if (tag.Type == typeof(xxMesh))
 					{
@@ -2757,6 +2763,26 @@ namespace SB3Utility
 			}
 		}
 
+		private void buttonZeroWeights_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedBone == null)
+				{
+					return;
+				}
+
+				Gui.Scripting.RunScript(EditorVar + ".ZeroWeights(meshId=" + loadedBone[0] + ", boneId=" + loadedBone[1] + ")");
+
+				LoadBone(null);
+				RecreateRenderObjects();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
 		private void buttonMeshRemove_Click(object sender, EventArgs e)
 		{
 			try
@@ -3324,7 +3350,7 @@ namespace SB3Utility
 				Int32.TryParse(textBoxKeyframeRange.Text.Substring(0, textBoxKeyframeRange.Text.LastIndexOf('-')), out startKeyframe);
 				int endKeyframe = 0;
 				Int32.TryParse(textBoxKeyframeRange.Text.Substring(textBoxKeyframeRange.Text.LastIndexOf('-') + 1), out endKeyframe);
-				bool linear = radioButtonLinear.Checked;
+				bool linear = checkBoxMeshExportFbxLinearInterpolation.Checked;
 
 				switch ((MeshExportFormat)comboBoxMeshExportFormat.SelectedIndex)
 				{
@@ -3549,6 +3575,10 @@ namespace SB3Utility
 						panelMeshExportOptionsDefault.BringToFront();
 						break;
 				}
+
+				MeshExportFormat[] values = Enum.GetValues(typeof(MeshExportFormat)) as MeshExportFormat[];
+				string description = values[comboBoxMeshExportFormat.SelectedIndex].GetDescription();
+				Gui.Config["MeshExportFormat"] = description;
 			}
 			catch (Exception ex)
 			{
@@ -3583,19 +3613,65 @@ namespace SB3Utility
 			Gui.Config["KeepBackupOfXX"] = keepBackupToolStripMenuItem.Checked;
 		}
 
-		private void buttonZeroWeights_Click(object sender, EventArgs e)
+		private void checkBoxNewSkin_Click(object sender, EventArgs e)
 		{
 			try
 			{
-				if (loadedBone == null)
+				if (checkBoxNewSkin.Checked)
+				{
+					buttonAddToSkin.Enabled = true;
+				}
+				else
+				{
+					if (SkinFrames.Count > 0)
+					{
+						StringBuilder skeletons = new StringBuilder();
+						skeletons.Append("{");
+						foreach (string root in SkinFrames)
+						{
+							skeletons.Append("\"");
+							skeletons.Append(root);
+							skeletons.Append("\", ");
+						}
+						skeletons.Remove(skeletons.Length - 2, 2);
+						skeletons.Append("}");
+						Gui.Scripting.RunScript(EditorVar + ".CreateSkin(meshId=" + loadedMesh + ", skeletons=" + skeletons + ")");
+
+						RecreateMeshes();
+						LoadMesh(loadedMesh);
+						SkinFrames.Clear();
+					}
+					buttonAddToSkin.Enabled = false;
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonAddToSkin_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedFrame < 0)
 				{
 					return;
 				}
 
-				Gui.Scripting.RunScript(EditorVar + ".ZeroWeights(meshId=" + loadedBone[0] + ", boneId=" + loadedBone[1] + ")");
-
-				LoadBone(null);
-				RecreateRenderObjects();
+				if (SkinFrames.Add(Editor.Frames[loadedFrame].Name))
+				{
+					Report.ReportLog("Frame " + Editor.Frames[loadedFrame].Name + " added to skin definition.");
+					treeViewObjectTree.SelectedNode.BackColor = Color.SteelBlue;
+					buttonAddToSkin.Text = "Remove From Skin";
+				}
+				else
+				{
+					SkinFrames.Remove(Editor.Frames[loadedFrame].Name);
+					Report.ReportLog("Frame " + Editor.Frames[loadedFrame].Name + " removed from skin definition.");
+					treeViewObjectTree.SelectedNode.BackColor = Color.White;
+					buttonAddToSkin.Text = "Add To Skin";
+				}
 			}
 			catch (Exception ex)
 			{

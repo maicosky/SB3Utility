@@ -1,4 +1,9 @@
-﻿[0.4.42.50]
+﻿[0.4.42.51]
+  - Fix XX Bone Remove and Copy To New corrupted bone indices
+  - Added creation of skins for XX meshes
+  - Added automatic reopening workspaces when external files are changed or deleted and renamed back.
+
+[0.4.42.50]
   - Fixed XX Frame calculation of combined transform
   - Added log window entries for dropping-into and automatic removals from workspace. Must be enabled in workspace menu.
   - Added scripted dropping of nodes from object trees. Must be enabled in workspace menu.

@@ -604,6 +604,7 @@ namespace SB3Utility
 					}
 				}
 			}
+			this.StartPosition = FormStartPosition.Manual;
 		}
 	}
 }

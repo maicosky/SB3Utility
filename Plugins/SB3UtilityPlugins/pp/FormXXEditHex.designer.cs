@@ -31,37 +31,37 @@ namespace SB3Utility
 			this.buttonOK = new System.Windows.Forms.Button();
 			this.tabControl1 = new System.Windows.Forms.TabControl();
 			this.tabPageXX = new System.Windows.Forms.TabPage();
+			this.dataGridViewEditorXX = new SB3Utility.DataGridViewEditor();
 			this.tabPageFrame = new System.Windows.Forms.TabPage();
+			this.dataGridViewEditorFrame = new SB3Utility.DataGridViewEditor();
 			this.tabPageMesh = new System.Windows.Forms.TabPage();
+			this.dataGridViewEditorMesh = new SB3Utility.DataGridViewEditor();
 			this.tabPageSubmesh = new System.Windows.Forms.TabPage();
+			this.dataGridViewEditorSubmesh = new SB3Utility.DataGridViewEditor();
 			this.tabPageMaterial = new System.Windows.Forms.TabPage();
+			this.dataGridViewEditorMaterial = new SB3Utility.DataGridViewEditor();
 			this.tabPageTexture = new System.Windows.Forms.TabPage();
+			this.dataGridViewEditorTexture = new SB3Utility.DataGridViewEditor();
 			this.buttonCancel = new System.Windows.Forms.Button();
 			this.menuStrip1 = new System.Windows.Forms.MenuStrip();
 			this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.copyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.pasteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.buttonReadOnly = new System.Windows.Forms.Button();
-			this.dataGridViewEditorXX = new SB3Utility.DataGridViewEditor();
-			this.dataGridViewEditorFrame = new SB3Utility.DataGridViewEditor();
-			this.dataGridViewEditorMesh = new SB3Utility.DataGridViewEditor();
-			this.dataGridViewEditorSubmesh = new SB3Utility.DataGridViewEditor();
-			this.dataGridViewEditorMaterial = new SB3Utility.DataGridViewEditor();
-			this.dataGridViewEditorTexture = new SB3Utility.DataGridViewEditor();
 			this.tabControl1.SuspendLayout();
 			this.tabPageXX.SuspendLayout();
-			this.tabPageFrame.SuspendLayout();
-			this.tabPageMesh.SuspendLayout();
-			this.tabPageSubmesh.SuspendLayout();
-			this.tabPageMaterial.SuspendLayout();
-			this.tabPageTexture.SuspendLayout();
-			this.menuStrip1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridViewEditorXX)).BeginInit();
+			this.tabPageFrame.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridViewEditorFrame)).BeginInit();
+			this.tabPageMesh.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridViewEditorMesh)).BeginInit();
+			this.tabPageSubmesh.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridViewEditorSubmesh)).BeginInit();
+			this.tabPageMaterial.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridViewEditorMaterial)).BeginInit();
+			this.tabPageTexture.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridViewEditorTexture)).BeginInit();
+			this.menuStrip1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// buttonOK
@@ -103,6 +103,21 @@ namespace SB3Utility
 			this.tabPageXX.Text = ".xx";
 			this.tabPageXX.UseVisualStyleBackColor = true;
 			// 
+			// dataGridViewEditorXX
+			// 
+			this.dataGridViewEditorXX.AllowUserToAddRows = false;
+			this.dataGridViewEditorXX.AllowUserToDeleteRows = false;
+			this.dataGridViewEditorXX.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
+			this.dataGridViewEditorXX.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.DisplayedCells;
+			this.dataGridViewEditorXX.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.Disable;
+			this.dataGridViewEditorXX.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+			this.dataGridViewEditorXX.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.dataGridViewEditorXX.Location = new System.Drawing.Point(0, 0);
+			this.dataGridViewEditorXX.Name = "dataGridViewEditorXX";
+			this.dataGridViewEditorXX.ShowRowIndex = true;
+			this.dataGridViewEditorXX.Size = new System.Drawing.Size(687, 361);
+			this.dataGridViewEditorXX.TabIndex = 0;
+			// 
 			// tabPageFrame
 			// 
 			this.tabPageFrame.Controls.Add(this.dataGridViewEditorFrame);
@@ -112,6 +127,21 @@ namespace SB3Utility
 			this.tabPageFrame.TabIndex = 0;
 			this.tabPageFrame.Text = "Frame";
 			this.tabPageFrame.UseVisualStyleBackColor = true;
+			// 
+			// dataGridViewEditorFrame
+			// 
+			this.dataGridViewEditorFrame.AllowUserToAddRows = false;
+			this.dataGridViewEditorFrame.AllowUserToDeleteRows = false;
+			this.dataGridViewEditorFrame.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
+			this.dataGridViewEditorFrame.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.DisplayedCells;
+			this.dataGridViewEditorFrame.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.Disable;
+			this.dataGridViewEditorFrame.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+			this.dataGridViewEditorFrame.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.dataGridViewEditorFrame.Location = new System.Drawing.Point(0, 0);
+			this.dataGridViewEditorFrame.Name = "dataGridViewEditorFrame";
+			this.dataGridViewEditorFrame.ShowRowIndex = true;
+			this.dataGridViewEditorFrame.Size = new System.Drawing.Size(687, 361);
+			this.dataGridViewEditorFrame.TabIndex = 1;
 			// 
 			// tabPageMesh
 			// 
@@ -123,6 +153,21 @@ namespace SB3Utility
 			this.tabPageMesh.Text = "Mesh";
 			this.tabPageMesh.UseVisualStyleBackColor = true;
 			// 
+			// dataGridViewEditorMesh
+			// 
+			this.dataGridViewEditorMesh.AllowUserToAddRows = false;
+			this.dataGridViewEditorMesh.AllowUserToDeleteRows = false;
+			this.dataGridViewEditorMesh.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
+			this.dataGridViewEditorMesh.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.DisplayedCells;
+			this.dataGridViewEditorMesh.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.Disable;
+			this.dataGridViewEditorMesh.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+			this.dataGridViewEditorMesh.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.dataGridViewEditorMesh.Location = new System.Drawing.Point(0, 0);
+			this.dataGridViewEditorMesh.Name = "dataGridViewEditorMesh";
+			this.dataGridViewEditorMesh.ShowRowIndex = true;
+			this.dataGridViewEditorMesh.Size = new System.Drawing.Size(687, 361);
+			this.dataGridViewEditorMesh.TabIndex = 1;
+			// 
 			// tabPageSubmesh
 			// 
 			this.tabPageSubmesh.Controls.Add(this.dataGridViewEditorSubmesh);
@@ -132,6 +177,21 @@ namespace SB3Utility
 			this.tabPageSubmesh.TabIndex = 5;
 			this.tabPageSubmesh.Text = "Submesh";
 			this.tabPageSubmesh.UseVisualStyleBackColor = true;
+			// 
+			// dataGridViewEditorSubmesh
+			// 
+			this.dataGridViewEditorSubmesh.AllowUserToAddRows = false;
+			this.dataGridViewEditorSubmesh.AllowUserToDeleteRows = false;
+			this.dataGridViewEditorSubmesh.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
+			this.dataGridViewEditorSubmesh.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.DisplayedCells;
+			this.dataGridViewEditorSubmesh.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.Disable;
+			this.dataGridViewEditorSubmesh.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+			this.dataGridViewEditorSubmesh.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.dataGridViewEditorSubmesh.Location = new System.Drawing.Point(0, 0);
+			this.dataGridViewEditorSubmesh.Name = "dataGridViewEditorSubmesh";
+			this.dataGridViewEditorSubmesh.ShowRowIndex = true;
+			this.dataGridViewEditorSubmesh.Size = new System.Drawing.Size(687, 361);
+			this.dataGridViewEditorSubmesh.TabIndex = 2;
 			// 
 			// tabPageMaterial
 			// 
@@ -143,6 +203,21 @@ namespace SB3Utility
 			this.tabPageMaterial.Text = "Material";
 			this.tabPageMaterial.UseVisualStyleBackColor = true;
 			// 
+			// dataGridViewEditorMaterial
+			// 
+			this.dataGridViewEditorMaterial.AllowUserToAddRows = false;
+			this.dataGridViewEditorMaterial.AllowUserToDeleteRows = false;
+			this.dataGridViewEditorMaterial.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
+			this.dataGridViewEditorMaterial.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.DisplayedCells;
+			this.dataGridViewEditorMaterial.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.Disable;
+			this.dataGridViewEditorMaterial.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+			this.dataGridViewEditorMaterial.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.dataGridViewEditorMaterial.Location = new System.Drawing.Point(0, 0);
+			this.dataGridViewEditorMaterial.Name = "dataGridViewEditorMaterial";
+			this.dataGridViewEditorMaterial.ShowRowIndex = true;
+			this.dataGridViewEditorMaterial.Size = new System.Drawing.Size(687, 361);
+			this.dataGridViewEditorMaterial.TabIndex = 1;
+			// 
 			// tabPageTexture
 			// 
 			this.tabPageTexture.Controls.Add(this.dataGridViewEditorTexture);
@@ -152,6 +227,21 @@ namespace SB3Utility
 			this.tabPageTexture.TabIndex = 4;
 			this.tabPageTexture.Text = "Texture";
 			this.tabPageTexture.UseVisualStyleBackColor = true;
+			// 
+			// dataGridViewEditorTexture
+			// 
+			this.dataGridViewEditorTexture.AllowUserToAddRows = false;
+			this.dataGridViewEditorTexture.AllowUserToDeleteRows = false;
+			this.dataGridViewEditorTexture.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
+			this.dataGridViewEditorTexture.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.DisplayedCells;
+			this.dataGridViewEditorTexture.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.Disable;
+			this.dataGridViewEditorTexture.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+			this.dataGridViewEditorTexture.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.dataGridViewEditorTexture.Location = new System.Drawing.Point(0, 0);
+			this.dataGridViewEditorTexture.Name = "dataGridViewEditorTexture";
+			this.dataGridViewEditorTexture.ShowRowIndex = true;
+			this.dataGridViewEditorTexture.Size = new System.Drawing.Size(687, 361);
+			this.dataGridViewEditorTexture.TabIndex = 1;
 			// 
 			// buttonCancel
 			// 
@@ -203,6 +293,7 @@ namespace SB3Utility
 			// 
 			// buttonReadOnly
 			// 
+			this.buttonReadOnly.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.buttonReadOnly.DialogResult = System.Windows.Forms.DialogResult.Retry;
 			this.buttonReadOnly.Location = new System.Drawing.Point(297, 431);
 			this.buttonReadOnly.Name = "buttonReadOnly";
@@ -211,96 +302,6 @@ namespace SB3Utility
 			this.buttonReadOnly.Text = "Read Only";
 			this.buttonReadOnly.UseVisualStyleBackColor = true;
 			this.buttonReadOnly.Click += new System.EventHandler(this.buttonReadOnly_Click);
-			// 
-			// dataGridViewEditorXX
-			// 
-			this.dataGridViewEditorXX.AllowUserToAddRows = false;
-			this.dataGridViewEditorXX.AllowUserToDeleteRows = false;
-			this.dataGridViewEditorXX.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
-			this.dataGridViewEditorXX.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.DisplayedCells;
-			this.dataGridViewEditorXX.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.Disable;
-			this.dataGridViewEditorXX.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-			this.dataGridViewEditorXX.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.dataGridViewEditorXX.Location = new System.Drawing.Point(0, 0);
-			this.dataGridViewEditorXX.Name = "dataGridViewEditorXX";
-			this.dataGridViewEditorXX.ShowRowIndex = true;
-			this.dataGridViewEditorXX.Size = new System.Drawing.Size(687, 361);
-			this.dataGridViewEditorXX.TabIndex = 0;
-			// 
-			// dataGridViewEditorFrame
-			// 
-			this.dataGridViewEditorFrame.AllowUserToAddRows = false;
-			this.dataGridViewEditorFrame.AllowUserToDeleteRows = false;
-			this.dataGridViewEditorFrame.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
-			this.dataGridViewEditorFrame.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.DisplayedCells;
-			this.dataGridViewEditorFrame.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.Disable;
-			this.dataGridViewEditorFrame.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-			this.dataGridViewEditorFrame.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.dataGridViewEditorFrame.Location = new System.Drawing.Point(0, 0);
-			this.dataGridViewEditorFrame.Name = "dataGridViewEditorFrame";
-			this.dataGridViewEditorFrame.ShowRowIndex = true;
-			this.dataGridViewEditorFrame.Size = new System.Drawing.Size(687, 361);
-			this.dataGridViewEditorFrame.TabIndex = 1;
-			// 
-			// dataGridViewEditorMesh
-			// 
-			this.dataGridViewEditorMesh.AllowUserToAddRows = false;
-			this.dataGridViewEditorMesh.AllowUserToDeleteRows = false;
-			this.dataGridViewEditorMesh.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
-			this.dataGridViewEditorMesh.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.DisplayedCells;
-			this.dataGridViewEditorMesh.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.Disable;
-			this.dataGridViewEditorMesh.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-			this.dataGridViewEditorMesh.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.dataGridViewEditorMesh.Location = new System.Drawing.Point(0, 0);
-			this.dataGridViewEditorMesh.Name = "dataGridViewEditorMesh";
-			this.dataGridViewEditorMesh.ShowRowIndex = true;
-			this.dataGridViewEditorMesh.Size = new System.Drawing.Size(687, 361);
-			this.dataGridViewEditorMesh.TabIndex = 1;
-			// 
-			// dataGridViewEditorSubmesh
-			// 
-			this.dataGridViewEditorSubmesh.AllowUserToAddRows = false;
-			this.dataGridViewEditorSubmesh.AllowUserToDeleteRows = false;
-			this.dataGridViewEditorSubmesh.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
-			this.dataGridViewEditorSubmesh.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.DisplayedCells;
-			this.dataGridViewEditorSubmesh.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.Disable;
-			this.dataGridViewEditorSubmesh.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-			this.dataGridViewEditorSubmesh.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.dataGridViewEditorSubmesh.Location = new System.Drawing.Point(0, 0);
-			this.dataGridViewEditorSubmesh.Name = "dataGridViewEditorSubmesh";
-			this.dataGridViewEditorSubmesh.ShowRowIndex = true;
-			this.dataGridViewEditorSubmesh.Size = new System.Drawing.Size(687, 361);
-			this.dataGridViewEditorSubmesh.TabIndex = 2;
-			// 
-			// dataGridViewEditorMaterial
-			// 
-			this.dataGridViewEditorMaterial.AllowUserToAddRows = false;
-			this.dataGridViewEditorMaterial.AllowUserToDeleteRows = false;
-			this.dataGridViewEditorMaterial.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
-			this.dataGridViewEditorMaterial.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.DisplayedCells;
-			this.dataGridViewEditorMaterial.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.Disable;
-			this.dataGridViewEditorMaterial.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-			this.dataGridViewEditorMaterial.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.dataGridViewEditorMaterial.Location = new System.Drawing.Point(0, 0);
-			this.dataGridViewEditorMaterial.Name = "dataGridViewEditorMaterial";
-			this.dataGridViewEditorMaterial.ShowRowIndex = true;
-			this.dataGridViewEditorMaterial.Size = new System.Drawing.Size(687, 361);
-			this.dataGridViewEditorMaterial.TabIndex = 1;
-			// 
-			// dataGridViewEditorTexture
-			// 
-			this.dataGridViewEditorTexture.AllowUserToAddRows = false;
-			this.dataGridViewEditorTexture.AllowUserToDeleteRows = false;
-			this.dataGridViewEditorTexture.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
-			this.dataGridViewEditorTexture.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.DisplayedCells;
-			this.dataGridViewEditorTexture.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.Disable;
-			this.dataGridViewEditorTexture.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-			this.dataGridViewEditorTexture.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.dataGridViewEditorTexture.Location = new System.Drawing.Point(0, 0);
-			this.dataGridViewEditorTexture.Name = "dataGridViewEditorTexture";
-			this.dataGridViewEditorTexture.ShowRowIndex = true;
-			this.dataGridViewEditorTexture.Size = new System.Drawing.Size(687, 361);
-			this.dataGridViewEditorTexture.TabIndex = 1;
 			// 
 			// FormXXEditHex
 			// 
@@ -324,19 +325,19 @@ namespace SB3Utility
 			this.Text = "Edit Hex";
 			this.tabControl1.ResumeLayout(false);
 			this.tabPageXX.ResumeLayout(false);
+			((System.ComponentModel.ISupportInitialize)(this.dataGridViewEditorXX)).EndInit();
 			this.tabPageFrame.ResumeLayout(false);
+			((System.ComponentModel.ISupportInitialize)(this.dataGridViewEditorFrame)).EndInit();
 			this.tabPageMesh.ResumeLayout(false);
+			((System.ComponentModel.ISupportInitialize)(this.dataGridViewEditorMesh)).EndInit();
 			this.tabPageSubmesh.ResumeLayout(false);
+			((System.ComponentModel.ISupportInitialize)(this.dataGridViewEditorSubmesh)).EndInit();
 			this.tabPageMaterial.ResumeLayout(false);
+			((System.ComponentModel.ISupportInitialize)(this.dataGridViewEditorMaterial)).EndInit();
 			this.tabPageTexture.ResumeLayout(false);
+			((System.ComponentModel.ISupportInitialize)(this.dataGridViewEditorTexture)).EndInit();
 			this.menuStrip1.ResumeLayout(false);
 			this.menuStrip1.PerformLayout();
-			((System.ComponentModel.ISupportInitialize)(this.dataGridViewEditorXX)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.dataGridViewEditorFrame)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.dataGridViewEditorMesh)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.dataGridViewEditorSubmesh)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.dataGridViewEditorMaterial)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.dataGridViewEditorTexture)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
