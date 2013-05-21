@@ -59,6 +59,7 @@
 			this.label6 = new System.Windows.Forms.Label();
 			this.label7 = new System.Windows.Forms.Label();
 			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+			this.label10 = new System.Windows.Forms.Label();
 			this.panelAnimation.SuspendLayout();
 			this.groupBox1.SuspendLayout();
 			this.groupBox3.SuspendLayout();
@@ -102,6 +103,7 @@
 			// 
 			this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+			this.groupBox1.Controls.Add(this.label10);
 			this.groupBox1.Controls.Add(this.checkBoxNegateQuaternionFlips);
 			this.groupBox1.Controls.Add(this.groupBox3);
 			this.groupBox1.Controls.Add(this.label2);
@@ -259,7 +261,7 @@
 			// 
 			this.numericPosition.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.numericPosition.Location = new System.Drawing.Point(289, 95);
+			this.numericPosition.Location = new System.Drawing.Point(289, 104);
 			this.numericPosition.Maximum = new decimal(new int[] {
             1000000,
             0,
@@ -400,6 +402,15 @@
 			this.label7.TabIndex = 13;
 			this.label7.Text = "Target Morph Clip";
 			// 
+			// label10
+			// 
+			this.label10.AutoSize = true;
+			this.label10.Location = new System.Drawing.Point(155, 116);
+			this.label10.Name = "label10";
+			this.label10.Size = new System.Drawing.Size(127, 13);
+			this.label10.TabIndex = 12;
+			this.label10.Text = "Start Position for Replace";
+			// 
 			// FormAnimViewDragDrop
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -463,5 +474,6 @@
 		public System.Windows.Forms.RadioButton radioButtonInterpolationLinear;
 		public System.Windows.Forms.CheckBox checkBoxNegateQuaternionFlips;
 		private System.Windows.Forms.ToolTip toolTip1;
+		private System.Windows.Forms.Label label10;
 	}
 }

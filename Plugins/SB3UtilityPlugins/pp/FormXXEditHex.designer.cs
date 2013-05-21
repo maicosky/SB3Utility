@@ -117,6 +117,7 @@ namespace SB3Utility
 			this.dataGridViewEditorXX.ShowRowIndex = true;
 			this.dataGridViewEditorXX.Size = new System.Drawing.Size(687, 361);
 			this.dataGridViewEditorXX.TabIndex = 0;
+			this.dataGridViewEditorXX.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewEditors_CellValueChanged);
 			// 
 			// tabPageFrame
 			// 
@@ -142,6 +143,7 @@ namespace SB3Utility
 			this.dataGridViewEditorFrame.ShowRowIndex = true;
 			this.dataGridViewEditorFrame.Size = new System.Drawing.Size(687, 361);
 			this.dataGridViewEditorFrame.TabIndex = 1;
+			this.dataGridViewEditorFrame.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewEditors_CellValueChanged);
 			// 
 			// tabPageMesh
 			// 
@@ -167,6 +169,7 @@ namespace SB3Utility
 			this.dataGridViewEditorMesh.ShowRowIndex = true;
 			this.dataGridViewEditorMesh.Size = new System.Drawing.Size(687, 361);
 			this.dataGridViewEditorMesh.TabIndex = 1;
+			this.dataGridViewEditorMesh.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewEditors_CellValueChanged);
 			// 
 			// tabPageSubmesh
 			// 
@@ -192,6 +195,7 @@ namespace SB3Utility
 			this.dataGridViewEditorSubmesh.ShowRowIndex = true;
 			this.dataGridViewEditorSubmesh.Size = new System.Drawing.Size(687, 361);
 			this.dataGridViewEditorSubmesh.TabIndex = 2;
+			this.dataGridViewEditorSubmesh.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewEditors_CellValueChanged);
 			// 
 			// tabPageMaterial
 			// 
@@ -217,6 +221,7 @@ namespace SB3Utility
 			this.dataGridViewEditorMaterial.ShowRowIndex = true;
 			this.dataGridViewEditorMaterial.Size = new System.Drawing.Size(687, 361);
 			this.dataGridViewEditorMaterial.TabIndex = 1;
+			this.dataGridViewEditorMaterial.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewEditors_CellValueChanged);
 			// 
 			// tabPageTexture
 			// 
@@ -242,6 +247,7 @@ namespace SB3Utility
 			this.dataGridViewEditorTexture.ShowRowIndex = true;
 			this.dataGridViewEditorTexture.Size = new System.Drawing.Size(687, 361);
 			this.dataGridViewEditorTexture.TabIndex = 1;
+			this.dataGridViewEditorTexture.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewEditors_CellValueChanged);
 			// 
 			// buttonCancel
 			// 

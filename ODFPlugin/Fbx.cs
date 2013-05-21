@@ -330,6 +330,7 @@ namespace ODFPlugin
 					odf.CreateUnknowns(keyframe);
 					keyframe.Index = i;
 					keyframe.FastTranslation = iKeyframe.Translation;
+					// keyframe.FastRotation = FbxUtility.QuaternionToEuler(iKeyframe.Rotation); not used, always 0
 					keyframe.FastScaling = iKeyframe.Scaling;
 					keyframe.ExtraFastRotation = iKeyframe.Rotation;
 					keyframe.Matrix = Matrix.Scaling(iKeyframe.Scaling) * Matrix.RotationQuaternion(iKeyframe.Rotation) * Matrix.Translation(iKeyframe.Translation);

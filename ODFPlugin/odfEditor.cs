@@ -100,21 +100,17 @@ namespace ODFPlugin
 		}
 
 		[Plugin]
-		public void SetSubmeshUnknowns(int meshId, int submeshId,
-			int unknown1, int unknown2, byte[] unknown3, int unknown4, int unknown5,
-			int unknown6, int unknown7, byte[] unknown8, byte[] unknown9)
+		public void SetSubmeshUnknowns(int meshIdx, int submeshIdx,
+			int Unknown1, int Unknown2, int Unknown4, int Unknown5, int Unknown6, int Unknown7, double Unknown8)
 		{
-			odfSubmesh submesh = Parser.MeshSection[meshId][submeshId];
-			submesh.Unknown1 = unknown1;
-			submesh.Unknown2 = unknown2;
-			submesh.Unknown3 = (byte[])unknown3.Clone();
-			submesh.Unknown4 = unknown4;
-			submesh.Unknown5 = unknown5;
-			submesh.Unknown6 = unknown6;
-			submesh.Unknown7 = unknown7;
-			submesh.Unknown8 = (byte[])unknown8.Clone();
-			if (Parser.MeshSection._FormatType < 10)
-				submesh.Unknown9 = (byte[])unknown9.Clone();
+			odfSubmesh submesh = Parser.MeshSection[meshIdx][submeshIdx];
+			submesh.Unknown1 = Unknown1;
+			submesh.Unknown2 = Unknown2;
+			submesh.Unknown4 = Unknown4;
+			submesh.Unknown5 = Unknown5;
+			submesh.Unknown6 = Unknown6;
+			submesh.Unknown7 = Unknown7;
+			submesh.Unknown8 = BitConverter.GetBytes((float)Unknown8);
 		}
 
 		[Plugin]

@@ -315,7 +315,7 @@
 			this.dockPanel.DockRightPortion = 0.3D;
 			this.dockPanel.Location = new System.Drawing.Point(0, 24);
 			this.dockPanel.Name = "dockPanel";
-			this.dockPanel.Size = new System.Drawing.Size(1190, 847);
+			this.dockPanel.Size = new System.Drawing.Size(1190, 825);
 			dockPanelGradient1.EndColor = System.Drawing.SystemColors.ControlLight;
 			dockPanelGradient1.StartColor = System.Drawing.SystemColors.ControlLight;
 			autoHideStripSkin1.DockStripGradient = dockPanelGradient1;
@@ -375,8 +375,8 @@
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(1190, 871);
-			this.Controls.Add(this.statusStrip);
 			this.Controls.Add(this.dockPanel);
+			this.Controls.Add(this.statusStrip);
 			this.Controls.Add(this.menuStrip);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.IsMdiContainer = true;

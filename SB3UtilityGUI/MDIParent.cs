@@ -100,7 +100,7 @@ namespace SB3Utility
 
 				Properties.Settings.Default.Save();
 
-				Application.Exit();
+				Application.ExitThread();
 			}
 			catch
 			{
@@ -169,6 +169,10 @@ namespace SB3Utility
 					toolsToolStripMenuItem.DropDownItems.Add(item);
 				}
 
+				if (CommandLineArgumentHandler.SB3UtilityIsServer())
+				{
+					CommandLineArgumentHandler.ReadyToServe();
+				}
 #if DEBUG
 				Test();
 #endif
@@ -437,6 +441,15 @@ namespace SB3Utility
 			{
 				Utility.ReportException(ex);
 			}
+		}
+
+		protected delegate void DockDragDropDelegate(object sender, DragEventArgs e);
+
+		public void DockDragDrop(string[] args)
+		{
+			DataObject data = new DataObject(DataFormats.FileDrop, args);
+			DragEventArgs e = new DragEventArgs(data, 0, 0, 0, DragDropEffects.None, DragDropEffects.None);
+			BeginInvoke(new DockDragDropDelegate(DockDragDrop), new object[] { null, e });
 		}
 
 		public void DockDragEnter(object sender, DragEventArgs e)

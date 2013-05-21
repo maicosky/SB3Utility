@@ -1665,7 +1665,7 @@
 			this.buttonMeshEditHex.Name = "buttonMeshEditHex";
 			this.buttonMeshEditHex.Size = new System.Drawing.Size(73, 23);
 			this.buttonMeshEditHex.TabIndex = 42;
-			this.buttonMeshEditHex.Text = "Edit Hex";
+			this.buttonMeshEditHex.Text = "Frame Hex";
 			this.buttonMeshEditHex.UseVisualStyleBackColor = true;
 			this.buttonMeshEditHex.Click += new System.EventHandler(this.buttonMeshEditHex_Click);
 			// 
@@ -2043,9 +2043,9 @@
 			this.buttonSubmeshEdit.Size = new System.Drawing.Size(73, 23);
 			this.buttonSubmeshEdit.TabIndex = 142;
 			this.buttonSubmeshEdit.TabStop = false;
-			this.buttonSubmeshEdit.Text = "Edit";
+			this.buttonSubmeshEdit.Text = "Edit Hex";
 			this.buttonSubmeshEdit.UseVisualStyleBackColor = true;
-			this.buttonSubmeshEdit.Click += new System.EventHandler(this.buttonSubmeshEdit_Click);
+			this.buttonSubmeshEdit.Click += new System.EventHandler(this.buttonSubmeshEditHex_Click);
 			// 
 			// buttonSubmeshRemove
 			// 

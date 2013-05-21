@@ -266,7 +266,41 @@ namespace SB3Utility
 					ImportedAnimationKeyframedTrack iTrack = new ImportedAnimationKeyframedTrack();
 					iAnim.TrackList.Add(iTrack);
 					iTrack.Name = newTrack.Key;
-					iTrack.Keyframes = newTrack.Value;
+					if (insertPos == 0)
+					{
+						iTrack.Keyframes = newTrack.Value;
+					}
+					else
+					{
+						iTrack.Keyframes = new ImportedAnimationKeyframe[insertPos + newTrack.Value.Length];
+						newTrack.Value.CopyTo(iTrack.Keyframes, insertPos);
+					}
+				}
+			}
+			else if (replaceMethod == ReplaceAnimationMethod.ReplacePresent)
+			{
+				if (insertPos > 0)
+				{
+					foreach (var oldTrack in iAnim.TrackList)
+					{
+						ImportedAnimationKeyframe[] keyframes = new ImportedAnimationKeyframe[insertPos + oldTrack.Keyframes.Length];
+						oldTrack.Keyframes.CopyTo(keyframes, insertPos);
+						oldTrack.Keyframes = keyframes;
+					}
+				}
+				foreach (var newTrack in newTrackList)
+				{
+					ImportedAnimationKeyframedTrack animationNode;
+					FbxUtility.animationGetOriginalKeyframes(animationNodeDic, newTrack.Key, iAnim, out animationNode);
+					if (insertPos == 0)
+					{
+						animationNode.Keyframes = newTrack.Value;
+					}
+					else
+					{
+						animationNode.Keyframes = new ImportedAnimationKeyframe[insertPos + newTrack.Value.Length];
+						newTrack.Value.CopyTo(animationNode.Keyframes, insertPos);
+					}
 				}
 			}
 			else if (replaceMethod == ReplaceAnimationMethod.Merge)

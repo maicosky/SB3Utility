@@ -2922,23 +2922,6 @@ namespace SB3Utility
 			}
 		}
 
-		private void buttonSubmeshEdit_Click(object sender, EventArgs e)
-		{
-			try
-			{
-				if (loadedMesh < 0)
-				{
-					return;
-				}
-
-				Report.ReportLog("not implemented");
-			}
-			catch (Exception ex)
-			{
-				Utility.ReportException(ex);
-			}
-		}
-
 		private void buttonSubmeshRemove_Click(object sender, EventArgs e)
 		{
 			try
@@ -3154,6 +3137,12 @@ namespace SB3Utility
 				}
 
 				List<string> vars = FormImageFiles.GetSelectedImageVariables();
+				if (vars == null)
+				{
+					Report.ReportLog("An image hasn't been selected");
+					return;
+				}
+
 				foreach (string var in vars)
 				{
 					Gui.Scripting.RunScript(EditorVar + ".AddTexture(image=" + var + ")");
@@ -3409,6 +3398,7 @@ namespace SB3Utility
 						if (Editor.Meshes[i] == frame)
 						{
 							gotoCells.Add(new int[] { 2, i });
+							gotoCells.Add(new int[] { 3, i, 0 });
 							break;
 						}
 					}
@@ -3452,8 +3442,51 @@ namespace SB3Utility
 				}
 
 				List<int[]> gotoCells = new List<int[]>();
-				gotoCells.Add(new int[] { 1, frameId });
 				gotoCells.Add(new int[] { 2, loadedMesh });
+				gotoCells.Add(new int[] { 3, loadedMesh, dataGridViewMesh.SelectedRows.Count > 0 ? dataGridViewMesh.SelectedRows[0].Index : 0 });
+				gotoCells.Add(new int[] { 1, frameId, 3 });
+
+				var editHex = new FormXXEditHex(this, gotoCells);
+				if (editHex.ShowDialog() == DialogResult.Retry)
+				{
+					editHex.Show();
+					OpenEditHexForms.Add(editHex);
+				}
+				else
+				{
+					editHex.Dispose();
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonSubmeshEditHex_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedMesh < 0  || dataGridViewMesh.SelectedRows.Count <= 0)
+				{
+					return;
+				}
+
+				int frameId = -1;
+				for (int i = 0; i < Editor.Frames.Count; i++)
+				{
+					if (Editor.Frames[i] == Editor.Meshes[loadedMesh])
+					{
+						frameId = i;
+						break;
+					}
+				}
+
+				List<int[]> gotoCells = new List<int[]>();
+				gotoCells.Add(new int[] { 1, frameId, 3 });
+				gotoCells.Add(new int[] { 2, loadedMesh });
+				gotoCells.Add(new int[] { 4, Editor.Meshes[loadedMesh].Mesh.SubmeshList[dataGridViewMesh.SelectedRows[0].Index].MaterialIndex });
+				gotoCells.Add(new int[] { 3, loadedMesh, dataGridViewMesh.SelectedRows[0].Index });
 
 				var editHex = new FormXXEditHex(this, gotoCells);
 				if (editHex.ShowDialog() == DialogResult.Retry)

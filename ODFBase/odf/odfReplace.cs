@@ -219,15 +219,15 @@ namespace ODFPlugin
 			List<odfSubmesh> addSubmeshes = new List<odfSubmesh>(newMesh.Count);
 			for (int i = 0; i < newMesh.Count; i++)
 			{
-				odfMaterial mat = odf.FindMaterialInfo(materialNames[i], parser.MaterialSection);
-				if (mat == null)
-				{
-					mat = CreateMaterial(materials[i], parser.GetNewID(typeof(odfMaterial)));
-					parser.MaterialSection.AddChild(mat);
-				}
 				ObjectID[] texIDs = new ObjectID[4] { ObjectID.INVALID, ObjectID.INVALID, ObjectID.INVALID, ObjectID.INVALID };
+				odfMaterial mat = odf.FindMaterialInfo(materialNames[i], parser.MaterialSection);
 				if (materials != null)
 				{
+					if (mat == null && i < materials.Count)
+					{
+						mat = CreateMaterial(materials[i], parser.GetNewID(typeof(odfMaterial)));
+						parser.MaterialSection.AddChild(mat);
+					}
 					for (int j = 0; j < materials[i].Textures.Length; j++)
 					{
 						string texName = materials[i].Textures[j];
@@ -252,7 +252,7 @@ namespace ODFPlugin
 
 				odfSubmesh newSubmesh = newMesh[i];
 				newSubmesh.Id = parser.GetNewID(typeof(odfSubmesh));
-				newSubmesh.MaterialId = mat.Id;
+				newSubmesh.MaterialId = mat != null ? mat.Id : ObjectID.INVALID;
 				newSubmesh.TextureIds = texIDs;
 
 				List<odfVertex> newVertexList = newSubmesh.VertexList;
@@ -276,7 +276,7 @@ namespace ODFPlugin
 						ObjectID texID = baseSubmesh.TextureIds[j];
 						newSubmesh.TextureIds[j] = texID;
 					}
-					newSubmesh.Name = baseSubmesh.Name;
+					newSubmesh.Name = new ObjectName(baseSubmesh.Name.Name, baseSubmesh.Name.Info);
 					CopyUnknowns(baseSubmesh, newSubmesh, parser.MeshSection._FormatType);
 
 					if ((bonesMethod == CopyMeshMethod.CopyOrder) || (bonesMethod == CopyMeshMethod.CopyNear))

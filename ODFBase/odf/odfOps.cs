@@ -495,8 +495,13 @@ namespace ODFPlugin
 					}
 					if (idxList.Count != bone.NumberIndices)
 					{
+						int oldLength = bone.VertexIndexArray.Length;
 						bone.VertexIndexArray = idxList.ToArray();
 						bone.WeightArray = weightList.ToArray();
+						if (bone.VertexIndexArray.Length != oldLength)
+						{
+							bone.AlwaysZero24perIndex = new byte[24 * bone.VertexIndexArray.Length];
+						}
 					}
 				}
 			}
@@ -559,9 +564,14 @@ namespace ODFPlugin
 			foreach (var boneListPair in boneTranslation)
 			{
 				odfBone srcBone = boneListPair.Key;
+				int oldLength = srcBone.VertexIndexArray.Length;
 				Tuple<List<int>, List<float>> destLists = boneListPair.Value;
 				srcBone.VertexIndexArray = destLists.Item1.ToArray();
 				srcBone.WeightArray = destLists.Item2.ToArray();
+				if (srcBone.VertexIndexArray.Length != oldLength)
+				{
+					srcBone.AlwaysZero24perIndex = new byte[24 * srcBone.VertexIndexArray.Length];
+				}
 			}
 		}
 

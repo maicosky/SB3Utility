@@ -85,6 +85,8 @@ namespace SB3Utility
 				var gridView = gridViews[i];
 				gridView.Columns[0].Visible = false;
 				gridView.Columns[1].DefaultCellStyle = gridView.ColumnHeadersDefaultCellStyle;
+				gridView.Columns[0].Frozen = true;
+				gridView.Columns[1].Frozen = true;
 			}
 
 			if (gotoCells != null)
@@ -100,7 +102,7 @@ namespace SB3Utility
 						var gridView = gridViews[tabId];
 						gridView.CurrentCell = gridView.Rows[meshId].Cells[1];
 
-						if (gridView == dataGridViewEditorMesh)
+						if (gridView == dataGridViewEditorSubmesh)
 						{
 							int submeshId = 0;
 							for (int j = 0; j < meshId; j++)
@@ -108,7 +110,11 @@ namespace SB3Utility
 								submeshId += editor.Meshes[j].Mesh.SubmeshList.Count;
 							}
 
-							dataGridViewEditorSubmesh.CurrentCell = dataGridViewEditorSubmesh.Rows[submeshId].Cells[1];
+							dataGridViewEditorSubmesh.CurrentCell = dataGridViewEditorSubmesh.Rows[submeshId + (cellPath.Length <= 2 ? 0 : cellPath[2])].Cells[1];
+						}
+						else if (gridView == dataGridViewEditorFrame && cellPath.Length > 2)
+						{
+							gridView.CurrentCell = gridView.Rows[meshId].Cells[cellPath[2]];
 						}
 					}
 					catch (Exception ex)
@@ -599,12 +605,30 @@ namespace SB3Utility
 				{
 					if (control is DataGridViewEditor)
 					{
-						((DataGridViewEditor)control).ReadOnly = true;
+						DataGridViewEditor dataGridEditor = (DataGridViewEditor)control;
+						dataGridEditor.ReadOnly = true;
+						dataGridEditor.DefaultCellStyle.BackColor = Color.LightSteelBlue;
 						break;
 					}
 				}
 			}
 			this.StartPosition = FormStartPosition.Manual;
+		}
+
+		private void dataGridViewEditors_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+		{
+			DataGridViewEditor dataGridView = (DataGridViewEditor)sender;
+			if (dataGridView.SelectedCells.Count > 1)
+			{
+				dataGridView.CellValueChanged -= dataGridViewEditors_CellValueChanged;
+				DataGridViewCell cell = dataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex];
+				string value = (string)cell.Value;
+				for (int i = 0; i < dataGridView.SelectedCells.Count; i++)
+				{
+					dataGridView.SelectedCells[i].Value = value;
+				}
+				dataGridView.CellValueChanged += dataGridViewEditors_CellValueChanged;
+			}
 		}
 	}
 }

@@ -1,4 +1,13 @@
-﻿[0.4.42.50]
+﻿[0.4.42.52]
+  - Fixed ODF corruption after use of CopyBonesNear and CopyBonesOrder
+  - Fixed crash when replacing meshes which used non existing materials
+  - Fixed "cant rename submesh without renaming another" after replacing meshes
+  - Changed replacing animations considers a start position in "Replace Mode"
+  - Added "Replace Present Mode" for replacing animations
+  - Added unknowns of submeshes can be changed
+  - Changed replacing animations: rotations are multiplied by -1
+
+[0.4.42.50]
   - Nameless meshes are exported using their id as name
 
 [0.4.42.39]

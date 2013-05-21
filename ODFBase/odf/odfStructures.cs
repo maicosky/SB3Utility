@@ -39,8 +39,8 @@ namespace ODFPlugin
 
 		public ObjectName(String name, String info)
 		{
-			Name = name;
-			Info = info;
+			Name = (String)name.Clone();
+			Info = info != null ? (String)info.Clone() : String.Empty;
 		}
 
 		public ObjectName(byte[] buffer)

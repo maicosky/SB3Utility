@@ -343,16 +343,19 @@ namespace SB3Utility
 				Gui.Scripting.Variables.Remove(FormVar);
 				FormVar = null;
 			}
-			TreeNode firstRoot = treeView.Nodes[0];
-			TreeNode firstChild = firstRoot.Nodes[0];
-			if (firstChild != null && firstChild.Tag != null && firstChild.Tag is DragSource)
+			if (treeView.Nodes.Count > 0)
 			{
-				DragSource ds = (DragSource)firstChild.Tag;
-				ImportedEditor importedEditor = Gui.Scripting.Variables[ds.Variable] as ImportedEditor;
-				if (importedEditor != null)
+				TreeNode firstRoot = treeView.Nodes[0];
+				TreeNode firstChild = firstRoot.Nodes[0];
+				if (firstChild != null && firstChild.Tag != null && firstChild.Tag is DragSource)
 				{
-					importedEditor.Dispose();
-					Gui.Scripting.Variables.Remove(ds.Variable);
+					DragSource ds = (DragSource)firstChild.Tag;
+					ImportedEditor importedEditor = Gui.Scripting.Variables[ds.Variable] as ImportedEditor;
+					if (importedEditor != null)
+					{
+						importedEditor.Dispose();
+						Gui.Scripting.Variables.Remove(ds.Variable);
+					}
 				}
 			}
 			if (Watcher != null)

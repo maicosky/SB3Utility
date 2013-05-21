@@ -6,6 +6,8 @@ using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
 using System.IO;
+using System.Globalization;
+using System.Text;
 using SlimDX;
 using SlimDX.Direct3D9;
 using WeifenLuo.WinFormsUI.Docking;
@@ -913,6 +915,32 @@ namespace ODFPlugin
 			return String.Format("{0:X}-{1:X}-{2:X}-{3:X}-{4:D}-{5:X}-{6:G}", meshObj.Unknown1, meshObj.Unknown2, meshObj.Unknown4, meshObj.Unknown5, meshObj.Unknown6, meshObj.Unknown7, BitConverter.ToSingle(meshObj.Unknown8, 0));
 		}
 
+		private string[] GetSubmeshUnknowns(string unknown)
+		{
+			string[] unknowns = unknown.Split('-');
+			try
+			{
+				if (unknowns.Length != 7)
+				{
+					Utility.ReportException(new Exception("Wrong number of values for unknowns"));
+					return null;
+				}
+				Int32.Parse(unknowns[0], NumberStyles.HexNumber);
+				Int32.Parse(unknowns[1], NumberStyles.HexNumber);
+				Int32.Parse(unknowns[2], NumberStyles.HexNumber);
+				Int32.Parse(unknowns[3], NumberStyles.HexNumber);
+				Int32.Parse(unknowns[4], NumberStyles.Integer);
+				Int32.Parse(unknowns[5], NumberStyles.HexNumber);
+				BitConverter.GetBytes(Single.Parse(unknowns[6], NumberStyles.Float));
+				return unknowns;
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+				return null;
+			}
+		}
+
 		void LoadMesh(int meshIdx)
 		{
 			dataGridViewMesh.Rows.Clear();
@@ -928,15 +956,17 @@ namespace ODFPlugin
 			else
 			{
 				dataGridViewMesh.SelectionChanged -= dataGridViewMesh_SelectionChanged;
+				dataGridViewMesh.CellValueChanged -= dataGridViewMesh_CellValueChanged;
 				odfMesh mesh = Editor.Parser.MeshSection[meshIdx];
 				for (int i = 0; i < mesh.Count; i++)
 				{
 					odfSubmesh submesh = mesh[i];
-					int rowIdx = dataGridViewMesh.Rows.Add(new object[] { submesh.Name.ToString(), submesh.VertexList.Count, submesh.FaceList.Count, (int)submesh.MaterialId, MeshObjectUnknownsToString(submesh) });
+					int rowIdx = dataGridViewMesh.Rows.Add(new object[] { i, submesh.Name.ToString(), submesh.VertexList.Count, submesh.FaceList.Count, (int)submesh.MaterialId, MeshObjectUnknownsToString(submesh) });
 					DataGridViewRow row = dataGridViewMesh.Rows[rowIdx];
 					row.Tag = submesh;
 				}
 				dataGridViewMesh.SelectionChanged += dataGridViewMesh_SelectionChanged;
+				dataGridViewMesh.CellValueChanged += dataGridViewMesh_CellValueChanged;
 				dataGridViewMesh.ClearSelection();
 
 				textBoxMeshName.Text = mesh.Name;
@@ -3777,7 +3807,7 @@ namespace ODFPlugin
 					Gui.Scripting.RunScript(EditorVar + ".SetSubmeshName(meshIdx=" + loadedMesh + ", submeshIdx=" + row.Index + ", name=\"" + textBoxMeshObjName.Text + "\")");
 
 					InitFrames();
-					row.Cells[0].Value = submesh.Name.Name;
+					row.Cells[1].Value = submesh.Name.Name;
 					InitMorphs();
 				}
 			}
@@ -4009,6 +4039,37 @@ namespace ODFPlugin
 					RecreateCrossRefs();
 
 					dataGridViewMesh.CurrentCell.Value = matIdValue;
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void dataGridViewMesh_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+		{
+			try
+			{
+				if (e.ColumnIndex != 5)
+				{
+					return;
+				}
+
+				string[] args = GetSubmeshUnknowns((string)dataGridViewMesh.Rows[e.RowIndex].Cells[e.ColumnIndex].Value);
+				if (args != null)
+				{
+					Gui.Scripting.RunScript(EditorVar + ".SetSubmeshUnknowns(" +
+						ScriptHelper.Parameters(new string[] {
+							"meshIdx=" + loadedMesh,
+							"submeshIdx=" + e.RowIndex,
+							"Unknown1=0x" + args[0],
+							"Unknown2=0x" + args[1],
+							"Unknown4=0x" + args[2],
+							"Unknown5=0x" + args[3],
+							"Unknown6=" + args[4],
+							"Unknown7=0x" + args[5],
+							"Unknown8=" + args[6] }) + ")");
 				}
 			}
 			catch (Exception ex)

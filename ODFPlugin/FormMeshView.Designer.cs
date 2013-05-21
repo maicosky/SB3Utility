@@ -31,14 +31,15 @@
 		private void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle14 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle15 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMeshView));
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle16 = new System.Windows.Forms.DataGridViewCellStyle();
 			this.buttonBoneRemove = new System.Windows.Forms.Button();
 			this.buttonBoneCopy = new System.Windows.Forms.Button();
 			this.buttonBoneGotoFrame = new System.Windows.Forms.Button();
@@ -268,6 +269,7 @@
 			this.buttonMeshRemove = new System.Windows.Forms.Button();
 			this.groupBoxMeshObjects = new System.Windows.Forms.GroupBox();
 			this.dataGridViewMesh = new System.Windows.Forms.DataGridView();
+			this.ColumnSubmeshIndex = new System.Windows.Forms.DataGridViewTextBoxColumn();
 			this.ColumnSubmeshName = new System.Windows.Forms.DataGridViewTextBoxColumn();
 			this.ColumnSubmeshVerts = new System.Windows.Forms.DataGridViewTextBoxColumn();
 			this.ColumnSubmeshFaces = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -1701,7 +1703,7 @@
 			this.listViewAnimationTrack.Name = "listViewAnimationTrack";
 			this.listViewAnimationTrack.ShowGroups = false;
 			this.listViewAnimationTrack.ShowItemToolTips = true;
-			this.listViewAnimationTrack.Size = new System.Drawing.Size(463, 298);
+			this.listViewAnimationTrack.Size = new System.Drawing.Size(460, 298);
 			this.listViewAnimationTrack.Sorting = System.Windows.Forms.SortOrder.Ascending;
 			this.listViewAnimationTrack.TabIndex = 1;
 			this.listViewAnimationTrack.UseCompatibleStateImageBehavior = false;
@@ -1737,8 +1739,8 @@
 			this.dataGridViewAnimationClip.AllowUserToAddRows = false;
 			this.dataGridViewAnimationClip.AllowUserToDeleteRows = false;
 			this.dataGridViewAnimationClip.AllowUserToResizeRows = false;
-			dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-			this.dataGridViewAnimationClip.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
+			dataGridViewCellStyle9.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+			this.dataGridViewAnimationClip.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle9;
 			this.dataGridViewAnimationClip.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
@@ -1753,22 +1755,22 @@
 			this.dataGridViewAnimationClip.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
 			this.dataGridViewAnimationClip.Location = new System.Drawing.Point(0, 17);
 			this.dataGridViewAnimationClip.Name = "dataGridViewAnimationClip";
-			dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-			dataGridViewCellStyle6.BackColor = System.Drawing.SystemColors.Control;
-			dataGridViewCellStyle6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			dataGridViewCellStyle6.ForeColor = System.Drawing.SystemColors.WindowText;
-			dataGridViewCellStyle6.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-			dataGridViewCellStyle6.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-			dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-			this.dataGridViewAnimationClip.RowHeadersDefaultCellStyle = dataGridViewCellStyle6;
+			dataGridViewCellStyle14.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+			dataGridViewCellStyle14.BackColor = System.Drawing.SystemColors.Control;
+			dataGridViewCellStyle14.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			dataGridViewCellStyle14.ForeColor = System.Drawing.SystemColors.WindowText;
+			dataGridViewCellStyle14.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+			dataGridViewCellStyle14.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+			dataGridViewCellStyle14.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+			this.dataGridViewAnimationClip.RowHeadersDefaultCellStyle = dataGridViewCellStyle14;
 			this.dataGridViewAnimationClip.RowHeadersVisible = false;
-			dataGridViewCellStyle7.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-			this.dataGridViewAnimationClip.RowsDefaultCellStyle = dataGridViewCellStyle7;
+			dataGridViewCellStyle15.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+			this.dataGridViewAnimationClip.RowsDefaultCellStyle = dataGridViewCellStyle15;
 			this.dataGridViewAnimationClip.RowTemplate.Resizable = System.Windows.Forms.DataGridViewTriState.False;
 			this.dataGridViewAnimationClip.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
 			this.dataGridViewAnimationClip.ShowCellErrors = false;
 			this.dataGridViewAnimationClip.ShowRowErrors = false;
-			this.dataGridViewAnimationClip.Size = new System.Drawing.Size(463, 173);
+			this.dataGridViewAnimationClip.Size = new System.Drawing.Size(463, 166);
 			this.dataGridViewAnimationClip.TabIndex = 2;
 			this.dataGridViewAnimationClip.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewAnimationClip_CellDoubleClick);
 			this.dataGridViewAnimationClip.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewAnimationClip_CellEndEdit);
@@ -1783,10 +1785,10 @@
 			// ColumnIdx
 			// 
 			this.ColumnIdx.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-			dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-			dataGridViewCellStyle2.Format = "N0";
-			dataGridViewCellStyle2.NullValue = null;
-			this.ColumnIdx.DefaultCellStyle = dataGridViewCellStyle2;
+			dataGridViewCellStyle10.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+			dataGridViewCellStyle10.Format = "N0";
+			dataGridViewCellStyle10.NullValue = null;
+			this.ColumnIdx.DefaultCellStyle = dataGridViewCellStyle10;
 			this.ColumnIdx.HeaderText = "Idx";
 			this.ColumnIdx.Name = "ColumnIdx";
 			this.ColumnIdx.ReadOnly = true;
@@ -1804,10 +1806,10 @@
 			// ColumnStart
 			// 
 			this.ColumnStart.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-			dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-			dataGridViewCellStyle3.Format = "N0";
-			dataGridViewCellStyle3.NullValue = null;
-			this.ColumnStart.DefaultCellStyle = dataGridViewCellStyle3;
+			dataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+			dataGridViewCellStyle11.Format = "N0";
+			dataGridViewCellStyle11.NullValue = null;
+			this.ColumnStart.DefaultCellStyle = dataGridViewCellStyle11;
 			this.ColumnStart.HeaderText = "Start";
 			this.ColumnStart.Name = "ColumnStart";
 			this.ColumnStart.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
@@ -1816,10 +1818,10 @@
 			// ColumnEnd
 			// 
 			this.ColumnEnd.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-			dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-			dataGridViewCellStyle4.Format = "N0";
-			dataGridViewCellStyle4.NullValue = null;
-			this.ColumnEnd.DefaultCellStyle = dataGridViewCellStyle4;
+			dataGridViewCellStyle12.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+			dataGridViewCellStyle12.Format = "N0";
+			dataGridViewCellStyle12.NullValue = null;
+			this.ColumnEnd.DefaultCellStyle = dataGridViewCellStyle12;
 			this.ColumnEnd.HeaderText = "End";
 			this.ColumnEnd.Name = "ColumnEnd";
 			this.ColumnEnd.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
@@ -1828,10 +1830,10 @@
 			// ColumnTracks
 			// 
 			this.ColumnTracks.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-			dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-			dataGridViewCellStyle5.Format = "N0";
-			dataGridViewCellStyle5.NullValue = null;
-			this.ColumnTracks.DefaultCellStyle = dataGridViewCellStyle5;
+			dataGridViewCellStyle13.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+			dataGridViewCellStyle13.Format = "N0";
+			dataGridViewCellStyle13.NullValue = null;
+			this.ColumnTracks.DefaultCellStyle = dataGridViewCellStyle13;
 			this.ColumnTracks.HeaderText = "Tracks";
 			this.ColumnTracks.Name = "ColumnTracks";
 			this.ColumnTracks.ReadOnly = true;
@@ -1849,7 +1851,7 @@
 			this.groupBox1.Controls.Add(this.numericAnimationClipKeyframe);
 			this.groupBox1.Controls.Add(this.labelSkeletalRender);
 			this.groupBox1.Controls.Add(this.label30);
-			this.groupBox1.Location = new System.Drawing.Point(0, 190);
+			this.groupBox1.Location = new System.Drawing.Point(0, 183);
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.Size = new System.Drawing.Size(463, 40);
 			this.groupBox1.TabIndex = 155;
@@ -3048,8 +3050,10 @@
 			this.dataGridViewMesh.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+			this.dataGridViewMesh.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.Disable;
 			this.dataGridViewMesh.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
 			this.dataGridViewMesh.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.ColumnSubmeshIndex,
             this.ColumnSubmeshName,
             this.ColumnSubmeshVerts,
             this.ColumnSubmeshFaces,
@@ -3057,7 +3061,18 @@
             this.ColumnSubmeshUnknowns});
 			this.dataGridViewMesh.Location = new System.Drawing.Point(3, 110);
 			this.dataGridViewMesh.Name = "dataGridViewMesh";
+			dataGridViewCellStyle16.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+			dataGridViewCellStyle16.BackColor = System.Drawing.SystemColors.AppWorkspace;
+			dataGridViewCellStyle16.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			dataGridViewCellStyle16.ForeColor = System.Drawing.SystemColors.WindowText;
+			dataGridViewCellStyle16.NullValue = "NULL";
+			dataGridViewCellStyle16.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+			dataGridViewCellStyle16.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+			dataGridViewCellStyle16.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+			this.dataGridViewMesh.RowHeadersDefaultCellStyle = dataGridViewCellStyle16;
 			this.dataGridViewMesh.RowHeadersVisible = false;
+			this.dataGridViewMesh.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
+			this.dataGridViewMesh.RowTemplate.DefaultCellStyle.NullValue = null;
 			this.dataGridViewMesh.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
 			this.dataGridViewMesh.ShowCellErrors = false;
 			this.dataGridViewMesh.ShowRowErrors = false;
@@ -3066,6 +3081,15 @@
 			this.dataGridViewMesh.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dataGridViewMesh_DataError);
 			this.dataGridViewMesh.EditingControlShowing += new System.Windows.Forms.DataGridViewEditingControlShowingEventHandler(this.dataGridViewMesh_EditingControlShowing);
 			this.dataGridViewMesh.SelectionChanged += new System.EventHandler(this.dataGridViewMesh_SelectionChanged);
+			// 
+			// ColumnSubmeshIndex
+			// 
+			this.ColumnSubmeshIndex.Frozen = true;
+			this.ColumnSubmeshIndex.HeaderText = "Index";
+			this.ColumnSubmeshIndex.Name = "ColumnSubmeshIndex";
+			this.ColumnSubmeshIndex.ReadOnly = true;
+			this.ColumnSubmeshIndex.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+			this.ColumnSubmeshIndex.Width = 30;
 			// 
 			// ColumnSubmeshName
 			// 
@@ -4006,11 +4030,6 @@
 		private System.Windows.Forms.Button buttonEditHex;
 		private System.Windows.Forms.Label label8;
 		private System.Windows.Forms.TextBox textBoxFormat;
-		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnSubmeshName;
-		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnSubmeshVerts;
-		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnSubmeshFaces;
-		private System.Windows.Forms.DataGridViewComboBoxColumn ColumnSubmeshMaterial;
-		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnSubmeshUnknowns;
 		private System.Windows.Forms.TabControl tabControlFrameMatrix;
 		private System.Windows.Forms.TabPage tabPageFrameMatrix;
 		private System.Windows.Forms.TabPage tabPageFrameSRT;
@@ -4147,6 +4166,12 @@
 		private System.Windows.Forms.TextBox textBoxEulerFilterPrecision;
 		private System.Windows.Forms.ColumnHeader columnHeader1;
 		private System.Windows.Forms.ColumnHeader columnHeader2;
+		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnSubmeshIndex;
+		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnSubmeshName;
+		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnSubmeshVerts;
+		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnSubmeshFaces;
+		private System.Windows.Forms.DataGridViewComboBoxColumn ColumnSubmeshMaterial;
+		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnSubmeshUnknowns;
 
 	}
 }

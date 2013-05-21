@@ -69,6 +69,7 @@
     <Compile Include="ApplicationException.Designer.cs">
       <DependentUpon>ApplicationException.cs</DependentUpon>
     </Compile>
+    <Compile Include="CommandLineArgumentHandler.cs" />
     <Compile Include="FormImage.cs">
       <SubType>Form</SubType>
     </Compile>

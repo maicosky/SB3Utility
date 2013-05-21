@@ -1,7 +1,19 @@
-﻿[0.4.42.51]
+﻿[0.4.42.52]
+  - Fixed closing empty workspaces
+  - Fixed crash of "Add Image" when no image was selected
+  - Changed Hex Editor got more selected fields, new button for starting the Hex Editor with a selected submesh,
+    frozen first column, cell background colour changed for READ ONLY mode, pasting into all selected cells
+  - Added all command line arguments are opened as files in *ONE* instance. Except when started with "/OpenWithGUI"
+
+[0.4.42.51]
   - Fix XX Bone Remove and Copy To New corrupted bone indices
   - Added creation of skins for XX meshes
   - Added automatic reopening workspaces when external files are changed or deleted and renamed back.
+  - Added editing of LST units
+  - Fixed XX saving external files which weren't readable afterwards.
+  - Fixed memory leak of editor for imported files.
+  - Added saving last used export format for XX meshes.
+  - Fixed Hex Edit reopening as read only at the center.
 
 [0.4.42.50]
   - Fixed XX Frame calculation of combined transform

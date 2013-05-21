@@ -56,6 +56,16 @@ namespace ODFPlugin
 				}
 			}
 
+foreach (var newTrack in newTrackList)
+{
+	ImportedAnimationKeyframe[] keyframes = newTrack.Value;
+	Quaternion q = keyframes[0].Rotation;
+	keyframes[0].Rotation *= -1;
+/*	if (keyframes[0].Rotation.Angle == 0 || q.Angle == 0)
+	{
+		Report.ReportLog("track " + newTrack.Key + " r=" + keyframes[0].Rotation.Angle + " q=" + q.Angle);
+	}*/
+}
 			FbxUtility.ReplaceAnimation(replaceMethod, insertPos, newTrackList, iAnim, animationNodeDic, negateQuaternionFlips);
 
 			animationNodeList.Clear();
