@@ -31,15 +31,15 @@
 		private void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle14 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle15 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMeshView));
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle16 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
 			this.buttonBoneRemove = new System.Windows.Forms.Button();
 			this.buttonBoneCopy = new System.Windows.Forms.Button();
 			this.buttonBoneGotoFrame = new System.Windows.Forms.Button();
@@ -172,6 +172,9 @@
 			this.label33 = new System.Windows.Forms.Label();
 			this.tabControlViews = new System.Windows.Forms.TabControl();
 			this.tabPageFrameView = new System.Windows.Forms.TabPage();
+			this.label32 = new System.Windows.Forms.Label();
+			this.label31 = new System.Windows.Forms.Label();
+			this.textBoxFrameUnknowns = new SB3Utility.EditTextBox();
 			this.buttonFrameMatrixLocalize = new System.Windows.Forms.Button();
 			this.tabControlFrameMatrix = new System.Windows.Forms.TabControl();
 			this.tabPageFrameSRT = new System.Windows.Forms.TabPage();
@@ -206,24 +209,6 @@
 			this.textBoxFrameID = new SB3Utility.EditTextBox();
 			this.label12 = new System.Windows.Forms.Label();
 			this.textBoxFrameName = new SB3Utility.EditTextBox();
-			this.groupBoxFrameUnknowns = new System.Windows.Forms.GroupBox();
-			this.textBoxFrameUnk2_5 = new System.Windows.Forms.TextBox();
-			this.label52 = new System.Windows.Forms.Label();
-			this.label51 = new System.Windows.Forms.Label();
-			this.label50 = new System.Windows.Forms.Label();
-			this.label38 = new System.Windows.Forms.Label();
-			this.textBoxFrameUnk11 = new System.Windows.Forms.TextBox();
-			this.textBoxFrameUnk10 = new System.Windows.Forms.TextBox();
-			this.textBoxFrameUnk9 = new System.Windows.Forms.TextBox();
-			this.textBoxFrameUnk8 = new System.Windows.Forms.TextBox();
-			this.textBoxFrameUnk12 = new System.Windows.Forms.TextBox();
-			this.textBoxFrameUnk7 = new System.Windows.Forms.TextBox();
-			this.textBoxFrameUnk6 = new System.Windows.Forms.TextBox();
-			this.textBoxFrameUnk5 = new System.Windows.Forms.TextBox();
-			this.textBoxFrameUnk4 = new System.Windows.Forms.TextBox();
-			this.textBoxFrameUnk3 = new System.Windows.Forms.TextBox();
-			this.textBoxFrameUnk2 = new System.Windows.Forms.TextBox();
-			this.textBoxFrameUnk1 = new System.Windows.Forms.TextBox();
 			this.tabPageBoneView = new System.Windows.Forms.TabPage();
 			this.tabControlBoneMatrix = new System.Windows.Forms.TabControl();
 			this.tabPageBoneSRT = new System.Windows.Forms.TabPage();
@@ -268,6 +253,8 @@
 			this.buttonMeshGotoFrame = new System.Windows.Forms.Button();
 			this.buttonMeshRemove = new System.Windows.Forms.Button();
 			this.groupBoxMeshObjects = new System.Windows.Forms.GroupBox();
+			this.label37 = new System.Windows.Forms.Label();
+			this.label36 = new System.Windows.Forms.Label();
 			this.dataGridViewMesh = new System.Windows.Forms.DataGridView();
 			this.ColumnSubmeshIndex = new System.Windows.Forms.DataGridViewTextBoxColumn();
 			this.ColumnSubmeshName = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -338,6 +325,7 @@
 			this.suppressWarningsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.keepBackupToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.deleteMorphsAutomaticallyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.zeroCheckForFieldsUsuallyBeingZeroToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
 			this.tabPageTextureView.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer3)).BeginInit();
@@ -412,7 +400,6 @@
 			this.tabPageFrameMatrix.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridViewFrameMatrix)).BeginInit();
 			this.groupBoxTXPT.SuspendLayout();
-			this.groupBoxFrameUnknowns.SuspendLayout();
 			this.tabPageBoneView.SuspendLayout();
 			this.tabControlBoneMatrix.SuspendLayout();
 			this.tabPageBoneSRT.SuspendLayout();
@@ -1739,8 +1726,8 @@
 			this.dataGridViewAnimationClip.AllowUserToAddRows = false;
 			this.dataGridViewAnimationClip.AllowUserToDeleteRows = false;
 			this.dataGridViewAnimationClip.AllowUserToResizeRows = false;
-			dataGridViewCellStyle9.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-			this.dataGridViewAnimationClip.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle9;
+			dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+			this.dataGridViewAnimationClip.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
 			this.dataGridViewAnimationClip.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
@@ -1755,22 +1742,22 @@
 			this.dataGridViewAnimationClip.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
 			this.dataGridViewAnimationClip.Location = new System.Drawing.Point(0, 17);
 			this.dataGridViewAnimationClip.Name = "dataGridViewAnimationClip";
-			dataGridViewCellStyle14.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-			dataGridViewCellStyle14.BackColor = System.Drawing.SystemColors.Control;
-			dataGridViewCellStyle14.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			dataGridViewCellStyle14.ForeColor = System.Drawing.SystemColors.WindowText;
-			dataGridViewCellStyle14.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-			dataGridViewCellStyle14.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-			dataGridViewCellStyle14.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-			this.dataGridViewAnimationClip.RowHeadersDefaultCellStyle = dataGridViewCellStyle14;
+			dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+			dataGridViewCellStyle6.BackColor = System.Drawing.SystemColors.Control;
+			dataGridViewCellStyle6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			dataGridViewCellStyle6.ForeColor = System.Drawing.SystemColors.WindowText;
+			dataGridViewCellStyle6.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+			dataGridViewCellStyle6.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+			dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+			this.dataGridViewAnimationClip.RowHeadersDefaultCellStyle = dataGridViewCellStyle6;
 			this.dataGridViewAnimationClip.RowHeadersVisible = false;
-			dataGridViewCellStyle15.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-			this.dataGridViewAnimationClip.RowsDefaultCellStyle = dataGridViewCellStyle15;
+			dataGridViewCellStyle7.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+			this.dataGridViewAnimationClip.RowsDefaultCellStyle = dataGridViewCellStyle7;
 			this.dataGridViewAnimationClip.RowTemplate.Resizable = System.Windows.Forms.DataGridViewTriState.False;
 			this.dataGridViewAnimationClip.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
 			this.dataGridViewAnimationClip.ShowCellErrors = false;
 			this.dataGridViewAnimationClip.ShowRowErrors = false;
-			this.dataGridViewAnimationClip.Size = new System.Drawing.Size(463, 166);
+			this.dataGridViewAnimationClip.Size = new System.Drawing.Size(463, 160);
 			this.dataGridViewAnimationClip.TabIndex = 2;
 			this.dataGridViewAnimationClip.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewAnimationClip_CellDoubleClick);
 			this.dataGridViewAnimationClip.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewAnimationClip_CellEndEdit);
@@ -1785,10 +1772,10 @@
 			// ColumnIdx
 			// 
 			this.ColumnIdx.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-			dataGridViewCellStyle10.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-			dataGridViewCellStyle10.Format = "N0";
-			dataGridViewCellStyle10.NullValue = null;
-			this.ColumnIdx.DefaultCellStyle = dataGridViewCellStyle10;
+			dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+			dataGridViewCellStyle2.Format = "N0";
+			dataGridViewCellStyle2.NullValue = null;
+			this.ColumnIdx.DefaultCellStyle = dataGridViewCellStyle2;
 			this.ColumnIdx.HeaderText = "Idx";
 			this.ColumnIdx.Name = "ColumnIdx";
 			this.ColumnIdx.ReadOnly = true;
@@ -1806,10 +1793,10 @@
 			// ColumnStart
 			// 
 			this.ColumnStart.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-			dataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-			dataGridViewCellStyle11.Format = "N0";
-			dataGridViewCellStyle11.NullValue = null;
-			this.ColumnStart.DefaultCellStyle = dataGridViewCellStyle11;
+			dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+			dataGridViewCellStyle3.Format = "N0";
+			dataGridViewCellStyle3.NullValue = null;
+			this.ColumnStart.DefaultCellStyle = dataGridViewCellStyle3;
 			this.ColumnStart.HeaderText = "Start";
 			this.ColumnStart.Name = "ColumnStart";
 			this.ColumnStart.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
@@ -1818,10 +1805,10 @@
 			// ColumnEnd
 			// 
 			this.ColumnEnd.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-			dataGridViewCellStyle12.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-			dataGridViewCellStyle12.Format = "N0";
-			dataGridViewCellStyle12.NullValue = null;
-			this.ColumnEnd.DefaultCellStyle = dataGridViewCellStyle12;
+			dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+			dataGridViewCellStyle4.Format = "N0";
+			dataGridViewCellStyle4.NullValue = null;
+			this.ColumnEnd.DefaultCellStyle = dataGridViewCellStyle4;
 			this.ColumnEnd.HeaderText = "End";
 			this.ColumnEnd.Name = "ColumnEnd";
 			this.ColumnEnd.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
@@ -1830,10 +1817,10 @@
 			// ColumnTracks
 			// 
 			this.ColumnTracks.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-			dataGridViewCellStyle13.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-			dataGridViewCellStyle13.Format = "N0";
-			dataGridViewCellStyle13.NullValue = null;
-			this.ColumnTracks.DefaultCellStyle = dataGridViewCellStyle13;
+			dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+			dataGridViewCellStyle5.Format = "N0";
+			dataGridViewCellStyle5.NullValue = null;
+			this.ColumnTracks.DefaultCellStyle = dataGridViewCellStyle5;
 			this.ColumnTracks.HeaderText = "Tracks";
 			this.ColumnTracks.Name = "ColumnTracks";
 			this.ColumnTracks.ReadOnly = true;
@@ -1851,7 +1838,7 @@
 			this.groupBox1.Controls.Add(this.numericAnimationClipKeyframe);
 			this.groupBox1.Controls.Add(this.labelSkeletalRender);
 			this.groupBox1.Controls.Add(this.label30);
-			this.groupBox1.Location = new System.Drawing.Point(0, 183);
+			this.groupBox1.Location = new System.Drawing.Point(0, 177);
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.Size = new System.Drawing.Size(463, 40);
 			this.groupBox1.TabIndex = 155;
@@ -1967,6 +1954,9 @@
 			// 
 			// tabPageFrameView
 			// 
+			this.tabPageFrameView.Controls.Add(this.label32);
+			this.tabPageFrameView.Controls.Add(this.label31);
+			this.tabPageFrameView.Controls.Add(this.textBoxFrameUnknowns);
 			this.tabPageFrameView.Controls.Add(this.buttonFrameMatrixLocalize);
 			this.tabPageFrameView.Controls.Add(this.tabControlFrameMatrix);
 			this.tabPageFrameView.Controls.Add(this.groupBoxTXPT);
@@ -1980,7 +1970,6 @@
 			this.tabPageFrameView.Controls.Add(this.textBoxFrameID);
 			this.tabPageFrameView.Controls.Add(this.label12);
 			this.tabPageFrameView.Controls.Add(this.textBoxFrameName);
-			this.tabPageFrameView.Controls.Add(this.groupBoxFrameUnknowns);
 			this.tabPageFrameView.Location = new System.Drawing.Point(4, 22);
 			this.tabPageFrameView.Name = "tabPageFrameView";
 			this.tabPageFrameView.Padding = new System.Windows.Forms.Padding(3);
@@ -1988,6 +1977,32 @@
 			this.tabPageFrameView.TabIndex = 0;
 			this.tabPageFrameView.Text = "Frame";
 			this.tabPageFrameView.UseVisualStyleBackColor = true;
+			// 
+			// label32
+			// 
+			this.label32.AutoSize = true;
+			this.label32.Location = new System.Drawing.Point(24, 93);
+			this.label32.Name = "label32";
+			this.label32.Size = new System.Drawing.Size(204, 13);
+			this.label32.TabIndex = 242;
+			this.label32.Text = "Format: int hex/8x float/2x int hex/3x float";
+			// 
+			// label31
+			// 
+			this.label31.AutoSize = true;
+			this.label31.Location = new System.Drawing.Point(1, 54);
+			this.label31.Name = "label31";
+			this.label31.Size = new System.Drawing.Size(58, 13);
+			this.label31.TabIndex = 241;
+			this.label31.Text = "Unknowns";
+			// 
+			// textBoxFrameUnknowns
+			// 
+			this.textBoxFrameUnknowns.BackColor = System.Drawing.SystemColors.ControlLightLight;
+			this.textBoxFrameUnknowns.Location = new System.Drawing.Point(2, 70);
+			this.textBoxFrameUnknowns.Name = "textBoxFrameUnknowns";
+			this.textBoxFrameUnknowns.Size = new System.Drawing.Size(247, 20);
+			this.textBoxFrameUnknowns.TabIndex = 92;
 			// 
 			// buttonFrameMatrixLocalize
 			// 
@@ -2328,173 +2343,6 @@
 			this.textBoxFrameName.Name = "textBoxFrameName";
 			this.textBoxFrameName.Size = new System.Drawing.Size(168, 20);
 			this.textBoxFrameName.TabIndex = 12;
-			// 
-			// groupBoxFrameUnknowns
-			// 
-			this.groupBoxFrameUnknowns.Controls.Add(this.textBoxFrameUnk2_5);
-			this.groupBoxFrameUnknowns.Controls.Add(this.label52);
-			this.groupBoxFrameUnknowns.Controls.Add(this.label51);
-			this.groupBoxFrameUnknowns.Controls.Add(this.label50);
-			this.groupBoxFrameUnknowns.Controls.Add(this.label38);
-			this.groupBoxFrameUnknowns.Controls.Add(this.textBoxFrameUnk11);
-			this.groupBoxFrameUnknowns.Controls.Add(this.textBoxFrameUnk10);
-			this.groupBoxFrameUnknowns.Controls.Add(this.textBoxFrameUnk9);
-			this.groupBoxFrameUnknowns.Controls.Add(this.textBoxFrameUnk8);
-			this.groupBoxFrameUnknowns.Controls.Add(this.textBoxFrameUnk12);
-			this.groupBoxFrameUnknowns.Controls.Add(this.textBoxFrameUnk7);
-			this.groupBoxFrameUnknowns.Controls.Add(this.textBoxFrameUnk6);
-			this.groupBoxFrameUnknowns.Controls.Add(this.textBoxFrameUnk5);
-			this.groupBoxFrameUnknowns.Controls.Add(this.textBoxFrameUnk4);
-			this.groupBoxFrameUnknowns.Controls.Add(this.textBoxFrameUnk3);
-			this.groupBoxFrameUnknowns.Controls.Add(this.textBoxFrameUnk2);
-			this.groupBoxFrameUnknowns.Controls.Add(this.textBoxFrameUnk1);
-			this.groupBoxFrameUnknowns.Location = new System.Drawing.Point(2, 43);
-			this.groupBoxFrameUnknowns.Name = "groupBoxFrameUnknowns";
-			this.groupBoxFrameUnknowns.Size = new System.Drawing.Size(248, 71);
-			this.groupBoxFrameUnknowns.TabIndex = 90;
-			this.groupBoxFrameUnknowns.TabStop = false;
-			this.groupBoxFrameUnknowns.Text = "Unknowns";
-			this.toolTip1.SetToolTip(this.groupBoxFrameUnknowns, "first is hex, all others are floats");
-			// 
-			// textBoxFrameUnk2_5
-			// 
-			this.textBoxFrameUnk2_5.BackColor = System.Drawing.SystemColors.ControlLightLight;
-			this.textBoxFrameUnk2_5.Location = new System.Drawing.Point(231, 45);
-			this.textBoxFrameUnk2_5.Name = "textBoxFrameUnk2_5";
-			this.textBoxFrameUnk2_5.Size = new System.Drawing.Size(12, 20);
-			this.textBoxFrameUnk2_5.TabIndex = 116;
-			// 
-			// label52
-			// 
-			this.label52.AutoSize = true;
-			this.label52.Location = new System.Drawing.Point(205, 22);
-			this.label52.Name = "label52";
-			this.label52.Size = new System.Drawing.Size(10, 13);
-			this.label52.TabIndex = 174;
-			this.label52.Text = "-";
-			// 
-			// label51
-			// 
-			this.label51.AutoSize = true;
-			this.label51.Location = new System.Drawing.Point(160, 48);
-			this.label51.Name = "label51";
-			this.label51.Size = new System.Drawing.Size(10, 13);
-			this.label51.TabIndex = 173;
-			this.label51.Text = ")";
-			// 
-			// label50
-			// 
-			this.label50.AutoSize = true;
-			this.label50.Location = new System.Drawing.Point(111, 48);
-			this.label50.Name = "label50";
-			this.label50.Size = new System.Drawing.Size(16, 13);
-			this.label50.TabIndex = 172;
-			this.label50.Text = "...";
-			// 
-			// label38
-			// 
-			this.label38.AutoSize = true;
-			this.label38.Location = new System.Drawing.Point(3, 22);
-			this.label38.Name = "label38";
-			this.label38.Size = new System.Drawing.Size(10, 13);
-			this.label38.TabIndex = 171;
-			this.label38.Text = "(";
-			// 
-			// textBoxFrameUnk11
-			// 
-			this.textBoxFrameUnk11.BackColor = System.Drawing.SystemColors.ControlLightLight;
-			this.textBoxFrameUnk11.Location = new System.Drawing.Point(172, 45);
-			this.textBoxFrameUnk11.Name = "textBoxFrameUnk11";
-			this.textBoxFrameUnk11.Size = new System.Drawing.Size(32, 20);
-			this.textBoxFrameUnk11.TabIndex = 112;
-			// 
-			// textBoxFrameUnk10
-			// 
-			this.textBoxFrameUnk10.BackColor = System.Drawing.SystemColors.ControlLightLight;
-			this.textBoxFrameUnk10.Location = new System.Drawing.Point(127, 45);
-			this.textBoxFrameUnk10.Name = "textBoxFrameUnk10";
-			this.textBoxFrameUnk10.Size = new System.Drawing.Size(32, 20);
-			this.textBoxFrameUnk10.TabIndex = 110;
-			// 
-			// textBoxFrameUnk9
-			// 
-			this.textBoxFrameUnk9.BackColor = System.Drawing.SystemColors.ControlLightLight;
-			this.textBoxFrameUnk9.Location = new System.Drawing.Point(79, 45);
-			this.textBoxFrameUnk9.Name = "textBoxFrameUnk9";
-			this.textBoxFrameUnk9.Size = new System.Drawing.Size(32, 20);
-			this.textBoxFrameUnk9.TabIndex = 108;
-			// 
-			// textBoxFrameUnk8
-			// 
-			this.textBoxFrameUnk8.BackColor = System.Drawing.SystemColors.ControlLightLight;
-			this.textBoxFrameUnk8.Location = new System.Drawing.Point(46, 45);
-			this.textBoxFrameUnk8.Name = "textBoxFrameUnk8";
-			this.textBoxFrameUnk8.Size = new System.Drawing.Size(32, 20);
-			this.textBoxFrameUnk8.TabIndex = 106;
-			// 
-			// textBoxFrameUnk12
-			// 
-			this.textBoxFrameUnk12.BackColor = System.Drawing.SystemColors.ControlLightLight;
-			this.textBoxFrameUnk12.Location = new System.Drawing.Point(208, 45);
-			this.textBoxFrameUnk12.Name = "textBoxFrameUnk12";
-			this.textBoxFrameUnk12.Size = new System.Drawing.Size(20, 20);
-			this.textBoxFrameUnk12.TabIndex = 114;
-			// 
-			// textBoxFrameUnk7
-			// 
-			this.textBoxFrameUnk7.BackColor = System.Drawing.SystemColors.ControlLightLight;
-			this.textBoxFrameUnk7.Location = new System.Drawing.Point(13, 45);
-			this.textBoxFrameUnk7.Name = "textBoxFrameUnk7";
-			this.textBoxFrameUnk7.Size = new System.Drawing.Size(32, 20);
-			this.textBoxFrameUnk7.TabIndex = 104;
-			// 
-			// textBoxFrameUnk6
-			// 
-			this.textBoxFrameUnk6.BackColor = System.Drawing.SystemColors.ControlLightLight;
-			this.textBoxFrameUnk6.Location = new System.Drawing.Point(167, 19);
-			this.textBoxFrameUnk6.Name = "textBoxFrameUnk6";
-			this.textBoxFrameUnk6.Size = new System.Drawing.Size(32, 20);
-			this.textBoxFrameUnk6.TabIndex = 102;
-			// 
-			// textBoxFrameUnk5
-			// 
-			this.textBoxFrameUnk5.BackColor = System.Drawing.SystemColors.ControlLightLight;
-			this.textBoxFrameUnk5.Location = new System.Drawing.Point(134, 19);
-			this.textBoxFrameUnk5.Name = "textBoxFrameUnk5";
-			this.textBoxFrameUnk5.Size = new System.Drawing.Size(32, 20);
-			this.textBoxFrameUnk5.TabIndex = 100;
-			// 
-			// textBoxFrameUnk4
-			// 
-			this.textBoxFrameUnk4.BackColor = System.Drawing.SystemColors.ControlLightLight;
-			this.textBoxFrameUnk4.Location = new System.Drawing.Point(101, 19);
-			this.textBoxFrameUnk4.Name = "textBoxFrameUnk4";
-			this.textBoxFrameUnk4.Size = new System.Drawing.Size(32, 20);
-			this.textBoxFrameUnk4.TabIndex = 98;
-			// 
-			// textBoxFrameUnk3
-			// 
-			this.textBoxFrameUnk3.BackColor = System.Drawing.SystemColors.ControlLightLight;
-			this.textBoxFrameUnk3.Location = new System.Drawing.Point(68, 19);
-			this.textBoxFrameUnk3.Name = "textBoxFrameUnk3";
-			this.textBoxFrameUnk3.Size = new System.Drawing.Size(32, 20);
-			this.textBoxFrameUnk3.TabIndex = 96;
-			// 
-			// textBoxFrameUnk2
-			// 
-			this.textBoxFrameUnk2.BackColor = System.Drawing.SystemColors.ControlLightLight;
-			this.textBoxFrameUnk2.Location = new System.Drawing.Point(34, 19);
-			this.textBoxFrameUnk2.Name = "textBoxFrameUnk2";
-			this.textBoxFrameUnk2.Size = new System.Drawing.Size(32, 20);
-			this.textBoxFrameUnk2.TabIndex = 94;
-			// 
-			// textBoxFrameUnk1
-			// 
-			this.textBoxFrameUnk1.BackColor = System.Drawing.SystemColors.ControlLightLight;
-			this.textBoxFrameUnk1.Location = new System.Drawing.Point(13, 19);
-			this.textBoxFrameUnk1.Name = "textBoxFrameUnk1";
-			this.textBoxFrameUnk1.Size = new System.Drawing.Size(20, 20);
-			this.textBoxFrameUnk1.TabIndex = 92;
 			// 
 			// tabPageBoneView
 			// 
@@ -3026,6 +2874,8 @@
 			// 
 			// groupBoxMeshObjects
 			// 
+			this.groupBoxMeshObjects.Controls.Add(this.label37);
+			this.groupBoxMeshObjects.Controls.Add(this.label36);
 			this.groupBoxMeshObjects.Controls.Add(this.dataGridViewMesh);
 			this.groupBoxMeshObjects.Controls.Add(this.textBoxMeshObjInfo);
 			this.groupBoxMeshObjects.Controls.Add(this.label15);
@@ -3043,10 +2893,32 @@
 			this.groupBoxMeshObjects.TabStop = false;
 			this.groupBoxMeshObjects.Text = "Submeshes";
 			// 
+			// label37
+			// 
+			this.label37.AutoSize = true;
+			this.label37.Location = new System.Drawing.Point(249, 81);
+			this.label37.Name = "label37";
+			this.label37.Size = new System.Drawing.Size(96, 13);
+			this.label37.TabIndex = 244;
+			this.label37.Text = "Unknowns Format:";
+			// 
+			// label36
+			// 
+			this.label36.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.label36.AutoEllipsis = true;
+			this.label36.Location = new System.Drawing.Point(249, 94);
+			this.label36.Name = "label36";
+			this.label36.Size = new System.Drawing.Size(221, 13);
+			this.label36.TabIndex = 243;
+			this.label36.Text = "2x int hex/int/int hex/int/int hex/float";
+			this.toolTip1.SetToolTip(this.label36, "2x int hex, int, int hex, int, int hex, float");
+			// 
 			// dataGridViewMesh
 			// 
 			this.dataGridViewMesh.AllowUserToAddRows = false;
 			this.dataGridViewMesh.AllowUserToDeleteRows = false;
+			this.dataGridViewMesh.AllowUserToResizeRows = false;
 			this.dataGridViewMesh.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
@@ -3061,17 +2933,16 @@
             this.ColumnSubmeshUnknowns});
 			this.dataGridViewMesh.Location = new System.Drawing.Point(3, 110);
 			this.dataGridViewMesh.Name = "dataGridViewMesh";
-			dataGridViewCellStyle16.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-			dataGridViewCellStyle16.BackColor = System.Drawing.SystemColors.AppWorkspace;
-			dataGridViewCellStyle16.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			dataGridViewCellStyle16.ForeColor = System.Drawing.SystemColors.WindowText;
-			dataGridViewCellStyle16.NullValue = "NULL";
-			dataGridViewCellStyle16.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-			dataGridViewCellStyle16.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-			dataGridViewCellStyle16.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-			this.dataGridViewMesh.RowHeadersDefaultCellStyle = dataGridViewCellStyle16;
+			dataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+			dataGridViewCellStyle8.BackColor = System.Drawing.SystemColors.AppWorkspace;
+			dataGridViewCellStyle8.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			dataGridViewCellStyle8.ForeColor = System.Drawing.SystemColors.WindowText;
+			dataGridViewCellStyle8.NullValue = "NULL";
+			dataGridViewCellStyle8.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+			dataGridViewCellStyle8.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+			dataGridViewCellStyle8.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+			this.dataGridViewMesh.RowHeadersDefaultCellStyle = dataGridViewCellStyle8;
 			this.dataGridViewMesh.RowHeadersVisible = false;
-			this.dataGridViewMesh.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
 			this.dataGridViewMesh.RowTemplate.DefaultCellStyle.NullValue = null;
 			this.dataGridViewMesh.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
 			this.dataGridViewMesh.ShowCellErrors = false;
@@ -3094,7 +2965,7 @@
 			// ColumnSubmeshName
 			// 
 			this.ColumnSubmeshName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-			this.ColumnSubmeshName.FillWeight = 41.06195F;
+			this.ColumnSubmeshName.FillWeight = 30F;
 			this.ColumnSubmeshName.HeaderText = "Name";
 			this.ColumnSubmeshName.MinimumWidth = 10;
 			this.ColumnSubmeshName.Name = "ColumnSubmeshName";
@@ -3122,7 +2993,7 @@
 			// ColumnSubmeshMaterial
 			// 
 			this.ColumnSubmeshMaterial.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-			this.ColumnSubmeshMaterial.FillWeight = 38.93805F;
+			this.ColumnSubmeshMaterial.FillWeight = 30F;
 			this.ColumnSubmeshMaterial.HeaderText = "Material";
 			this.ColumnSubmeshMaterial.MinimumWidth = 10;
 			this.ColumnSubmeshMaterial.Name = "ColumnSubmeshMaterial";
@@ -3130,13 +3001,12 @@
 			// 
 			// ColumnSubmeshUnknowns
 			// 
-			this.ColumnSubmeshUnknowns.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-			this.ColumnSubmeshUnknowns.FillWeight = 23F;
+			this.ColumnSubmeshUnknowns.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+			this.ColumnSubmeshUnknowns.FillWeight = 30F;
 			this.ColumnSubmeshUnknowns.HeaderText = "Unknowns";
 			this.ColumnSubmeshUnknowns.MinimumWidth = 10;
 			this.ColumnSubmeshUnknowns.Name = "ColumnSubmeshUnknowns";
 			this.ColumnSubmeshUnknowns.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-			this.ColumnSubmeshUnknowns.Width = 64;
 			// 
 			// textBoxMeshObjInfo
 			// 
@@ -3683,7 +3553,8 @@
             this.closeViewFilesAtStartToolStripMenuItem,
             this.suppressWarningsToolStripMenuItem,
             this.keepBackupToolStripMenuItem,
-            this.deleteMorphsAutomaticallyToolStripMenuItem});
+            this.deleteMorphsAutomaticallyToolStripMenuItem,
+            this.zeroCheckForFieldsUsuallyBeingZeroToolStripMenuItem});
 			this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
 			this.optionsToolStripMenuItem.Size = new System.Drawing.Size(56, 18);
 			this.optionsToolStripMenuItem.Text = "&Options";
@@ -3693,7 +3564,7 @@
 			this.closeViewFilesAtStartToolStripMenuItem.Checked = global::ODFPlugin.Properties.Settings.Default.CloseViewFilesAtStart;
 			this.closeViewFilesAtStartToolStripMenuItem.CheckOnClick = true;
 			this.closeViewFilesAtStartToolStripMenuItem.Name = "closeViewFilesAtStartToolStripMenuItem";
-			this.closeViewFilesAtStartToolStripMenuItem.Size = new System.Drawing.Size(210, 22);
+			this.closeViewFilesAtStartToolStripMenuItem.Size = new System.Drawing.Size(236, 22);
 			this.closeViewFilesAtStartToolStripMenuItem.Text = "Close View \'Files\' At Start";
 			// 
 			// suppressWarningsToolStripMenuItem
@@ -3701,7 +3572,7 @@
 			this.suppressWarningsToolStripMenuItem.Checked = global::ODFPlugin.Properties.Settings.Default.SuppressWarnings;
 			this.suppressWarningsToolStripMenuItem.CheckOnClick = true;
 			this.suppressWarningsToolStripMenuItem.Name = "suppressWarningsToolStripMenuItem";
-			this.suppressWarningsToolStripMenuItem.Size = new System.Drawing.Size(210, 22);
+			this.suppressWarningsToolStripMenuItem.Size = new System.Drawing.Size(236, 22);
 			this.suppressWarningsToolStripMenuItem.Text = "Suppress Warnings";
 			// 
 			// keepBackupToolStripMenuItem
@@ -3710,7 +3581,7 @@
 			this.keepBackupToolStripMenuItem.CheckOnClick = true;
 			this.keepBackupToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.keepBackupToolStripMenuItem.Name = "keepBackupToolStripMenuItem";
-			this.keepBackupToolStripMenuItem.Size = new System.Drawing.Size(210, 22);
+			this.keepBackupToolStripMenuItem.Size = new System.Drawing.Size(236, 22);
 			this.keepBackupToolStripMenuItem.Text = "Keep Backup";
 			// 
 			// deleteMorphsAutomaticallyToolStripMenuItem
@@ -3718,8 +3589,16 @@
 			this.deleteMorphsAutomaticallyToolStripMenuItem.Checked = global::ODFPlugin.Properties.Settings.Default.DeleteMorphsAutomatically;
 			this.deleteMorphsAutomaticallyToolStripMenuItem.CheckOnClick = true;
 			this.deleteMorphsAutomaticallyToolStripMenuItem.Name = "deleteMorphsAutomaticallyToolStripMenuItem";
-			this.deleteMorphsAutomaticallyToolStripMenuItem.Size = new System.Drawing.Size(210, 22);
+			this.deleteMorphsAutomaticallyToolStripMenuItem.Size = new System.Drawing.Size(236, 22);
 			this.deleteMorphsAutomaticallyToolStripMenuItem.Text = "Delete Morphs Automatically";
+			// 
+			// zeroCheckForFieldsUsuallyBeingZeroToolStripMenuItem
+			// 
+			this.zeroCheckForFieldsUsuallyBeingZeroToolStripMenuItem.Checked = global::ODFPlugin.Properties.Settings.Default.ZeroCheck;
+			this.zeroCheckForFieldsUsuallyBeingZeroToolStripMenuItem.CheckOnClick = true;
+			this.zeroCheckForFieldsUsuallyBeingZeroToolStripMenuItem.Name = "zeroCheckForFieldsUsuallyBeingZeroToolStripMenuItem";
+			this.zeroCheckForFieldsUsuallyBeingZeroToolStripMenuItem.Size = new System.Drawing.Size(236, 22);
+			this.zeroCheckForFieldsUsuallyBeingZeroToolStripMenuItem.Text = "0 Check For Fields Usually Being 0";
 			// 
 			// saveFileDialog1
 			// 
@@ -3827,8 +3706,6 @@
 			((System.ComponentModel.ISupportInitialize)(this.dataGridViewFrameMatrix)).EndInit();
 			this.groupBoxTXPT.ResumeLayout(false);
 			this.groupBoxTXPT.PerformLayout();
-			this.groupBoxFrameUnknowns.ResumeLayout(false);
-			this.groupBoxFrameUnknowns.PerformLayout();
 			this.tabPageBoneView.ResumeLayout(false);
 			this.tabPageBoneView.PerformLayout();
 			this.tabControlBoneMatrix.ResumeLayout(false);
@@ -3947,24 +3824,7 @@
 		private SB3Utility.EditTextBox textBoxFrameID;
 		private System.Windows.Forms.Label label12;
 		private SB3Utility.EditTextBox textBoxFrameName;
-		private System.Windows.Forms.GroupBox groupBoxFrameUnknowns;
-		private System.Windows.Forms.TextBox textBoxFrameUnk2_5;
-		private System.Windows.Forms.Label label52;
-		private System.Windows.Forms.Label label51;
-		private System.Windows.Forms.Label label50;
-		private System.Windows.Forms.Label label38;
-		private System.Windows.Forms.TextBox textBoxFrameUnk11;
-		private System.Windows.Forms.TextBox textBoxFrameUnk10;
-		private System.Windows.Forms.TextBox textBoxFrameUnk9;
-		private System.Windows.Forms.TextBox textBoxFrameUnk8;
-		private System.Windows.Forms.TextBox textBoxFrameUnk12;
-		private System.Windows.Forms.TextBox textBoxFrameUnk7;
-		private System.Windows.Forms.TextBox textBoxFrameUnk6;
-		private System.Windows.Forms.TextBox textBoxFrameUnk5;
-		private System.Windows.Forms.TextBox textBoxFrameUnk4;
-		private System.Windows.Forms.TextBox textBoxFrameUnk3;
-		private System.Windows.Forms.TextBox textBoxFrameUnk2;
-		private System.Windows.Forms.TextBox textBoxFrameUnk1;
+		private SB3Utility.EditTextBox textBoxFrameUnknowns;
 		private System.Windows.Forms.Label label26;
 		private SB3Utility.EditTextBox textBoxMeshInfo;
 		private SB3Utility.EditTextBox textBoxMeshID;
@@ -4166,12 +4026,17 @@
 		private System.Windows.Forms.TextBox textBoxEulerFilterPrecision;
 		private System.Windows.Forms.ColumnHeader columnHeader1;
 		private System.Windows.Forms.ColumnHeader columnHeader2;
+		private System.Windows.Forms.ToolStripMenuItem zeroCheckForFieldsUsuallyBeingZeroToolStripMenuItem;
+		private System.Windows.Forms.Label label31;
 		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnSubmeshIndex;
 		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnSubmeshName;
 		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnSubmeshVerts;
 		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnSubmeshFaces;
 		private System.Windows.Forms.DataGridViewComboBoxColumn ColumnSubmeshMaterial;
 		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnSubmeshUnknowns;
+		private System.Windows.Forms.Label label32;
+		private System.Windows.Forms.Label label36;
+		private System.Windows.Forms.Label label37;
 
 	}
 }

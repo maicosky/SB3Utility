@@ -414,10 +414,11 @@ namespace ODFPlugin
 		public ObjectName Name { get; set; }
 		public ObjectID Id { get; set; }
 		public int Unknown1 { get; set; }
-		public int Unknown2 { get; set; }
+		public byte[] AlwaysZero1 { get; set; }
 		public ObjectID MaterialId { get; set; }
 		public ObjectID[] TextureIds { get; set; }
-		public byte[] Unknown3 { get; set; }
+		public UInt32 Unknown31 { get; set; }
+		public byte[] AlwaysZero2 { get; set; }
 		public int Unknown4 { get; set; }
 		public int NumVertices { get { return VertexList.Count; } }
 		public int NumVertexIndices { get { return FaceList.Count * 3; } }
@@ -425,17 +426,17 @@ namespace ODFPlugin
 		public int Unknown6 { get; set; }
 		public int Unknown7 { get; set; }
 		public byte[] Unknown8 { get; set; }
-		public byte[] Unknown9 { get; set; } // if _FormatType < 10
+		public byte[] AlwaysZero3 { get; set; } // if _FormatType < 10
 		public List<odfVertex> VertexList { get; set; }
 		public List<odfFace> FaceList { get; set; }
-		public byte[] Unknown10 { get; set; }
+		public byte[] AlwaysZero4 { get; set; }
 
 		public odfSubmesh(ObjectName name, ObjectID id, int formatType)
 		{
 			Name = name;
 			Id = id;
 			if ((_FormatType = formatType) < 10)
-				Unknown9 = new byte[448];
+				AlwaysZero3 = new byte[448];
 		}
 
 		public int _FormatType { get; protected set; }
@@ -448,13 +449,14 @@ namespace ODFPlugin
 			Id.WriteTo(stream);
 			BinaryWriter writer = new BinaryWriter(stream);
 			writer.Write(Unknown1);
-			writer.Write(Unknown2);
+			writer.Write(AlwaysZero1);
 			MaterialId.WriteTo(stream);
 			for (int i = 0; i < 4; i++)
 			{
 				TextureIds[i].WriteTo(stream);
 			}
-			writer.Write(Unknown3);
+			writer.Write(Unknown31);
+			writer.Write(AlwaysZero2);
 			writer.Write(Unknown4);
 			if (_FormatType < 10)
 			{
@@ -472,7 +474,7 @@ namespace ODFPlugin
 			{
 				writer.Write(NumVertices);
 				writer.Write(NumVertexIndices);
-				writer.Write(Unknown9);
+				writer.Write(AlwaysZero3);
 			}
 			else
 			{
@@ -487,22 +489,22 @@ namespace ODFPlugin
 			{
 				face.WriteTo(stream);
 			}
-			writer.Write(Unknown10);
+			writer.Write(AlwaysZero4);
 		}
 
 		public odfSubmesh Clone()
 		{
 			odfSubmesh newSubmesh = new odfSubmesh(Name, Id, _FormatType);
 			newSubmesh.Unknown1 = Unknown1;
-			newSubmesh.Unknown2 = Unknown2;
+			newSubmesh.AlwaysZero1 = (byte[])AlwaysZero1.Clone();
 			newSubmesh.MaterialId = new ObjectID(MaterialId);
 			newSubmesh.TextureIds = (ObjectID[])TextureIds.Clone();
-			newSubmesh.Unknown3 = (byte[])Unknown3.Clone();
+			newSubmesh.AlwaysZero2 = (byte[])AlwaysZero2.Clone();
 			newSubmesh.Unknown4 = Unknown4;
 			newSubmesh.Unknown5 = Unknown5;
 			newSubmesh.Unknown6 = Unknown6;
-			if (Unknown9 != null)
-				newSubmesh.Unknown9 = (byte[])Unknown9.Clone();
+			if (AlwaysZero3 != null)
+				newSubmesh.AlwaysZero3 = (byte[])AlwaysZero3.Clone();
 			newSubmesh.Unknown7 = Unknown7;
 			newSubmesh.Unknown8 = (byte[])Unknown8.Clone();
 			newSubmesh.VertexList = new List<odfVertex>(NumVertices);
@@ -511,7 +513,7 @@ namespace ODFPlugin
 			newSubmesh.FaceList = new List<odfFace>(NumVertexIndices / 3);
 			foreach (odfFace face in FaceList)
 				newSubmesh.FaceList.Add(face.Clone());
-			newSubmesh.Unknown10 = (byte[])Unknown10.Clone();
+			newSubmesh.AlwaysZero4 = (byte[])AlwaysZero4.Clone();
 			return newSubmesh;
 		}
 
@@ -590,19 +592,19 @@ namespace ODFPlugin
 		public ObjectName Name { get; set; }
 		public ObjectID Id { get; set; }
 		public Matrix Matrix { get; set; }
-		public byte[] Unknown1 { get; set; }
+		public byte[] AlwaysZero1 { get; set; }
 		public ObjectID ParentId { get; set; }
 		public ObjectID MeshId { get; set; }
-		public byte[] Unknown2 { get; set; }
+		public byte[] AlwaysZero2 { get; set; }
 		public int Unknown3 { get; set; }
 		public float[] Unknown4 { get; set; }
-		public byte[] Unknown5 { get; set; }
+		public UInt32 Unknown5 { get; set; }
 		public int Unknown6 { get; set; }
-		public byte[] Unknown7 { get; set; }
+		public byte[] AlwaysZero7 { get; set; }
 		public float Unknown8 { get; set; }
-		public byte[] Unknown9 { get; set; }
+		public byte[] AlwaysZero9 { get; set; }
 		public float Unknown10 { get; set; }
-		public byte[] Unknown11 { get; set; }
+		public byte[] AlwaysZero11 { get; set; }
 		public float Unknown12 { get; set; }
 
 		public odfFrame(ObjectName name, ObjectID id, int childCapacity)
@@ -625,19 +627,19 @@ namespace ODFPlugin
 			Id.WriteTo(stream);
 			BinaryWriter writer = new BinaryWriter(stream);
 			writer.Write(Matrix);
-			writer.Write(Unknown1);
+			writer.Write(AlwaysZero1);
 			ParentId.WriteTo(stream);
 			MeshId.WriteTo(stream);
-			writer.Write(Unknown2);
+			writer.Write(AlwaysZero2);
 			writer.Write(Unknown3);
 			writer.Write(Unknown4);
 			writer.Write(Unknown5);
 			writer.Write(Unknown6);
-			writer.Write(Unknown7);
+			writer.Write(AlwaysZero7);
 			writer.Write(Unknown8);
-			writer.Write(Unknown9);
+			writer.Write(AlwaysZero9);
 			writer.Write(Unknown10);
-			writer.Write(Unknown11);
+			writer.Write(AlwaysZero11);
 			writer.Write(Unknown12);
 			foreach (odfFrame childFrame in children)
 			{
@@ -651,17 +653,17 @@ namespace ODFPlugin
 			frame.Parent = Parent;
 			frame.ParentId = new ObjectID(ParentId);
 			frame.Matrix = Matrix;
-			frame.Unknown1 = (byte[])Unknown1.Clone();
-			frame.Unknown2 = (byte[])Unknown2.Clone();
+			frame.AlwaysZero1 = (byte[])AlwaysZero1.Clone();
+			frame.AlwaysZero2 = (byte[])AlwaysZero2.Clone();
 			frame.Unknown3 = Unknown3;
 			frame.Unknown4 = (float[])Unknown4.Clone();
-			frame.Unknown5 = (byte[])Unknown5.Clone();
+			frame.Unknown5 = Unknown5;
 			frame.Unknown6 = Unknown6;
-			frame.Unknown7 = (byte[])Unknown7.Clone();
+			frame.AlwaysZero7 = (byte[])AlwaysZero7.Clone();
 			frame.Unknown8 = Unknown8;
-			frame.Unknown9 = (byte[])Unknown9.Clone();
+			frame.AlwaysZero9 = (byte[])AlwaysZero9.Clone();
 			frame.Unknown10 = Unknown10;
-			frame.Unknown11 = (byte[])Unknown11.Clone();
+			frame.AlwaysZero11 = (byte[])AlwaysZero11.Clone();
 			frame.Unknown12 = Unknown12;
 
 			if (mesh && (int)MeshId != 0)
@@ -1239,28 +1241,28 @@ namespace ODFPlugin
 	{
 		public static void odfFrame(odfFrame frame, bool emptyFieldsOnly)
 		{
-			if (!emptyFieldsOnly || frame.Unknown1 == null)
-				frame.Unknown1 = new byte[44];
-			if (!emptyFieldsOnly || frame.Unknown2 == null)
-				frame.Unknown2 = new byte[216];
+			if (!emptyFieldsOnly || frame.AlwaysZero1 == null)
+				frame.AlwaysZero1 = new byte[44];
+			if (!emptyFieldsOnly || frame.AlwaysZero2 == null)
+				frame.AlwaysZero2 = new byte[216];
 			if (!emptyFieldsOnly)
 				frame.Unknown3 = 0;
 			if (!emptyFieldsOnly)
 				frame.Unknown4 = new float[8] { 0, 90, -90, 90, -90, 0, 0, 0 };
-			if (!emptyFieldsOnly || frame.Unknown5 == null)
-				frame.Unknown5 = new byte[4];
+			if (!emptyFieldsOnly)
+				frame.Unknown5 = 0;
 			if (!emptyFieldsOnly)
 				frame.Unknown6 = 0;
-			if (!emptyFieldsOnly || frame.Unknown7 == null)
-				frame.Unknown7 = new byte[4];
+			if (!emptyFieldsOnly || frame.AlwaysZero7 == null)
+				frame.AlwaysZero7 = new byte[4];
 			if (!emptyFieldsOnly)
 				frame.Unknown8 = 0;
-			if (!emptyFieldsOnly || frame.Unknown9 == null)
-				frame.Unknown9 = new byte[0x1FC];
+			if (!emptyFieldsOnly || frame.AlwaysZero9 == null)
+				frame.AlwaysZero9 = new byte[0x1FC];
 			if (!emptyFieldsOnly)
 				frame.Unknown10 = 0.25f;
-			if (!emptyFieldsOnly || frame.Unknown11 == null)
-				frame.Unknown11 = new byte[8];
+			if (!emptyFieldsOnly || frame.AlwaysZero11 == null)
+				frame.AlwaysZero11 = new byte[8];
 			if (!emptyFieldsOnly)
 				frame.Unknown12 = 0;
 		}
@@ -1269,10 +1271,10 @@ namespace ODFPlugin
 		{
 			if (!emptyFieldsOnly)
 				submesh.Unknown1 = 1;
-			if (!emptyFieldsOnly)
-				submesh.Unknown2 = 0;
-			if (!emptyFieldsOnly || submesh.Unknown3 == null)
-				submesh.Unknown3 = new byte[20];
+			if (!emptyFieldsOnly || submesh.AlwaysZero1 == null)
+				submesh.AlwaysZero1 = new byte[4];
+			if (!emptyFieldsOnly || submesh.AlwaysZero2 == null)
+				submesh.AlwaysZero2 = new byte[20];
 			if (!emptyFieldsOnly)
 				submesh.Unknown4 = 0x0F;
 			if (!emptyFieldsOnly)
@@ -1283,10 +1285,10 @@ namespace ODFPlugin
 				submesh.Unknown7 = 0x0600;
 			if (!emptyFieldsOnly)
 				submesh.Unknown8 = BitConverter.GetBytes(0.4f);
-			if ((!emptyFieldsOnly || submesh.Unknown9 == null) && submesh._FormatType < 10)
-				submesh.Unknown9 = new byte[448];
-			if (!emptyFieldsOnly || submesh.Unknown10 == null)
-				submesh.Unknown10 = new byte[24];
+			if ((!emptyFieldsOnly || submesh.AlwaysZero3 == null) && submesh._FormatType < 10)
+				submesh.AlwaysZero3 = new byte[448];
+			if (!emptyFieldsOnly || submesh.AlwaysZero4 == null)
+				submesh.AlwaysZero4 = new byte[24];
 		}
 
 		public static void odfMaterial(odfMaterial material)

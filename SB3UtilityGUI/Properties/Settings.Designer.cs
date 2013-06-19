@@ -247,9 +247,9 @@ namespace SB3Utility.Properties {
         [global::System.Configuration.SettingsProviderAttribute(typeof(PortableSettingsProvider))]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute(".pp")]
-        public string BackupExtentionPP {
+        public string BackupExtensionPP {
             get {
-                return ((string)(this["BackupExtentionPP"]));
+                return ((string)(this["BackupExtensionPP"]));
             }
         }
         

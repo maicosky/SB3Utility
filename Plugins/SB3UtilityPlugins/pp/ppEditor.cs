@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.ComponentModel;
+using System.Configuration;
 using System.Threading;
 using System.Windows.Forms;
+using System.Xml;
 
 namespace SB3Utility
 {
@@ -13,8 +16,26 @@ namespace SB3Utility
 	{
 		public ppParser Parser { get; protected set; }
 
+		public static Dictionary<string, List<ExternalTool>> ExternalTools;
+
 		public ppEditor(ppParser parser)
 		{
+			if (ExternalTools == null)
+			{
+				ExternalTools = new Dictionary<string, List<ExternalTool>>();
+
+				foreach (SettingsPropertyValue value in Gui.Config.PropertyValues)
+				{
+					if (value.PropertyValue.GetType() == typeof(ExternalTool))
+					{
+						ExternalTool tool = (ExternalTool)value.PropertyValue;
+						tool = RegisterExternalTool(tool, false);
+						string toolVar = Gui.Scripting.GetNextVariable("externalTool");
+						Gui.Scripting.Variables.Add(toolVar, tool);
+					}
+				}
+			}
+
 			Parser = parser;
 		}
 
@@ -25,15 +46,15 @@ namespace SB3Utility
 		}
 
 		[Plugin]
-		public BackgroundWorker SavePP(bool keepBackup, string backupExtention, bool background)
+		public BackgroundWorker SavePP(bool keepBackup, string backupExtension, bool background)
 		{
-			return SavePP(Parser.FilePath, keepBackup, backupExtention, background);
+			return SavePP(Parser.FilePath, keepBackup, backupExtension, background);
 		}
 
 		[Plugin]
-		public BackgroundWorker SavePP(string path, bool keepBackup, string backupExtention, bool background)
+		public BackgroundWorker SavePP(string path, bool keepBackup, string backupExtension, bool background)
 		{
-			return Parser.WriteArchive(path, keepBackup, backupExtention, background);
+			return Parser.WriteArchive(path, keepBackup, backupExtension, background);
 		}
 
 		[Plugin]
@@ -141,6 +162,134 @@ namespace SB3Utility
 			}
 
 			return readFile.CreateReadStream();
+		}
+
+		[Plugin]
+		public static ExternalTool RegisterExternalTool(string extension, int ppFormatIndex, string toolPath, string toText, string toBin)
+		{
+			return RegisterExternalTool(extension, ppFormatIndex, toolPath, toText, toBin, true);
+		}
+
+		public static ExternalTool RegisterExternalTool(string extension, int ppFormatIndex, string toolPath, string toText, string toBin, bool save)
+		{
+			ExternalTool tool = new ExternalTool(extension, ppFormatIndex, toolPath, toText, toBin);
+			return RegisterExternalTool(tool, save);
+		}
+
+		[Plugin]
+		public static ExternalTool RegisterExternalTool(ExternalTool tool, bool save)
+		{
+			try
+			{
+				string extensionKey = tool.Extension.ToUpper();
+				List<ExternalTool> extList;
+				if (!ExternalTools.TryGetValue(extensionKey, out extList))
+				{
+					extList = new List<ExternalTool>();
+					ExternalTools.Add(extensionKey, extList);
+				}
+				else
+				{
+					foreach (ExternalTool presentTool in extList)
+					{
+						if (presentTool.ToolPath.Equals(tool.ToolPath, StringComparison.InvariantCultureIgnoreCase))
+						{
+							presentTool.ToTextOptions = tool.ToTextOptions;
+							presentTool.ToBinaryOptions = tool.ToBinaryOptions;
+							presentTool.ppFormatIndex = tool.ppFormatIndex;
+							tool = presentTool;
+							return tool;
+						}
+					}
+				}
+				extList.Add(tool);
+				return tool;
+			}
+			finally
+			{
+				if (save)
+				{
+					bool stored = false;
+					HashSet<int> usedIndices = new HashSet<int>();
+					foreach (SettingsPropertyValue value in Gui.Config.PropertyValues)
+					{
+						if (value.Name.StartsWith("ExternalTool"))
+						{
+							ExternalTool newTool = (ExternalTool)value.PropertyValue;
+							if (newTool.ToolPath.Equals(tool.ToolPath, StringComparison.InvariantCultureIgnoreCase))
+							{
+								Gui.Config[value.Name] = tool;
+								stored = true;
+								break;
+							}
+							string intStr = value.Name.Substring("ExternalTool".Length);
+							usedIndices.Add(Int32.Parse(intStr));
+						}
+					}
+					if (!stored)
+					{
+						int smallestFreeTool;
+						for (smallestFreeTool = 0; smallestFreeTool < usedIndices.Count; smallestFreeTool++)
+						{
+							if (!usedIndices.Contains(smallestFreeTool))
+							{
+								break;
+							}
+						}
+						if (smallestFreeTool >= 30/*Settings.MaxExternalTools*/)
+						{
+							Report.ReportLog("Cant persist more than 30 external tools.");
+						}
+						else
+						{
+							SettingsProperty newProp = new SettingsProperty(
+								"ExternalTool" + smallestFreeTool, typeof(ExternalTool),
+								Gui.Config.Providers[Path.GetFileName(System.Reflection.Assembly.GetEntryAssembly().Location)],
+								false,
+								tool,
+								SettingsSerializeAs.String,
+								null,
+								true, true
+							);
+							Gui.Config.Properties.Add(newProp);
+							SettingsPropertyValue newValue = new SettingsPropertyValue(newProp);
+							newValue.PropertyValue = tool;
+							Gui.Config.PropertyValues.Add(newValue);
+						}
+					}
+				}
+			}
+		}
+
+		[Plugin]
+		public static void UnregisterExternalTool(ExternalTool tool)
+		{
+			List<ExternalTool> extList;
+			if (ExternalTools.TryGetValue(tool.Extension, out extList))
+			{
+				for (int i = 0; i < extList.Count; i++)
+				{
+					if (tool == extList[i])
+					{
+						extList.RemoveAt(i);
+
+						foreach (SettingsPropertyValue value in Gui.Config.PropertyValues)
+						{
+							if (value.PropertyValue.GetType() == typeof(ExternalTool))
+							{
+								ExternalTool settingsTool = (ExternalTool)value.PropertyValue;
+								if (settingsTool.ToolPath == tool.ToolPath)
+								{
+									Gui.Config.PropertyValues.Remove(value.Name);
+									Gui.Config.Properties.Remove(value.Name);
+									break;
+								}
+							}
+						}
+						return;
+					}
+				}
+			}
 		}
 	}
 }

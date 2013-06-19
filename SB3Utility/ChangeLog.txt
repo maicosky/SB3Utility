@@ -1,4 +1,14 @@
-﻿[0.4.42.52]
+﻿[0.4.42.53]
+  - Fixed syntax error: Extensions. Skript language affected in SavePP parameter
+  - Added dropping meshes from the Object Tree into a workspace.
+  - Added a filter which ignores every second instance of any object in that workspace.
+  - Added Shift-Delete deletes all selected objects in the XX editor and in the views of pp files.
+  - Fixed: files can be droppped into the new lst editor.
+  - Support for external tools
+  - Fixed after reordering submeshes wrong submeshes were highlighted.
+  - Fixed SyntaxhighlightingTextBox crashed for certain characters at the end of file.
+
+[0.4.42.52]
   - Fixed closing empty workspaces
   - Fixed crash of "Add Image" when no image was selected
   - Changed Hex Editor got more selected fields, new button for starting the Hex Editor with a selected submesh,

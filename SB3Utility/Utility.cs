@@ -39,6 +39,16 @@ namespace SB3Utility
 			return newArray;
 		}
 
+		public static float[] ConvertToFloatArray(object[] array)
+		{
+			float[] newArray = new float[array.Length];
+			for (int i = 0; i < array.Length; i++)
+			{
+				newArray[i] = (float)(double)array[i];
+			}
+			return newArray;
+		}
+
 		public static string DecryptName(byte[] buf)
 		{
 			if (buf.Length < 1)

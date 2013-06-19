@@ -113,6 +113,10 @@ namespace ODFPlugin
 			ParserVar = Gui.Scripting.GetNextVariable("odfParser");
 			string parserCommand = ParserVar + " = OpenODF(path=\"" + path + "\")";
 			odfParser parser = (odfParser)Gui.Scripting.RunScript(parserCommand);
+			if (zeroCheckForFieldsUsuallyBeingZeroToolStripMenuItem.Checked)
+			{
+				Report.ReportLog("Zero check: " + parser.ZeroCheck());
+			}
 
 			EditorVar = Gui.Scripting.GetNextVariable("odfEditor");
 			string editorCommand = EditorVar + " = odfEditor(parser=" + ParserVar + ")";
@@ -192,6 +196,7 @@ namespace ODFPlugin
 
 			textBoxFrameName.AfterEditTextChanged += new EventHandler(textBoxFrameName_AfterEditTextChanged);
 			textBoxFrameID.AfterEditTextChanged += new EventHandler(textBoxFrameID_AfterEditTextChanged);
+			textBoxFrameUnknowns.AfterEditTextChanged += new EventHandler(textBoxFrameUnknowns_AfterEditTextChanged);
 			textBoxBoneFrameID.AfterEditTextChanged += new EventHandler(textBoxBoneFrameID_AfterEditTextChanged);
 			textBoxMeshName.AfterEditTextChanged += new EventHandler(textBoxMeshName_AfterEditTextChanged);
 			textBoxMeshID.AfterEditTextChanged += new EventHandler(textBoxMeshID_AfterEditTextChanged);
@@ -227,7 +232,6 @@ namespace ODFPlugin
 			this.groupBoxMeshTextures.Tag = true;
 			this.groupBoxMaterialExtraSetsUnknowns.Tag = true;
 			this.groupBoxMaterialProperties.Tag = true;
-			this.groupBoxFrameUnknowns.Tag = true;
 			this.groupBoxTXPT.Tag = true;
 
 			if (this.closeViewFilesAtStartToolStripMenuItem.Checked)
@@ -274,6 +278,7 @@ namespace ODFPlugin
 			suppressWarningsToolStripMenuItem.CheckedChanged += suppressWarningsToolStripMenuItem_CheckedChanged;
 			keepBackupToolStripMenuItem.CheckedChanged += keepBackupToolStripMenuItem_CheckedChanged;
 			deleteMorphsAutomaticallyToolStripMenuItem.CheckedChanged += deleteMorphsAutomaticallyToolStripMenuItem_CheckedChanged;
+			zeroCheckForFieldsUsuallyBeingZeroToolStripMenuItem.CheckedChanged += zeroCheckForFieldsUsuallyBeingZeroToolStripMenuItem_CheckedChanged;
 		}
 
 		private void ClearControl(Control control)
@@ -444,8 +449,7 @@ namespace ODFPlugin
 			if (Editor.Parser.TextureSection != null)
 				InitTextures();
 
-			if (Editor.Parser.MeshSection != null && Editor.Parser.MaterialSection != null && Editor.Parser.TextureSection != null)
-				RecreateCrossRefs();
+			RecreateCrossRefs();
 
 			InitMorphs();
 			InitAnims();
@@ -803,6 +807,62 @@ namespace ODFPlugin
 			}
 		}
 
+		private string FrameUnknownsToString(odfFrame frame)
+		{
+			StringBuilder sb = new StringBuilder(100);
+			sb.AppendFormat("x{0:X}", frame.Unknown3);
+			for (int i = 0; i < frame.Unknown4.Length; i++)
+			{
+				sb.AppendFormat("/{0:G}", frame.Unknown4[i]);
+			}
+			sb.AppendFormat("/x{0:X}/x{1:X}/{2:G}/{3:G}/{4:G}", frame.Unknown5, frame.Unknown6, frame.Unknown8, frame.Unknown10, frame.Unknown12);
+			return sb.ToString();
+		}
+
+		private string[] GetFrameUnknowns(string unknownValues)
+		{
+			string[] unknowns = unknownValues.Split(new char[] { '/', 'x' }, StringSplitOptions.RemoveEmptyEntries);
+			try
+			{
+				if (unknowns.Length != 14)
+				{
+					Utility.ReportException(new Exception("Wrong number of values for unknowns"));
+					return null;
+				}
+				string[] args = new string[7];
+				Int32.Parse(unknowns[0], NumberStyles.HexNumber);
+				args[0] = unknowns[0];
+				StringBuilder sb = new StringBuilder(100);
+				sb.Append("{ ");
+				for (int i = 0; i < 8; i++)
+				{
+					BitConverter.GetBytes(Single.Parse(unknowns[1 + i], NumberStyles.Float));
+					sb.Append(unknowns[1 + i]);
+					if (i < 7)
+					{
+						sb.Append(", ");
+					}
+				}
+				sb.Append(" }");
+				args[1] = sb.ToString();
+				Int32.Parse(unknowns[9], NumberStyles.HexNumber);
+				args[2] = unknowns[9];
+				Int32.Parse(unknowns[10], NumberStyles.HexNumber);
+				args[3] = unknowns[10];
+				for (int i = 0; i < 3; i++)
+				{
+					BitConverter.GetBytes(Single.Parse(unknowns[11 + i], NumberStyles.Float));
+					args[4 + i] = unknowns[11 + i];
+				}
+				return args;
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+				return null;
+			}
+		}
+
 		void LoadFrame(int frameIdx)
 		{
 			if (frameIdx < 0)
@@ -815,19 +875,9 @@ namespace ODFPlugin
 				odfFrame frame = Editor.Frames[frameIdx];
 				textBoxFrameName.Text = frame.Name;
 				textBoxFrameID.Text = frame.Id.ToString();
-				textBoxFrameUnk1.Text = String.Format("{0:X}", frame.Unknown3);
-				textBoxFrameUnk2.Text = String.Format("{0:G}", frame.Unknown4[0]);
-				textBoxFrameUnk3.Text = String.Format("{0:G}", frame.Unknown4[1]);
-				textBoxFrameUnk4.Text = String.Format("{0:G}", frame.Unknown4[2]);
-				textBoxFrameUnk5.Text = String.Format("{0:G}", frame.Unknown4[3]);
-				textBoxFrameUnk6.Text = String.Format("{0:G}", frame.Unknown4[4]);
-				textBoxFrameUnk7.Text = String.Format("{0:G}", frame.Unknown4[5]);
-				textBoxFrameUnk8.Text = String.Format("{0:G}", frame.Unknown4[6]);
-				textBoxFrameUnk9.Text = String.Format("{0:G}", frame.Unknown4[7]);
-				textBoxFrameUnk10.Text = String.Format("{0:G}", frame.Unknown8);
-				textBoxFrameUnk11.Text = String.Format("{0:G}", frame.Unknown10);
-				textBoxFrameUnk12.Text = String.Format("{0:G}", frame.Unknown12);
-				textBoxFrameUnk2_5.Text = String.Format("{0:X}", frame.Unknown6);
+
+				textBoxFrameUnknowns.Text = FrameUnknownsToString(frame);
+
 				LoadMatrix(frame.Matrix, dataGridViewFrameSRT, dataGridViewFrameMatrix);
 
 				if (Editor.Parser.TXPTSection != null)
@@ -909,15 +959,14 @@ namespace ODFPlugin
 			loadedBone = idxPair;
 		}
 
-
 		private string MeshObjectUnknownsToString(odfSubmesh meshObj)
 		{
-			return String.Format("{0:X}-{1:X}-{2:X}-{3:X}-{4:D}-{5:X}-{6:G}", meshObj.Unknown1, meshObj.Unknown2, meshObj.Unknown4, meshObj.Unknown5, meshObj.Unknown6, meshObj.Unknown7, BitConverter.ToSingle(meshObj.Unknown8, 0));
+			return String.Format("x{0:X}/x{1:X}/{2:D}/x{3:X}/{4:D}/x{5:X}/{6:G}", meshObj.Unknown1, meshObj.Unknown31, meshObj.Unknown4, meshObj.Unknown5, meshObj.Unknown6, meshObj.Unknown7, BitConverter.ToSingle(meshObj.Unknown8, 0));
 		}
 
 		private string[] GetSubmeshUnknowns(string unknown)
 		{
-			string[] unknowns = unknown.Split('-');
+			string[] unknowns = unknown.Split(new char[] { '/', 'x' }, StringSplitOptions.RemoveEmptyEntries);
 			try
 			{
 				if (unknowns.Length != 7)
@@ -927,7 +976,7 @@ namespace ODFPlugin
 				}
 				Int32.Parse(unknowns[0], NumberStyles.HexNumber);
 				Int32.Parse(unknowns[1], NumberStyles.HexNumber);
-				Int32.Parse(unknowns[2], NumberStyles.HexNumber);
+				Int32.Parse(unknowns[2], NumberStyles.Integer);
 				Int32.Parse(unknowns[3], NumberStyles.HexNumber);
 				Int32.Parse(unknowns[4], NumberStyles.Integer);
 				Int32.Parse(unknowns[5], NumberStyles.HexNumber);
@@ -1244,32 +1293,38 @@ namespace ODFPlugin
 			crossRefTextureMeshesCount.Clear();
 			crossRefTextureMaterialsCount.Clear();
 
-			var meshes = Editor.Parser.MeshSection.ChildList;
-			var materials = Editor.Parser.MaterialSection.ChildList;
-			var textures = Editor.Parser.TextureSection.ChildList;
+			var meshes = Editor.Parser.MeshSection != null ? Editor.Parser.MeshSection.ChildList : null;
+			var materials = Editor.Parser.MaterialSection != null ? Editor.Parser.MaterialSection.ChildList : null;
+			var textures = Editor.Parser.TextureSection != null ? Editor.Parser.TextureSection.ChildList : null;
 
-			for (int i = 0; i < meshes.Count; i++)
+			if (meshes != null)
 			{
-				crossRefMeshMaterials.Add(i, new List<KeyList<odfMaterial>>(materials.Count));
-				crossRefMeshTextures.Add(i, new List<KeyList<odfTexture>>(textures != null ? textures.Count : 0));
-				crossRefMaterialMeshesCount.Add(i, 0);
-				crossRefTextureMeshesCount.Add(i, 0);
+				for (int i = 0; i < meshes.Count; i++)
+				{
+					crossRefMeshMaterials.Add(i, new List<KeyList<odfMaterial>>(materials != null ? materials.Count : 0));
+					crossRefMeshTextures.Add(i, new List<KeyList<odfTexture>>(textures != null ? textures.Count : 0));
+					crossRefMaterialMeshesCount.Add(i, 0);
+					crossRefTextureMeshesCount.Add(i, 0);
+				}
 			}
 
-			for (int i = 0; i < materials.Count; i++)
+			if (materials != null)
 			{
-				crossRefMaterialMeshes.Add(i, new List<KeyList<odfMesh>>(meshes.Count));
-				crossRefMaterialTextures.Add(i, new List<KeyList<odfTexture>>(textures != null ? textures.Count : 0));
-				crossRefMeshMaterialsCount.Add(i, 0);
-				crossRefTextureMaterialsCount.Add(i, 0);
+				for (int i = 0; i < materials.Count; i++)
+				{
+					crossRefMaterialMeshes.Add(i, new List<KeyList<odfMesh>>(meshes != null ? meshes.Count : 0));
+					crossRefMaterialTextures.Add(i, new List<KeyList<odfTexture>>(textures != null ? textures.Count : 0));
+					crossRefMeshMaterialsCount.Add(i, 0);
+					crossRefTextureMaterialsCount.Add(i, 0);
+				}
 			}
 
 			if (textures != null)
 			{
 				for (int i = 0; i < textures.Count; i++)
 				{
-					crossRefTextureMeshes.Add(i, new List<KeyList<odfMesh>>(meshes.Count));
-					crossRefTextureMaterials.Add(i, new List<KeyList<odfMaterial>>(materials.Count));
+					crossRefTextureMeshes.Add(i, new List<KeyList<odfMesh>>(meshes != null ? meshes.Count : 0));
+					crossRefTextureMaterials.Add(i, new List<KeyList<odfMaterial>>(materials != null ? materials.Count : 0));
 					crossRefMeshTexturesCount.Add(i, 0);
 					crossRefMaterialTexturesCount.Add(i, 0);
 				}
@@ -1313,47 +1368,50 @@ namespace ODFPlugin
 				}
 			}
 
-			for (int i = 0; i < meshes.Count; i++)
+			if (meshes != null)
 			{
-				odfMesh mesh = meshes[i];
-				for (int j = 0; j < mesh.Count; j++)
+				for (int i = 0; i < meshes.Count; i++)
 				{
-					odfSubmesh meshObj = mesh[j];
-					odfMaterial mat = odf.FindMaterialInfo(meshObj.MaterialId, Editor.Parser.MaterialSection);
-					if (mat != null)
+					odfMesh mesh = meshes[i];
+					for (int j = 0; j < mesh.Count; j++)
 					{
-						int matIdx = materials.IndexOf(mat);
-						crossRefMeshMaterials[i].Add(new KeyList<odfMaterial>(materials, matIdx));
-						crossRefMaterialMeshes[matIdx].Add(new KeyList<odfMesh>(meshes, i));
-						if ((int)meshObj.MaterialId != 0 && textures != null)
+						odfSubmesh meshObj = mesh[j];
+						odfMaterial mat = odf.FindMaterialInfo(meshObj.MaterialId, Editor.Parser.MaterialSection);
+						if (mat != null)
 						{
-							for (int n = 0; n < matTexNameCombo.Length; n++)
+							int matIdx = materials.IndexOf(mat);
+							crossRefMeshMaterials[i].Add(new KeyList<odfMaterial>(materials, matIdx));
+							crossRefMaterialMeshes[matIdx].Add(new KeyList<odfMesh>(meshes, i));
+							if ((int)meshObj.MaterialId != 0 && textures != null)
 							{
-								bool foundMatTex = false;
-								ObjectID texID = meshObj.TextureIds[n];
-								if ((int)texID == 0)
-									continue;
-								for (int m = 0; m < textures.Count; m++)
+								for (int n = 0; n < matTexNameCombo.Length; n++)
 								{
-									odfTexture tex = textures[m];
-									if (texID == tex.Id)
+									bool foundMatTex = false;
+									ObjectID texID = meshObj.TextureIds[n];
+									if ((int)texID == 0)
+										continue;
+									for (int m = 0; m < textures.Count; m++)
 									{
-										crossRefMeshTextures[i].Add(new KeyList<odfTexture>(textures, m));
-										crossRefTextureMeshes[m].Add(new KeyList<odfMesh>(meshes, i));
-										foundMatTex = true;
-										break;
+										odfTexture tex = textures[m];
+										if (texID == tex.Id)
+										{
+											crossRefMeshTextures[i].Add(new KeyList<odfTexture>(textures, m));
+											crossRefTextureMeshes[m].Add(new KeyList<odfMesh>(meshes, i));
+											foundMatTex = true;
+											break;
+										}
 									}
-								}
-								if (!foundMatTex && !suppressWarningsToolStripMenuItem.Checked)
-								{
-									Report.ReportLog("Warning: Couldn't find texture " + texID + " of mesh object " + meshObj.Name + ".");
+									if (!foundMatTex && !suppressWarningsToolStripMenuItem.Checked)
+									{
+										Report.ReportLog("Warning: Couldn't find texture " + texID + " of mesh object " + meshObj.Name + ".");
+									}
 								}
 							}
 						}
-					}
-					else if (!suppressWarningsToolStripMenuItem.Checked)
-					{
-						Report.ReportLog("Warning: Mesh " + mesh.Name + " Object " + meshObj.Name + " has an invalid material id.");
+						else if (!suppressWarningsToolStripMenuItem.Checked)
+						{
+							Report.ReportLog("Warning: Mesh " + mesh.Name + " Object " + meshObj.Name + " has an invalid material id.");
+						}
 					}
 				}
 			}
@@ -1443,6 +1501,11 @@ namespace ODFPlugin
 
 		private void CrossRefAddItem<T>(List<KeyList<T>> list, Dictionary<int, int> dic, ListView listView, ListView mainView)
 		{
+			if (list == null)
+			{
+				return;
+			}
+
 			bool added = false;
 			for (int i = 0; i < list.Count; i++)
 			{
@@ -1476,6 +1539,11 @@ namespace ODFPlugin
 
 		private void CrossRefRemoveItem<T>(List<KeyList<T>> list, Dictionary<int, int> dic, ListView listView)
 		{
+			if (list == null)
+			{
+				return;
+			}
+
 			bool removed = false;
 			for (int i = 0; i < list.Count; i++)
 			{
@@ -2004,12 +2072,16 @@ namespace ODFPlugin
 					listViewMeshTexture.BeginUpdate();
 
 					int meshIdx = (int)e.Item.Tag;
+					List<KeyList<odfMaterial>> matList;
+					crossRefMeshMaterials.TryGetValue(meshIdx, out matList);
+					List<KeyList<odfTexture>> texList;
+					crossRefMeshTextures.TryGetValue(meshIdx, out texList);
 					if (e.IsSelected)
 					{
 						tabControlViews.SelectTabWithoutLoosingFocus(tabPageMeshView);
 						LoadMesh(meshIdx);
-						CrossRefAddItem(crossRefMeshMaterials[meshIdx], crossRefMeshMaterialsCount, listViewMeshMaterial, listViewMaterial);
-						CrossRefAddItem(crossRefMeshTextures[meshIdx], crossRefMeshTexturesCount, listViewMeshTexture, listViewTexture);
+						CrossRefAddItem(matList, crossRefMeshMaterialsCount, listViewMeshMaterial, listViewMaterial);
+						CrossRefAddItem(texList, crossRefMeshTexturesCount, listViewMeshTexture, listViewTexture);
 
 						if (renderObjectMeshes[meshIdx] == null)
 						{
@@ -2036,8 +2108,8 @@ namespace ODFPlugin
 						{
 							LoadMesh(-1);
 						}
-						CrossRefRemoveItem(crossRefMeshMaterials[meshIdx], crossRefMeshMaterialsCount, listViewMeshMaterial);
-						CrossRefRemoveItem(crossRefMeshTextures[meshIdx], crossRefMeshTexturesCount, listViewMeshTexture);
+						CrossRefRemoveItem(matList, crossRefMeshMaterialsCount, listViewMeshMaterial);
+						CrossRefRemoveItem(texList, crossRefMeshTexturesCount, listViewMeshTexture);
 
 						Gui.Renderer.RemoveRenderObject(renderObjectIds[meshIdx]);
 					}
@@ -2072,12 +2144,16 @@ namespace ODFPlugin
 					listViewMaterialTexture.BeginUpdate();
 
 					int matIdx = (int)e.Item.Tag;
+					List<KeyList<odfMesh>> meshList;
+					crossRefMaterialMeshes.TryGetValue(matIdx, out meshList);
+					List<KeyList<odfTexture>> texList;
+					crossRefMaterialTextures.TryGetValue(matIdx, out texList);
 					if (e.IsSelected)
 					{
 						tabControlViews.SelectTabWithoutLoosingFocus(tabPageMaterialView);
 						LoadMaterial(matIdx);
-						CrossRefAddItem(crossRefMaterialMeshes[matIdx], crossRefMaterialMeshesCount, listViewMaterialMesh, listViewMesh);
-						CrossRefAddItem(crossRefMaterialTextures[matIdx], crossRefMaterialTexturesCount, listViewMaterialTexture, listViewTexture);
+						CrossRefAddItem(meshList, crossRefMaterialMeshesCount, listViewMaterialMesh, listViewMesh);
+						CrossRefAddItem(texList, crossRefMaterialTexturesCount, listViewMaterialTexture, listViewTexture);
 					}
 					else
 					{
@@ -2085,8 +2161,8 @@ namespace ODFPlugin
 						{
 							LoadMaterial(-1);
 						}
-						CrossRefRemoveItem(crossRefMaterialMeshes[matIdx], crossRefMaterialMeshesCount, listViewMaterialMesh);
-						CrossRefRemoveItem(crossRefMaterialTextures[matIdx], crossRefMaterialTexturesCount, listViewMaterialTexture);
+						CrossRefRemoveItem(meshList, crossRefMaterialMeshesCount, listViewMaterialMesh);
+						CrossRefRemoveItem(texList, crossRefMaterialTexturesCount, listViewMaterialTexture);
 					}
 
 					CrossRefSetSelected(e.IsSelected, listViewMaterial, matIdx);
@@ -3083,6 +3159,36 @@ namespace ODFPlugin
 			}
 		}
 
+		private void textBoxFrameUnknowns_AfterEditTextChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedFrame < 0)
+				{
+					return;
+				}
+
+				string[] args = GetFrameUnknowns(textBoxFrameUnknowns.Text);
+				if (args != null)
+				{
+					Gui.Scripting.RunScript(EditorVar + ".SetFrameUnknowns(" +
+						ScriptHelper.Parameters(new string[] {
+							"idx=" + loadedFrame,
+							"Unknown3=0x" + args[0],
+							"Unknown4=" + args[1],
+							"Unknown5=0x" + args[2],
+							"Unknown6=0x" + args[3],
+							"Unknown8=" + args[4],
+							"Unknown10=" + args[5],
+							"Unknown12=" + args[6] }) + ")");
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
 		private void buttonFrameMoveUp_Click(object sender, EventArgs e)
 		{
 			try
@@ -3905,6 +4011,7 @@ namespace ODFPlugin
 				}
 				else
 				{
+					InitFrames();
 					LoadMesh(loadedMesh);
 					if (lastSelectedRow == dataGridViewMesh.Rows.Count)
 						lastSelectedRow--;
@@ -4064,8 +4171,8 @@ namespace ODFPlugin
 							"meshIdx=" + loadedMesh,
 							"submeshIdx=" + e.RowIndex,
 							"Unknown1=0x" + args[0],
-							"Unknown2=0x" + args[1],
-							"Unknown4=0x" + args[2],
+							"Unknown31=0x" + args[1],
+							"Unknown4=" + args[2],
 							"Unknown5=0x" + args[3],
 							"Unknown6=" + args[4],
 							"Unknown7=0x" + args[5],
@@ -4449,6 +4556,11 @@ namespace ODFPlugin
 		private void deleteMorphsAutomaticallyToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
 		{
 			Properties.Settings.Default["DeleteMorphsAutomatically"] = deleteMorphsAutomaticallyToolStripMenuItem.Checked;
+		}
+
+		private void zeroCheckForFieldsUsuallyBeingZeroToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+		{
+			Properties.Settings.Default["ZeroCheck"] = zeroCheckForFieldsUsuallyBeingZeroToolStripMenuItem.Checked;
 		}
 
 		#endregion Menu Strip Item Handlers

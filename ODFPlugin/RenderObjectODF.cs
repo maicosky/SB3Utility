@@ -40,8 +40,8 @@ namespace ODFPlugin
 
 			this.device = Gui.Renderer.Device;
 
-			Textures = new Texture[parser.TextureSection.Count];
-			TextureDic = new Dictionary<int, int>(parser.TextureSection.Count);
+			Textures = new Texture[parser.TextureSection != null ? parser.TextureSection.Count : 0];
+			TextureDic = new Dictionary<int, int>(parser.TextureSection != null ? parser.TextureSection.Count : 0);
 			Materials = new Material[parser.MaterialSection.Count];
 			BoneMatrixDic = new Dictionary<string, Matrix>();
 

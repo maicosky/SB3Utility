@@ -40,6 +40,9 @@ namespace SB3Utility
 				syntaxHighlightingTextBoxLSTContents.InitText(parser.Text);
 				syntaxHighlightingTextBoxLSTContents.TextChanged += new EventHandler(syntaxHighlightingTextBoxLSTContents_TextChanged);
 
+				syntaxHighlightingTextBoxLSTContents.DragDrop += new DragEventHandler(syntaxHighlightingTextBoxLSTContents_DragDrop);
+				syntaxHighlightingTextBoxLSTContents.EnableAutoDragDrop = true;
+
 				Gui.Docking.ShowDockContent(this, Gui.Docking.DockEditors, ContentCategory.Others);
 			}
 			catch (Exception ex)
@@ -181,6 +184,12 @@ namespace SB3Utility
 			{
 				Utility.ReportException(ex);
 			}
+		}
+
+		private void syntaxHighlightingTextBoxLSTContents_DragDrop(object sender, DragEventArgs e)
+		{
+			Gui.Docking.DockDragDrop(sender, e);
+			e.Effect = DragDropEffects.None;
 		}
 	}
 }

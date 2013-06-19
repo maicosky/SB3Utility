@@ -368,7 +368,11 @@ namespace UrielGuy.SyntaxHighlightingTextBox
 				{
 					sb.Append("\\\'");
 					sb.Append(b.ToString("X2"));
-					b = bytes[++i];
+					if (++i >= bytes.Length)
+					{
+						break;
+					}
+					b = bytes[i];
 					sb.Append("\\\'");
 					sb.Append(b.ToString("X2"));
 				}

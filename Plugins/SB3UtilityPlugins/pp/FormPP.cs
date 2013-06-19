@@ -26,6 +26,8 @@ namespace SB3Utility
 
 		private Utility.SoundLib soundLib;
 
+		private const Keys MASS_DESTRUCTION_KEY_COMBINATION = Keys.Delete | Keys.Shift;
+
 		public FormPP(string path, string variable)
 		{
 			try
@@ -85,8 +87,8 @@ namespace SB3Utility
 
 				keepBackupToolStripMenuItem.Checked = (bool)Gui.Config["KeepBackupOfPP"];
 				keepBackupToolStripMenuItem.CheckedChanged += keepBackupToolStripMenuItem_CheckedChanged;
-				backupExtentionToolStripEditTextBox.Text = (string)Gui.Config["BackupExtentionPP"];
-				backupExtentionToolStripEditTextBox.AfterEditTextChanged += backupExtentionToolStripEditTextBox_AfterEditTextChanged;
+				backupExtensionToolStripEditTextBox.Text = (string)Gui.Config["BackupExtensionPP"];
+				backupExtensionToolStripEditTextBox.AfterEditTextChanged += backupExtensionToolStripEditTextBox_AfterEditTextChanged;
 			}
 			catch (Exception ex)
 			{
@@ -168,6 +170,11 @@ namespace SB3Utility
 				}
 				else
 				{
+					List<ExternalTool> toolList;
+					if (!subfile.Name.ToUpper().EndsWith(".LST") && !ppEditor.ExternalTools.TryGetValue(Path.GetExtension(subfile.Name).ToUpper(), out toolList))
+					{
+						item.BackColor = Color.LightCoral;
+					}
 					otherFiles.Add(item);
 				}
 			}
@@ -265,6 +272,15 @@ namespace SB3Utility
 			}
 		}
 
+		private void xxSubfilesList_KeyUp(object sender, KeyEventArgs e)
+		{
+			if (e.KeyData != MASS_DESTRUCTION_KEY_COMBINATION)
+			{
+				return;
+			}
+			removeToolStripMenuItem_Click(sender, e);
+		}
+
 		private void xaSubfilesList_KeyPress(object sender, KeyPressEventArgs e)
 		{
 			try
@@ -279,6 +295,15 @@ namespace SB3Utility
 			{
 				Utility.ReportException(ex);
 			}
+		}
+
+		private void xaSubfilesList_KeyUp(object sender, KeyEventArgs e)
+		{
+			if (e.KeyData != MASS_DESTRUCTION_KEY_COMBINATION)
+			{
+				return;
+			}
+			removeToolStripMenuItem_Click(sender, e);
 		}
 
 		public List<FormXX> OpenXXSubfilesList()
@@ -432,6 +457,15 @@ namespace SB3Utility
 			}
 		}
 
+		private void imageSubfilesList_KeyUp(object sender, KeyEventArgs e)
+		{
+			if (e.KeyData != MASS_DESTRUCTION_KEY_COMBINATION)
+			{
+				return;
+			}
+			removeToolStripMenuItem_Click(sender, e);
+		}
+
 		private void soundSubfilesList_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
 		{
 			try
@@ -460,11 +494,20 @@ namespace SB3Utility
 			}
 		}
 
+		private void soundSubfilesList_KeyUp(object sender, KeyEventArgs e)
+		{
+			if (e.KeyData != MASS_DESTRUCTION_KEY_COMBINATION)
+			{
+				return;
+			}
+			removeToolStripMenuItem_Click(sender, e);
+		}
+
 		private void saveppToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			try
 			{
-				BackgroundWorker worker = (BackgroundWorker)Gui.Scripting.RunScript(EditorVar + ".SavePP(keepBackup=" + keepBackupToolStripMenuItem.Checked + ", backupExtention=\"" + (string)Gui.Config["BackupExtentionPP"] + "\", background=True)");
+				BackgroundWorker worker = (BackgroundWorker)Gui.Scripting.RunScript(EditorVar + ".SavePP(keepBackup=" + keepBackupToolStripMenuItem.Checked + ", backupExtension=\"" + (string)Gui.Config["BackupExtensionPP"] + "\", background=True)");
 				ShowBlockingDialog(Editor.Parser.FilePath, worker);
 			}
 			catch (Exception ex)
@@ -479,7 +522,7 @@ namespace SB3Utility
 			{
 				if (saveFileDialog1.ShowDialog() == DialogResult.OK)
 				{
-					BackgroundWorker worker = (BackgroundWorker)Gui.Scripting.RunScript(EditorVar + ".SavePP(path=\"" + saveFileDialog1.FileName + "\", keepBackup=" + keepBackupToolStripMenuItem.Checked + ", backupExtention=\"" + (string)Gui.Config["BackupExtentionPP"] + "\", background=True)");
+					BackgroundWorker worker = (BackgroundWorker)Gui.Scripting.RunScript(EditorVar + ".SavePP(path=\"" + saveFileDialog1.FileName + "\", keepBackup=" + keepBackupToolStripMenuItem.Checked + ", backupExtension=\"" + (string)Gui.Config["BackupExtensionPP"] + "\", background=True)");
 					ShowBlockingDialog(saveFileDialog1.FileName, worker);
 				}
 			}
@@ -818,9 +861,93 @@ namespace SB3Utility
 			Gui.Config["KeepBackupOfPP"] = keepBackupToolStripMenuItem.Checked;
 		}
 
-		private void backupExtentionToolStripEditTextBox_AfterEditTextChanged(object sender, EventArgs e)
+		private void backupExtensionToolStripEditTextBox_AfterEditTextChanged(object sender, EventArgs e)
 		{
-			Gui.Config["BackupExtentionPP"] = backupExtentionToolStripEditTextBox.Text;
+			Gui.Config["BackupExtensionPP"] = backupExtensionToolStripEditTextBox.Text;
+		}
+
+		private void registerToolToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				string extension = otherSubfilesList.SelectedItems.Count > 0 ? Path.GetExtension(otherSubfilesList.SelectedItems[0].Text) : null;
+				using (var regTool = new FormPPRegisterTool(extension, (int)Editor.Parser.Format.ppFormatIdx))
+				{
+					regTool.ShowDialog();
+				}
+
+				UpdateOtherSubfilesLists();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private static void UpdateOtherSubfilesLists()
+		{
+			List<DockContent> formPPList;
+			Gui.Docking.DockContents.TryGetValue(typeof(FormPP), out formPPList);
+			foreach (FormPP formPP in formPPList)
+			{
+				foreach (ListViewItem item in formPP.otherSubfilesList.Items)
+				{
+					List<ExternalTool> toolList;
+					item.BackColor =
+							item.Text.ToUpper().EndsWith(".LST") ||
+							ppEditor.ExternalTools.TryGetValue(Path.GetExtension(item.Text).ToUpper(), out toolList)
+							&& toolList.Count > 0
+							? Color.White : Color.LightCoral;
+				}
+			}
+		}
+
+		private void forSelectedExtensionsOnlyToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			if (tabControlSubfiles.SelectedTab == tabPageOtherSubfiles)
+			{
+				HashSet<string> extensions = new HashSet<string>();
+				foreach (ListViewItem item in otherSubfilesList.Items)
+				{
+					if (item.Selected)
+					{
+						extensions.Add(Path.GetExtension(item.Text).ToUpper());
+					}
+				}
+				foreach (string extension in extensions)
+				{
+					List<ExternalTool> toolList;
+					if (ppEditor.ExternalTools.TryGetValue(extension, out toolList))
+					{
+						ExternalTool tool;
+						while (toolList.Count > 0)
+						{
+							tool = toolList[0];
+							string toolVar = FormPPRegisterTool.SearchToolVar(tool);
+							ppEditor.UnregisterExternalTool(tool);
+							Gui.Scripting.Variables.Remove(toolVar);
+						}
+					}
+				}
+
+				UpdateOtherSubfilesLists();
+			}
+		}
+
+		private void aLLRegardlessOfExtensionToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			foreach (List<ExternalTool> toolList in ppEditor.ExternalTools.Values)
+			{
+				while (toolList.Count > 0)
+				{
+					ExternalTool tool = toolList[0];
+					string toolVar = FormPPRegisterTool.SearchToolVar(tool);
+					ppEditor.UnregisterExternalTool(tool);
+					Gui.Scripting.Variables.Remove(toolVar);
+				}
+			}
+
+			UpdateOtherSubfilesLists();
 		}
 
 		private void otherSubfilesList_DoubleClick(object sender, EventArgs e)
@@ -851,6 +978,15 @@ namespace SB3Utility
 			}
 		}
 
+		private void otherSubfilesList_KeyUp(object sender, KeyEventArgs e)
+		{
+			if (e.KeyData != MASS_DESTRUCTION_KEY_COMBINATION)
+			{
+				return;
+			}
+			removeToolStripMenuItem_Click(sender, e);
+		}
+
 		private void OpenOtherSubfilesList()
 		{
 			foreach (ListViewItem item in otherSubfilesList.SelectedItems)
@@ -860,6 +996,18 @@ namespace SB3Utility
 				{
 					FormLST formLST = (FormLST)Gui.Scripting.RunScript(FormVariable + ".OpenLSTSubfile(name=\"" + writeFile.Name + "\")", false);
 					formLST.Activate();
+				}
+
+				string extension = Path.GetExtension(writeFile.Name).ToUpper();
+				List<ExternalTool> toolList;
+				if (ppEditor.ExternalTools.TryGetValue(extension, out toolList))
+				{
+					if (ToolOutputEditor.SelectTool(extension, (int)Editor.Parser.Format.ppFormatIdx, true) == null)
+					{
+						throw new Exception("No tool registered for " + extension + " supports ppFormat " + Editor.Parser.Format.ppFormatIdx + " decoding");
+					}
+					FormToolOutput formToolOutput = (FormToolOutput)Gui.Scripting.RunScript(FormVariable + ".OpenToolOutput(name=\"" + writeFile.Name + "\")", false);
+					formToolOutput.Activate();
 				}
 			}
 		}
@@ -896,6 +1044,52 @@ namespace SB3Utility
 			}
 
 			return child as FormLST;
+		}
+
+		[Plugin]
+		public FormToolOutput OpenToolOutput(string name)
+		{
+			DockContent child;
+			if (!ChildForms.TryGetValue(name, out child))
+			{
+				string childParserVar = null;
+				if (!ChildParserVars.TryGetValue(name, out childParserVar))
+				{
+					childParserVar = Gui.Scripting.GetNextVariable("toolOutputParser");
+					Gui.Scripting.RunScript(childParserVar + " = OpenToolOutput(parser=" + ParserVar + ", name=\"" + name + "\")");
+					if (Gui.Scripting.Variables[childParserVar] == null)
+					{
+						string type = String.Empty;
+						foreach (IWriteFile subfile in Editor.Parser.Subfiles)
+						{
+							if (subfile.Name == name)
+							{
+								type = subfile.GetType().ToString();
+							}
+						}
+						throw new Exception("Unable to create parser for " + name + " type=" + type);
+					}
+					Gui.Scripting.RunScript(EditorVar + ".ReplaceSubfile(file=" + childParserVar + ")");
+					ChildParserVars.Add(name, childParserVar);
+
+					foreach (ListViewItem item in otherSubfilesList.Items)
+					{
+						if (((IWriteFile)item.Tag).Name.Equals(name, StringComparison.InvariantCultureIgnoreCase))
+						{
+							item.Font = new Font(item.Font, FontStyle.Bold);
+							otherSubfilesList.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+							break;
+						}
+					}
+				}
+
+				child = new FormToolOutput(Editor.Parser, childParserVar);
+				child.FormClosing += new FormClosingEventHandler(ChildForms_FormClosing);
+				child.Tag = name;
+				ChildForms.Add(name, child);
+			}
+
+			return child as FormToolOutput;
 		}
 	}
 }

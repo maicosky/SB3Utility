@@ -1,7 +1,7 @@
-﻿#pragma warning disable 1591
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 using SB3Utility;
 
@@ -219,6 +219,219 @@ namespace ODFPlugin
 			}
 		}
 
+		#region ZeroCheck
+
+		public bool ZeroCheck()
+		{
+			bool resultT = TextureSection == null || ZeroCheckTextures();
+			bool resultM = MeshSection == null || ZeroCheckMeshes();
+			bool resultF = ZeroCheckFrames(FrameSection.RootFrame);
+			bool resultE = EnvelopeSection == null || ZeroCheckEnvelopes();
+			bool resultO = MorphSection == null || ZeroCheckMorphs();
+			bool resultA = AnimSection == null || ZeroCheckAnimations(AnimSection);
+			bool resultB = BANMList == null || ZeroCheckBAnim();
+			return resultT && resultM && resultF && resultE && resultO && resultA && resultB;
+		}
+
+		bool ZeroCheckTextures()
+		{
+			bool result = true;
+			foreach (odfTexture tex in TextureSection)
+			{
+				Tuple<string, byte[]>[] checkMembers = new Tuple<string, byte[]>[] {
+					new Tuple<string, byte[]>("Unknown1", tex.Unknown1),
+				};
+				foreach (var member in checkMembers)
+				{
+					if (member.Item2 != null)
+					{
+						for (int i = 0; i < member.Item2.Length; i++)
+						{
+							if (member.Item2[i] != 0)
+							{
+								Report.ReportLog("Zero check failed: Texture " + tex.Name + " " + member.Item1 + " @" + i + " value=" + member.Item2[i]);
+								result = false;
+							}
+						}
+					}
+				}
+			}
+			return result;
+		}
+
+		bool ZeroCheckMeshes()
+		{
+			bool result = true;
+			foreach (odfMesh mesh in MeshSection)
+			{
+				foreach (odfSubmesh submesh in mesh)
+				{
+					Tuple<string, byte[]>[] checkMembers = new Tuple<string, byte[]>[] {
+						new Tuple<string, byte[]>("AlwaysZero1", submesh.AlwaysZero1),
+						new Tuple<string, byte[]>("AlwaysZero2", submesh.AlwaysZero2),
+						new Tuple<string, byte[]>("AlwaysZero3", submesh.AlwaysZero3),
+						new Tuple<string, byte[]>("AlwaysZero4", submesh.AlwaysZero4),
+					};
+					foreach (var member in checkMembers)
+					{
+						if (member.Item2 != null)
+						{
+							for (int i = 0; i < member.Item2.Length; i++)
+							{
+								if (member.Item2[i] != 0)
+								{
+									Report.ReportLog("Zero check failed: Submesh " + submesh.Name + " " + member.Item1 + " @" + i + " value=" + member.Item2[i]);
+									result = false;
+								}
+							}
+						}
+					}
+				}
+			}
+			return result;
+		}
+
+		bool ZeroCheckFrames(odfFrame root)
+		{
+			Tuple<string, byte[]>[] checkMembers = new Tuple<string, byte[]>[] {
+				new Tuple<string, byte[]>("AlwaysZero1", root.AlwaysZero1),
+				new Tuple<string, byte[]>("AlwaysZero2", root.AlwaysZero2),
+				new Tuple<string, byte[]>("AlwaysZero7", root.AlwaysZero7),
+				new Tuple<string, byte[]>("AlwaysZero9", root.AlwaysZero9),
+				new Tuple<string, byte[]>("AlwaysZero11", root.AlwaysZero11),
+			};
+			foreach (var member in checkMembers)
+			{
+				for (int i = 0; i < member.Item2.Length; i++)
+				{
+					if (member.Item2[i] != 0)
+					{
+						Report.ReportLog("Zero check failed: Frame " + root.Name + " " + member.Item1 + " @" + i + " value=" + member.Item2[i]);
+						return false;
+					}
+				}
+			}
+
+			foreach (odfFrame child in root)
+			{
+				if (!ZeroCheckFrames(child))
+					return false;
+			}
+			return true;
+		}
+
+		bool ZeroCheckEnvelopes()
+		{
+			bool result = true;
+
+			for (int i = 0; i < EnvelopeSection.AlwaysZero64.Length; i++)
+			{
+				if (EnvelopeSection.AlwaysZero64[i] != 0)
+				{
+					Report.ReportLog("Zero check failed: Envelope " + "AlwaysZero64" + " @" + i + " value=" + EnvelopeSection.AlwaysZero64[i]);
+					result = false;
+				}
+			}
+
+			foreach (odfBoneList bones in EnvelopeSection)
+			{
+				for (int i = 0; i < bones.AlwaysZero4.Length; i++)
+				{
+					if (bones.AlwaysZero4[i] != 0)
+					{
+						Report.ReportLog("Zero check failed: BoneList " + odf.FindMeshObject(bones.SubmeshId, MeshSection).Name + " " + "AlwaysZero4" + " @" + i + " value=" + bones.AlwaysZero4[i]);
+						result = false;
+					}
+				}
+
+				int numNonZeroBones = 0;
+				foreach (odfBone bone in bones)
+				{
+					for (int i = 0; i < bone.AlwaysZero24perIndex.Length; i++)
+					{
+						if (bone.AlwaysZero24perIndex[i] != 0)
+						{
+							numNonZeroBones++;
+							break;
+						}
+					}
+				}
+				if (numNonZeroBones > 0)
+				{
+					Report.ReportLog("Zero check failed: BoneList " + odf.FindMeshObject(bones.SubmeshId, MeshSection).Name + " with " + numNonZeroBones + " bones with non-zero values in AlwaysZero24perIndex");
+					result = false;
+				}
+			}
+			return result;
+		}
+
+		bool ZeroCheckMorphs()
+		{
+			bool result = true;
+			foreach (odfMorphObject obj in MorphSection)
+			{
+				for (int i = 0; i < obj.AlwaysZero16.Length; i++)
+				{
+					if (obj.AlwaysZero16[i] != 0)
+					{
+						Report.ReportLog("Zero check failed: Morph " + obj.Name + "AlwaysZero16" + " @" + i + " value=" + obj.AlwaysZero16[i]);
+						result = false;
+					}
+				}
+			}
+			return result;
+		}
+
+		bool ZeroCheckAnimations(odfANIMSection animations)
+		{
+			bool result = true;
+			foreach (odfTrack track in animations)
+			{
+				for (int i = 0; i < track.AlwaysZero16.Length; i++)
+				{
+					if (track.AlwaysZero16[i] != 0)
+					{
+						Report.ReportLog("Zero check failed: Animation track " + track.BoneFrameId + " " + "AlwaysZero16" + " @" + i + " value=" + track.AlwaysZero16[i]);
+						result = false;
+					}
+				}
+
+				foreach (odfKeyframe keyframe in track.KeyframeList)
+				{
+					for (int i = 0; i < keyframe.AlwaysZero88.Length; i++)
+					{
+						if (keyframe.AlwaysZero88[i] != 0)
+						{
+							Report.ReportLog("Zero check failed: Animation track " + track.BoneFrameId + " keyframe " + keyframe.Index + " " + "AlwaysZero88" + " @" + i + " value=" + keyframe.AlwaysZero88[i]);
+							result = false;
+						}
+					}
+				}
+			}
+			return result;
+		}
+
+		bool ZeroCheckBAnim()
+		{
+			bool result = true;
+			foreach (odfBANMSection bAnim in BANMList)
+			{
+				if (bAnim.AlwaysZeroName.Name.Length > 0)
+				{
+					Report.ReportLog("Zero check failed: BAnim " + bAnim.Name + " " + "AlwaysZeroName" + "=" + bAnim.AlwaysZeroName);
+					result = false;
+				}
+
+				if (!ZeroCheckAnimations(bAnim))
+				{
+					result = false;
+				}
+			}
+			return result;
+		}
+
+		#endregion ZeroCheck
+
 		public bool loadSubfile(odfFileSection section)
 		{
 			using (BinaryReader reader = ODFFormat.ReadFile(section, ODFPath))
@@ -395,7 +608,7 @@ namespace ODFPlugin
 					id = new ObjectID(reader.ReadBytes(4));
 
 					int unknown1 = reader.ReadInt32();
-					int unknown2 = reader.ReadInt32();
+					byte[] alwaysZero1 = reader.ReadBytes(4);
 
 					ObjectID materialId = new ObjectID(reader.ReadBytes(4));
 					ObjectID[] texID = new ObjectID[4];
@@ -404,7 +617,9 @@ namespace ODFPlugin
 						texID[texIdx] = new ObjectID(reader.ReadBytes(4));
 					}
 
-					byte[] alwaysZero20 = reader.ReadBytes(20);
+					UInt32 unknown31 = reader.ReadUInt32();
+
+					byte[] alwaysZero2 = reader.ReadBytes(16);
 
 					int unknown3 = reader.ReadInt32();
 
@@ -426,10 +641,11 @@ namespace ODFPlugin
 					}
 					odfSubmesh submesh = new odfSubmesh(name, id, meshSection._FormatType);
 					submesh.Unknown1 = unknown1;
-					submesh.Unknown2 = unknown2;
+					submesh.AlwaysZero1 = alwaysZero1;
 					submesh.MaterialId = materialId;
 					submesh.TextureIds = texID;
-					submesh.Unknown3 = alwaysZero20;
+					submesh.Unknown31 = unknown31;
+					submesh.AlwaysZero2 = alwaysZero2;
 					submesh.Unknown4 = unknown3;
 					submesh.Unknown5 = unknown4;
 					submesh.Unknown6 = unknown5;
@@ -440,7 +656,7 @@ namespace ODFPlugin
 						submesh.Unknown8 = numVertIndicesOrUnknown;
 						numVertices = BitConverter.ToInt32(unknownOrNumVerts, 0);
 						numVertexIndices = BitConverter.ToInt32(unknownOrNumVertIndices, 0);
-						submesh.Unknown9 = reader.ReadBytes(448);
+						submesh.AlwaysZero3 = reader.ReadBytes(448);
 					}
 					else
 					{
@@ -453,7 +669,7 @@ namespace ODFPlugin
 					submesh.VertexList = ParseVertexList(reader, numVertices);
 					submesh.FaceList = ParseFaceList(reader, numVertexIndices / 3);
 
-					submesh.Unknown10 = reader.ReadBytes(24);
+					submesh.AlwaysZero4 = reader.ReadBytes(24);
 
 					mesh.AddChild(submesh);
 				}
@@ -516,19 +732,19 @@ namespace ODFPlugin
 				odfFrame frame = new odfFrame(name, id, 4);
 
 				frame.Matrix = reader.ReadMatrix();
-				frame.Unknown1 = reader.ReadBytes(44);
+				frame.AlwaysZero1 = reader.ReadBytes(44);
 				frame.ParentId = new ObjectID(reader.ReadBytes(4));
 				frame.MeshId = new ObjectID(reader.ReadBytes(4));
-				frame.Unknown2 = reader.ReadBytes(216);
+				frame.AlwaysZero2 = reader.ReadBytes(216);
 				frame.Unknown3 = reader.ReadInt32();
 				frame.Unknown4 = reader.ReadSingleArray(8);
-				frame.Unknown5 = reader.ReadBytes(4);
+				frame.Unknown5 = reader.ReadUInt32();
 				frame.Unknown6 = reader.ReadInt32();
-				frame.Unknown7 = reader.ReadBytes(4);
+				frame.AlwaysZero7 = reader.ReadBytes(4);
 				frame.Unknown8 = reader.ReadSingle();
-				frame.Unknown9 = reader.ReadBytes(0x1FC);
+				frame.AlwaysZero9 = reader.ReadBytes(0x1FC);
 				frame.Unknown10 = reader.ReadSingle();
-				frame.Unknown11 = reader.ReadBytes(8);
+				frame.AlwaysZero11 = reader.ReadBytes(8);
 				frame.Unknown12 = reader.ReadSingle();
 
 				if (objSection.Count > 0)

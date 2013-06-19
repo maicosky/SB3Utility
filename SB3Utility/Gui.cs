@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.IO;
 using System.Windows.Forms;
 using System.Configuration;
 using WeifenLuo.WinFormsUI.Docking;
@@ -11,13 +11,13 @@ namespace SB3Utility
 {
 	public static class Gui
 	{
-		public static string Version = "0.4.42.52";
+		public static string Version = "0.4.42.53";
 
 		public static IScripting Scripting { get; set; }
 		public static IDocking Docking { get; set; }
 		public static IImageControl ImageControl { get; set; }
 		public static IRenderer Renderer { get; set; }
-		public static System.Configuration.ApplicationSettingsBase Config;
+		public static ApplicationSettingsBase Config;
 	}
 
 	public interface IScripting

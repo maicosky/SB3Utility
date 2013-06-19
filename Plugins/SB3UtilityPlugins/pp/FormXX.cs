@@ -114,6 +114,8 @@ namespace SB3Utility
 
 		private HashSet<string> SkinFrames = new HashSet<string>();
 
+		private const Keys MASS_DESTRUCTION_KEY_COMBINATION = Keys.Delete | Keys.Shift;
+
 		public FormXX(string path, string variable)
 		{
 			try
@@ -1585,6 +1587,38 @@ namespace SB3Utility
 			}
 		}
 
+		private void treeViewObjectTree_KeyUp(object sender, KeyEventArgs e)
+		{
+			if (e.KeyData != MASS_DESTRUCTION_KEY_COMBINATION || treeViewObjectTree.SelectedNode == null)
+			{
+				return;
+			}
+			DragSource? src = treeViewObjectTree.SelectedNode.Tag as DragSource?;
+			if (src != null)
+			{
+				if (src.Value.Type == typeof(xxFrame))
+				{
+					buttonFrameRemove_Click(null, null);
+				}
+				else if (src.Value.Type == typeof(xxMesh))
+				{
+					buttonMeshRemove_Click(null, null);
+				}
+				else if (src.Value.Type == typeof(xxBone))
+				{
+					buttonBoneRemove_Click(null, null);
+				}
+				else if (src.Value.Type == typeof(xxMaterial))
+				{
+					buttonMaterialRemove_Click(null, null);
+				}
+				else if (src.Value.Type == typeof(xxTexture))
+				{
+					buttonTextureRemove_Click(null, null);
+				}
+			}
+		}
+
 		private void listViewMesh_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
 		{
 			try
@@ -1649,6 +1683,15 @@ namespace SB3Utility
 			}
 		}
 
+		private void listViewMesh_KeyUp(object sender, KeyEventArgs e)
+		{
+			if (e.KeyData != MASS_DESTRUCTION_KEY_COMBINATION || loadedMesh == -1)
+			{
+				return;
+			}
+			buttonMeshRemove_Click(null, null);
+		}
+
 		private void listViewMaterial_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
 		{
 			try
@@ -1690,6 +1733,15 @@ namespace SB3Utility
 			{
 				Utility.ReportException(ex);
 			}
+		}
+
+		private void listViewMaterial_KeyUp(object sender, KeyEventArgs e)
+		{
+			if (e.KeyData != MASS_DESTRUCTION_KEY_COMBINATION || loadedMaterial == -1)
+			{
+				return;
+			}
+			buttonMaterialRemove_Click(null, null);
 		}
 
 		private void listViewTexture_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
@@ -1735,9 +1787,23 @@ namespace SB3Utility
 			}
 		}
 
+		private void listViewTexture_KeyUp(object sender, KeyEventArgs e)
+		{
+			if (e.KeyData != MASS_DESTRUCTION_KEY_COMBINATION || loadedTexture == -1)
+			{
+				return;
+			}
+			buttonTextureRemove_Click(null, null);
+		}
+
 		private void listViewMeshMaterial_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
 		{
 			listViewMaterial_ItemSelectionChanged(sender, e);
+		}
+
+		private void listViewMeshMaterial_KeyUp(object sender, KeyEventArgs e)
+		{
+			listViewMaterial_KeyUp(sender, e);
 		}
 
 		private void listViewMeshTexture_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
@@ -1745,9 +1811,19 @@ namespace SB3Utility
 			listViewTexture_ItemSelectionChanged(sender, e);
 		}
 
+		private void listViewMeshTexture_KeyUp(object sender, KeyEventArgs e)
+		{
+			listViewTexture_KeyUp(sender, e);
+		}
+
 		private void listViewMaterialMesh_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
 		{
 			listViewMesh_ItemSelectionChanged(sender, e);
+		}
+
+		private void listViewMaterialMesh_KeyUp(object sender, KeyEventArgs e)
+		{
+			listViewMesh_KeyUp(sender, e);
 		}
 
 		private void listViewMaterialTexture_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
@@ -1755,14 +1831,29 @@ namespace SB3Utility
 			listViewTexture_ItemSelectionChanged(sender, e);
 		}
 
+		private void listViewMaterialTexture_KeyUp(object sender, KeyEventArgs e)
+		{
+			listViewTexture_KeyUp(sender, e);
+		}
+
 		private void listViewTextureMesh_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
 		{
 			listViewMesh_ItemSelectionChanged(sender, e);
 		}
 
+		private void listViewTextureMesh_KeyUp(object sender, KeyEventArgs e)
+		{
+			listViewMesh_KeyUp(sender, e);
+		}
+
 		private void listViewTextureMaterial_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
 		{
 			listViewMaterial_ItemSelectionChanged(sender, e);
+		}
+
+		private void listViewTextureMaterial_KeyUp(object sender, KeyEventArgs e)
+		{
+			listViewMaterial_KeyUp(sender, e);
 		}
 
 		TreeNode FindFrameNode(string name, TreeNodeCollection nodes)
@@ -1894,6 +1985,18 @@ namespace SB3Utility
 			{
 				if (e.Item is TreeNode)
 				{
+					xxMesh draggedMesh = null;
+					TreeNode draggedItem = (TreeNode)e.Item;
+					if (draggedItem.Tag is DragSource)
+					{
+						DragSource src = (DragSource)draggedItem.Tag;
+						if (src.Type == typeof(xxMesh))
+						{
+							draggedItem = ((TreeNode)e.Item).Parent;
+							draggedMesh = Editor.Meshes[(int)src.Id].Mesh;
+						}
+					}
+
 					if ((bool)Gui.Config["WorkspaceScripting"])
 					{
 						if (EditorFormVar == null)
@@ -1901,10 +2004,53 @@ namespace SB3Utility
 							EditorFormVar = Gui.Scripting.GetNextVariable("EditorFormVar");
 							Gui.Scripting.RunScript(EditorFormVar + " = SearchEditorForm(\"" + this.ToolTipText + "\")");
 						}
-						SetDraggedNode((TreeNode)e.Item);
+						SetDraggedNode(draggedItem);
 					}
 
-					treeViewObjectTree.DoDragDrop(e.Item, DragDropEffects.Copy);
+					treeViewObjectTree.DoDragDrop(draggedItem, DragDropEffects.Copy);
+
+					if (draggedMesh != null && draggedMesh.SubmeshList.Count > 0 && Editor.Parser.MaterialList.Count > 0)
+					{
+						HashSet<int> matIndices = new HashSet<int>();
+						HashSet<int> texIndices = new HashSet<int>();
+						foreach (xxSubmesh submesh in draggedMesh.SubmeshList)
+						{
+							if (submesh.MaterialIndex >= 0)
+							{
+								matIndices.Add(submesh.MaterialIndex);
+								xxMaterialTexture[] matTextures = Editor.Parser.MaterialList[submesh.MaterialIndex].Textures;
+								foreach (xxMaterialTexture matTex in matTextures)
+								{
+									if (matTex != null)
+									{
+										int texId = Editor.GetTextureId(matTex.Name);
+										texIndices.Add(texId);
+									}
+								}
+							}
+						}
+
+						TreeNode materialsNode = treeViewObjectTree.Nodes[1];
+						foreach (TreeNode matNode in materialsNode.Nodes)
+						{
+							DragSource src = (DragSource)matNode.Tag;
+							if (matIndices.Contains((int)src.Id))
+							{
+								ItemDragEventArgs args = new ItemDragEventArgs(MouseButtons.None, matNode);
+								treeViewObjectTree_ItemDrag(null, args);
+							}
+						}
+						TreeNode texturesNode = treeViewObjectTree.Nodes[2];
+						foreach (TreeNode texNode in texturesNode.Nodes)
+						{
+							DragSource src = (DragSource)texNode.Tag;
+							if (texIndices.Contains((int)src.Id))
+							{
+								ItemDragEventArgs args = new ItemDragEventArgs(MouseButtons.None, texNode);
+								treeViewObjectTree_ItemDrag(null, args);
+							}
+						}
+					}
 				}
 			}
 			catch (Exception ex)
@@ -3206,6 +3352,7 @@ namespace SB3Utility
 				{
 					Gui.Scripting.RunScript(EditorVar + ".MoveSubmesh(meshId=" + loadedMesh + ", submeshId=" + (int)checkBoxMeshReorderSubmesh.Tag + ", newPosition=" + dataGridViewMesh.SelectedRows[0].Index + ")");
 
+					RecreateRenderObjects();
 					int pos = dataGridViewMesh.SelectedRows[0].Index;
 					DataGridViewRow src = dataGridViewMesh.Rows[(int)checkBoxMeshReorderSubmesh.Tag];
 					dataGridViewMesh.Rows.Remove(src);

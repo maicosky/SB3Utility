@@ -1,4 +1,10 @@
-﻿[0.4.42.52]
+﻿[0.4.42.53]
+  - Added Zero Check for identifying unknowns
+  - Found new unknown field, separated more AlwaysZero fields
+  - Stability fixes for missing ODF sections
+  - Fixed after deleting submeshes the Object Tree wasn't updated and produced crashes when a node of a bone was clicked.
+
+[0.4.42.52]
   - Fixed ODF corruption after use of CopyBonesNear and CopyBonesOrder
   - Fixed crash when replacing meshes which used non existing materials
   - Fixed "cant rename submesh without renaming another" after replacing meshes

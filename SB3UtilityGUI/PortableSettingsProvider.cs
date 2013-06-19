@@ -9,7 +9,12 @@
  * http://creativecommons.org/licenses/by-sa/3.0/legalcode
  *
  *
+ * Changes:
+ * - Added workaround for changed default namespaces
+ * - Synchronized deleted Properties
  *
+ * Todo:
+ * - SetPropertyValues doesn't consider isDirty
  *
  *************************************************************/
 using System;
@@ -38,7 +43,7 @@ public class PortableSettingsProvider : SettingsProvider
 	const string USERNODE = "userSettings";
 
 	// Application Specific Node
-	string APPNODE = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name + ".Properties.Settings";
+	string APPNODE = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name/*wrong, should be RootNamespace*/ + ".Properties.Settings";
 
 	private System.Xml.XmlDocument xmlDoc = null;
 
@@ -98,10 +103,17 @@ public class PortableSettingsProvider : SettingsProvider
 	// Save any of the applications settings that have changed (flagged as "dirty")
 	public override void SetPropertyValues(SettingsContext sContext, SettingsPropertyValueCollection settingsColl)
 	{
+		DeleteUnusedSettings(settingsColl);
+
 		// Set the values in XML
 		foreach (SettingsPropertyValue spVal in settingsColl)
 		{
-			SetSetting(spVal);
+// Todo: shouldn't we consider isDirty?
+//			if (spVal.IsDirty)
+//			{
+				SetSetting(spVal);
+//				spVal.IsDirty = false;
+//			}
 		}
 
 		// Write the XML file to disk
@@ -135,6 +147,9 @@ public class PortableSettingsProvider : SettingsProvider
 				try
 				{
 					xmlDoc.Load(System.IO.Path.Combine(GetAppPath(), GetSettingsFilename()));
+
+					XmlNode AppPropertiesSettings = xmlDoc.SelectSingleNode("//setting").ParentNode;
+					APPNODE = AppPropertiesSettings.Name;
 				}
 
 				// If the file does not exist on disk, catch the exception then create the XML template for the file.
@@ -254,6 +269,28 @@ public class PortableSettingsProvider : SettingsProvider
 			}
 		}
 		return retVal;
+	}
+
+	private void DeleteUnusedSettings(SettingsPropertyValueCollection settingsColl)
+	{
+		XmlNodeList settings = XMLConfig.SelectNodes("//setting");
+		XmlNode AppPropertiesSettings = settings[0].ParentNode;
+		foreach (XmlNode setting in settings)
+		{
+			string searchName = setting.Attributes["name"].Value;
+			foreach (SettingsPropertyValue value in settingsColl)
+			{
+				if (value.Name == searchName)
+				{
+					searchName = null;
+					break;
+				}
+			}
+			if (searchName != null)
+			{
+				AppPropertiesSettings.RemoveChild(setting);
+			}
+		}
 	}
 
 	private void SetSetting(SettingsPropertyValue setProp)

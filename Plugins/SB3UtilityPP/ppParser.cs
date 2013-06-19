@@ -23,11 +23,11 @@ namespace SB3Utility
 			this.Subfiles = format.ppHeader.ReadHeader(path, format);
 		}
 
-		public BackgroundWorker WriteArchive(string destPath, bool keepBackup, string backupExtention, bool background)
+		public BackgroundWorker WriteArchive(string destPath, bool keepBackup, string backupExtension, bool background)
 		{
 			this.destPath = destPath;
 			this.keepBackup = keepBackup;
-			this.backupExt = backupExtention;
+			this.backupExt = backupExtension;
 
 			BackgroundWorker worker = new BackgroundWorker();
 			worker.WorkerSupportsCancellation = true;

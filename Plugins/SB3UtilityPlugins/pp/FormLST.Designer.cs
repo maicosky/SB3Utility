@@ -95,6 +95,7 @@ namespace SB3Utility
 			this.syntaxHighlightingTextBoxLSTContents.BackColor = System.Drawing.Color.Gainsboro;
 			this.syntaxHighlightingTextBoxLSTContents.CaseSensitive = false;
 			this.syntaxHighlightingTextBoxLSTContents.DetectUrls = false;
+			this.syntaxHighlightingTextBoxLSTContents.EnableAutoDragDrop = true;
 			this.syntaxHighlightingTextBoxLSTContents.FilterAutoComplete = false;
 			this.syntaxHighlightingTextBoxLSTContents.Font = new System.Drawing.Font("MS PGothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
 			this.syntaxHighlightingTextBoxLSTContents.HideSelection = false;

@@ -62,5 +62,15 @@ namespace ODFPlugin.Properties {
                 return ((bool)(this["DeleteMorphsAutomatically"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(PortableSettingsProvider))]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ZeroCheck {
+            get {
+                return ((bool)(this["ZeroCheck"]));
+            }
+        }
     }
 }

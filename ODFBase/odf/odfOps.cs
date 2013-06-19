@@ -336,17 +336,17 @@ namespace ODFPlugin
 
 		public static void CopyUnknowns(odfFrame src, odfFrame dest)
 		{
-			dest.Unknown1 = (byte[])src.Unknown1.Clone();
-			dest.Unknown2 = (byte[])src.Unknown2.Clone();
+			dest.AlwaysZero1 = (byte[])src.AlwaysZero1.Clone();
+			dest.AlwaysZero2 = (byte[])src.AlwaysZero2.Clone();
 			dest.Unknown3 = src.Unknown3;
 			dest.Unknown4 = (float[])src.Unknown4.Clone();
-			dest.Unknown5 = (byte[])src.Unknown5.Clone();
+			dest.Unknown5 = src.Unknown5;
 			dest.Unknown6 = src.Unknown6;
-			dest.Unknown7 = (byte[])src.Unknown7.Clone();
+			dest.AlwaysZero7 = (byte[])src.AlwaysZero7.Clone();
 			dest.Unknown8 = src.Unknown8;
-			dest.Unknown9 = (byte[])src.Unknown9.Clone();
+			dest.AlwaysZero9 = (byte[])src.AlwaysZero9.Clone();
 			dest.Unknown10 = src.Unknown10;
-			dest.Unknown11 = (byte[])src.Unknown11.Clone();
+			dest.AlwaysZero11 = (byte[])src.AlwaysZero11.Clone();
 			dest.Unknown12 = src.Unknown12;
 		}
 
@@ -358,8 +358,8 @@ namespace ODFPlugin
 		public static void CopyUnknowns(odfSubmesh srcSubmesh, odfSubmesh destSubmesh, int format)
 		{
 			destSubmesh.Unknown1 = srcSubmesh.Unknown1;
-			destSubmesh.Unknown2 = srcSubmesh.Unknown2;
-			destSubmesh.Unknown3 = (byte[])srcSubmesh.Unknown3.Clone();
+			destSubmesh.AlwaysZero1 = (byte[])srcSubmesh.AlwaysZero1.Clone();
+			destSubmesh.AlwaysZero2 = (byte[])srcSubmesh.AlwaysZero2.Clone();
 			destSubmesh.Unknown4 = srcSubmesh.Unknown4;
 			destSubmesh.Unknown5 = srcSubmesh.Unknown5;
 			destSubmesh.Unknown6 = srcSubmesh.Unknown6;
@@ -367,14 +367,14 @@ namespace ODFPlugin
 			destSubmesh.Unknown8 = (byte[])srcSubmesh.Unknown8.Clone();
 			if (format < 10)
 			{
-				if (srcSubmesh.Unknown9 != null)
-					destSubmesh.Unknown9 = (byte[])srcSubmesh.Unknown9.Clone();
-				else if (destSubmesh.Unknown9 == null)
-					destSubmesh.Unknown9 = new byte[448];
+				if (srcSubmesh.AlwaysZero3 != null)
+					destSubmesh.AlwaysZero3 = (byte[])srcSubmesh.AlwaysZero3.Clone();
+				else if (destSubmesh.AlwaysZero3 == null)
+					destSubmesh.AlwaysZero3 = new byte[448];
 			}
 			else
-				destSubmesh.Unknown9 = null;
-			destSubmesh.Unknown10 = (byte[])srcSubmesh.Unknown10.Clone();
+				destSubmesh.AlwaysZero3 = null;
+			destSubmesh.AlwaysZero4 = (byte[])srcSubmesh.AlwaysZero4.Clone();
 		}
 
 		public static void CreateUnknown(odfMaterial material)

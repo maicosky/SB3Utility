@@ -68,7 +68,7 @@
     <Setting Name="WidthHeight" Provider="PortableSettingsProvider" Type="System.Drawing.Size" Scope="Application">
       <Value Profile="(Default)">0, 0</Value>
     </Setting>
-    <Setting Name="BackupExtentionPP" Provider="PortableSettingsProvider" Type="System.String" Scope="Application">
+    <Setting Name="BackupExtensionPP" Provider="PortableSettingsProvider" Type="System.String" Scope="Application">
       <Value Profile="(Default)">.pp</Value>
     </Setting>
     <Setting Name="WorkspaceLogMessages" Provider="PortableSettingsProvider" Type="System.Boolean" Scope="Application">

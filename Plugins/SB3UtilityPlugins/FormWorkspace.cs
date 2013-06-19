@@ -571,6 +571,14 @@ namespace SB3Utility
 				treeView.AddChild(type);
 			}
 
+			foreach (TreeNode child in type.Nodes)
+			{
+				DragSource? childSource = child.Tag as DragSource?;
+				if (source.Value.Id == childSource.Value.Id)
+				{
+					return child;
+				}
+			}
 			treeView.AddChild(type, clone);
 
 			List<TreeNode> treeNodes = null;

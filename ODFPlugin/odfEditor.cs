@@ -81,31 +81,25 @@ namespace ODFPlugin
 
 		[Plugin]
 		public void SetFrameUnknowns(int idx,
-			byte[] unknown1, byte[] unknown2, int unknown3, float[] unknown4, byte[] unknown5, int unknown6,
-			byte[] unknown7, float unknown8, byte[] unknown9, float unknown10, byte[] unknown11, float unknown12)
+			int Unknown3, object[] Unknown4, int Unknown5, int Unknown6, double Unknown8, double Unknown10, double Unknown12)
 		{
-			odfFrame frame = Parser.FrameSection[idx];
-			frame.Unknown1 = (byte[])unknown1.Clone();
-			frame.Unknown2 = (byte[])unknown2.Clone();
-			frame.Unknown3 = unknown3;
-			frame.Unknown4 = (float[])unknown4.Clone();
-			frame.Unknown5 = (byte[])unknown5.Clone();
-			frame.Unknown6 = unknown6;
-			frame.Unknown7 = (byte[])unknown7.Clone();
-			frame.Unknown8 = unknown8;
-			frame.Unknown9 = (byte[])unknown9.Clone();
-			frame.Unknown10 = unknown10;
-			frame.Unknown11 = (byte[])unknown11.Clone();
-			frame.Unknown12 = unknown12;
+			odfFrame frame = Frames[idx];
+			frame.Unknown3 = Unknown3;
+			frame.Unknown4 = Utility.ConvertToFloatArray(Unknown4);
+			frame.Unknown5 = (UInt32)Unknown5;
+			frame.Unknown6 = Unknown6;
+			frame.Unknown8 = (float)Unknown8;
+			frame.Unknown10 = (float)Unknown10;
+			frame.Unknown12 = (float)Unknown12;
 		}
 
 		[Plugin]
 		public void SetSubmeshUnknowns(int meshIdx, int submeshIdx,
-			int Unknown1, int Unknown2, int Unknown4, int Unknown5, int Unknown6, int Unknown7, double Unknown8)
+			int Unknown1, int Unknown31, int Unknown4, int Unknown5, int Unknown6, int Unknown7, double Unknown8)
 		{
 			odfSubmesh submesh = Parser.MeshSection[meshIdx][submeshIdx];
 			submesh.Unknown1 = Unknown1;
-			submesh.Unknown2 = Unknown2;
+			submesh.Unknown31 = (UInt32)Unknown31;
 			submesh.Unknown4 = Unknown4;
 			submesh.Unknown5 = Unknown5;
 			submesh.Unknown6 = Unknown6;
@@ -653,12 +647,16 @@ namespace ODFPlugin
 		public void SetMaterialPhong(int origin, int idx, object[] diffuse, object[] ambient, object[] emissive, object[] specular, double shininess, double unknown)
 		{
 			odfMaterial mat = Parser.MaterialSection[idx];
+			float[] diff = Utility.ConvertToFloatArray(diffuse);
+			float[] amb = Utility.ConvertToFloatArray(ambient);
+			float[] emi = Utility.ConvertToFloatArray(emissive);
+			float[] spec = Utility.ConvertToFloatArray(specular);
 			if (origin == 0)
 			{
-				mat.Diffuse = new Color4((float)(double)diffuse[3], (float)(double)diffuse[0], (float)(double)diffuse[1], (float)(double)diffuse[2]);
-				mat.Ambient = new Color4((float)(double)ambient[3], (float)(double)ambient[0], (float)(double)ambient[1], (float)(double)ambient[2]);
-				mat.Emissive = new Color4((float)(double)emissive[3], (float)(double)emissive[0], (float)(double)emissive[1], (float)(double)emissive[2]);
-				mat.Specular = new Color4((float)(double)specular[3], (float)(double)specular[0], (float)(double)specular[1], (float)(double)specular[2]);
+				mat.Diffuse = new Color4(diff[3], diff[0], diff[1], diff[2]);
+				mat.Ambient = new Color4(amb[3], amb[0], amb[1], amb[2]);
+				mat.Emissive = new Color4(emi[3], emi[0], emi[1], emi[2]);
+				mat.Specular = new Color4(spec[3], spec[0], spec[1], spec[2]);
 				mat.SpecularPower = (float)shininess;
 				mat.Unknown1 = (float)unknown;
 			}
@@ -667,10 +665,10 @@ namespace ODFPlugin
 				odfMaterialList matList = odf.FindMaterialList(mat.Id, Parser.MataSection);
 				odfMaterialPropertySet matProp = matList[origin - 1];
 				matProp.Unknown1 = (float)unknown;
-				matProp.Diffuse = new Color4((float)(double)diffuse[3], (float)(double)diffuse[0], (float)(double)diffuse[1], (float)(double)diffuse[2]);
-				matProp.Ambient = new Color4((float)(double)ambient[3], (float)(double)ambient[0], (float)(double)ambient[1], (float)(double)ambient[2]);
-				matProp.Emissive = new Color4((float)(double)emissive[3], (float)(double)emissive[0], (float)(double)emissive[1], (float)(double)emissive[2]);
-				matProp.Specular = new Color4((float)(double)specular[3], (float)(double)specular[0], (float)(double)specular[1], (float)(double)specular[2]);
+				matProp.Diffuse = new Color4(diff[3], diff[0], diff[1], diff[2]);
+				matProp.Ambient = new Color4(amb[3], amb[0], amb[1], amb[2]);
+				matProp.Emissive = new Color4(emi[3], emi[0], emi[1], emi[2]);
+				matProp.Specular = new Color4(spec[3], spec[0], spec[1], spec[2]);
 				matProp.SpecularPower = (float)shininess;
 			}
 		}
