@@ -20,6 +20,10 @@ namespace PPD_Preview_Clothes
 					{
 						return new sviexParser(subfile.CreateReadStream(), subfile.Name);
 					}
+					if (parser.Subfiles[i] is sviexParser)
+					{
+						return (sviexParser)parser.Subfiles[i];
+					}
 
 					break;
 				}

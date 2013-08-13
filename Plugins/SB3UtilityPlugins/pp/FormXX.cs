@@ -622,7 +622,7 @@ namespace SB3Utility
 			return false;
 		}
 
-		void RecreateRenderObjects()
+		public void RecreateRenderObjects()
 		{
 			DisposeRenderObjects();
 

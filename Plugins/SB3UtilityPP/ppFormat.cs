@@ -43,7 +43,8 @@ namespace SB3Utility
 		Hero,
 		HET,
 		HETDTL,
-		PPD
+		PPD,
+		Musumakeup
 	}
 
 	public abstract class ppFormat
@@ -81,7 +82,8 @@ namespace SB3Utility
 			new ppFormat_Hero(),
 			new ppFormat_HET(),
 			new ppFormat_HETDTL(),
-			new ppFormat_PPD()
+			new ppFormat_PPD(),
+			new ppFormat_Musumakeup()
 		};
 
 		public abstract Stream ReadStream(Stream stream);
@@ -105,9 +107,9 @@ namespace SB3Utility
 		}
 
 		#region GetFormat
-		public static ppFormat GetFormat(string path)
+		public static ppFormat GetFormat(string path, out ppHeader header)
 		{
-			ppHeader header = null;
+			header = null;
 			for (int i = 0; i < ppHeader.Array.Length; i++)
 			{
 				try
@@ -139,12 +141,6 @@ namespace SB3Utility
 							break;
 						}
 					}
-				}
-
-				if (resultFormat == null)
-				{
-					resultFormat = header.ppFormats[0];
-					Report.ReportLog("Couldn't auto-detect the ppFormat for " + path + ". Using " + resultFormat.Name + " instead");
 				}
 			}
 
@@ -864,6 +860,20 @@ namespace SB3Utility
 				0x7E, 0x59, 0x64, 0x6A, 0xDF, 0x21, 0x30, 0xEF,
 				0x05, 0x29, 0x4A, 0xE4, 0xF6, 0x49, 0xAF, 0xF9,
 				0x63, 0x77, 0xA8, 0x72, 0x22, 0x46, 0x9E, 0x85 });
+		}
+	}
+
+	public class ppFormat_Musumakeup : ppFormat_WakeariHeader
+	{
+		public ppFormat_Musumakeup() : base("Musumakeup", ppFormatIdx.Musumakeup) { }
+
+		protected override ICryptoTransform CryptoTransform()
+		{
+			return new CryptoTransformOneCode(new byte[] {
+				0xAD, 0x6B, 0x04, 0x3D, 0x86, 0x1B, 0x9B, 0x77,
+				0xA6, 0xFB, 0x5F, 0x71, 0xB6, 0x01, 0x99, 0x17,
+				0xB2, 0xB5, 0x61, 0xBE, 0x9E, 0xF0, 0xB5, 0xBF,
+				0x75, 0xE3, 0xC9, 0x65, 0x63, 0x5C, 0x9E, 0x0A });
 		}
 	}
 

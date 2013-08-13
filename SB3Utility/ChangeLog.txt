@@ -1,4 +1,12 @@
-﻿[0.4.42.53]
+﻿[0.4.43]
+  - Added reopening pp files with selected format: "New Source Format" menu option
+  - Added ppEditor method SetFormat(int sourceId, int destinationId)
+  - Fixed SB3UtilityScript crash in ppEditor constructor
+  - Added support for Musumakeup
+  - PPD_Clothes_Preview Plugin fixed and added options for SVIEX Normals Approximation
+  - PPD_Clothes_Preview Plugin SVIEX Normals preview
+
+[0.4.42.53]
   - Fixed syntax error: Extensions. Skript language affected in SavePP parameter
   - Added dropping meshes from the Object Tree into a workspace.
   - Added a filter which ignores every second instance of any object in that workspace.

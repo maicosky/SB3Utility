@@ -20,7 +20,7 @@ namespace SB3Utility
 
 		public ppEditor(ppParser parser)
 		{
-			if (ExternalTools == null)
+			if (ExternalTools == null && Gui.Config != null)
 			{
 				ExternalTools = new Dictionary<string, List<ExternalTool>>();
 
@@ -39,10 +39,33 @@ namespace SB3Utility
 			Parser = parser;
 		}
 
+		public ppEditor(string path, ppHeader header) : this(new ppParser(path, header.ppFormats[0]))
+		{
+			Report.ReportLog("Couldn't auto-detect the ppFormat for " + path + ". Using " + Parser.Format + " instead");
+		}
+
+		public ppEditor(ppHeader parser)
+		{
+			throw new Exception("Either use OpenPP(path, format) or use ppEditor(path, header).");
+		}
+
 		[Plugin]
 		public void SetFormat(int id)
 		{
 			Parser.Format = ppFormat.Array[id];
+		}
+
+		[Plugin]
+		public void SetFormat(int sourceId, int destinationId)
+		{
+			Parser.Format = ppFormat.Array[destinationId];
+			foreach (IWriteFile subfile in Parser.Subfiles)
+			{
+				if (subfile is ppSubfile)
+				{
+					((ppSubfile)subfile).ppFormat = ppFormat.Array[sourceId];
+				}
+			}
 		}
 
 		[Plugin]

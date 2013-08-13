@@ -13,12 +13,17 @@ namespace SB3Utility
 		/// <param name="path"><b>[DefaultVar]</b> Path of the file.</param>
 		/// <returns>A ppParser that represents the .pp archive.</returns>
 		[Plugin]
-		public static ppParser OpenPP([DefaultVar]string path)
+		public static object OpenPP([DefaultVar]string path)
 		{
-			ppFormat format = ppFormat.GetFormat(path);
+			ppHeader header;
+			ppFormat format = ppFormat.GetFormat(path, out header);
 			if (format == null)
 			{
-				throw new Exception("Couldn't auto-detect the ppFormat");
+				if (header == null)
+				{
+					throw new Exception("Couldn't auto-detect the ppFormat");
+				}
+				return header;
 			}
 			return new ppParser(path, format);
 		}

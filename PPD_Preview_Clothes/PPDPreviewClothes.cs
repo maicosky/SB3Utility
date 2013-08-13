@@ -111,7 +111,7 @@ namespace PPD_Preview_Clothes
 			String clothPreviewPath = Path.GetDirectoryName(parser.FilePath) + @"\" + subfile.Name + ".preview";
 			Plugins.ExportSubfile(parser, subfile.Name, clothPreviewPath);
 			lastBasePath = Path.GetDirectoryName(parser.FilePath) + @"\base.pp";
-			ppParser basePP = Plugins.OpenPP(lastBasePath);
+			ppParser basePP = (ppParser)Plugins.OpenPP(lastBasePath);
 			ppEditor baseEditor = new ppEditor(basePP);
 			String sampleBodyPath = Path.GetDirectoryName(parser.FilePath) + @"\sample_body.xx.$org$";
 			if (!File.Exists(sampleBodyPath))
@@ -148,7 +148,7 @@ namespace PPD_Preview_Clothes
 			String sampleBodyPath = Path.GetDirectoryName(lastBasePath) + @"\sample_body.xx.$org$";
 			if (File.Exists(sampleBodyPath))
 			{
-				ppParser basePP = Plugins.OpenPP(lastBasePath);
+				ppParser basePP = (ppParser)Plugins.OpenPP(lastBasePath);
 				ppEditor baseEditor = new ppEditor(basePP);
 				baseEditor.RemoveSubfile("sample_body.xx");
 				baseEditor.AddSubfile(sampleBodyPath);

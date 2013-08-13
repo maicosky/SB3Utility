@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using WeifenLuo.WinFormsUI.Docking;
 using System.Windows.Forms;
+using SlimDX;
 
 using SB3Utility;
 
@@ -314,7 +315,7 @@ namespace PPD_Preview_Clothes
 
 					sviexEditor srcEditor = (sviexEditor)Gui.Scripting.RunScript(srcEditorVar + " = sviexEditor(parser=" + srcParserVar + ")");
 					srcEditor.progressBar = progressBarApproximation;
-					Gui.Scripting.RunScript(srcEditorVar + ".CopyNearestNormals(srcMeshes={ " + srcMeshes + " }, srcSubmeshes={ " + srcSubmeshes + " }, dstMeshes={ " + dstMeshes + " }, dstSubmeshes={ " + dstSubmeshes + " }, dstParser=" + dstParserVar + ")");
+					Gui.Scripting.RunScript(srcEditorVar + ".CopyNearestNormals(srcMeshes={ " + srcMeshes + " }, srcSubmeshes={ " + srcSubmeshes + " }, dstMeshes={ " + dstMeshes + " }, dstSubmeshes={ " + dstSubmeshes + " }, dstParser=" + dstParserVar + ", nearVertexThreshold=" + ((float)numericUpDownNearVertexSqDist.Value).ToFloatString() + ", nearestNormal=" + checkBoxNearestNormal.Checked + ", automatic=" + checkBoxAutomatic.Checked + ")");
 					Gui.Scripting.RunScript(dstItem.ppForm.EditorVar + ".ReplaceSubfile(file=" + dstParserVar + ")");
 
 					comboBoxTargetSVIEXunits.SelectedItem = dstFile;
@@ -329,6 +330,120 @@ namespace PPD_Preview_Clothes
 			{
 				Utility.ReportException(ex);
 			}
+		}
+
+		private void checkBoxShowTargetNormals_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				ComboBoxItemXX cbItem = (ComboBoxItemXX)comboBoxTargetXX.SelectedItem;
+				if (cbItem == null)
+				{
+					return;
+				}
+				if (checkBoxShowTargetNormals.Checked)
+				{
+					SwapNormals(cbItem, ((IWriteFile)comboBoxTargetSVIEXunits.SelectedItem).Name);
+				}
+				else
+				{
+					cbItem.xxForm.RecreateRenderObjects();
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private static void SwapNormals(ComboBoxItemXX cbItem, string sviexName)
+		{
+			Dictionary<xxVertex, Vector3> originalNormals = new Dictionary<xxVertex, Vector3>();
+			sviexParser targetParser = PluginsPPD.OpenSVIEX((ppParser)Gui.Scripting.Variables[cbItem.ppForm.ParserVar], sviexName);
+			foreach (sviexParser.SubmeshSection section in targetParser.sections)
+			{
+				bool meshFound = false;
+				foreach (ComboBoxItemMesh itemMesh in cbItem.meshes)
+				{
+					if (section.Name == itemMesh.meshFrame.Name)
+					{
+						meshFound = true;
+						xxSubmesh submesh = itemMesh.meshFrame.Mesh.SubmeshList[section.submeshIdx];
+						if (section.indices.Length != submesh.VertexList.Count)
+						{
+							Report.ReportLog("Unmatching SVIEX mesh=" + section.Name + " submeshIdx=" + section.submeshIdx + " has " + section.indices.Length + " indices.");
+							break;
+						}
+						for (int i = 0; i < section.indices.Length; i++)
+						{
+							ushort vIdx = section.indices[i];
+							Vector3 norm = section.normals[i];
+							xxVertex vert = submesh.VertexList[vIdx];
+							originalNormals.Add(vert, vert.Normal);
+							vert.Normal = norm;
+						}
+						break;
+					}
+				}
+				if (!meshFound)
+				{
+					Report.ReportLog("SVIEX Normals not copied for " + section.Name);
+				}
+			}
+
+			cbItem.xxForm.RecreateRenderObjects();
+
+			foreach (sviexParser.SubmeshSection section in targetParser.sections)
+			{
+				foreach (ComboBoxItemMesh itemMesh in cbItem.meshes)
+				{
+					if (section.Name == itemMesh.meshFrame.Name)
+					{
+						xxSubmesh submesh = itemMesh.meshFrame.Mesh.SubmeshList[section.submeshIdx];
+						if (section.indices.Length != submesh.VertexList.Count)
+						{
+							break;
+						}
+						for (int i = 0; i < section.indices.Length; i++)
+						{
+							ushort vIdx = section.indices[i];
+							xxVertex vert = submesh.VertexList[vIdx];
+							Vector3 norm = originalNormals[vert];
+							vert.Normal = norm;
+						}
+						break;
+					}
+				}
+			}
+		}
+
+		private void checkBoxShowSourceNormals_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				ComboBoxItemXX cbItem = (ComboBoxItemXX)comboBoxCorrectlyLitXX.SelectedItem;
+				if (cbItem == null)
+				{
+					return;
+				}
+				if (checkBoxShowSourceNormals.Checked)
+				{
+					SwapNormals(cbItem, ((IWriteFile)comboBoxSourceSVIEXunits.SelectedItem).Name);
+				}
+				else
+				{
+					cbItem.xxForm.RecreateRenderObjects();
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void checkBoxAutomatic_Click(object sender, EventArgs e)
+		{
+			checkBoxNearestNormal.Enabled = !checkBoxAutomatic.Checked;
 		}
 	}
 }

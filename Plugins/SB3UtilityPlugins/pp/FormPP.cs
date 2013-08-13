@@ -28,6 +28,45 @@ namespace SB3Utility
 
 		private const Keys MASS_DESTRUCTION_KEY_COMBINATION = Keys.Delete | Keys.Shift;
 
+		class ComboBoxItem
+		{
+			public ComboBoxItem(object pValue, Color fColor)
+			{
+				val = pValue; foreColor = fColor;
+			}
+
+			object val;
+			public object Value
+			{
+				get { return val; }
+				set { val = value; }
+			}
+
+			Color foreColor = Color.Black;
+			public Color ForeColor
+			{
+				get { return foreColor; }
+				set { foreColor = value; }
+			}
+
+			public override string ToString()
+			{
+				return val.ToString();
+			}
+		}
+
+		private void comboBoxFormat_DrawItem(object sender, DrawItemEventArgs e)
+		{
+			e.DrawBackground();
+			ComboBoxItem item = (ComboBoxItem)comboBoxFormat.Items[e.Index];
+			Brush brush = new SolidBrush(item.ForeColor);
+			if ((e.State & DrawItemState.Selected) == DrawItemState.Selected)
+			{
+				brush = item.ForeColor == Color.Black ? Brushes.White : Brushes.LightGreen;
+			}
+			e.Graphics.DrawString(item.ToString(), comboBoxFormat.Font, brush, e.Bounds.X, e.Bounds.Y);
+		}
+
 		public FormPP(string path, string variable)
 		{
 			try
@@ -37,10 +76,21 @@ namespace SB3Utility
 				FormVariable = variable;
 
 				ParserVar = Gui.Scripting.GetNextVariable("ppParser");
-				ppParser ppParser = (ppParser)Gui.Scripting.RunScript(ParserVar + " = OpenPP(path=\"" + path + "\")");
-
 				EditorVar = Gui.Scripting.GetNextVariable("ppEditor");
-				Editor = (ppEditor)Gui.Scripting.RunScript(EditorVar + " = ppEditor(parser=" + ParserVar + ")");
+
+				object result = Gui.Scripting.RunScript(ParserVar + " = OpenPP(path=\"" + path + "\")");
+				ppParser ppParser;
+				if (result is ppParser)
+				{
+					ppParser = (ppParser)result;
+					Editor = (ppEditor)Gui.Scripting.RunScript(EditorVar + " = ppEditor(parser=" + ParserVar + ")");
+				}
+				else
+				{
+					Editor = (ppEditor)Gui.Scripting.RunScript(EditorVar + " = ppEditor(path=\"" + path + "\", header=" + ParserVar + ")");
+					ppParser = Editor.Parser;
+					Gui.Scripting.Variables[ParserVar] = ppParser;
+				}
 
 				Text = Path.GetFileName(ppParser.FilePath);
 				ToolTipText = ppParser.FilePath;
@@ -56,7 +106,25 @@ namespace SB3Utility
 
 				InitSubfileLists();
 
-				comboBoxFormat.Items.AddRange(ppFormat.Array);
+				ppHeader header = result as ppHeader;
+				foreach (ppFormat format in ppFormat.Array)
+				{
+					bool isContained = false;
+					if (header != null)
+					{
+						for (int i = 0; i < header.ppFormats.Length; i++)
+						{
+							ppFormat subformat = header.ppFormats[i];
+							if (subformat == format)
+							{
+								isContained = true;
+								break;
+							}
+						}
+					}
+					ComboBoxItem item = new ComboBoxItem(format, isContained ? Color.Green : Color.Black);
+					comboBoxFormat.Items.Add(item);
+				}
 				comboBoxFormat.SelectedIndex = (int)ppParser.Format.ppFormatIdx;
 				comboBoxFormat.SelectedIndexChanged += new EventHandler(comboBoxFormat_SelectedIndexChanged);
 
@@ -421,7 +489,8 @@ namespace SB3Utility
 		{
 			try
 			{
-				Gui.Scripting.RunScript(EditorVar + ".SetFormat(" + (int)((ppFormat)comboBoxFormat.SelectedItem).ppFormatIdx + ")");
+				ComboBoxItem item = (ComboBoxItem)comboBoxFormat.SelectedItem;
+				Gui.Scripting.RunScript(EditorVar + ".SetFormat(" + (int)((ppFormat)item.Value).ppFormatIdx + ")");
 			}
 			catch (Exception ex)
 			{
@@ -568,6 +637,22 @@ namespace SB3Utility
 						}
 					}
 				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void newSourceFormatToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				ppParser ppParser = (ppParser)Gui.Scripting.Variables[ParserVar];
+				ComboBoxItem item = (ComboBoxItem)comboBoxFormat.SelectedItem;
+				ppFormat format = (ppFormat)item.Value;
+				ppParser = (ppParser)Gui.Scripting.RunScript(ParserVar + " = OpenPP(path=\"" + ppParser.FilePath + "\", format=" + (int)format.ppFormatIdx + ")");
+				Editor = (ppEditor)Gui.Scripting.RunScript(EditorVar + " = ppEditor(parser=" + ParserVar + ")");
 			}
 			catch (Exception ex)
 			{

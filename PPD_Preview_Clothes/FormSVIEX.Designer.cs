@@ -36,11 +36,13 @@ namespace PPD_Preview_Clothes
 			this.comboBoxTargetXX = new System.Windows.Forms.ComboBox();
 			this.label2 = new System.Windows.Forms.Label();
 			this.label3 = new System.Windows.Forms.Label();
-			this.textBoxTargetedSubmeshes = new SB3Utility.EditTextBox();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.checkBoxShowTargetNormals = new System.Windows.Forms.CheckBox();
 			this.comboBoxTargetMeshes = new System.Windows.Forms.ComboBox();
 			this.comboBoxTargetSVIEXunits = new System.Windows.Forms.ComboBox();
+			this.textBoxTargetedSubmeshes = new SB3Utility.EditTextBox();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
+			this.checkBoxShowSourceNormals = new System.Windows.Forms.CheckBox();
 			this.comboBoxCorrectlyLitMeshes = new System.Windows.Forms.ComboBox();
 			this.comboBoxSourceSVIEXunits = new System.Windows.Forms.ComboBox();
 			this.label1 = new System.Windows.Forms.Label();
@@ -49,17 +51,14 @@ namespace PPD_Preview_Clothes
 			this.textBoxSourceSubmeshes = new SB3Utility.EditTextBox();
 			this.buttonApproximateNormals = new System.Windows.Forms.Button();
 			this.progressBarApproximation = new System.Windows.Forms.ProgressBar();
-			this.numericUpDownMaxNormalDiff = new System.Windows.Forms.NumericUpDown();
-			this.label5 = new System.Windows.Forms.Label();
-			this.label6 = new System.Windows.Forms.Label();
-			this.numericUpDownMaxVertexSqDist = new System.Windows.Forms.NumericUpDown();
-			this.checkBoxMaxVertexDist = new System.Windows.Forms.CheckBox();
-			this.checkBoxMaxNormalDiff = new System.Windows.Forms.CheckBox();
 			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+			this.numericUpDownNearVertexSqDist = new System.Windows.Forms.NumericUpDown();
+			this.label5 = new System.Windows.Forms.Label();
+			this.checkBoxNearestNormal = new System.Windows.Forms.CheckBox();
+			this.checkBoxAutomatic = new System.Windows.Forms.CheckBox();
 			this.groupBox1.SuspendLayout();
 			this.groupBox2.SuspendLayout();
-			((System.ComponentModel.ISupportInitialize)(this.numericUpDownMaxNormalDiff)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.numericUpDownMaxVertexSqDist)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.numericUpDownNearVertexSqDist)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// comboBoxTargetXX
@@ -92,19 +91,9 @@ namespace PPD_Preview_Clothes
 			this.label3.TabIndex = 4;
 			this.label3.Text = "Targeted Submeshes";
 			// 
-			// textBoxTargetedSubmeshes
-			// 
-			this.textBoxTargetedSubmeshes.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.textBoxTargetedSubmeshes.Location = new System.Drawing.Point(222, 71);
-			this.textBoxTargetedSubmeshes.Name = "textBoxTargetedSubmeshes";
-			this.textBoxTargetedSubmeshes.Size = new System.Drawing.Size(147, 20);
-			this.textBoxTargetedSubmeshes.TabIndex = 18;
-			this.toolTip1.SetToolTip(this.textBoxTargetedSubmeshes, "Submeshes to create normals for.\r\nProvide a comma seperated list or\r\n-1 for all s" +
-        "ubmeshes.");
-			this.textBoxTargetedSubmeshes.AfterEditTextChanged += new System.EventHandler(this.textBoxTargetedSubmeshes_AfterEditTextChanged);
-			// 
 			// groupBox1
 			// 
+			this.groupBox1.Controls.Add(this.checkBoxShowTargetNormals);
 			this.groupBox1.Controls.Add(this.comboBoxTargetMeshes);
 			this.groupBox1.Controls.Add(this.comboBoxTargetSVIEXunits);
 			this.groupBox1.Controls.Add(this.label3);
@@ -113,10 +102,24 @@ namespace PPD_Preview_Clothes
 			this.groupBox1.Controls.Add(this.textBoxTargetedSubmeshes);
 			this.groupBox1.Location = new System.Drawing.Point(14, 12);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(375, 100);
+			this.groupBox1.Size = new System.Drawing.Size(375, 130);
 			this.groupBox1.TabIndex = 10;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Selected Target Meshes";
+			// 
+			// checkBoxShowTargetNormals
+			// 
+			this.checkBoxShowTargetNormals.Appearance = System.Windows.Forms.Appearance.Button;
+			this.checkBoxShowTargetNormals.AutoSize = true;
+			this.checkBoxShowTargetNormals.Location = new System.Drawing.Point(45, 98);
+			this.checkBoxShowTargetNormals.Name = "checkBoxShowTargetNormals";
+			this.checkBoxShowTargetNormals.Size = new System.Drawing.Size(119, 23);
+			this.checkBoxShowTargetNormals.TabIndex = 25;
+			this.checkBoxShowTargetNormals.Text = "Show SVIEX Normals";
+			this.toolTip1.SetToolTip(this.checkBoxShowTargetNormals, "1. Select Normals from \"Target SVIEX units\"\r\n2. Click \"Show SVIEX Normals\"\r\n3. Cl" +
+        "ick \"Show SVIEX Normals\" again to revert");
+			this.checkBoxShowTargetNormals.UseVisualStyleBackColor = true;
+			this.checkBoxShowTargetNormals.Click += new System.EventHandler(this.checkBoxShowTargetNormals_Click);
 			// 
 			// comboBoxTargetMeshes
 			// 
@@ -142,20 +145,46 @@ namespace PPD_Preview_Clothes
 			this.comboBoxTargetSVIEXunits.TabIndex = 16;
 			this.toolTip1.SetToolTip(this.comboBoxTargetSVIEXunits, "Non existing units will be generated");
 			// 
+			// textBoxTargetedSubmeshes
+			// 
+			this.textBoxTargetedSubmeshes.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.textBoxTargetedSubmeshes.Location = new System.Drawing.Point(222, 71);
+			this.textBoxTargetedSubmeshes.Name = "textBoxTargetedSubmeshes";
+			this.textBoxTargetedSubmeshes.Size = new System.Drawing.Size(147, 20);
+			this.textBoxTargetedSubmeshes.TabIndex = 18;
+			this.toolTip1.SetToolTip(this.textBoxTargetedSubmeshes, "Submeshes to create normals for.\r\nProvide a comma seperated list or\r\n-1 for all s" +
+        "ubmeshes.");
+			this.textBoxTargetedSubmeshes.AfterEditTextChanged += new System.EventHandler(this.textBoxTargetedSubmeshes_AfterEditTextChanged);
+			// 
 			// groupBox2
 			// 
+			this.groupBox2.Controls.Add(this.checkBoxShowSourceNormals);
 			this.groupBox2.Controls.Add(this.comboBoxCorrectlyLitMeshes);
 			this.groupBox2.Controls.Add(this.comboBoxSourceSVIEXunits);
 			this.groupBox2.Controls.Add(this.label1);
 			this.groupBox2.Controls.Add(this.comboBoxCorrectlyLitXX);
 			this.groupBox2.Controls.Add(this.label4);
 			this.groupBox2.Controls.Add(this.textBoxSourceSubmeshes);
-			this.groupBox2.Location = new System.Drawing.Point(14, 118);
+			this.groupBox2.Location = new System.Drawing.Point(14, 148);
 			this.groupBox2.Name = "groupBox2";
-			this.groupBox2.Size = new System.Drawing.Size(375, 100);
+			this.groupBox2.Size = new System.Drawing.Size(375, 130);
 			this.groupBox2.TabIndex = 20;
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Correctly Lit Meshes";
+			// 
+			// checkBoxShowSourceNormals
+			// 
+			this.checkBoxShowSourceNormals.Appearance = System.Windows.Forms.Appearance.Button;
+			this.checkBoxShowSourceNormals.AutoSize = true;
+			this.checkBoxShowSourceNormals.Location = new System.Drawing.Point(45, 98);
+			this.checkBoxShowSourceNormals.Name = "checkBoxShowSourceNormals";
+			this.checkBoxShowSourceNormals.Size = new System.Drawing.Size(119, 23);
+			this.checkBoxShowSourceNormals.TabIndex = 35;
+			this.checkBoxShowSourceNormals.Text = "Show SVIEX Normals";
+			this.toolTip1.SetToolTip(this.checkBoxShowSourceNormals, "1. Select Normals from \"Source SVIEX units\"\r\n2. Click \"Show SVIEX Normals\"\r\n3. Cl" +
+        "ick \"Show SVIEX Normals\" again to revert\r\n");
+			this.checkBoxShowSourceNormals.UseVisualStyleBackColor = true;
+			this.checkBoxShowSourceNormals.Click += new System.EventHandler(this.checkBoxShowSourceNormals_Click);
 			// 
 			// comboBoxCorrectlyLitMeshes
 			// 
@@ -225,115 +254,88 @@ namespace PPD_Preview_Clothes
 			// buttonApproximateNormals
 			// 
 			this.buttonApproximateNormals.Enabled = false;
-			this.buttonApproximateNormals.Location = new System.Drawing.Point(122, 310);
+			this.buttonApproximateNormals.Location = new System.Drawing.Point(122, 333);
 			this.buttonApproximateNormals.Name = "buttonApproximateNormals";
 			this.buttonApproximateNormals.Size = new System.Drawing.Size(159, 23);
 			this.buttonApproximateNormals.TabIndex = 100;
 			this.buttonApproximateNormals.Text = "Approximate Target Normals";
+			this.toolTip1.SetToolTip(this.buttonApproximateNormals, "Normals are copied based on nearest vertices.");
 			this.buttonApproximateNormals.UseVisualStyleBackColor = true;
 			this.buttonApproximateNormals.Click += new System.EventHandler(this.buttonApproximateNormals_Click);
 			// 
 			// progressBarApproximation
 			// 
-			this.progressBarApproximation.Location = new System.Drawing.Point(14, 341);
+			this.progressBarApproximation.Location = new System.Drawing.Point(14, 364);
 			this.progressBarApproximation.Maximum = 1;
 			this.progressBarApproximation.Name = "progressBarApproximation";
 			this.progressBarApproximation.Size = new System.Drawing.Size(375, 25);
 			this.progressBarApproximation.Step = 1;
 			this.progressBarApproximation.TabIndex = 31;
 			// 
-			// numericUpDownMaxNormalDiff
+			// numericUpDownNearVertexSqDist
 			// 
-			this.numericUpDownMaxNormalDiff.DecimalPlaces = 5;
-			this.numericUpDownMaxNormalDiff.Enabled = false;
-			this.numericUpDownMaxNormalDiff.Increment = new decimal(new int[] {
+			this.numericUpDownNearVertexSqDist.DecimalPlaces = 6;
+			this.numericUpDownNearVertexSqDist.Increment = new decimal(new int[] {
             1,
             0,
             0,
-            131072});
-			this.numericUpDownMaxNormalDiff.Location = new System.Drawing.Point(35, 258);
-			this.numericUpDownMaxNormalDiff.Maximum = new decimal(new int[] {
-            4,
-            0,
-            0,
-            0});
-			this.numericUpDownMaxNormalDiff.Name = "numericUpDownMaxNormalDiff";
-			this.numericUpDownMaxNormalDiff.Size = new System.Drawing.Size(97, 20);
-			this.numericUpDownMaxNormalDiff.TabIndex = 30;
-			this.numericUpDownMaxNormalDiff.Value = new decimal(new int[] {
+            327680});
+			this.numericUpDownNearVertexSqDist.Location = new System.Drawing.Point(129, 294);
+			this.numericUpDownNearVertexSqDist.Name = "numericUpDownNearVertexSqDist";
+			this.numericUpDownNearVertexSqDist.Size = new System.Drawing.Size(71, 20);
+			this.numericUpDownNearVertexSqDist.TabIndex = 50;
+			this.toolTip1.SetToolTip(this.numericUpDownNearVertexSqDist, "Source and destination vertices having a smaller distance²\r\nare considered to hav" +
+        "e the same position.");
+			this.numericUpDownNearVertexSqDist.Value = new decimal(new int[] {
             1,
             0,
             0,
-            262144});
+            327680});
 			// 
 			// label5
 			// 
 			this.label5.AutoSize = true;
-			this.label5.Location = new System.Drawing.Point(12, 242);
+			this.label5.Location = new System.Drawing.Point(12, 296);
 			this.label5.Name = "label5";
-			this.label5.Size = new System.Drawing.Size(114, 13);
-			this.label5.TabIndex = 33;
-			this.label5.Text = "Max. Normal Distance²";
+			this.label5.Size = new System.Drawing.Size(111, 13);
+			this.label5.TabIndex = 101;
+			this.label5.Text = "Near Vertex Distance²";
 			// 
-			// label6
+			// checkBoxNearestNormal
 			// 
-			this.label6.AutoSize = true;
-			this.label6.Location = new System.Drawing.Point(269, 242);
-			this.label6.Name = "label6";
-			this.label6.Size = new System.Drawing.Size(111, 13);
-			this.label6.TabIndex = 101;
-			this.label6.Text = "Max. Vertex Distance²";
+			this.checkBoxNearestNormal.AutoSize = true;
+			this.checkBoxNearestNormal.Checked = true;
+			this.checkBoxNearestNormal.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.checkBoxNearestNormal.Location = new System.Drawing.Point(206, 295);
+			this.checkBoxNearestNormal.Name = "checkBoxNearestNormal";
+			this.checkBoxNearestNormal.Size = new System.Drawing.Size(99, 17);
+			this.checkBoxNearestNormal.TabIndex = 60;
+			this.checkBoxNearestNormal.Text = "Nearest Normal";
+			this.toolTip1.SetToolTip(this.checkBoxNearestNormal, "Either take the nearest normal or sum all normals of the same position.");
+			this.checkBoxNearestNormal.UseVisualStyleBackColor = true;
 			// 
-			// numericUpDownMaxVertexSqDist
+			// checkBoxAutomatic
 			// 
-			this.numericUpDownMaxVertexSqDist.DecimalPlaces = 4;
-			this.numericUpDownMaxVertexSqDist.Enabled = false;
-			this.numericUpDownMaxVertexSqDist.Location = new System.Drawing.Point(293, 258);
-			this.numericUpDownMaxVertexSqDist.Maximum = new decimal(new int[] {
-            10000,
-            0,
-            0,
-            0});
-			this.numericUpDownMaxVertexSqDist.Name = "numericUpDownMaxVertexSqDist";
-			this.numericUpDownMaxVertexSqDist.Size = new System.Drawing.Size(96, 20);
-			this.numericUpDownMaxVertexSqDist.TabIndex = 35;
-			this.numericUpDownMaxVertexSqDist.Value = new decimal(new int[] {
-            100,
-            0,
-            0,
-            0});
-			// 
-			// checkBoxMaxVertexDist
-			// 
-			this.checkBoxMaxVertexDist.AutoSize = true;
-			this.checkBoxMaxVertexDist.Enabled = false;
-			this.checkBoxMaxVertexDist.Location = new System.Drawing.Point(272, 261);
-			this.checkBoxMaxVertexDist.Name = "checkBoxMaxVertexDist";
-			this.checkBoxMaxVertexDist.Size = new System.Drawing.Size(15, 14);
-			this.checkBoxMaxVertexDist.TabIndex = 102;
-			this.checkBoxMaxVertexDist.UseVisualStyleBackColor = true;
-			// 
-			// checkBoxMaxNormalDiff
-			// 
-			this.checkBoxMaxNormalDiff.AutoSize = true;
-			this.checkBoxMaxNormalDiff.Enabled = false;
-			this.checkBoxMaxNormalDiff.Location = new System.Drawing.Point(14, 260);
-			this.checkBoxMaxNormalDiff.Name = "checkBoxMaxNormalDiff";
-			this.checkBoxMaxNormalDiff.Size = new System.Drawing.Size(15, 14);
-			this.checkBoxMaxNormalDiff.TabIndex = 103;
-			this.checkBoxMaxNormalDiff.UseVisualStyleBackColor = true;
+			this.checkBoxAutomatic.AutoSize = true;
+			this.checkBoxAutomatic.Location = new System.Drawing.Point(311, 295);
+			this.checkBoxAutomatic.Name = "checkBoxAutomatic";
+			this.checkBoxAutomatic.Size = new System.Drawing.Size(73, 17);
+			this.checkBoxAutomatic.TabIndex = 102;
+			this.checkBoxAutomatic.Text = "Automatic";
+			this.toolTip1.SetToolTip(this.checkBoxAutomatic, "Automatically chooses \"Nearest Normal\" for EACH vertex.\r\nThe decision is based on" +
+        " another vertex with the same\r\nposition in the same destination submesh.");
+			this.checkBoxAutomatic.UseVisualStyleBackColor = true;
+			this.checkBoxAutomatic.Click += new System.EventHandler(this.checkBoxAutomatic_Click);
 			// 
 			// FormSVIEX
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(403, 378);
-			this.Controls.Add(this.checkBoxMaxNormalDiff);
-			this.Controls.Add(this.checkBoxMaxVertexDist);
-			this.Controls.Add(this.numericUpDownMaxVertexSqDist);
-			this.Controls.Add(this.label6);
+			this.ClientSize = new System.Drawing.Size(403, 401);
+			this.Controls.Add(this.checkBoxAutomatic);
+			this.Controls.Add(this.checkBoxNearestNormal);
 			this.Controls.Add(this.label5);
-			this.Controls.Add(this.numericUpDownMaxNormalDiff);
+			this.Controls.Add(this.numericUpDownNearVertexSqDist);
 			this.Controls.Add(this.progressBarApproximation);
 			this.Controls.Add(this.buttonApproximateNormals);
 			this.Controls.Add(this.groupBox2);
@@ -345,8 +347,7 @@ namespace PPD_Preview_Clothes
 			this.groupBox1.PerformLayout();
 			this.groupBox2.ResumeLayout(false);
 			this.groupBox2.PerformLayout();
-			((System.ComponentModel.ISupportInitialize)(this.numericUpDownMaxNormalDiff)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.numericUpDownMaxVertexSqDist)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.numericUpDownNearVertexSqDist)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -366,16 +367,16 @@ namespace PPD_Preview_Clothes
 		private SB3Utility.EditTextBox textBoxSourceSubmeshes;
 		private System.Windows.Forms.Button buttonApproximateNormals;
 		private System.Windows.Forms.ProgressBar progressBarApproximation;
-		private System.Windows.Forms.NumericUpDown numericUpDownMaxNormalDiff;
-		private System.Windows.Forms.Label label5;
-		private System.Windows.Forms.Label label6;
-		private System.Windows.Forms.NumericUpDown numericUpDownMaxVertexSqDist;
-		private System.Windows.Forms.CheckBox checkBoxMaxVertexDist;
-		private System.Windows.Forms.CheckBox checkBoxMaxNormalDiff;
 		private System.Windows.Forms.ComboBox comboBoxTargetSVIEXunits;
 		private System.Windows.Forms.ComboBox comboBoxSourceSVIEXunits;
 		private System.Windows.Forms.ToolTip toolTip1;
 		private System.Windows.Forms.ComboBox comboBoxTargetMeshes;
 		private System.Windows.Forms.ComboBox comboBoxCorrectlyLitMeshes;
+		private System.Windows.Forms.CheckBox checkBoxShowTargetNormals;
+		private System.Windows.Forms.CheckBox checkBoxShowSourceNormals;
+		private System.Windows.Forms.NumericUpDown numericUpDownNearVertexSqDist;
+		private System.Windows.Forms.Label label5;
+		private System.Windows.Forms.CheckBox checkBoxNearestNormal;
+		private System.Windows.Forms.CheckBox checkBoxAutomatic;
 	}
 }

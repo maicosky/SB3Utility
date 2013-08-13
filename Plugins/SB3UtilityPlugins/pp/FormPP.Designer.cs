@@ -73,10 +73,11 @@
 			this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.keepBackupToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.backupExtensionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.backupExtensionToolStripEditTextBox = new SB3Utility.ToolStripEditTextBox();
 			this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
 			this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
 			this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
+			this.newSourceFormatToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.backupExtensionToolStripEditTextBox = new SB3Utility.ToolStripEditTextBox();
 			this.tabControlSubfiles.SuspendLayout();
 			this.tabPageXXSubfiles.SuspendLayout();
 			this.tabPageXASubfiles.SuspendLayout();
@@ -277,6 +278,7 @@
 			// 
 			this.comboBoxFormat.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+			this.comboBoxFormat.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
 			this.comboBoxFormat.DropDownHeight = 300;
 			this.comboBoxFormat.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.comboBoxFormat.IntegralHeight = false;
@@ -285,6 +287,7 @@
 			this.comboBoxFormat.Size = new System.Drawing.Size(234, 21);
 			this.comboBoxFormat.TabIndex = 141;
 			this.comboBoxFormat.TabStop = false;
+			this.comboBoxFormat.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.comboBoxFormat_DrawItem);
 			// 
 			// label41
 			// 
@@ -324,10 +327,11 @@
 			this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.exportPPToolStripMenuItem,
             this.toolStripSeparator5,
-            this.reopenToolStripMenuItem,
-            this.toolStripSeparator1,
             this.saveppToolStripMenuItem,
             this.saveppAsToolStripMenuItem,
+            this.toolStripSeparator1,
+            this.reopenToolStripMenuItem,
+            this.newSourceFormatToolStripMenuItem,
             this.toolStripSeparator6,
             this.closeToolStripMenuItem});
 			this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
@@ -470,7 +474,7 @@
 			// forSelectedExtensionsOnlyToolStripMenuItem
 			// 
 			this.forSelectedExtensionsOnlyToolStripMenuItem.Name = "forSelectedExtensionsOnlyToolStripMenuItem";
-			this.forSelectedExtensionsOnlyToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
+			this.forSelectedExtensionsOnlyToolStripMenuItem.Size = new System.Drawing.Size(218, 22);
 			this.forSelectedExtensionsOnlyToolStripMenuItem.Text = "For Selected Extensions Only";
 			this.forSelectedExtensionsOnlyToolStripMenuItem.Click += new System.EventHandler(this.forSelectedExtensionsOnlyToolStripMenuItem_Click);
 			// 
@@ -505,11 +509,6 @@
 			this.backupExtensionToolStripMenuItem.Size = new System.Drawing.Size(158, 22);
 			this.backupExtensionToolStripMenuItem.Text = "Backup &Extension";
 			// 
-			// backupExtensionToolStripEditTextBox
-			// 
-			this.backupExtensionToolStripEditTextBox.Name = "backupExtensionToolStripEditTextBox";
-			this.backupExtensionToolStripEditTextBox.Size = new System.Drawing.Size(50, 21);
-			// 
 			// saveFileDialog1
 			// 
 			this.saveFileDialog1.RestoreDirectory = true;
@@ -518,6 +517,20 @@
 			// 
 			this.openFileDialog1.Multiselect = true;
 			this.openFileDialog1.RestoreDirectory = true;
+			// 
+			// newSourceFormatToolStripMenuItem
+			// 
+			this.newSourceFormatToolStripMenuItem.Name = "newSourceFormatToolStripMenuItem";
+			this.newSourceFormatToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
+			this.newSourceFormatToolStripMenuItem.Text = "New Source &Format";
+			this.newSourceFormatToolStripMenuItem.ToolTipText = "This reopens the pp file using the currently selected format.\r\nUse this function " +
+    "after a failed automatic format detection.";
+			this.newSourceFormatToolStripMenuItem.Click += new System.EventHandler(this.newSourceFormatToolStripMenuItem_Click);
+			// 
+			// backupExtensionToolStripEditTextBox
+			// 
+			this.backupExtensionToolStripEditTextBox.Name = "backupExtensionToolStripEditTextBox";
+			this.backupExtensionToolStripEditTextBox.Size = new System.Drawing.Size(50, 21);
 			// 
 			// FormPP
 			// 
@@ -597,6 +610,7 @@
 		private System.Windows.Forms.ToolStripMenuItem unregisterToolsToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem forSelectedExtensionsOnlyToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem aLLRegardlessOfExtensionToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem newSourceFormatToolStripMenuItem;
 
 	}
 }
