@@ -187,25 +187,28 @@ namespace SB3Utility
 
 		private void DrawAnimationMeshContainer(AnimationMeshContainer meshContainer)
 		{
-			device.SetRenderState(RenderState.ZEnable, ZBufferType.UseZBuffer);
-			device.SetRenderState(RenderState.Lighting, true);
+			if (meshContainer.MeshData != null)
+			{
+				device.SetRenderState(RenderState.ZEnable, ZBufferType.UseZBuffer);
+				device.SetRenderState(RenderState.Lighting, true);
 
-			Cull culling = (Gui.Renderer.Culling) ? Cull.Counterclockwise : Cull.None;
-			device.SetRenderState(RenderState.CullMode, culling);
+				Cull culling = (Gui.Renderer.Culling) ? Cull.Counterclockwise : Cull.None;
+				device.SetRenderState(RenderState.CullMode, culling);
 
-			FillMode fill = (Gui.Renderer.Wireframe) ? FillMode.Wireframe : FillMode.Solid;
-			device.SetRenderState(RenderState.FillMode, fill);
+				FillMode fill = (Gui.Renderer.Wireframe) ? FillMode.Wireframe : FillMode.Solid;
+				device.SetRenderState(RenderState.FillMode, fill);
 
-			int matIdx = meshContainer.MaterialIndex;
-			device.Material = ((matIdx >= 0) && (matIdx < Materials.Length)) ? Materials[matIdx] : nullMaterial;
+				int matIdx = meshContainer.MaterialIndex;
+				device.Material = ((matIdx >= 0) && (matIdx < Materials.Length)) ? Materials[matIdx] : nullMaterial;
 
-			int texIdx = meshContainer.TextureIndex;
-			Texture tex = ((texIdx >= 0) && (texIdx < Textures.Length)) ? Textures[texIdx] : null;
-			device.SetTexture(0, tex);
+				int texIdx = meshContainer.TextureIndex;
+				Texture tex = ((texIdx >= 0) && (texIdx < Textures.Length)) ? Textures[texIdx] : null;
+				device.SetTexture(0, tex);
 
-			meshContainer.MeshData.Mesh.DrawSubset(0);
+				meshContainer.MeshData.Mesh.DrawSubset(0);
+			}
 
-			if (HighlightSubmesh.Contains(submeshNum))
+			if (HighlightSubmesh.Contains(submeshNum) && meshContainer.MeshData != null)
 			{
 				device.SetRenderState(RenderState.ZEnable, ZBufferType.DontUseZBuffer);
 				device.SetRenderState(RenderState.FillMode, FillMode.Wireframe);
@@ -214,7 +217,7 @@ namespace SB3Utility
 				meshContainer.MeshData.Mesh.DrawSubset(0);
 			}
 
-			if (Gui.Renderer.ShowNormals)
+			if (Gui.Renderer.ShowNormals && meshContainer.NormalLines != null)
 			{
 				device.SetRenderState(RenderState.ZEnable, ZBufferType.UseZBuffer);
 				device.SetRenderState(RenderState.Lighting, false);
@@ -344,38 +347,50 @@ namespace SB3Utility
 					List<xxFace> faceList = submesh.FaceList;
 					List<xxVertex> vertexList = submesh.VertexList;
 
-					Mesh animationMesh = new Mesh(device, faceList.Count, vertexList.Count, MeshFlags.Managed, PositionBlendWeightsIndexedNormalTexturedColoured.Format);
-
-					using (DataStream indexStream = animationMesh.LockIndexBuffer(LockFlags.None))
+					Mesh animationMesh = null;
+					PositionBlendWeightsIndexedColored[] normalLines = null;
+					try
 					{
-						for (int j = 0; j < faceList.Count; j++)
+						animationMesh = new Mesh(device, faceList.Count, vertexList.Count, MeshFlags.Managed, PositionBlendWeightsIndexedNormalTexturedColoured.Format);
+
+						using (DataStream indexStream = animationMesh.LockIndexBuffer(LockFlags.None))
 						{
-							ushort[] indices = faceList[j].VertexIndices;
-							indexStream.Write(indices[0]);
-							indexStream.Write(indices[2]);
-							indexStream.Write(indices[1]);
+							for (int j = 0; j < faceList.Count; j++)
+							{
+								ushort[] indices = faceList[j].VertexIndices;
+								indexStream.Write(indices[0]);
+								indexStream.Write(indices[2]);
+								indexStream.Write(indices[1]);
+							}
+							animationMesh.UnlockIndexBuffer();
 						}
-						animationMesh.UnlockIndexBuffer();
+
+						FillVertexBuffer(animationMesh, vertexList, -1);
+
+						normalLines = new PositionBlendWeightsIndexedColored[vertexList.Count * 2];
+						for (int j = 0; j < vertexList.Count; j++)
+						{
+							xxVertex vertex = vertexList[j];
+
+							normalLines[j * 2] = new PositionBlendWeightsIndexedColored(vertex.Position, vertex.Weights3, vertex.BoneIndices, Color.Yellow.ToArgb());
+							normalLines[(j * 2) + 1] = new PositionBlendWeightsIndexedColored(vertex.Position + (vertex.Normal / 16), vertex.Weights3, vertex.BoneIndices, Color.Yellow.ToArgb());
+
+							min = Vector3.Minimize(min, vertex.Position);
+							max = Vector3.Maximize(max, vertex.Position);
+						}
 					}
-
-					FillVertexBuffer(animationMesh, vertexList, -1);
-
-					var normalLines = new PositionBlendWeightsIndexedColored[vertexList.Count * 2];
-					for (int j = 0; j < vertexList.Count; j++)
+					catch
 					{
-						xxVertex vertex = vertexList[j];
-
-						normalLines[j * 2] = new PositionBlendWeightsIndexedColored(vertex.Position, vertex.Weights3, vertex.BoneIndices, Color.Yellow.ToArgb());
-						normalLines[(j * 2) + 1] = new PositionBlendWeightsIndexedColored(vertex.Position + (vertex.Normal / 16), vertex.Weights3, vertex.BoneIndices, Color.Yellow.ToArgb());
-
-						min = Vector3.Minimize(min, vertex.Position);
-						max = Vector3.Maximize(max, vertex.Position);
+						Report.ReportLog("No display of submeshes with more than 64k vertices!");
 					}
 
 					AnimationMeshContainer meshContainer = new AnimationMeshContainer();
-					meshContainer.Name = animationFrame.Name;
-					meshContainer.MeshData = new MeshData(animationMesh);
-					meshContainer.NormalLines = normalLines;
+					if (animationMesh != null)
+					{
+						meshContainer.Name = animationFrame.Name;
+						meshContainer.MeshData = new MeshData(animationMesh);
+						meshContainer.NormalLines = normalLines;
+					}
 					meshContainers[i] = meshContainer;
 
 					int matIdx = submesh.MaterialIndex;

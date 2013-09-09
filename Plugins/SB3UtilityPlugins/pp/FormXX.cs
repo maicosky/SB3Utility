@@ -25,9 +25,9 @@ namespace SB3Utility
 			DirectXSDK,
 			[Description("Collada")]
 			Collada,
-			[Description("Collada (FBX 2012.2)")]
+			[Description("Collada (FBX 2014.1)")]
 			ColladaFbx,
-			[Description("FBX 2012.2")]
+			[Description("FBX 2014.1")]
 			Fbx,
 			[Description("AutoCAD DXF")]
 			Dxf,
@@ -320,6 +320,9 @@ namespace SB3Utility
 			}
 			comboBoxMeshExportFormat.Items.AddRange(descriptions);
 			comboBoxMeshExportFormat.SelectedItem = Gui.Config["MeshExportFormat"];
+
+			checkBoxMeshExportMqoSortMeshes.Checked = (bool)Gui.Config["ExportMqoSortMeshes"];
+			checkBoxMeshExportMqoSortMeshes.CheckedChanged += checkBoxMeshExportMqoSortMeshes_CheckedChanged;
 
 			Gui.Docking.ShowDockContent(this, Gui.Docking.DockEditors, ContentCategory.Meshes);
 
@@ -3491,7 +3494,7 @@ namespace SB3Utility
 				switch ((MeshExportFormat)comboBoxMeshExportFormat.SelectedIndex)
 				{
 					case MeshExportFormat.Mqo:
-						Gui.Scripting.RunScript("ExportMqo(parser=" + ParserVar + ", meshNames=" + meshNames + ", dirPath=\"" + dir.FullName + "\", singleMqo=" + checkBoxMeshExportMqoSingleFile.Checked + ", worldCoords=" + checkBoxMeshExportMqoWorldCoords.Checked + ")");
+						Gui.Scripting.RunScript("ExportMqo(parser=" + ParserVar + ", meshNames=" + meshNames + ", dirPath=\"" + dir.FullName + "\", singleMqo=" + checkBoxMeshExportMqoSingleFile.Checked + ", worldCoords=" + checkBoxMeshExportMqoWorldCoords.Checked + ", sortMeshes=" + checkBoxMeshExportMqoSortMeshes.Checked + ")");
 						break;
 					case MeshExportFormat.DirectXSDK:
 						Gui.Scripting.RunScript("ExportDirectX(path=\"" + Utility.GetDestFile(dir, "meshes", ".x") + "\", xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", ticksPerSecond=" + numericMeshExportDirectXTicksPerSecond.Value + ", keyframeLength=" + numericMeshExportDirectXKeyframeLength.Value + ")");
@@ -3525,6 +3528,11 @@ namespace SB3Utility
 			{
 				Utility.ReportException(ex);
 			}
+		}
+
+		private void checkBoxMeshExportMqoSortMeshes_CheckedChanged(object sender, EventArgs e)
+		{
+			Gui.Config["ExportMqoSortMeshes"] = checkBoxMeshExportMqoSortMeshes.Checked;
 		}
 
 		private void buttonFrameEditHex_Click(object sender, EventArgs e)

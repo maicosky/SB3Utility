@@ -32,26 +32,27 @@ namespace AiDroidPlugin
 		public void InitTextures(bool allTextures, bool noMaskFilter)
 		{
 			Textures.Clear();
-			if (allTextures)
-			{
-				DirectoryInfo dir = new DirectoryInfo(rem.TexturePathFromREM(Parser.RemPath));
-				foreach (FileInfo file in dir.EnumerateFiles())
-				{
-					string fileName = file.Name.ToLower();
-					if (!noMaskFilter || !fileName.Contains("_mask") && !fileName.Contains("_shade"))
-					{
-						Textures.Add(file.Name);
-					}
-				}
-			}
-			else
-			{
-				foreach (remMaterial mat in Parser.MATC)
-				{
-					if (mat.texture != null && !Textures.Contains(mat.texture))
-						Textures.Add(mat.texture);
-				}
-			}
+            String texDir = allTextures ? rem.TexturePathFromREM(Parser.RemPath) : null;
+            if (allTextures && texDir != null)
+            {
+                DirectoryInfo dir = new DirectoryInfo(texDir);
+                foreach (FileInfo file in dir.EnumerateFiles())
+                {
+                    string fileName = file.Name.ToLower();
+                    if (!noMaskFilter || !fileName.Contains("_mask") && !fileName.Contains("_shade"))
+                    {
+                        Textures.Add(file.Name);
+                    }
+                }
+            }
+            else
+            {
+                foreach (remMaterial mat in Parser.MATC)
+                {
+                    if (mat.texture != null && !Textures.Contains(mat.texture))
+                        Textures.Add(mat.texture);
+                }
+            }
 		}
 
 		public void Dispose()

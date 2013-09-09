@@ -23,9 +23,9 @@ namespace AiDroidPlugin
 		{
 			[Description("Metasequoia")]
 			Mqo,
-			[Description("Collada (FBX 2012.2)")]
+			[Description("Collada (FBX 2014.1)")]
 			ColladaFbx,
-			[Description("FBX 2012.2")]
+			[Description("FBX 2014.1")]
 			Fbx,
 			[Description("AutoCAD DXF")]
 			Dxf,
@@ -306,7 +306,7 @@ namespace AiDroidPlugin
 				descriptions[i] = values[i].GetDescription();
 			}
 			comboBoxMeshExportFormat.Items.AddRange(descriptions);
-			comboBoxMeshExportFormat.SelectedIndex = 2;
+			comboBoxMeshExportFormat.SelectedIndex = (int)MeshExportFormat.Fbx;
 
 			Gui.Docking.ShowDockContent(this, Gui.Docking.DockEditors, ContentCategory.Meshes);
 
@@ -978,8 +978,11 @@ namespace AiDroidPlugin
 				if (mat.texture != null)
 				{
 					int texIdx = textures.IndexOf(mat.texture);
-					crossRefMaterialTextures[i].Add(new KeyList<string>(textures, texIdx));
-					crossRefTextureMaterials[texIdx].Add(new KeyList<remMaterial>(materials, i));
+                    if (texIdx >= 0)
+                    {
+                        crossRefMaterialTextures[i].Add(new KeyList<string>(textures, texIdx));
+                        crossRefTextureMaterials[texIdx].Add(new KeyList<remMaterial>(materials, i));
+                    }
 				}
 			}
 
@@ -997,8 +1000,11 @@ namespace AiDroidPlugin
 					if (mat.texture != null)
 					{
 						int texIdx = textures.IndexOf(mat.texture);
-						crossRefMeshTextures[i].Add(new KeyList<string>(textures, texIdx));
-						crossRefTextureMeshes[texIdx].Add(new KeyList<remMesh>(meshes, i));
+                        if (texIdx >= 0)
+                        {
+                            crossRefMeshTextures[i].Add(new KeyList<string>(textures, texIdx));
+                            crossRefTextureMeshes[texIdx].Add(new KeyList<remMesh>(meshes, i));
+                        }
 					}
 				}
 			}

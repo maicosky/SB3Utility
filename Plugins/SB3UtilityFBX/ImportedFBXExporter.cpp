@@ -1,5 +1,5 @@
 #include <fbxsdk.h>
-#include <fbxfilesdk/kfbxio/kfbxiosettings.h>
+#include <fbxsdk/fileio/fbxiosettings.h>
 #include "SB3UtilityFBX.h"
 
 namespace SB3Utility
@@ -14,6 +14,7 @@ namespace SB3Utility
 		}
 		String^ currentDir = Directory::GetCurrentDirectory();
 		Directory::SetCurrentDirectory(dir->FullName);
+		path = Path::GetFileName(path);
 
 		Exporter^ exporter = gcnew Exporter(path, imported, exportFormat, allFrames, skins, compatibility);
 		exporter->ExportAnimations(startKeyframe, endKeyframe, linear, EulerFilter, filterPrecision);
@@ -42,17 +43,17 @@ namespace SB3Utility
 		pTextures = NULL;
 		pMeshNodes = NULL;
 
-		pin_ptr<KFbxSdkManager*> pSdkManagerPin = &pSdkManager;
-		pin_ptr<KFbxScene*> pScenePin = &pScene;
+		pin_ptr<FbxManager*> pSdkManagerPin = &pSdkManager;
+		pin_ptr<FbxScene*> pScenePin = &pScene;
 		Init(pSdkManagerPin, pScenePin);
 
 		cDest = Fbx::StringToCharArray(path);
 		cFormat = Fbx::StringToCharArray(exportFormat);
-		pExporter = KFbxExporter::Create(pSdkManager, "");
+		pExporter = FbxExporter::Create(pSdkManager, "");
 		int lFormatIndex, lFormatCount = pSdkManager->GetIOPluginRegistry()->GetWriterFormatCount();
 		for (lFormatIndex = 0; lFormatIndex < lFormatCount; lFormatIndex++)
 		{
-			KString lDesc = KString(pSdkManager->GetIOPluginRegistry()->GetWriterFormatDescription(lFormatIndex));
+			FbxString lDesc = FbxString(pSdkManager->GetIOPluginRegistry()->GetWriterFormatDescription(lFormatIndex));
 			if (lDesc.Find(cFormat) >= 0)
 			{
 				if (pSdkManager->GetIOPluginRegistry()->WriterIsFBX(lFormatIndex))
@@ -80,28 +81,28 @@ namespace SB3Utility
 		IOS_REF.SetBoolProp(EXP_FBX_ANIMATION, true);
 		IOS_REF.SetBoolProp(EXP_FBX_GLOBAL_SETTINGS, true);
 
-		KFbxGlobalSettings& globalSettings = pScene->GetGlobalSettings();
-		KTime::ETimeMode pTimeMode = KTime::eCINEMA;
+		FbxGlobalSettings& globalSettings = pScene->GetGlobalSettings();
+		FbxTime::EMode pTimeMode = FbxTime::eFrames24;
 		globalSettings.SetTimeMode(pTimeMode);
 
 		if (!pExporter->Initialize(cDest, lFormatIndex, pSdkManager->GetIOSettings()))
 		{
-			throw gcnew Exception(gcnew String("Failed to initialize KFbxExporter: ") + gcnew String(pExporter->GetLastErrorString()));
+			throw gcnew Exception(gcnew String("Failed to initialize FbxExporter: ") + gcnew String(pExporter->GetStatus().GetErrorString()));
 		}
 
-		pMaterials = new KArrayTemplate<KFbxSurfacePhong*>();
-		pTextures = new KArrayTemplate<KFbxFileTexture*>();
+		pMaterials = new FbxArray<FbxSurfacePhong*>();
+		pTextures = new FbxArray<FbxFileTexture*>();
 		pMaterials->Reserve(imported->MaterialList->Count);
 		pTextures->Reserve(imported->TextureList->Count);
 
-		pMeshNodes = new KArrayTemplate<KFbxNode*>();
+		pMeshNodes = new FbxArray<FbxNode*>();
 		ExportFrame(pScene->GetRootNode(), imported->FrameList[0]);
 
 		SetJointsFromImportedMeshes();
 
 		for (int i = 0; i < pMeshNodes->GetCount(); i++)
 		{
-			KFbxNode* meshNode = pMeshNodes->GetAt(i);
+			FbxNode* meshNode = pMeshNodes->GetAt(i);
 			ImportedMesh^ mesh = ImportedHelpers::FindMesh(gcnew String(meshNode->GetName()), imported->MeshList);
 			ExportMesh(meshNode, mesh);
 		}
@@ -164,17 +165,17 @@ namespace SB3Utility
 		SetJointsNode(pScene->GetRootNode()->GetChild(0), boneNames);
 	}
 
-	void Fbx::Exporter::ExportFrame(KFbxNode* pParentNode, ImportedFrame^ frame)
+	void Fbx::Exporter::ExportFrame(FbxNode* pParentNode, ImportedFrame^ frame)
 	{
 		String^ frameName = frame->Name;
 		if ((frameNames == nullptr) || frameNames->Contains(frameName))
 		{
-			KFbxNode* pFrameNode = NULL;
+			FbxNode* pFrameNode = NULL;
 			char* pName = NULL;
 			try
 			{
 				pName = StringToCharArray(frameName);
-				pFrameNode = KFbxNode::Create(pSdkManager, pName);
+				pFrameNode = FbxNode::Create(pSdkManager, pName);
 			}
 			finally
 			{
@@ -186,9 +187,9 @@ namespace SB3Utility
 			frame->Matrix.Decompose(scale, rotate, translate);
 			Vector3 rotateVector = Fbx::QuaternionToEuler(rotate);
 
-			pFrameNode->LclScaling.Set(KFbxVector4(scale.X , scale.Y, scale.Z));
-			pFrameNode->LclRotation.Set(KFbxVector4(fbxDouble3(rotateVector.X, rotateVector.Y, rotateVector.Z)));
-			pFrameNode->LclTranslation.Set(KFbxVector4(translate.X, translate.Y, translate.Z));
+			pFrameNode->LclScaling.Set(FbxVector4(scale.X , scale.Y, scale.Z));
+			pFrameNode->LclRotation.Set(FbxVector4(FbxDouble3(rotateVector.X, rotateVector.Y, rotateVector.Z)));
+			pFrameNode->LclTranslation.Set(FbxVector4(translate.X, translate.Y, translate.Z));
 			pParentNode->AddChild(pFrameNode);
 
 			if (ImportedHelpers::FindMesh(frameName, imported->MeshList) != nullptr)
@@ -203,7 +204,7 @@ namespace SB3Utility
 		}
 	}
 
-	void Fbx::Exporter::ExportMesh(KFbxNode* pFrameNode, ImportedMesh^ meshList)
+	void Fbx::Exporter::ExportMesh(FbxNode* pFrameNode, ImportedMesh^ meshList)
 	{
 		String^ frameName = meshList->Name;
 		List<ImportedBone^>^ boneList = meshList->BoneList;
@@ -217,12 +218,12 @@ namespace SB3Utility
 			hasBones = false;
 		}
 
-		KArrayTemplate<KFbxNode*>* pBoneNodeList = NULL;
+		FbxArray<FbxNode*>* pBoneNodeList = NULL;
 		try
 		{
 			if (hasBones)
 			{
-				pBoneNodeList = new KArrayTemplate<KFbxNode*>();
+				pBoneNodeList = new FbxArray<FbxNode*>();
 				pBoneNodeList->Reserve(boneList->Count);
 				for (int i = 0; i < boneList->Count; i++)
 				{
@@ -232,7 +233,7 @@ namespace SB3Utility
 					try
 					{
 						pBoneName = StringToCharArray(boneName);
-						KFbxNode* foundNode = pScene->GetRootNode()->FindChild(pBoneName);
+						FbxNode* foundNode = pScene->GetRootNode()->FindChild(pBoneName);
 						if (foundNode == NULL)
 						{
 							throw gcnew Exception(gcnew String("Couldn't find frame ") + boneName + gcnew String(" used by the bone"));
@@ -249,24 +250,24 @@ namespace SB3Utility
 			for (int i = 0; i < meshList->SubmeshList->Count; i++)
 			{
 				char* pName = NULL;
-				KArrayTemplate<KFbxCluster*>* pClusterArray = NULL;
+				FbxArray<FbxCluster*>* pClusterArray = NULL;
 				try
 				{
 					pName = StringToCharArray(frameName + "_" + i);
-					KFbxMesh* pMesh = KFbxMesh::Create(pSdkManager, "");
+					FbxMesh* pMesh = FbxMesh::Create(pSdkManager, "");
 
 					if (hasBones)
 					{
-						pClusterArray = new KArrayTemplate<KFbxCluster*>();
+						pClusterArray = new FbxArray<FbxCluster*>();
 						pClusterArray->Reserve(boneList->Count);
 
 						for (int i = 0; i < boneList->Count; i++)
 						{
-							KFbxNode* pNode = pBoneNodeList->GetAt(i);
-							KString lClusterName = pNode->GetNameOnly() + KString("Cluster");
-							KFbxCluster* pCluster = KFbxCluster::Create(pSdkManager, lClusterName.Buffer());
+							FbxNode* pNode = pBoneNodeList->GetAt(i);
+							FbxString lClusterName = pNode->GetNameOnly() + FbxString("Cluster");
+							FbxCluster* pCluster = FbxCluster::Create(pSdkManager, lClusterName.Buffer());
 							pCluster->SetLink(pNode);
-							pCluster->SetLinkMode(KFbxCluster::eTOTAL1);
+							pCluster->SetLinkMode(FbxCluster::eTotalOne);
 							pClusterArray->Add(pCluster);
 						}
 					}
@@ -275,7 +276,7 @@ namespace SB3Utility
 					List<ImportedFace^>^ faceList = meshObj->FaceList;
 					List<ImportedVertex^>^ vertexList = meshObj->VertexList;
 
-					KFbxLayer* pLayer = pMesh->GetLayer(0);
+					FbxLayer* pLayer = pMesh->GetLayer(0);
 					if (pLayer == NULL)
 					{
 						pMesh->CreateLayer();
@@ -283,28 +284,28 @@ namespace SB3Utility
 					}
 
 					pMesh->InitControlPoints(vertexList->Count);
-					KFbxVector4* pControlPoints = pMesh->GetControlPoints();
+					FbxVector4* pControlPoints = pMesh->GetControlPoints();
 
-					KFbxLayerElementNormal* pLayerElementNormal = KFbxLayerElementNormal::Create(pMesh, "");
-					pLayerElementNormal->SetMappingMode(KFbxLayerElement::eBY_CONTROL_POINT);
-					pLayerElementNormal->SetReferenceMode(KFbxLayerElement::eDIRECT);
+					FbxLayerElementNormal* pLayerElementNormal = FbxLayerElementNormal::Create(pMesh, "");
+					pLayerElementNormal->SetMappingMode(FbxLayerElement::eByControlPoint);
+					pLayerElementNormal->SetReferenceMode(FbxLayerElement::eDirect);
 					pLayer->SetNormals(pLayerElementNormal);
 
-					KFbxLayerElementUV* pUVLayer = KFbxLayerElementUV::Create(pMesh, "");
-					pUVLayer->SetMappingMode(KFbxLayerElement::eBY_CONTROL_POINT);
-					pUVLayer->SetReferenceMode(KFbxLayerElement::eDIRECT);
-					pLayer->SetUVs(pUVLayer, KFbxLayerElement::eDIFFUSE_TEXTURES);
+					FbxLayerElementUV* pUVLayer = FbxLayerElementUV::Create(pMesh, "");
+					pUVLayer->SetMappingMode(FbxLayerElement::eByControlPoint);
+					pUVLayer->SetReferenceMode(FbxLayerElement::eDirect);
+					pLayer->SetUVs(pUVLayer, FbxLayerElement::eTextureDiffuse);
 
-					KFbxNode* pMeshNode = KFbxNode::Create(pSdkManager, pName);
+					FbxNode* pMeshNode = FbxNode::Create(pSdkManager, pName);
 					pMeshNode->SetNodeAttribute(pMesh);
 					pFrameNode->AddChild(pMeshNode);
 
 					ImportedMaterial^ mat = ImportedHelpers::FindMaterial(meshObj->Material, imported->MaterialList);
 					if (mat != nullptr)
 					{
-						KFbxLayerElementMaterial* pMaterialLayer = KFbxLayerElementMaterial::Create(pMesh, "");
-						pMaterialLayer->SetMappingMode(KFbxLayerElement::eALL_SAME);
-						pMaterialLayer->SetReferenceMode(KFbxLayerElement::eINDEX_TO_DIRECT);
+						FbxLayerElementMaterial* pMaterialLayer = FbxLayerElementMaterial::Create(pMesh, "");
+						pMaterialLayer->SetMappingMode(FbxLayerElement::eAllSame);
+						pMaterialLayer->SetReferenceMode(FbxLayerElement::eIndexToDirect);
 						pMaterialLayer->GetIndexArray().Add(0);
 						pLayer->SetMaterials(pMaterialLayer);
 
@@ -315,7 +316,7 @@ namespace SB3Utility
 							int foundMat = -1;
 							for (int j = 0; j < pMaterials->GetCount(); j++)
 							{
-								KFbxSurfacePhong* pMatTemp = pMaterials->GetAt(j);
+								FbxSurfacePhong* pMatTemp = pMaterials->GetAt(j);
 								if (strcmp(pMatTemp->GetName(), pMatName) == 0)
 								{
 									foundMat = j;
@@ -323,28 +324,28 @@ namespace SB3Utility
 								}
 							}
 
-							KFbxSurfacePhong* pMat;
+							FbxSurfacePhong* pMat;
 							if (foundMat >= 0)
 							{
 								pMat = pMaterials->GetAt(foundMat);
 							}
 							else
 							{
-								KString lShadingName  = "Phong";
+								FbxString lShadingName  = "Phong";
 								Color4 diffuse = mat->Diffuse;
 								Color4 ambient = mat->Ambient;
 								Color4 emissive = mat->Emissive;
 								Color4 specular = mat->Specular;
 								float specularPower = mat->Power;
-								pMat = KFbxSurfacePhong::Create(pSdkManager, pMatName);
-								pMat->Diffuse.Set(fbxDouble3(diffuse.Red, diffuse.Green, diffuse.Blue));
-								pMat->DiffuseFactor.Set(fbxDouble1(diffuse.Alpha));
-								pMat->Ambient.Set(fbxDouble3(ambient.Red, ambient.Green, ambient.Blue));
-								pMat->AmbientFactor.Set(fbxDouble1(ambient.Alpha));
-								pMat->Emissive.Set(fbxDouble3(emissive.Red, emissive.Green, emissive.Blue));
-								pMat->EmissiveFactor.Set(fbxDouble1(emissive.Alpha));
-								pMat->Specular.Set(fbxDouble3(specular.Red, specular.Green, specular.Blue));
-								pMat->SpecularFactor.Set(fbxDouble1(specular.Alpha));
+								pMat = FbxSurfacePhong::Create(pSdkManager, pMatName);
+								pMat->Diffuse.Set(FbxDouble3(diffuse.Red, diffuse.Green, diffuse.Blue));
+								pMat->DiffuseFactor.Set(FbxDouble(diffuse.Alpha));
+								pMat->Ambient.Set(FbxDouble3(ambient.Red, ambient.Green, ambient.Blue));
+								pMat->AmbientFactor.Set(FbxDouble(ambient.Alpha));
+								pMat->Emissive.Set(FbxDouble3(emissive.Red, emissive.Green, emissive.Blue));
+								pMat->EmissiveFactor.Set(FbxDouble(emissive.Alpha));
+								pMat->Specular.Set(FbxDouble3(specular.Red, specular.Green, specular.Blue));
+								pMat->SpecularFactor.Set(FbxDouble(specular.Alpha));
 								pMat->Shininess.Set(specularPower);
 								pMat->ShadingModel.Set(lShadingName);
 
@@ -354,45 +355,45 @@ namespace SB3Utility
 							pMeshNode->AddMaterial(pMat);
 
 							bool hasTexture = false;
-							KFbxLayerElementTexture* pTextureLayerDiffuse = NULL;
-							KFbxFileTexture* pTextureDiffuse = ExportTexture(ImportedHelpers::FindTexture(mat->Textures[0], imported->TextureList), pTextureLayerDiffuse, pMesh);
+							FbxLayerElementTexture* pTextureLayerDiffuse = NULL;
+							FbxFileTexture* pTextureDiffuse = ExportTexture(ImportedHelpers::FindTexture((String^)mat->Textures[0], imported->TextureList), pTextureLayerDiffuse, pMesh);
 							if (pTextureDiffuse != NULL)
 							{
-								pLayer->SetTextures(KFbxLayerElement::eDIFFUSE_TEXTURES, pTextureLayerDiffuse);
+								pLayer->SetTextures(FbxLayerElement::eTextureDiffuse, pTextureLayerDiffuse);
 								pMat->Diffuse.ConnectSrcObject(pTextureDiffuse);
 								hasTexture = true;
 							}
 
-							KFbxLayerElementTexture* pTextureLayerAmbient = NULL;
-							KFbxFileTexture* pTextureAmbient = ExportTexture(ImportedHelpers::FindTexture(mat->Textures[1], imported->TextureList), pTextureLayerAmbient, pMesh);
+							FbxLayerElementTexture* pTextureLayerAmbient = NULL;
+							FbxFileTexture* pTextureAmbient = ExportTexture(ImportedHelpers::FindTexture((String^)mat->Textures[1], imported->TextureList), pTextureLayerAmbient, pMesh);
 							if (pTextureAmbient != NULL)
 							{
-								pLayer->SetTextures(KFbxLayerElement::eAMBIENT_TEXTURES, pTextureLayerAmbient);
+								pLayer->SetTextures(FbxLayerElement::eTextureAmbient, pTextureLayerAmbient);
 								pMat->Ambient.ConnectSrcObject(pTextureAmbient);
 								hasTexture = true;
 							}
 
-							KFbxLayerElementTexture* pTextureLayerEmissive = NULL;
-							KFbxFileTexture* pTextureEmissive = ExportTexture(ImportedHelpers::FindTexture(mat->Textures[2], imported->TextureList), pTextureLayerEmissive, pMesh);
+							FbxLayerElementTexture* pTextureLayerEmissive = NULL;
+							FbxFileTexture* pTextureEmissive = ExportTexture(ImportedHelpers::FindTexture((String^)mat->Textures[2], imported->TextureList), pTextureLayerEmissive, pMesh);
 							if (pTextureEmissive != NULL)
 							{
-								pLayer->SetTextures(KFbxLayerElement::eEMISSIVE_TEXTURES, pTextureLayerEmissive);
+								pLayer->SetTextures(FbxLayerElement::eTextureEmissive, pTextureLayerEmissive);
 								pMat->Emissive.ConnectSrcObject(pTextureEmissive);
 								hasTexture = true;
 							}
 
-							KFbxLayerElementTexture* pTextureLayerSpecular = NULL;
-							KFbxFileTexture* pTextureSpecular = ExportTexture(ImportedHelpers::FindTexture(mat->Textures[3], imported->TextureList), pTextureLayerSpecular, pMesh);
+							FbxLayerElementTexture* pTextureLayerSpecular = NULL;
+							FbxFileTexture* pTextureSpecular = ExportTexture(ImportedHelpers::FindTexture((String^)mat->Textures[3], imported->TextureList), pTextureLayerSpecular, pMesh);
 							if (pTextureSpecular != NULL)
 							{
-								pLayer->SetTextures(KFbxLayerElement::eSPECULAR_TEXTURES, pTextureLayerSpecular);
+								pLayer->SetTextures(FbxLayerElement::eTextureSpecular, pTextureLayerSpecular);
 								pMat->Specular.ConnectSrcObject(pTextureSpecular);
 								hasTexture = true;
 							}
 
 							if (hasTexture)
 							{
-								pMeshNode->SetShadingMode(KFbxNode::eTEXTURE_SHADING);
+								pMeshNode->SetShadingMode(FbxNode::eTextureShading);
 							}
 						}
 						finally
@@ -405,11 +406,11 @@ namespace SB3Utility
 					{
 						ImportedVertex^ vertex = vertexList[j];
 						Vector3 coords = vertex->Position;
-						pControlPoints[j] = KFbxVector4(coords.X, coords.Y, coords.Z);
+						pControlPoints[j] = FbxVector4(coords.X, coords.Y, coords.Z);
 						Vector3 normal = vertex->Normal;
-						pLayerElementNormal->GetDirectArray().Add(KFbxVector4(normal.X, normal.Y, normal.Z));
+						pLayerElementNormal->GetDirectArray().Add(FbxVector4(normal.X, normal.Y, normal.Z));
 						array<float>^ uv = vertex->UV;
-						pUVLayer->GetDirectArray().Add(KFbxVector2(uv[0], -uv[1]));
+						pUVLayer->GetDirectArray().Add(FbxVector2(uv[0], -uv[1]));
 
 						if (hasBones)
 						{
@@ -419,7 +420,7 @@ namespace SB3Utility
 							{
 								if (boneIndices[k] < boneList->Count)
 								{
-									KFbxCluster* pCluster = pClusterArray->GetAt(boneIndices[k]);
+									FbxCluster* pCluster = pClusterArray->GetAt(boneIndices[k]);
 									pCluster->AddControlPointIndex(j, weights4[k]);
 								}
 							}
@@ -429,9 +430,9 @@ namespace SB3Utility
 					for (int j = 0; j < faceList->Count; j++)
 					{
 						ImportedFace^ face = faceList[j];
-						unsigned short v1 = face->VertexIndices[0];
-						unsigned short v2 = face->VertexIndices[1];
-						unsigned short v3 = face->VertexIndices[2];
+						unsigned short v1 = (unsigned short)face->VertexIndices[0];
+						unsigned short v2 = (unsigned short)face->VertexIndices[1];
+						unsigned short v3 = (unsigned short)face->VertexIndices[2];
 						pMesh->BeginPolygon(false);
 						pMesh->AddPolygon(v1);
 						pMesh->AddPolygon(v2);
@@ -441,15 +442,15 @@ namespace SB3Utility
 
 					if (hasBones)
 					{
-						KFbxSkin* pSkin = KFbxSkin::Create(pSdkManager, "");
+						FbxSkin* pSkin = FbxSkin::Create(pSdkManager, "");
 						for (int j = 0; j < boneList->Count; j++)
 						{
-							KFbxCluster* pCluster = pClusterArray->GetAt(j);
+							FbxCluster* pCluster = pClusterArray->GetAt(j);
 							if (pCluster->GetControlPointIndicesCount() > 0)
 							{
-								KFbxNode* pBoneNode = pBoneNodeList->GetAt(j);
+								FbxNode* pBoneNode = pBoneNodeList->GetAt(j);
 								Matrix boneMatrix = boneList[j]->Matrix;
-								KFbxXMatrix lBoneMatrix;
+								FbxAMatrix lBoneMatrix;
 								for (int m = 0; m < 4; m++)
 								{
 									for (int n = 0; n < 4; n++)
@@ -458,7 +459,7 @@ namespace SB3Utility
 									}
 								}
 
-								KFbxXMatrix lMeshMatrix = pScene->GetEvaluator()->GetNodeGlobalTransform(pMeshNode);
+								FbxAMatrix lMeshMatrix = pScene->GetEvaluator()->GetNodeGlobalTransform(pMeshNode);
 
 								pCluster->SetTransformMatrix(lMeshMatrix);
 								pCluster->SetTransformLinkMatrix(lMeshMatrix * lBoneMatrix.Inverse());
@@ -492,17 +493,17 @@ namespace SB3Utility
 		}
 	}
 
-	KFbxFileTexture* Fbx::Exporter::ExportTexture(ImportedTexture^ matTex, KFbxLayerElementTexture*& pTextureLayer, KFbxMesh* pMesh)
+	FbxFileTexture* Fbx::Exporter::ExportTexture(ImportedTexture^ matTex, FbxLayerElementTexture*& pTextureLayer, FbxMesh* pMesh)
 	{
-		KFbxFileTexture* pTex = NULL;
+		FbxFileTexture* pTex = NULL;
 
 		if (matTex != nullptr)
 		{
 			String^ matTexName = matTex->Name;
 
-			pTextureLayer = KFbxLayerElementTexture::Create(pMesh, "");
-			pTextureLayer->SetMappingMode(KFbxLayerElement::eALL_SAME);
-			pTextureLayer->SetReferenceMode(KFbxLayerElement::eDIRECT);
+			pTextureLayer = FbxLayerElementTexture::Create(pMesh, "");
+			pTextureLayer->SetMappingMode(FbxLayerElement::eAllSame);
+			pTextureLayer->SetReferenceMode(FbxLayerElement::eDirect);
 
 			char* pTexName = NULL;
 			try
@@ -511,7 +512,7 @@ namespace SB3Utility
 				int foundTex = -1;
 				for (int i = 0; i < pTextures->GetCount(); i++)
 				{
-					KFbxFileTexture* pTexTemp = pTextures->GetAt(i);
+					FbxFileTexture* pTexTemp = pTextures->GetAt(i);
 					if (strcmp(pTexTemp->GetName(), pTexName) == 0)
 					{
 						foundTex = i;
@@ -525,29 +526,31 @@ namespace SB3Utility
 				}
 				else
 				{
-					pTex = KFbxFileTexture::Create(pSdkManager, pTexName);
+					pTex = FbxFileTexture::Create(pSdkManager, pTexName);
 					pTex->SetFileName(pTexName);
-					pTex->SetTextureUse(KFbxTexture::eSTANDARD);
-					pTex->SetMappingType(KFbxTexture::eUV);
-					pTex->SetMaterialUse(KFbxFileTexture::eMODEL_MATERIAL);
+					pTex->SetTextureUse(FbxTexture::eStandard);
+					pTex->SetMappingType(FbxTexture::eUV);
+					pTex->SetMaterialUse(FbxFileTexture::eModelMaterial);
 					pTex->SetSwapUV(false);
 					pTex->SetTranslation(0.0, 0.0);
 					pTex->SetScale(1.0, 1.0);
 					pTex->SetRotation(0.0, 0.0);
 					pTextures->Add(pTex);
 
-					String^ path = Path::GetDirectoryName(gcnew String(pExporter->GetFileName().Buffer())) + Path::DirectorySeparatorChar + Path::GetFileName(matTex->Name);
-					FileInfo^ file = gcnew FileInfo(path);
+					String^ path = Path::GetDirectoryName(gcnew String(pExporter->GetFileName().Buffer()));
+					if (path == String::Empty)
+					{
+						path = ".";
+					}
+					FileInfo^ file = gcnew FileInfo(path + Path::DirectorySeparatorChar + Path::GetFileName(matTex->Name));
 					DirectoryInfo^ dir = file->Directory;
 					if (!dir->Exists)
 					{
 						dir->Create();
 					}
-					{
-						BinaryWriter^ writer = gcnew BinaryWriter(file->Create());
-						writer->Write(matTex->Data);
-						writer->Close();
-					}
+					BinaryWriter^ writer = gcnew BinaryWriter(file->Create());
+					writer->Write(matTex->Data);
+					writer->Close();
 				}
 				
 				pTextureLayer->GetDirectArray().Add(pTex);
@@ -571,15 +574,15 @@ namespace SB3Utility
 
 		List<String^>^ pNotFound = gcnew List<String^>();
 
-		KFbxTypedProperty<fbxDouble3> scale = KFbxProperty::Create(pScene, DTDouble3, InterpolationHelper::pScaleName);
-		KFbxTypedProperty<fbxDouble4> rotate = KFbxProperty::Create(pScene, DTDouble4, InterpolationHelper::pRotateName);
-		KFbxTypedProperty<fbxDouble3> translate = KFbxProperty::Create(pScene, DTDouble3, InterpolationHelper::pTranslateName);
+		FbxPropertyT<FbxDouble3> scale = FbxProperty::Create(pScene, FbxDouble3DT, InterpolationHelper::pScaleName);
+		FbxPropertyT<FbxDouble4> rotate = FbxProperty::Create(pScene, FbxDouble4DT, InterpolationHelper::pRotateName);
+		FbxPropertyT<FbxDouble3> translate = FbxProperty::Create(pScene, FbxDouble3DT, InterpolationHelper::pTranslateName);
 
-		KFbxAnimCurveFilterUnroll* lFilter = EulerFilter ? new KFbxAnimCurveFilterUnroll() : NULL;
+		FbxAnimCurveFilterUnroll* lFilter = EulerFilter ? new FbxAnimCurveFilterUnroll() : NULL;
 
 		for (int i = 0; i < importedAnimationList->Count; i++)
 		{
-			KString kTakeName = KString("Take") + KString(i);
+			FbxString kTakeName = FbxString("Take") + FbxString(i);
 			bool keyframed = dynamic_cast<ImportedKeyframedAnimation^>(importedAnimationList[i]) != nullptr;
 			if (keyframed)
 			{
@@ -604,22 +607,22 @@ namespace SB3Utility
 		}
 	}
 
-	void Fbx::Exporter::ExportKeyframedAnimation(ImportedKeyframedAnimation^ parser, KString& kTakeName, int startKeyframe, int endKeyframe, bool linear, KFbxAnimCurveFilterUnroll* EulerFilter, float filterPrecision,
-			KFbxTypedProperty<fbxDouble3>& scale, KFbxTypedProperty<fbxDouble4>& rotate, KFbxTypedProperty<fbxDouble3>& translate, List<String^>^ pNotFound)
+	void Fbx::Exporter::ExportKeyframedAnimation(ImportedKeyframedAnimation^ parser, FbxString& kTakeName, int startKeyframe, int endKeyframe, bool linear, FbxAnimCurveFilterUnroll* EulerFilter, float filterPrecision,
+			FbxPropertyT<FbxDouble3>& scale, FbxPropertyT<FbxDouble4>& rotate, FbxPropertyT<FbxDouble3>& translate, List<String^>^ pNotFound)
 	{
 		List<ImportedAnimationKeyframedTrack^>^ pAnimationList = parser->TrackList;
 
 		char* lTakeName = kTakeName.Buffer();
 
-		KTime lTime;
-		KFbxAnimStack* lAnimStack = KFbxAnimStack::Create(pScene, lTakeName);
-		KFbxAnimLayer* lAnimLayer = KFbxAnimLayer::Create(pScene, "Base Layer");
+		FbxTime lTime;
+		FbxAnimStack* lAnimStack = FbxAnimStack::Create(pScene, lTakeName);
+		FbxAnimLayer* lAnimLayer = FbxAnimLayer::Create(pScene, "Base Layer");
 		lAnimStack->AddMember(lAnimLayer);
 		InterpolationHelper^ interpolationHelper;
 		int resampleCount = 0;
 		if (startKeyframe >= 0)
 		{
-			interpolationHelper = gcnew InterpolationHelper(pScene, lAnimLayer, linear ? KFbxAnimCurveDef::eINTERPOLATION_LINEAR : KFbxAnimCurveDef::eINTERPOLATION_CUBIC, &scale, &rotate, &translate);
+			interpolationHelper = gcnew InterpolationHelper(pScene, lAnimLayer, linear ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic, &scale, &rotate, &translate);
 			for each (ImportedAnimationKeyframedTrack^ track in pAnimationList)
 			{
 				if (track->Keyframes->Length > resampleCount)
@@ -633,7 +636,7 @@ namespace SB3Utility
 		{
 			ImportedAnimationKeyframedTrack^ keyframeList = pAnimationList[j];
 			String^ name = keyframeList->Name;
-			KFbxNode* pNode = NULL;
+			FbxNode* pNode = NULL;
 			char* pName = NULL;
 			try
 			{
@@ -654,15 +657,15 @@ namespace SB3Utility
 			}
 			else
 			{
-				KFbxAnimCurve* lCurveSX = pNode->LclScaling.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_S_X, true);
-				KFbxAnimCurve* lCurveSY = pNode->LclScaling.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_S_Y, true);
-				KFbxAnimCurve* lCurveSZ = pNode->LclScaling.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_S_Z, true);
-				KFbxAnimCurve* lCurveRX = pNode->LclRotation.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_R_X, true);
-				KFbxAnimCurve* lCurveRY = pNode->LclRotation.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_R_Y, true);
-				KFbxAnimCurve* lCurveRZ = pNode->LclRotation.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_R_Z, true);
-				KFbxAnimCurve* lCurveTX = pNode->LclTranslation.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_T_X, true);
-				KFbxAnimCurve* lCurveTY = pNode->LclTranslation.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_T_Y, true);
-				KFbxAnimCurve* lCurveTZ = pNode->LclTranslation.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_T_Z, true);
+				FbxAnimCurve* lCurveSX = pNode->LclScaling.GetCurve(lAnimLayer, FBXSDK_CURVENODE_COMPONENT_X, true);
+				FbxAnimCurve* lCurveSY = pNode->LclScaling.GetCurve(lAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y, true);
+				FbxAnimCurve* lCurveSZ = pNode->LclScaling.GetCurve(lAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z, true);
+				FbxAnimCurve* lCurveRX = pNode->LclRotation.GetCurve(lAnimLayer, FBXSDK_CURVENODE_COMPONENT_X, true);
+				FbxAnimCurve* lCurveRY = pNode->LclRotation.GetCurve(lAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y, true);
+				FbxAnimCurve* lCurveRZ = pNode->LclRotation.GetCurve(lAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z, true);
+				FbxAnimCurve* lCurveTX = pNode->LclTranslation.GetCurve(lAnimLayer, FBXSDK_CURVENODE_COMPONENT_X, true);
+				FbxAnimCurve* lCurveTY = pNode->LclTranslation.GetCurve(lAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y, true);
+				FbxAnimCurve* lCurveTZ = pNode->LclTranslation.GetCurve(lAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z, true);
 
 				lCurveSX->KeyModifyBegin();
 				lCurveSY->KeyModifyBegin();
@@ -751,35 +754,35 @@ namespace SB3Utility
 
 				if (EulerFilter)
 				{
-					KFbxAnimCurve* lCurve [3];
+					FbxAnimCurve* lCurve [3];
 					lCurve[0] = lCurveRX;
 					lCurve[1] = lCurveRY;
 					lCurve[2] = lCurveRZ;
 					EulerFilter->Reset();
 					EulerFilter->SetTestForPath(true);
 					EulerFilter->SetQualityTolerance(filterPrecision);
-					EulerFilter->Apply((KFbxAnimCurve**)lCurve, 3);
+					EulerFilter->Apply((FbxAnimCurve**)lCurve, 3);
 				}
 			}
 		}
 	}
 
-	void Fbx::Exporter::ExportSampledAnimation(ImportedSampledAnimation^ parser, KString& kTakeName, int startKeyframe, int endKeyframe, bool linear, KFbxAnimCurveFilterUnroll* EulerFilter, float filterPrecision,
-			KFbxTypedProperty<fbxDouble3>& scale, KFbxTypedProperty<fbxDouble4>& rotate, KFbxTypedProperty<fbxDouble3>& translate, List<String^>^ pNotFound)
+	void Fbx::Exporter::ExportSampledAnimation(ImportedSampledAnimation^ parser, FbxString& kTakeName, int startKeyframe, int endKeyframe, bool linear, FbxAnimCurveFilterUnroll* EulerFilter, float filterPrecision,
+			FbxPropertyT<FbxDouble3>& scale, FbxPropertyT<FbxDouble4>& rotate, FbxPropertyT<FbxDouble3>& translate, List<String^>^ pNotFound)
 	{
 		List<ImportedAnimationSampledTrack^>^ pAnimationList = parser->TrackList;
 
 		char* lTakeName = kTakeName.Buffer();
 
-		KTime lTime;
-		KFbxAnimStack* lAnimStack = KFbxAnimStack::Create(pScene, lTakeName);
-		KFbxAnimLayer* lAnimLayer = KFbxAnimLayer::Create(pScene, "Base Layer");
+		FbxTime lTime;
+		FbxAnimStack* lAnimStack = FbxAnimStack::Create(pScene, lTakeName);
+		FbxAnimLayer* lAnimLayer = FbxAnimLayer::Create(pScene, "Base Layer");
 		lAnimStack->AddMember(lAnimLayer);
 		InterpolationHelper^ interpolationHelper;
 		int resampleCount = 0;
 		if (startKeyframe >= 0)
 		{
-			interpolationHelper = gcnew InterpolationHelper(pScene, lAnimLayer, linear ? KFbxAnimCurveDef::eINTERPOLATION_LINEAR : KFbxAnimCurveDef::eINTERPOLATION_CUBIC, &scale, &rotate, &translate);
+			interpolationHelper = gcnew InterpolationHelper(pScene, lAnimLayer, linear ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic, &scale, &rotate, &translate);
 			for each (ImportedAnimationSampledTrack^ track in pAnimationList)
 			{
 				if (track->Scalings->Length > resampleCount)
@@ -801,7 +804,7 @@ namespace SB3Utility
 		{
 			ImportedAnimationSampledTrack^ sampleList = pAnimationList[j];
 			String^ name = sampleList->Name;
-			KFbxNode* pNode = NULL;
+			FbxNode* pNode = NULL;
 			char* pName = NULL;
 			try
 			{
@@ -822,15 +825,15 @@ namespace SB3Utility
 			}
 			else
 			{
-				KFbxAnimCurve* lCurveSX = pNode->LclScaling.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_S_X, true);
-				KFbxAnimCurve* lCurveSY = pNode->LclScaling.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_S_Y, true);
-				KFbxAnimCurve* lCurveSZ = pNode->LclScaling.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_S_Z, true);
-				KFbxAnimCurve* lCurveRX = pNode->LclRotation.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_R_X, true);
-				KFbxAnimCurve* lCurveRY = pNode->LclRotation.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_R_Y, true);
-				KFbxAnimCurve* lCurveRZ = pNode->LclRotation.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_R_Z, true);
-				KFbxAnimCurve* lCurveTX = pNode->LclTranslation.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_T_X, true);
-				KFbxAnimCurve* lCurveTY = pNode->LclTranslation.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_T_Y, true);
-				KFbxAnimCurve* lCurveTZ = pNode->LclTranslation.GetCurve<KFbxAnimCurve>(lAnimLayer, KFCURVENODE_T_Z, true);
+				FbxAnimCurve* lCurveSX = pNode->LclScaling.GetCurve(lAnimLayer, FBXSDK_CURVENODE_COMPONENT_X, true);
+				FbxAnimCurve* lCurveSY = pNode->LclScaling.GetCurve(lAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y, true);
+				FbxAnimCurve* lCurveSZ = pNode->LclScaling.GetCurve(lAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z, true);
+				FbxAnimCurve* lCurveRX = pNode->LclRotation.GetCurve(lAnimLayer, FBXSDK_CURVENODE_COMPONENT_X, true);
+				FbxAnimCurve* lCurveRY = pNode->LclRotation.GetCurve(lAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y, true);
+				FbxAnimCurve* lCurveRZ = pNode->LclRotation.GetCurve(lAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z, true);
+				FbxAnimCurve* lCurveTX = pNode->LclTranslation.GetCurve(lAnimLayer, FBXSDK_CURVENODE_COMPONENT_X, true);
+				FbxAnimCurve* lCurveTY = pNode->LclTranslation.GetCurve(lAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y, true);
+				FbxAnimCurve* lCurveTZ = pNode->LclTranslation.GetCurve(lAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z, true);
 
 				lCurveSX->KeyModifyBegin();
 				lCurveSY->KeyModifyBegin();
@@ -937,14 +940,14 @@ namespace SB3Utility
 
 				if (EulerFilter)
 				{
-					KFbxAnimCurve* lCurve [3];
+					FbxAnimCurve* lCurve [3];
 					lCurve[0] = lCurveRX;
 					lCurve[1] = lCurveRY;
 					lCurve[2] = lCurveRZ;
 					EulerFilter->Reset();
 					EulerFilter->SetTestForPath(true);
 					EulerFilter->SetQualityTolerance(filterPrecision);
-					EulerFilter->Apply((KFbxAnimCurve**)lCurve, 3);
+					EulerFilter->Apply((FbxAnimCurve**)lCurve, 3);
 				}
 			}
 		}

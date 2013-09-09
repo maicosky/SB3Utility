@@ -115,6 +115,7 @@ namespace SB3Utility
 		protected bool isRendering = false;
 		protected Point lastMousePos = new Point();
 		protected MouseButtons mouseDown = MouseButtons.None;
+		protected bool deviceLost = false;
 
 		Mesh CursorMesh;
 		Material CursorMaterial;
@@ -169,9 +170,6 @@ namespace SB3Utility
 				Report.ReportLog("Vertex tweening is not supported!");
 			}
 
-			camera = new Camera(control);
-			RenderControl = control;
-			
 			Device.SetRenderState(RenderState.Lighting, true);
 			Device.SetRenderState(RenderState.DiffuseMaterialSource, ColorSource.Material);
 			Device.SetRenderState(RenderState.EmissiveMaterialSource, ColorSource.Material);
@@ -219,7 +217,8 @@ namespace SB3Utility
 			Background = Color.FromArgb(255, 10, 10, 60);
 
 			isInitialized = true;
-			Render();
+			camera = new Camera(control);
+			RenderControl = control;
 		}
 
 		~Renderer()
@@ -323,7 +322,14 @@ namespace SB3Utility
 				presentParams.BackBufferCount = 1;
 				presentParams.BackBufferWidth = renderControl.Width;
 				presentParams.BackBufferHeight = renderControl.Height;
-				swapChain = new SwapChain(Device, presentParams);
+				try
+				{
+					swapChain = new SwapChain(Device, presentParams);
+				}
+				catch
+				{
+					deviceLost = true;
+				}
 				renderRect = new Rectangle(0, 0, renderControl.Width, renderControl.Height);
 			}
 		}
@@ -404,6 +410,11 @@ namespace SB3Utility
 		{
 			try
 			{
+				if (deviceLost)
+				{
+					ReinitializeRenderer();
+					return;
+				}
 				if (isInitialized && !isRendering && (swapChain != null))
 				{
 					isRendering = true;
@@ -442,56 +453,83 @@ namespace SB3Utility
 					isRendering = false;
 				}
 			}
-			catch (Exception)
+			catch
+			{
+				isInitialized = false;
+				isRendering = false;
+				ReinitializeRenderer();
+				isInitialized = true;
+				if (!deviceLost)
+				{
+					Render();
+				}
+			}
+		}
+
+		private void ReinitializeRenderer()
+		{
+			if (swapChain != null)
 			{
 				swapChain.Dispose();
 				swapChain = null;
+			}
+			if (TextFont != null)
+			{
 				TextFont.Dispose();
 				TextFont = null;
+			}
+			if (CursorMesh != null)
+			{
 				CursorMesh.Dispose();
 				CursorMesh = null;
-
-				PresentParameters presentParams = new PresentParameters();
-				presentParams.Windowed = true;
-				presentParams.BackBufferCount = 0;
-				presentParams.BackBufferWidth = Screen.PrimaryScreen.WorkingArea.Width;
-				presentParams.BackBufferHeight = Screen.PrimaryScreen.WorkingArea.Height;
-				Device.Reset(new PresentParameters[] { presentParams });
-
-				RenderControl = renderControl;
-
-				Device.SetRenderState(RenderState.Lighting, true);
-				Device.SetRenderState(RenderState.DiffuseMaterialSource, ColorSource.Material);
-				Device.SetRenderState(RenderState.EmissiveMaterialSource, ColorSource.Material);
-				Device.SetRenderState(RenderState.SpecularMaterialSource, ColorSource.Material);
-				Device.SetRenderState(RenderState.SpecularEnable, true);
-				Device.SetRenderState(RenderState.AlphaBlendEnable, true);
-				Device.SetRenderState(RenderState.BlendOperationAlpha, BlendOperation.Add);
-				Device.SetRenderState(RenderState.SourceBlend, Blend.SourceAlpha);
-				Device.SetRenderState(RenderState.DestinationBlend, Blend.InverseSourceAlpha);
-
-				Light light = new Light();
-				light.Type = LightType.Directional;
-				light.Ambient = new Color4(int.Parse((string)Gui.Config["LightAmbientARGB"], System.Globalization.NumberStyles.AllowHexSpecifier));
-				light.Diffuse = new Color4(int.Parse((string)Gui.Config["LightDiffuseARGB"], System.Globalization.NumberStyles.AllowHexSpecifier));
-				light.Specular = new Color4(int.Parse((string)Gui.Config["LightSpecularARGB"], System.Globalization.NumberStyles.AllowHexSpecifier));
-				Device.SetLight(0, light);
-				Device.EnableLight(0, true);
-
-				TextFont = new SlimDX.Direct3D9.Font(Device, new System.Drawing.Font("Arial", 8));
-				TextColor = new Color4(Color.White);
-
-				CursorMesh = Mesh.CreateSphere(Device, 1, 10, 10);
-				CursorMaterial = new Material();
-				CursorMaterial.Ambient = new Color4(1, 1f, 1f, 1f);
-				CursorMaterial.Diffuse = new Color4(1, 0.6f, 1, 0.3f);
-
-				Culling = true;
-				Background = Color.FromArgb(255, 10, 10, 60);
-
-				isInitialized = true;
-				isRendering = false;
 			}
+
+			PresentParameters presentParams = new PresentParameters();
+			presentParams.Windowed = true;
+			presentParams.BackBufferCount = 0;
+			presentParams.BackBufferWidth = Screen.PrimaryScreen.WorkingArea.Width;
+			presentParams.BackBufferHeight = Screen.PrimaryScreen.WorkingArea.Height;
+			try
+			{
+				Device.Reset(new PresentParameters[] { presentParams });
+				deviceLost = false;
+			}
+			catch
+			{
+				deviceLost = true;
+				return;
+			}
+
+			Device.SetRenderState(RenderState.Lighting, true);
+			Device.SetRenderState(RenderState.DiffuseMaterialSource, ColorSource.Material);
+			Device.SetRenderState(RenderState.EmissiveMaterialSource, ColorSource.Material);
+			Device.SetRenderState(RenderState.SpecularMaterialSource, ColorSource.Material);
+			Device.SetRenderState(RenderState.SpecularEnable, true);
+			Device.SetRenderState(RenderState.AlphaBlendEnable, true);
+			Device.SetRenderState(RenderState.BlendOperationAlpha, BlendOperation.Add);
+			Device.SetRenderState(RenderState.SourceBlend, Blend.SourceAlpha);
+			Device.SetRenderState(RenderState.DestinationBlend, Blend.InverseSourceAlpha);
+
+			Light light = new Light();
+			light.Type = LightType.Directional;
+			light.Ambient = new Color4(int.Parse((string)Gui.Config["LightAmbientARGB"], System.Globalization.NumberStyles.AllowHexSpecifier));
+			light.Diffuse = new Color4(int.Parse((string)Gui.Config["LightDiffuseARGB"], System.Globalization.NumberStyles.AllowHexSpecifier));
+			light.Specular = new Color4(int.Parse((string)Gui.Config["LightSpecularARGB"], System.Globalization.NumberStyles.AllowHexSpecifier));
+			Device.SetLight(0, light);
+			Device.EnableLight(0, true);
+
+			TextFont = new SlimDX.Direct3D9.Font(Device, new System.Drawing.Font("Arial", 8));
+			TextColor = new Color4(Color.White);
+
+			CursorMesh = Mesh.CreateSphere(Device, 1, 10, 10);
+			CursorMaterial = new Material();
+			CursorMaterial.Ambient = new Color4(1, 1f, 1f, 1f);
+			CursorMaterial.Diffuse = new Color4(1, 0.6f, 1, 0.3f);
+
+			Culling = true;
+			Background = Color.FromArgb(255, 10, 10, 60);
+
+			RenderControl = renderControl;
 		}
 
 		void DrawCursor()

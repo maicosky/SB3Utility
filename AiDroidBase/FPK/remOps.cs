@@ -12,14 +12,21 @@ namespace AiDroidPlugin
 	{
 		public static ImportedTexture ImportedTexture(remId texture, string remPath, bool diffuse_else_ambient)
 		{
+			string matTexName = texture.ToString();
 			String texh_folder = TexturePathFromREM(remPath);
 			if (texh_folder == null)
 			{
-				Report.ReportLog("TEXH folder could not be located.");
-				return null;
+				try
+				{
+					return new ImportedTexture(Path.GetDirectoryName(remPath) + @"\" + matTexName);
+				}
+				catch
+				{
+					Report.ReportLog("TEXH folder could not be located. " + matTexName + " also not found in the folder of " + remPath);
+					return null;
+				}
 			}
 
-			string matTexName = texture.ToString();
 			int lastDotPos = matTexName.LastIndexOf('.');
 			if (lastDotPos < 0)
 			{
@@ -35,9 +42,7 @@ namespace AiDroidPlugin
 				files = Directory.GetFiles(texh_folder, pattern);
 			}
 			catch (DirectoryNotFoundException) { }
-			if (files != null && files.Length > 0)
-				matTexName = files[0].Substring(files[0].LastIndexOf('\\') + 1);
-			else
+			if (files == null || files.Length == 0)
 			{
 				texh_folder += "TexH(v2)\\";
 				String pre = "zlc-";
@@ -47,15 +52,23 @@ namespace AiDroidPlugin
 					files = Directory.GetFiles(texh_folder, pre + body + pattern + ext);
 				}
 				catch (DirectoryNotFoundException) { }
-				if (files != null && files.Length > 0)
-					matTexName = files[0].Substring(files[0].LastIndexOf('\\') + 1);
-				else
-					Report.ReportLog(
-						(diffuse_else_ambient ? body : body + "_mask01") + ext +
-							" neither found in TEXH nor in TEXH\\TexH(v2) folder. Using " + matTexName + " instead."
-					);
+				if (files == null || files.Length == 0)
+				{
+					try
+					{
+						return new ImportedTexture(Path.GetDirectoryName(remPath) + @"\" + matTexName);
+					}
+					catch
+					{
+						Report.ReportLog(
+							(diffuse_else_ambient ? body : body + "_mask01") + ext +
+								" neither found in TEXH nor in TEXH\\TexH(v2) folder and also not in the folder of " + remPath
+						);
+						return null;
+					}
+				}
 			}
-			return new ImportedTexture(files != null && files.Length > 0 ? files[0] : matTexName);
+			return new ImportedTexture(files[0]);
 		}
 
 		public static String TexturePathFromREM(string remPath)

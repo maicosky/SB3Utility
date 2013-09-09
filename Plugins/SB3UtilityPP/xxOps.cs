@@ -596,6 +596,10 @@ namespace SB3Utility
 				}
 			}
 			vertListDup.TrimExcess();
+			if (vertListDup.Count >= 64*1024)
+			{
+				throw new Exception("VertexListDuplicate would become unstorable if it exceeded 65535 vertices!");
+			}
 			return vertListDup;
 		}
 

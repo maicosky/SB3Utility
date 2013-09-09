@@ -51,30 +51,30 @@ namespace SB3Utility {
 			Importer(String^ path, bool EulerFilter, float filterPrecision);
 
 		private:
-			KArrayTemplate<KFbxSurfacePhong*>* pMaterials;
-			KArrayTemplate<KFbxTexture*>* pTextures;
+			FbxArray<FbxSurfacePhong*>* pMaterials;
+			FbxArray<FbxTexture*>* pTextures;
 			int unnamedMeshCount;
 
 			char* cPath;
-			KFbxSdkManager* pSdkManager;
-			KFbxScene* pScene;
-			KFbxImporter* pImporter;
+			FbxManager* pSdkManager;
+			FbxScene* pScene;
+			FbxImporter* pImporter;
 
-			KFbxAnimCurveFilterUnroll* lFilter;
+			FbxAnimCurveFilterUnroll* lFilter;
 			bool EulerFilter;
 			float filterPrecision;
 
-			void ImportNode(ImportedFrame^ parent, KFbxNode* pNode);
-			ImportedFrame^ ImportFrame(ImportedFrame^ parent, KFbxNode* pNode);
-			void ImportMesh(ImportedFrame^ parent, KArrayTemplate<KFbxNode*>* pMeshArray);
-			ImportedMaterial^ ImportMaterial(KFbxMesh* pMesh);
-			String^ ImportTexture(KFbxFileTexture* pTexture);
+			void ImportNode(ImportedFrame^ parent, FbxNode* pNode);
+			ImportedFrame^ ImportFrame(ImportedFrame^ parent, FbxNode* pNode);
+			void ImportMesh(ImportedFrame^ parent, FbxArray<FbxNode*>* pMeshArray);
+			ImportedMaterial^ ImportMaterial(FbxMesh* pMesh);
+			String^ ImportTexture(FbxFileTexture* pTexture);
 			void ImportAnimation();
-			void ImportAnimation(KFbxAnimLayer* pAnimLayer, KFbxNode* pNode, ImportedKeyframedAnimation^ wsAnimation);
-			void ImportAnimation(KFbxAnimLayer* pAnimLayer, KFbxNode* pNode, ImportedSampledAnimation^ wsAnimation);
-			Type^ GetAnimationType(KFbxAnimLayer* pAnimLayer, KFbxNode* pNode);
-			template <class T> void GetVector(KFbxLayerElementTemplate<T>* pLayerElement, T& pVector, int controlPointIdx, int vertexIdx);
-			void ImportMorph(KArrayTemplate<KFbxNode*>* pMeshArray);
+			void ImportAnimation(FbxAnimLayer* pAnimLayer, FbxNode* pNode, ImportedKeyframedAnimation^ wsAnimation);
+			void ImportAnimation(FbxAnimLayer* pAnimLayer, FbxNode* pNode, ImportedSampledAnimation^ wsAnimation);
+			Type^ GetAnimationType(FbxAnimLayer* pAnimLayer, FbxNode* pNode);
+			template <class T> void GetVector(FbxLayerElementTemplate<T>* pLayerElement, T& pVector, int controlPointIdx, int vertexIdx);
+			void ImportMorph(FbxArray<FbxNode*>* pMeshArray);
 
 			ref class Vertex
 			{
@@ -112,69 +112,69 @@ namespace SB3Utility {
 
 			char* cDest;
 			char* cFormat;
-			KFbxSdkManager* pSdkManager;
-			KFbxScene* pScene;
-			KFbxExporter* pExporter;
-			KArrayTemplate<KFbxSurfacePhong*>* pMaterials;
-			KArrayTemplate<KFbxFileTexture*>* pTextures;
-			KArrayTemplate<KFbxNode*>* pMeshNodes;
+			FbxManager* pSdkManager;
+			FbxScene* pScene;
+			FbxExporter* pExporter;
+			FbxArray<FbxSurfacePhong*>* pMaterials;
+			FbxArray<FbxFileTexture*>* pTextures;
+			FbxArray<FbxNode*>* pMeshNodes;
 
 			Exporter(String^ path, xxParser^ xxparser, List<xxFrame^>^ meshParents, String^ exportFormat, bool allFrames, bool skins, bool embedMedia, bool compatibility);
 			~Exporter();
 			!Exporter();
-			void ExportFrame(KFbxNode* pParentNode, xxFrame^ frame);
-			void ExportMesh(KFbxNode* pFrameNode, xxFrame^ frame);
-			KFbxFileTexture* ExportTexture(xxMaterialTexture^ matTex, KFbxLayerElementTexture*& pLayerTexture, KFbxMesh* pMesh);
+			void ExportFrame(FbxNode* pParentNode, xxFrame^ frame);
+			void ExportMesh(FbxNode* pFrameNode, xxFrame^ frame);
+			FbxFileTexture* ExportTexture(xxMaterialTexture^ matTex, FbxLayerElementTexture*& pLayerTexture, FbxMesh* pMesh);
 			void ExportAnimations(List<xaParser^>^ xaSubfileList, int startKeyframe, int endKeyframe, bool linear);
 			void SetJoints();
-			void SetJointsNode(KFbxNode* pNode, HashSet<String^>^ boneNames);
+			void SetJointsNode(FbxNode* pNode, HashSet<String^>^ boneNames);
 			void ExportMorphs(xxFrame^ baseFrame, xaMorphClip^ morphClip, xaParser^ xaparser, bool oneBlendShape);
 
 			Exporter(String^ path, IImported^ imported, String^ exportFormat, bool allFrames, bool skins, bool compatibility);
 			HashSet<String^>^ SearchHierarchy();
 			void SearchHierarchy(ImportedFrame^ frame, HashSet<String^>^ exportFrames);
 			void SetJointsFromImportedMeshes();
-			void ExportFrame(KFbxNode* pParentNode, ImportedFrame^ frame);
-			void ExportMesh(KFbxNode* pFrameNode, ImportedMesh^ meshList);
-			KFbxFileTexture* ExportTexture(ImportedTexture^ matTex, KFbxLayerElementTexture*& pTextureLayer, KFbxMesh* pMesh);
+			void ExportFrame(FbxNode* pParentNode, ImportedFrame^ frame);
+			void ExportMesh(FbxNode* pFrameNode, ImportedMesh^ meshList);
+			FbxFileTexture* ExportTexture(ImportedTexture^ matTex, FbxLayerElementTexture*& pTextureLayer, FbxMesh* pMesh);
 			void ExportAnimations(int startKeyframe, int endKeyframe, bool linear, bool EulerFilter, float filterValue);
-			void ExportKeyframedAnimation(ImportedKeyframedAnimation^ parser, KString& kTakeName, int startKeyframe, int endKeyframe, bool linear, KFbxAnimCurveFilterUnroll* EulerFilter, float filterPrecision,
-					KFbxTypedProperty<fbxDouble3>& scale, KFbxTypedProperty<fbxDouble4>& rotate, KFbxTypedProperty<fbxDouble3>& translate, List<String^>^ pNotFound);
-			void ExportSampledAnimation(ImportedSampledAnimation^ parser, KString& kTakeName, int startKeyframe, int endKeyframe, bool linear, KFbxAnimCurveFilterUnroll* EulerFilter, float filterPrecision,
-					KFbxTypedProperty<fbxDouble3>& scale, KFbxTypedProperty<fbxDouble4>& rotate, KFbxTypedProperty<fbxDouble3>& translate, List<String^>^ pNotFound);
+			void ExportKeyframedAnimation(ImportedKeyframedAnimation^ parser, FbxString& kTakeName, int startKeyframe, int endKeyframe, bool linear, FbxAnimCurveFilterUnroll* EulerFilter, float filterPrecision,
+					FbxPropertyT<FbxDouble3>& scale, FbxPropertyT<FbxDouble4>& rotate, FbxPropertyT<FbxDouble3>& translate, List<String^>^ pNotFound);
+			void ExportSampledAnimation(ImportedSampledAnimation^ parser, FbxString& kTakeName, int startKeyframe, int endKeyframe, bool linear, FbxAnimCurveFilterUnroll* EulerFilter, float filterPrecision,
+					FbxPropertyT<FbxDouble3>& scale, FbxPropertyT<FbxDouble4>& rotate, FbxPropertyT<FbxDouble3>& translate, List<String^>^ pNotFound);
 		};
 
 	private:
 		ref class InterpolationHelper
 		{
 		private:
-			KFbxScene* pScene;
-			KFbxAnimLayer* pAnimLayer;
-			KFbxAnimEvaluator* pAnimEvaluator;
+			FbxScene* pScene;
+			FbxAnimLayer* pAnimLayer;
+			FbxAnimEvaluator* pAnimEvaluator;
 
-			KFbxAnimCurveDef::EInterpolationType interpolationMethod;
+			FbxAnimCurveDef::EInterpolationType interpolationMethod;
 
-			KFbxTypedProperty<fbxDouble3>* scale, * translate;
-			KFbxTypedProperty<fbxDouble4>* rotate;
-			KFbxAnimCurve* pScaleCurveX, * pScaleCurveY, * pScaleCurveZ,
+			FbxPropertyT<FbxDouble3>* scale, * translate;
+			FbxPropertyT<FbxDouble4>* rotate;
+			FbxAnimCurve* pScaleCurveX, * pScaleCurveY, * pScaleCurveZ,
 				* pRotateCurveX, * pRotateCurveY, * pRotateCurveZ, * pRotateCurveW,
 				* pTranslateCurveX, * pTranslateCurveY, * pTranslateCurveZ;
 
-			array<KFbxAnimCurve*>^ allCurves;
+			array<FbxAnimCurve*>^ allCurves;
 
 		public:
 			static const char* pScaleName = "Scale";
 			static const char* pRotateName = "Rotate";
 			static const char* pTranslateName = "Translate";
 
-			InterpolationHelper(KFbxScene* scene, KFbxAnimLayer* layer, KFbxAnimCurveDef::EInterpolationType interpolationMethod,
-				KFbxTypedProperty<fbxDouble3>* scale, KFbxTypedProperty<fbxDouble4>* rotate, KFbxTypedProperty<fbxDouble3>* translate);
+			InterpolationHelper(FbxScene* scene, FbxAnimLayer* layer, FbxAnimCurveDef::EInterpolationType interpolationMethod,
+				FbxPropertyT<FbxDouble3>* scale, FbxPropertyT<FbxDouble4>* rotate, FbxPropertyT<FbxDouble3>* translate);
 			List<xaAnimationKeyframe^>^ InterpolateTrack(List<xaAnimationKeyframe^>^ keyframes, int resampleCount);
 			array<ImportedAnimationKeyframe^>^ InterpolateTrack(array<ImportedAnimationKeyframe^>^ keyframes, int resampleCount);
 			ImportedAnimationSampledTrack^ InterpolateTrack(ImportedAnimationSampledTrack^ track, int resampleCount);
 		};
 
 		static char* StringToCharArray(String^ s);
-		static void Init(KFbxSdkManager** pSdkManager, KFbxScene** pScene);
+		static void Init(FbxManager** pSdkManager, FbxScene** pScene);
 	};
 }

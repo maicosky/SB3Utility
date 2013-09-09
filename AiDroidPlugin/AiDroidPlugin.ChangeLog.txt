@@ -1,4 +1,9 @@
-﻿[0.4.42.39]
+﻿[0.5.1]
+  - fixed invalid material when merging imported materials
+  - fixed crash when a texture wasn't found in TEXH folder
+  - textures are also taken from the current folder
+
+[0.4.42.39]
   - imported meshes can be easier placed into destination frames
   - Fixed that invalid bones crashed the renderer
   - Fixed importing materials didn't update textures

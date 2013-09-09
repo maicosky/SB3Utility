@@ -84,7 +84,9 @@ namespace SB3Utility
 				else
 				{
 					Texture renderTexture = Texture.FromMemory(Gui.Renderer.Device, tex.Data);
-					Bitmap bitmap = new Bitmap(Texture.ToStream(renderTexture, ImageFileFormat.Bmp));
+					DataStream stream = Texture.ToStream(renderTexture, ImageFileFormat.Bmp);
+					Bitmap bitmap = new Bitmap(stream);
+					stream.Dispose();
 					renderTexture.Dispose();
 					pictureBox1.Image = bitmap;
 

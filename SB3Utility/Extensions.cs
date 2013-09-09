@@ -239,6 +239,14 @@ namespace SB3Utility
 			writer.Write(-Math.Abs(color.Alpha));
 		}
 
+		public static void WriteUnnegated(this BinaryWriter writer, Color4 color)
+		{
+			writer.Write(color.Red);
+			writer.Write(color.Green);
+			writer.Write(color.Blue);
+			writer.Write(color.Alpha);
+		}
+
 		static T[] ReadArray<T>(BinaryReader reader, Func<T> del, int length)
 		{
 			T[] array = new T[length];

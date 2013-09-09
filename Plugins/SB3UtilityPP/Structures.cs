@@ -570,10 +570,10 @@ namespace SB3Utility
 		public void WriteTo(Stream stream)
 		{
 			BinaryWriter writer = new BinaryWriter(stream);
-			writer.Write(Diffuse);
-			writer.Write(Ambient);
-			writer.Write(Specular);
-			writer.Write(Emissive);
+			writer.WriteUnnegated(Diffuse);
+			writer.WriteUnnegated(Ambient);
+			writer.WriteUnnegated(Specular);
+			writer.WriteUnnegated(Emissive);
 			writer.Write(Power);
 			writer.Write(Unknown1);
 		}

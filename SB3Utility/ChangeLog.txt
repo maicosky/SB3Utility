@@ -1,4 +1,13 @@
-﻿[0.4.43]
+﻿[0.5.1]
+  - Fixed storing negated attribute values of materials in xa units
+  - Updated support for Fbx 2014.1 (new dependency to VC++ 2012)
+  - Replacing meshes throws an error when a VertexDuplicateList would exceed 64k vertices
+  - MQO exports can optionally sort meshes
+  - Fixed crash in the renderer for submeshes with more than 64k vertices (skipping their rendering)
+  - Fixed memory leak when imported images are previewed
+  - Renderer stability fixes (CTRL-Alt-Del and full screen applications forcing SB3Utility's window to shrink)
+
+[0.4.43]
   - Added reopening pp files with selected format: "New Source Format" menu option
   - Added ppEditor method SetFormat(int sourceId, int destinationId)
   - Fixed SB3UtilityScript crash in ppEditor constructor

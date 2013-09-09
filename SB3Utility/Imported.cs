@@ -202,9 +202,9 @@ namespace SB3Utility
 			return null;
 		}
 
-		public static ImportedTexture FindTexture(String name, List<ImportedTexture> importedTextureList)
+		public static ImportedTexture FindTexture(string name, List<ImportedTexture> importedTextureList)
 		{
-			if (name == null || name == String.Empty)
+			if (name == null || name == string.Empty)
 			{
 				return null;
 			}

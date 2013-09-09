@@ -630,7 +630,7 @@ namespace AiDroidPlugin
 		public static void remMaterial(remMaterial mat)
 		{
 			mat.unk_or_flag = 0;
-			mat.unknown = null;
+			mat.unknown = new remId(null);
 		}
 	}
 }

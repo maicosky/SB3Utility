@@ -24,9 +24,9 @@ namespace ODFPlugin
 		{
 			[Description("Metasequoia")]
 			Mqo,
-			[Description("Collada (FBX 2012.2)")]
+			[Description("Collada (FBX 2014.1)")]
 			ColladaFbx,
-			[Description("FBX 2012.2")]
+			[Description("FBX 2014.1")]
 			Fbx,
 			[Description("AutoCAD DXF")]
 			Dxf,
@@ -272,7 +272,7 @@ namespace ODFPlugin
 				descriptions[i] = values[i].GetDescription();
 			}
 			comboBoxMeshExportFormat.Items.AddRange(descriptions);
-			comboBoxMeshExportFormat.SelectedIndex = 2;
+			comboBoxMeshExportFormat.SelectedIndex = (int)MeshExportFormat.Fbx;
 
 			closeViewFilesAtStartToolStripMenuItem.CheckedChanged += closeViewFilesAtStartToolStripMenuItem_CheckedChanged;
 			suppressWarningsToolStripMenuItem.CheckedChanged += suppressWarningsToolStripMenuItem_CheckedChanged;

@@ -45,10 +45,15 @@ namespace SB3Utility
 		/// <param name="dirPath">The destination directory.</param>
 		/// <param name="singleMqo"><b>True</b> will export all meshes in a single file. <b>False</b> will export a file per mesh.</param>
 		/// <param name="worldCoords"><b>True</b> will transform vertices into world coordinates by multiplying them by their parent frames. <b>False</b> will keep their local coordinates.</param>
+		/// <param name="sortMeshes">exports meshes sorted in alphabetic order</param>
 		[Plugin]
-		public static void ExportMqo([DefaultVar]xxParser parser, object[] meshNames, string dirPath, bool singleMqo, bool worldCoords)
+		public static void ExportMqo([DefaultVar]xxParser parser, object[] meshNames, string dirPath, bool singleMqo, bool worldCoords, bool sortMeshes = true)
 		{
 			List<xxFrame> meshParents = xx.FindMeshFrames(parser.Frame, new List<string>(Utility.Convert<string>(meshNames)));
+			if (sortMeshes)
+			{
+				meshParents.Sort();
+			}
 			Mqo.Exporter.Export(dirPath, parser, meshParents, singleMqo, worldCoords);
 		}
 

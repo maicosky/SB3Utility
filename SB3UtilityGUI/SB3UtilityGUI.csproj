@@ -39,7 +39,11 @@
     <ApplicationIcon>HF-Logo.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="SlimDX, Version=4.0.13.43, Culture=neutral, PublicKeyToken=b1b0c32fd1ffe4f9, processorArchitecture=x86" />
+    <Reference Include="SlimDX, Version=4.0.13.43, Culture=neutral, PublicKeyToken=b1b0c32fd1ffe4f9, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\SB3UtilityExternalLibraries\SlimDX.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
@@ -185,13 +189,13 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>if not exist msvcp100.dll copy "$(DevEnvDir)..\..\VC\redist\x86\Microsoft.VC100.CRT\*.*"
-if not exist irrKlang.NET4.dll copy ..\SB3UtilityExternalLibraries\irrKlang.NET4.dll
-if not exist SlimDX.dll copy ..\SB3UtilityExternalLibraries\SlimDX.dll
+    <PostBuildEvent>if not exist msvcr110.dll (echo msvcr110.dll missing! &amp;&amp; copy ..\SB3UtilityExternalLibraries\msvc*.dll)
+if not exist irrKlang.NET4.dll (echo irrKlang.NET4.dll missing! &amp;&amp; copy ..\SB3UtilityExternalLibraries\irrKlang.NET4.dll)
+if not exist SlimDX.dll (echo SlimDX.dll missing! &amp;&amp; copy ..\SB3UtilityExternalLibraries\SlimDX.dll)
 if not exist Jolt.dll (echo Jolt.dll missing! &amp;&amp; set errorlevel=-1)
 if not exist Jolt.Testing.GeneratedTypes.dll (echo Jolt.Testing.GeneratedTypes.dll missing! &amp;&amp; set errorlevel=-1)
 if not exist WeifenLuo.WinFormsUI.Docking.dll (echo WeifenLuo.WinFormsUI.Docking.dll missing! &amp;&amp; set errorlevel=-1)
-if not exist plugins\fbxsdk-2012.2.dll (echo plugins\fbxsdk-2012.2.dll missing! &amp;&amp; set errorlevel=-1)</PostBuildEvent>
+if not exist plugins\libfbxsdk.dll (echo plugins\libfbxsdk.dll missing! &amp;&amp; set errorlevel=-1)</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -1,5 +1,5 @@
 #include <fbxsdk.h>
-#include <fbxfilesdk/kfbxio/kfbxiosettings.h>
+#include <fbxsdk/fileio/fbxiosettings.h>
 #include "SB3UtilityFBX.h"
 
 using namespace System::Reflection;
@@ -14,6 +14,7 @@ namespace SB3Utility
 		{
 			currentDir = Directory::GetCurrentDirectory();
 			Directory::SetCurrentDirectory(Path::GetDirectoryName(path));
+			path = Path::GetFileName(path);
 
 			unnamedMeshCount = 0;
 			FrameList = gcnew List<ImportedFrame^>();
@@ -30,12 +31,12 @@ namespace SB3Utility
 			pMaterials = NULL;
 			pTextures = NULL;
 
-			pin_ptr<KFbxSdkManager*> pSdkManagerPin = &pSdkManager;
-			pin_ptr<KFbxScene*> pScenePin = &pScene;
+			pin_ptr<FbxManager*> pSdkManagerPin = &pSdkManager;
+			pin_ptr<FbxScene*> pScenePin = &pScene;
 			Init(pSdkManagerPin, pScenePin);
 
 			cPath = Fbx::StringToCharArray(path);
-			pImporter = KFbxImporter::Create(pSdkManager, "");
+			pImporter = FbxImporter::Create(pSdkManager, "");
 
 			IOS_REF.SetBoolProp(IMP_FBX_MATERIAL, true);
 			IOS_REF.SetBoolProp(IMP_FBX_TEXTURE, true);
@@ -47,14 +48,14 @@ namespace SB3Utility
 
 			if (!pImporter->Initialize(cPath, -1, pSdkManager->GetIOSettings()))
 			{
-				throw gcnew Exception(gcnew String("Failed to initialize KFbxImporter: ") + gcnew String(pImporter->GetLastErrorString()));
+				throw gcnew Exception(gcnew String("Failed to initialize FbxImporter: ") + gcnew String(pImporter->GetStatus().GetErrorString()));
 			}
 
 			pImporter->Import(pScene);
-			pMaterials = new KArrayTemplate<KFbxSurfacePhong*>();
-			pTextures = new KArrayTemplate<KFbxTexture*>();
+			pMaterials = new FbxArray<FbxSurfacePhong*>();
+			pTextures = new FbxArray<FbxTexture*>();
 
-			KFbxNode* pRootNode = pScene->GetRootNode();
+			FbxNode* pRootNode = pScene->GetRootNode();
 			if (pRootNode != NULL)
 			{
 				ImportNode(nullptr, pRootNode);
@@ -95,17 +96,17 @@ namespace SB3Utility
 		}
 	}
 
-	void Fbx::Importer::ImportNode(ImportedFrame^ parent, KFbxNode* pNode)
+	void Fbx::Importer::ImportNode(ImportedFrame^ parent, FbxNode* pNode)
 	{
-		KArrayTemplate<KFbxNode*>* pMeshArray = NULL;
+		FbxArray<FbxNode*>* pMeshArray = NULL;
 		try
 		{
-			pMeshArray = new KArrayTemplate<KFbxNode*>();
+			pMeshArray = new FbxArray<FbxNode*>();
 			bool hasShapes = false;
 
 			for (int i = 0; i < pNode->GetChildCount(); i++)
 			{
-				KFbxNode* pNodeChild = pNode->GetChild(i);
+				FbxNode* pNodeChild = pNode->GetChild(i);
 				if (pNodeChild->GetNodeAttribute() == NULL)
 				{
 					ImportedFrame^ frame = ImportFrame(parent, pNodeChild);
@@ -113,19 +114,19 @@ namespace SB3Utility
 				}
 				else
 				{
-					KFbxNodeAttribute::EAttributeType lAttributeType = pNodeChild->GetNodeAttribute()->GetAttributeType();
+					FbxNodeAttribute::EType lAttributeType = pNodeChild->GetNodeAttribute()->GetAttributeType();
 
 					switch (lAttributeType)
 					{
-						case KFbxNodeAttribute::eNULL:
-						case KFbxNodeAttribute::eSKELETON:
+						case FbxNodeAttribute::eNull:
+						case FbxNodeAttribute::eSkeleton:
 							{
 								ImportedFrame^ frame = ImportFrame(parent, pNodeChild);
 								ImportNode(frame, pNodeChild);
 							}
 							break;
 
-						case KFbxNodeAttribute::eMESH:
+						case FbxNodeAttribute::eMesh:
 							if (pNodeChild->GetMesh()->GetShapeCount() > 0)
 							{
 								hasShapes = true;
@@ -134,7 +135,7 @@ namespace SB3Utility
 							break;
 
 						default:
-							KString str = KString(lAttributeType);
+							FbxString str = FbxString(lAttributeType);
 							Report::ReportLog(gcnew String("Warning: ") + gcnew String(pNodeChild->GetName()) + gcnew String(" has unsupported node attribute type ") + gcnew String(str.Buffer()));
 							break;
 					}
@@ -159,7 +160,7 @@ namespace SB3Utility
 		}
 	}
 
-	ImportedFrame^ Fbx::Importer::ImportFrame(ImportedFrame^ parent, KFbxNode* pNode)
+	ImportedFrame^ Fbx::Importer::ImportFrame(ImportedFrame^ parent, FbxNode* pNode)
 	{
 		ImportedFrame^ frame = gcnew ImportedFrame();
 		frame->InitChildren(pNode->GetChildCount());
@@ -174,7 +175,7 @@ namespace SB3Utility
 			parent->AddChild(frame);
 		}
 
-		KFbxXMatrix lNodeMatrix = pScene->GetEvaluator()->GetNodeLocalTransform(pNode);
+		FbxAMatrix lNodeMatrix = pScene->GetEvaluator()->GetNodeLocalTransform(pNode);
 		Matrix matrix;
 		for (int m = 0; m < 4; m++)
 		{
@@ -188,7 +189,7 @@ namespace SB3Utility
 		return frame;
 	}
 
-	void Fbx::Importer::ImportMesh(ImportedFrame^ parent, KArrayTemplate<KFbxNode*>* pMeshArray)
+	void Fbx::Importer::ImportMesh(ImportedFrame^ parent, FbxArray<FbxNode*>* pMeshArray)
 	{
 		if (pMeshArray->GetCount() > 0)
 		{
@@ -209,9 +210,9 @@ namespace SB3Utility
 			bool skinned = false;
 			for (int i = 0; i < pMeshArray->GetCount(); i++)
 			{
-				KFbxNode* pMeshNode = pMeshArray->GetAt(i);
-				KFbxMesh* pMesh = pMeshNode->GetMesh();
-				if (pMesh->GetDeformerCount(KFbxDeformer::eSKIN) > 0)
+				FbxNode* pMeshNode = pMeshArray->GetAt(i);
+				FbxMesh* pMesh = pMeshNode->GetMesh();
+				if (pMesh->GetDeformerCount(FbxDeformer::eSkin) > 0)
 				{
 					skinned = true;
 					break;
@@ -226,8 +227,8 @@ namespace SB3Utility
 				meshList->SubmeshList->Add(submesh);
 				submesh->Index = i;
 
-				KFbxNode* pMeshNode = pMeshArray->GetAt(i);
-				KFbxMesh* pMesh = pMeshNode->GetMesh();
+				FbxNode* pMeshNode = pMeshArray->GetAt(i);
+				FbxMesh* pMesh = pMeshNode->GetMesh();
 
 				String^ submeshName = gcnew String(pMeshNode->GetName());
 				int idx = submeshName->LastIndexOf('_');
@@ -241,15 +242,15 @@ namespace SB3Utility
 					}
 				}
 
-				KFbxLayer* pLayerNormal = pMesh->GetLayer(0, KFbxLayerElement::eNORMAL);
-				KFbxLayerElementNormal* pLayerElementNormal = NULL;
+				FbxLayer* pLayerNormal = pMesh->GetLayer(0, FbxLayerElement::eNormal);
+				FbxLayerElementNormal* pLayerElementNormal = NULL;
 				if (pLayerNormal != NULL)
 				{
 					pLayerElementNormal = pLayerNormal->GetNormals();
 				}
 
-				KFbxLayer* pLayerUV = pMesh->GetLayer(0, KFbxLayerElement::eUV);
-				KFbxLayerElementUV* pLayerElementUV = NULL;
+				FbxLayer* pLayerUV = pMesh->GetLayer(0, FbxLayerElement::eUV);
+				FbxLayerElementUV* pLayerElementUV = NULL;
 				if (pLayerUV != NULL)
 				{
 					pLayerElementUV = pLayerUV->GetUVs();
@@ -280,19 +281,19 @@ namespace SB3Utility
 						int controlPointIdx = pMesh->GetPolygonVertices()[polyVertIdxStart + k];
 						Vertex^ vert = gcnew Vertex();
 
-						KFbxVector4 pos = pMesh->GetControlPointAt(controlPointIdx);
+						FbxVector4 pos = pMesh->GetControlPointAt(controlPointIdx);
 						vert->position = gcnew array<float>(3) { (float)pos[0], (float)pos[1], (float)pos[2] };
 
 						if (pLayerElementNormal != NULL)
 						{
-							KFbxVector4 norm;
+							FbxVector4 norm;
 							GetVector(pLayerElementNormal, norm, controlPointIdx, vertCount);
 							vert->normal = gcnew array<float>(3) { (float)norm[0], (float)norm[1], (float)norm[2] };
 						}
 
 						if (pLayerElementUV != NULL)
 						{
-							KFbxVector2 uv;
+							FbxVector2 uv;
 							GetVector(pLayerElementUV, uv, controlPointIdx, vertCount);
 							vert->uv = gcnew array<float>(2) { (float)uv[0], -(float)uv[1] };
 						}
@@ -339,10 +340,10 @@ namespace SB3Utility
 					}
 				}
 
-				KFbxSkin* pSkin = (KFbxSkin*)pMesh->GetDeformer(0, KFbxDeformer::eSKIN);
+				FbxSkin* pSkin = (FbxSkin*)pMesh->GetDeformer(0, FbxDeformer::eSkin);
 				if (pSkin != NULL)
 				{
-					if (pMesh->GetDeformerCount(KFbxDeformer::eSKIN) > 1)
+					if (pMesh->GetDeformerCount(FbxDeformer::eSkin) > 1)
 					{
 						Report::ReportLog(gcnew String("Warning: Mesh ") + gcnew String(pMeshNode->GetName()) + " has more than 1 skin. Only the first will be used");
 					}
@@ -350,20 +351,20 @@ namespace SB3Utility
 					int numClusters = pSkin->GetClusterCount();
 					for (int j = 0; j < numClusters; j++)
 					{
-						KFbxCluster* pCluster = pSkin->GetCluster(j);
-						if (pCluster->GetLinkMode() == KFbxCluster::eADDITIVE)
+						FbxCluster* pCluster = pSkin->GetCluster(j);
+						if (pCluster->GetLinkMode() == FbxCluster::eAdditive)
 						{
 							throw gcnew Exception(gcnew String("Mesh ") + gcnew String(pMeshNode->GetName()) + " has additive weights and aren't supported");
 						}
 
 #if 1
-						KFbxXMatrix lMatrix;
+						FbxAMatrix lMatrix;
 						pCluster->GetTransformLinkMatrix(lMatrix);
 						lMatrix = lMatrix.Inverse();
 #else
-						KFbxXMatrix lMatrix, lMeshMatrix;
+						FbxAMatrix lMatrix, lMeshMatrix;
 						pCluster->GetTransformMatrix(lMeshMatrix);
-						/*KFbxXMatrix geomMatrix = pMeshNode->GetScene()->GetEvaluator()->GetNodeLocalTransform(pMeshNode);
+						/*FbxAMatrix geomMatrix = pMeshNode->GetScene()->GetEvaluator()->GetNodeLocalTransform(pMeshNode);
 						lMeshMatrix *= geomMatrix;*/
 						pCluster->GetTransformLinkMatrix(lMatrix);
 						lMatrix = (lMeshMatrix.Inverse() * lMatrix).Inverse();
@@ -377,7 +378,7 @@ namespace SB3Utility
 							}
 						}
 
-						KFbxNode* pLinkNode = pCluster->GetLink();
+						FbxNode* pLinkNode = pCluster->GetLink();
 						String^ boneName = gcnew String(pLinkNode->GetName());
 						int boneIdx;
 						if (!boneDic->TryGetValue(boneName, boneIdx))
@@ -486,24 +487,24 @@ namespace SB3Utility
 		}
 	}
 
-	ImportedMaterial^ Fbx::Importer::ImportMaterial(KFbxMesh* pMesh)
+	ImportedMaterial^ Fbx::Importer::ImportMaterial(FbxMesh* pMesh)
 	{
 		ImportedMaterial^ matInfo = nullptr;
 
-		KFbxLayer* pLayerMaterial = pMesh->GetLayer(0, KFbxLayerElement::eMATERIAL);
+		FbxLayer* pLayerMaterial = pMesh->GetLayer(0, FbxLayerElement::eMaterial);
 		if (pLayerMaterial != NULL)
 		{
-			KFbxLayerElementMaterial* pLayerElementMaterial = pLayerMaterial->GetMaterials();
+			FbxLayerElementMaterial* pLayerElementMaterial = pLayerMaterial->GetMaterials();
 			if (pLayerElementMaterial != NULL)
 			{
-				KFbxSurfaceMaterial* pMaterial = NULL;
+				FbxSurfaceMaterial* pMaterial = NULL;
 				switch (pLayerElementMaterial->GetReferenceMode())
 				{
-				case KFbxLayerElement::eDIRECT:
+				case FbxLayerElement::eDirect:
 					pMaterial = pMesh->GetNode()->GetMaterial(0);
 					break;
 
-				case KFbxLayerElement::eINDEX_TO_DIRECT:
+				case FbxLayerElement::eIndexToDirect:
 					pMaterial = pMesh->GetNode()->GetMaterial(pLayerElementMaterial->GetIndexArray().GetAt(0));
 					break;
 
@@ -517,9 +518,9 @@ namespace SB3Utility
 
 				if (pMaterial != NULL)
 				{
-					if (pMaterial->GetClassId().Is(KFbxSurfacePhong::ClassId))
+					if (pMaterial->GetClassId().Is(FbxSurfacePhong::ClassId))
 					{
-						KFbxSurfacePhong* pPhong = (KFbxSurfacePhong*)pMaterial;
+						FbxSurfacePhong* pPhong = (FbxSurfacePhong*)pMaterial;
 						int matIdx = pMaterials->Find(pPhong);
 						if (matIdx >= 0)
 						{
@@ -530,28 +531,28 @@ namespace SB3Utility
 							matInfo = gcnew ImportedMaterial();
 							matInfo->Name = gcnew String(pPhong->GetName());
 							
-							fbxDouble3 lDiffuse = pPhong->Diffuse.Get();
-							fbxDouble1 lDiffuseFactor = pPhong->DiffuseFactor.Get();
+							FbxDouble3 lDiffuse = pPhong->Diffuse.Get();
+							FbxDouble lDiffuseFactor = pPhong->DiffuseFactor.Get();
 							matInfo->Diffuse = Color4((float)lDiffuseFactor, (float)lDiffuse[0], (float)lDiffuse[1], (float)lDiffuse[2]);
 
-							fbxDouble3 lAmbient = pPhong->Ambient.Get();
-							fbxDouble1 lAmbientFactor = pPhong->AmbientFactor.Get();
+							FbxDouble3 lAmbient = pPhong->Ambient.Get();
+							FbxDouble lAmbientFactor = pPhong->AmbientFactor.Get();
 							matInfo->Ambient = Color4((float)lAmbientFactor, (float)lAmbient[0], (float)lAmbient[1], (float)lAmbient[2]);
 
-							fbxDouble3 lEmissive = pPhong->Emissive.Get();
-							fbxDouble1 lEmissiveFactor = pPhong->EmissiveFactor.Get();
+							FbxDouble3 lEmissive = pPhong->Emissive.Get();
+							FbxDouble lEmissiveFactor = pPhong->EmissiveFactor.Get();
 							matInfo->Emissive = Color4((float)lEmissiveFactor, (float)lEmissive[0], (float)lEmissive[1], (float)lEmissive[2]);
 
-							fbxDouble3 lSpecular = pPhong->Specular.Get();
-							fbxDouble1 lSpecularFactor = pPhong->SpecularFactor.Get();
+							FbxDouble3 lSpecular = pPhong->Specular.Get();
+							FbxDouble lSpecularFactor = pPhong->SpecularFactor.Get();
 							matInfo->Specular = Color4((float)lSpecularFactor, (float)lSpecular[0], (float)lSpecular[1], (float)lSpecular[2]);
 							matInfo->Power = (float)pPhong->Shininess.Get();
 
 							array<String^>^ texNames = gcnew array<String^>(4);
-							texNames[0] = ImportTexture((KFbxFileTexture*)pPhong->Diffuse.GetSrcObject(KFbxFileTexture::ClassId));
-							texNames[1] = ImportTexture((KFbxFileTexture*)pPhong->Ambient.GetSrcObject(KFbxFileTexture::ClassId));
-							texNames[2] = ImportTexture((KFbxFileTexture*)pPhong->Emissive.GetSrcObject(KFbxFileTexture::ClassId));
-							texNames[3] = ImportTexture((KFbxFileTexture*)pPhong->Specular.GetSrcObject(KFbxFileTexture::ClassId));
+							texNames[0] = ImportTexture(pPhong->Diffuse.GetSrcObject<FbxFileTexture>());
+							texNames[1] = ImportTexture(pPhong->Ambient.GetSrcObject<FbxFileTexture>());
+							texNames[2] = ImportTexture(pPhong->Emissive.GetSrcObject<FbxFileTexture>());
+							texNames[3] = ImportTexture(pPhong->Specular.GetSrcObject<FbxFileTexture>());
 							matInfo->Textures = texNames;
 
 							pMaterials->Add(pPhong);
@@ -569,7 +570,7 @@ namespace SB3Utility
 		return matInfo;
 	}
 
-	String^ Fbx::Importer::ImportTexture(KFbxFileTexture* pTexture)
+	String^ Fbx::Importer::ImportTexture(FbxFileTexture* pTexture)
 	{
 		using namespace System::IO;
 
@@ -617,27 +618,27 @@ namespace SB3Utility
 	{
 		if (EulerFilter)
 		{
-			lFilter = new KFbxAnimCurveFilterUnroll();
+			lFilter = new FbxAnimCurveFilterUnroll();
 		}
 
-		for (int i = 0; i < pScene->GetSrcObjectCount(FBX_TYPE(KFbxAnimStack)); i++)
+		for (int i = 0; i < pScene->GetSrcObjectCount<FbxAnimStack>(); i++)
 		{
-			KFbxAnimStack* pAnimStack = KFbxCast<KFbxAnimStack>(pScene->GetSrcObject(FBX_TYPE(KFbxAnimStack), i));
+			FbxAnimStack* pAnimStack = FbxCast<FbxAnimStack>(pScene->GetSrcObject<FbxAnimStack>(i));
 
-			int numLayers = pAnimStack->GetMemberCount(FBX_TYPE(KFbxAnimLayer));
+			int numLayers = pAnimStack->GetMemberCount<FbxAnimLayer>();
 			if (numLayers > 1)
 			{
 				Report::ReportLog(gcnew String("Warning: Only the first layer of animation ") + gcnew String(pAnimStack->GetName()) + " will be imported");
 			}
 			if (numLayers > 0)
 			{
-				Type^ animType = GetAnimationType(pAnimStack->GetMember(FBX_TYPE(KFbxAnimLayer), 0), pScene->GetRootNode());
+				Type^ animType = GetAnimationType(pAnimStack->GetMember<FbxAnimLayer>(0), pScene->GetRootNode());
 				ConstructorInfo^ ctor = animType->GetConstructor(Type::EmptyTypes);
 				if (animType == ImportedKeyframedAnimation::typeid)
 				{
 					ImportedKeyframedAnimation^ wsAnimation = (ImportedKeyframedAnimation^)ctor->Invoke(Type::EmptyTypes);
 					wsAnimation->TrackList = gcnew List<ImportedAnimationKeyframedTrack^>(pScene->GetNodeCount());
-					ImportAnimation(pAnimStack->GetMember(FBX_TYPE(KFbxAnimLayer), 0), pScene->GetRootNode(), wsAnimation);
+					ImportAnimation(pAnimStack->GetMember<FbxAnimLayer>(0), pScene->GetRootNode(), wsAnimation);
 					if (wsAnimation->TrackList->Count > 0)
 					{
 						AnimationList->Add(wsAnimation);
@@ -647,7 +648,7 @@ namespace SB3Utility
 				{
 					ImportedSampledAnimation^ wsAnimation = (ImportedSampledAnimation^)ctor->Invoke(Type::EmptyTypes);
 					wsAnimation->TrackList = gcnew List<ImportedAnimationSampledTrack^>(pScene->GetNodeCount());
-					ImportAnimation(pAnimStack->GetMember(FBX_TYPE(KFbxAnimLayer), 0), pScene->GetRootNode(), wsAnimation);
+					ImportAnimation(pAnimStack->GetMember<FbxAnimLayer>(0), pScene->GetRootNode(), wsAnimation);
 					if (wsAnimation->TrackList->Count > 0)
 					{
 						AnimationList->Add(wsAnimation);
@@ -657,17 +658,17 @@ namespace SB3Utility
 		}
 	}
 
-	Type^ Fbx::Importer::GetAnimationType(KFbxAnimLayer* pAnimLayer, KFbxNode* pNode)
+	Type^ Fbx::Importer::GetAnimationType(FbxAnimLayer* pAnimLayer, FbxNode* pNode)
 	{
-		KFbxAnimCurve* pAnimCurveTX = pNode->LclTranslation.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_T_X);
-		KFbxAnimCurve* pAnimCurveTY = pNode->LclTranslation.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_T_Y);
-		KFbxAnimCurve* pAnimCurveTZ = pNode->LclTranslation.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_T_Z);
-		KFbxAnimCurve* pAnimCurveRX = pNode->LclRotation.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_R_X);
-		KFbxAnimCurve* pAnimCurveRY = pNode->LclRotation.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_R_Y);
-		KFbxAnimCurve* pAnimCurveRZ = pNode->LclRotation.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_R_Z);
-		KFbxAnimCurve* pAnimCurveSX = pNode->LclScaling.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_S_X);
-		KFbxAnimCurve* pAnimCurveSY = pNode->LclScaling.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_S_Y);
-		KFbxAnimCurve* pAnimCurveSZ = pNode->LclScaling.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_S_Z);
+		FbxAnimCurve* pAnimCurveTX = pNode->LclTranslation.GetCurve(pAnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
+		FbxAnimCurve* pAnimCurveTY = pNode->LclTranslation.GetCurve(pAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y);
+		FbxAnimCurve* pAnimCurveTZ = pNode->LclTranslation.GetCurve(pAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z);
+		FbxAnimCurve* pAnimCurveRX = pNode->LclRotation.GetCurve(pAnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
+		FbxAnimCurve* pAnimCurveRY = pNode->LclRotation.GetCurve(pAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y);
+		FbxAnimCurve* pAnimCurveRZ = pNode->LclRotation.GetCurve(pAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z);
+		FbxAnimCurve* pAnimCurveSX = pNode->LclScaling.GetCurve(pAnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
+		FbxAnimCurve* pAnimCurveSY = pNode->LclScaling.GetCurve(pAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y);
+		FbxAnimCurve* pAnimCurveSZ = pNode->LclScaling.GetCurve(pAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z);
 
 		if ((pAnimCurveTX != NULL) && (pAnimCurveTY != NULL) && (pAnimCurveTZ != NULL) &&
 			(pAnimCurveRX != NULL) && (pAnimCurveRY != NULL) && (pAnimCurveRZ != NULL) &&
@@ -704,17 +705,17 @@ namespace SB3Utility
 		return ImportedKeyframedAnimation::typeid;
 	}
 
-	void Fbx::Importer::ImportAnimation(KFbxAnimLayer* pAnimLayer, KFbxNode* pNode, ImportedKeyframedAnimation^ wsAnimation)
+	void Fbx::Importer::ImportAnimation(FbxAnimLayer* pAnimLayer, FbxNode* pNode, ImportedKeyframedAnimation^ wsAnimation)
 	{
-		KFbxAnimCurve* pAnimCurveTX = pNode->LclTranslation.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_T_X);
-		KFbxAnimCurve* pAnimCurveTY = pNode->LclTranslation.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_T_Y);
-		KFbxAnimCurve* pAnimCurveTZ = pNode->LclTranslation.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_T_Z);
-		KFbxAnimCurve* pAnimCurveRX = pNode->LclRotation.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_R_X);
-		KFbxAnimCurve* pAnimCurveRY = pNode->LclRotation.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_R_Y);
-		KFbxAnimCurve* pAnimCurveRZ = pNode->LclRotation.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_R_Z);
-		KFbxAnimCurve* pAnimCurveSX = pNode->LclScaling.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_S_X);
-		KFbxAnimCurve* pAnimCurveSY = pNode->LclScaling.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_S_Y);
-		KFbxAnimCurve* pAnimCurveSZ = pNode->LclScaling.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_S_Z);
+		FbxAnimCurve* pAnimCurveTX = pNode->LclTranslation.GetCurve(pAnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
+		FbxAnimCurve* pAnimCurveTY = pNode->LclTranslation.GetCurve(pAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y);
+		FbxAnimCurve* pAnimCurveTZ = pNode->LclTranslation.GetCurve(pAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z);
+		FbxAnimCurve* pAnimCurveRX = pNode->LclRotation.GetCurve(pAnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
+		FbxAnimCurve* pAnimCurveRY = pNode->LclRotation.GetCurve(pAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y);
+		FbxAnimCurve* pAnimCurveRZ = pNode->LclRotation.GetCurve(pAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z);
+		FbxAnimCurve* pAnimCurveSX = pNode->LclScaling.GetCurve(pAnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
+		FbxAnimCurve* pAnimCurveSY = pNode->LclScaling.GetCurve(pAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y);
+		FbxAnimCurve* pAnimCurveSZ = pNode->LclScaling.GetCurve(pAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z);
 
 		if ((pAnimCurveTX != NULL) && (pAnimCurveTY != NULL) && (pAnimCurveTZ != NULL) &&
 			(pAnimCurveRX != NULL) && (pAnimCurveRY != NULL) && (pAnimCurveRZ != NULL) &&
@@ -722,24 +723,24 @@ namespace SB3Utility
 		{
 			if (EulerFilter)
 			{
-				KFbxAnimCurve* lCurve [3];
+				FbxAnimCurve* lCurve [3];
 				lCurve[0] = pAnimCurveRX;
 				lCurve[1] = pAnimCurveRY;
 				lCurve[2] = pAnimCurveRZ;
 				lFilter->Reset();
 				lFilter->SetTestForPath(true);
 				lFilter->SetQualityTolerance(filterPrecision);
-				lFilter->Apply((KFbxAnimCurve**)lCurve, 3);
+				lFilter->Apply((FbxAnimCurve**)lCurve, 3);
 			}
 
 			int numKeys = pAnimCurveSX->KeyGetCount();
-			KTime kTime = pAnimCurveSX->KeyGetTime(numKeys - 1);
-			int keyIndex = (int)Math::Round((double)(kTime.GetSecondDouble() * 24.0), 0);
+			FbxTime FbxTime = pAnimCurveSX->KeyGetTime(numKeys - 1);
+			int keyIndex = (int)Math::Round((double)(FbxTime.GetSecondDouble() * 24.0), 0);
 			array<ImportedAnimationKeyframe^>^ keyArray = gcnew array<ImportedAnimationKeyframe^>(keyIndex + 1);
 			for (int i = 0; i < numKeys; i++)
 			{
-				kTime = pAnimCurveSX->KeyGetTime(i);
-				keyIndex = (int)Math::Round((double)(kTime.GetSecondDouble() * 24.0), 0);
+				FbxTime = pAnimCurveSX->KeyGetTime(i);
+				keyIndex = (int)Math::Round((double)(FbxTime.GetSecondDouble() * 24.0), 0);
 				keyArray[keyIndex] = gcnew ImportedAnimationKeyframe();
 				keyArray[keyIndex]->Scaling = Vector3(pAnimCurveSX->KeyGetValue(i), pAnimCurveSY->KeyGetValue(i), pAnimCurveSZ->KeyGetValue(i));
 				Vector3 rotation = Vector3(pAnimCurveRX->KeyGetValue(i), pAnimCurveRY->KeyGetValue(i), pAnimCurveRZ->KeyGetValue(i));
@@ -759,17 +760,17 @@ namespace SB3Utility
 		}
 	}
 
-	void Fbx::Importer::ImportAnimation(KFbxAnimLayer* pAnimLayer, KFbxNode* pNode, ImportedSampledAnimation^ wsAnimation)
+	void Fbx::Importer::ImportAnimation(FbxAnimLayer* pAnimLayer, FbxNode* pNode, ImportedSampledAnimation^ wsAnimation)
 	{
-		KFbxAnimCurve* pAnimCurveTX = pNode->LclTranslation.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_T_X);
-		KFbxAnimCurve* pAnimCurveTY = pNode->LclTranslation.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_T_Y);
-		KFbxAnimCurve* pAnimCurveTZ = pNode->LclTranslation.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_T_Z);
-		KFbxAnimCurve* pAnimCurveRX = pNode->LclRotation.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_R_X);
-		KFbxAnimCurve* pAnimCurveRY = pNode->LclRotation.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_R_Y);
-		KFbxAnimCurve* pAnimCurveRZ = pNode->LclRotation.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_R_Z);
-		KFbxAnimCurve* pAnimCurveSX = pNode->LclScaling.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_S_X);
-		KFbxAnimCurve* pAnimCurveSY = pNode->LclScaling.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_S_Y);
-		KFbxAnimCurve* pAnimCurveSZ = pNode->LclScaling.GetCurve<KFbxAnimCurve>(pAnimLayer, KFCURVENODE_S_Z);
+		FbxAnimCurve* pAnimCurveTX = pNode->LclTranslation.GetCurve(pAnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
+		FbxAnimCurve* pAnimCurveTY = pNode->LclTranslation.GetCurve(pAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y);
+		FbxAnimCurve* pAnimCurveTZ = pNode->LclTranslation.GetCurve(pAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z);
+		FbxAnimCurve* pAnimCurveRX = pNode->LclRotation.GetCurve(pAnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
+		FbxAnimCurve* pAnimCurveRY = pNode->LclRotation.GetCurve(pAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y);
+		FbxAnimCurve* pAnimCurveRZ = pNode->LclRotation.GetCurve(pAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z);
+		FbxAnimCurve* pAnimCurveSX = pNode->LclScaling.GetCurve(pAnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
+		FbxAnimCurve* pAnimCurveSY = pNode->LclScaling.GetCurve(pAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y);
+		FbxAnimCurve* pAnimCurveSZ = pNode->LclScaling.GetCurve(pAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z);
 
 		if ((pAnimCurveTX != NULL) && (pAnimCurveTY != NULL) && (pAnimCurveTZ != NULL) &&
 			(pAnimCurveRX != NULL) && (pAnimCurveRY != NULL) && (pAnimCurveRZ != NULL) &&
@@ -777,47 +778,47 @@ namespace SB3Utility
 		{
 			if (EulerFilter)
 			{
-				KFbxAnimCurve* lCurve [3];
+				FbxAnimCurve* lCurve [3];
 				lCurve[0] = pAnimCurveRX;
 				lCurve[1] = pAnimCurveRY;
 				lCurve[2] = pAnimCurveRZ;
 				lFilter->Reset();
 				lFilter->SetTestForPath(true);
 				lFilter->SetQualityTolerance(filterPrecision);
-				lFilter->Apply((KFbxAnimCurve**)lCurve, 3);
+				lFilter->Apply((FbxAnimCurve**)lCurve, 3);
 			}
 
 			int numKeys = pAnimCurveSX->KeyGetCount();
-			KTime kTime = pAnimCurveSX->KeyGetTime(numKeys - 1);
-			int keyIndex = (int)Math::Round((double)(kTime.GetSecondDouble() * 24.0), 0);
+			FbxTime FbxTime = pAnimCurveSX->KeyGetTime(numKeys - 1);
+			int keyIndex = (int)Math::Round((double)(FbxTime.GetSecondDouble() * 24.0), 0);
 			array<Nullable<Vector3>>^ scalings = gcnew array<Nullable<Vector3>>(keyIndex + 1);
 			for (int i = 0; i < numKeys; i++)
 			{
-				kTime = pAnimCurveSX->KeyGetTime(i);
-				keyIndex = (int)Math::Round((double)(kTime.GetSecondDouble() * 24.0), 0);
+				FbxTime = pAnimCurveSX->KeyGetTime(i);
+				keyIndex = (int)Math::Round((double)(FbxTime.GetSecondDouble() * 24.0), 0);
 				scalings[keyIndex] = Vector3(pAnimCurveSX->KeyGetValue(i), pAnimCurveSY->KeyGetValue(i), pAnimCurveSZ->KeyGetValue(i));
 			}
 
 			numKeys = pAnimCurveRX->KeyGetCount();
-			kTime = pAnimCurveRX->KeyGetTime(numKeys - 1);
-			keyIndex = (int)Math::Round((double)(kTime.GetSecondDouble() * 24.0), 0);
+			FbxTime = pAnimCurveRX->KeyGetTime(numKeys - 1);
+			keyIndex = (int)Math::Round((double)(FbxTime.GetSecondDouble() * 24.0), 0);
 			array<Nullable<Quaternion>>^ rotations = gcnew array<Nullable<Quaternion>>(keyIndex + 1);
 			for (int i = 0; i < numKeys; i++)
 			{
-				kTime = pAnimCurveRX->KeyGetTime(i);
-				keyIndex = (int)Math::Round((double)(kTime.GetSecondDouble() * 24.0), 0);
+				FbxTime = pAnimCurveRX->KeyGetTime(i);
+				keyIndex = (int)Math::Round((double)(FbxTime.GetSecondDouble() * 24.0), 0);
 				Vector3 rotation = Vector3(pAnimCurveRX->KeyGetValue(i), pAnimCurveRY->KeyGetValue(i), pAnimCurveRZ->KeyGetValue(i));
 				rotations[keyIndex] = Fbx::EulerToQuaternion(rotation);
 			}
 
 			numKeys = pAnimCurveTX->KeyGetCount();
-			kTime = pAnimCurveTX->KeyGetTime(numKeys - 1);
-			keyIndex = (int)Math::Round((double)(kTime.GetSecondDouble() * 24.0), 0);
+			FbxTime = pAnimCurveTX->KeyGetTime(numKeys - 1);
+			keyIndex = (int)Math::Round((double)(FbxTime.GetSecondDouble() * 24.0), 0);
 			array<Nullable<Vector3>>^ translations = gcnew array<Nullable<Vector3>>(keyIndex + 1);
 			for (int i = 0; i < numKeys; i++)
 			{
-				kTime = pAnimCurveTX->KeyGetTime(i);
-				keyIndex = (int)Math::Round((double)(kTime.GetSecondDouble() * 24.0), 0);
+				FbxTime = pAnimCurveTX->KeyGetTime(i);
+				keyIndex = (int)Math::Round((double)(FbxTime.GetSecondDouble() * 24.0), 0);
 				translations[keyIndex] = Vector3(pAnimCurveTX->KeyGetValue(i), pAnimCurveTY->KeyGetValue(i), pAnimCurveTZ->KeyGetValue(i));
 			}
 
@@ -858,18 +859,18 @@ namespace SB3Utility
 		return equals;
 	}
 
-	template <class T> void Fbx::Importer::GetVector(KFbxLayerElementTemplate<T>* pLayerElement, T& pVector, int controlPointIdx, int vertexIdx)
+	template <class T> void Fbx::Importer::GetVector(FbxLayerElementTemplate<T>* pLayerElement, T& pVector, int controlPointIdx, int vertexIdx)
 	{
 		switch (pLayerElement->GetMappingMode())
 		{
-		case KFbxLayerElement::eBY_CONTROL_POINT:
+		case FbxLayerElement::eByControlPoint:
 			switch (pLayerElement->GetReferenceMode())
 			{
-			case KFbxLayerElement::eDIRECT:
+			case FbxLayerElement::eDirect:
 				pVector = pLayerElement->GetDirectArray().GetAt(controlPointIdx);
 				break;
-			case KFbxLayerElement::eINDEX:
-			case KFbxLayerElement::eINDEX_TO_DIRECT:
+			case FbxLayerElement::eIndex:
+			case FbxLayerElement::eIndexToDirect:
 				{
 					int idx = pLayerElement->GetIndexArray().GetAt(controlPointIdx);
 					pVector = pLayerElement->GetDirectArray().GetAt(idx);
@@ -884,14 +885,14 @@ namespace SB3Utility
 			}
 			break;
 
-		case KFbxLayerElement::eBY_POLYGON_VERTEX:
+		case FbxLayerElement::eByPolygonVertex:
 			switch (pLayerElement->GetReferenceMode())
 			{
-			case KFbxLayerElement::eDIRECT:
+			case FbxLayerElement::eDirect:
 				pVector = pLayerElement->GetDirectArray().GetAt(vertexIdx);
 				break;
-			case KFbxLayerElement::eINDEX:
-			case KFbxLayerElement::eINDEX_TO_DIRECT:
+			case FbxLayerElement::eIndex:
+			case FbxLayerElement::eIndexToDirect:
 				{
 					int idx = pLayerElement->GetIndexArray().GetAt(vertexIdx);
 					pVector = pLayerElement->GetDirectArray().GetAt(idx);
@@ -915,20 +916,20 @@ namespace SB3Utility
 		}
 	}
 
-	void Fbx::Importer::ImportMorph(KArrayTemplate<KFbxNode*>* pMeshArray)
+	void Fbx::Importer::ImportMorph(FbxArray<FbxNode*>* pMeshArray)
 	{
 		for (int i = 0; i < pMeshArray->GetCount(); i++)
 		{
-			KFbxNode* pNode = pMeshArray->GetAt(i);
-			KFbxMesh* pMesh = pNode->GetMesh();
-			int numShapes = pMesh->GetDeformerCount(KFbxDeformer::eBLENDSHAPE);
+			FbxNode* pNode = pMeshArray->GetAt(i);
+			FbxMesh* pMesh = pNode->GetMesh();
+			int numShapes = pMesh->GetDeformerCount(FbxDeformer::eBlendShape);
 			bool channelOrganized = false;
 			if (numShapes > 0)
 			{
-				KFbxBlendShape* lBlendShape = NULL;
+				FbxBlendShape* lBlendShape = NULL;
 				if (numShapes == 1)
 				{
-					lBlendShape = (KFbxBlendShape*)pMesh->GetDeformer(0, KFbxDeformer::eBLENDSHAPE);
+					lBlendShape = (FbxBlendShape*)pMesh->GetDeformer(0, FbxDeformer::eBlendShape);
 					if (lBlendShape->GetBlendShapeChannelCount() > 1)
 					{
 						numShapes = lBlendShape->GetBlendShapeChannelCount();
@@ -949,14 +950,14 @@ namespace SB3Utility
 
 				for (int j = 0; j < numShapes; j++)
 				{
-					KFbxBlendShapeChannel* lChannel;
+					FbxBlendShapeChannel* lChannel;
 					if (channelOrganized)
 					{
 						lChannel = lBlendShape->GetBlendShapeChannel(j);
 					}
 					else
 					{
-						lBlendShape = (KFbxBlendShape*)pMesh->GetDeformer(j, KFbxDeformer::eBLENDSHAPE);
+						lBlendShape = (FbxBlendShape*)pMesh->GetDeformer(j, FbxDeformer::eBlendShape);
 						if (lBlendShape->GetBlendShapeChannelCount() != 1)
 						{
 							Report::ReportLog("Warning! " + clipName + "'s blendShape " + j + " has " + lBlendShape->GetBlendShapeChannelCount() + " channels. Channels beyond the first are ignored.");
@@ -967,7 +968,7 @@ namespace SB3Utility
 					{
 						Report::ReportLog("Warning! " + clipName + "'s has a blendChannel with " + lChannel->GetTargetShapeCount() + " shapes. Shapes beyond the first are ignored.");
 					}
-					KFbxShape* pShape = lChannel->GetTargetShape(0);
+					FbxShape* pShape = lChannel->GetTargetShape(0);
 					ImportedMorphKeyframe^ morph = gcnew ImportedMorphKeyframe();
 					morphList->KeyframeList->Add(morph);
 
@@ -980,8 +981,8 @@ namespace SB3Utility
 					}
 					morph->Name = shapeName;
 					
-					KFbxLayer* pLayerNormal = pShape->GetLayer(0, KFbxLayerElement::eNORMAL);
-					KFbxLayerElementNormal* pLayerElementNormal = NULL;
+					FbxLayer* pLayerNormal = pShape->GetLayer(0, FbxLayerElement::eNormal);
+					FbxLayerElementNormal* pLayerElementNormal = NULL;
 					if (pLayerNormal != NULL)
 					{
 						pLayerElementNormal = pLayerNormal->GetNormals();
@@ -998,7 +999,7 @@ namespace SB3Utility
 						vertInfo->Weights = gcnew array<float>(4);
 						vertInfo->UV = gcnew array<float>(2);
 
-						KFbxVector4 lCoords = pShape->GetControlPointAt(k);
+						FbxVector4 lCoords = pShape->GetControlPointAt(k);
 						vertInfo->Position = Vector3((float)lCoords[0], (float)lCoords[1], (float)lCoords[2]);
 
 						if (pLayerElementNormal == NULL)
@@ -1007,7 +1008,7 @@ namespace SB3Utility
 						}
 						else
 						{
-							KFbxVector4 lNorm;
+							FbxVector4 lNorm;
 							GetVector(pLayerElementNormal, lNorm, k, k);
 							vertInfo->Normal = Vector3((float)lNorm[0], (float)lNorm[1], (float)lNorm[2]);
 						}
