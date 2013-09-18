@@ -1,4 +1,7 @@
-﻿[0.5.1]
+﻿[0.5.2]
+  - Added uv splitting of cylindrical projected faces to FBX imports
+
+[0.5.1]
   - Fixed storing negated attribute values of materials in xa units
   - Updated support for Fbx 2014.1 (new dependency to VC++ 2012)
   - Replacing meshes throws an error when a VertexDuplicateList would exceed 64k vertices

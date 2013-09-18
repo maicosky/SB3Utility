@@ -830,14 +830,14 @@ namespace AiDroidPlugin
 			return dupList;
 		}
 
-		public static void SaveREM(remParser parser, string destPath, bool keepBackup)
+		public static void SaveREM(remParser parser, string destPath, bool keepBackup, string backupExt)
 		{
 			DirectoryInfo dir = new DirectoryInfo(Path.GetDirectoryName(destPath));
 
 			string backup = null;
 			if (keepBackup && File.Exists(destPath))
 			{
-				backup = Utility.GetDestFile(dir, Path.GetFileNameWithoutExtension(destPath) + ".bak", Path.GetExtension(destPath));
+				backup = Utility.GetDestFile(dir, Path.GetFileNameWithoutExtension(destPath) + ".bak", backupExt);
 				File.Move(destPath, backup);
 			}
 

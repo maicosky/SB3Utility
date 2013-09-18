@@ -269,7 +269,7 @@ namespace AiDroidPlugin
 			}
 		}
 
-		public remBone Clone(bool mesh, bool childFrames, remParser parser, List<remMesh> clonedMeshes, List<remSkin> clonedSkins)
+		public remBone Clone(bool mesh, bool childFrames, remParser parser, List<remMaterial> clonedMaterials, List<remMesh> clonedMeshes, List<remSkin> clonedSkins)
 		{
 			remBone frame = new remBone(Count);
 			frame.name = name;
@@ -280,6 +280,14 @@ namespace AiDroidPlugin
 				remMesh remMesh = rem.FindMesh(this, parser.MESC);
 				if (remMesh != null)
 				{
+					foreach (remId matId in remMesh.materials)
+					{
+						remMaterial mat = rem.FindMaterial(matId, parser.MATC);
+						if (!clonedMaterials.Contains(mat))
+						{
+							clonedMaterials.Add(mat.Clone());
+						}
+					}
 					remMesh clone = remMesh.Clone(true, true, parser, clonedSkins);
 					clone.frame = frame.name;
 					clonedMeshes.Add(clone);
@@ -289,7 +297,7 @@ namespace AiDroidPlugin
 			{
 				for (int i = 0; i < Count; i++)
 				{
-					frame.AddChild(this[i].Clone(mesh, true, parser, clonedMeshes, clonedSkins));
+					frame.AddChild(this[i].Clone(mesh, true, parser, clonedMaterials, clonedMeshes, clonedSkins));
 				}
 			}
 			return frame;

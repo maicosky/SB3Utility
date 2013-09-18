@@ -189,7 +189,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>if not exist msvcr110.dll (echo msvcr110.dll missing! &amp;&amp; copy ..\SB3UtilityExternalLibraries\msvc*.dll)
+    <PostBuildEvent>if not exist msvcp100.dll (echo msvcp100.dll missing! &amp;&amp; copy ..\SB3UtilityExternalLibraries\msvc*100.dll)
+if not exist plugins\msvcr110.dll (echo msvcr110.dll missing! &amp;&amp; copy ..\SB3UtilityExternalLibraries\msvc*110.dll plugins)
 if not exist irrKlang.NET4.dll (echo irrKlang.NET4.dll missing! &amp;&amp; copy ..\SB3UtilityExternalLibraries\irrKlang.NET4.dll)
 if not exist SlimDX.dll (echo SlimDX.dll missing! &amp;&amp; copy ..\SB3UtilityExternalLibraries\SlimDX.dll)
 if not exist Jolt.dll (echo Jolt.dll missing! &amp;&amp; set errorlevel=-1)

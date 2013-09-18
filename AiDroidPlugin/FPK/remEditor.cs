@@ -32,27 +32,29 @@ namespace AiDroidPlugin
 		public void InitTextures(bool allTextures, bool noMaskFilter)
 		{
 			Textures.Clear();
-            String texDir = allTextures ? rem.TexturePathFromREM(Parser.RemPath) : null;
-            if (allTextures && texDir != null)
-            {
-                DirectoryInfo dir = new DirectoryInfo(texDir);
-                foreach (FileInfo file in dir.EnumerateFiles())
-                {
-                    string fileName = file.Name.ToLower();
-                    if (!noMaskFilter || !fileName.Contains("_mask") && !fileName.Contains("_shade"))
-                    {
-                        Textures.Add(file.Name);
-                    }
-                }
-            }
-            else
-            {
-                foreach (remMaterial mat in Parser.MATC)
-                {
-                    if (mat.texture != null && !Textures.Contains(mat.texture))
-                        Textures.Add(mat.texture);
-                }
-            }
+			String texDir = allTextures ? rem.TexturePathFromREM(Parser.RemPath) : null;
+			if (allTextures && texDir != null)
+			{
+				DirectoryInfo dir = new DirectoryInfo(texDir);
+				foreach (FileInfo file in dir.EnumerateFiles())
+				{
+					string fileName = file.Name.ToLower();
+					if (!noMaskFilter || !fileName.Contains("_mask") && !fileName.Contains("_shade"))
+					{
+						Textures.Add(file.Name);
+					}
+				}
+			}
+			else
+			{
+				foreach (remMaterial mat in Parser.MATC)
+				{
+					if (mat.texture != null && !Textures.Contains(mat.texture))
+					{
+						Textures.Add(mat.texture);
+					}
+				}
+			}
 		}
 
 		public void Dispose()
@@ -62,9 +64,9 @@ namespace AiDroidPlugin
 		}
 
 		[Plugin]
-		public void SaveREM(string path, bool backup)
+		public void SaveREM(string path, bool backup, string backupExtension)
 		{
-			rem.SaveREM(Parser, path, backup);
+			rem.SaveREM(Parser, path, backup, backupExtension);
 		}
 
 		[Plugin]
@@ -264,16 +266,18 @@ namespace AiDroidPlugin
 		[Plugin]
 		public void AddFrame(remBone srcFrame, remParser srcParser, int destParentIdx)
 		{
+			List<remMaterial> materialClones = new List<remMaterial>(srcParser.MATC.Count);
 			List<remMesh> meshClones = new List<remMesh>(srcParser.MESC.Count);
 			List<remSkin> skinClones = new List<remSkin>(srcParser.SKIC.Count);
 			if (srcFrame == null)
 			{
 				srcFrame = srcParser.BONC.rootFrame;
 			}
-			var newFrame = srcFrame.Clone(true, true, srcParser, meshClones, skinClones);
+			var newFrame = srcFrame.Clone(true, true, srcParser, materialClones, meshClones, skinClones);
 
 			AddFrame(newFrame, destParentIdx);
 
+			PullNewMaterials(materialClones);
 			Parser.MESC.ChildList.AddRange(meshClones);
 			Parser.SKIC.ChildList.AddRange(skinClones);
 		}
@@ -345,16 +349,18 @@ namespace AiDroidPlugin
 		[Plugin]
 		public void ReplaceFrame(remBone srcFrame, remParser srcParser, int destParentIdx)
 		{
+			List<remMaterial> materialClones = new List<remMaterial>(srcParser.MATC.Count);
 			List<remMesh> meshClones = new List<remMesh>(srcParser.MESC.Count);
 			List<remSkin> skinClones = new List<remSkin>(srcParser.SKIC.Count);
 			if (srcFrame == null)
 			{
 				srcFrame = srcParser.BONC.rootFrame;
 			}
-			var newFrame = srcFrame.Clone(true, true, srcParser, meshClones, skinClones);
+			var newFrame = srcFrame.Clone(true, true, srcParser, materialClones, meshClones, skinClones);
 
 			ReplaceFrame(newFrame, destParentIdx);
 
+			PullNewMaterials(materialClones);
 			Parser.MESC.ChildList.AddRange(meshClones);
 			Parser.SKIC.ChildList.AddRange(skinClones);
 		}
@@ -435,18 +441,34 @@ namespace AiDroidPlugin
 		[Plugin]
 		public void MergeFrame(remBone srcFrame, remParser srcParser, int destParentIdx)
 		{
+			List<remMaterial> materialClones = new List<remMaterial>(srcParser.MATC.Count);
 			List<remMesh> meshClones = new List<remMesh>(srcParser.MESC.Count);
 			List<remSkin> skinClones = new List<remSkin>(srcParser.SKIC.Count);
 			if (srcFrame == null)
 			{
 				srcFrame = srcParser.BONC.rootFrame;
 			}
-			var newFrame = srcFrame.Clone(true, true, srcParser, meshClones, skinClones);
+			var newFrame = srcFrame.Clone(true, true, srcParser, materialClones, meshClones, skinClones);
 
 			MergeFrame(newFrame, destParentIdx);
 
+			PullNewMaterials(materialClones);
 			Parser.MESC.ChildList.AddRange(meshClones);
 			Parser.SKIC.ChildList.AddRange(skinClones);
+		}
+
+		private void PullNewMaterials(List<remMaterial> materialClones)
+		{
+			for (int i = 0; i < materialClones.Count; i++)
+			{
+				remMaterial mat = materialClones[i];
+				if (rem.FindMaterial(mat.name, Parser.MATC) != null)
+				{
+					materialClones.RemoveAt(i);
+					i--;
+				}
+			}
+			Parser.MATC.ChildList.AddRange(materialClones);
 		}
 
 		void MergeFrame(remBone newFrame, int destParentIdx)

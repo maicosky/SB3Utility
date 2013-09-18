@@ -1,4 +1,9 @@
-﻿[0.5.1]
+﻿[0.5.2]
+  - Added editable backup extension of REM files
+  - Fixed material selection crash for missing materials
+  - Used materials are copied along with mesh frames from other REMs (via Workspace)
+
+[0.5.1]
   - fixed invalid material when merging imported materials
   - fixed crash when a texture wasn't found in TEXH folder
   - textures are also taken from the current folder

@@ -300,20 +300,44 @@ namespace SB3Utility
 
 						List<Vertex^>^ vertMapList = vertMap[controlPointIdx];
 						Vertex^ foundVert = nullptr;
+						Vertex^ sameUV = nullptr;
 						for (int m = 0; m < vertMapList->Count; m++)
 						{
+							if (sameUV == nullptr && vertMapList[m]->uv[0] == vert->uv[0] && vertMapList[m]->uv[1] == vert->uv[1])
+							{
+								sameUV = vertMapList[m];
+							}
 							if (vertMapList[m]->Equals(vert))
 							{
-								foundVert = vertMapList[m];
+								foundVert = sameUV == nullptr ? vertMapList[m] : sameUV;
 								break;
 							}
 						}
 
 						if (foundVert == nullptr)
 						{
-							vertMapList->Add(vert);
+							bool newUV = true;
+							for each (Vertex^ v in vertMapList)
+							{
+								if (v->uv[0] == vert->uv[0] && v->uv[1] == vert->uv[1])
+								{
+									newUV = false;
+									break;
+								}
+							}
+							if (newUV)
+							{
+								vert->index = -1;
+								vertMapList->Insert(0, vert);
+								foundVert = vert;
+							}
+							else
+							{
+								foundVert = sameUV;
+								vertMapList->Add(vert);
+							}
 						}
-						faceMap[j][k] = vertMapList[0];
+						faceMap[j][k] = foundVert;
 
 						vertCount++;
 					}
@@ -325,18 +349,29 @@ namespace SB3Utility
 					int numNormals = vertMapList->Count;
 					if (numNormals > 0)
 					{
-						Vertex^ vertNormal = vertMapList[0];
-						while (vertMapList->Count > 1)
+						array<float>^ normal = gcnew array<float>(3);
+						for (int k = 0; k < vertMapList->Count; k++)
 						{
-							array<float>^ addNormal = vertMapList[1]->normal;
-							vertNormal->normal[0] += addNormal[0];
-							vertNormal->normal[1] += addNormal[1];
-							vertNormal->normal[2] += addNormal[2];
-							vertMapList->RemoveAt(1);
+							Vertex^ v = vertMapList[k];
+							array<float>^ addNormal = v->normal;
+							normal[0] += addNormal[0];
+							normal[1] += addNormal[1];
+							normal[2] += addNormal[2];
+							if (v->index == 0)
+							{
+								vertMapList->RemoveAt(k);
+								k--;
+							}
 						}
-						vertNormal->normal[0] /= numNormals;
-						vertNormal->normal[1] /= numNormals;
-						vertNormal->normal[2] /= numNormals;
+						normal[0] /= numNormals;
+						normal[1] /= numNormals;
+						normal[2] /= numNormals;
+						for each (Vertex^ v in vertMapList)
+						{
+							v->normal[0] = normal[0];
+							v->normal[1] = normal[1];
+							v->normal[2] = normal[2];
+						}
 					}
 				}
 

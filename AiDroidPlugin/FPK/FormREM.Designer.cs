@@ -196,6 +196,9 @@
 			this.textBoxTexSize = new SB3Utility.EditTextBox();
 			this.textBoxTexName = new SB3Utility.EditTextBox();
 			this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+			this.backupExtensionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.backupExtensionToolStripEditTextBox = new SB3Utility.ToolStripEditTextBox();
+			this.editTextBox1 = new SB3Utility.EditTextBox();
 			this.menuStrip1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
 			this.splitContainer1.Panel1.SuspendLayout();
@@ -288,7 +291,7 @@
             this.toolStripSeparator6,
             this.closeToolStripMenuItem});
 			this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-			this.fileToolStripMenuItem.Size = new System.Drawing.Size(35, 18);
+			this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 18);
 			this.fileToolStripMenuItem.Text = "&File";
 			// 
 			// reopenToolStripMenuItem
@@ -296,49 +299,50 @@
 			this.reopenToolStripMenuItem.Name = "reopenToolStripMenuItem";
 			this.reopenToolStripMenuItem.ShortcutKeyDisplayString = "";
 			this.reopenToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.R)));
-			this.reopenToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+			this.reopenToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
 			this.reopenToolStripMenuItem.Text = "&Reopen .rem";
 			this.reopenToolStripMenuItem.Click += new System.EventHandler(this.reopenToolStripMenuItem_Click);
 			// 
 			// toolStripSeparator1
 			// 
 			this.toolStripSeparator1.Name = "toolStripSeparator1";
-			this.toolStripSeparator1.Size = new System.Drawing.Size(172, 6);
+			this.toolStripSeparator1.Size = new System.Drawing.Size(179, 6);
 			// 
 			// saveremToolStripMenuItem
 			// 
 			this.saveremToolStripMenuItem.Name = "saveremToolStripMenuItem";
 			this.saveremToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-			this.saveremToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+			this.saveremToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
 			this.saveremToolStripMenuItem.Text = "&Save .rem";
 			this.saveremToolStripMenuItem.Click += new System.EventHandler(this.saveremToolStripMenuItem_Click);
 			// 
 			// saveremAsToolStripMenuItem
 			// 
 			this.saveremAsToolStripMenuItem.Name = "saveremAsToolStripMenuItem";
-			this.saveremAsToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+			this.saveremAsToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
 			this.saveremAsToolStripMenuItem.Text = "Save .rem &As...";
 			this.saveremAsToolStripMenuItem.Click += new System.EventHandler(this.saveremAsToolStripMenuItem_Click);
 			// 
 			// toolStripSeparator6
 			// 
 			this.toolStripSeparator6.Name = "toolStripSeparator6";
-			this.toolStripSeparator6.Size = new System.Drawing.Size(172, 6);
+			this.toolStripSeparator6.Size = new System.Drawing.Size(179, 6);
 			// 
 			// closeToolStripMenuItem
 			// 
 			this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
 			this.closeToolStripMenuItem.ShortcutKeyDisplayString = "Ctrl+F4";
-			this.closeToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+			this.closeToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
 			this.closeToolStripMenuItem.Text = "&Close";
 			this.closeToolStripMenuItem.Click += new System.EventHandler(this.closeToolStripMenuItem_Click);
 			// 
 			// optionsToolStripMenuItem
 			// 
 			this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.keepBackupToolStripMenuItem});
+            this.keepBackupToolStripMenuItem,
+            this.backupExtensionToolStripMenuItem});
 			this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-			this.optionsToolStripMenuItem.Size = new System.Drawing.Size(56, 18);
+			this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 18);
 			this.optionsToolStripMenuItem.Text = "&Options";
 			// 
 			// keepBackupToolStripMenuItem
@@ -347,7 +351,7 @@
 			this.keepBackupToolStripMenuItem.CheckOnClick = true;
 			this.keepBackupToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.keepBackupToolStripMenuItem.Name = "keepBackupToolStripMenuItem";
-			this.keepBackupToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
+			this.keepBackupToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
 			this.keepBackupToolStripMenuItem.Text = "Keep &Backup";
 			// 
 			// splitContainer1
@@ -833,6 +837,7 @@
 			// 
 			// tabPageFrameView
 			// 
+			this.tabPageFrameView.Controls.Add(this.editTextBox1);
 			this.tabPageFrameView.Controls.Add(this.buttonFrameMatrixLocalize);
 			this.tabPageFrameView.Controls.Add(this.buttonFrameMatrixIdentity);
 			this.tabPageFrameView.Controls.Add(this.buttonFrameMatrixInverse);
@@ -2083,6 +2088,26 @@
 			this.textBoxTexName.Size = new System.Drawing.Size(148, 20);
 			this.textBoxTexName.TabIndex = 7;
 			// 
+			// backupExtensionToolStripMenuItem
+			// 
+			this.backupExtensionToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.backupExtensionToolStripEditTextBox});
+			this.backupExtensionToolStripMenuItem.Name = "backupExtensionToolStripMenuItem";
+			this.backupExtensionToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
+			this.backupExtensionToolStripMenuItem.Text = "Backup &Extension";
+			// 
+			// backupExtensionToolStripEditTextBox
+			// 
+			this.backupExtensionToolStripEditTextBox.Name = "backupExtensionToolStripEditTextBox";
+			this.backupExtensionToolStripEditTextBox.Size = new System.Drawing.Size(50, 23);
+			// 
+			// editTextBox1
+			// 
+			this.editTextBox1.Location = new System.Drawing.Point(8, 8);
+			this.editTextBox1.Name = "editTextBox1";
+			this.editTextBox1.Size = new System.Drawing.Size(100, 20);
+			this.editTextBox1.TabIndex = 87;
+			// 
 			// FormREM
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -2352,5 +2377,8 @@
 		private System.Windows.Forms.CheckBox checkBoxInterpolationLinear;
 		private System.Windows.Forms.Label label48;
 		private System.Windows.Forms.Button buttonBoneRestPose;
+		private System.Windows.Forms.ToolStripMenuItem backupExtensionToolStripMenuItem;
+		private SB3Utility.ToolStripEditTextBox backupExtensionToolStripEditTextBox;
+		private SB3Utility.EditTextBox editTextBox1;
 	}
 }

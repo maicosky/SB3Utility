@@ -311,6 +311,8 @@ namespace AiDroidPlugin
 			Gui.Docking.ShowDockContent(this, Gui.Docking.DockEditors, ContentCategory.Meshes);
 
 			keepBackupToolStripMenuItem.CheckedChanged += keepBackupToolStripMenuItem_CheckedChanged;
+			backupExtensionToolStripEditTextBox.Text = (string)Properties.Settings.Default["BackupExtensionREM"];
+			backupExtensionToolStripEditTextBox.AfterEditTextChanged += backupExtensionToolStripEditTextBox_AfterEditTextChanged;
 		}
 
 		private void ClearControl(Control control)
@@ -878,12 +880,19 @@ namespace AiDroidPlugin
 			loadedTexture = id;
 		}
 
-		private void RecreateFrames()
+		private void RecreateFrames(bool newMaterials)
 		{
 			CrossRefsClear();
 			DisposeRenderObjects();
 			LoadFrame(-1);
 			LoadMesh(-1);
+			if (newMaterials)
+			{
+				int oldMat = loadedMaterial;
+				LoadMaterial(-1);
+				InitMaterials();
+				LoadMaterial(oldMat);
+			}
 			InitFrames();
 			InitMeshes();
 			RecreateRenderObjects();
@@ -978,11 +987,11 @@ namespace AiDroidPlugin
 				if (mat.texture != null)
 				{
 					int texIdx = textures.IndexOf(mat.texture);
-                    if (texIdx >= 0)
-                    {
-                        crossRefMaterialTextures[i].Add(new KeyList<string>(textures, texIdx));
-                        crossRefTextureMaterials[texIdx].Add(new KeyList<remMaterial>(materials, i));
-                    }
+					if (texIdx >= 0)
+					{
+						crossRefMaterialTextures[i].Add(new KeyList<string>(textures, texIdx));
+						crossRefTextureMaterials[texIdx].Add(new KeyList<remMaterial>(materials, i));
+					}
 				}
 			}
 
@@ -1000,11 +1009,11 @@ namespace AiDroidPlugin
 					if (mat.texture != null)
 					{
 						int texIdx = textures.IndexOf(mat.texture);
-                        if (texIdx >= 0)
-                        {
-                            crossRefMeshTextures[i].Add(new KeyList<string>(textures, texIdx));
-                            crossRefTextureMeshes[texIdx].Add(new KeyList<remMesh>(meshes, i));
-                        }
+						if (texIdx >= 0)
+						{
+							crossRefMeshTextures[i].Add(new KeyList<string>(textures, texIdx));
+							crossRefTextureMeshes[texIdx].Add(new KeyList<remMesh>(meshes, i));
+						}
 					}
 				}
 			}
@@ -1382,7 +1391,7 @@ namespace AiDroidPlugin
 						if (dragOptions.ShowDialog() == DialogResult.OK)
 						{
 							Gui.Scripting.RunScript(EditorVar + "." + dragOptions.FrameMethod.GetName() + "(srcFrame=" + srcFrameParameter + ", srcParser=" + source.Variable + ".Parser, destParentIdx=" + dragOptions.numericFrameId.Value + ")");
-							RecreateFrames();
+							RecreateFrames(true);
 						}
 					}
 				}
@@ -1411,7 +1420,7 @@ namespace AiDroidPlugin
 						if (dragOptions.ShowDialog() == DialogResult.OK)
 						{
 							Gui.Scripting.RunScript(EditorVar + "." + dragOptions.FrameMethod.GetName() + "(srcFrame=" + source.Variable + ".Frames[" + (int)source.Id + "], destParentIdx=" + dragOptions.numericFrameId.Value + ", topFrameRescaling=" + dragOptions.checkBoxFrameRescale.Checked + ")");
-							RecreateFrames();
+							RecreateFrames(false);
 						}
 					}
 				}
@@ -2621,7 +2630,7 @@ namespace AiDroidPlugin
 					return;
 				}
 
-				int currentCellValueBeforeEndEdit = (int)dataGridViewMesh.CurrentCell.Value;
+				int currentCellValueBeforeEndEdit = dataGridViewMesh.CurrentCell.Value != null ? (int)dataGridViewMesh.CurrentCell.Value : -1;
 
 				dataGridViewMesh.EndEdit();
 
@@ -2889,13 +2898,15 @@ namespace AiDroidPlugin
 
 		private void saveremToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			Gui.Scripting.RunScript(EditorVar + ".SaveREM(path=\"" + this.ToolTipText + "\", backup=" + keepBackupToolStripMenuItem.Checked + ")");
+			Gui.Scripting.RunScript(EditorVar + ".SaveREM(path=\"" + this.ToolTipText + "\", backup=" + keepBackupToolStripMenuItem.Checked + ", backupExtension=\"" + backupExtensionToolStripEditTextBox.Text + "\")");
 		}
 
 		private void saveremAsToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			if (saveFileDialog1.ShowDialog() == DialogResult.OK)
-				Gui.Scripting.RunScript(EditorVar + ".SaveREM(path=\"" + saveFileDialog1.FileName + "\", backup=" + keepBackupToolStripMenuItem.Checked + ")");
+			{
+				Gui.Scripting.RunScript(EditorVar + ".SaveREM(path=\"" + saveFileDialog1.FileName + "\", backup=" + keepBackupToolStripMenuItem.Checked + ", backupExtension=\"" + backupExtensionToolStripEditTextBox.Text + "\")");
+			}
 		}
 
 		private void closeToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2906,6 +2917,11 @@ namespace AiDroidPlugin
 		private void keepBackupToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
 		{
 			Properties.Settings.Default["KeepBackupOfREM"] = keepBackupToolStripMenuItem.Checked;
+		}
+
+		private void backupExtensionToolStripEditTextBox_AfterEditTextChanged(object sender, EventArgs e)
+		{
+			Properties.Settings.Default["BackupExtensionREM"] = backupExtensionToolStripEditTextBox.Text;
 		}
 
 		#endregion Menu Strip Item Handlers

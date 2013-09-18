@@ -26,7 +26,7 @@ namespace SB3Utility.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Configuration.SettingsProviderAttribute(typeof(PortableSettingsProvider))]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("libfbxsdk.dll;SB3UtilityFBX.dll;SB3UtilityPP.dll;")]
+        [global::System.Configuration.DefaultSettingValueAttribute("libfbxsdk.dll;msvcr110.dll;SB3UtilityFBX.dll;SB3UtilityPP.dll;")]
         public string PluginsDoNotLoad {
             get {
                 return ((string)(this["PluginsDoNotLoad"]));
