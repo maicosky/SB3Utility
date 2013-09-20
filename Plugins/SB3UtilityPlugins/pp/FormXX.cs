@@ -930,6 +930,10 @@ namespace SB3Utility
 
 			if (treeViewObjectTree.Nodes.Count > 1)
 			{
+				if (treeViewObjectTree.Nodes[1].IsExpanded)
+				{
+					materialsNode.Expand();
+				}
 				treeViewObjectTree.Nodes.RemoveAt(1);
 			}
 			treeViewObjectTree.Nodes.Insert(1, materialsNode);
@@ -971,6 +975,10 @@ namespace SB3Utility
 
 			if (treeViewObjectTree.Nodes.Count > 2)
 			{
+				if (treeViewObjectTree.Nodes[2].IsExpanded)
+				{
+					texturesNode.Expand();
+				}
 				treeViewObjectTree.Nodes.RemoveAt(2);
 			}
 			treeViewObjectTree.Nodes.Insert(2, texturesNode);

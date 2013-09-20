@@ -31,15 +31,15 @@
 		private void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle65 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle70 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle71 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle66 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle67 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle68 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle69 = new System.Windows.Forms.DataGridViewCellStyle();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMeshView));
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle72 = new System.Windows.Forms.DataGridViewCellStyle();
 			this.buttonBoneRemove = new System.Windows.Forms.Button();
 			this.buttonBoneCopy = new System.Windows.Forms.Button();
 			this.buttonBoneGotoFrame = new System.Windows.Forms.Button();
@@ -1726,8 +1726,8 @@
 			this.dataGridViewAnimationClip.AllowUserToAddRows = false;
 			this.dataGridViewAnimationClip.AllowUserToDeleteRows = false;
 			this.dataGridViewAnimationClip.AllowUserToResizeRows = false;
-			dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-			this.dataGridViewAnimationClip.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
+			dataGridViewCellStyle65.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+			this.dataGridViewAnimationClip.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle65;
 			this.dataGridViewAnimationClip.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
@@ -1742,22 +1742,22 @@
 			this.dataGridViewAnimationClip.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
 			this.dataGridViewAnimationClip.Location = new System.Drawing.Point(0, 17);
 			this.dataGridViewAnimationClip.Name = "dataGridViewAnimationClip";
-			dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-			dataGridViewCellStyle6.BackColor = System.Drawing.SystemColors.Control;
-			dataGridViewCellStyle6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			dataGridViewCellStyle6.ForeColor = System.Drawing.SystemColors.WindowText;
-			dataGridViewCellStyle6.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-			dataGridViewCellStyle6.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-			dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-			this.dataGridViewAnimationClip.RowHeadersDefaultCellStyle = dataGridViewCellStyle6;
+			dataGridViewCellStyle70.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+			dataGridViewCellStyle70.BackColor = System.Drawing.SystemColors.Control;
+			dataGridViewCellStyle70.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			dataGridViewCellStyle70.ForeColor = System.Drawing.SystemColors.WindowText;
+			dataGridViewCellStyle70.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+			dataGridViewCellStyle70.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+			dataGridViewCellStyle70.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+			this.dataGridViewAnimationClip.RowHeadersDefaultCellStyle = dataGridViewCellStyle70;
 			this.dataGridViewAnimationClip.RowHeadersVisible = false;
-			dataGridViewCellStyle7.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-			this.dataGridViewAnimationClip.RowsDefaultCellStyle = dataGridViewCellStyle7;
+			dataGridViewCellStyle71.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+			this.dataGridViewAnimationClip.RowsDefaultCellStyle = dataGridViewCellStyle71;
 			this.dataGridViewAnimationClip.RowTemplate.Resizable = System.Windows.Forms.DataGridViewTriState.False;
 			this.dataGridViewAnimationClip.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
 			this.dataGridViewAnimationClip.ShowCellErrors = false;
 			this.dataGridViewAnimationClip.ShowRowErrors = false;
-			this.dataGridViewAnimationClip.Size = new System.Drawing.Size(463, 160);
+			this.dataGridViewAnimationClip.Size = new System.Drawing.Size(463, 158);
 			this.dataGridViewAnimationClip.TabIndex = 2;
 			this.dataGridViewAnimationClip.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewAnimationClip_CellDoubleClick);
 			this.dataGridViewAnimationClip.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewAnimationClip_CellEndEdit);
@@ -1772,10 +1772,10 @@
 			// ColumnIdx
 			// 
 			this.ColumnIdx.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-			dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-			dataGridViewCellStyle2.Format = "N0";
-			dataGridViewCellStyle2.NullValue = null;
-			this.ColumnIdx.DefaultCellStyle = dataGridViewCellStyle2;
+			dataGridViewCellStyle66.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+			dataGridViewCellStyle66.Format = "N0";
+			dataGridViewCellStyle66.NullValue = null;
+			this.ColumnIdx.DefaultCellStyle = dataGridViewCellStyle66;
 			this.ColumnIdx.HeaderText = "Idx";
 			this.ColumnIdx.Name = "ColumnIdx";
 			this.ColumnIdx.ReadOnly = true;
@@ -1793,10 +1793,10 @@
 			// ColumnStart
 			// 
 			this.ColumnStart.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-			dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-			dataGridViewCellStyle3.Format = "N0";
-			dataGridViewCellStyle3.NullValue = null;
-			this.ColumnStart.DefaultCellStyle = dataGridViewCellStyle3;
+			dataGridViewCellStyle67.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+			dataGridViewCellStyle67.Format = "N0";
+			dataGridViewCellStyle67.NullValue = null;
+			this.ColumnStart.DefaultCellStyle = dataGridViewCellStyle67;
 			this.ColumnStart.HeaderText = "Start";
 			this.ColumnStart.Name = "ColumnStart";
 			this.ColumnStart.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
@@ -1805,10 +1805,10 @@
 			// ColumnEnd
 			// 
 			this.ColumnEnd.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-			dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-			dataGridViewCellStyle4.Format = "N0";
-			dataGridViewCellStyle4.NullValue = null;
-			this.ColumnEnd.DefaultCellStyle = dataGridViewCellStyle4;
+			dataGridViewCellStyle68.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+			dataGridViewCellStyle68.Format = "N0";
+			dataGridViewCellStyle68.NullValue = null;
+			this.ColumnEnd.DefaultCellStyle = dataGridViewCellStyle68;
 			this.ColumnEnd.HeaderText = "End";
 			this.ColumnEnd.Name = "ColumnEnd";
 			this.ColumnEnd.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
@@ -1817,10 +1817,10 @@
 			// ColumnTracks
 			// 
 			this.ColumnTracks.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-			dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-			dataGridViewCellStyle5.Format = "N0";
-			dataGridViewCellStyle5.NullValue = null;
-			this.ColumnTracks.DefaultCellStyle = dataGridViewCellStyle5;
+			dataGridViewCellStyle69.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+			dataGridViewCellStyle69.Format = "N0";
+			dataGridViewCellStyle69.NullValue = null;
+			this.ColumnTracks.DefaultCellStyle = dataGridViewCellStyle69;
 			this.ColumnTracks.HeaderText = "Tracks";
 			this.ColumnTracks.Name = "ColumnTracks";
 			this.ColumnTracks.ReadOnly = true;
@@ -1838,7 +1838,7 @@
 			this.groupBox1.Controls.Add(this.numericAnimationClipKeyframe);
 			this.groupBox1.Controls.Add(this.labelSkeletalRender);
 			this.groupBox1.Controls.Add(this.label30);
-			this.groupBox1.Location = new System.Drawing.Point(0, 177);
+			this.groupBox1.Location = new System.Drawing.Point(0, 175);
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.Size = new System.Drawing.Size(463, 40);
 			this.groupBox1.TabIndex = 155;
@@ -2468,6 +2468,7 @@
 			// 
 			// tabPageMeshView
 			// 
+			this.tabPageMeshView.AllowDrop = true;
 			this.tabPageMeshView.Controls.Add(this.splitContainer2);
 			this.tabPageMeshView.Location = new System.Drawing.Point(4, 22);
 			this.tabPageMeshView.Name = "tabPageMeshView";
@@ -2475,6 +2476,9 @@
 			this.tabPageMeshView.TabIndex = 2;
 			this.tabPageMeshView.Text = "Mesh";
 			this.tabPageMeshView.UseVisualStyleBackColor = true;
+			this.tabPageMeshView.DragDrop += new System.Windows.Forms.DragEventHandler(this.tabPageMeshView_DragDrop);
+			this.tabPageMeshView.DragEnter += new System.Windows.Forms.DragEventHandler(this.tabPageMeshView_DragEnter);
+			this.tabPageMeshView.DragOver += new System.Windows.Forms.DragEventHandler(this.tabPageMeshView_DragOver);
 			// 
 			// splitContainer2
 			// 
@@ -2933,15 +2937,15 @@
             this.ColumnSubmeshUnknowns});
 			this.dataGridViewMesh.Location = new System.Drawing.Point(3, 110);
 			this.dataGridViewMesh.Name = "dataGridViewMesh";
-			dataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-			dataGridViewCellStyle8.BackColor = System.Drawing.SystemColors.AppWorkspace;
-			dataGridViewCellStyle8.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			dataGridViewCellStyle8.ForeColor = System.Drawing.SystemColors.WindowText;
-			dataGridViewCellStyle8.NullValue = "NULL";
-			dataGridViewCellStyle8.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-			dataGridViewCellStyle8.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-			dataGridViewCellStyle8.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-			this.dataGridViewMesh.RowHeadersDefaultCellStyle = dataGridViewCellStyle8;
+			dataGridViewCellStyle72.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+			dataGridViewCellStyle72.BackColor = System.Drawing.SystemColors.AppWorkspace;
+			dataGridViewCellStyle72.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			dataGridViewCellStyle72.ForeColor = System.Drawing.SystemColors.WindowText;
+			dataGridViewCellStyle72.NullValue = "NULL";
+			dataGridViewCellStyle72.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+			dataGridViewCellStyle72.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+			dataGridViewCellStyle72.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+			this.dataGridViewMesh.RowHeadersDefaultCellStyle = dataGridViewCellStyle72;
 			this.dataGridViewMesh.RowHeadersVisible = false;
 			this.dataGridViewMesh.RowTemplate.DefaultCellStyle.NullValue = null;
 			this.dataGridViewMesh.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
@@ -3502,7 +3506,7 @@
             this.toolStripSeparator6,
             this.closeToolStripMenuItem});
 			this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-			this.fileToolStripMenuItem.Size = new System.Drawing.Size(35, 18);
+			this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 18);
 			this.fileToolStripMenuItem.Text = "&File";
 			// 
 			// reopenToolStripMenuItem
@@ -3510,40 +3514,40 @@
 			this.reopenToolStripMenuItem.Name = "reopenToolStripMenuItem";
 			this.reopenToolStripMenuItem.ShortcutKeyDisplayString = "";
 			this.reopenToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.R)));
-			this.reopenToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
+			this.reopenToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
 			this.reopenToolStripMenuItem.Text = "&Reopen .odf";
 			this.reopenToolStripMenuItem.Click += new System.EventHandler(this.reopenToolStripMenuItem_Click);
 			// 
 			// toolStripSeparator1
 			// 
 			this.toolStripSeparator1.Name = "toolStripSeparator1";
-			this.toolStripSeparator1.Size = new System.Drawing.Size(170, 6);
+			this.toolStripSeparator1.Size = new System.Drawing.Size(176, 6);
 			// 
 			// saveODFToolStripMenuItem
 			// 
 			this.saveODFToolStripMenuItem.Name = "saveODFToolStripMenuItem";
 			this.saveODFToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.T)));
-			this.saveODFToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
+			this.saveODFToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
 			this.saveODFToolStripMenuItem.Text = "&Save .odf";
 			this.saveODFToolStripMenuItem.Click += new System.EventHandler(this.saveODFToolStripMenuItem_Click);
 			// 
 			// saveODFAsToolStripMenuItem
 			// 
 			this.saveODFAsToolStripMenuItem.Name = "saveODFAsToolStripMenuItem";
-			this.saveODFAsToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
+			this.saveODFAsToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
 			this.saveODFAsToolStripMenuItem.Text = "Save .odf &As...";
 			this.saveODFAsToolStripMenuItem.Click += new System.EventHandler(this.saveODFAsToolStripMenuItem_Click);
 			// 
 			// toolStripSeparator6
 			// 
 			this.toolStripSeparator6.Name = "toolStripSeparator6";
-			this.toolStripSeparator6.Size = new System.Drawing.Size(170, 6);
+			this.toolStripSeparator6.Size = new System.Drawing.Size(176, 6);
 			// 
 			// closeToolStripMenuItem
 			// 
 			this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
 			this.closeToolStripMenuItem.ShortcutKeyDisplayString = "Ctrl+F4";
-			this.closeToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
+			this.closeToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
 			this.closeToolStripMenuItem.Text = "&Close";
 			this.closeToolStripMenuItem.Click += new System.EventHandler(this.closeToolStripMenuItem_Click);
 			// 
@@ -3556,7 +3560,7 @@
             this.deleteMorphsAutomaticallyToolStripMenuItem,
             this.zeroCheckForFieldsUsuallyBeingZeroToolStripMenuItem});
 			this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-			this.optionsToolStripMenuItem.Size = new System.Drawing.Size(56, 18);
+			this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 18);
 			this.optionsToolStripMenuItem.Text = "&Options";
 			// 
 			// closeViewFilesAtStartToolStripMenuItem
@@ -3564,7 +3568,7 @@
 			this.closeViewFilesAtStartToolStripMenuItem.Checked = global::ODFPlugin.Properties.Settings.Default.CloseViewFilesAtStart;
 			this.closeViewFilesAtStartToolStripMenuItem.CheckOnClick = true;
 			this.closeViewFilesAtStartToolStripMenuItem.Name = "closeViewFilesAtStartToolStripMenuItem";
-			this.closeViewFilesAtStartToolStripMenuItem.Size = new System.Drawing.Size(236, 22);
+			this.closeViewFilesAtStartToolStripMenuItem.Size = new System.Drawing.Size(252, 22);
 			this.closeViewFilesAtStartToolStripMenuItem.Text = "Close View \'Files\' At Start";
 			// 
 			// suppressWarningsToolStripMenuItem
@@ -3572,7 +3576,7 @@
 			this.suppressWarningsToolStripMenuItem.Checked = global::ODFPlugin.Properties.Settings.Default.SuppressWarnings;
 			this.suppressWarningsToolStripMenuItem.CheckOnClick = true;
 			this.suppressWarningsToolStripMenuItem.Name = "suppressWarningsToolStripMenuItem";
-			this.suppressWarningsToolStripMenuItem.Size = new System.Drawing.Size(236, 22);
+			this.suppressWarningsToolStripMenuItem.Size = new System.Drawing.Size(252, 22);
 			this.suppressWarningsToolStripMenuItem.Text = "Suppress Warnings";
 			// 
 			// keepBackupToolStripMenuItem
@@ -3581,7 +3585,7 @@
 			this.keepBackupToolStripMenuItem.CheckOnClick = true;
 			this.keepBackupToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.keepBackupToolStripMenuItem.Name = "keepBackupToolStripMenuItem";
-			this.keepBackupToolStripMenuItem.Size = new System.Drawing.Size(236, 22);
+			this.keepBackupToolStripMenuItem.Size = new System.Drawing.Size(252, 22);
 			this.keepBackupToolStripMenuItem.Text = "Keep Backup";
 			// 
 			// deleteMorphsAutomaticallyToolStripMenuItem
@@ -3589,7 +3593,7 @@
 			this.deleteMorphsAutomaticallyToolStripMenuItem.Checked = global::ODFPlugin.Properties.Settings.Default.DeleteMorphsAutomatically;
 			this.deleteMorphsAutomaticallyToolStripMenuItem.CheckOnClick = true;
 			this.deleteMorphsAutomaticallyToolStripMenuItem.Name = "deleteMorphsAutomaticallyToolStripMenuItem";
-			this.deleteMorphsAutomaticallyToolStripMenuItem.Size = new System.Drawing.Size(236, 22);
+			this.deleteMorphsAutomaticallyToolStripMenuItem.Size = new System.Drawing.Size(252, 22);
 			this.deleteMorphsAutomaticallyToolStripMenuItem.Text = "Delete Morphs Automatically";
 			// 
 			// zeroCheckForFieldsUsuallyBeingZeroToolStripMenuItem
@@ -3597,7 +3601,7 @@
 			this.zeroCheckForFieldsUsuallyBeingZeroToolStripMenuItem.Checked = global::ODFPlugin.Properties.Settings.Default.ZeroCheck;
 			this.zeroCheckForFieldsUsuallyBeingZeroToolStripMenuItem.CheckOnClick = true;
 			this.zeroCheckForFieldsUsuallyBeingZeroToolStripMenuItem.Name = "zeroCheckForFieldsUsuallyBeingZeroToolStripMenuItem";
-			this.zeroCheckForFieldsUsuallyBeingZeroToolStripMenuItem.Size = new System.Drawing.Size(236, 22);
+			this.zeroCheckForFieldsUsuallyBeingZeroToolStripMenuItem.Size = new System.Drawing.Size(252, 22);
 			this.zeroCheckForFieldsUsuallyBeingZeroToolStripMenuItem.Text = "0 Check For Fields Usually Being 0";
 			// 
 			// saveFileDialog1

@@ -63,9 +63,9 @@ namespace ODFPlugin
 		int loadedFrame;
 		Tuple<int, int> loadedBone;
 		odfBone highlightedBone;
-		int loadedMesh;
-		int loadedMaterial;
-		int loadedTexture;
+		int loadedMesh = -1;
+		int loadedMaterial = -1;
+		int loadedTexture = -1;
 
 		Dictionary<int, List<KeyList<odfMaterial>>> crossRefMeshMaterials = new Dictionary<int, List<KeyList<odfMaterial>>>();
 		Dictionary<int, List<KeyList<odfTexture>>> crossRefMeshTextures = new Dictionary<int, List<KeyList<odfTexture>>>();
@@ -466,11 +466,42 @@ namespace ODFPlugin
 		{
 			TreeNode objRootNode = CreateFrameTree(Editor.Parser.FrameSection.RootFrame, null);
 
+			string selectedNodeText = null;
+			Type selectedNodeType = null;
+			if (treeViewObjectTree.SelectedNode != null)
+			{
+				selectedNodeText = treeViewObjectTree.SelectedNode.Text;
+				if (treeViewObjectTree.SelectedNode.Tag != null)
+				{
+					selectedNodeType = ((DragSource)treeViewObjectTree.SelectedNode.Tag).Type;
+				}
+			}
+			HashSet<string> expandedNodes = ExpandedNodes(treeViewObjectTree);
+
 			if (treeViewObjectTree.Nodes.Count > 0)
 			{
 				treeViewObjectTree.Nodes.RemoveAt(0);
 			}
 			treeViewObjectTree.Nodes.Insert(0, objRootNode);
+
+			ExpandNodes(treeViewObjectTree, expandedNodes);
+			if (selectedNodeText != null)
+			{
+				TreeNode newNode = FindFrameNode(selectedNodeText, treeViewObjectTree.Nodes);
+				if (newNode != null)
+				{
+					Type newType = null;
+					if (newNode.Tag != null)
+					{
+						newType = ((DragSource)newNode.Tag).Type;
+					}
+					if (selectedNodeType == newType)
+					{
+						newNode.EnsureVisible();
+						treeViewObjectTree.SelectedNode = newNode;
+					}
+				}
+			}
 		}
 
 		public TreeNode CreateFrameTree(odfFrame frame, TreeNode parentNode)
@@ -559,6 +590,68 @@ namespace ODFPlugin
 			return newNode;
 		}
 
+		private HashSet<string> ExpandedNodes(TreeView tree)
+		{
+			HashSet<string> nodes = new HashSet<string>();
+			TreeNode root = new TreeNode();
+			while (tree.Nodes.Count > 0)
+			{
+				TreeNode node = tree.Nodes[0];
+				node.Remove();
+				root.Nodes.Add(node);
+			}
+			FindExpandedNodes(root, nodes);
+			while (root.Nodes.Count > 0)
+			{
+				TreeNode node = root.Nodes[0];
+				node.Remove();
+				tree.Nodes.Add(node);
+			}
+			return nodes;
+		}
+
+		private void FindExpandedNodes(TreeNode parent, HashSet<string> result)
+		{
+			foreach (TreeNode node in parent.Nodes)
+			{
+				if (node.IsExpanded)
+				{
+					result.Add(parent.Text + "/" + node.Text);
+				}
+				FindExpandedNodes(node, result);
+			}
+		}
+
+		private void ExpandNodes(TreeView tree, HashSet<string> nodes)
+		{
+			TreeNode root = new TreeNode();
+			while (tree.Nodes.Count > 0)
+			{
+				TreeNode node = tree.Nodes[0];
+				node.Remove();
+				root.Nodes.Add(node);
+			}
+			FindNodesToExpand(root, nodes);
+			while (root.Nodes.Count > 0)
+			{
+				TreeNode node = root.Nodes[0];
+				node.Remove();
+				tree.Nodes.Add(node);
+			}
+		}
+
+		private void FindNodesToExpand(TreeNode parent, HashSet<string> nodes)
+		{
+			foreach (TreeNode node in parent.Nodes)
+			{
+				if (nodes.Contains(parent.Text + "/" + node.Text))
+				{
+					node.Expand();
+				}
+				FindNodesToExpand(node, nodes);
+			}
+		}
+
 		void InitMeshes()
 		{
 			ListViewItem[] meshItems = new ListViewItem[Editor.Parser.MeshSection.Count];
@@ -601,6 +694,10 @@ namespace ODFPlugin
 
 			if (treeViewObjectTree.Nodes.Count > 1)
 			{
+				if (treeViewObjectTree.Nodes[1].IsExpanded)
+				{
+					materialsNode.Expand();
+				}
 				treeViewObjectTree.Nodes.RemoveAt(1);
 			}
 			treeViewObjectTree.Nodes.Insert(1, materialsNode);
@@ -630,18 +727,27 @@ namespace ODFPlugin
 			texturelistHeader.AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
 
 			TreeNode texturesNode = new TreeNode("Textures");
+			TreeNode currentTexture = null;
 			for (int i = 0; i < Editor.Parser.TextureSection.Count; i++)
 			{
 				TreeNode texNode = new TreeNode(Editor.Parser.TextureSection[i].Name);
 				texNode.Tag = new DragSource(EditorVar, typeof(odfTexture), i);
 				texturesNode.Nodes.Add(texNode);
+				if (loadedTexture == i)
+					currentTexture = texNode;
 			}
 
 			if (treeViewObjectTree.Nodes.Count > 2)
 			{
+				if (treeViewObjectTree.Nodes[2].IsExpanded)
+				{
+					texturesNode.Expand();
+				}
 				treeViewObjectTree.Nodes.RemoveAt(2);
 			}
 			treeViewObjectTree.Nodes.Insert(2, texturesNode);
+			if (currentTexture != null)
+				currentTexture.EnsureVisible();
 		}
 
 		private void InitMorphs()
@@ -1717,6 +1823,32 @@ namespace ODFPlugin
 				Gui.Renderer.Render();
 		}
 
+		TreeNode FindFrameNode(string name, TreeNodeCollection nodes)
+		{
+			foreach (TreeNode node in nodes)
+			{
+				if (!(node.Tag is DragSource))
+					continue;
+
+				DragSource src = (DragSource)node.Tag;
+				if (src.Type != typeof(odfFrame))
+					continue;
+
+				if (Editor.Frames[(int)src.Id].Name == name)
+				{
+					return node;
+				}
+
+				TreeNode found = FindFrameNode(name, node.Nodes);
+				if (found != null)
+				{
+					return found;
+				}
+			}
+
+			return null;
+		}
+
 		TreeNode FindFrameNode(odfFrame frame, TreeNodeCollection nodes)
 		{
 			foreach (TreeNode node in nodes)
@@ -1772,7 +1904,67 @@ namespace ODFPlugin
 			{
 				if (e.Item is TreeNode)
 				{
-					treeViewObjectTree.DoDragDrop(e.Item, DragDropEffects.Copy);
+					odfMesh draggedMesh = null;
+					TreeNode draggedItem = (TreeNode)e.Item;
+					if (draggedItem.Tag is DragSource)
+					{
+						DragSource src = (DragSource)draggedItem.Tag;
+						if (src.Type == typeof(odfMesh))
+						{
+							draggedItem = ((TreeNode)e.Item).Parent;
+							draggedMesh = Editor.Parser.MeshSection[(int)src.Id];
+						}
+					}
+
+					treeViewObjectTree.DoDragDrop(draggedItem, DragDropEffects.Copy);
+
+					if (draggedMesh != null && draggedMesh.Count > 0 && Editor.Parser.MaterialSection != null)
+					{
+						HashSet<int> matIndices = new HashSet<int>();
+						HashSet<int> texIndices = new HashSet<int>();
+						foreach (odfSubmesh submesh in draggedMesh)
+						{
+							if (submesh.MaterialId != ObjectID.INVALID)
+							{
+								odfMaterial mat = odf.FindMaterialInfo(submesh.MaterialId, Editor.Parser.MaterialSection);
+								if (mat != null)
+								{
+									int matIdx = Editor.Parser.MaterialSection.IndexOf(mat);
+									matIndices.Add(matIdx);
+								}
+								for (int i = 0; i < submesh.TextureIds.Length; i++)
+								{
+									odfTexture texture = odf.FindTextureInfo(submesh.TextureIds[i], Editor.Parser.TextureSection);
+									if (texture != null)
+									{
+										int texIdx = Editor.Parser.TextureSection.IndexOf(texture);
+										texIndices.Add(texIdx);
+									}
+								}
+							}
+						}
+
+						TreeNode materialsNode = treeViewObjectTree.Nodes[1];
+						foreach (TreeNode matNode in materialsNode.Nodes)
+						{
+							DragSource src = (DragSource)matNode.Tag;
+							if (matIndices.Contains((int)src.Id))
+							{
+								ItemDragEventArgs args = new ItemDragEventArgs(MouseButtons.None, matNode);
+								treeViewObjectTree_ItemDrag(null, args);
+							}
+						}
+						TreeNode texturesNode = treeViewObjectTree.Nodes[2];
+						foreach (TreeNode texNode in texturesNode.Nodes)
+						{
+							DragSource src = (DragSource)texNode.Tag;
+							if (texIndices.Contains((int)src.Id))
+							{
+								ItemDragEventArgs args = new ItemDragEventArgs(MouseButtons.None, texNode);
+								treeViewObjectTree_ItemDrag(null, args);
+							}
+						}
+					}
 				}
 			}
 			catch (Exception ex)
@@ -3283,7 +3475,7 @@ namespace ODFPlugin
 
 				Gui.Scripting.RunScript(EditorVar + ".RemoveFrame(idx=" + frameIdx + ", deleteMorphs=" + deleteMorphsAutomaticallyToolStripMenuItem.Checked + ")");
 
-				LoadODF();
+				RecreateFrames();
 			}
 			catch (Exception ex)
 			{
@@ -4182,6 +4374,72 @@ namespace ODFPlugin
 			catch (Exception ex)
 			{
 				Utility.ReportException(ex);
+			}
+		}
+
+		private void tabPageMeshView_DragDrop(object sender, DragEventArgs e)
+		{
+			try
+			{
+				TreeNode node = (TreeNode)e.Data.GetData(typeof(TreeNode));
+				if (node == null)
+				{
+					Gui.Docking.DockDragDrop(sender, e);
+				}
+				else
+				{
+					if (loadedMesh >= 0)
+					{
+						odfMesh mesh = Editor.Parser.MeshSection[loadedMesh];
+						TreeNode meshNode = FindMeshNode(mesh, treeViewObjectTree.Nodes);
+						meshNode.EnsureVisible();
+						treeViewObjectTree.AfterSelect -= treeViewObjectTree_AfterSelect;
+						treeViewObjectTree.SelectedNode = meshNode.Parent;
+						treeViewObjectTree.AfterSelect += treeViewObjectTree_AfterSelect;
+					}
+					ProcessDragDropSources(node);
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void tabPageMeshView_DragEnter(object sender, DragEventArgs e)
+		{
+			try
+			{
+				UpdateDragDropMeshView(sender, e);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void tabPageMeshView_DragOver(object sender, DragEventArgs e)
+		{
+			try
+			{
+				UpdateDragDropMeshView(sender, e);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void UpdateDragDropMeshView(object sender, DragEventArgs e)
+		{
+			TreeNode node = (TreeNode)e.Data.GetData(typeof(TreeNode));
+			if (node == null)
+			{
+				Gui.Docking.DockDragEnter(sender, e);
+			}
+			else
+			{
+				e.Effect = e.AllowedEffect & DragDropEffects.Copy;
 			}
 		}
 
