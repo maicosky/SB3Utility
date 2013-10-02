@@ -387,6 +387,19 @@ namespace SB3Utility
 		}
 
 		[Plugin]
+		public void SetAnimationClipUnknowns(int clipId, byte[] unknown1, byte[] unknown2, byte[] unknown3, byte[] unknown4, byte[] unknown5, byte[] unknown6, byte[] unknown7)
+		{
+			xaAnimationClip clip = Parser.AnimationSection.ClipList[clipId];
+			clip.Unknown1 = (byte[])unknown1.Clone();
+			clip.Unknown2 = (byte[])unknown2.Clone();
+			clip.Unknown3 = (byte[])unknown3.Clone();
+			clip.Unknown4 = (byte[])unknown4.Clone();
+			clip.Unknown5 = (byte[])unknown5.Clone();
+			clip.Unknown6 = (byte[])unknown6.Clone();
+			clip.Unknown7 = (byte[])unknown7.Clone();
+		}
+
+		[Plugin]
 		public void MoveAnimationClip(xaAnimationClip clip, int position)
 		{
 			Parser.AnimationSection.ClipList.Remove(clip);

@@ -498,22 +498,22 @@
 			// radioButtonReplaceNormalsNo
 			// 
 			this.radioButtonReplaceNormalsNo.AutoSize = true;
+			this.radioButtonReplaceNormalsNo.Checked = true;
 			this.radioButtonReplaceNormalsNo.Location = new System.Drawing.Point(53, 2);
 			this.radioButtonReplaceNormalsNo.Name = "radioButtonReplaceNormalsNo";
 			this.radioButtonReplaceNormalsNo.Size = new System.Drawing.Size(39, 17);
 			this.radioButtonReplaceNormalsNo.TabIndex = 1;
+			this.radioButtonReplaceNormalsNo.TabStop = true;
 			this.radioButtonReplaceNormalsNo.Text = "No";
 			this.radioButtonReplaceNormalsNo.UseVisualStyleBackColor = true;
 			// 
 			// radioButtonReplaceNormalsYes
 			// 
 			this.radioButtonReplaceNormalsYes.AutoSize = true;
-			this.radioButtonReplaceNormalsYes.Checked = true;
 			this.radioButtonReplaceNormalsYes.Location = new System.Drawing.Point(6, 2);
 			this.radioButtonReplaceNormalsYes.Name = "radioButtonReplaceNormalsYes";
 			this.radioButtonReplaceNormalsYes.Size = new System.Drawing.Size(43, 17);
 			this.radioButtonReplaceNormalsYes.TabIndex = 0;
-			this.radioButtonReplaceNormalsYes.TabStop = true;
 			this.radioButtonReplaceNormalsYes.Text = "Yes";
 			this.radioButtonReplaceNormalsYes.UseVisualStyleBackColor = true;
 			// 
@@ -535,18 +535,18 @@
 			this.label11.TabIndex = 13;
 			this.label11.Text = "Target Morph Object";
 			// 
-			// FormODFDragDrop
+			// FormMeshViewDragDrop
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(390, 192);
 			this.Controls.Add(this.buttonCancel);
 			this.Controls.Add(this.buttonOK);
-			this.Controls.Add(this.panelFrame);
 			this.Controls.Add(this.panelMorphList);
 			this.Controls.Add(this.panelMesh);
+			this.Controls.Add(this.panelFrame);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-			this.Name = "FormODFDragDrop";
+			this.Name = "FormMeshViewDragDrop";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.Text = "Options";
 			this.toolTip1.SetToolTip(this, "You may want to choose \'Suppress Warnings\' in the editor menu if you get flooded " +

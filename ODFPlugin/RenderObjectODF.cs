@@ -6,6 +6,7 @@ using System.Drawing;
 using SlimDX;
 using SlimDX.Direct3D9;
 using System.Runtime.InteropServices;
+using System.Runtime.ExceptionServices;
 
 using SB3Utility;
 
@@ -396,15 +397,16 @@ namespace ODFPlugin
 								{
 									odfTextureFile texFile = new odfTextureFile(null, Path.GetDirectoryName(parser.ODFPath) + Path.DirectorySeparatorChar + tex.TextureFile);
 									int fileSize = 0;
-									byte[] data;
-									using (BinaryReader reader = texFile.DecryptFile(ref fileSize))
-									{
-										data = reader.ReadBytes(fileSize);
-									}
-									Texture memTex = Texture.FromMemory(device, data);
+									ImportedTexture impTex = new ImportedTexture(texFile.DecryptFile(ref fileSize).BaseStream, tex.TextureFile);
+									Texture memTex = impTex.ToTexture(device);
 									texIdx = TextureDic.Count;
 									TextureDic.Add((int)submesh.TextureIds[0], texIdx);
 									Textures[texIdx] = memTex;
+								}
+								catch (SlimDXException ex)
+								{
+									Utility.ReportException(ex);
+									Report.ReportLog("Please check " + tex.TextureFile + ". It may have an unsupported format.");
 								}
 								catch (Exception ex)
 								{

@@ -104,8 +104,15 @@ namespace ODFPlugin
 				foreach (odfTexture tex in usedTextures)
 				{
 					String texFilePath = Path.GetDirectoryName(parser.ODFPath) + @"\" + tex.TextureFile;
-					odfTextureFile odfTex = new odfTextureFile(tex.Name, texFilePath);
-					odf.ExportTexture(odfTex, dir.FullName + @"\" + tex.TextureFile);
+					try
+					{
+						odfTextureFile odfTex = new odfTextureFile(tex.Name, texFilePath);
+						odf.ExportTexture(odfTex, dir.FullName + @"\" + tex.TextureFile);
+					}
+					catch (Exception ex)
+					{
+						Utility.ReportException(ex);
+					}
 				}
 			}
 
@@ -279,7 +286,6 @@ namespace ODFPlugin
 					}
 
 					vertLists = new List<List<ImportedVertex>>(morphObj.Count);
-					ImportedVertex[] vertArr = new ImportedVertex[meshObjBase.VertexList.Count];
 					for (int i = 0; i < morphObj.Count; i++)
 					{
 						if (skipUnusedProfiles)
@@ -314,8 +320,15 @@ namespace ODFPlugin
 					foreach (odfTexture tex in usedTextures)
 					{
 						String texFilePath = Path.GetDirectoryName(parser.ODFPath) + @"\" + tex.TextureFile;
-						odfTextureFile odfTex = new odfTextureFile(tex.Name, texFilePath);
-						odf.ExportTexture(odfTex, dir.FullName + @"\" + tex.TextureFile);
+						try
+						{
+							odfTextureFile odfTex = new odfTextureFile(tex.Name, texFilePath);
+							odf.ExportTexture(odfTex, dir.FullName + @"\" + tex.TextureFile);
+						}
+						catch (Exception ex)
+						{
+							Utility.ReportException(ex);
+						}
 					}
 					Report.ReportLog("Finished exporting morph to " + dest);
 				}
@@ -354,8 +367,24 @@ namespace ODFPlugin
 					}
 
 					Random rand = new Random();
-					for (int i = 0; i < vertLists.Count; i++)
+					int vertListIdx = 0;
+					for (int i = 0; i < morphObj.Count; i++)
 					{
+						if (skipUnusedProfiles)
+						{
+							bool skip = true;
+							for (int j = 0; j < morphObj.SelectorList.Count; j++)
+							{
+								if (morphObj.SelectorList[j].ProfileIndex == i)
+								{
+									skip = false;
+									break;
+								}
+							}
+							if (skip)
+								continue;
+						}
+
 						float[] color = new float[3];
 						for (int k = 0; k < color.Length; k++)
 						{
@@ -367,7 +396,7 @@ namespace ODFPlugin
 						writer.WriteLine("\tshading 1");
 						writer.WriteLine("\tcolor " + color[0].ToFloatString() + " " + color[1].ToFloatString() + " " + color[2].ToFloatString());
 						writer.WriteLine("\tcolor_type 1");
-						SB3Utility.Mqo.ExporterCommon.WriteMeshObject(writer, vertLists[i], faceList, mat != null ? 0 : -1, colorVertex);
+						SB3Utility.Mqo.ExporterCommon.WriteMeshObject(writer, vertLists[vertListIdx++], faceList, mat != null ? 0 : -1, colorVertex);
 						writer.WriteLine("}");
 					}
 

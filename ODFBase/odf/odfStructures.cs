@@ -1273,8 +1273,10 @@ namespace ODFPlugin
 				submesh.Unknown1 = 1;
 			if (!emptyFieldsOnly || submesh.AlwaysZero1 == null)
 				submesh.AlwaysZero1 = new byte[4];
+			if (!emptyFieldsOnly)
+				submesh.Unknown31 = 0;
 			if (!emptyFieldsOnly || submesh.AlwaysZero2 == null)
-				submesh.AlwaysZero2 = new byte[20];
+				submesh.AlwaysZero2 = new byte[16];
 			if (!emptyFieldsOnly)
 				submesh.Unknown4 = 0x0F;
 			if (!emptyFieldsOnly)

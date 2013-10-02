@@ -223,30 +223,30 @@ namespace ODFPlugin
 				odfMaterial mat = odf.FindMaterialInfo(materialNames[i], parser.MaterialSection);
 				if (materials != null)
 				{
-					if (mat == null && i < materials.Count)
+					ImportedMaterial impMat = ImportedHelpers.FindMaterial(materialNames[i], materials);
+					if (mat == null)
 					{
-						mat = CreateMaterial(materials[i], parser.GetNewID(typeof(odfMaterial)));
+						mat = CreateMaterial(impMat, parser.GetNewID(typeof(odfMaterial)));
 						parser.MaterialSection.AddChild(mat);
 					}
-					for (int j = 0; j < materials[i].Textures.Length; j++)
+					for (int j = 0; j < impMat.Textures.Length; j++)
 					{
-						string texName = materials[i].Textures[j];
+						string texName = impMat.Textures[j];
 						odfTexture tex = odf.FindTextureInfo(texName, parser.TextureSection);
 						if (tex == null)
 						{
-							for (int k = 0; k < textures.Count; k++)
+							ImportedTexture impTex = ImportedHelpers.FindTexture(texName, textures);
+							if (impTex != null)
 							{
-								if (textures[k].Name == texName)
-								{
-									tex = CreateTexture(textures[k], parser.GetNewID(typeof(odfTexture)), parser.TextureSection._FormatType, Path.GetDirectoryName(parser.ODFPath));
-									parser.TextureSection.AddChild(tex);
-									texIDs[j] = tex.Id;
-									break;
-								}
+								tex = CreateTexture(impTex, parser.GetNewID(typeof(odfTexture)), parser.TextureSection._FormatType, Path.GetDirectoryName(parser.ODFPath));
+								parser.TextureSection.AddChild(tex);
+								texIDs[j] = tex.Id;
 							}
 						}
 						else
+						{
 							texIDs[j] = tex.Id;
+						}
 					}
 				}
 
@@ -266,6 +266,7 @@ namespace ODFPlugin
 
 				odfSubmesh baseSubmesh = null;
 				odfBoneList newBones = null;
+				int newBonesIdx = -1;
 				int idx = indices[i];
 				if ((frameMesh != null) && (idx >= 0) && (idx < frameMesh.Count))
 				{
@@ -285,21 +286,28 @@ namespace ODFPlugin
 						if (baseBones != null)
 						{
 							newBones = baseBones.Clone();
-							newBones.Id = parser.GetNewID(typeof(odfBoneList));
+							newBones.Id = ObjectID.INVALID;// parser.GetNewID(typeof(odfBoneList));
 							newBones.SubmeshId = newSubmesh.Id;
+							newBonesIdx = parser.EnvelopeSection.IndexOf(baseBones);
 						}
 					}
 					else if (bonesMethod == CopyMeshMethod.Replace)
-						newBones = CreateBoneList(parser.GetNewID(typeof(odfBoneList)), frame.Id, newSubmesh, mesh.BoneList, transform, parser.FrameSection.RootFrame);
+					{
+						newBones = CreateBoneList(ObjectID.INVALID/*parser.GetNewID(typeof(odfBoneList))*/, frame.Id, newSubmesh, mesh.BoneList, transform, parser.FrameSection.RootFrame);
+						newBonesIdx = parser.EnvelopeSection.Count;
+					}
 				}
 				else
 				{
 					CreateUnknowns(newSubmesh, parser.MeshSection._FormatType);
 
-					newBones = CreateBoneList(parser.GetNewID(typeof(odfBoneList)), frame.Id, newSubmesh, mesh.BoneList, transform, parser.FrameSection.RootFrame);
+					newBones = CreateBoneList(ObjectID.INVALID/*parser.GetNewID(typeof(odfBoneList))*/, frame.Id, newSubmesh, mesh.BoneList, transform, parser.FrameSection.RootFrame);
+					newBonesIdx = parser.EnvelopeSection.Count;
 				}
 				if (newBones != null)
-					parser.EnvelopeSection.AddChild(newBones);
+				{
+					parser.EnvelopeSection.InsertChild(newBonesIdx, newBones);
+				}
 
 				if (baseSubmesh != null)
 				{

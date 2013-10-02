@@ -40,6 +40,8 @@
 			this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.keepBackupToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.backupExtensionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.backupExtensionToolStripEditTextBox = new SB3Utility.ToolStripEditTextBox();
 			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
 			this.tabControlLists = new System.Windows.Forms.TabControl();
 			this.tabPageObject = new System.Windows.Forms.TabPage();
@@ -196,9 +198,6 @@
 			this.textBoxTexSize = new SB3Utility.EditTextBox();
 			this.textBoxTexName = new SB3Utility.EditTextBox();
 			this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
-			this.backupExtensionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.backupExtensionToolStripEditTextBox = new SB3Utility.ToolStripEditTextBox();
-			this.editTextBox1 = new SB3Utility.EditTextBox();
 			this.menuStrip1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
 			this.splitContainer1.Panel1.SuspendLayout();
@@ -353,6 +352,19 @@
 			this.keepBackupToolStripMenuItem.Name = "keepBackupToolStripMenuItem";
 			this.keepBackupToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
 			this.keepBackupToolStripMenuItem.Text = "Keep &Backup";
+			// 
+			// backupExtensionToolStripMenuItem
+			// 
+			this.backupExtensionToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.backupExtensionToolStripEditTextBox});
+			this.backupExtensionToolStripMenuItem.Name = "backupExtensionToolStripMenuItem";
+			this.backupExtensionToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
+			this.backupExtensionToolStripMenuItem.Text = "Backup &Extension";
+			// 
+			// backupExtensionToolStripEditTextBox
+			// 
+			this.backupExtensionToolStripEditTextBox.Name = "backupExtensionToolStripEditTextBox";
+			this.backupExtensionToolStripEditTextBox.Size = new System.Drawing.Size(50, 23);
 			// 
 			// splitContainer1
 			// 
@@ -837,7 +849,6 @@
 			// 
 			// tabPageFrameView
 			// 
-			this.tabPageFrameView.Controls.Add(this.editTextBox1);
 			this.tabPageFrameView.Controls.Add(this.buttonFrameMatrixLocalize);
 			this.tabPageFrameView.Controls.Add(this.buttonFrameMatrixIdentity);
 			this.tabPageFrameView.Controls.Add(this.buttonFrameMatrixInverse);
@@ -2088,26 +2099,6 @@
 			this.textBoxTexName.Size = new System.Drawing.Size(148, 20);
 			this.textBoxTexName.TabIndex = 7;
 			// 
-			// backupExtensionToolStripMenuItem
-			// 
-			this.backupExtensionToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.backupExtensionToolStripEditTextBox});
-			this.backupExtensionToolStripMenuItem.Name = "backupExtensionToolStripMenuItem";
-			this.backupExtensionToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
-			this.backupExtensionToolStripMenuItem.Text = "Backup &Extension";
-			// 
-			// backupExtensionToolStripEditTextBox
-			// 
-			this.backupExtensionToolStripEditTextBox.Name = "backupExtensionToolStripEditTextBox";
-			this.backupExtensionToolStripEditTextBox.Size = new System.Drawing.Size(50, 23);
-			// 
-			// editTextBox1
-			// 
-			this.editTextBox1.Location = new System.Drawing.Point(8, 8);
-			this.editTextBox1.Name = "editTextBox1";
-			this.editTextBox1.Size = new System.Drawing.Size(100, 20);
-			this.editTextBox1.TabIndex = 87;
-			// 
 			// FormREM
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -2379,6 +2370,5 @@
 		private System.Windows.Forms.Button buttonBoneRestPose;
 		private System.Windows.Forms.ToolStripMenuItem backupExtensionToolStripMenuItem;
 		private SB3Utility.ToolStripEditTextBox backupExtensionToolStripEditTextBox;
-		private SB3Utility.EditTextBox editTextBox1;
 	}
 }

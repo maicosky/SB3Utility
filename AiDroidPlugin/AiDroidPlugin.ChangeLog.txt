@@ -1,4 +1,7 @@
-﻿[0.5.2]
+﻿[0.5.4]
+  - Fix in the gui and improved Object Tree handling
+
+[0.5.2]
   - Added editable backup extension of REM files
   - Fixed material selection crash for missing materials
   - Used materials are copied along with mesh frames from other REMs (via Workspace)

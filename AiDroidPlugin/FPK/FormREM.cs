@@ -535,11 +535,38 @@ namespace AiDroidPlugin
 		{
 			objRootNode = CreateFrameTree(Editor.Parser.BONC.rootFrame, null);
 
+			string selectedNodeText = null;
+			Type selectedNodeType = null;
+			if (treeViewObjectTree.SelectedNode != null)
+			{
+				selectedNodeText = treeViewObjectTree.SelectedNode.Text;
+				if (treeViewObjectTree.SelectedNode.Tag != null)
+				{
+					selectedNodeType = ((DragSource)treeViewObjectTree.SelectedNode.Tag).Type;
+				}
+			}
+			HashSet<string> expandedNodes = ExpandedNodes(treeViewObjectTree);
+
 			if (treeViewObjectTree.Nodes.Count > 0)
 			{
 				treeViewObjectTree.Nodes.RemoveAt(0);
 			}
 			treeViewObjectTree.Nodes.Insert(0, objRootNode);
+
+			ExpandNodes(treeViewObjectTree, expandedNodes);
+			if (selectedNodeText != null)
+			{
+				TreeNode newNode = FindFrameNode(selectedNodeText, treeViewObjectTree.Nodes);
+				if (newNode != null)
+				{
+					Type newType = newNode.Tag != null ? ((DragSource)newNode.Tag).Type : null;
+					if (selectedNodeType == newType)
+					{
+						newNode.EnsureVisible();
+						treeViewObjectTree.SelectedNode = newNode;
+					}
+				}
+			}
 		}
 
 		private TreeNode CreateFrameTree(remBone frame, TreeNode parentNode)
@@ -580,6 +607,68 @@ namespace AiDroidPlugin
 			}
 
 			return newNode;
+		}
+
+		private HashSet<string> ExpandedNodes(TreeView tree)
+		{
+			HashSet<string> nodes = new HashSet<string>();
+			TreeNode root = new TreeNode();
+			while (tree.Nodes.Count > 0)
+			{
+				TreeNode node = tree.Nodes[0];
+				node.Remove();
+				root.Nodes.Add(node);
+			}
+			FindExpandedNodes(root, nodes);
+			while (root.Nodes.Count > 0)
+			{
+				TreeNode node = root.Nodes[0];
+				node.Remove();
+				tree.Nodes.Add(node);
+			}
+			return nodes;
+		}
+
+		private void FindExpandedNodes(TreeNode parent, HashSet<string> result)
+		{
+			foreach (TreeNode node in parent.Nodes)
+			{
+				if (node.IsExpanded)
+				{
+					result.Add(parent.Text + "/" + node.Text);
+				}
+				FindExpandedNodes(node, result);
+			}
+		}
+
+		private void ExpandNodes(TreeView tree, HashSet<string> nodes)
+		{
+			TreeNode root = new TreeNode();
+			while (tree.Nodes.Count > 0)
+			{
+				TreeNode node = tree.Nodes[0];
+				node.Remove();
+				root.Nodes.Add(node);
+			}
+			FindNodesToExpand(root, nodes);
+			while (root.Nodes.Count > 0)
+			{
+				TreeNode node = root.Nodes[0];
+				node.Remove();
+				tree.Nodes.Add(node);
+			}
+		}
+
+		private void FindNodesToExpand(TreeNode parent, HashSet<string> nodes)
+		{
+			foreach (TreeNode node in parent.Nodes)
+			{
+				if (nodes.Contains(parent.Text + "/" + node.Text))
+				{
+					node.Expand();
+				}
+				FindNodesToExpand(node, nodes);
+			}
 		}
 
 		void InitMeshes()
@@ -624,6 +713,10 @@ namespace AiDroidPlugin
 
 			if (treeViewObjectTree.Nodes.Count > 1)
 			{
+				if (treeViewObjectTree.Nodes[1].IsExpanded)
+				{
+					materialsNode.Expand();
+				}
 				treeViewObjectTree.Nodes.RemoveAt(1);
 			}
 			treeViewObjectTree.Nodes.Insert(1, materialsNode);
@@ -665,6 +758,10 @@ namespace AiDroidPlugin
 
 			if (treeViewObjectTree.Nodes.Count > 2)
 			{
+				if (treeViewObjectTree.Nodes[2].IsExpanded)
+				{
+					texturesNode.Expand();
+				}
 				treeViewObjectTree.Nodes.RemoveAt(2);
 			}
 			treeViewObjectTree.Nodes.Insert(2, texturesNode);
@@ -695,7 +792,8 @@ namespace AiDroidPlugin
 					return null;
 				}
 
-				if (Editor.Parser.BONC[(int)source.Value.Id].name == name)
+				int frameIdx = (int)source.Value.Id;
+				if (frameIdx >= 0 && Editor.Parser.BONC[frameIdx].name == name)
 				{
 					return node;
 				}
@@ -1878,7 +1976,7 @@ namespace AiDroidPlugin
 
 				Gui.Scripting.RunScript(EditorVar + ".RemoveFrame(idx=" + frameIdx + ")");
 
-				LoadREM();
+				RecreateFrames(false);
 			}
 			catch (Exception ex)
 			{

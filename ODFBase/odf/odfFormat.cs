@@ -209,7 +209,7 @@ namespace ODFPlugin
 						bufSum += buf[i];
 					}
 
-					if ((buf[2] == 0x02) && (bufSum == 0x02 || bufSum == 0x0F))
+					if ((buf[2] == 0x02 || buf[2] == 0x0A) && (bufSum == 0x02 || bufSum == 0x0A || bufSum == 0x0F || bufSum == 0x17))
 					{
 						return false;
 					}

@@ -610,7 +610,8 @@ namespace SB3Utility
 			for (int i = 0; i <= clipMax; i++)
 			{
 				xaAnimationClip clip = clipList[i];
-				dataGridViewAnimationClip.Rows.Add(new string[] { i.ToString(), clip.Name, clip.Start.ToString(), clip.End.ToString(), clip.Next.ToString(), clip.Speed.ToString() });
+				string unknowns = clip.Unknown2[0].ToString("X2") + clip.Unknown4[0].ToString("X2");
+				dataGridViewAnimationClip.Rows.Add(new string[] { i.ToString(), clip.Name, clip.Start.ToString(), clip.End.ToString(), clip.Next.ToString(), clip.Speed.ToString(), unknowns });
 				DataGridViewRow row = dataGridViewAnimationClip.Rows[i];
 				row.Tag = clip;
 			}
@@ -840,6 +841,15 @@ namespace SB3Utility
 				int next = Int32.Parse(row.Cells[4].Value.ToString());
 				float speed = Single.Parse(row.Cells[5].Value.ToString());
 				Gui.Scripting.RunScript(EditorVar + ".SetAnimationClip(clip=" + EditorVar + ".Parser.AnimationSection.ClipList[" + e.RowIndex + "], name=\"" + name + "\", start=" + start + ", end=" + end + ", next=" + next + ", speed=" + speed.ToFloatString() + ")");
+				string hex = row.Cells[6].Value.ToString();
+				string unknown1 = ScriptHelper.Bytes("unknown1", Utility.BytesToString(clip.Unknown1));
+				string unknown2 = ScriptHelper.Bytes("unknown2", hex.Substring(0, 2));
+				string unknown3 = ScriptHelper.Bytes("unknown3", Utility.BytesToString(clip.Unknown3));
+				string unknown4 = ScriptHelper.Bytes("unknown4", hex.Substring(2, 2));
+				string unknown5 = ScriptHelper.Bytes("unknown5", Utility.BytesToString(clip.Unknown5));
+				string unknown6 = ScriptHelper.Bytes("unknown6", Utility.BytesToString(clip.Unknown6));
+				string unknown7 = ScriptHelper.Bytes("unknown7", Utility.BytesToString(clip.Unknown7));
+				Gui.Scripting.RunScript(EditorVar + ".SetAnimationClipUnknowns(clipId=" + e.RowIndex + ", " + unknown1 + ", " + unknown2 + ", " + unknown3 + ", " + unknown4 + ", " + unknown5 + ", " + unknown6 + ", " + unknown7 + ")");
 
 				createAnimationClipDataGridView();
 			}

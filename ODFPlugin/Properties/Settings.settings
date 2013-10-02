@@ -17,5 +17,8 @@
     <Setting Name="ZeroCheck" Provider="PortableSettingsProvider" Type="System.Boolean" Scope="Application">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="MeshExportFormat" Provider="PortableSettingsProvider" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">FBX 2014.1</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

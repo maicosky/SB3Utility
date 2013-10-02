@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using SlimDX;
+using SlimDX.Direct3D9;
 
 namespace SB3Utility
 {
@@ -75,19 +76,13 @@ namespace SB3Utility
 	{
 		public string Name { get; set; }
 		public byte[] Data { get; set; }
+		public bool isCompressed { get; protected set; }
 
 		public ImportedTexture()
 		{
 		}
 
-		public ImportedTexture(string path)
-		{
-			Name = Path.GetFileName(path);
-			using (BinaryReader reader = new BinaryReader(File.OpenRead(path)))
-			{
-				Data = reader.ReadBytes((int)reader.BaseStream.Length);
-			}
-		}
+		public ImportedTexture(string path) : this(File.OpenRead(path), Path.GetFileName(path)) { }
 
 		public ImportedTexture(Stream stream, string name)
 		{
@@ -96,6 +91,58 @@ namespace SB3Utility
 			{
 				Data = reader.ReadToEnd();
 			}
+
+			if (Path.GetExtension(name).ToUpper() == ".TGA")
+			{
+				isCompressed = Data[2] == 0x0A;
+			}
+		}
+
+		public Texture ToTexture(Device device)
+		{
+			if (!isCompressed)
+			{
+				return Texture.FromMemory(device, Data);
+			}
+
+			int width = BitConverter.ToInt16(Data, 8 + 4);
+			int height = BitConverter.ToInt16(Data, 8 + 6);
+			int bpp = Data[8 + 8];
+
+			int bytesPerPixel = bpp / 8;
+			int total = width * height * bytesPerPixel;
+
+			byte[] uncompressedTGA = new byte[18 + total + 26];
+			Array.Copy(Data, uncompressedTGA, 18);
+			uncompressedTGA[2] = 0x02;
+
+			int srcIdx = 18, dstIdx = 18;
+			for (int end = 18 + total; dstIdx < end; )
+			{
+				byte packetHdr = Data[srcIdx++];
+				int packetType = packetHdr & (1 << 7);
+
+				if (packetType != 0)
+				{
+					int repeat = (packetHdr & ~(1 << 7)) + 1;
+					for (int j = 0; j < repeat; j++)
+					{
+						Array.Copy(Data, srcIdx, uncompressedTGA, dstIdx, bytesPerPixel);
+						dstIdx += bytesPerPixel;
+					}
+					srcIdx += bytesPerPixel;
+				}
+				else
+				{
+					int len = ((packetHdr & ~(1 << 7)) + 1) * bytesPerPixel;
+					Array.Copy(Data, srcIdx, uncompressedTGA, dstIdx, len);
+					srcIdx += len;
+					dstIdx += len;
+				}
+			}
+
+			Array.Copy(Data, srcIdx, uncompressedTGA, dstIdx, 26);
+			return Texture.FromMemory(device, uncompressedTGA);
 		}
 	}
 

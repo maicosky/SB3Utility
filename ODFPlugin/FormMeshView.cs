@@ -102,30 +102,37 @@ namespace ODFPlugin
 
 		public FormMeshView(string path, string variable)
 		{
-			InitializeComponent();
-			Properties.Settings.Default.PropertyChanged += PropertyChangedEventHandler;
-
-			this.ShowHint = DockState.Document;
-			this.Text = Path.GetFileName(path);
-			this.ToolTipText = path;
-			this.exportDir = Path.GetDirectoryName(path) + @"\" + Path.GetFileNameWithoutExtension(path);
-
-			ParserVar = Gui.Scripting.GetNextVariable("odfParser");
-			string parserCommand = ParserVar + " = OpenODF(path=\"" + path + "\")";
-			odfParser parser = (odfParser)Gui.Scripting.RunScript(parserCommand);
-			if (zeroCheckForFieldsUsuallyBeingZeroToolStripMenuItem.Checked)
+			try
 			{
-				Report.ReportLog("Zero check: " + parser.ZeroCheck());
+				InitializeComponent();
+				Properties.Settings.Default.PropertyChanged += PropertyChangedEventHandler;
+
+				this.ShowHint = DockState.Document;
+				this.Text = Path.GetFileName(path);
+				this.ToolTipText = path;
+				this.exportDir = Path.GetDirectoryName(path) + @"\" + Path.GetFileNameWithoutExtension(path);
+
+				ParserVar = Gui.Scripting.GetNextVariable("odfParser");
+				string parserCommand = ParserVar + " = OpenODF(path=\"" + path + "\")";
+				odfParser parser = (odfParser)Gui.Scripting.RunScript(parserCommand);
+				if (zeroCheckForFieldsUsuallyBeingZeroToolStripMenuItem.Checked)
+				{
+					Report.ReportLog("Zero check: " + parser.ZeroCheck());
+				}
+
+				EditorVar = Gui.Scripting.GetNextVariable("odfEditor");
+				string editorCommand = EditorVar + " = odfEditor(parser=" + ParserVar + ")";
+				Editor = (odfEditor)Gui.Scripting.RunScript(editorCommand);
+
+				FormVar = variable;
+
+				Init();
+				LoadODF();
 			}
-
-			EditorVar = Gui.Scripting.GetNextVariable("odfEditor");
-			string editorCommand = EditorVar + " = odfEditor(parser=" + ParserVar + ")";
-			Editor = (odfEditor)Gui.Scripting.RunScript(editorCommand);
-
-			FormVar = variable;
-
-			Init();
-			LoadODF();
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
 		}
 
 		private void PropertyChangedEventHandler(object sender, PropertyChangedEventArgs e)
@@ -272,7 +279,7 @@ namespace ODFPlugin
 				descriptions[i] = values[i].GetDescription();
 			}
 			comboBoxMeshExportFormat.Items.AddRange(descriptions);
-			comboBoxMeshExportFormat.SelectedIndex = (int)MeshExportFormat.Fbx;
+			comboBoxMeshExportFormat.SelectedItem = Properties.Settings.Default["MeshExportFormat"];
 
 			closeViewFilesAtStartToolStripMenuItem.CheckedChanged += closeViewFilesAtStartToolStripMenuItem_CheckedChanged;
 			suppressWarningsToolStripMenuItem.CheckedChanged += suppressWarningsToolStripMenuItem_CheckedChanged;
@@ -441,7 +448,7 @@ namespace ODFPlugin
 
 			InitFormat();
 
-			InitFrames();
+			InitFrames(true);
 			if (Editor.Parser.MeshSection != null)
 				InitMeshes();
 			if (Editor.Parser.MaterialSection != null)
@@ -462,7 +469,7 @@ namespace ODFPlugin
 			textBoxFormat.Text = formatType.ToString();
 		}
 
-		void InitFrames()
+		void InitFrames(bool selectWithAction)
 		{
 			TreeNode objRootNode = CreateFrameTree(Editor.Parser.FrameSection.RootFrame, null);
 
@@ -471,7 +478,7 @@ namespace ODFPlugin
 			if (treeViewObjectTree.SelectedNode != null)
 			{
 				selectedNodeText = treeViewObjectTree.SelectedNode.Text;
-				if (treeViewObjectTree.SelectedNode.Tag != null)
+				if (treeViewObjectTree.SelectedNode.Tag is DragSource)
 				{
 					selectedNodeType = ((DragSource)treeViewObjectTree.SelectedNode.Tag).Type;
 				}
@@ -498,7 +505,15 @@ namespace ODFPlugin
 					if (selectedNodeType == newType)
 					{
 						newNode.EnsureVisible();
+						if (!selectWithAction)
+						{
+							treeViewObjectTree.AfterSelect -= treeViewObjectTree_AfterSelect;
+						}
 						treeViewObjectTree.SelectedNode = newNode;
+						if (!selectWithAction)
+						{
+							treeViewObjectTree.AfterSelect += treeViewObjectTree_AfterSelect;
+						}
 					}
 				}
 			}
@@ -1284,20 +1299,32 @@ namespace ODFPlugin
 				textBoxTexName.Text = tex.Name;
 				textBoxTexID.Text = tex.Id.ToString();
 
-				odfTextureFile texFile = new odfTextureFile(null, Path.GetDirectoryName(Editor.Parser.ODFPath) + Path.DirectorySeparatorChar + tex.TextureFile);
-				int fileSize = 0;
-				byte[] data;
-				using (BinaryReader reader = texFile.DecryptFile(ref fileSize))
+				try
 				{
-					data = reader.ReadBytes(fileSize);
-				}
-				Texture renderTexture = Texture.FromMemory(Gui.Renderer.Device, data);
-				Bitmap bitmap = new Bitmap(Texture.ToStream(renderTexture, ImageFileFormat.Bmp));
-				renderTexture.Dispose();
-				pictureBoxTexture.Image = bitmap;
-				textBoxTexSize.Text = bitmap.Width + "x" + bitmap.Height;
+					odfTextureFile texFile = new odfTextureFile(null, Path.GetDirectoryName(Editor.Parser.ODFPath) + Path.DirectorySeparatorChar + tex.TextureFile);
+					int fileSize = 0;
+					byte[] data;
+					using (BinaryReader reader = texFile.DecryptFile(ref fileSize))
+					{
+						data = reader.ReadBytes(fileSize);
+					}
+					Texture renderTexture = Texture.FromMemory(Gui.Renderer.Device, data);
+					Bitmap bitmap = new Bitmap(Texture.ToStream(renderTexture, ImageFileFormat.Bmp));
+					renderTexture.Dispose();
+					pictureBoxTexture.Image = bitmap;
+					textBoxTexSize.Text = bitmap.Width + "x" + bitmap.Height;
 
-				ResizeImage();
+					ResizeImage();
+				}
+				catch (SlimDXException ex)
+				{
+					Utility.ReportException(ex);
+					Report.ReportLog("Please check " + tex.TextureFile + ". It may have an unsupported format.");
+				}
+				catch (Exception ex)
+				{
+					Utility.ReportException(ex);
+				}
 			}
 			loadedTexture = texIdx;
 		}
@@ -1339,7 +1366,7 @@ namespace ODFPlugin
 			DisposeRenderObjects();
 			LoadFrame(-1);
 			LoadMesh(-1);
-			InitFrames();
+			InitFrames(true);
 			InitMeshes();
 			RecreateRenderObjects();
 			RecreateCrossRefs();
@@ -1350,7 +1377,7 @@ namespace ODFPlugin
 			CrossRefsClear();
 			DisposeRenderObjects();
 			LoadMesh(-1);
-			InitFrames();
+			InitFrames(true);
 			InitMeshes();
 			InitMaterials();
 			InitTextures();
@@ -2089,6 +2116,15 @@ namespace ODFPlugin
 							destFrameIdx = Editor.GetFrameIndex(srcEditor.Imported.MeshList[(int)source.Id].Name);
 							if (destFrameIdx < 0)
 							{
+								odfMesh mesh = odf.FindMeshListSome(srcEditor.Imported.MeshList[(int)source.Id].Name, Editor.Parser.MeshSection);
+								if (mesh != null)
+								{
+									odfFrame meshFrame = odf.FindMeshFrame(mesh.Id, Editor.Parser.FrameSection.RootFrame);
+									destFrameIdx = Editor.GetFrameIndex(meshFrame.Name);
+								}
+							}
+							if (destFrameIdx < 0)
+							{
 								destFrameIdx = 0;
 							}
 						}
@@ -2570,11 +2606,12 @@ namespace ODFPlugin
 					using (var dragOptions = new FormMeshViewDragDrop(Editor, FormMeshViewDragDrop.Panel.MorphList))
 					{
 						var srcEditor = (ImportedEditor)Gui.Scripting.Variables[source.Variable];
-						dragOptions.textBoxName.Text = srcEditor.Morphs[(int)source.Id].Name;
+						WorkspaceMorph wsMorph = srcEditor.Morphs[(int)source.Id];
+						dragOptions.textBoxName.Text = wsMorph.Name;
+						dragOptions.radioButtonReplaceNormalsYes.Checked = wsMorph.KeyframeList[0].VertexList[0].Normal != Vector3.Zero;
 						if (dragOptions.ShowDialog() == DialogResult.OK)
 						{
 							// repeating only final choices for repeatability of the script
-							WorkspaceMorph wsMorph = srcEditor.Morphs[(int)source.Id];
 							foreach (ImportedMorphKeyframe keyframe in wsMorph.KeyframeList)
 							{
 								if (!wsMorph.isMorphKeyframeEnabled(keyframe))
@@ -3679,7 +3716,7 @@ namespace ODFPlugin
 				Gui.Scripting.RunScript(EditorVar + ".SetBoneFrameId(boneListIdx=" + loadedBone.Item1 + ", boneIdx=" + loadedBone.Item2 + ", frameId=\"" + textBoxBoneFrameID.Text + "\")");
 
 				LoadBone(loadedBone);
-				InitFrames();
+				InitFrames(false);
 				RecreateRenderObjects();
 			}
 			catch (Exception ex)
@@ -3724,7 +3761,7 @@ namespace ODFPlugin
 				Gui.Scripting.RunScript(EditorVar + ".RemoveBone(boneListIdx=" + loadedBone.Item1 + ", boneIdx=" + loadedBone.Item2 + ")");
 
 				LoadBone(null);
-				InitFrames();
+				InitFrames(false);
 				highlightedBone = null;
 				RecreateRenderObjects();
 			}
@@ -3745,7 +3782,7 @@ namespace ODFPlugin
 
 				Gui.Scripting.RunScript(EditorVar + ".CopyBone(boneListIdx=" + loadedBone.Item1 + ", boneIdx=" + loadedBone.Item2 + ")");
 
-				InitFrames();
+				InitFrames(false);
 			}
 			catch (Exception ex)
 			{
@@ -4013,6 +4050,10 @@ namespace ODFPlugin
 					panelMeshExportOptionsDefault.BringToFront();
 					break;
 				}
+
+				MeshExportFormat[] values = Enum.GetValues(typeof(MeshExportFormat)) as MeshExportFormat[];
+				string description = values[comboBoxMeshExportFormat.SelectedIndex].GetDescription();
+				Properties.Settings.Default["MeshExportFormat"] = description;
 			}
 			catch (Exception ex)
 			{
@@ -4104,7 +4145,7 @@ namespace ODFPlugin
 				{
 					Gui.Scripting.RunScript(EditorVar + ".SetSubmeshName(meshIdx=" + loadedMesh + ", submeshIdx=" + row.Index + ", name=\"" + textBoxMeshObjName.Text + "\")");
 
-					InitFrames();
+					InitFrames(false);
 					row.Cells[1].Value = submesh.Name.Name;
 					InitMorphs();
 				}
@@ -4130,7 +4171,7 @@ namespace ODFPlugin
 				{
 					Gui.Scripting.RunScript(EditorVar + ".SetSubmeshId(meshIdx=" + loadedMesh + ", submeshIdx=" + row.Index + ", id=\"" + textBoxMeshObjID.Text + "\")");
 
-					InitFrames();
+					InitFrames(false);
 					InitMorphs();
 				}
 			}
@@ -4203,7 +4244,7 @@ namespace ODFPlugin
 				}
 				else
 				{
-					InitFrames();
+					InitFrames(false);
 					LoadMesh(loadedMesh);
 					if (lastSelectedRow == dataGridViewMesh.Rows.Count)
 						lastSelectedRow--;

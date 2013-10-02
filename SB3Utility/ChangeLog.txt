@@ -1,4 +1,7 @@
-﻿[0.5.2]
+﻿[0.5.4]
+ - Added a new field in the animation clips for repeating.
+
+[0.5.2]
   - Added uv splitting of cylindrical projected faces to FBX imports
 
 [0.5.1]

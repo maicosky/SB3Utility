@@ -132,14 +132,6 @@
 			this.buttonAnimationKeyframeRemove = new System.Windows.Forms.Button();
 			this.buttonAnimationClipEditHex = new System.Windows.Forms.Button();
 			this.dataGridViewAnimationClip = new System.Windows.Forms.DataGridView();
-			this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-			this.ColumnAnimationClipName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-			this.ColumnAnimationClipStart = new System.Windows.Forms.DataGridViewTextBoxColumn();
-			this.ColumnAnimationClipEnd = new System.Windows.Forms.DataGridViewTextBoxColumn();
-			this.ColumnAnimationClipNext = new System.Windows.Forms.DataGridViewTextBoxColumn();
-			this.ColumnAnimationClipSpeed = new System.Windows.Forms.DataGridViewTextBoxColumn();
-			this.ColumnAnimationClipUnknown1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-			this.ColumnAnimationClipRest = new System.Windows.Forms.DataGridViewTextBoxColumn();
 			this.label33 = new System.Windows.Forms.Label();
 			this.groupBox3 = new System.Windows.Forms.GroupBox();
 			this.buttonAnimationClipDelete = new System.Windows.Forms.Button();
@@ -168,6 +160,14 @@
 			this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.keepBackupToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+			this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+			this.ColumnAnimationClipName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+			this.ColumnAnimationClipStart = new System.Windows.Forms.DataGridViewTextBoxColumn();
+			this.ColumnAnimationClipEnd = new System.Windows.Forms.DataGridViewTextBoxColumn();
+			this.ColumnAnimationClipNext = new System.Windows.Forms.DataGridViewTextBoxColumn();
+			this.ColumnAnimationClipSpeed = new System.Windows.Forms.DataGridViewTextBoxColumn();
+			this.ColumnAnimationClipUnknown1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+			this.ColumnAnimationClipRest = new System.Windows.Forms.DataGridViewTextBoxColumn();
 			this.tabControlXA.SuspendLayout();
 			this.tabPageXAObjectView.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer7)).BeginInit();
@@ -1326,70 +1326,6 @@
 			this.dataGridViewAnimationClip.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewAnimationClip_CellValueChanged);
 			this.dataGridViewAnimationClip.SelectionChanged += new System.EventHandler(this.dataGridViewAnimationClip_SelectionChanged);
 			// 
-			// Column1
-			// 
-			this.Column1.Frozen = true;
-			this.Column1.HeaderText = "Idx";
-			this.Column1.Name = "Column1";
-			this.Column1.ReadOnly = true;
-			this.Column1.Width = 29;
-			// 
-			// ColumnAnimationClipName
-			// 
-			this.ColumnAnimationClipName.Frozen = true;
-			this.ColumnAnimationClipName.HeaderText = "Name";
-			this.ColumnAnimationClipName.MinimumWidth = 25;
-			this.ColumnAnimationClipName.Name = "ColumnAnimationClipName";
-			this.ColumnAnimationClipName.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-			this.ColumnAnimationClipName.Width = 234;
-			// 
-			// ColumnAnimationClipStart
-			// 
-			this.ColumnAnimationClipStart.Frozen = true;
-			this.ColumnAnimationClipStart.HeaderText = "Start";
-			this.ColumnAnimationClipStart.MinimumWidth = 25;
-			this.ColumnAnimationClipStart.Name = "ColumnAnimationClipStart";
-			this.ColumnAnimationClipStart.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-			this.ColumnAnimationClipStart.Width = 36;
-			// 
-			// ColumnAnimationClipEnd
-			// 
-			this.ColumnAnimationClipEnd.Frozen = true;
-			this.ColumnAnimationClipEnd.HeaderText = "End";
-			this.ColumnAnimationClipEnd.MinimumWidth = 25;
-			this.ColumnAnimationClipEnd.Name = "ColumnAnimationClipEnd";
-			this.ColumnAnimationClipEnd.Width = 36;
-			// 
-			// ColumnAnimationClipNext
-			// 
-			this.ColumnAnimationClipNext.Frozen = true;
-			this.ColumnAnimationClipNext.HeaderText = "Next";
-			this.ColumnAnimationClipNext.MinimumWidth = 25;
-			this.ColumnAnimationClipNext.Name = "ColumnAnimationClipNext";
-			this.ColumnAnimationClipNext.Width = 33;
-			// 
-			// ColumnAnimationClipSpeed
-			// 
-			this.ColumnAnimationClipSpeed.Frozen = true;
-			this.ColumnAnimationClipSpeed.HeaderText = "Speed";
-			this.ColumnAnimationClipSpeed.MinimumWidth = 25;
-			this.ColumnAnimationClipSpeed.Name = "ColumnAnimationClipSpeed";
-			this.ColumnAnimationClipSpeed.Width = 45;
-			// 
-			// ColumnAnimationClipUnknown1
-			// 
-			this.ColumnAnimationClipUnknown1.HeaderText = "Unknown1";
-			this.ColumnAnimationClipUnknown1.Name = "ColumnAnimationClipUnknown1";
-			this.ColumnAnimationClipUnknown1.Visible = false;
-			this.ColumnAnimationClipUnknown1.Width = 60;
-			// 
-			// ColumnAnimationClipRest
-			// 
-			this.ColumnAnimationClipRest.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-			this.ColumnAnimationClipRest.HeaderText = "";
-			this.ColumnAnimationClipRest.Name = "ColumnAnimationClipRest";
-			this.ColumnAnimationClipRest.ReadOnly = true;
-			// 
 			// label33
 			// 
 			this.label33.AutoSize = true;
@@ -1594,7 +1530,7 @@
             this.toolStripSeparator6,
             this.closeToolStripMenuItem});
 			this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-			this.fileToolStripMenuItem.Size = new System.Drawing.Size(35, 18);
+			this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 18);
 			this.fileToolStripMenuItem.Text = "&File";
 			// 
 			// reopenToolStripMenuItem
@@ -1602,40 +1538,40 @@
 			this.reopenToolStripMenuItem.Name = "reopenToolStripMenuItem";
 			this.reopenToolStripMenuItem.ShortcutKeyDisplayString = "";
 			this.reopenToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.R)));
-			this.reopenToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
+			this.reopenToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
 			this.reopenToolStripMenuItem.Text = "&Reopen .xa";
 			this.reopenToolStripMenuItem.Click += new System.EventHandler(this.reopenToolStripMenuItem_Click);
 			// 
 			// toolStripSeparator1
 			// 
 			this.toolStripSeparator1.Name = "toolStripSeparator1";
-			this.toolStripSeparator1.Size = new System.Drawing.Size(166, 6);
+			this.toolStripSeparator1.Size = new System.Drawing.Size(169, 6);
 			// 
 			// saveToolStripMenuItem
 			// 
 			this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
 			this.saveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.T)));
-			this.saveToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
+			this.saveToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
 			this.saveToolStripMenuItem.Text = "&Save .xa";
 			this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
 			// 
 			// saveAsToolStripMenuItem
 			// 
 			this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-			this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
+			this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
 			this.saveAsToolStripMenuItem.Text = "Save .xa &As...";
 			this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.saveAsToolStripMenuItem_Click);
 			// 
 			// toolStripSeparator6
 			// 
 			this.toolStripSeparator6.Name = "toolStripSeparator6";
-			this.toolStripSeparator6.Size = new System.Drawing.Size(166, 6);
+			this.toolStripSeparator6.Size = new System.Drawing.Size(169, 6);
 			// 
 			// closeToolStripMenuItem
 			// 
 			this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
 			this.closeToolStripMenuItem.ShortcutKeyDisplayString = "Ctrl+F4";
-			this.closeToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
+			this.closeToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
 			this.closeToolStripMenuItem.Text = "&Close";
 			this.closeToolStripMenuItem.Click += new System.EventHandler(this.closeToolStripMenuItem_Click);
 			// 
@@ -1644,7 +1580,7 @@
 			this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.keepBackupToolStripMenuItem});
 			this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-			this.optionsToolStripMenuItem.Size = new System.Drawing.Size(56, 18);
+			this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 18);
 			this.optionsToolStripMenuItem.Text = "&Options";
 			// 
 			// keepBackupToolStripMenuItem
@@ -1653,13 +1589,76 @@
 			this.keepBackupToolStripMenuItem.CheckOnClick = true;
 			this.keepBackupToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.keepBackupToolStripMenuItem.Name = "keepBackupToolStripMenuItem";
-			this.keepBackupToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
+			this.keepBackupToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
 			this.keepBackupToolStripMenuItem.Text = "Keep Backup";
 			this.keepBackupToolStripMenuItem.CheckedChanged += new System.EventHandler(this.keepBackupToolStripMenuItem_CheckedChanged);
 			// 
 			// saveFileDialog1
 			// 
 			this.saveFileDialog1.Filter = ".xa Files (*.xa)|*.xa|All Files (*.*)|*.*";
+			// 
+			// Column1
+			// 
+			this.Column1.Frozen = true;
+			this.Column1.HeaderText = "Idx";
+			this.Column1.Name = "Column1";
+			this.Column1.ReadOnly = true;
+			this.Column1.Width = 29;
+			// 
+			// ColumnAnimationClipName
+			// 
+			this.ColumnAnimationClipName.Frozen = true;
+			this.ColumnAnimationClipName.HeaderText = "Name";
+			this.ColumnAnimationClipName.MinimumWidth = 25;
+			this.ColumnAnimationClipName.Name = "ColumnAnimationClipName";
+			this.ColumnAnimationClipName.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+			this.ColumnAnimationClipName.Width = 234;
+			// 
+			// ColumnAnimationClipStart
+			// 
+			this.ColumnAnimationClipStart.Frozen = true;
+			this.ColumnAnimationClipStart.HeaderText = "Start";
+			this.ColumnAnimationClipStart.MinimumWidth = 25;
+			this.ColumnAnimationClipStart.Name = "ColumnAnimationClipStart";
+			this.ColumnAnimationClipStart.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+			this.ColumnAnimationClipStart.Width = 36;
+			// 
+			// ColumnAnimationClipEnd
+			// 
+			this.ColumnAnimationClipEnd.Frozen = true;
+			this.ColumnAnimationClipEnd.HeaderText = "End";
+			this.ColumnAnimationClipEnd.MinimumWidth = 25;
+			this.ColumnAnimationClipEnd.Name = "ColumnAnimationClipEnd";
+			this.ColumnAnimationClipEnd.Width = 36;
+			// 
+			// ColumnAnimationClipNext
+			// 
+			this.ColumnAnimationClipNext.Frozen = true;
+			this.ColumnAnimationClipNext.HeaderText = "Next";
+			this.ColumnAnimationClipNext.MinimumWidth = 25;
+			this.ColumnAnimationClipNext.Name = "ColumnAnimationClipNext";
+			this.ColumnAnimationClipNext.Width = 33;
+			// 
+			// ColumnAnimationClipSpeed
+			// 
+			this.ColumnAnimationClipSpeed.Frozen = true;
+			this.ColumnAnimationClipSpeed.HeaderText = "Speed";
+			this.ColumnAnimationClipSpeed.MinimumWidth = 25;
+			this.ColumnAnimationClipSpeed.Name = "ColumnAnimationClipSpeed";
+			this.ColumnAnimationClipSpeed.Width = 45;
+			// 
+			// ColumnAnimationClipUnknown1
+			// 
+			this.ColumnAnimationClipUnknown1.HeaderText = "Hex";
+			this.ColumnAnimationClipUnknown1.Name = "ColumnAnimationClipUnknown1";
+			this.ColumnAnimationClipUnknown1.Width = 40;
+			// 
+			// ColumnAnimationClipRest
+			// 
+			this.ColumnAnimationClipRest.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+			this.ColumnAnimationClipRest.HeaderText = "";
+			this.ColumnAnimationClipRest.Name = "ColumnAnimationClipRest";
+			this.ColumnAnimationClipRest.ReadOnly = true;
 			// 
 			// FormXA
 			// 
@@ -1827,14 +1826,6 @@
 		private System.Windows.Forms.CheckBox checkBoxFbxOptionEmbedMedia;
 		private System.Windows.Forms.CheckBox checkBoxFbxOptionOneBlendshape;
 		private System.Windows.Forms.DataGridView dataGridViewAnimationClip;
-		private System.Windows.Forms.DataGridViewTextBoxColumn Column1;
-		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnAnimationClipName;
-		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnAnimationClipStart;
-		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnAnimationClipEnd;
-		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnAnimationClipNext;
-		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnAnimationClipSpeed;
-		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnAnimationClipUnknown1;
-		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnAnimationClipRest;
 		private System.Windows.Forms.Button buttonAnimationClipDelete;
 		private System.Windows.Forms.Button buttonAnimationClipEditHex;
 		private System.Windows.Forms.ColumnHeader columnHeader1;
@@ -1860,5 +1851,13 @@
 		private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem keepBackupToolStripMenuItem;
 		private System.Windows.Forms.SaveFileDialog saveFileDialog1;
+		private System.Windows.Forms.DataGridViewTextBoxColumn Column1;
+		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnAnimationClipName;
+		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnAnimationClipStart;
+		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnAnimationClipEnd;
+		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnAnimationClipNext;
+		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnAnimationClipSpeed;
+		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnAnimationClipUnknown1;
+		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnAnimationClipRest;
 	}
 }
