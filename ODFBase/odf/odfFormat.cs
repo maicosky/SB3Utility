@@ -1,10 +1,11 @@
-#pragma warning disable 1591
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using System.ComponentModel;
 using System.Security.Cryptography;
+
+using SB3Utility;
 
 namespace ODFPlugin
 {
@@ -13,7 +14,8 @@ namespace ODFPlugin
 	{
 		private string Name { get; set; }
 
-		public bool isEncrypted;
+		public bool isEncrypted { get; protected set; }
+		public odfFileHeader odfHdr { get; protected set; }
 
 		protected abstract ICryptoTransform CryptoTransform();
 
@@ -24,56 +26,59 @@ namespace ODFPlugin
 
 		public List<odfFileSection> ScanFile(string odfPath, int fileSize)
 		{
-			FileStream fs = null;
-			try
+			using (FileStream fs = testEncryption(odfPath))
 			{
-				testEncryption(odfPath);
 				List<odfFileSection> sectionList = new List<odfFileSection>();
-				ICryptoTransform trans = this.isEncrypted ? CryptoTransform() : null;
-				int addr = 12;
-				int length;
-				do
+				ICryptoTransform trans = null;
+				Stream stream = fs;
+				if (this.isEncrypted)
 				{
-					fs = File.OpenRead(odfPath);
-					length = (int)fs.Length;
+					trans = CryptoTransform();
+					stream = (Stream)new CryptoStream(fs, trans, CryptoStreamMode.Read);
+				}
+
+				List<BinaryReader> usedReaders = new List<BinaryReader>(20);
+				for (int addr = 12, length = (int)fs.Length; addr < length; )
+				{
 					if (trans is CryptoTransformThreeChoices)
+					{
 						((CryptoTransformThreeChoices)trans).keyOffset = addr;
+					}
 					fs.Seek(addr, SeekOrigin.Begin);
 
-					odfFileSection section;
-					Stream stream = this.isEncrypted ? (Stream)new CryptoStream(new BufferedStream(fs), trans, CryptoStreamMode.Read) : new BufferedStream(fs);
-					using (BinaryReader reader = new BinaryReader(stream))
-					{
-						
-						section = new odfFileSection(odfFileSection.DecryptSectionType(reader.ReadBytes(4)), odfPath);
-						section.Size = reader.ReadInt32();
-						section.Offset = addr + 4+4;
+					BinaryReader reader = new BinaryReader(stream);
+					odfFileSection section = new odfFileSection(odfFileSection.DecryptSectionType(reader.ReadBytes(4)), odfPath);
+					section.Size = reader.ReadInt32();
+					usedReaders.Add(reader);
+					section.Offset = addr + 4 + 4;
 
-						addr += 4+4 + section.Size;
-						if (section.Type == odfSectionType.BANM)
-							addr += 264;
+					addr += 4 + 4 + section.Size;
+					if (section.Type == odfSectionType.BANM)
+					{
+						addr += 264;
 					}
 					sectionList.Add(section);
-				} while (addr < length);
+				}
+				while (usedReaders.Count > 0)
+				{
+					BinaryReader reader = usedReaders[0];
+					usedReaders.RemoveAt(0);
+					reader.Dispose();
+				}
 
 				return sectionList;
 			}
-			catch (Exception e)
-			{
-				if (fs != null)
-					fs.Close();
-				throw e;
-			}
 		}
 
-		private void testEncryption(string odfPath)
+		private FileStream testEncryption(string odfPath)
 		{
-			using (BinaryReader reader = new BinaryReader(File.OpenRead(odfPath)))
-			{
-				byte[] fileType = reader.ReadBytes(3);
-				string fileTypeDecoded = Encoding.ASCII.GetString(fileType);
-				this.isEncrypted = fileTypeDecoded != "ODF" && fileTypeDecoded != "ODA";
-			}
+			FileStream stream = File.OpenRead(odfPath);
+			odfHdr = new odfFileHeader(stream);
+
+			string fileTypeDecoded = Encoding.ASCII.GetString(odfHdr.signature, 0, 3);
+			this.isEncrypted = fileTypeDecoded != "ODF" && fileTypeDecoded != "ODA";
+
+			return stream;
 		}
 
 		public BinaryReader ReadFile(odfFileSection section, string odfPath)
@@ -112,7 +117,12 @@ namespace ODFPlugin
 
 		public CryptoStream WriteFile(Stream stream)
 		{
-			return new CryptoStream(stream, CryptoTransform(), CryptoStreamMode.Write);
+			ICryptoTransform trans = CryptoTransform();
+			if (trans is CryptoTransformThreeChoices)
+			{
+				((CryptoTransformThreeChoices)trans).keyOffset = (int)stream.Position;
+			}
+			return new CryptoStream(stream, trans, CryptoStreamMode.Write);
 		}
 
 		public override string ToString()

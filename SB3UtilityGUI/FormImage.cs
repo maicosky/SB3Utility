@@ -87,6 +87,14 @@ namespace SB3Utility
 					DataStream stream = Texture.ToStream(renderTexture, ImageFileFormat.Bmp);
 					Bitmap bitmap = new Bitmap(stream);
 					stream.Dispose();
+					int bpp = 0;
+					{
+						string format = renderTexture.GetLevelDescription(0).Format.GetDescription();
+						bpp = (format.Contains("A8") ? 8 : 0)
+							+ (format.Contains("R8") ? 8 : 0)
+							+ (format.Contains("G8") ? 8 : 0)
+							+ (format.Contains("B8") ? 8 : 0);
+					}
 					renderTexture.Dispose();
 					pictureBox1.Image = bitmap;
 
@@ -99,7 +107,7 @@ namespace SB3Utility
 					}
 
 					textBoxName.Text = tex.Name;
-					textBoxSize.Text = bitmap.Width + "x" + bitmap.Height;
+					textBoxSize.Text = bitmap.Width + "x" + bitmap.Height + (bpp > 0 ? "x" + bpp : String.Empty);
 				}
 
 				image = tex;

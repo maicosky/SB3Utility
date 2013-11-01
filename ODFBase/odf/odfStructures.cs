@@ -11,7 +11,13 @@ namespace ODFPlugin
 {
 	public class odfFileHeader : IObjInfo
 	{
-		public byte[] signature { get; set; }
+		public byte[] signature { get; protected set; }
+
+		public odfFileHeader(Stream stream)
+		{
+			BinaryReader reader = new BinaryReader(stream);
+			signature = reader.ReadBytes(12);
+		}
 
 		public void WriteTo(Stream stream)
 		{

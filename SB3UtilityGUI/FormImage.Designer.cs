@@ -38,9 +38,9 @@
 			// 
 			// pictureBox1
 			// 
-			this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-						| System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.pictureBox1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
 			this.pictureBox1.Location = new System.Drawing.Point(0, 0);
 			this.pictureBox1.Name = "pictureBox1";
@@ -51,9 +51,9 @@
 			// 
 			// panel1
 			// 
-			this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-						| System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.panel1.Controls.Add(this.pictureBox1);
 			this.panel1.Location = new System.Drawing.Point(0, 29);
 			this.panel1.Name = "panel1";
@@ -62,21 +62,21 @@
 			// 
 			// textBoxName
 			// 
-			this.textBoxName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this.textBoxName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.textBoxName.Location = new System.Drawing.Point(0, 5);
 			this.textBoxName.Name = "textBoxName";
 			this.textBoxName.ReadOnly = true;
-			this.textBoxName.Size = new System.Drawing.Size(82, 20);
+			this.textBoxName.Size = new System.Drawing.Size(75, 20);
 			this.textBoxName.TabIndex = 2;
 			// 
 			// textBoxSize
 			// 
 			this.textBoxSize.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.textBoxSize.Location = new System.Drawing.Point(85, 5);
+			this.textBoxSize.Location = new System.Drawing.Point(78, 5);
 			this.textBoxSize.Name = "textBoxSize";
 			this.textBoxSize.ReadOnly = true;
-			this.textBoxSize.Size = new System.Drawing.Size(69, 20);
+			this.textBoxSize.Size = new System.Drawing.Size(76, 20);
 			this.textBoxSize.TabIndex = 3;
 			// 
 			// FormImage

@@ -29,8 +29,6 @@ namespace AiDroidPlugin
 			Fbx,
 			[Description("AutoCAD DXF")]
 			Dxf,
-			[Description("3D Studio 3DS")]
-			_3ds,
 			[Description("Alias OBJ")]
 			Obj,
 			[Description("FBX 2006")]
@@ -2379,7 +2377,6 @@ namespace AiDroidPlugin
 				case MeshExportFormat.Fbx:
 				case MeshExportFormat.ColladaFbx:
 				case MeshExportFormat.Dxf:
-				case MeshExportFormat._3ds:
 				case MeshExportFormat.Obj:
 				case MeshExportFormat.Fbx_2006:
 					panelMeshExportOptionsFbx.BringToFront();
@@ -2473,9 +2470,6 @@ namespace AiDroidPlugin
 				case MeshExportFormat.Dxf:
 					Gui.Scripting.RunScript("ExportFbx(parser=" + ParserVar + ", meshNames=" + meshNames + ", reaParsers=" + reaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + EulerFilter + ", filterPrecision=" + filterPrecision.ToFloatString() + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".dxf") + "\", exportFormat=\".dxf\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", compatibility=" + false + ")");
 					break;
-				case MeshExportFormat._3ds:
-					Gui.Scripting.RunScript("ExportFbx(parser=" + ParserVar + ", meshNames=" + meshNames + ", reaParsers=" + reaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + EulerFilter + ", filterPrecision=" + filterPrecision.ToFloatString() + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".3ds") + "\", exportFormat=\".3ds\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", compatibility=" + false + ")");
-					break;
 				case MeshExportFormat.Obj:
 					Gui.Scripting.RunScript("ExportFbx(parser=" + ParserVar + ", meshNames=" + meshNames + ", reaParsers=" + reaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + EulerFilter + ", filterPrecision=" + filterPrecision.ToFloatString() + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".obj") + "\", exportFormat=\".obj\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", compatibility=" + false + ")");
 					break;
@@ -2568,7 +2562,31 @@ namespace AiDroidPlugin
 				{
 					if (normals.ShowDialog() == DialogResult.OK)
 					{
-						Gui.Scripting.RunScript(EditorVar + ".CalculateNormals(idx=" + loadedMesh + ", threshold=" + ((float)normals.numericThreshold.Value).ToFloatString() + ")");
+						if (normals.checkBoxNormalsForSelectedMeshes.Checked)
+						{
+							string editors = "editors={";
+							string numMeshes = "numMeshes={";
+							string meshes = "meshes={";
+							List<DockContent> remList = null;
+							Gui.Docking.DockContents.TryGetValue(typeof(FormREM), out remList);
+							foreach (FormREM rem in remList)
+							{
+								if (rem.listViewMesh.SelectedItems.Count == 0)
+								{
+									continue;
+								}
+
+								editors += rem.EditorVar + ", ";
+								numMeshes += rem.listViewMesh.SelectedItems.Count + ", ";
+								foreach (ListViewItem item in rem.listViewMesh.SelectedItems)
+								{
+									meshes += (int)item.Tag + ", ";
+								}
+							}
+							string idArgs = editors.Substring(0, editors.Length - 2) + "}, " + numMeshes.Substring(0, numMeshes.Length - 2) + "}, " + meshes.Substring(0, meshes.Length - 2) + "}";
+
+							Gui.Scripting.RunScript(EditorVar + ".CalculateNormals(" + idArgs + ", threshold=" + ((float)normals.numericThreshold.Value).ToFloatString() + ")");
+						}
 
 						RecreateRenderObjects();
 					}

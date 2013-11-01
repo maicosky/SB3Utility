@@ -731,7 +731,34 @@ namespace AiDroidPlugin
 		[Plugin]
 		public void CalculateNormals(int idx, double threshold)
 		{
-			rem.CalculateNormals(Parser.MESC[idx], (float)threshold);
+			// rem.CalculateNormals(Parser.MESC[idx], (float)threshold);
+			throw new NotImplementedException();
+		}
+
+		[Plugin]
+		public void CalculateNormals(object[] editors, object[] numMeshes, object[] meshes, double threshold)
+		{
+			if (editors == null || numMeshes == null || meshes == null)
+			{
+				return;
+			}
+
+			List<rem.Submesh> submeshList = new List<rem.Submesh>(meshes.Length);
+			remEditor editor = null;
+			int editorIdx = -1;
+			int i = 1;
+			foreach (object id in meshes)
+			{
+				if (--i == 0)
+				{
+					editorIdx++;
+					i = (int)(double)numMeshes[editorIdx];
+					editor = (remEditor)editors[editorIdx];
+				}
+				rem.Mesh mesh = new rem.Mesh(editor.Meshes[(int)(double)id], rem.FindSkin(editor.Meshes[(int)(double)id].name, editor.Parser.SKIC));
+				submeshList.AddRange(mesh.ChildList);
+			}
+			rem.CalculateNormals(submeshList, (float)threshold);
 		}
 
 		[Plugin]

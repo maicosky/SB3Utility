@@ -277,7 +277,21 @@ namespace SB3Utility
 							break;
 						}
 					}
-					tokens.Add(new Token(sb.ToString(), TokenType.HexOrIndex, scriptName, line, column));
+					string idx = sb.ToString();
+					TokenType tType;
+					int dummy;
+					if (idx.Length == 0 ||
+						idx.Length > 1 && idx[0].IsHex() && idx[1].IsHex()
+							&& (idx.Length == 2 || idx.Length > 2 && idx[2] == '-') ||
+						Int32.TryParse(idx, out dummy))
+					{
+						tType = TokenType.HexOrIndex;
+					}
+					else
+					{
+						tType = TokenType.Name;
+					}
+					tokens.Add(new Token(idx, tType, scriptName, line, column));
 				}
 				else if (Char.IsLetter(c) || c == '_')
 				{
@@ -885,11 +899,11 @@ namespace SB3Utility
 
 		Expr GetIndexed(Expr result, List<Token> tokens, ref int tokenIdx)
 		{
-			if ((tokenIdx < tokens.Count) && (tokens[tokenIdx].Type == TokenType.HexOrIndex))
+			if ((tokenIdx < tokens.Count) && (tokens[tokenIdx].Type == TokenType.HexOrIndex || tokens[tokenIdx].Type == TokenType.Name))
 			{
 				Command cmd = new Command(ExprType.Indexed);
 				cmd.Args.Add(result);
-				cmd.Args.Add(new Literal(ExprType.Number, tokens[tokenIdx].Value));
+				cmd.Args.Add(new Literal(tokens[tokenIdx].Type == TokenType.HexOrIndex ? ExprType.Number : ExprType.Name, tokens[tokenIdx].Value));
 				tokenIdx++;
 
 				result = cmd;

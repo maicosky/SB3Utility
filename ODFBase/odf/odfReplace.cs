@@ -221,31 +221,31 @@ namespace ODFPlugin
 			{
 				ObjectID[] texIDs = new ObjectID[4] { ObjectID.INVALID, ObjectID.INVALID, ObjectID.INVALID, ObjectID.INVALID };
 				odfMaterial mat = odf.FindMaterialInfo(materialNames[i], parser.MaterialSection);
-				if (materials != null)
+				if (materials != null && mat == null)
 				{
 					ImportedMaterial impMat = ImportedHelpers.FindMaterial(materialNames[i], materials);
-					if (mat == null)
+					if (impMat != null)
 					{
 						mat = CreateMaterial(impMat, parser.GetNewID(typeof(odfMaterial)));
 						parser.MaterialSection.AddChild(mat);
-					}
-					for (int j = 0; j < impMat.Textures.Length; j++)
-					{
-						string texName = impMat.Textures[j];
-						odfTexture tex = odf.FindTextureInfo(texName, parser.TextureSection);
-						if (tex == null)
+						for (int j = 0; j < impMat.Textures.Length; j++)
 						{
-							ImportedTexture impTex = ImportedHelpers.FindTexture(texName, textures);
-							if (impTex != null)
+							string texName = impMat.Textures[j];
+							odfTexture tex = odf.FindTextureInfo(texName, parser.TextureSection);
+							if (tex == null)
 							{
-								tex = CreateTexture(impTex, parser.GetNewID(typeof(odfTexture)), parser.TextureSection._FormatType, Path.GetDirectoryName(parser.ODFPath));
-								parser.TextureSection.AddChild(tex);
+								ImportedTexture impTex = ImportedHelpers.FindTexture(texName, textures);
+								if (impTex != null)
+								{
+									tex = CreateTexture(impTex, parser.GetNewID(typeof(odfTexture)), parser.TextureSection._FormatType, Path.GetDirectoryName(parser.ODFPath));
+									parser.TextureSection.AddChild(tex);
+									texIDs[j] = tex.Id;
+								}
+							}
+							else
+							{
 								texIDs[j] = tex.Id;
 							}
-						}
-						else
-						{
-							texIDs[j] = tex.Id;
 						}
 					}
 				}

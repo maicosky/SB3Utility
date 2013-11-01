@@ -225,7 +225,7 @@ namespace ODFPlugin
 		{
 			bool resultT = TextureSection == null || ZeroCheckTextures();
 			bool resultM = MeshSection == null || ZeroCheckMeshes();
-			bool resultF = ZeroCheckFrames(FrameSection.RootFrame);
+			bool resultF = FrameSection == null || ZeroCheckFrames(FrameSection.RootFrame);
 			bool resultE = EnvelopeSection == null || ZeroCheckEnvelopes();
 			bool resultO = MorphSection == null || ZeroCheckMorphs();
 			bool resultA = AnimSection == null || ZeroCheckAnimations(AnimSection);
@@ -784,7 +784,7 @@ namespace ODFPlugin
 			odfEnvelopeSection envSection = new odfEnvelopeSection(numEnvelopes);
 			envSection.Id = id;
 			envSection.AlwaysZero64 = alwaysZero;
-			envSection._FormatType = MeshSection._FormatType;
+			envSection._FormatType = MeshSection != null ? MeshSection._FormatType : -1;
 			for (int envIdx = 0; envIdx < numEnvelopes; envIdx++)
 			{
 				odfBoneList boneList = ParseBoneList(reader, envSection._FormatType);
@@ -1024,7 +1024,9 @@ namespace ODFPlugin
 				{
 					int capacity = fileSec.Size + 8;
 					if (fileSec.Type == odfSectionType.BANM)
+					{
 						capacity += 264;
+					}
 					MemoryStream memStream = new MemoryStream(capacity);
 					fileSec.WriteTo(memStream);
 					fileSec.Size = (int)memStream.Position - 8;
@@ -1041,19 +1043,14 @@ namespace ODFPlugin
 
 				totalLength += 8 + fileSec.Size;
 				if (fileSec.Type == odfSectionType.BANM)
+				{
 					totalLength += 264;
+				}
 			}
 
-			odfFileSection odfFileHeader = new odfFileSection(odfSectionType.INVALID, ODFPath);
-			odfFileHeader.Offset = 0;
-			odfFileHeader.Size = 12;
-			odfFileHeader odfHdr = new odfFileHeader();
-			using (BinaryReader reader = ODFFormat.ReadFile(odfFileHeader, ODFPath))
-			{
-				odfHdr.signature = reader.ReadBytes(odfFileHeader.Size);
-			}
 			using (BinaryWriter writer = new BinaryWriter(File.Create(destPath)))
 			{
+				ODFFormat.odfHdr.WriteTo(writer.BaseStream);
 				odfFormat_LGKLRetail newFormat = null;
 				Stream stream = null;
 				if (ODFFormat.isEncrypted)
@@ -1062,8 +1059,9 @@ namespace ODFPlugin
 					stream = newFormat.WriteFile(writer.BaseStream);
 				}
 				else
+				{
 					stream = writer.BaseStream;
-				odfHdr.WriteTo(stream);
+				}
 				BinaryWriter encryptedWriter = new BinaryWriter(stream);
 				int offset = 12 + 8;
 				foreach (odfFileSection fileSec in ODFSections)
@@ -1071,7 +1069,9 @@ namespace ODFPlugin
 					int newOffset = offset;
 					offset += 8 + fileSec.Size;
 					if (fileSec.Type == odfSectionType.BANM)
+					{
 						offset += 264;
+					}
 					if (fileSec.Section != null)
 					{
 						byte[] buffer = null;
@@ -1084,7 +1084,9 @@ namespace ODFPlugin
 							fileSecDict.Remove(fileSec);
 						}
 						else
+						{
 							throw new Exception("Buffer lost.");
+						}
 						fileSec.Offset = newOffset;
 					}
 					else

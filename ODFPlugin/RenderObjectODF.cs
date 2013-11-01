@@ -130,7 +130,6 @@ namespace ODFPlugin
 		{
 			device.SetRenderState(RenderState.ZEnable, ZBufferType.UseZBuffer);
 			device.SetRenderState(RenderState.Lighting, true);
-//			device.SetRenderState(RenderState.Lighting, false);
 
 #if !DONT_MIRROR
 			Cull culling = (Gui.Renderer.Culling) ? Cull.Counterclockwise : Cull.None;
@@ -141,8 +140,6 @@ namespace ODFPlugin
 
 			FillMode fill = (Gui.Renderer.Wireframe) ? FillMode.Wireframe : FillMode.Solid;
 			device.SetRenderState(RenderState.FillMode, fill);
-
-//			device.SetRenderState(RenderState.NormalizeNormals, true);
 
 			if (meshContainer.BoneNames.Length > 0)
 			{
@@ -163,24 +160,13 @@ namespace ODFPlugin
 					break;
 				}
 
-//				Matrix[] bitMatrices = new Matrix[meshContainer.BoneNames.Length];
 				for (int i = 0; i < meshContainer.BoneNames.Length; i++)
 				{
 					if (meshContainer.BoneFrames[i] != null)
 					{
 						device.SetTransform(i, meshContainer.BoneOffsets[i] * meshContainer.BoneFrames[i].CombinedTransform);
-/*						bitMatrices[i] = Matrix.Invert(meshContainer.BoneOffsets[i]);
-						bitMatrices[i] = Matrix.Transpose(bitMatrices[i]);*/
 					}
 				}
-/*				Mesh mesh = meshContainer.MeshData.Mesh;
-				DataStream src = mesh.LockVertexBuffer(LockFlags.ReadOnly);
-				DataStream dst = meshContainer.SkinInfo.LockVertexBuffer(LockFlags.None);
-				Report.ReportLog("locked " + (dst == null ? "no dst" : "dst not null"));
-				mesh.SkinInfo.UpdateSkinnedMesh(meshContainer.BoneOffsets, bitMatrices, src, dst);
-				Report.ReportLog("update");
-				mesh.UnlockVertexBuffer();
-				Report.ReportLog("unlocked");*/
 			}
 			else
 			{
@@ -199,7 +185,6 @@ namespace ODFPlugin
 			Texture tex = ((texIdx >= 0) && (texIdx < Textures.Length)) ? Textures[texIdx] : null;
 			device.SetTexture(0, tex);
 
-//			meshContainer.MeshData.Mesh.ComputeNormals();
 			meshContainer.MeshData.Mesh.DrawSubset(0);
 
 			if (HighlightSubmesh.Contains(submeshNum))
@@ -423,8 +408,6 @@ namespace ODFPlugin
 					meshContainers[i].NextMeshContainer = meshContainers[i + 1];
 				}
 
-				min = Vector3.TransformCoordinate(min, animationFrame.CombinedTransform);
-				max = Vector3.TransformCoordinate(max, animationFrame.CombinedTransform);
 				animationFrame.Bounds = new BoundingBox(min, max);
 				animationFrame.MeshContainer = meshContainers[0];
 				meshFrames.Add(animationFrame);
@@ -594,7 +577,7 @@ namespace ODFPlugin
 				{
 					AnimationFrame bone = boneFrames[i];
 
-					if (bone != null && bone.Parent != null /*&& BoneMatrixDic.TryGetValue(bone.Parent.Name, out boneParentMatrix)*/)
+					if (bone != null && bone.Parent != null)
 					{
 						byte parentBoneIdx = 0xFF;
 						for (byte j = 0; j < mesh.BoneNames.Length; j++)
@@ -609,13 +592,11 @@ namespace ODFPlugin
 						{
 							continue;
 						}
-						Matrix boneMatrix = Matrix.Invert(mesh.BoneOffsets[i]/*boneMatrix*/);
-						Matrix boneParentMatrix = Matrix.Invert(mesh.BoneOffsets[parentBoneIdx]/*boneParentMatrix*/);
+						Matrix boneMatrix = Matrix.Invert(mesh.BoneOffsets[i]);
+						Matrix boneParentMatrix = Matrix.Invert(mesh.BoneOffsets[parentBoneIdx]);
 
 						Vector3 bonePos = Vector3.TransformCoordinate(new Vector3(), boneMatrix);
-//						bonePos.Z *= -1f;
 						Vector3 boneParentPos = Vector3.TransformCoordinate(new Vector3(), boneParentMatrix);
-//						boneParentPos.Z *= -1f;
 
 						Vector3 direction = bonePos - boneParentPos;
 						Vector3 perpendicular = direction.Perpendicular();

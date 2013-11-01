@@ -1,4 +1,7 @@
-﻿[0.5.4]
+﻿[0.5.6]
+  - Changed computing common normals for all selected REM meshes
+
+[0.5.4]
   - Fix in the gui and improved Object Tree handling
 
 [0.5.2]

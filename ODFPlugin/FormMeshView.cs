@@ -30,8 +30,6 @@ namespace ODFPlugin
 			Fbx,
 			[Description("AutoCAD DXF")]
 			Dxf,
-			[Description("3D Studio 3DS")]
-			_3ds,
 			[Description("Alias OBJ")]
 			Obj,
 			[Description("FBX 2006")]
@@ -4013,9 +4011,6 @@ namespace ODFPlugin
 				case MeshExportFormat.Dxf:
 					Gui.Scripting.RunScript("ExportFbx(parser=" + ParserVar + ", meshNames=" + meshNames + ", animations=" + odaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + EulerFilter + ", filterPrecision=" + filterPrecision.ToFloatString() + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".dxf") + "\", exportFormat=\".dxf\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", odaSkeleton=" + checkBoxODAskeleton.Checked + ", compatibility=" + false + ")");
 					break;
-				case MeshExportFormat._3ds:
-					Gui.Scripting.RunScript("ExportFbx(parser=" + ParserVar + ", meshNames=" + meshNames + ", animations=" + odaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + EulerFilter + ", filterPrecision=" + filterPrecision.ToFloatString() + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".3ds") + "\", exportFormat=\".3ds\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", odaSkeleton=" + checkBoxODAskeleton.Checked + ", compatibility=" + false + ")");
-					break;
 				case MeshExportFormat.Obj:
 					Gui.Scripting.RunScript("ExportFbx(parser=" + ParserVar + ", meshNames=" + meshNames + ", animations=" + odaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + EulerFilter + ", filterPrecision=" + filterPrecision.ToFloatString() + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".obj") + "\", exportFormat=\".obj\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", odaSkeleton=" + checkBoxODAskeleton.Checked + ", compatibility=" + false + ")");
 					break;
@@ -4042,7 +4037,6 @@ namespace ODFPlugin
 				case MeshExportFormat.Fbx_2006:
 				case MeshExportFormat.ColladaFbx:
 				case MeshExportFormat.Dxf:
-				case MeshExportFormat._3ds:
 				case MeshExportFormat.Obj:
 					panelMeshExportOptionsFbx.BringToFront();
 					break;

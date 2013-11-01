@@ -640,10 +640,13 @@ namespace AiDroidPlugin
 			}
 		}
 
-		public static void CalculateNormals(remMesh mesh, float threshold)
+		public static void CalculateNormals(List<Submesh> submeshes, float threshold)
 		{
-			var pairList = new List<Tuple<List<int>, List<remVertex>>>(mesh.numMats);
-			pairList.Add(new Tuple<List<int>, List<remVertex>>(new List<int>(mesh.faces), new List<remVertex>(mesh.vertices)));
+			var pairList = new List<Tuple<List<int>, List<remVertex>>>(submeshes.Count);
+			for (int i = 0; i < submeshes.Count; i++)
+			{
+				pairList.Add(new Tuple<List<int>, List<remVertex>>(new List<int>(submeshes[i].FaceList), new List<remVertex>(submeshes[i].VertexList)));
+			}
 			CalculateNormals(pairList, threshold);
 		}
 

@@ -497,7 +497,8 @@ namespace SB3Utility
 					ppFormat.Array[(int)ppFormatIdx.HET],
 					ppFormat.Array[(int)ppFormatIdx.HETDTL],
 					ppFormat.Array[(int)ppFormatIdx.PPD],
-					ppFormat.Array[(int)ppFormatIdx.Musumakeup]
+					ppFormat.Array[(int)ppFormatIdx.Musumakeup],
+					ppFormat.Array[(int)ppFormatIdx.ImmoralWard]
 				};
 			}
 		}

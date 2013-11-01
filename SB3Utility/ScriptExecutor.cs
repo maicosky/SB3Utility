@@ -129,7 +129,8 @@ namespace SB3Utility
 				else if (cmd.Type == ExprType.Indexed)
 				{
 					object obj = ExecuteExpr(cmd.Args[0]);
-					int index = Int32.Parse(((Literal)cmd.Args[1]).Value);
+					object indexArg = ExecuteExpr(cmd.Args[1]);
+					int index = indexArg is Double ? (int)(Double)indexArg : (int)indexArg;
 
 					var type = obj.GetType();
 					if (type.IsArray)

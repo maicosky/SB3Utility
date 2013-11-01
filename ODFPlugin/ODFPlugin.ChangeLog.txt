@@ -1,4 +1,9 @@
-﻿[0.5.4]
+﻿[0.5.5]
+  - Fix for Center View in the renderer for ODF meshes (most of them).
+  - Loading and saving ODF and ODA is a bit faster, and allow the complete removal of the source file.
+  - Again! Automatic imports of materials and textures chose incorrect imported ones when not all submeshes were replaced.
+
+[0.5.4]
   - Fix for morph exports of ODFs using Skip Unused Profiles and Replace Normals gets set according to normals being imported.
   - Added storing the last chosen mesh export format
   - Fixed setting wrong target mesh frame in the replacing options upon dropping the mesh into an unused area of the Object Tree.

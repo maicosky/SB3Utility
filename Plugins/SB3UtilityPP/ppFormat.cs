@@ -44,7 +44,8 @@ namespace SB3Utility
 		HET,
 		HETDTL,
 		PPD,
-		Musumakeup
+		Musumakeup,
+		ImmoralWard
 	}
 
 	public abstract class ppFormat
@@ -83,7 +84,8 @@ namespace SB3Utility
 			new ppFormat_HET(),
 			new ppFormat_HETDTL(),
 			new ppFormat_PPD(),
-			new ppFormat_Musumakeup()
+			new ppFormat_Musumakeup(),
+			new ppFormat_ImmoralWard()
 		};
 
 		public abstract Stream ReadStream(Stream stream);
@@ -874,6 +876,20 @@ namespace SB3Utility
 				0xA6, 0xFB, 0x5F, 0x71, 0xB6, 0x01, 0x99, 0x17,
 				0xB2, 0xB5, 0x61, 0xBE, 0x9E, 0xF0, 0xB5, 0xBF,
 				0x75, 0xE3, 0xC9, 0x65, 0x63, 0x5C, 0x9E, 0x0A });
+		}
+	}
+
+	public class ppFormat_ImmoralWard : ppFormat_WakeariHeader
+	{
+		public ppFormat_ImmoralWard() : base("Immoral Ward", ppFormatIdx.ImmoralWard) { }
+
+		protected override ICryptoTransform CryptoTransform()
+		{
+			return new CryptoTransformOneCode(new byte[] {
+				0xE8, 0x7F, 0xB1, 0xF9, 0xD7, 0x1B, 0x35, 0x25,
+				0x32, 0x55, 0x28, 0x4B, 0xEC, 0x61, 0xBD, 0x5F,
+				0x57, 0xFE, 0xA5, 0xD7, 0x97, 0xFC, 0xDF, 0x0C,
+				0x57, 0xFB, 0xD2, 0xE4, 0xBA, 0x75, 0x99, 0xAE });
 		}
 	}
 

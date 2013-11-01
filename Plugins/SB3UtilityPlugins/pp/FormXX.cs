@@ -31,8 +31,6 @@ namespace SB3Utility
 			Fbx,
 			[Description("AutoCAD DXF")]
 			Dxf,
-			[Description("3D Studio 3DS")]
-			_3ds,
 			[Description("Alias OBJ")]
 			Obj,
 			[Description("FBX 2006")]
@@ -1162,6 +1160,15 @@ namespace SB3Utility
 				ImportedTexture importedTex = xx.ImportedTexture(tex);
 				Texture renderTexture = Texture.FromMemory(Gui.Renderer.Device, importedTex.Data);
 				Bitmap bitmap = new Bitmap(Texture.ToStream(renderTexture, ImageFileFormat.Bmp));
+				string format = renderTexture.GetLevelDescription(0).Format.GetDescription();
+				int bpp = (format.Contains("A8") ? 8 : 0)
+					+ (format.Contains("R8") ? 8 : 0)
+					+ (format.Contains("G8") ? 8 : 0)
+					+ (format.Contains("B8") ? 8 : 0);
+				if (bpp > 0)
+				{
+					textBoxTexSize.Text += "x" + bpp;
+				}
 				renderTexture.Dispose();
 				pictureBoxTexture.Image = bitmap;
 
@@ -2005,6 +2012,12 @@ namespace SB3Utility
 						{
 							draggedItem = ((TreeNode)e.Item).Parent;
 							draggedMesh = Editor.Meshes[(int)src.Id].Mesh;
+						}
+						else if (src.Type == typeof(xxBone))
+						{
+							xxMesh mesh = Editor.Meshes[((int[])src.Id)[0]].Mesh;
+							xxBone bone = mesh.BoneList[((int[])src.Id)[1]];
+							draggedItem = FindFrameNode(bone.Name, treeViewObjectTree.Nodes);
 						}
 					}
 
@@ -3522,9 +3535,6 @@ namespace SB3Utility
 					case MeshExportFormat.Dxf:
 						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".dxf") + "\", exportFormat=\".dxf\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", embedMedia=" + checkBoxMeshExportEmbedMedia.Checked + ", compatibility=" + false + ")");
 						break;
-					case MeshExportFormat._3ds:
-						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".3ds") + "\", exportFormat=\".3ds\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", embedMedia=" + checkBoxMeshExportEmbedMedia.Checked + ", compatibility=" + false + ")");
-						break;
 					case MeshExportFormat.Obj:
 						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".obj") + "\", exportFormat=\".obj\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", embedMedia=" + checkBoxMeshExportEmbedMedia.Checked + ", compatibility=" + false + ")");
 						break;
@@ -3763,7 +3773,6 @@ namespace SB3Utility
 					case MeshExportFormat.Fbx_2006:
 					case MeshExportFormat.ColladaFbx:
 					case MeshExportFormat.Dxf:
-					case MeshExportFormat._3ds:
 					case MeshExportFormat.Obj:
 						panelMeshExportOptionsFbx.BringToFront();
 						break;
