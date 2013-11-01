@@ -309,6 +309,8 @@ namespace SB3Utility
 					int i = 0, numbersInLine = 0, stringsInLine = 0;
 					while (i < buf.Length)
 					{
+						if (i < ascii.Length && ascii[i] == '-')
+							i++;
 						int startPos = i;
 						while (i < ascii.Length && char.IsDigit(ascii[i]))
 							i++;
@@ -328,7 +330,7 @@ namespace SB3Utility
 							startPos = i;
 							while (i < ascii.Length)
 							{
-								if (ascii[i] == 't')
+								if (ascii[i] == '\t')
 								{
 									i++;
 									break;

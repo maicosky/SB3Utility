@@ -1,5 +1,6 @@
 ﻿[0.5.6]
   - Fixes editing unknowns of submeshes
+  - Fixes automatic pp format detection (LST units)
   - Added support for IW
 
 [0.5.5]
