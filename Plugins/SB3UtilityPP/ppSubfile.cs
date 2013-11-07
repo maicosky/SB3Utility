@@ -12,8 +12,8 @@ namespace SB3Utility
 	public class ppSubfile : IReadFile, IWriteFile
 	{
 		public string ppPath;
-		public int offset;
-		public int size;
+		public uint offset;
+		public uint size;
 		public ppFormat ppFormat;
 
 		public object Metadata { get; set; }

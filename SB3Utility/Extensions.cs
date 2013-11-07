@@ -294,6 +294,11 @@ namespace SB3Utility
 		{
 			WriteArray<int>(new Action<int>(writer.Write), array);
 		}
+
+		public static byte[] ReadBytes(this BinaryReader reader, uint count)
+		{
+			return reader.ReadBytes((int)count);
+		}
 		#endregion
 
 		#region IfNotNull

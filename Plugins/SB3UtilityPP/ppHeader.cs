@@ -27,9 +27,9 @@ namespace SB3Utility
 			new ppHeader_Wakeari()
 		};
 
-		public abstract int HeaderSize(int numFiles);
+		public abstract uint HeaderSize(int numFiles);
 		public abstract List<IWriteFile> ReadHeader(string path, ppFormat format);
-		public abstract void WriteHeader(Stream stream, List<IWriteFile> files, int[] sizes, object[] metadata);
+		public abstract void WriteHeader(Stream stream, List<IWriteFile> files, uint[] sizes, object[] metadata);
 		public abstract ppHeader TryHeader(string path);
 		public abstract ppFormat[] ppFormats { get; }
 	}
@@ -46,9 +46,9 @@ namespace SB3Utility
 			}
 		}
 
-		public override int HeaderSize(int numFiles)
+		public override uint HeaderSize(int numFiles)
 		{
-			return (36 * numFiles) + 8;
+			return (uint)((36 * numFiles) + 8);
 		}
 
 		public override List<IWriteFile> ReadHeader(string path, ppFormat format)
@@ -77,12 +77,12 @@ namespace SB3Utility
 				}
 
 				// get filesizes
-				int offset = HeaderSize(numFiles);  // start of first file data
+				uint offset = HeaderSize(numFiles);  // start of first file data
 				for (int i = 0; i < numFiles; i++)
 				{
 					ppSubfile subfile = (ppSubfile)subfiles[i];
 					subfile.offset = offset;
-					subfile.size = binaryReader.ReadInt32();
+					subfile.size = binaryReader.ReadUInt32();
 					offset += subfile.size;
 				}
 			}
@@ -90,7 +90,7 @@ namespace SB3Utility
 			return subfiles;
 		}
 
-		public override void WriteHeader(Stream stream, List<IWriteFile> files, int[] sizes, object[] metadata)
+		public override void WriteHeader(Stream stream, List<IWriteFile> files, uint[] sizes, object[] metadata)
 		{
 			byte[] headerBuf = new byte[HeaderSize(files.Count)];
 			BinaryWriter headerWriter = new BinaryWriter(new MemoryStream(headerBuf));
@@ -112,7 +112,7 @@ namespace SB3Utility
 			}
 
 			// file sizes
-			int totalSize = 0;
+			uint totalSize = 0;
 			for (int i = 0; i < files.Count; i++)
 			{
 				headerWriter.Write(sizes[i]);
@@ -132,7 +132,7 @@ namespace SB3Utility
 			using (BinaryReader binaryReader = new BinaryReader(File.OpenRead(path)))
 			{
 				int numFiles = binaryReader.ReadInt32();
-				int headerSizeTemp = HeaderSize(numFiles);
+				uint headerSizeTemp = HeaderSize(numFiles);
 				if ((numFiles > 0) && (headerSizeTemp > 0) && (headerSizeTemp <= binaryReader.BaseStream.Length))
 				{
 					int totalSizeRead = binaryReader.ReadInt32();
@@ -215,9 +215,9 @@ namespace SB3Utility
 			get { return 0x01; }
 		}
 
-		public override int HeaderSize(int numFiles)
+		public override uint HeaderSize(int numFiles)
 		{
-			return (268 * numFiles) + 9;
+			return (uint)((268 * numFiles) + 9);
 		}
 
 		public List<IWriteFile> ReadHeader(string path, ppFormat format, byte[] SMFigTable)
@@ -236,8 +236,8 @@ namespace SB3Utility
 					ppSubfile subfile = new ppSubfile(path);
 					subfile.ppFormat = format;
 					subfile.Name = Utility.EncodingShiftJIS.GetString(buf, offset, 260).TrimEnd(new char[] { '\0' });
-					subfile.size = BitConverter.ToInt32(buf, offset + 260);
-					subfile.offset = BitConverter.ToInt32(buf, offset + 264);
+					subfile.size = BitConverter.ToUInt32(buf, offset + 260);
+					subfile.offset = BitConverter.ToUInt32(buf, offset + 264);
 					subfiles.Add(subfile);
 				}
 			}
@@ -245,7 +245,7 @@ namespace SB3Utility
 			return subfiles;
 		}
 
-		public void WriteHeader(Stream stream, List<IWriteFile> files, int[] sizes, byte[] SMFigTable)
+		public void WriteHeader(Stream stream, List<IWriteFile> files, uint[] sizes, byte[] SMFigTable)
 		{
 			byte[] headerBuf = new byte[HeaderSize(files.Count)];
 			BinaryWriter headerWriter = new BinaryWriter(new MemoryStream(headerBuf));
@@ -254,7 +254,7 @@ namespace SB3Utility
 			headerWriter.Write(DecryptHeaderBytes(BitConverter.GetBytes(files.Count), SMFigTable));
 
 			byte[] fileHeaderBuf = new byte[268 * files.Count];
-			int fileOffset = headerBuf.Length;
+			uint fileOffset = (uint)headerBuf.Length;
 			for (int i = 0; i < files.Count; i++)
 			{
 				int idx = i * 268;
@@ -281,7 +281,7 @@ namespace SB3Utility
 				{
 					int numFiles = BitConverter.ToInt32(DecryptHeaderBytes(reader.ReadBytes(4), SMFigTable), 0);
 
-					int headerSizeTemp = HeaderSize(numFiles);
+					uint headerSizeTemp = HeaderSize(numFiles);
 					if ((numFiles > 0) && (headerSizeTemp > 0) && (headerSizeTemp <= reader.BaseStream.Length))
 					{
 						DecryptHeaderBytes(reader.ReadBytes(numFiles * 268), SMFigTable);
@@ -316,7 +316,7 @@ namespace SB3Utility
 			return ReadHeader(path, format, InitTableFigure());
 		}
 
-		public override void WriteHeader(Stream stream, List<IWriteFile> files, int[] sizes, object[] metadata)
+		public override void WriteHeader(Stream stream, List<IWriteFile> files, uint[] sizes, object[] metadata)
 		{
 			base.WriteHeader(stream, files, sizes, InitTableFigure());
 		}
@@ -447,7 +447,7 @@ namespace SB3Utility
 			return ReadHeader(path, format, null);
 		}
 
-		public override void WriteHeader(Stream stream, List<IWriteFile> files, int[] sizes, object[] metadata)
+		public override void WriteHeader(Stream stream, List<IWriteFile> files, uint[] sizes, object[] metadata)
 		{
 			base.WriteHeader(stream, files, sizes, null);
 		}
@@ -507,9 +507,9 @@ namespace SB3Utility
 		const int Version = 0x6C;
 		byte[] ppVersionBytes = Encoding.ASCII.GetBytes("[PPVER]\0");
 
-		public override int HeaderSize(int numFiles)
+		public override uint HeaderSize(int numFiles)
 		{
-			return (288 * numFiles) + 9 + 12;
+			return (uint)((288 * numFiles) + 9 + 12);
 		}
 
 		public override List<IWriteFile> ReadHeader(string path, ppFormat format)
@@ -531,8 +531,8 @@ namespace SB3Utility
 					ppSubfile subfile = new ppSubfile(path);
 					subfile.ppFormat = format;
 					subfile.Name = Utility.EncodingShiftJIS.GetString(buf, offset, 260).TrimEnd(new char[] { '\0' });
-					subfile.size = BitConverter.ToInt32(buf, offset + 260);
-					subfile.offset = BitConverter.ToInt32(buf, offset + 264);
+					subfile.size = BitConverter.ToUInt32(buf, offset + 260);
+					subfile.offset = BitConverter.ToUInt32(buf, offset + 264);
 
 					Metadata metadata = new Metadata();
 					metadata.LastBytes = new byte[20];
@@ -545,7 +545,7 @@ namespace SB3Utility
 			return subfiles;
 		}
 
-		public override void WriteHeader(Stream stream, List<IWriteFile> files, int[] sizes, object[] metadata)
+		public override void WriteHeader(Stream stream, List<IWriteFile> files, uint[] sizes, object[] metadata)
 		{
 			byte[] headerBuf = new byte[HeaderSize(files.Count)];
 			BinaryWriter writer = new BinaryWriter(new MemoryStream(headerBuf));
@@ -557,7 +557,7 @@ namespace SB3Utility
 			writer.Write(ppHeader_SMRetail.DecryptHeaderBytes(BitConverter.GetBytes(files.Count)));
 
 			byte[] fileHeaderBuf = new byte[288 * files.Count];
-			int fileOffset = headerBuf.Length;
+			uint fileOffset = (uint)headerBuf.Length;
 			for (int i = 0; i < files.Count; i++)
 			{
 				int idx = i * 288;

@@ -82,8 +82,8 @@ namespace SB3Utility
 				using (BinaryWriter writer = new BinaryWriter(File.Create(destPath)))
 				{
 					writer.BaseStream.Seek(Format.ppHeader.HeaderSize(Subfiles.Count), SeekOrigin.Begin);
-					int offset = (int)writer.BaseStream.Position;
-					int[] sizes = new int[Subfiles.Count];
+					uint offset = (uint)writer.BaseStream.Position;
+					uint[] sizes = new uint[Subfiles.Count];
 					object[] metadata = new object[Subfiles.Count];
 
 					for (int i = 0; i < Subfiles.Count; i++)
@@ -103,7 +103,7 @@ namespace SB3Utility
 							{
 								reader.BaseStream.Seek(subfile.offset, SeekOrigin.Begin);
 
-								int readSteps = subfile.size / Utility.BufSize;
+								uint readSteps = subfile.size / Utility.BufSize;
 								for (int j = 0; j < readSteps; j++)
 								{
 									writer.Write(reader.ReadBytes(Utility.BufSize));
@@ -119,7 +119,7 @@ namespace SB3Utility
 							metadata[i] = Format.FinishWriteTo(stream);
 						}
 
-						int pos = (int)writer.BaseStream.Position;
+						uint pos = (uint)writer.BaseStream.Position;
 						sizes[i] = pos - offset;
 						offset = pos;
 					}
@@ -128,7 +128,7 @@ namespace SB3Utility
 					{
 						writer.BaseStream.Seek(0, SeekOrigin.Begin);
 						Format.ppHeader.WriteHeader(writer.BaseStream, Subfiles, sizes, metadata);
-						offset = (int)writer.BaseStream.Position;
+						offset = (uint)writer.BaseStream.Position;
 						for (int i = 0; i < Subfiles.Count; i++)
 						{
 							ppSubfile subfile = Subfiles[i] as ppSubfile;

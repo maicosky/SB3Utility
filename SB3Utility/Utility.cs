@@ -15,7 +15,7 @@ namespace SB3Utility
 	{
 		public static Encoding EncodingShiftJIS = Encoding.GetEncoding("Shift-JIS");
 		public static CultureInfo CultureUS = new CultureInfo("en-US");
-		public const int BufSize = 0x400000;
+		public const uint BufSize = 0x400000;
 
 		public static string GetDestFile(DirectoryInfo dir, string prefix, string ext)
 		{

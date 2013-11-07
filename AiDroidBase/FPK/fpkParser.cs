@@ -45,8 +45,8 @@ namespace AiDroidPlugin
 				for (int i = 0; i < numFiles; i++)
 				{
 					fpkSubfile subfile = new fpkSubfile(path);
-					subfile.offset = reader.ReadInt32();
-					subfile.size = reader.ReadInt32();
+					subfile.offset = reader.ReadUInt32();
+					subfile.size = reader.ReadUInt32();
 					byte[] nameBuf = reader.ReadBytes(20);
 					int len = 0;
 					while (nameBuf[len] != 0)
@@ -115,8 +115,8 @@ namespace AiDroidPlugin
 					for (int i = 0; i < numFiles; i++)
 					{
 						fpkSubfile subfile = new fpkSubfile(path);
-						subfile.offset = cryptoReader.ReadInt32();
-						subfile.size = cryptoReader.ReadInt32();
+						subfile.offset = cryptoReader.ReadUInt32();
+						subfile.size = cryptoReader.ReadUInt32();
 						byte[] nameBuf = cryptoReader.ReadBytes(128);
 						int len = 0;
 						while (len < nameBuf.Length && nameBuf[len] != 0)
@@ -226,7 +226,7 @@ namespace AiDroidPlugin
 		public abstract Stream WriteStream(Stream stream);
 		public abstract object FinishWriteTo(Stream stream);
 
-		public static fpkSubfileFormat GetFormat(FileStream fs, int length)
+		public static fpkSubfileFormat GetFormat(FileStream fs, uint length)
 		{
 			BinaryReader reader = new BinaryReader(fs);
 			string formatStr = Utility.EncodingShiftJIS.GetString(reader.ReadBytes(4));
@@ -243,11 +243,11 @@ namespace AiDroidPlugin
 
 	public class fpkSubfileFormat_Uncompressed : fpkSubfileFormat
 	{
-		protected int length;
+		protected uint length;
 
 		public fpkSubfileFormat_Uncompressed() : base("Uncompressed", fpkSubfileFormatIdx.Uncompressed) { }
 
-		public fpkSubfileFormat_Uncompressed(int length)
+		public fpkSubfileFormat_Uncompressed(uint length)
 			: this()
 		{
 			this.length = length;
@@ -295,8 +295,8 @@ namespace AiDroidPlugin
 		public string fpkPath;
 
 		public string Name { get; set; }
-		public int offset;
-		public int size;
+		public uint offset;
+		public uint size;
 		public int crc;
 
 		public fpkSubfileFormat format;
@@ -438,7 +438,7 @@ namespace AiDroidPlugin
 							{
 								reader.BaseStream.Seek(subfile.offset, SeekOrigin.Begin);
 
-								int readSteps = subfile.size / Utility.BufSize;
+								uint readSteps = subfile.size / Utility.BufSize;
 								for (int j = 0; j < readSteps; j++)
 								{
 									writer.Write(reader.ReadBytes(Utility.BufSize));
