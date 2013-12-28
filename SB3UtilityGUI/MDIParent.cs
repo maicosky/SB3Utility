@@ -79,7 +79,9 @@ namespace SB3Utility
 
 				eulerFilterToolStripMenuItem.CheckedChanged += eulerFilterToolStripMenuItem_Click;
 				toolStripEditTextBoxFilterPrecision.Text = ((Single)Gui.Config["FbxImportAnimationFilterPrecision"]).ToString();
-				toolStripEditTextBoxFilterPrecision.AfterEditTextChanged += new EventHandler(toolStripEditTextBoxFilterPrecision_AfterEditTextChanged);
+				toolStripEditTextBoxFilterPrecision.AfterEditTextChanged += toolStripEditTextBoxFilterPrecision_AfterEditTextChanged;
+				toolStripEditTextBoxSwapThesholdMB.Text = ((long)Gui.Config["PrivateMemSwapThresholdMB"]).ToString();
+				toolStripEditTextBoxSwapThesholdMB.AfterEditTextChanged += toolStripEditTextBoxSwapThesholdMB_AfterEditTextChanged;
 			}
 			catch (Exception ex)
 			{
@@ -660,6 +662,11 @@ namespace SB3Utility
 		private void toolStripEditTextBoxFilterPrecision_AfterEditTextChanged(object sender, EventArgs e)
 		{
 			Properties.Settings.Default["FbxImportAnimationFilterPrecision"] = Single.Parse(toolStripEditTextBoxFilterPrecision.Text);
+		}
+
+		private void toolStripEditTextBoxSwapThesholdMB_AfterEditTextChanged(object sender, EventArgs e)
+		{
+			Properties.Settings.Default["PrivateMemSwapThresholdMB"] = long.Parse(toolStripEditTextBoxSwapThesholdMB.Text);
 		}
 
 		private void definedVariablesToolStripMenuItem_Click(object sender, EventArgs e)

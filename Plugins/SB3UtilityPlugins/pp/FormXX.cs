@@ -113,6 +113,7 @@ namespace SB3Utility
 		private HashSet<string> SkinFrames = new HashSet<string>();
 
 		private const Keys MASS_DESTRUCTION_KEY_COMBINATION = Keys.Delete | Keys.Shift;
+		private readonly Color MARK_BACKGROUND_COLOR = Color.SteelBlue;
 
 		public FormXX(string path, string variable)
 		{
@@ -2112,12 +2113,62 @@ namespace SB3Utility
 		{
 			try
 			{
+				TreeNode node = (TreeNode)e.Data.GetData(typeof(TreeNode));
+				if (node != null)
+				{
+					MarkEmptyDropZone();
+				}
 				UpdateDragDrop(sender, e);
 			}
 			catch (Exception ex)
 			{
 				Utility.ReportException(ex);
 			}
+		}
+
+		private void MarkEmptyDropZone()
+		{
+			treeViewObjectTree.BackColor = MARK_BACKGROUND_COLOR;
+			SetBackColor(treeViewObjectTree.Nodes, Color.White);
+		}
+
+		private void SetBackColor(TreeNodeCollection nodes, Color col)
+		{
+			foreach (TreeNode node in nodes)
+			{
+				node.BackColor = col;
+				SetBackColor(node.Nodes, col);
+			}
+		}
+
+		private void treeViewObjectTree_DragLeave(object sender, EventArgs e)
+		{
+			UnmarkEmptyDropZone();
+		}
+
+		private void UnmarkEmptyDropZone()
+		{
+			treeViewObjectTree.BackColor = Color.White;
+		}
+
+		TreeNode lastSelectedNode = null;
+
+		private void treeViewObjectTree_DrawNode(object sender, DrawTreeNodeEventArgs e)
+		{
+			if ((e.State & TreeNodeStates.Selected) != 0)
+			{
+				lastSelectedNode = e.Node;
+				if (treeViewObjectTree.BackColor == MARK_BACKGROUND_COLOR)
+				{
+					treeViewObjectTree.BackColor = Color.White;
+				}
+			}
+			else if (e.Node == lastSelectedNode && !e.Node.IsSelected && lastSelectedNode.BackColor == Color.White)
+			{
+				lastSelectedNode.TreeView.BackColor = MARK_BACKGROUND_COLOR;
+				lastSelectedNode = null;
+			}
+			e.DrawDefault = true;
 		}
 
 		private void treeViewObjectTree_DragOver(object sender, DragEventArgs e)
@@ -2146,6 +2197,7 @@ namespace SB3Utility
 					ProcessDragDropSources(node);
 					dragOptions.checkBoxOkContinue.Checked = false;
 				}
+				UnmarkEmptyDropZone();
 			}
 			catch (Exception ex)
 			{
@@ -3152,16 +3204,16 @@ namespace SB3Utility
 					return;
 				}
 
-				if (!checkBoxMeshReorderSubmesh.Checked)
+				if (!checkBoxSubmeshReorder.Checked)
 				{
-					checkBoxMeshReorderSubmesh.Text = "Move To";
-					checkBoxMeshReorderSubmesh.Checked = true;
-					checkBoxMeshReorderSubmesh.Tag = dataGridViewMesh.SelectedRows[0].Index;
+					checkBoxSubmeshReorder.Text = "Move To";
+					checkBoxSubmeshReorder.Checked = true;
+					checkBoxSubmeshReorder.Tag = dataGridViewMesh.SelectedRows[0].Index;
 				}
 				else
 				{
-					checkBoxMeshReorderSubmesh.Text = "Reorder";
-					checkBoxMeshReorderSubmesh.Checked = false;
+					checkBoxSubmeshReorder.Text = "Reorder";
+					checkBoxSubmeshReorder.Checked = false;
 				}
 			}
 			catch (Exception ex)
@@ -3368,22 +3420,22 @@ namespace SB3Utility
 		{
 			try
 			{
-				if (!checkBoxMeshReorderSubmesh.Checked)
+				if (!checkBoxSubmeshReorder.Checked)
 				{
 					HighlightSubmeshes();
 				}
 				else
 				{
-					Gui.Scripting.RunScript(EditorVar + ".MoveSubmesh(meshId=" + loadedMesh + ", submeshId=" + (int)checkBoxMeshReorderSubmesh.Tag + ", newPosition=" + dataGridViewMesh.SelectedRows[0].Index + ")");
+					Gui.Scripting.RunScript(EditorVar + ".MoveSubmesh(meshId=" + loadedMesh + ", submeshId=" + (int)checkBoxSubmeshReorder.Tag + ", newPosition=" + dataGridViewMesh.SelectedRows[0].Index + ")");
 
 					RecreateRenderObjects();
 					int pos = dataGridViewMesh.SelectedRows[0].Index;
-					DataGridViewRow src = dataGridViewMesh.Rows[(int)checkBoxMeshReorderSubmesh.Tag];
+					DataGridViewRow src = dataGridViewMesh.Rows[(int)checkBoxSubmeshReorder.Tag];
 					dataGridViewMesh.Rows.Remove(src);
 					dataGridViewMesh.Rows.Insert(pos, src);
 
-					checkBoxMeshReorderSubmesh.Text = "Reorder";
-					checkBoxMeshReorderSubmesh.Checked = false;
+					checkBoxSubmeshReorder.Text = "Reorder";
+					checkBoxSubmeshReorder.Checked = false;
 				}
 			}
 			catch (Exception ex)
@@ -3822,7 +3874,7 @@ namespace SB3Utility
 		{
 			try
 			{
-				if (checkBoxNewSkin.Checked)
+				if (checkBoxMeshNewSkin.Checked)
 				{
 					buttonAddToSkin.Enabled = true;
 				}
@@ -3876,6 +3928,56 @@ namespace SB3Utility
 					Report.ReportLog("Frame " + Editor.Frames[loadedFrame].Name + " removed from skin definition.");
 					treeViewObjectTree.SelectedNode.BackColor = Color.White;
 					buttonAddToSkin.Text = "Add To Skin";
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonMeshRestPose_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				string meshNames = String.Empty;
+				List<int> reselect = null;
+				if (listViewMesh.SelectedItems.Count > 0)
+				{
+					reselect = new List<int>(listViewMesh.SelectedIndices.Count);
+					for (int i = 0; i < listViewMesh.SelectedItems.Count; i++)
+					{
+						int meshId = (int)listViewMesh.SelectedItems[i].Tag;
+						meshNames += "\"" + Editor.Meshes[meshId].Name + "\", ";
+						reselect.Add(meshId);
+					}
+				}
+				else
+				{
+					if (listViewMesh.Items.Count <= 0)
+					{
+						return;
+					}
+
+					for (int i = 0; i < listViewMesh.Items.Count; i++)
+					{
+						meshNames += "\"" + Editor.Meshes[(int)listViewMesh.Items[i].Tag].Name + "\", ";
+					}
+				}
+				meshNames = "{ " + meshNames.Substring(0, meshNames.Length - 2) + " }";
+
+				Gui.Scripting.RunScript(EditorVar + ".ComputeBoneMatrices(meshNames=" + meshNames + ")");
+
+				RecreateMeshes();
+				if (reselect != null)
+				{
+					for (int i = 0; i < listViewMesh.Items.Count; i++)
+					{
+						if (reselect.Contains((int)listViewMesh.Items[i].Tag))
+						{
+							listViewMesh.Items[i].Selected = true;
+						}
+					}
 				}
 			}
 			catch (Exception ex)

@@ -819,6 +819,22 @@ namespace SB3Utility
 		}
 
 		[Plugin]
+		public void ComputeBoneMatrices(object[] meshNames)
+		{
+			string[] meshFrameNames = Utility.Convert<string>(meshNames);
+			List<string> meshFrameNamesList = new List<string>(meshFrameNames.Length);
+			foreach (string name in meshFrameNames)
+			{
+				meshFrameNamesList.Add(name);
+			}
+			List<xxFrame> meshFrames = xx.FindMeshFrames(Parser.Frame, meshFrameNamesList);
+			foreach (xxFrame meshFrame in meshFrames)
+			{
+				xx.ComputeBoneMatrices(meshFrame.Mesh.BoneList, Parser.Frame);
+			}
+		}
+
+		[Plugin]
 		public void ExportTexture(int id, string path)
 		{
 			xx.ExportTexture(Parser.TextureList[id], path);

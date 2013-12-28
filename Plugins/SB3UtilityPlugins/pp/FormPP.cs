@@ -201,13 +201,24 @@ namespace SB3Utility
 
 		private void InitSubfileLists()
 		{
+			adjustSubfileListsEnabled(false);
+			int[] selectedXX = new int[xxSubfilesList.SelectedIndices.Count];
+			xxSubfilesList.SelectedIndices.CopyTo(selectedXX, 0);
 			xxSubfilesList.Items.Clear();
+			int[] selectedXA = new int[xaSubfilesList.SelectedIndices.Count];
+			xaSubfilesList.SelectedIndices.CopyTo(selectedXA, 0);
 			xaSubfilesList.Items.Clear();
+			int[] selectedImg = new int[imageSubfilesList.SelectedIndices.Count];
+			imageSubfilesList.SelectedIndices.CopyTo(selectedImg, 0);
 			imageSubfilesList.Items.Clear();
+			int[] selectedSnd = new int[soundSubfilesList.SelectedIndices.Count];
+			soundSubfilesList.SelectedIndices.CopyTo(selectedSnd, 0);
 			soundSubfilesList.Items.Clear();
+			int[] selectedOther = new int[otherSubfilesList.SelectedIndices.Count];
+			otherSubfilesList.SelectedIndices.CopyTo(selectedOther, 0);
 			otherSubfilesList.Items.Clear();
 
-			adjustSubfileListsEnabled(false);
+			int longestXX = -1, longestXA = -1, longestImg = -1, longestSnd = -1, longestOther = -1;
 			List<ListViewItem> xxFiles = new List<ListViewItem>(Editor.Parser.Subfiles.Count);
 			List<ListViewItem> xaFiles = new List<ListViewItem>(Editor.Parser.Subfiles.Count);
 			List<ListViewItem> imageFiles = new List<ListViewItem>(Editor.Parser.Subfiles.Count);
@@ -218,45 +229,106 @@ namespace SB3Utility
 				IWriteFile subfile = Editor.Parser.Subfiles[i];
 				ListViewItem item = new ListViewItem(subfile.Name);
 				item.Tag = subfile;
+				if (!(subfile is ppSubfile))
+				{
+					item.Font = new Font(item.Font, subfile is ppSwapfile ? FontStyle.Italic : FontStyle.Bold);
+				}
 
 				string ext = Path.GetExtension(subfile.Name).ToLower();
 				if (ext.Equals(".xx"))
 				{
 					xxFiles.Add(item);
+					if (longestXX < 0 || subfile.Name.Length > ((IWriteFile)xxFiles[longestXX].Tag).Name.Length)
+					{
+						longestXX = xxFiles.Count - 1;
+					}
 				}
 				else if (ext.Equals(".xa"))
 				{
 					xaFiles.Add(item);
+					if (longestXA < 0 || subfile.Name.Length > ((IWriteFile)xaFiles[longestXA].Tag).Name.Length)
+					{
+						longestXA = xaFiles.Count - 1;
+					}
 				}
 				else if (ext.Equals(".ema") || Utility.ImageSupported(ext))
 				{
 					imageFiles.Add(item);
+					if (longestImg < 0 || subfile.Name.Length > ((IWriteFile)imageFiles[longestImg].Tag).Name.Length)
+					{
+						longestImg = imageFiles.Count - 1;
+					}
 				}
 				else if (ext.Equals(".ogg") || ext.Equals(".wav"))
 				{
 					soundFiles.Add(item);
+					if (longestSnd < 0 || subfile.Name.Length > ((IWriteFile)soundFiles[longestSnd].Tag).Name.Length)
+					{
+						longestSnd = soundFiles.Count - 1;
+					}
 				}
 				else
 				{
 					List<ExternalTool> toolList;
-					if (!subfile.Name.ToUpper().EndsWith(".LST") && !ppEditor.ExternalTools.TryGetValue(Path.GetExtension(subfile.Name).ToUpper(), out toolList))
+					if (!ext.EndsWith(".lst") && !ppEditor.ExternalTools.TryGetValue(ext.ToUpper(), out toolList))
 					{
 						item.BackColor = Color.LightCoral;
 					}
 					otherFiles.Add(item);
+					if (longestOther < 0 || subfile.Name.Length > ((IWriteFile)otherFiles[longestOther].Tag).Name.Length)
+					{
+						longestOther = otherFiles.Count - 1;
+					}
 				}
 			}
 			xxSubfilesList.Items.AddRange(xxFiles.ToArray());
+			if (longestXX >= 0)
+			{
+				xxSubfilesList.Items[longestXX].EnsureVisible();
+			}
 			xaSubfilesList.Items.AddRange(xaFiles.ToArray());
+			if (longestXA >= 0)
+			{
+				xaSubfilesList.Items[longestXA].EnsureVisible();
+			}
 			imageSubfilesList.Items.AddRange(imageFiles.ToArray());
+			if (longestImg >= 0)
+			{
+				imageSubfilesList.Items[longestImg].EnsureVisible();
+			}
 			soundSubfilesList.Items.AddRange(soundFiles.ToArray());
+			if (longestSnd >= 0)
+			{
+				soundSubfilesList.Items[longestSnd].EnsureVisible();
+			}
 			otherSubfilesList.Items.AddRange(otherFiles.ToArray());
-			adjustSubfileLists();
+			if (longestOther >= 0)
+			{
+				otherSubfilesList.Items[longestOther].EnsureVisible();
+			}
 			adjustSubfileListsEnabled(true);
+			adjustSubfileLists();
+			ReselectItems(xxSubfilesList, selectedXX);
+			ReselectItems(xaSubfilesList, selectedXA);
+			ReselectItems(imageSubfilesList, selectedImg);
+			ReselectItems(soundSubfilesList, selectedSnd);
+			ReselectItems(otherSubfilesList, selectedOther);
 
 			if (soundSubfilesList.Items.Count > 0 && soundLib == null)
 			{
 				soundLib = new Utility.SoundLib();
+			}
+		}
+
+		private void ReselectItems(ListView subfiles, int[] selectedSubfiles)
+		{
+			foreach (int i in selectedSubfiles)
+			{
+				if (i < subfiles.Items.Count)
+				{
+					subfiles.Items[i].Selected = true;
+					subfiles.Items[i].EnsureVisible();
+				}
 			}
 		}
 
@@ -282,10 +354,7 @@ namespace SB3Utility
 		{
 			for (int i = 0; i < subfileListViews.Count; i++)
 			{
-				subfileListViews[i].BeginUpdate();
-				subfileListViews[i].Sort();
 				subfileListViews[i].AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
-				subfileListViews[i].EndUpdate();
 
 				TabPage tabPage = (TabPage)subfileListViews[i].Parent;
 				int countIdx = tabPage.Text.IndexOf('[');
@@ -478,6 +547,39 @@ namespace SB3Utility
 				DockContent form = (DockContent)sender;
 				form.FormClosing -= new FormClosingEventHandler(ChildForms_FormClosing);
 				ChildForms.Remove((string)form.Tag);
+
+				System.Diagnostics.Process currentProcess = System.Diagnostics.Process.GetCurrentProcess();
+				long privateMemMB = currentProcess.PrivateMemorySize64 / 1024 / 1024;
+				if (privateMemMB >= (long)Gui.Config["PrivateMemSwapThresholdMB"])
+				{
+					string parserVar;
+					if (form is FormXX)
+					{
+						FormXX formXX = (FormXX)form;
+						parserVar = formXX.ParserVar;
+					}
+					else if (form is FormXA)
+					{
+						FormXA formXA = (FormXA)form;
+						parserVar = formXA.ParserVar;
+					}
+					else if (form is FormLST)
+					{
+						FormLST formLST = (FormLST)form;
+						parserVar = formLST.ParserVar;
+					}
+					else
+					{
+						throw new Exception("Unimplemented editor type closed " + form.GetType());
+					}
+					string swapfileVar = Gui.Scripting.GetNextVariable("swapfile");
+					Gui.Scripting.RunScript(swapfileVar + " = OpenSwapfile(ppParser=" + ParserVar + ", parserToSwap=" + parserVar + ")");
+					Gui.Scripting.RunScript(EditorVar + ".ReplaceSubfile(file=" + swapfileVar + ")");
+					ChildParserVars.Remove((string)form.Tag);
+					Gui.Scripting.RunScript(swapfileVar + "=null");
+					Gui.Scripting.RunScript(parserVar + "=null");
+					InitSubfileLists();
+				}
 			}
 			catch (Exception ex)
 			{

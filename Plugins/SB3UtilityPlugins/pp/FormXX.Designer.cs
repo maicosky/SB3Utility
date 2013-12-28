@@ -44,12 +44,13 @@
 			this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.keepBackupToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-			this.checkBoxNewSkin = new System.Windows.Forms.CheckBox();
+			this.checkBoxMeshNewSkin = new System.Windows.Forms.CheckBox();
 			this.checkBoxMeshExportMqoSortMeshes = new System.Windows.Forms.CheckBox();
 			this.checkBoxMeshExportFbxLinearInterpolation = new System.Windows.Forms.CheckBox();
 			this.checkBoxMeshExportEmbedMedia = new System.Windows.Forms.CheckBox();
 			this.textBoxKeyframeRange = new SB3Utility.EditTextBox();
-			this.checkBoxMeshReorderSubmesh = new System.Windows.Forms.CheckBox();
+			this.checkBoxSubmeshReorder = new System.Windows.Forms.CheckBox();
+			this.treeViewObjectTree = new System.Windows.Forms.TreeView();
 			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
 			this.textBoxFormat = new SB3Utility.EditTextBox();
 			this.buttonConvert = new System.Windows.Forms.Button();
@@ -57,7 +58,6 @@
 			this.label26 = new System.Windows.Forms.Label();
 			this.tabControlLists = new System.Windows.Forms.TabControl();
 			this.tabPageObject = new System.Windows.Forms.TabPage();
-			this.treeViewObjectTree = new System.Windows.Forms.TreeView();
 			this.panelObjectTreeBottom = new System.Windows.Forms.Panel();
 			this.buttonObjectTreeCollapse = new System.Windows.Forms.Button();
 			this.buttonObjectTreeExpand = new System.Windows.Forms.Button();
@@ -151,7 +151,7 @@
 			this.buttonMeshNormals = new System.Windows.Forms.Button();
 			this.buttonMeshEditHex = new System.Windows.Forms.Button();
 			this.buttonMeshMinBones = new System.Windows.Forms.Button();
-			this.MeshGotoFrame = new System.Windows.Forms.Button();
+			this.buttonMeshGotoFrame = new System.Windows.Forms.Button();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
 			this.label28 = new System.Windows.Forms.Label();
 			this.comboBoxMeshExportFormat = new System.Windows.Forms.ComboBox();
@@ -181,7 +181,7 @@
 			this.ColumnSubmeshVerts = new System.Windows.Forms.DataGridViewTextBoxColumn();
 			this.ColumnSubmeshFaces = new System.Windows.Forms.DataGridViewTextBoxColumn();
 			this.ColumnSubmeshMaterial = new System.Windows.Forms.DataGridViewComboBoxColumn();
-			this.buttonSubmeshEdit = new System.Windows.Forms.Button();
+			this.buttonSubmeshEditHex = new System.Windows.Forms.Button();
 			this.buttonSubmeshRemove = new System.Windows.Forms.Button();
 			this.textBoxMeshName = new SB3Utility.EditTextBox();
 			this.tabPageMaterialView = new System.Windows.Forms.TabPage();
@@ -223,6 +223,7 @@
 			this.textBoxMatDiffuseR = new SB3Utility.EditTextBox();
 			this.textBoxMatName = new SB3Utility.EditTextBox();
 			this.tabPageTextureView = new System.Windows.Forms.TabPage();
+			this.label14 = new System.Windows.Forms.Label();
 			this.buttonTextureEditHex = new System.Windows.Forms.Button();
 			this.buttonTextureAdd = new System.Windows.Forms.Button();
 			this.panelTexturePic = new System.Windows.Forms.Panel();
@@ -233,7 +234,7 @@
 			this.buttonTextureRemove = new System.Windows.Forms.Button();
 			this.textBoxTexSize = new SB3Utility.EditTextBox();
 			this.textBoxTexName = new SB3Utility.EditTextBox();
-			this.label14 = new System.Windows.Forms.Label();
+			this.buttonMeshRestPose = new System.Windows.Forms.Button();
 			this.menuStrip1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
 			this.splitContainer1.Panel1.SuspendLayout();
@@ -328,7 +329,7 @@
             this.toolStripSeparator6,
             this.closeToolStripMenuItem});
 			this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-			this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 18);
+			this.fileToolStripMenuItem.Size = new System.Drawing.Size(35, 18);
 			this.fileToolStripMenuItem.Text = "&File";
 			// 
 			// reopenToolStripMenuItem
@@ -336,40 +337,40 @@
 			this.reopenToolStripMenuItem.Name = "reopenToolStripMenuItem";
 			this.reopenToolStripMenuItem.ShortcutKeyDisplayString = "";
 			this.reopenToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.R)));
-			this.reopenToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+			this.reopenToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
 			this.reopenToolStripMenuItem.Text = "&Reopen .xx";
 			this.reopenToolStripMenuItem.Click += new System.EventHandler(this.reopenToolStripMenuItem_Click);
 			// 
 			// toolStripSeparator1
 			// 
 			this.toolStripSeparator1.Name = "toolStripSeparator1";
-			this.toolStripSeparator1.Size = new System.Drawing.Size(168, 6);
+			this.toolStripSeparator1.Size = new System.Drawing.Size(166, 6);
 			// 
 			// savexxToolStripMenuItem
 			// 
 			this.savexxToolStripMenuItem.Name = "savexxToolStripMenuItem";
 			this.savexxToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-			this.savexxToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+			this.savexxToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
 			this.savexxToolStripMenuItem.Text = "&Save .xx";
 			this.savexxToolStripMenuItem.Click += new System.EventHandler(this.savexxToolStripMenuItem_Click);
 			// 
 			// savexxAsToolStripMenuItem
 			// 
 			this.savexxAsToolStripMenuItem.Name = "savexxAsToolStripMenuItem";
-			this.savexxAsToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+			this.savexxAsToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
 			this.savexxAsToolStripMenuItem.Text = "Save .xx &As...";
 			this.savexxAsToolStripMenuItem.Click += new System.EventHandler(this.savexxAsToolStripMenuItem_Click);
 			// 
 			// toolStripSeparator6
 			// 
 			this.toolStripSeparator6.Name = "toolStripSeparator6";
-			this.toolStripSeparator6.Size = new System.Drawing.Size(168, 6);
+			this.toolStripSeparator6.Size = new System.Drawing.Size(166, 6);
 			// 
 			// closeToolStripMenuItem
 			// 
 			this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
 			this.closeToolStripMenuItem.ShortcutKeyDisplayString = "Ctrl+F4";
-			this.closeToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+			this.closeToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
 			this.closeToolStripMenuItem.Text = "&Close";
 			this.closeToolStripMenuItem.Click += new System.EventHandler(this.closeToolStripMenuItem_Click);
 			// 
@@ -378,7 +379,7 @@
 			this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.keepBackupToolStripMenuItem});
 			this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-			this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 18);
+			this.optionsToolStripMenuItem.Size = new System.Drawing.Size(56, 18);
 			this.optionsToolStripMenuItem.Text = "&Options";
 			// 
 			// keepBackupToolStripMenuItem
@@ -387,21 +388,27 @@
 			this.keepBackupToolStripMenuItem.CheckOnClick = true;
 			this.keepBackupToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.keepBackupToolStripMenuItem.Name = "keepBackupToolStripMenuItem";
-			this.keepBackupToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
+			this.keepBackupToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
 			this.keepBackupToolStripMenuItem.Text = "Keep &Backup";
 			// 
-			// checkBoxNewSkin
+			// toolTip1
 			// 
-			this.checkBoxNewSkin.Appearance = System.Windows.Forms.Appearance.Button;
-			this.checkBoxNewSkin.Location = new System.Drawing.Point(174, 169);
-			this.checkBoxNewSkin.Name = "checkBoxNewSkin";
-			this.checkBoxNewSkin.Size = new System.Drawing.Size(73, 23);
-			this.checkBoxNewSkin.TabIndex = 50;
-			this.checkBoxNewSkin.Text = "New Skin";
-			this.checkBoxNewSkin.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-			this.toolTip1.SetToolTip(this.checkBoxNewSkin, resources.GetString("checkBoxNewSkin.ToolTip"));
-			this.checkBoxNewSkin.UseVisualStyleBackColor = true;
-			this.checkBoxNewSkin.Click += new System.EventHandler(this.checkBoxNewSkin_Click);
+			this.toolTip1.ShowAlways = true;
+			this.toolTip1.UseAnimation = false;
+			this.toolTip1.UseFading = false;
+			// 
+			// checkBoxMeshNewSkin
+			// 
+			this.checkBoxMeshNewSkin.Appearance = System.Windows.Forms.Appearance.Button;
+			this.checkBoxMeshNewSkin.Location = new System.Drawing.Point(174, 169);
+			this.checkBoxMeshNewSkin.Name = "checkBoxMeshNewSkin";
+			this.checkBoxMeshNewSkin.Size = new System.Drawing.Size(73, 23);
+			this.checkBoxMeshNewSkin.TabIndex = 50;
+			this.checkBoxMeshNewSkin.Text = "New Skin";
+			this.checkBoxMeshNewSkin.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+			this.toolTip1.SetToolTip(this.checkBoxMeshNewSkin, resources.GetString("checkBoxMeshNewSkin.ToolTip"));
+			this.checkBoxMeshNewSkin.UseVisualStyleBackColor = true;
+			this.checkBoxMeshNewSkin.Click += new System.EventHandler(this.checkBoxNewSkin_Click);
 			// 
 			// checkBoxMeshExportMqoSortMeshes
 			// 
@@ -456,20 +463,40 @@
 			this.toolTip1.SetToolTip(this.textBoxKeyframeRange, "Starting with -1 exports all keyframes without interpolation.\r\nStarting with 0 or" +
         " higher also interpolates.");
 			// 
-			// checkBoxMeshReorderSubmesh
+			// checkBoxSubmeshReorder
 			// 
-			this.checkBoxMeshReorderSubmesh.Appearance = System.Windows.Forms.Appearance.Button;
-			this.checkBoxMeshReorderSubmesh.AutoCheck = false;
-			this.checkBoxMeshReorderSubmesh.Location = new System.Drawing.Point(174, 18);
-			this.checkBoxMeshReorderSubmesh.Name = "checkBoxMeshReorderSubmesh";
-			this.checkBoxMeshReorderSubmesh.Size = new System.Drawing.Size(73, 23);
-			this.checkBoxMeshReorderSubmesh.TabIndex = 146;
-			this.checkBoxMeshReorderSubmesh.Text = "Reorder";
-			this.checkBoxMeshReorderSubmesh.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-			this.toolTip1.SetToolTip(this.checkBoxMeshReorderSubmesh, "1. Select the submesh to move.\r\n2. Click this button.\r\n3. Click on a row to which" +
+			this.checkBoxSubmeshReorder.Appearance = System.Windows.Forms.Appearance.Button;
+			this.checkBoxSubmeshReorder.AutoCheck = false;
+			this.checkBoxSubmeshReorder.Location = new System.Drawing.Point(174, 18);
+			this.checkBoxSubmeshReorder.Name = "checkBoxSubmeshReorder";
+			this.checkBoxSubmeshReorder.Size = new System.Drawing.Size(73, 23);
+			this.checkBoxSubmeshReorder.TabIndex = 146;
+			this.checkBoxSubmeshReorder.Text = "Reorder";
+			this.checkBoxSubmeshReorder.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+			this.toolTip1.SetToolTip(this.checkBoxSubmeshReorder, "1. Select the submesh to move.\r\n2. Click this button.\r\n3. Click on a row to which" +
         " the submesh should be moved to.");
-			this.checkBoxMeshReorderSubmesh.UseVisualStyleBackColor = true;
-			this.checkBoxMeshReorderSubmesh.Click += new System.EventHandler(this.checkBoxMeshReorderSubmesh_Click);
+			this.checkBoxSubmeshReorder.UseVisualStyleBackColor = true;
+			this.checkBoxSubmeshReorder.Click += new System.EventHandler(this.checkBoxMeshReorderSubmesh_Click);
+			// 
+			// treeViewObjectTree
+			// 
+			this.treeViewObjectTree.AllowDrop = true;
+			this.treeViewObjectTree.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.treeViewObjectTree.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawText;
+			this.treeViewObjectTree.HideSelection = false;
+			this.treeViewObjectTree.Location = new System.Drawing.Point(0, 0);
+			this.treeViewObjectTree.Name = "treeViewObjectTree";
+			this.treeViewObjectTree.Size = new System.Drawing.Size(251, 435);
+			this.treeViewObjectTree.TabIndex = 1;
+			this.treeViewObjectTree.DrawNode += new System.Windows.Forms.DrawTreeNodeEventHandler(this.treeViewObjectTree_DrawNode);
+			this.treeViewObjectTree.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.treeViewObjectTree_ItemDrag);
+			this.treeViewObjectTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewObjectTree_AfterSelect);
+			this.treeViewObjectTree.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.treeViewObjectTree_NodeMouseClick);
+			this.treeViewObjectTree.DragDrop += new System.Windows.Forms.DragEventHandler(this.treeViewObjectTree_DragDrop);
+			this.treeViewObjectTree.DragEnter += new System.Windows.Forms.DragEventHandler(this.treeViewObjectTree_DragEnter);
+			this.treeViewObjectTree.DragOver += new System.Windows.Forms.DragEventHandler(this.treeViewObjectTree_DragOver);
+			this.treeViewObjectTree.DragLeave += new System.EventHandler(this.treeViewObjectTree_DragLeave);
+			this.treeViewObjectTree.KeyUp += new System.Windows.Forms.KeyEventHandler(this.treeViewObjectTree_KeyUp);
 			// 
 			// splitContainer1
 			// 
@@ -563,23 +590,6 @@
 			this.tabPageObject.TabIndex = 2;
 			this.tabPageObject.Text = "Object Tree";
 			this.tabPageObject.UseVisualStyleBackColor = true;
-			// 
-			// treeViewObjectTree
-			// 
-			this.treeViewObjectTree.AllowDrop = true;
-			this.treeViewObjectTree.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.treeViewObjectTree.HideSelection = false;
-			this.treeViewObjectTree.Location = new System.Drawing.Point(0, 0);
-			this.treeViewObjectTree.Name = "treeViewObjectTree";
-			this.treeViewObjectTree.Size = new System.Drawing.Size(251, 435);
-			this.treeViewObjectTree.TabIndex = 1;
-			this.treeViewObjectTree.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.treeViewObjectTree_ItemDrag);
-			this.treeViewObjectTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewObjectTree_AfterSelect);
-			this.treeViewObjectTree.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.treeViewObjectTree_NodeMouseClick);
-			this.treeViewObjectTree.DragDrop += new System.Windows.Forms.DragEventHandler(this.treeViewObjectTree_DragDrop);
-			this.treeViewObjectTree.DragEnter += new System.Windows.Forms.DragEventHandler(this.treeViewObjectTree_DragEnter);
-			this.treeViewObjectTree.DragOver += new System.Windows.Forms.DragEventHandler(this.treeViewObjectTree_DragOver);
-			this.treeViewObjectTree.KeyUp += new System.Windows.Forms.KeyEventHandler(this.treeViewObjectTree_KeyUp);
 			// 
 			// panelObjectTreeBottom
 			// 
@@ -1655,11 +1665,12 @@
 			// 
 			// tabPageMeshView
 			// 
-			this.tabPageMeshView.Controls.Add(this.checkBoxNewSkin);
+			this.tabPageMeshView.Controls.Add(this.buttonMeshRestPose);
+			this.tabPageMeshView.Controls.Add(this.checkBoxMeshNewSkin);
 			this.tabPageMeshView.Controls.Add(this.buttonMeshNormals);
 			this.tabPageMeshView.Controls.Add(this.buttonMeshEditHex);
 			this.tabPageMeshView.Controls.Add(this.buttonMeshMinBones);
-			this.tabPageMeshView.Controls.Add(this.MeshGotoFrame);
+			this.tabPageMeshView.Controls.Add(this.buttonMeshGotoFrame);
 			this.tabPageMeshView.Controls.Add(this.groupBox2);
 			this.tabPageMeshView.Controls.Add(this.checkBoxMeshSkinned);
 			this.tabPageMeshView.Controls.Add(this.label8);
@@ -1704,15 +1715,15 @@
 			this.buttonMeshMinBones.UseVisualStyleBackColor = true;
 			this.buttonMeshMinBones.Click += new System.EventHandler(this.buttonMeshMinBones_Click);
 			// 
-			// MeshGotoFrame
+			// buttonMeshGotoFrame
 			// 
-			this.MeshGotoFrame.Location = new System.Drawing.Point(5, 140);
-			this.MeshGotoFrame.Name = "MeshGotoFrame";
-			this.MeshGotoFrame.Size = new System.Drawing.Size(73, 23);
-			this.MeshGotoFrame.TabIndex = 30;
-			this.MeshGotoFrame.Text = "Goto Frame";
-			this.MeshGotoFrame.UseVisualStyleBackColor = true;
-			this.MeshGotoFrame.Click += new System.EventHandler(this.buttonMeshGotoFrame_Click);
+			this.buttonMeshGotoFrame.Location = new System.Drawing.Point(5, 140);
+			this.buttonMeshGotoFrame.Name = "buttonMeshGotoFrame";
+			this.buttonMeshGotoFrame.Size = new System.Drawing.Size(73, 23);
+			this.buttonMeshGotoFrame.TabIndex = 30;
+			this.buttonMeshGotoFrame.Text = "Goto Frame";
+			this.buttonMeshGotoFrame.UseVisualStyleBackColor = true;
+			this.buttonMeshGotoFrame.Click += new System.EventHandler(this.buttonMeshGotoFrame_Click);
 			// 
 			// groupBox2
 			// 
@@ -2001,13 +2012,13 @@
 			// 
 			this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
-			this.groupBox1.Controls.Add(this.checkBoxMeshReorderSubmesh);
+			this.groupBox1.Controls.Add(this.checkBoxSubmeshReorder);
 			this.groupBox1.Controls.Add(this.dataGridViewMesh);
-			this.groupBox1.Controls.Add(this.buttonSubmeshEdit);
+			this.groupBox1.Controls.Add(this.buttonSubmeshEditHex);
 			this.groupBox1.Controls.Add(this.buttonSubmeshRemove);
-			this.groupBox1.Location = new System.Drawing.Point(0, 200);
+			this.groupBox1.Location = new System.Drawing.Point(0, 229);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(253, 296);
+			this.groupBox1.Size = new System.Drawing.Size(253, 267);
 			this.groupBox1.TabIndex = 140;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Submeshes";
@@ -2029,7 +2040,7 @@
 			this.dataGridViewMesh.Name = "dataGridViewMesh";
 			this.dataGridViewMesh.RowHeadersVisible = false;
 			this.dataGridViewMesh.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-			this.dataGridViewMesh.Size = new System.Drawing.Size(246, 244);
+			this.dataGridViewMesh.Size = new System.Drawing.Size(246, 215);
 			this.dataGridViewMesh.TabIndex = 152;
 			this.dataGridViewMesh.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewMesh_CellClick);
 			this.dataGridViewMesh.EditingControlShowing += new System.Windows.Forms.DataGridViewEditingControlShowingEventHandler(this.dataGridViewMesh_EditingControlShowing);
@@ -2062,16 +2073,16 @@
 			this.ColumnSubmeshMaterial.HeaderText = "Material";
 			this.ColumnSubmeshMaterial.Name = "ColumnSubmeshMaterial";
 			// 
-			// buttonSubmeshEdit
+			// buttonSubmeshEditHex
 			// 
-			this.buttonSubmeshEdit.Location = new System.Drawing.Point(5, 18);
-			this.buttonSubmeshEdit.Name = "buttonSubmeshEdit";
-			this.buttonSubmeshEdit.Size = new System.Drawing.Size(73, 23);
-			this.buttonSubmeshEdit.TabIndex = 142;
-			this.buttonSubmeshEdit.TabStop = false;
-			this.buttonSubmeshEdit.Text = "Edit Hex";
-			this.buttonSubmeshEdit.UseVisualStyleBackColor = true;
-			this.buttonSubmeshEdit.Click += new System.EventHandler(this.buttonSubmeshEditHex_Click);
+			this.buttonSubmeshEditHex.Location = new System.Drawing.Point(5, 18);
+			this.buttonSubmeshEditHex.Name = "buttonSubmeshEditHex";
+			this.buttonSubmeshEditHex.Size = new System.Drawing.Size(73, 23);
+			this.buttonSubmeshEditHex.TabIndex = 142;
+			this.buttonSubmeshEditHex.TabStop = false;
+			this.buttonSubmeshEditHex.Text = "Edit Hex";
+			this.buttonSubmeshEditHex.UseVisualStyleBackColor = true;
+			this.buttonSubmeshEditHex.Click += new System.EventHandler(this.buttonSubmeshEditHex_Click);
 			// 
 			// buttonSubmeshRemove
 			// 
@@ -2457,6 +2468,15 @@
 			this.tabPageTextureView.Text = "Texture";
 			this.tabPageTextureView.UseVisualStyleBackColor = true;
 			// 
+			// label14
+			// 
+			this.label14.AutoSize = true;
+			this.label14.Location = new System.Drawing.Point(173, 4);
+			this.label14.Name = "label14";
+			this.label14.Size = new System.Drawing.Size(57, 13);
+			this.label14.TabIndex = 39;
+			this.label14.Text = "Resolution";
+			// 
 			// buttonTextureEditHex
 			// 
 			this.buttonTextureEditHex.Location = new System.Drawing.Point(176, 49);
@@ -2559,14 +2579,16 @@
 			this.textBoxTexName.Size = new System.Drawing.Size(172, 20);
 			this.textBoxTexName.TabIndex = 5;
 			// 
-			// label14
+			// buttonMeshRestPose
 			// 
-			this.label14.AutoSize = true;
-			this.label14.Location = new System.Drawing.Point(173, 4);
-			this.label14.Name = "label14";
-			this.label14.Size = new System.Drawing.Size(57, 13);
-			this.label14.TabIndex = 39;
-			this.label14.Text = "Resolution";
+			this.buttonMeshRestPose.Location = new System.Drawing.Point(174, 198);
+			this.buttonMeshRestPose.Name = "buttonMeshRestPose";
+			this.buttonMeshRestPose.Size = new System.Drawing.Size(73, 23);
+			this.buttonMeshRestPose.TabIndex = 141;
+			this.buttonMeshRestPose.Text = "Rest Pose";
+			this.toolTip1.SetToolTip(this.buttonMeshRestPose, "Recomputes all bone matrices\r\nof all selected meshes");
+			this.buttonMeshRestPose.UseVisualStyleBackColor = true;
+			this.buttonMeshRestPose.Click += new System.EventHandler(this.buttonMeshRestPose_Click);
 			// 
 			// FormXX
 			// 
@@ -2717,7 +2739,7 @@
 		private System.Windows.Forms.Button buttonSubmeshRemove;
 		private System.Windows.Forms.Button buttonMeshRemove;
 		private System.Windows.Forms.ComboBox comboBoxMeshExportFormat;
-		private System.Windows.Forms.Button buttonSubmeshEdit;
+		private System.Windows.Forms.Button buttonSubmeshEditHex;
 		private System.Windows.Forms.GroupBox groupBox1;
 		private System.Windows.Forms.Panel panelMeshExportOptionsCollada;
 		private System.Windows.Forms.CheckBox checkBoxMeshExportColladaAllFrames;
@@ -2816,7 +2838,7 @@
 		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnSubmeshVerts;
 		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnSubmeshFaces;
 		private System.Windows.Forms.DataGridViewComboBoxColumn ColumnSubmeshMaterial;
-		private System.Windows.Forms.Button MeshGotoFrame;
+		private System.Windows.Forms.Button buttonMeshGotoFrame;
 		private System.Windows.Forms.Button buttonTextureAdd;
 		private System.Windows.Forms.Button buttonMeshMinBones;
 		private System.Windows.Forms.NumericUpDown numericFrameMatrixRatio;
@@ -2866,14 +2888,15 @@
 		private System.Windows.Forms.CheckBox checkBoxMeshExportEmbedMedia;
 		private System.Windows.Forms.Button buttonMaterialEditHex;
 		private System.Windows.Forms.Button buttonTextureEditHex;
-		private System.Windows.Forms.CheckBox checkBoxMeshReorderSubmesh;
+		private System.Windows.Forms.CheckBox checkBoxSubmeshReorder;
 		public System.Windows.Forms.DataGridView dataGridViewMesh;
 		private System.Windows.Forms.CheckBox checkBoxMeshExportNoMesh;
 		private System.Windows.Forms.Button buttonZeroWeights;
 		private System.Windows.Forms.CheckBox checkBoxMeshExportFbxLinearInterpolation;
 		private System.Windows.Forms.Button buttonAddToSkin;
-		private System.Windows.Forms.CheckBox checkBoxNewSkin;
+		private System.Windows.Forms.CheckBox checkBoxMeshNewSkin;
 		private System.Windows.Forms.CheckBox checkBoxMeshExportMqoSortMeshes;
 		private System.Windows.Forms.Label label14;
+		private System.Windows.Forms.Button buttonMeshRestPose;
 	}
 }

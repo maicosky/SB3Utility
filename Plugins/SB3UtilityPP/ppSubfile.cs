@@ -12,7 +12,7 @@ namespace SB3Utility
 	public class ppSubfile : IReadFile, IWriteFile
 	{
 		public string ppPath;
-		public uint offset;
+		public long offset;
 		public uint size;
 		public ppFormat ppFormat;
 

@@ -176,6 +176,7 @@
     <Compile Include="pp\FormPPRename.Designer.cs">
       <DependentUpon>FormPPRename.cs</DependentUpon>
     </Compile>
+    <Compile Include="pp\swapfile.cs" />
     <Compile Include="pp\Texture.cs" />
     <Compile Include="ImportBinary.cs" />
     <Compile Include="pp\pp.cs" />

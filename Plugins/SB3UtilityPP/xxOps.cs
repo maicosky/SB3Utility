@@ -1463,6 +1463,20 @@ namespace SB3Utility
 			}
 		}
 
+		public static void ComputeBoneMatrices(List<xxBone> boneList, xxFrame root)
+		{
+			foreach (xxBone bone in boneList)
+			{
+				xxFrame boneFrame = xx.FindFrame(bone.Name, root);
+				if (boneFrame != null)
+				{
+					Matrix m = boneFrame.WorldTransform();
+					m.Invert();
+					bone.Matrix = m;
+				}
+			}
+		}
+
 		public static void SaveXX(xxParser parser, string destPath, bool keepBackup)
 		{
 			DirectoryInfo dir = new DirectoryInfo(Path.GetDirectoryName(destPath));

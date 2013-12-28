@@ -302,5 +302,15 @@ namespace SB3Utility.Properties {
                 return ((bool)(this["ExportMqoSortMeshes"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(PortableSettingsProvider))]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("200")]
+        public long PrivateMemSwapThresholdMB {
+            get {
+                return ((long)(this["PrivateMemSwapThresholdMB"]));
+            }
+        }
     }
 }

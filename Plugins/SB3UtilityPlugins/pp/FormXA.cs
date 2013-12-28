@@ -20,7 +20,7 @@ namespace SB3Utility
 		{
 			[Description("Metasequoia")]
 			Mqo,
-			[Description("FBX 2012.2")]
+			[Description("FBX 2014.1")]
 			Fbx,
 			[Description("FBX 2006")]
 			Fbx_2006

@@ -65,6 +65,8 @@
 			this.eulerFilterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.filterPrecisionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripEditTextBoxFilterPrecision = new SB3Utility.ToolStripEditTextBox();
+			this.swapThresholdMBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripEditTextBoxSwapThesholdMB = new SB3Utility.ToolStripEditTextBox();
 			this.windowsMenu = new System.Windows.Forms.ToolStripMenuItem();
 			this.helpMenu = new System.Windows.Forms.ToolStripMenuItem();
 			this.contentsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -201,7 +203,6 @@
 			// 
 			// definedVariablesToolStripMenuItem
 			// 
-			this.definedVariablesToolStripMenuItem.Enabled = false;
 			this.definedVariablesToolStripMenuItem.Name = "definedVariablesToolStripMenuItem";
 			this.definedVariablesToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
 			this.definedVariablesToolStripMenuItem.Text = "Defined &Variables";
@@ -212,7 +213,8 @@
 			// 
 			this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.pluginsToolStripMenuItem,
-            this.fbxImportAnimationToolStripMenuItem});
+            this.fbxImportAnimationToolStripMenuItem,
+            this.swapThresholdMBToolStripMenuItem});
 			this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
 			this.optionsToolStripMenuItem.Size = new System.Drawing.Size(56, 20);
 			this.optionsToolStripMenuItem.Text = "&Options";
@@ -252,8 +254,24 @@
 			// toolStripEditTextBoxFilterPrecision
 			// 
 			this.toolStripEditTextBoxFilterPrecision.Name = "toolStripEditTextBoxFilterPrecision";
-			this.toolStripEditTextBoxFilterPrecision.Size = new System.Drawing.Size(100, 21);
+			this.toolStripEditTextBoxFilterPrecision.Size = new System.Drawing.Size(50, 21);
 			this.toolStripEditTextBoxFilterPrecision.Text = "0.25";
+			// 
+			// swapThresholdMBToolStripMenuItem
+			// 
+			this.swapThresholdMBToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripEditTextBoxSwapThesholdMB});
+			this.swapThresholdMBToolStripMenuItem.Name = "swapThresholdMBToolStripMenuItem";
+			this.swapThresholdMBToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
+			this.swapThresholdMBToolStripMenuItem.Text = "&Swap Threshold MB";
+			this.swapThresholdMBToolStripMenuItem.ToolTipText = "The threshold is checked when closing editors.";
+			// 
+			// toolStripEditTextBoxSwapThesholdMB
+			// 
+			this.toolStripEditTextBoxSwapThesholdMB.Name = "toolStripEditTextBoxSwapThesholdMB";
+			this.toolStripEditTextBoxSwapThesholdMB.Size = new System.Drawing.Size(50, 21);
+			this.toolStripEditTextBoxSwapThesholdMB.Text = "200";
+			this.toolStripEditTextBoxSwapThesholdMB.ToolTipText = "Allocated memory of private workset.";
 			// 
 			// windowsMenu
 			// 
@@ -429,6 +447,8 @@
 		private ToolStripEditTextBox toolStripEditTextBoxFilterPrecision;
 		private System.Windows.Forms.ToolStripMenuItem viewQuickAccessToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem definedVariablesToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem swapThresholdMBToolStripMenuItem;
+		private ToolStripEditTextBox toolStripEditTextBoxSwapThesholdMB;
 	}
 }
 

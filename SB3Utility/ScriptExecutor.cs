@@ -64,7 +64,14 @@ namespace SB3Utility
 				}
 				else if (literal.Type == ExprType.Name)
 				{
-					result = Variables[literal.Value.ToLowerInvariant()];
+					try
+					{
+						result = Variables[literal.Value.ToLowerInvariant()];
+					}
+					catch (KeyNotFoundException)
+					{
+						result = null;
+					}
 				}
 				else if (literal.Type == ExprType.Bool)
 				{
@@ -166,9 +173,16 @@ namespace SB3Utility
 					result = ExecuteExpr(cmd.Args[1]);
 					if (Variables.ContainsKey(name))
 					{
-						Variables[name] = result;
+						if (result != null)
+						{
+							Variables[name] = result;
+						}
+						else
+						{
+							Variables.Remove(name);
+						}
 					}
-					else
+					else if (result != null)
 					{
 						Variables.Add(name, result);
 					}

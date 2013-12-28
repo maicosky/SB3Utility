@@ -54,6 +54,7 @@
     <Compile Include="ppHeader.cs" />
     <Compile Include="ppParser.cs" />
     <Compile Include="ppSubfile.cs" />
+    <Compile Include="ppSwapfile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Structures.cs" />
     <Compile Include="WakeariStream.cs" />
