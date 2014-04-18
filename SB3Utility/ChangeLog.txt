@@ -1,4 +1,28 @@
-﻿[0.5.6]
+﻿[0.6.3]
+  - PPD_Clothes_Preview Plugin added SVIEX functions for AA2 Trial
+  - Added support for SVIEX units in pp file format detection
+
+[0.6.2]
+  - Added support for AA2 Trial
+
+[0.6.1]
+  - Added support for REAL PLAY
+
+[0.6.0]
+  - Added support for REAL PLAY Trial
+  - Added check for invalid bones
+  - Fixed invisible errors at initialization
+  - Added confirmation of closing pp files with added, edited, deleted and renamed subfiles
+  - Added swapfiles and throw out functionality for opened xx, xa and lst editors (even parsers for external tools)
+  - Fixed renaming subfiles
+  - Added restoring selection of subfiles after modification of pp structure
+  - Added XA animation track list sorting
+  - Fixed handling of pp files bigger than 2GB
+  - Added recomputation of bone matrices
+  - Added visual support for dropping into an empty area of the Object Tree
+  - Scripting variables getting null are removed. Reading a non-existing variable returns null.
+
+[0.5.6]
   - Fixes editing unknowns of submeshes
   - Fixes automatic pp format detection (LST units)
   - Added support for IW

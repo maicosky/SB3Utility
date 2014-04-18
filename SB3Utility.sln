@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SB3Utility", "SB3Utility\SB3Utility.csproj", "{A351DFAB-3235-4CEA-9916-1BAE973B65AE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SB3UtilityScript", "SB3UtilityScript\SB3UtilityScript.csproj", "{55377B00-E8E2-41B6-9EBD-80472DEBBB06}"
@@ -25,8 +25,14 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SB3UtilityGUI", "SB3UtilityGUI\SB3UtilityGUI.csproj", "{82CE4DA4-1BC6-46A9-A376-44B706A185BD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ODFBase", "ODFBase\ODFBase.csproj", "{8C406D6F-E4E1-4F24-814F-859E58B9EBEF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{120B541E-0A9D-4871-9315-679CB97109E2} = {120B541E-0A9D-4871-9315-679CB97109E2}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AiDroidBase", "AiDroidBase\AiDroidBase.csproj", "{F90359AB-D9E6-4110-8AD4-FC12A93D0CF4}"
+	ProjectSection(ProjectDependencies) = postProject
+		{120B541E-0A9D-4871-9315-679CB97109E2} = {120B541E-0A9D-4871-9315-679CB97109E2}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AiDroidPlugin", "AiDroidPlugin\AiDroidPlugin.csproj", "{56C17EED-BF1C-41B8-A08E-B63C0C602A03}"
 EndProject

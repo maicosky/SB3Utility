@@ -31,6 +31,7 @@
 			this.tabControlSubfiles = new System.Windows.Forms.TabControl();
 			this.tabPageXXSubfiles = new System.Windows.Forms.TabPage();
 			this.xxSubfilesList = new System.Windows.Forms.ListView();
+			this.xxSubfilesListHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.tabPageXASubfiles = new System.Windows.Forms.TabPage();
 			this.xaSubfilesList = new System.Windows.Forms.ListView();
 			this.xaSubfilesListHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -77,7 +78,6 @@
 			this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
 			this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
 			this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
-			this.xxSubfilesListHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.tabControlSubfiles.SuspendLayout();
 			this.tabPageXXSubfiles.SuspendLayout();
 			this.tabPageXASubfiles.SuspendLayout();
@@ -569,7 +569,6 @@
 		private System.Windows.Forms.ListView imageSubfilesList;
 		private System.Windows.Forms.ColumnHeader imageSubfilesListHeader;
 		private System.Windows.Forms.TabPage tabPageOtherSubfiles;
-		private System.Windows.Forms.ListView otherSubfilesList;
 		private System.Windows.Forms.ColumnHeader otherSubfilesListHeader;
 		private System.Windows.Forms.ComboBox comboBoxFormat;
 		private System.Windows.Forms.Label label41;
@@ -611,6 +610,7 @@
 		private System.Windows.Forms.ToolStripMenuItem aLLRegardlessOfExtensionToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem newSourceFormatToolStripMenuItem;
 		private System.Windows.Forms.ColumnHeader xxSubfilesListHeader;
+		public System.Windows.Forms.ListView otherSubfilesList;
 
 	}
 }

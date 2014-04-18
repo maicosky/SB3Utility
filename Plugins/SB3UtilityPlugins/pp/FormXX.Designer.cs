@@ -44,13 +44,13 @@
 			this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.keepBackupToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+			this.buttonMeshRestPose = new System.Windows.Forms.Button();
 			this.checkBoxMeshNewSkin = new System.Windows.Forms.CheckBox();
 			this.checkBoxMeshExportMqoSortMeshes = new System.Windows.Forms.CheckBox();
 			this.checkBoxMeshExportFbxLinearInterpolation = new System.Windows.Forms.CheckBox();
 			this.checkBoxMeshExportEmbedMedia = new System.Windows.Forms.CheckBox();
-			this.textBoxKeyframeRange = new SB3Utility.EditTextBox();
 			this.checkBoxSubmeshReorder = new System.Windows.Forms.CheckBox();
-			this.treeViewObjectTree = new System.Windows.Forms.TreeView();
+			this.textBoxKeyframeRange = new SB3Utility.EditTextBox();
 			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
 			this.textBoxFormat = new SB3Utility.EditTextBox();
 			this.buttonConvert = new System.Windows.Forms.Button();
@@ -58,7 +58,9 @@
 			this.label26 = new System.Windows.Forms.Label();
 			this.tabControlLists = new System.Windows.Forms.TabControl();
 			this.tabPageObject = new System.Windows.Forms.TabPage();
+			this.treeViewObjectTree = new System.Windows.Forms.TreeView();
 			this.panelObjectTreeBottom = new System.Windows.Forms.Panel();
+			this.buttonCheckBones = new System.Windows.Forms.Button();
 			this.buttonObjectTreeCollapse = new System.Windows.Forms.Button();
 			this.buttonObjectTreeExpand = new System.Windows.Forms.Button();
 			this.tabPageMesh = new System.Windows.Forms.TabPage();
@@ -234,7 +236,6 @@
 			this.buttonTextureRemove = new System.Windows.Forms.Button();
 			this.textBoxTexSize = new SB3Utility.EditTextBox();
 			this.textBoxTexName = new SB3Utility.EditTextBox();
-			this.buttonMeshRestPose = new System.Windows.Forms.Button();
 			this.menuStrip1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
 			this.splitContainer1.Panel1.SuspendLayout();
@@ -397,6 +398,17 @@
 			this.toolTip1.UseAnimation = false;
 			this.toolTip1.UseFading = false;
 			// 
+			// buttonMeshRestPose
+			// 
+			this.buttonMeshRestPose.Location = new System.Drawing.Point(174, 198);
+			this.buttonMeshRestPose.Name = "buttonMeshRestPose";
+			this.buttonMeshRestPose.Size = new System.Drawing.Size(73, 23);
+			this.buttonMeshRestPose.TabIndex = 141;
+			this.buttonMeshRestPose.Text = "Rest Pose";
+			this.toolTip1.SetToolTip(this.buttonMeshRestPose, "Recomputes all bone matrices\r\nof all selected meshes");
+			this.buttonMeshRestPose.UseVisualStyleBackColor = true;
+			this.buttonMeshRestPose.Click += new System.EventHandler(this.buttonMeshRestPose_Click);
+			// 
 			// checkBoxMeshNewSkin
 			// 
 			this.checkBoxMeshNewSkin.Appearance = System.Windows.Forms.Appearance.Button;
@@ -451,18 +463,6 @@
 			this.toolTip1.SetToolTip(this.checkBoxMeshExportEmbedMedia, "Textures are stored inside the output file.");
 			this.checkBoxMeshExportEmbedMedia.UseVisualStyleBackColor = true;
 			// 
-			// textBoxKeyframeRange
-			// 
-			this.textBoxKeyframeRange.Location = new System.Drawing.Point(133, 23);
-			this.textBoxKeyframeRange.MaxLength = 10;
-			this.textBoxKeyframeRange.Name = "textBoxKeyframeRange";
-			this.textBoxKeyframeRange.Size = new System.Drawing.Size(45, 20);
-			this.textBoxKeyframeRange.TabIndex = 268;
-			this.textBoxKeyframeRange.TabStop = false;
-			this.textBoxKeyframeRange.Text = "-1-0";
-			this.toolTip1.SetToolTip(this.textBoxKeyframeRange, "Starting with -1 exports all keyframes without interpolation.\r\nStarting with 0 or" +
-        " higher also interpolates.");
-			// 
 			// checkBoxSubmeshReorder
 			// 
 			this.checkBoxSubmeshReorder.Appearance = System.Windows.Forms.Appearance.Button;
@@ -478,25 +478,17 @@
 			this.checkBoxSubmeshReorder.UseVisualStyleBackColor = true;
 			this.checkBoxSubmeshReorder.Click += new System.EventHandler(this.checkBoxMeshReorderSubmesh_Click);
 			// 
-			// treeViewObjectTree
+			// textBoxKeyframeRange
 			// 
-			this.treeViewObjectTree.AllowDrop = true;
-			this.treeViewObjectTree.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.treeViewObjectTree.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawText;
-			this.treeViewObjectTree.HideSelection = false;
-			this.treeViewObjectTree.Location = new System.Drawing.Point(0, 0);
-			this.treeViewObjectTree.Name = "treeViewObjectTree";
-			this.treeViewObjectTree.Size = new System.Drawing.Size(251, 435);
-			this.treeViewObjectTree.TabIndex = 1;
-			this.treeViewObjectTree.DrawNode += new System.Windows.Forms.DrawTreeNodeEventHandler(this.treeViewObjectTree_DrawNode);
-			this.treeViewObjectTree.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.treeViewObjectTree_ItemDrag);
-			this.treeViewObjectTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewObjectTree_AfterSelect);
-			this.treeViewObjectTree.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.treeViewObjectTree_NodeMouseClick);
-			this.treeViewObjectTree.DragDrop += new System.Windows.Forms.DragEventHandler(this.treeViewObjectTree_DragDrop);
-			this.treeViewObjectTree.DragEnter += new System.Windows.Forms.DragEventHandler(this.treeViewObjectTree_DragEnter);
-			this.treeViewObjectTree.DragOver += new System.Windows.Forms.DragEventHandler(this.treeViewObjectTree_DragOver);
-			this.treeViewObjectTree.DragLeave += new System.EventHandler(this.treeViewObjectTree_DragLeave);
-			this.treeViewObjectTree.KeyUp += new System.Windows.Forms.KeyEventHandler(this.treeViewObjectTree_KeyUp);
+			this.textBoxKeyframeRange.Location = new System.Drawing.Point(133, 23);
+			this.textBoxKeyframeRange.MaxLength = 10;
+			this.textBoxKeyframeRange.Name = "textBoxKeyframeRange";
+			this.textBoxKeyframeRange.Size = new System.Drawing.Size(45, 20);
+			this.textBoxKeyframeRange.TabIndex = 268;
+			this.textBoxKeyframeRange.TabStop = false;
+			this.textBoxKeyframeRange.Text = "-1-0";
+			this.toolTip1.SetToolTip(this.textBoxKeyframeRange, "Starting with -1 exports all keyframes without interpolation.\r\nStarting with 0 or" +
+        " higher also interpolates.");
 			// 
 			// splitContainer1
 			// 
@@ -591,8 +583,29 @@
 			this.tabPageObject.Text = "Object Tree";
 			this.tabPageObject.UseVisualStyleBackColor = true;
 			// 
+			// treeViewObjectTree
+			// 
+			this.treeViewObjectTree.AllowDrop = true;
+			this.treeViewObjectTree.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.treeViewObjectTree.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawText;
+			this.treeViewObjectTree.HideSelection = false;
+			this.treeViewObjectTree.Location = new System.Drawing.Point(0, 0);
+			this.treeViewObjectTree.Name = "treeViewObjectTree";
+			this.treeViewObjectTree.Size = new System.Drawing.Size(251, 435);
+			this.treeViewObjectTree.TabIndex = 1;
+			this.treeViewObjectTree.DrawNode += new System.Windows.Forms.DrawTreeNodeEventHandler(this.treeViewObjectTree_DrawNode);
+			this.treeViewObjectTree.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.treeViewObjectTree_ItemDrag);
+			this.treeViewObjectTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewObjectTree_AfterSelect);
+			this.treeViewObjectTree.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.treeViewObjectTree_NodeMouseClick);
+			this.treeViewObjectTree.DragDrop += new System.Windows.Forms.DragEventHandler(this.treeViewObjectTree_DragDrop);
+			this.treeViewObjectTree.DragEnter += new System.Windows.Forms.DragEventHandler(this.treeViewObjectTree_DragEnter);
+			this.treeViewObjectTree.DragOver += new System.Windows.Forms.DragEventHandler(this.treeViewObjectTree_DragOver);
+			this.treeViewObjectTree.DragLeave += new System.EventHandler(this.treeViewObjectTree_DragLeave);
+			this.treeViewObjectTree.KeyUp += new System.Windows.Forms.KeyEventHandler(this.treeViewObjectTree_KeyUp);
+			// 
 			// panelObjectTreeBottom
 			// 
+			this.panelObjectTreeBottom.Controls.Add(this.buttonCheckBones);
 			this.panelObjectTreeBottom.Controls.Add(this.buttonObjectTreeCollapse);
 			this.panelObjectTreeBottom.Controls.Add(this.buttonObjectTreeExpand);
 			this.panelObjectTreeBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
@@ -601,10 +614,20 @@
 			this.panelObjectTreeBottom.Size = new System.Drawing.Size(251, 29);
 			this.panelObjectTreeBottom.TabIndex = 37;
 			// 
+			// buttonCheckBones
+			// 
+			this.buttonCheckBones.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.buttonCheckBones.Location = new System.Drawing.Point(162, 4);
+			this.buttonCheckBones.Name = "buttonCheckBones";
+			this.buttonCheckBones.Size = new System.Drawing.Size(86, 23);
+			this.buttonCheckBones.TabIndex = 5;
+			this.buttonCheckBones.Text = "Check Bones";
+			this.buttonCheckBones.UseVisualStyleBackColor = true;
+			this.buttonCheckBones.Click += new System.EventHandler(this.buttonCheckBones_Click);
+			// 
 			// buttonObjectTreeCollapse
 			// 
-			this.buttonObjectTreeCollapse.Anchor = System.Windows.Forms.AnchorStyles.Top;
-			this.buttonObjectTreeCollapse.Location = new System.Drawing.Point(139, 4);
+			this.buttonObjectTreeCollapse.Location = new System.Drawing.Point(81, 4);
 			this.buttonObjectTreeCollapse.Name = "buttonObjectTreeCollapse";
 			this.buttonObjectTreeCollapse.Size = new System.Drawing.Size(75, 23);
 			this.buttonObjectTreeCollapse.TabIndex = 4;
@@ -614,8 +637,7 @@
 			// 
 			// buttonObjectTreeExpand
 			// 
-			this.buttonObjectTreeExpand.Anchor = System.Windows.Forms.AnchorStyles.Top;
-			this.buttonObjectTreeExpand.Location = new System.Drawing.Point(37, 4);
+			this.buttonObjectTreeExpand.Location = new System.Drawing.Point(0, 4);
 			this.buttonObjectTreeExpand.Name = "buttonObjectTreeExpand";
 			this.buttonObjectTreeExpand.Size = new System.Drawing.Size(75, 23);
 			this.buttonObjectTreeExpand.TabIndex = 3;
@@ -2579,17 +2601,6 @@
 			this.textBoxTexName.Size = new System.Drawing.Size(172, 20);
 			this.textBoxTexName.TabIndex = 5;
 			// 
-			// buttonMeshRestPose
-			// 
-			this.buttonMeshRestPose.Location = new System.Drawing.Point(174, 198);
-			this.buttonMeshRestPose.Name = "buttonMeshRestPose";
-			this.buttonMeshRestPose.Size = new System.Drawing.Size(73, 23);
-			this.buttonMeshRestPose.TabIndex = 141;
-			this.buttonMeshRestPose.Text = "Rest Pose";
-			this.toolTip1.SetToolTip(this.buttonMeshRestPose, "Recomputes all bone matrices\r\nof all selected meshes");
-			this.buttonMeshRestPose.UseVisualStyleBackColor = true;
-			this.buttonMeshRestPose.Click += new System.EventHandler(this.buttonMeshRestPose_Click);
-			// 
 			// FormXX
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -2735,7 +2746,6 @@
 		private System.Windows.Forms.ColumnHeader listViewTextureMaterialHeader;
 		private System.Windows.Forms.Label label74;
 		private System.Windows.Forms.Label label1;
-		private EditTextBox textBoxMeshName;
 		private System.Windows.Forms.Button buttonSubmeshRemove;
 		private System.Windows.Forms.Button buttonMeshRemove;
 		private System.Windows.Forms.ComboBox comboBoxMeshExportFormat;
@@ -2813,7 +2823,6 @@
 		private System.Windows.Forms.TabPage tabPageBoneView;
 		private EditTextBox textBoxBoneName;
 		private System.Windows.Forms.Label label25;
-		private System.Windows.Forms.TabPage tabPageMeshView;
 		private System.Windows.Forms.GroupBox groupBox2;
 		private System.Windows.Forms.Label label28;
 		private System.Windows.Forms.Panel panelMeshExportOptionsDefault;
@@ -2898,5 +2907,8 @@
 		private System.Windows.Forms.CheckBox checkBoxMeshExportMqoSortMeshes;
 		private System.Windows.Forms.Label label14;
 		private System.Windows.Forms.Button buttonMeshRestPose;
+		private System.Windows.Forms.Button buttonCheckBones;
+		public EditTextBox textBoxMeshName;
+		private System.Windows.Forms.TabPage tabPageMeshView;
 	}
 }

@@ -11,11 +11,12 @@ using UrielGuy.SyntaxHighlightingTextBox;
 
 namespace SB3Utility
 {
-	public partial class FormLST : DockContent
+	public partial class FormLST : DockContent, CanIncludeEditedContent
 	{
 		public string ParserVar { get; protected set; }
 
 		protected bool edited = false;
+		private bool contentChanged = false;
 
 		public FormLST(ppParser ppParser, string lstParserVar)
 		{
@@ -43,12 +44,47 @@ namespace SB3Utility
 				syntaxHighlightingTextBoxLSTContents.DragDrop += new DragEventHandler(syntaxHighlightingTextBoxLSTContents_DragDrop);
 				syntaxHighlightingTextBoxLSTContents.EnableAutoDragDrop = true;
 
+				buttonApplyCheck.Enabled = false;
+
 				Gui.Docking.ShowDockContent(this, Gui.Docking.DockEditors, ContentCategory.Others);
 			}
 			catch (Exception ex)
 			{
 				Utility.ReportException(ex);
 			}
+		}
+
+		public bool Changed
+		{
+			get { return contentChanged; }
+
+			set
+			{
+				if (value)
+				{
+					if (!contentChanged)
+					{
+						Text += "*";
+					}
+				}
+				else if (contentChanged)
+				{
+					lstParser parser = (lstParser)Gui.Scripting.Variables[ParserVar];
+					Text = parser.Name;
+				}
+				contentChanged = value;
+			}
+		}
+
+		private void FormLST_FormClosing(object sender, FormClosingEventArgs e)
+		{
+			if (!edited)
+			{
+				return;
+			}
+
+			lstParser parser = (lstParser)Gui.Scripting.Variables[ParserVar];
+			parser.Text = syntaxHighlightingTextBoxLSTContents.Text.Replace("»\t", "\t").Replace("\n", "\r\n");
 		}
 
 		private void checkBoxWordWrap_Click(object sender, EventArgs e)
@@ -63,11 +99,12 @@ namespace SB3Utility
 				return;
 			}
 
-			this.Text += '*';
 			edited = true;
+			buttonApplyCheck.Enabled = true;
+			Changed = true;
 		}
 
-		private void buttonApply_Click(object sender, EventArgs e)
+		private void buttonApplyCheck_Click(object sender, EventArgs e)
 		{
 			try
 			{
@@ -151,8 +188,8 @@ namespace SB3Utility
 					}
 				}
 
-				this.Text = this.ToolTipText.Substring(this.ToolTipText.LastIndexOf('\\') + 1);
 				edited = false;
+				buttonApplyCheck.Enabled = false;
 			}
 			catch (Exception ex)
 			{
@@ -177,8 +214,8 @@ namespace SB3Utility
 				syntaxHighlightingTextBoxLSTContents.SelectionStart = 0;
 				syntaxHighlightingTextBoxLSTContents.TextChanged += new EventHandler(syntaxHighlightingTextBoxLSTContents_TextChanged);
 
-				this.Text = this.ToolTipText.Substring(this.ToolTipText.LastIndexOf('\\') + 1);
 				edited = false;
+				buttonApplyCheck.Enabled = false;
 			}
 			catch (Exception ex)
 			{

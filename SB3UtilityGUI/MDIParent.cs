@@ -85,7 +85,14 @@ namespace SB3Utility
 			}
 			catch (Exception ex)
 			{
-				Utility.ReportException(ex);
+				if (dockLog != null)
+				{
+					Utility.ReportException(ex);
+				}
+				else
+				{
+					throw ex;
+				}
 			}
 		}
 
@@ -93,6 +100,24 @@ namespace SB3Utility
 		{
 			try
 			{
+				if (e.CloseReason != CloseReason.TaskManagerClosing && e.CloseReason != CloseReason.WindowsShutDown)
+				{
+					foreach (var pair in DockContents)
+					{
+						List<DockContent> contentList = pair.Value;
+						while (contentList.Count > 0)
+						{
+							IDockContent content = contentList[0];
+							content.DockHandler.Form.Close();
+							if (!content.DockHandler.Form.IsDisposed)
+							{
+								e.Cancel = true;
+								return;
+							}
+						}
+					}
+				}
+
 				string pluginsDoNotLoad = String.Empty;
 				foreach (var plugin in PluginManager.DoNotLoad)
 				{
@@ -313,7 +338,7 @@ namespace SB3Utility
 		{
 			try
 			{
-				content.FormClosing += new FormClosingEventHandler(content_FormClosing);
+				content.FormClosed += content_FormClosed;
 
 				List<DockContent> typeList;
 				Type type = content.GetType();
@@ -355,12 +380,12 @@ namespace SB3Utility
 			}
 		}
 
-		void content_FormClosing(object sender, FormClosingEventArgs e)
+		void content_FormClosed(object sender, FormClosedEventArgs e)
 		{
 			try
 			{
 				DockContent dock = (DockContent)sender;
-				dock.FormClosing -= new FormClosingEventHandler(content_FormClosing);
+				dock.FormClosed -= content_FormClosed;
 
 				List<DockContent> typeList = DockContents[dock.GetType()];
 				typeList.Remove(dock);

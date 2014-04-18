@@ -295,9 +295,39 @@ namespace SB3Utility
 			WriteArray<int>(new Action<int>(writer.Write), array);
 		}
 
+		public static Vector2[] ReadVector2Array(this BinaryReader reader, int length)
+		{
+			return ReadArray<Vector2>(reader, new Func<Vector2>(reader.ReadVector2), length);
+		}
+
+		public static void Write(this BinaryWriter writer, Vector2[] array)
+		{
+			WriteArray<Vector2>(new Action<Vector2>(writer.Write), array);
+		}
+
+		public static Vector3[] ReadVector3Array(this BinaryReader reader, int length)
+		{
+			return ReadArray<Vector3>(reader, new Func<Vector3>(reader.ReadVector3), length);
+		}
+
+		public static void Write(this BinaryWriter writer, Vector3[] array)
+		{
+			WriteArray<Vector3>(new Action<Vector3>(writer.Write), array);
+		}
+
 		public static byte[] ReadBytes(this BinaryReader reader, uint count)
 		{
 			return reader.ReadBytes((int)count);
+		}
+
+		public static sbyte[] ReadSBytes(this BinaryReader reader, int count)
+		{
+			return ReadArray<SByte>(reader, new Func<SByte>(reader.ReadSByte), count);
+		}
+
+		public static void Write(this BinaryWriter writer, SByte[] array)
+		{
+			WriteArray<SByte>(new Action<SByte>(writer.Write), array);
 		}
 		#endregion
 

@@ -45,7 +45,10 @@ namespace SB3Utility
 		HETDTL,
 		PPD,
 		Musumakeup,
-		ImmoralWard
+		ImmoralWard,
+		RealPlayTrial,
+		RealPlay,
+		AA2Trial
 	}
 
 	public abstract class ppFormat
@@ -85,7 +88,10 @@ namespace SB3Utility
 			new ppFormat_HETDTL(),
 			new ppFormat_PPD(),
 			new ppFormat_Musumakeup(),
-			new ppFormat_ImmoralWard()
+			new ppFormat_ImmoralWard(),
+			new ppFormat_RealPlayTrial(),
+			new ppFormat_RealPlay(),
+			new ppFormat_AA2Trial()
 		};
 
 		public abstract Stream ReadStream(Stream stream);
@@ -161,6 +167,10 @@ namespace SB3Utility
 			else if (ext == ".xa")
 			{
 				tryFunc = new Func<ppSubfile, bool>(TryFileXA);
+			}
+			else if (ext == ".sviex")
+			{
+				tryFunc = new Func<ppSubfile, bool>(TryFileSVIEX);
 			}
 			else if (ext == ".bmp")
 			{
@@ -374,6 +384,39 @@ namespace SB3Utility
 			}
 
 			return false;
+		}
+
+		public static bool TryFileSVIEX(ppSubfile subfile)
+		{
+			if (subfile.size < 32)
+			{
+				return false;
+			}
+			using (BinaryReader reader = new BinaryReader(subfile.CreateReadStream()))
+			{
+				int version = reader.ReadInt32();
+				if (version != 100)
+				{
+					return false;
+				}
+				int numSections = reader.ReadInt32();
+				if (numSections < 1 || numSections > 1000)
+				{
+					return false;
+				}
+				version = reader.ReadInt32();
+				if (version != 100)
+				{
+					return false;
+				}
+				int lenFirstMesh = reader.ReadInt32();
+				if (lenFirstMesh < 1 || lenFirstMesh > 50)
+				{
+					return false;
+				}
+			}
+
+			return true;
 		}
 		#endregion
 	}
@@ -892,6 +935,48 @@ namespace SB3Utility
 				0x32, 0x55, 0x28, 0x4B, 0xEC, 0x61, 0xBD, 0x5F,
 				0x57, 0xFE, 0xA5, 0xD7, 0x97, 0xFC, 0xDF, 0x0C,
 				0x57, 0xFB, 0xD2, 0xE4, 0xBA, 0x75, 0x99, 0xAE });
+		}
+	}
+
+	public class ppFormat_RealPlayTrial : ppFormat_WakeariHeader
+	{
+		public ppFormat_RealPlayTrial() : base("Real Play Trial", ppFormatIdx.RealPlayTrial) { }
+
+		protected override ICryptoTransform CryptoTransform()
+		{
+			return new CryptoTransformOneCode(new byte[] {
+				0xDE, 0xBE, 0xEB, 0xF6, 0xB8, 0xA3, 0x25, 0xA1,
+				0xDA, 0xBB, 0xFC, 0xC1, 0x79, 0xD1, 0x71, 0x5B,
+				0xF2, 0x9F, 0x8C, 0x1D, 0xBC, 0xDA, 0xAB, 0x42,
+				0x9B, 0x6F, 0x19, 0xB6, 0x17, 0x0D, 0xE2, 0x7A });
+		}
+	}
+
+	public class ppFormat_RealPlay : ppFormat_WakeariHeader
+	{
+		public ppFormat_RealPlay() : base("Real Play", ppFormatIdx.RealPlay) { }
+
+		protected override ICryptoTransform CryptoTransform()
+		{
+			return new CryptoTransformOneCode(new byte[] {
+				0x38, 0x0C, 0x6B, 0xC1, 0x47, 0x75, 0x9D, 0xB8,
+				0xAC, 0x56, 0x02, 0xF0, 0x8F, 0x14, 0x00, 0xE4,
+				0xB0, 0x32, 0x9A, 0x2C, 0x4D, 0x0D, 0x37, 0x95,
+				0x46, 0xC9, 0xA5, 0x77, 0x7F, 0x8B, 0x5D, 0x43 });
+		}
+	}
+
+	public class ppFormat_AA2Trial : ppFormat_WakeariHeader
+	{
+		public ppFormat_AA2Trial() : base("AA2 Trial", ppFormatIdx.AA2Trial) { }
+
+		protected override ICryptoTransform CryptoTransform()
+		{
+			return new CryptoTransformOneCode(new byte[] {
+				0x4D, 0x2D, 0xBF, 0x6A, 0x5B, 0x4A, 0xCE, 0x9D,
+				0xF4, 0xA5, 0x16, 0x87, 0x92, 0x9B, 0x13, 0x03,
+				0x8F, 0x92, 0x3C, 0xF0, 0x98, 0x81, 0xDB, 0x8E,
+				0x5F, 0xB4, 0x1D, 0x2B, 0x90, 0xC9, 0x65, 0x00 });
 		}
 	}
 

@@ -22,9 +22,15 @@ namespace SB3Utility
 		{
 			try
 			{
+				if (e.CloseReason == CloseReason.MdiFormClosing)
+				{
+					e.Cancel = true;
+					return;
+				}
+
 				foreach (var pair in ChildForms)
 				{
-					pair.Key.FormClosing -= new FormClosingEventHandler(ChildForms_FormClosing);
+					pair.Key.FormClosed -= new FormClosedEventHandler(ChildForms_FormClosed);
 				}
 				ChildForms.Clear();
 			}
@@ -34,12 +40,12 @@ namespace SB3Utility
 			}
 		}
 
-		private void ChildForms_FormClosing(object sender, FormClosingEventArgs e)
+		private void ChildForms_FormClosed(object sender, FormClosedEventArgs e)
 		{
 			try
 			{
 				DockContent form = (DockContent)sender;
-				form.FormClosing -= new FormClosingEventHandler(ChildForms_FormClosing);
+				form.FormClosed -= new FormClosedEventHandler(ChildForms_FormClosed);
 
 				ListViewItem item;
 				if (ChildForms.TryGetValue(form, out item))
@@ -58,7 +64,7 @@ namespace SB3Utility
 		{
 			if (!IsHidden && !ChildForms.ContainsKey(content))
 			{
-				content.FormClosing += new FormClosingEventHandler(ChildForms_FormClosing);
+				content.FormClosed += new FormClosedEventHandler(ChildForms_FormClosed);
 
 				ListViewItem item = new ListViewItem(content.Text);
 				item.ToolTipText = content.ToolTipText;

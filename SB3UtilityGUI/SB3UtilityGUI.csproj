@@ -38,11 +38,14 @@
   <PropertyGroup>
     <ApplicationIcon>HF-Logo.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="SlimDX, Version=4.0.13.43, Culture=neutral, PublicKeyToken=b1b0c32fd1ffe4f9, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\SB3UtilityExternalLibraries\SlimDX.dll</HintPath>
-      <Private>False</Private>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
@@ -56,7 +59,7 @@
     <Reference Include="System.Xml" />
     <Reference Include="WeifenLuo.WinFormsUI.Docking, Version=2.5.0.15095, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\bin\WeifenLuo.WinFormsUI.Docking.dll</HintPath>
+      <HintPath>..\SB3UtilityExternalLibraries\WeifenLuo.WinFormsUI.Docking.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
@@ -193,10 +196,15 @@
 if not exist plugins\msvcr110.dll (echo msvcr110.dll missing! &amp;&amp; copy ..\SB3UtilityExternalLibraries\msvc*110.dll plugins)
 if not exist irrKlang.NET4.dll (echo irrKlang.NET4.dll missing! &amp;&amp; copy ..\SB3UtilityExternalLibraries\irrKlang.NET4.dll)
 if not exist SlimDX.dll (echo SlimDX.dll missing! &amp;&amp; copy ..\SB3UtilityExternalLibraries\SlimDX.dll)
-if not exist Jolt.dll (echo Jolt.dll missing! &amp;&amp; set errorlevel=-1)
-if not exist Jolt.Testing.GeneratedTypes.dll (echo Jolt.Testing.GeneratedTypes.dll missing! &amp;&amp; set errorlevel=-1)
-if not exist WeifenLuo.WinFormsUI.Docking.dll (echo WeifenLuo.WinFormsUI.Docking.dll missing! &amp;&amp; set errorlevel=-1)
-if not exist plugins\libfbxsdk.dll (echo plugins\libfbxsdk.dll missing! &amp;&amp; set errorlevel=-1)</PostBuildEvent>
+if not exist Jolt.dll (echo Jolt.dll missing! &amp;&amp; copy ..\SB3UtilityExternalLibraries\Jolt.dll)
+if not exist Jolt.Testing.GeneratedTypes.dll (echo Jolt.Testing.GeneratedTypes.dll missing! &amp;&amp; copy ..\SB3UtilityExternalLibraries\Jolt.Testing.GeneratedTypes.dll)
+if not exist WeifenLuo.WinFormsUI.Docking.dll (echo WeifenLuo.WinFormsUI.Docking.dll missing! &amp;&amp; copy ..\SB3UtilityExternalLibraries\WeifenLuo.WinFormsUI.Docking.dll)
+if not exist plugins\libfbxsdk.dll (echo plugins\libfbxsdk.dll missing! &amp;&amp; copy ..\SB3UtilityExternalLibraries\libfbxsdk.dll plugins)
+REM The following DLLs are needed for the dependency check of SB3UtilityFBX. Not needed to be deployed.
+REM if exist plugins\Jolt.dll del plugins\Jolt.dll
+REM if exist plugins\Jolt.Testing.GeneratedTypes.dll del plugins\Jolt.Testing.GeneratedTypes.dll
+REM if exist plugins\WeifenLuo.WinFormsUI.Docking.dll del plugins\WeifenLuo.WinFormsUI.Docking.dll
+REM if exist plugins\SB3Utility.dll del plugins\SB3Utility.dll</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

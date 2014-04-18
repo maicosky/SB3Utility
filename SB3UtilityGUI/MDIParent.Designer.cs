@@ -206,7 +206,6 @@
 			this.definedVariablesToolStripMenuItem.Name = "definedVariablesToolStripMenuItem";
 			this.definedVariablesToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
 			this.definedVariablesToolStripMenuItem.Text = "Defined &Variables";
-			this.definedVariablesToolStripMenuItem.Visible = false;
 			this.definedVariablesToolStripMenuItem.Click += new System.EventHandler(this.definedVariablesToolStripMenuItem_Click);
 			// 
 			// optionsToolStripMenuItem

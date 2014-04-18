@@ -10,14 +10,21 @@ using WeifenLuo.WinFormsUI.Docking;
 
 namespace SB3Utility
 {
+	public interface CanIncludeEditedContent
+	{
+		bool Changed { get; set; }
+	}
+
 	[Plugin]
 	[PluginOpensFile(".pp")]
-	public partial class FormPP : DockContent
+	public partial class FormPP : DockContent, CanIncludeEditedContent
 	{
 		public string FormVariable { get; protected set; }
 		public ppEditor Editor { get; protected set; }
 		public string EditorVar { get; protected set; }
 		public string ParserVar { get; protected set; }
+
+		private bool contentChanged = false;
 
 		List<ListView> subfileListViews = new List<ListView>();
 
@@ -69,6 +76,32 @@ namespace SB3Utility
 
 		public FormPP(string path, string variable)
 		{
+			List<DockContent> formPPList;
+			if (Gui.Docking.DockContents.TryGetValue(typeof(FormPP), out formPPList))
+			{
+				var listCopy = new List<FormPP>(formPPList.Count);
+				for (int i = 0; i < formPPList.Count; i++)
+				{
+					listCopy.Add((FormPP)formPPList[i]);
+				}
+
+				foreach (var form in listCopy)
+				{
+					if (form != this)
+					{
+						var formParser = (ppParser)Gui.Scripting.Variables[form.ParserVar];
+						if (formParser.FilePath == path)
+						{
+							form.Close();
+							if (!form.IsDisposed)
+							{
+								throw new Exception("Loading " + path + " another time cancelled.");
+							}
+						}
+					}
+				}
+			}
+
 			try
 			{
 				InitializeComponent();
@@ -128,30 +161,8 @@ namespace SB3Utility
 				comboBoxFormat.SelectedIndex = (int)ppParser.Format.ppFormatIdx;
 				comboBoxFormat.SelectedIndexChanged += new EventHandler(comboBoxFormat_SelectedIndexChanged);
 
-				Gui.Docking.ShowDockContent(this, Gui.Docking.DockFiles, ContentCategory.Archives);
 				this.FormClosing += new FormClosingEventHandler(FormPP_FormClosing);
-
-				List<DockContent> formPPList;
-				if (Gui.Docking.DockContents.TryGetValue(typeof(FormPP), out formPPList))
-				{
-					var listCopy = new List<FormPP>(formPPList.Count);
-					for (int i = 0; i < formPPList.Count; i++)
-					{
-						listCopy.Add((FormPP)formPPList[i]);
-					}
-
-					foreach (var form in listCopy)
-					{
-						if (form != this)
-						{
-							var formParser = (ppParser)Gui.Scripting.Variables[form.ParserVar];
-							if (formParser.FilePath == path)
-							{
-								form.Close();
-							}
-						}
-					}
-				}
+				Gui.Docking.ShowDockContent(this, Gui.Docking.DockFiles, ContentCategory.Archives);
 
 				keepBackupToolStripMenuItem.Checked = (bool)Gui.Config["KeepBackupOfPP"];
 				keepBackupToolStripMenuItem.CheckedChanged += keepBackupToolStripMenuItem_CheckedChanged;
@@ -164,10 +175,63 @@ namespace SB3Utility
 			}
 		}
 
+		public bool Changed
+		{
+			get { return contentChanged; }
+
+			set
+			{
+				if (value)
+				{
+					if (!contentChanged)
+					{
+						Text += "*";
+					}
+				}
+				else if (contentChanged)
+				{
+					Text = Path.GetFileName(ToolTipText);
+				}
+				contentChanged = value;
+			}
+		}
+
 		private void FormPP_FormClosing(object sender, FormClosingEventArgs e)
 		{
 			try
 			{
+				if (e.CloseReason == CloseReason.MdiFormClosing)
+				{
+					e.Cancel = true;
+					return;
+				}
+
+				if (e.CloseReason != CloseReason.TaskManagerClosing && e.CloseReason != CloseReason.WindowsShutDown)
+				{
+					bool confirm = Changed;
+					if (!Changed)
+					{
+						ppParser parser = (ppParser)Gui.Scripting.Variables[ParserVar];
+						foreach (IWriteFile subfile in parser.Subfiles)
+						{
+							if (!(subfile is ppSubfile) && (!ChildForms.ContainsKey(subfile.Name) || ((CanIncludeEditedContent)ChildForms[subfile.Name]).Changed))
+							{
+								confirm = true;
+								break;
+							}
+						}
+					}
+					if (confirm)
+					{
+						BringToFront();
+						if (MessageBox.Show("Confirm to close the pp file and lose all changes.", "Close " + Text + " ?", MessageBoxButtons.OKCancel) != DialogResult.OK)
+						{
+							e.Cancel = true;
+							return;
+						}
+					}
+				}
+
 				foreach (ListViewItem item in soundSubfilesList.SelectedItems)
 				{
 					item.Selected = false;
@@ -231,7 +295,7 @@ namespace SB3Utility
 				item.Tag = subfile;
 				if (!(subfile is ppSubfile))
 				{
-					item.Font = new Font(item.Font, subfile is ppSwapfile ? FontStyle.Italic : FontStyle.Bold);
+					item.Font = new Font(item.Font, subfile is ppSwapfile || subfile is RawFile ? FontStyle.Italic : FontStyle.Bold);
 				}
 
 				string ext = Path.GetExtension(subfile.Name).ToLower();
@@ -463,6 +527,7 @@ namespace SB3Utility
 			if (!ChildForms.TryGetValue(name, out child))
 			{
 				string childParserVar;
+				bool changed = true;
 				if (!ChildParserVars.TryGetValue(name, out childParserVar))
 				{
 					childParserVar = Gui.Scripting.GetNextVariable("xxParser");
@@ -476,12 +541,15 @@ namespace SB3Utility
 						{
 							item.Font = new Font(item.Font, FontStyle.Bold);
 							xxSubfilesList.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+							changed = item.Tag is ppSwapfile || item.Tag is RawFile;
+							item.Tag = Gui.Scripting.Variables[childParserVar];
 							break;
 						}
 					}
 				}
 
 				child = new FormXX(Editor.Parser, childParserVar);
+				((FormXX)child).Changed = changed;
 				child.FormClosing += new FormClosingEventHandler(ChildForms_FormClosing);
 				child.Tag = name;
 				ChildForms.Add(name, child);
@@ -513,6 +581,7 @@ namespace SB3Utility
 			if (!ChildForms.TryGetValue(name, out child))
 			{
 				string childParserVar;
+				bool changed = true;
 				if (!ChildParserVars.TryGetValue(name, out childParserVar))
 				{
 					childParserVar = Gui.Scripting.GetNextVariable("xaParser");
@@ -526,12 +595,15 @@ namespace SB3Utility
 						{
 							item.Font = new Font(item.Font, FontStyle.Bold);
 							xaSubfilesList.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+							changed = item.Tag is ppSwapfile || item.Tag is RawFile;
+							item.Tag = Gui.Scripting.Variables[childParserVar];
 							break;
 						}
 					}
 				}
 
 				child = new FormXA(Editor.Parser, childParserVar);
+				((FormXA)child).Changed = changed;
 				child.FormClosing += new FormClosingEventHandler(ChildForms_FormClosing);
 				child.Tag = name;
 				ChildForms.Add(name, child);
@@ -548,37 +620,61 @@ namespace SB3Utility
 				form.FormClosing -= new FormClosingEventHandler(ChildForms_FormClosing);
 				ChildForms.Remove((string)form.Tag);
 
-				System.Diagnostics.Process currentProcess = System.Diagnostics.Process.GetCurrentProcess();
-				long privateMemMB = currentProcess.PrivateMemorySize64 / 1024 / 1024;
-				if (privateMemMB >= (long)Gui.Config["PrivateMemSwapThresholdMB"])
+				string parserVar = null;
+				if (form is FormXX)
 				{
-					string parserVar;
-					if (form is FormXX)
+					FormXX formXX = (FormXX)form;
+					parserVar = formXX.ParserVar;
+				}
+				else if (form is FormXA)
+				{
+					FormXA formXA = (FormXA)form;
+					parserVar = formXA.ParserVar;
+				}
+				else if (form is FormLST)
+				{
+					FormLST formLST = (FormLST)form;
+					parserVar = formLST.ParserVar;
+				}
+
+				bool dontSwap = false;
+				if (form is CanIncludeEditedContent)
+				{
+					CanIncludeEditedContent editorForm = (CanIncludeEditedContent)form;
+					if (!editorForm.Changed)
 					{
-						FormXX formXX = (FormXX)form;
-						parserVar = formXX.ParserVar;
+						List<IWriteFile> headerFromFile = Editor.Parser.Format.ppHeader.ReadHeader(Editor.Parser.FilePath, Editor.Parser.Format);
+						foreach (ppSubfile subfile in headerFromFile)
+						{
+							if (subfile.Name == (string)form.Tag)
+							{
+								headerFromFile.Remove(subfile);
+								Editor.ReplaceSubfile(subfile);
+
+								ChildParserVars.Remove((string)form.Tag);
+								Gui.Scripting.RunScript(parserVar + "=null");
+								InitSubfileLists();
+								dontSwap = true;
+								break;
+							}
+						}
 					}
-					else if (form is FormXA)
+				}
+
+				if (!dontSwap)
+				{
+					System.Diagnostics.Process currentProcess = System.Diagnostics.Process.GetCurrentProcess();
+					long privateMemMB = currentProcess.PrivateMemorySize64 / 1024 / 1024;
+					if (privateMemMB >= (long)Gui.Config["PrivateMemSwapThresholdMB"])
 					{
-						FormXA formXA = (FormXA)form;
-						parserVar = formXA.ParserVar;
+						string swapfileVar = Gui.Scripting.GetNextVariable("swapfile");
+						Gui.Scripting.RunScript(swapfileVar + " = OpenSwapfile(ppParser=" + ParserVar + ", parserToSwap=" + parserVar + ")");
+						Gui.Scripting.RunScript(EditorVar + ".ReplaceSubfile(file=" + swapfileVar + ")");
+						ChildParserVars.Remove((string)form.Tag);
+						Gui.Scripting.RunScript(swapfileVar + "=null");
+						Gui.Scripting.RunScript(parserVar + "=null");
+						InitSubfileLists();
 					}
-					else if (form is FormLST)
-					{
-						FormLST formLST = (FormLST)form;
-						parserVar = formLST.ParserVar;
-					}
-					else
-					{
-						throw new Exception("Unimplemented editor type closed " + form.GetType());
-					}
-					string swapfileVar = Gui.Scripting.GetNextVariable("swapfile");
-					Gui.Scripting.RunScript(swapfileVar + " = OpenSwapfile(ppParser=" + ParserVar + ", parserToSwap=" + parserVar + ")");
-					Gui.Scripting.RunScript(EditorVar + ".ReplaceSubfile(file=" + swapfileVar + ")");
-					ChildParserVars.Remove((string)form.Tag);
-					Gui.Scripting.RunScript(swapfileVar + "=null");
-					Gui.Scripting.RunScript(parserVar + "=null");
-					InitSubfileLists();
 				}
 			}
 			catch (Exception ex)
@@ -680,6 +776,7 @@ namespace SB3Utility
 			{
 				BackgroundWorker worker = (BackgroundWorker)Gui.Scripting.RunScript(EditorVar + ".SavePP(keepBackup=" + keepBackupToolStripMenuItem.Checked + ", backupExtension=\"" + (string)Gui.Config["BackupExtensionPP"] + "\", background=True)");
 				ShowBlockingDialog(Editor.Parser.FilePath, worker);
+				ClearChanges();
 			}
 			catch (Exception ex)
 			{
@@ -695,6 +792,7 @@ namespace SB3Utility
 				{
 					BackgroundWorker worker = (BackgroundWorker)Gui.Scripting.RunScript(EditorVar + ".SavePP(path=\"" + saveFileDialog1.FileName + "\", keepBackup=" + keepBackupToolStripMenuItem.Checked + ", backupExtension=\"" + (string)Gui.Config["BackupExtensionPP"] + "\", background=True)");
 					ShowBlockingDialog(saveFileDialog1.FileName, worker);
+					ClearChanges();
 				}
 			}
 			catch (Exception ex)
@@ -715,30 +813,60 @@ namespace SB3Utility
 			}
 		}
 
+		void ClearChanges()
+		{
+			List<IWriteFile> headerFromFile = Editor.Parser.Format.ppHeader.ReadHeader(Editor.Parser.FilePath, Editor.Parser.Format);
+			List<IWriteFile> swapped = new List<IWriteFile>(Editor.Parser.Subfiles.Count);
+			foreach (IWriteFile unit in Editor.Parser.Subfiles)
+			{
+				if (unit is ppSwapfile || unit is RawFile)
+				{
+					swapped.Add(unit);
+				}
+				else if (ChildForms.ContainsKey(unit.Name))
+				{
+					var editorForm = ChildForms[unit.Name] as CanIncludeEditedContent;
+					if (editorForm != null)
+					{
+						editorForm.Changed = false;
+					}
+				}
+				else if (!(unit is ppSubfile))
+				{
+					swapped.Add(unit);
+					string parserVar = null;
+					if (ChildParserVars.TryGetValue(unit.Name, out parserVar))
+					{
+						ChildParserVars.Remove(unit.Name);
+						Gui.Scripting.RunScript(parserVar + "=null");
+					}
+				}
+			}
+			if (swapped.Count > 0)
+			{
+				foreach (IWriteFile swapfile in swapped)
+				{
+					foreach (ppSubfile subfile in headerFromFile)
+					{
+						if (subfile.Name == swapfile.Name)
+						{
+							headerFromFile.Remove(subfile);
+							Editor.ReplaceSubfile(subfile);
+							break;
+						}
+					}
+				}
+				InitSubfileLists();
+			}
+			Changed = false;
+		}
+
 		private void reopenToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			try
 			{
 				string opensFileVar = Gui.Scripting.GetNextVariable("opensPP");
 				Gui.Scripting.RunScript(opensFileVar + " = FormPP(path=\"" + Editor.Parser.FilePath + "\", variable=\"" + opensFileVar + "\")", false);
-
-				List<DockContent> formPPList;
-				if (Gui.Docking.DockContents.TryGetValue(typeof(FormPP), out formPPList))
-				{
-					var listCopy = new List<FormPP>(formPPList.Count);
-					for (int i = 0; i < formPPList.Count; i++)
-					{
-						listCopy.Add((FormPP)formPPList[i]);
-					}
-
-					foreach (var form in listCopy)
-					{
-						if (form.FormVariable == FormVariable)
-						{
-							form.Close();
-						}
-					}
-				}
 			}
 			catch (Exception ex)
 			{
@@ -755,6 +883,8 @@ namespace SB3Utility
 				ppFormat format = (ppFormat)item.Value;
 				ppParser = (ppParser)Gui.Scripting.RunScript(ParserVar + " = OpenPP(path=\"" + ppParser.FilePath + "\", format=" + (int)format.ppFormatIdx + ")");
 				Editor = (ppEditor)Gui.Scripting.RunScript(EditorVar + " = ppEditor(parser=" + ParserVar + ")");
+
+				InitSubfileLists();
 			}
 			catch (Exception ex)
 			{
@@ -771,6 +901,7 @@ namespace SB3Utility
 					foreach (string path in openFileDialog1.FileNames)
 					{
 						Gui.Scripting.RunScript(EditorVar + ".AddSubfile(path=\"" + path + "\", replace=True)");
+						Changed = true;
 					}
 
 					InitSubfileLists();
@@ -859,6 +990,7 @@ namespace SB3Utility
 
 				if (removed)
 				{
+					Changed = true;
 					InitSubfileLists();
 				}
 			}
@@ -916,42 +1048,28 @@ namespace SB3Utility
 						if (renameForm.ShowDialog() == DialogResult.OK)
 						{
 							IWriteFile subfile = (IWriteFile)item.Tag;
+							string oldName = subfile.Name;
 							string newName = (string)Gui.Scripting.RunScript(EditorVar + ".RenameSubfile(subfile=\"" + subfile.Name + "\", newName=\"" + renameForm.NewName + "\")");
+							Changed = true;
 
 							item.Text = newName;
 							item.ListView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
 
-							if (tabControlSubfiles.SelectedTab == tabPageXXSubfiles)
+							if (tabControlSubfiles.SelectedTab == tabPageXXSubfiles ||
+								tabControlSubfiles.SelectedTab == tabPageXASubfiles ||
+								tabControlSubfiles.SelectedTab == tabPageOtherSubfiles)
 							{
-								if (ChildParserVars.ContainsKey(subfile.Name))
+								if (ChildParserVars.ContainsKey(oldName))
 								{
-									string value = ChildParserVars[subfile.Name];
-									ChildParserVars.Remove(subfile.Name);
+									string value = ChildParserVars[oldName];
+									ChildParserVars.Remove(oldName);
 									ChildParserVars.Add(newName, value);
 								}
 
-								if (ChildForms.ContainsKey(subfile.Name))
+								if (ChildForms.ContainsKey(oldName))
 								{
-									DockContent value = ChildForms[subfile.Name];
-									ChildForms.Remove(subfile.Name);
-									ChildForms.Add(newName, value);
-									value.Text = newName;
-									value.ToolTipText = Editor.Parser.FilePath + @"\" + newName;
-								}
-							}
-							else if (tabControlSubfiles.SelectedTab == tabPageXASubfiles)
-							{
-								if (ChildParserVars.ContainsKey(subfile.Name))
-								{
-									string value = ChildParserVars[subfile.Name];
-									ChildParserVars.Remove(subfile.Name);
-									ChildParserVars.Add(newName, value);
-								}
-
-								if (ChildForms.ContainsKey(subfile.Name))
-								{
-									DockContent value = ChildForms[subfile.Name];
-									ChildForms.Remove(subfile.Name);
+									DockContent value = ChildForms[oldName];
+									ChildForms.Remove(oldName);
 									ChildForms.Add(newName, value);
 									value.Text = newName;
 									value.ToolTipText = Editor.Parser.FilePath + @"\" + newName;
@@ -1206,6 +1324,7 @@ namespace SB3Utility
 			if (!ChildForms.TryGetValue(name, out child))
 			{
 				string childParserVar = null;
+				bool changed = true;
 				if (!ChildParserVars.TryGetValue(name, out childParserVar))
 				{
 					childParserVar = Gui.Scripting.GetNextVariable("lstParser");
@@ -1219,12 +1338,15 @@ namespace SB3Utility
 						{
 							item.Font = new Font(item.Font, FontStyle.Bold);
 							otherSubfilesList.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+							changed = item.Tag is ppSwapfile || item.Tag is RawFile;
+							item.Tag = Gui.Scripting.Variables[childParserVar];
 							break;
 						}
 					}
 				}
 
 				child = new FormLST(Editor.Parser, childParserVar);
+				((FormLST)child).Changed = changed;
 				child.FormClosing += new FormClosingEventHandler(ChildForms_FormClosing);
 				child.Tag = name;
 				ChildForms.Add(name, child);
@@ -1252,6 +1374,7 @@ namespace SB3Utility
 							if (subfile.Name == name)
 							{
 								type = subfile.GetType().ToString();
+								break;
 							}
 						}
 						throw new Exception("Unable to create parser for " + name + " type=" + type);

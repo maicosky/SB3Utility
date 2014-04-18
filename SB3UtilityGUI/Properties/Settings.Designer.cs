@@ -306,7 +306,7 @@ namespace SB3Utility.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Configuration.SettingsProviderAttribute(typeof(PortableSettingsProvider))]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("200")]
+        [global::System.Configuration.DefaultSettingValueAttribute("386")]
         public long PrivateMemSwapThresholdMB {
             get {
                 return ((long)(this["PrivateMemSwapThresholdMB"]));

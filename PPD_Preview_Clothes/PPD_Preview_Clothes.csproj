@@ -42,8 +42,10 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="WeifenLuo.WinFormsUI.Docking">
-      <HintPath>..\bin\WeifenLuo.WinFormsUI.Docking.dll</HintPath>
+    <Reference Include="WeifenLuo.WinFormsUI.Docking, Version=2.5.0.15095, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\SB3UtilityExternalLibraries\WeifenLuo.WinFormsUI.Docking.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -68,14 +70,17 @@
     <ProjectReference Include="..\Plugins\SB3UtilityPlugins\SB3UtilityPlugins.csproj">
       <Project>{76C12FB4-AEBF-4271-9CCA-6F04A25ED266}</Project>
       <Name>SB3UtilityPlugins</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\Plugins\SB3UtilityPP\SB3UtilityPP.csproj">
       <Project>{5647B104-8F58-4867-B849-DAC65D5243BD}</Project>
       <Name>SB3UtilityPP</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\SB3Utility\SB3Utility.csproj">
       <Project>{A351DFAB-3235-4CEA-9916-1BAE973B65AE}</Project>
       <Name>SB3Utility</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

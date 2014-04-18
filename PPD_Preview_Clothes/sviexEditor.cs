@@ -11,32 +11,84 @@ namespace PPD_Preview_Clothes
 	[Plugin]
 	public class sviexEditor : IDisposable
 	{
-		sviexParser SortedParser;
+		public sviexParser Parser { get; protected set; }
 		public ProgressBar progressBar;
+
+		sviexParser SortedParser;
 
 		public sviexEditor(sviexParser parser)
 		{
-			SortedParser = new sviexParser();
-			foreach (sviexParser.SubmeshSection section in parser.sections)
-			{
-				sviexParser.SubmeshSection sortedSection = new sviexParser.SubmeshSection();
-				sortedSection.Name = section.Name;
-				sortedSection.submeshIdx = section.submeshIdx;
-				sortedSection.indices = new ushort[section.indices.Length];
-				sortedSection.normals = new Vector3[section.normals.Length];
-				for (ushort i = 0; i < section.indices.Length; i++)
-				{
-					sortedSection.indices[i] = i;
-					int dstIdx = section.indices[i];
-					sortedSection.normals[dstIdx] = section.normals[i];
-				}
-				SortedParser.sections.Add(sortedSection);
-			}
+			Parser = parser;
 		}
 
 		public void Dispose()
 		{
 			SortedParser = null;
+		}
+
+		[Plugin]
+		public void Reorder()
+		{
+			SortedParser = new sviexParser();
+			foreach (sviexParser.SubmeshSection section in Parser.sections)
+			{
+				sviexParser.SubmeshSection sortedSection = new sviexParser.SubmeshSection();
+				sortedSection.Name = section.Name;
+				sortedSection.submeshIdx = section.submeshIdx;
+				sortedSection.indices = new ushort[section.indices.Length];
+				for (ushort i = 0; i < section.indices.Length; i++)
+				{
+					sortedSection.indices[i] = i;
+				}
+				if (section.positionsPresent == 1)
+				{
+					sortedSection.positionsPresent = 1;
+					sortedSection.positions = new Vector3[section.indices.Length];
+					for (ushort i = 0; i < section.indices.Length; i++)
+					{
+						int dstIdx = section.indices[i];
+						sortedSection.positions[dstIdx] = section.positions[i];
+					}
+				}
+				if (section.bonesPresent == 1)
+				{
+					sortedSection.bonesPresent = 1;
+					sortedSection.boneWeights3 = new float[section.boneWeights3.Length][];
+					sortedSection.boneIndices = new byte[section.boneIndices.Length][];
+					sortedSection.bones = new sviexParser.SubmeshSection.SVIEX_Bone[section.bones.Length];
+					for (ushort i = 0; i < section.indices.Length; i++)
+					{
+						int dstIdx = section.indices[i];
+						sortedSection.boneWeights3[dstIdx] = (float[])section.boneWeights3[i].Clone();
+						sortedSection.boneIndices[dstIdx] = (byte[])section.boneIndices[i].Clone();
+						sortedSection.bones[dstIdx] = new sviexParser.SubmeshSection.SVIEX_Bone();
+						sortedSection.bones[dstIdx].name = (string)section.bones[i].name.Clone();
+						sortedSection.bones[dstIdx].boneIdx = section.bones[i].boneIdx;
+						sortedSection.bones[dstIdx].matrix = section.bones[i].matrix;
+					}
+				}
+				if (section.normalsPresent == 1)
+				{
+					sortedSection.normalsPresent = 1;
+					sortedSection.normals = new Vector3[section.normals.Length];
+					for (ushort i = 0; i < section.indices.Length; i++)
+					{
+						int dstIdx = section.indices[i];
+						sortedSection.normals[dstIdx] = section.normals[i];
+					}
+				}
+				if (section.uvsPresent == 1)
+				{
+					sortedSection.uvsPresent = 1;
+					sortedSection.uvs = new Vector2[section.indices.Length];
+					for (ushort i = 0; i < section.indices.Length; i++)
+					{
+						int dstIdx = section.indices[i];
+						sortedSection.uvs[dstIdx] = section.uvs[i];
+					}
+				}
+				SortedParser.sections.Add(sortedSection);
+			}
 		}
 
 		[Plugin]
@@ -110,6 +162,7 @@ namespace PPD_Preview_Clothes
 					newSection.Name = dstMeshFrame.Name;
 					newSection.submeshIdx = dstMeshFrame.Mesh.SubmeshList.IndexOf(dstSubmesh);
 					newSection.indices = new ushort[dstSubmesh.VertexList.Count];
+					newSection.normalsPresent = 1;
 					newSection.normals = new Vector3[dstSubmesh.VertexList.Count];
 					for (ushort i = 0; i < dstSubmesh.VertexList.Count; i++)
 					{
@@ -251,6 +304,225 @@ namespace PPD_Preview_Clothes
 			}
 
 			dstParser.sections = newParser.sections;
+		}
+
+		[Plugin]
+		public bool CopyToSubmesh(xxFrame meshFrame, int submeshIdx, bool positions, bool bones, bool normals, bool uvs)
+		{
+			foreach (sviexParser.SubmeshSection submeshSection in Parser.sections)
+			{
+				if (submeshSection.Name == meshFrame.Name && submeshSection.submeshIdx == submeshIdx)
+				{
+					xxSubmesh submesh = meshFrame.Mesh.SubmeshList[submeshIdx];
+					if (submeshSection.indices.Length != submesh.VertexList.Count)
+					{
+						Report.ReportLog(meshFrame.Name + "[" + submeshIdx + "] has a different number of vertices than defined in the sviex(" + submesh.VertexList.Count + "/" + submeshSection.indices.Length + ").");
+						return false;
+					}
+					if (positions && submeshSection.positions != null)
+					{
+						for (ushort i = 0; i < submeshSection.positions.Length; i++)
+						{
+							submesh.VertexList[submeshSection.indices[i]].Position = submeshSection.positions[i];
+						}
+					}
+					if (bones && submeshSection.boneWeights3 != null)
+					{
+						for (ushort i = 0; i < submeshSection.boneWeights3.Length; i++)
+						{
+							submesh.VertexList[submeshSection.indices[i]].Weights3 = (float[])submeshSection.boneWeights3[i].Clone();
+						}
+						for (ushort i = 0; i < submeshSection.boneIndices.Length; i++)
+						{
+							submesh.VertexList[submeshSection.indices[i]].BoneIndices = (byte[])submeshSection.boneIndices[i].Clone();
+						}
+
+						meshFrame.Mesh.BoneList.Clear();
+						for (ushort i = 0; i < submeshSection.bones.Length; i++)
+						{
+							xxBone bone = new xxBone();
+							bone.Name = (string)submeshSection.bones[i].name.Clone();
+							bone.Index = submeshSection.bones[i].boneIdx;
+							bone.Matrix = submeshSection.bones[i].matrix;
+							meshFrame.Mesh.BoneList.Add(bone);
+						}
+					}
+					if (normals && submeshSection.normals != null)
+					{
+						for (ushort i = 0; i < submeshSection.normals.Length; i++)
+						{
+							submesh.VertexList[submeshSection.indices[i]].Normal = submeshSection.normals[i];
+						}
+					}
+					if (uvs && submeshSection.uvs != null)
+					{
+						for (ushort i = 0; i < submeshSection.uvs.Length; i++)
+						{
+							submesh.VertexList[submeshSection.indices[i]].UV = new float[2] { submeshSection.uvs[i].X, submeshSection.uvs[i].Y };
+						}
+					}
+					return true;
+				}
+			}
+			return false;
+		}
+
+		[Plugin]
+		public bool CopyIntoSVIEX(xxFrame meshFrame, int submeshIdx, bool positions, bool bones, bool normals, bool uvs, bool unrestricted, bool nearestPositions)
+		{
+			if (unrestricted || nearestPositions)
+			{
+				positions = bones = normals = uvs = true;
+			}
+			foreach (sviexParser.SubmeshSection submeshSection in Parser.sections)
+			{
+				if (submeshSection.Name == meshFrame.Name && submeshSection.submeshIdx == submeshIdx)
+				{
+					xxSubmesh submesh = meshFrame.Mesh.SubmeshList[submeshIdx];
+					int[] nearestVertexIndices = null;
+					if (nearestPositions && submeshSection.positionsPresent == 1)
+					{
+						nearestVertexIndices = new int[submesh.VertexList.Count];
+						for (ushort i = 0; i < submesh.VertexList.Count; i++)
+						{
+							int bestIdx = -1;
+							double nearestDist = Double.MaxValue;
+							for (ushort j = 0; j < submeshSection.positions.Length; j++)
+							{
+								double distSquare = (submeshSection.positions[j].X - submesh.VertexList[i].Position.X) * (submeshSection.positions[j].X - submesh.VertexList[i].Position.X)
+									+ (submeshSection.positions[j].Y - submesh.VertexList[i].Position.Y) * (submeshSection.positions[j].Y - submesh.VertexList[i].Position.Y)
+									+ (submeshSection.positions[j].Z - submesh.VertexList[i].Position.Z) * (submeshSection.positions[j].Z - submesh.VertexList[i].Position.Z);
+								if (distSquare < nearestDist)
+								{
+									bestIdx = j;
+									nearestDist = distSquare;
+								}
+							}
+							nearestVertexIndices[i] = bestIdx;
+						}
+					}
+					Vector3[] newNormals = submeshSection.normals;
+					Vector2[] newUVs = submeshSection.uvs;
+					byte[][] newBoneIndices = submeshSection.boneIndices;
+					float[][] newBoneWeights3 = submeshSection.boneWeights3;
+					if (submeshSection.indices.Length != submesh.VertexList.Count)
+					{
+						if (unrestricted || nearestPositions)
+						{
+							submeshSection.indices = new ushort[submesh.VertexList.Count];
+							for (ushort i = 0; i < submeshSection.indices.Length; i++)
+							{
+								submeshSection.indices[i] = i;
+							}
+							if (submeshSection.positionsPresent == 1)
+							{
+								submeshSection.positions = new Vector3[submesh.VertexList.Count];
+							}
+							if (submeshSection.bonesPresent == 1)
+							{
+								newBoneWeights3 = new float[submesh.VertexList.Count][];
+								newBoneIndices = new byte[submesh.VertexList.Count][];
+							}
+							if (submeshSection.normalsPresent == 1)
+							{
+								newNormals = new Vector3[submesh.VertexList.Count];
+							}
+							if (submeshSection.uvsPresent == 1)
+							{
+								newUVs = new Vector2[submesh.VertexList.Count];
+							}
+						}
+						else
+						{
+							Report.ReportLog(meshFrame.Name + "[" + submeshIdx + "] has a different number of vertices than defined in the sviex(" + submesh.VertexList.Count + "/" + submeshSection.indices.Length + ").");
+							return false;
+						}
+					}
+					if (positions && submeshSection.positionsPresent == 1)
+					{
+						for (ushort i = 0; i < submeshSection.positions.Length; i++)
+						{
+							submeshSection.positions[i] = submesh.VertexList[submeshSection.indices[i]].Position;
+						}
+					}
+					if (bones && submeshSection.bonesPresent == 1)
+					{
+						if (nearestPositions)
+						{
+							for (ushort i = 0; i < newBoneWeights3.Length; i++)
+							{
+								newBoneWeights3[i] = (float[])submeshSection.boneWeights3[nearestVertexIndices[i]].Clone();
+							}
+							for (ushort i = 0; i < newBoneIndices.Length; i++)
+							{
+								newBoneIndices[i] = (byte[])submeshSection.boneIndices[nearestVertexIndices[i]].Clone();
+							}
+						}
+						else
+						{
+							for (ushort i = 0; i < newBoneWeights3.Length; i++)
+							{
+								newBoneWeights3[i] = (float[])submesh.VertexList[submeshSection.indices[i]].Weights3.Clone();
+							}
+							for (ushort i = 0; i < newBoneIndices.Length; i++)
+							{
+								newBoneIndices[i] = (byte[])submesh.VertexList[submeshSection.indices[i]].BoneIndices.Clone();
+							}
+						}
+						submeshSection.boneWeights3 = newBoneWeights3;
+						submeshSection.boneIndices = newBoneIndices;
+
+						submeshSection.bones = new sviexParser.SubmeshSection.SVIEX_Bone[meshFrame.Mesh.BoneList.Count];
+						for (ushort i = 0; i < submeshSection.bones.Length; i++)
+						{
+							sviexParser.SubmeshSection.SVIEX_Bone bone = new sviexParser.SubmeshSection.SVIEX_Bone();
+							bone.name = (string)meshFrame.Mesh.BoneList[i].Name.Clone();
+							bone.boneIdx = meshFrame.Mesh.BoneList[i].Index;
+							bone.matrix = meshFrame.Mesh.BoneList[i].Matrix;
+							submeshSection.bones[i] = bone;
+						}
+					}
+					if (normals && submeshSection.normalsPresent == 1)
+					{
+						if (nearestPositions)
+						{
+							for (ushort i = 0; i < submesh.VertexList.Count; i++)
+							{
+								newNormals[i] = submeshSection.normals[nearestVertexIndices[i]];
+							}
+						}
+						else
+						{
+							for (ushort i = 0; i < submesh.VertexList.Count; i++)
+							{
+								newNormals[i] = submesh.VertexList[submeshSection.indices[i]].Normal;
+							}
+						}
+						submeshSection.normals = newNormals;
+					}
+					if (uvs && submeshSection.uvsPresent == 1)
+					{
+						if (nearestPositions)
+						{
+							for (ushort i = 0; i < submesh.VertexList.Count; i++)
+							{
+								newUVs[i] = submeshSection.uvs[nearestVertexIndices[i]];
+							}
+						}
+						else
+						{
+							for (ushort i = 0; i < submesh.VertexList.Count; i++)
+							{
+								float[] uv = submesh.VertexList[submeshSection.indices[i]].UV;
+								newUVs[i] = new Vector2(uv[0], uv[1]);
+							}
+						}
+						submeshSection.uvs = newUVs;
+					}
+					return true;
+				}
+			}
+			return false;
 		}
 	}
 }

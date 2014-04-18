@@ -31,7 +31,7 @@ namespace SB3Utility
 		private void InitializeComponent()
 		{
 			this.checkBoxWordWrap = new System.Windows.Forms.CheckBox();
-			this.buttonApply = new System.Windows.Forms.Button();
+			this.buttonApplyCheck = new System.Windows.Forms.Button();
 			this.buttonRevert = new System.Windows.Forms.Button();
 			this.labelFormatError = new System.Windows.Forms.Label();
 			this.syntaxHighlightingTextBoxLSTContents = new UrielGuy.SyntaxHighlightingTextBox.SyntaxHighlightingTextBox();
@@ -43,7 +43,7 @@ namespace SB3Utility
 			this.checkBoxWordWrap.AutoSize = true;
 			this.checkBoxWordWrap.Checked = true;
 			this.checkBoxWordWrap.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.checkBoxWordWrap.Location = new System.Drawing.Point(337, 243);
+			this.checkBoxWordWrap.Location = new System.Drawing.Point(392, 243);
 			this.checkBoxWordWrap.Name = "checkBoxWordWrap";
 			this.checkBoxWordWrap.Size = new System.Drawing.Size(81, 17);
 			this.checkBoxWordWrap.TabIndex = 9;
@@ -51,21 +51,21 @@ namespace SB3Utility
 			this.checkBoxWordWrap.UseVisualStyleBackColor = true;
 			this.checkBoxWordWrap.Click += new System.EventHandler(this.checkBoxWordWrap_Click);
 			// 
-			// buttonApply
+			// buttonApplyCheck
 			// 
-			this.buttonApply.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.buttonApply.Location = new System.Drawing.Point(12, 239);
-			this.buttonApply.Name = "buttonApply";
-			this.buttonApply.Size = new System.Drawing.Size(75, 23);
-			this.buttonApply.TabIndex = 3;
-			this.buttonApply.Text = "Apply";
-			this.buttonApply.UseVisualStyleBackColor = true;
-			this.buttonApply.Click += new System.EventHandler(this.buttonApply_Click);
+			this.buttonApplyCheck.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.buttonApplyCheck.Location = new System.Drawing.Point(12, 239);
+			this.buttonApplyCheck.Name = "buttonApplyCheck";
+			this.buttonApplyCheck.Size = new System.Drawing.Size(88, 23);
+			this.buttonApplyCheck.TabIndex = 3;
+			this.buttonApplyCheck.Text = "Apply && Check";
+			this.buttonApplyCheck.UseVisualStyleBackColor = true;
+			this.buttonApplyCheck.Click += new System.EventHandler(this.buttonApplyCheck_Click);
 			// 
 			// buttonRevert
 			// 
-			this.buttonRevert.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.buttonRevert.Location = new System.Drawing.Point(107, 239);
+			this.buttonRevert.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.buttonRevert.Location = new System.Drawing.Point(299, 239);
 			this.buttonRevert.Name = "buttonRevert";
 			this.buttonRevert.Size = new System.Drawing.Size(75, 23);
 			this.buttonRevert.TabIndex = 6;
@@ -79,7 +79,7 @@ namespace SB3Utility
 			this.labelFormatError.AutoSize = true;
 			this.labelFormatError.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.labelFormatError.ForeColor = System.Drawing.Color.Red;
-			this.labelFormatError.Location = new System.Drawing.Point(200, 242);
+			this.labelFormatError.Location = new System.Drawing.Point(106, 242);
 			this.labelFormatError.Name = "labelFormatError";
 			this.labelFormatError.Size = new System.Drawing.Size(121, 16);
 			this.labelFormatError.TabIndex = 10;
@@ -102,7 +102,7 @@ namespace SB3Utility
 			this.syntaxHighlightingTextBoxLSTContents.Location = new System.Drawing.Point(4, 6);
 			this.syntaxHighlightingTextBoxLSTContents.MaxUndoRedoSteps = 50;
 			this.syntaxHighlightingTextBoxLSTContents.Name = "syntaxHighlightingTextBoxLSTContents";
-			this.syntaxHighlightingTextBoxLSTContents.Size = new System.Drawing.Size(412, 227);
+			this.syntaxHighlightingTextBoxLSTContents.Size = new System.Drawing.Size(467, 227);
 			this.syntaxHighlightingTextBoxLSTContents.TabIndex = 0;
 			this.syntaxHighlightingTextBoxLSTContents.Text = "";
 			// 
@@ -110,16 +110,16 @@ namespace SB3Utility
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.AutoSize = true;
-			this.ClientSize = new System.Drawing.Size(420, 266);
+			this.ClientSize = new System.Drawing.Size(475, 266);
 			this.Controls.Add(this.labelFormatError);
 			this.Controls.Add(this.buttonRevert);
 			this.Controls.Add(this.syntaxHighlightingTextBoxLSTContents);
 			this.Controls.Add(this.checkBoxWordWrap);
-			this.Controls.Add(this.buttonApply);
+			this.Controls.Add(this.buttonApplyCheck);
 			this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.Name = "FormLST";
 			this.Text = "FormLST";
+			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FormLST_FormClosing);
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -129,7 +129,7 @@ namespace SB3Utility
 
 		private SyntaxHighlightingTextBox syntaxHighlightingTextBoxLSTContents;
 		private System.Windows.Forms.CheckBox checkBoxWordWrap;
-		private System.Windows.Forms.Button buttonApply;
+		private System.Windows.Forms.Button buttonApplyCheck;
 		private System.Windows.Forms.Button buttonRevert;
 		private System.Windows.Forms.Label labelFormatError;
 	}

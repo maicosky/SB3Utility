@@ -74,7 +74,7 @@ namespace SB3Utility
 
 		public void WriteTo(Stream stream)
 		{
-			using (BinaryReader reader = new BinaryReader(File.OpenRead(swapFilePath)))
+			using (BinaryReader reader = new BinaryReader(CreateReadStream()))
 			{
 				BinaryWriter writer = new BinaryWriter(stream);
 				for (byte[] buffer; (buffer = reader.ReadBytes(Utility.BufSize)).Length > 0; )

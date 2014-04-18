@@ -243,7 +243,7 @@ namespace PPD_Preview_Clothes
 				}
 				else
 				{
-					comboBoxSourceSVIEXunits.Items.Add("No SVIEX for " + cbItem.meshes);
+					comboBoxSourceSVIEXunits.Items.Add("No SVIEX present");
 					buttonApproximateNormals.Enabled = false;
 				}
 				comboBoxSourceSVIEXunits.SelectedIndex = 0;
@@ -314,6 +314,7 @@ namespace PPD_Preview_Clothes
 					Gui.Scripting.RunScript(parserCommand);
 
 					sviexEditor srcEditor = (sviexEditor)Gui.Scripting.RunScript(srcEditorVar + " = sviexEditor(parser=" + srcParserVar + ")");
+					Gui.Scripting.RunScript(srcEditorVar + ".Reorder()");
 					srcEditor.progressBar = progressBarApproximation;
 					Gui.Scripting.RunScript(srcEditorVar + ".CopyNearestNormals(srcMeshes={ " + srcMeshes + " }, srcSubmeshes={ " + srcSubmeshes + " }, dstMeshes={ " + dstMeshes + " }, dstSubmeshes={ " + dstSubmeshes + " }, dstParser=" + dstParserVar + ", nearVertexThreshold=" + ((float)numericUpDownNearVertexSqDist.Value).ToFloatString() + ", nearestNormal=" + checkBoxNearestNormal.Checked + ", automatic=" + checkBoxAutomatic.Checked + ")");
 					Gui.Scripting.RunScript(dstItem.ppForm.EditorVar + ".ReplaceSubfile(file=" + dstParserVar + ")");
@@ -321,6 +322,7 @@ namespace PPD_Preview_Clothes
 					comboBoxTargetSVIEXunits.SelectedItem = dstFile;
 				}
 				Gui.Scripting.Variables.Remove(srcParserVar);
+				Gui.Scripting.Variables.Remove(dstParserVar);
 				Gui.Scripting.Variables.Remove(srcEditorVar);
 
 				progressBarApproximation.Value = 0;
@@ -444,6 +446,214 @@ namespace PPD_Preview_Clothes
 		private void checkBoxAutomatic_Click(object sender, EventArgs e)
 		{
 			checkBoxNearestNormal.Enabled = !checkBoxAutomatic.Checked;
+		}
+
+		private void buttonCopyToMeshes_Click(object sender, EventArgs e)
+		{
+			List<DockContent> formXXList;
+			if (!Gui.Docking.DockContents.TryGetValue(typeof(FormXX), out formXXList))
+			{
+				return;
+			}
+			List<DockContent> formPPList;
+			if (!Gui.Docking.DockContents.TryGetValue(typeof(FormPP), out formPPList))
+			{
+				return;
+			}
+
+			groupBoxAA2SVIEXJuggler.Enabled = false;
+			try
+			{
+				List<string> srcParserVarList = new List<string>();
+				List<string> srcEditorVarList = new List<string>();
+				foreach (FormPP form in formPPList)
+				{
+					foreach (ListViewItem item in form.otherSubfilesList.SelectedItems)
+					{
+						if (item.Text.ToLower().EndsWith(".sviex"))
+						{
+							string srcParserVar = Gui.Scripting.GetNextVariable("sviexParser");
+							srcParserVarList.Add(srcParserVar);
+							string parserCommand = srcParserVar + " = OpenSVIEX(parser=" + form.ParserVar + ", name=\"" + item.Text + "\")";
+							Gui.Scripting.RunScript(parserCommand);
+							string srcEditorVar = Gui.Scripting.GetNextVariable("sviexEditor");
+							srcEditorVarList.Add(srcEditorVar);
+							Gui.Scripting.RunScript(srcEditorVar + " = sviexEditor(parser=" + srcParserVar + ")");
+						}
+					}
+				}
+				foreach (FormXX xxForm in formXXList)
+				{
+					bool recreateFrames = false;
+					foreach (ListViewItem item in xxForm.listViewMesh.SelectedItems)
+					{
+						xxFrame meshFrame = xxForm.Editor.Meshes[(int)item.Tag];
+						for (ushort i = 0; i < meshFrame.Mesh.SubmeshList.Count; i++)
+						{
+							if (radioButtonSubmeshesAll.Checked ||
+								radioButtonSubmeshesSelected.Checked && xxForm.textBoxMeshName.Text == meshFrame.Name
+									&& i < xxForm.dataGridViewMesh.Rows.Count && xxForm.dataGridViewMesh.Rows[i].Selected)
+							{
+								foreach (string srcEditorVar in srcEditorVarList)
+								{
+									sviexEditor editor = (sviexEditor)Gui.Scripting.Variables[srcEditorVar];
+									for (ushort j = 0; j < editor.Parser.sections.Count; j++)
+									{
+										sviexParser.SubmeshSection submeshSection = editor.Parser.sections[j];
+										if (submeshSection.Name == meshFrame.Name && submeshSection.submeshIdx == i)
+										{
+											bool copied = (bool)Gui.Scripting.RunScript(srcEditorVar + ".CopyToSubmesh(meshFrame=" + xxForm.EditorVar + ".Meshes[" + (int)item.Tag + "], submeshIdx=" + i
+												+ ", positions=" + checkBoxElementsPositions.Checked + ", bones=" + checkBoxElementsBonesWeights.Checked + ", normals=" + checkBoxElementsNormals.Checked + ", uvs=" + checkBoxElementsUVs.Checked + ")");
+											if (copied)
+											{
+												recreateFrames = true;
+											}
+											break;
+										}
+									}
+								}
+							}
+						}
+					}
+					if (recreateFrames)
+					{
+						xxForm.Changed = true;
+						int[] selection = new int[xxForm.listViewMesh.SelectedIndices.Count];
+						xxForm.listViewMesh.SelectedIndices.CopyTo(selection, 0);
+						xxForm.RecreateFrames();
+						foreach (int i in selection)
+						{
+							xxForm.listViewMesh.Items[i].Selected = true;
+						}
+					}
+				}
+
+				foreach (string parserVar in srcParserVarList)
+				{
+					Gui.Scripting.RunScript(parserVar + "=null");
+				}
+				foreach (string editorVar in srcEditorVarList)
+				{
+					Gui.Scripting.RunScript(editorVar + "=null");
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+			groupBoxAA2SVIEXJuggler.Enabled = true;
+		}
+
+		private void buttonCopyToSVIEXes_Click(object sender, EventArgs e)
+		{
+			List<DockContent> formXXList;
+			if (!Gui.Docking.DockContents.TryGetValue(typeof(FormXX), out formXXList))
+			{
+				return;
+			}
+			List<DockContent> formPPList;
+			if (!Gui.Docking.DockContents.TryGetValue(typeof(FormPP), out formPPList))
+			{
+				return;
+			}
+
+			groupBoxAA2SVIEXJuggler.Enabled = false;
+			try
+			{
+				List<string> srcParserVarList = new List<string>();
+				List<string> srcEditorVarList = new List<string>();
+				foreach (FormPP form in formPPList)
+				{
+					foreach (ListViewItem item in form.otherSubfilesList.SelectedItems)
+					{
+						if (item.Text.ToLower().EndsWith(".sviex"))
+						{
+							string srcParserVar = Gui.Scripting.GetNextVariable("sviexParser");
+							srcParserVarList.Add(srcParserVar);
+							string parserCommand = srcParserVar + " = OpenSVIEX(parser=" + form.ParserVar + ", name=\"" + item.Text + "\")";
+							Gui.Scripting.RunScript(parserCommand);
+							string srcEditorVar = Gui.Scripting.GetNextVariable("sviexEditor");
+							srcEditorVarList.Add(srcEditorVar);
+							Gui.Scripting.RunScript(srcEditorVar + " = sviexEditor(parser=" + srcParserVar + ")");
+						}
+					}
+				}
+				foreach (string srcEditorVar in srcEditorVarList)
+				{
+					sviexEditor editor = (sviexEditor)Gui.Scripting.Variables[srcEditorVar];
+					bool sviexChanged = false;
+					for (ushort j = 0; j < editor.Parser.sections.Count; j++)
+					{
+						sviexParser.SubmeshSection submeshSection = editor.Parser.sections[j];
+						foreach (FormXX xxForm in formXXList)
+						{
+							foreach (ListViewItem item in xxForm.listViewMesh.SelectedItems)
+							{
+								xxFrame meshFrame = xxForm.Editor.Meshes[(int)item.Tag];
+								if (submeshSection.Name == meshFrame.Name)
+								{
+									for (ushort i = 0; i < meshFrame.Mesh.SubmeshList.Count; i++)
+									{
+										if (radioButtonSubmeshesAll.Checked ||
+											radioButtonSubmeshesSelected.Checked && xxForm.textBoxMeshName.Text == meshFrame.Name
+												&& i < xxForm.dataGridViewMesh.Rows.Count && xxForm.dataGridViewMesh.Rows[i].Selected)
+										{
+											if (submeshSection.submeshIdx == i)
+											{
+												bool copied = (bool)Gui.Scripting.RunScript(srcEditorVar + ".CopyIntoSVIEX(meshFrame=" + xxForm.EditorVar + ".Meshes[" + (int)item.Tag + "], submeshIdx=" + i
+													+ ", positions=" + checkBoxElementsPositions.Checked + ", bones=" + checkBoxElementsBonesWeights.Checked + ", normals=" + checkBoxElementsNormals.Checked + ", uvs=" + checkBoxElementsUVs.Checked
+													+ ", unrestricted=" + radioButtonUnrestricted.Checked + ", nearestPositions=" + radioButtonNearestPositions.Checked + ")");
+												if (copied)
+												{
+													sviexChanged = true;
+												}
+												break;
+											}
+										}
+									}
+									break;
+								}
+							}
+						}
+					}
+					if (sviexChanged)
+					{
+						foreach (FormPP form in formPPList)
+						{
+							foreach (ListViewItem item in form.otherSubfilesList.SelectedItems)
+							{
+								if (item.Text == editor.Parser.Name)
+								{
+									form.Changed = true;
+									foreach (string srcParserVar in srcParserVarList)
+									{
+										if (editor.Parser == Gui.Scripting.Variables[srcParserVar])
+										{
+											Gui.Scripting.RunScript(form.EditorVar + ".ReplaceSubfile(file=" + srcParserVar + ")");
+											break;
+										}
+									}
+									break;
+								}
+							}
+						}
+					}
+				}
+
+				foreach (string parserVar in srcParserVarList)
+				{
+					Gui.Scripting.RunScript(parserVar + "=null");
+				}
+				foreach (string editorVar in srcEditorVarList)
+				{
+					Gui.Scripting.RunScript(editorVar + "=null");
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+			groupBoxAA2SVIEXJuggler.Enabled = true;
 		}
 	}
 }

@@ -15,7 +15,7 @@ namespace SB3Utility
 {
 	[Plugin]
 	[PluginOpensFile(".xx")]
-	public partial class FormXX : DockContent, EditorForm
+	public partial class FormXX : DockContent, EditorForm, CanIncludeEditedContent
 	{
 		private enum MeshExportFormat
 		{
@@ -62,6 +62,8 @@ namespace SB3Utility
 
 		public string EditorFormVar { get; protected set; }
 		TreeNode draggedNode = null;
+
+		private bool contentChanged = false;
 
 		[Plugin]
 		public TreeNode GetDraggedNode()
@@ -117,6 +119,32 @@ namespace SB3Utility
 
 		public FormXX(string path, string variable)
 		{
+			this.ToolTipText = path;
+			List<DockContent> formXXList;
+			if (Gui.Docking.DockContents.TryGetValue(typeof(FormXX), out formXXList))
+			{
+				var listCopy = new List<FormXX>(formXXList.Count);
+				for (int i = 0; i < formXXList.Count; i++)
+				{
+					listCopy.Add((FormXX)formXXList[i]);
+				}
+
+				foreach (var form in listCopy)
+				{
+					if (form != this)
+					{
+						if (form.ToolTipText == this.ToolTipText)
+						{
+							form.Close();
+							if (!form.IsDisposed)
+							{
+								throw new Exception("Loading " + path + " another time cancelled.");
+							}
+						}
+					}
+				}
+			}
+
 			try
 			{
 				InitializeComponent();
@@ -124,7 +152,6 @@ namespace SB3Utility
 
 				this.ShowHint = DockState.Document;
 				this.Text = Path.GetFileName(path);
-				this.ToolTipText = path;
 				this.exportDir = Path.GetDirectoryName(path) + @"\" + Path.GetFileNameWithoutExtension(path);
 
 				Init();
@@ -133,26 +160,7 @@ namespace SB3Utility
 				FormVar = variable;
 				ReopenXX();
 
-				List<DockContent> formXXList;
-				if (Gui.Docking.DockContents.TryGetValue(typeof(FormXX), out formXXList))
-				{
-					var listCopy = new List<FormXX>(formXXList.Count);
-					for (int i = 0; i < formXXList.Count; i++)
-					{
-						listCopy.Add((FormXX)formXXList[i]);
-					}
-
-					foreach (var form in listCopy)
-					{
-						if (form != this)
-						{
-							if (form.ToolTipText == this.ToolTipText)
-							{
-								form.Close();
-							}
-						}
-					}
-				}
+				FormClosing += FormXXFile_FormClosing;
 			}
 			catch (Exception ex)
 			{
@@ -200,8 +208,50 @@ namespace SB3Utility
 			}
 		}
 
+		public bool Changed
+		{
+			get { return contentChanged; }
+
+			set
+			{
+				if (value)
+				{
+					if (!contentChanged)
+					{
+						Text += "*";
+					}
+				}
+				else if (contentChanged)
+				{
+					Text = Path.GetFileName(ToolTipText);
+				}
+				contentChanged = value;
+			}
+		}
+
+		private void FormXXFile_FormClosing(object sender, FormClosingEventArgs e)
+		{
+			if (e.CloseReason != CloseReason.TaskManagerClosing && e.CloseReason != CloseReason.WindowsShutDown)
+			{
+				if (Changed)
+				{
+					BringToFront();
+					if (MessageBox.Show("Confirm to close the xx file and lose all changes.", "Close " + Editor.Parser.Name + " ?", MessageBoxButtons.OKCancel) != DialogResult.OK)
+					{
+						e.Cancel = true;
+						return;
+					}
+				}
+			}
+		}
+
 		void CustomDispose()
 		{
+			if (Text == String.Empty)
+			{
+				return;
+			}
+
 			try
 			{
 				foreach (FormXXEditHex editHex in OpenEditHexForms)
@@ -382,6 +432,7 @@ namespace SB3Utility
 					if (submesh.MaterialIndex != matIdx)
 					{
 						Gui.Scripting.RunScript(EditorVar + ".SetSubmeshMaterial(meshId=" + loadedMesh + ", submeshId=" + rowIdx + ", material=" + matIdx + ")");
+						Changed = true;
 
 						RecreateRenderObjects();
 						RecreateCrossRefs();
@@ -404,6 +455,7 @@ namespace SB3Utility
 				}
 
 				Gui.Scripting.RunScript(EditorVar + ".SetTextureName(id=" + loadedTexture + ", name=\"" + textBoxTexName.Text + "\")");
+				Changed = true;
 
 				xxTexture tex = Editor.Parser.TextureList[loadedTexture];
 				RenameListViewItems(Editor.Parser.TextureList, listViewTexture, tex, tex.Name);
@@ -433,6 +485,7 @@ namespace SB3Utility
 				string name = (combo.SelectedIndex == 0) ? String.Empty : (string)combo.Items[combo.SelectedIndex];
 
 				Gui.Scripting.RunScript(EditorVar + ".SetMaterialTexture(id=" + loadedMaterial + ", index=" + matTexIdx + ", name=\"" + name + "\")");
+				Changed = true;
 
 				RecreateRenderObjects();
 				RecreateCrossRefs();
@@ -458,6 +511,7 @@ namespace SB3Utility
 				string name = combo.Text;
 
 				Gui.Scripting.RunScript(EditorVar + ".SetMaterialTexture(id=" + loadedMaterial + ", index=" + matTexIdx + ", name=\"" + name + "\")");
+				Changed = true;
 
 				RecreateRenderObjects();
 				RecreateCrossRefs();
@@ -485,6 +539,7 @@ namespace SB3Utility
 					", specular=" + MatMatrixColorScript(matMatrixText[2]) +
 					", emissive=" + MatMatrixColorScript(matMatrixText[3]) +
 					", shininess=" + Single.Parse(matMatrixText[4][0].Text).ToFloatString() + ")");
+				Changed = true;
 
 				RecreateRenderObjects();
 				RecreateCrossRefs();
@@ -515,6 +570,7 @@ namespace SB3Utility
 				}
 
 				Gui.Scripting.RunScript(EditorVar + ".SetMaterialName(id=" + loadedMaterial + ", name=\"" + textBoxMatName.Text + "\")");
+				Changed = true;
 
 				xxMaterial mat = Editor.Parser.MaterialList[loadedMaterial];
 				RenameListViewItems(Editor.Parser.MaterialList, listViewMaterial, mat, mat.Name);
@@ -657,6 +713,7 @@ namespace SB3Utility
 				}
 
 				Gui.Scripting.RunScript(EditorVar + ".SetFrameName(id=" + loadedFrame + ", name=\"" + textBoxFrameName.Text + "\")");
+				Changed = true;
 
 				RecreateRenderObjects();
 
@@ -697,6 +754,7 @@ namespace SB3Utility
 				}
 
 				Gui.Scripting.RunScript(EditorVar + ".SetFrameName2(id=" + loadedFrame + ", name=\"" + textBoxFrameName2.Text + "\")");
+				Changed = true;
 			}
 			catch (Exception ex)
 			{
@@ -2233,17 +2291,20 @@ namespace SB3Utility
 					if (dragOptions.checkBoxOkContinue.Checked || dragOptions.ShowDialog() == DialogResult.OK)
 					{
 						Gui.Scripting.RunScript(EditorVar + "." + dragOptions.FrameMethod.GetName() + "(srcFrame=" + source.Variable + ".Frames[" + (int)source.Id + "], srcFormat=" + source.Variable + ".Parser.Format, destParentId=" + dragOptions.numericFrameId.Value + ", meshMatOffset=" + dragOptions.numericFrameMeshMatOffset.Value + ")");
+						Changed = true;
 						RecreateFrames();
 					}
 				}
 				else if (source.Type == typeof(xxMaterial))
 				{
 					Gui.Scripting.RunScript(EditorVar + ".MergeMaterial(mat=" + source.Variable + ".Parser.MaterialList[" + (int)source.Id + "], srcFormat=" + source.Variable + ".Parser.Format)");
+					Changed = true;
 					RecreateMaterials();
 				}
 				else if (source.Type == typeof(xxTexture))
 				{
 					Gui.Scripting.RunScript(EditorVar + ".MergeTexture(tex=" + source.Variable + ".Parser.TextureList[" + (int)source.Id + "])");
+					Changed = true;
 					RecreateTextures();
 				}
 				else if (source.Type == typeof(ImportedFrame))
@@ -2258,6 +2319,7 @@ namespace SB3Utility
 					if (dragOptions.checkBoxOkContinue.Checked || dragOptions.ShowDialog() == DialogResult.OK)
 					{
 						Gui.Scripting.RunScript(EditorVar + "." + dragOptions.FrameMethod.GetName() + "(srcFrame=" + source.Variable + ".Frames[" + (int)source.Id + "], destParentId=" + dragOptions.numericFrameId.Value + ", meshMatOffset=" + dragOptions.numericFrameMeshMatOffset.Value + ")");
+						Changed = true;
 						RecreateFrames();
 					}
 				}
@@ -2354,17 +2416,20 @@ namespace SB3Utility
 							}
 						}
 						Gui.Scripting.RunScript(EditorVar + ".ReplaceMesh(mesh=" + source.Variable + ".Meshes[" + (int)source.Id + "], frameId=" + dragOptions.numericMeshId.Value + ", merge=" + dragOptions.radioButtonMeshMerge.Checked + ", normals=\"" + dragOptions.NormalsMethod.GetName() + "\", bones=\"" + dragOptions.BonesMethod.GetName() + "\", targetFullMesh=" + dragOptions.radioButtonNearestMesh.Checked + ")");
+						Changed = true;
 						RecreateMeshes();
 					}
 				}
 				else if (source.Type == typeof(ImportedMaterial))
 				{
 					Gui.Scripting.RunScript(EditorVar + ".MergeMaterial(mat=" + source.Variable + ".Imported.MaterialList[" + (int)source.Id + "])");
+					Changed = true;
 					RecreateMaterials();
 				}
 				else if (source.Type == typeof(ImportedTexture))
 				{
 					Gui.Scripting.RunScript(EditorVar + ".MergeTexture(tex=" + source.Variable + ".Imported.TextureList[" + (int)source.Id + "])");
+					Changed = true;
 					RecreateTextures();
 				}
 			}
@@ -2501,6 +2566,34 @@ namespace SB3Utility
 			}
 		}
 
+		private void buttonCheckBones_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				TreeNode boneNode = null;
+				foreach (xxFrame meshFrame in Editor.Meshes)
+				{
+					List<xxBone> boneList = meshFrame.Mesh.BoneList;
+					foreach (xxBone bone in boneList)
+					{
+						if (xx.FindFrame(bone.Name, Editor.Parser.Frame) == null)
+						{
+							if (boneNode == null)
+							{
+								boneNode = FindBoneNode(bone, treeViewObjectTree.Nodes[0].Nodes);
+								treeViewObjectTree.SelectedNode = boneNode;
+							}
+							Report.ReportLog("Invalid bone " + bone.Name + " in mesh " + meshFrame.Name + " found.");
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
 		private void buttonConvert_Click(object sender, EventArgs e)
 		{
 			try
@@ -2510,6 +2603,7 @@ namespace SB3Utility
 					if (convert.ShowDialog() == DialogResult.OK)
 					{
 						Gui.Scripting.RunScript("ConvertXX(parser=" + ParserVar + ", format=" + convert.Format + ")");
+						Changed = true;
 
 						InitFormat();
 					}
@@ -2576,6 +2670,7 @@ namespace SB3Utility
 
 					var source = (DragSource)parentNode.Tag;
 					Gui.Scripting.RunScript(EditorVar + ".MoveFrame(id=" + loadedFrame + ", parent=" + (int)source.Id + ", index=" + (idx - 1) + ")");
+					Changed = true;
 				}
 			}
 			catch (Exception ex)
@@ -2618,6 +2713,7 @@ namespace SB3Utility
 
 					var source = (DragSource)parentNode.Tag;
 					Gui.Scripting.RunScript(EditorVar + ".MoveFrame(id=" + loadedFrame + ", parent=" + (int)source.Id + ", index=" + (idx + 1) + ")");
+					Changed = true;
 				}
 			}
 			catch (Exception ex)
@@ -2641,6 +2737,7 @@ namespace SB3Utility
 				}
 
 				Gui.Scripting.RunScript(EditorVar + ".RemoveFrame(id=" + loadedFrame + ")");
+				Changed = true;
 
 				RecreateFrames();
 			}
@@ -2775,8 +2872,9 @@ namespace SB3Utility
 					}
 				}
 				command += ")";
-
 				Gui.Scripting.RunScript(command);
+				Changed = true;
+
 				RecreateRenderObjects();
 			}
 			catch (Exception ex)
@@ -2912,8 +3010,9 @@ namespace SB3Utility
 					}
 				}
 				command += ")";
-
 				Gui.Scripting.RunScript(command);
+				Changed = true;
+
 				RecreateRenderObjects();
 			}
 			catch (Exception ex)
@@ -2932,6 +3031,7 @@ namespace SB3Utility
 				}
 
 				Gui.Scripting.RunScript(EditorVar + ".RemoveBone(meshId=" + loadedBone[0] + ", boneId=" + loadedBone[1] + ")");
+				Changed = true;
 
 				LoadBone(null);
 				RecreateRenderObjects();
@@ -2953,6 +3053,7 @@ namespace SB3Utility
 				}
 
 				Gui.Scripting.RunScript(EditorVar + ".CopyBone(meshId=" + loadedBone[0] + ", boneId=" + loadedBone[1] + ")");
+				Changed = true;
 
 				InitFrames();
 				RecreateRenderObjects();
@@ -2973,6 +3074,7 @@ namespace SB3Utility
 				}
 
 				Gui.Scripting.RunScript(EditorVar + ".SetBoneName(meshId=" + loadedBone[0] + ", boneId=" + loadedBone[1] + ", name=\"" + textBoxBoneName.Text + "\")");
+				Changed = true;
 				RecreateRenderObjects();
 
 				var bone = Editor.Meshes[loadedBone[0]].Mesh.BoneList[loadedBone[1]];
@@ -2995,6 +3097,7 @@ namespace SB3Utility
 				}
 
 				Gui.Scripting.RunScript(EditorVar + ".ZeroWeights(meshId=" + loadedBone[0] + ", boneId=" + loadedBone[1] + ")");
+				Changed = true;
 
 				LoadBone(null);
 				RecreateRenderObjects();
@@ -3025,6 +3128,7 @@ namespace SB3Utility
 				{
 					Gui.Scripting.RunScript(EditorVar + ".RemoveMesh(id=" + id + ")");
 				}
+				Changed = true;
 
 				RecreateMeshes();
 			}
@@ -3044,6 +3148,7 @@ namespace SB3Utility
 				}
 
 				Gui.Scripting.RunScript(EditorVar + ".MinBones(id=" + loadedMesh + ")");
+				Changed = true;
 
 				InitFrames();
 				RecreateRenderObjects();
@@ -3092,6 +3197,7 @@ namespace SB3Utility
 							string idArgs = editors.Substring(0, editors.Length - 2) + "}, " + numMeshes.Substring(0, numMeshes.Length - 2) + "}, " + meshes.Substring(0, meshes.Length - 2) + "}";
 
 							Gui.Scripting.RunScript(EditorVar + ".CalculateNormals(" + idArgs + ", threshold=" + ((float)normals.numericThreshold.Value).ToFloatString() + ")");
+							Changed = true;
 						}
 						if (normals.checkBoxCalculateNormalsInXAs.Checked || normals.checkBoxSelectedItemsOnly.Checked)
 						{
@@ -3130,6 +3236,7 @@ namespace SB3Utility
 											continue;
 									}
 									Gui.Scripting.RunScript(form.EditorVar + ".CalculateNormals(meshFrame=" + EditorVar + ".Meshes[" + loadedMesh + "], morphClip=" + (morphClipName != null ? "\"" + morphClipName + "\"" : "null") + ", keyframe=" + (keyframeName != null ? "\"" + keyframeName + "\"" : "null") + ", threshold=" + ((float)normals.numericThreshold.Value).ToFloatString() + ")");
+									Changed = true;
 								}
 							}
 						}
@@ -3170,6 +3277,7 @@ namespace SB3Utility
 				{
 					int index = indices[i] - i;
 					Gui.Scripting.RunScript(EditorVar + ".RemoveSubmesh(meshId=" + loadedMesh + ", submeshId=" + index + ")");
+					Changed = true;
 				}
 
 				dataGridViewMesh.SelectionChanged += new EventHandler(dataGridViewMesh_SelectionChanged);
@@ -3242,6 +3350,7 @@ namespace SB3Utility
 				{
 					Gui.Scripting.RunScript(EditorVar + ".RemoveMaterial(id=" + id + ")");
 				}
+				Changed = true;
 
 				RecreateRenderObjects();
 				LoadMesh(loadedMesh);
@@ -3265,6 +3374,7 @@ namespace SB3Utility
 				}
 
 				Gui.Scripting.RunScript(EditorVar + ".CopyMaterial(id=" + loadedMaterial + ")");
+				Changed = true;
 
 				InitMaterials();
 				RecreateCrossRefs();
@@ -3336,6 +3446,7 @@ namespace SB3Utility
 				{
 					Gui.Scripting.RunScript(EditorVar + ".RemoveTexture(id=" + id + ")");
 				}
+				Changed = true;
 
 				RecreateRenderObjects();
 				InitTextures();
@@ -3369,6 +3480,7 @@ namespace SB3Utility
 				{
 					Gui.Scripting.RunScript(EditorVar + ".AddTexture(image=" + var + ")");
 				}
+				Changed = true;
 
 				RecreateRenderObjects();
 				InitTextures();
@@ -3396,6 +3508,7 @@ namespace SB3Utility
 				}
 
 				Gui.Scripting.RunScript(EditorVar + ".ReplaceTexture(id=" + loadedTexture + ", image=" + Gui.ImageControl.ImageScriptVariable + ")");
+				Changed = true;
 
 				RecreateRenderObjects();
 				InitTextures();
@@ -3427,6 +3540,7 @@ namespace SB3Utility
 				else
 				{
 					Gui.Scripting.RunScript(EditorVar + ".MoveSubmesh(meshId=" + loadedMesh + ", submeshId=" + (int)checkBoxSubmeshReorder.Tag + ", newPosition=" + dataGridViewMesh.SelectedRows[0].Index + ")");
+					Changed = true;
 
 					RecreateRenderObjects();
 					int pos = dataGridViewMesh.SelectedRows[0].Index;
@@ -3845,6 +3959,15 @@ namespace SB3Utility
 
 		private void reopenToolStripMenuItem_Click(object sender, EventArgs e)
 		{
+			if (Changed)
+			{
+				if (MessageBox.Show("Confirm to reload the xx file and lose all changes.", "Reload " + Editor.Parser.Name + " ?", MessageBoxButtons.OKCancel) != DialogResult.OK)
+				{
+					return;
+				}
+				Changed = false;
+			}
+
 			UnloadXX();
 			ReopenXX();
 		}
@@ -3852,12 +3975,16 @@ namespace SB3Utility
 		private void savexxToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			Gui.Scripting.RunScript(EditorVar + ".SaveXX(path=\"" + this.ToolTipText + "\", backup=" + keepBackupToolStripMenuItem.Checked + ")");
+			Changed = false;
 		}
 
 		private void savexxAsToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+			{
 				Gui.Scripting.RunScript(EditorVar + ".SaveXX(path=\"" + saveFileDialog1.FileName + "\", backup=" + keepBackupToolStripMenuItem.Checked + ")");
+				Changed = false;
+			}
 		}
 
 		private void closeToolStripMenuItem_Click(object sender, EventArgs e)
@@ -3893,6 +4020,7 @@ namespace SB3Utility
 						skeletons.Remove(skeletons.Length - 2, 2);
 						skeletons.Append("}");
 						Gui.Scripting.RunScript(EditorVar + ".CreateSkin(meshId=" + loadedMesh + ", skeletons=" + skeletons + ")");
+						Changed = true;
 
 						RecreateMeshes();
 						LoadMesh(loadedMesh);
@@ -3967,6 +4095,7 @@ namespace SB3Utility
 				meshNames = "{ " + meshNames.Substring(0, meshNames.Length - 2) + " }";
 
 				Gui.Scripting.RunScript(EditorVar + ".ComputeBoneMatrices(meshNames=" + meshNames + ")");
+				Changed = true;
 
 				RecreateMeshes();
 				if (reselect != null)
