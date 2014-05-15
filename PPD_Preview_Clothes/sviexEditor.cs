@@ -21,6 +21,13 @@ namespace PPD_Preview_Clothes
 			Parser = parser;
 		}
 
+		public sviexEditor(sviParser parser)
+		{
+			Parser = new sviexParser();
+			Parser.Name = parser.Name;
+			Parser.sections.Add(parser);
+		}
+
 		public void Dispose()
 		{
 			SortedParser = null;
@@ -30,10 +37,10 @@ namespace PPD_Preview_Clothes
 		public void Reorder()
 		{
 			SortedParser = new sviexParser();
-			foreach (sviexParser.SubmeshSection section in Parser.sections)
+			foreach (sviParser section in Parser.sections)
 			{
-				sviexParser.SubmeshSection sortedSection = new sviexParser.SubmeshSection();
-				sortedSection.Name = section.Name;
+				sviParser sortedSection = new sviParser();
+				sortedSection.meshName = section.meshName;
 				sortedSection.submeshIdx = section.submeshIdx;
 				sortedSection.indices = new ushort[section.indices.Length];
 				for (ushort i = 0; i < section.indices.Length; i++)
@@ -55,13 +62,13 @@ namespace PPD_Preview_Clothes
 					sortedSection.bonesPresent = 1;
 					sortedSection.boneWeights3 = new float[section.boneWeights3.Length][];
 					sortedSection.boneIndices = new byte[section.boneIndices.Length][];
-					sortedSection.bones = new sviexParser.SubmeshSection.SVIEX_Bone[section.bones.Length];
+					sortedSection.bones = new sviParser.sviBone[section.bones.Length];
 					for (ushort i = 0; i < section.indices.Length; i++)
 					{
 						int dstIdx = section.indices[i];
 						sortedSection.boneWeights3[dstIdx] = (float[])section.boneWeights3[i].Clone();
 						sortedSection.boneIndices[dstIdx] = (byte[])section.boneIndices[i].Clone();
-						sortedSection.bones[dstIdx] = new sviexParser.SubmeshSection.SVIEX_Bone();
+						sortedSection.bones[dstIdx] = new sviParser.sviBone();
 						sortedSection.bones[dstIdx].name = (string)section.bones[i].name.Clone();
 						sortedSection.bones[dstIdx].boneIdx = section.bones[i].boneIdx;
 						sortedSection.bones[dstIdx].matrix = section.bones[i].matrix;
@@ -106,9 +113,9 @@ namespace PPD_Preview_Clothes
 				for (int i = 0; i < numSubmeshes; i++)
 				{
 					int srcSubmeshIdx = (int)srcSubmeshDoubleIndices[srcSubmeshIdxIdx++];
-					foreach (sviexParser.SubmeshSection section in SortedParser.sections)
+					foreach (sviParser section in SortedParser.sections)
 					{
-						if (section.Name == meshFrame.Name && section.submeshIdx == srcSubmeshIdx)
+						if (section.meshName == meshFrame.Name && section.submeshIdx == srcSubmeshIdx)
 						{
 							xxSubmesh submesh = meshFrame.Mesh.SubmeshList[srcSubmeshIdx];
 							srcSubmeshSet.Add(submesh);
@@ -158,8 +165,8 @@ namespace PPD_Preview_Clothes
 					{
 						progressBar.Maximum += dstSubmesh.VertexList.Count;
 					}
-					sviexParser.SubmeshSection newSection = new sviexParser.SubmeshSection();
-					newSection.Name = dstMeshFrame.Name;
+					sviParser newSection = new sviParser();
+					newSection.meshName = dstMeshFrame.Name;
 					newSection.submeshIdx = dstMeshFrame.Mesh.SubmeshList.IndexOf(dstSubmesh);
 					newSection.indices = new ushort[dstSubmesh.VertexList.Count];
 					newSection.normalsPresent = 1;
@@ -241,9 +248,9 @@ namespace PPD_Preview_Clothes
 							double nearestDist = Double.MaxValue;
 							foreach (var finding in bestFindings)
 							{
-								foreach (sviexParser.SubmeshSection srcSection in SortedParser.sections)
+								foreach (sviParser srcSection in SortedParser.sections)
 								{
-									if (srcSection.Name == finding.Key.Name)
+									if (srcSection.meshName == finding.Key.Name)
 									{
 										foreach (var submeshFinding in finding.Value)
 										{
@@ -283,9 +290,9 @@ namespace PPD_Preview_Clothes
 						else
 						{
 							int bestSubmeshIdx = bestMeshFrame.Mesh.SubmeshList.IndexOf(bestSubmesh);
-							foreach (sviexParser.SubmeshSection srcSection in SortedParser.sections)
+							foreach (sviParser srcSection in SortedParser.sections)
 							{
-								if (srcSection.Name == bestMeshFrame.Name && srcSection.submeshIdx == bestSubmeshIdx)
+								if (srcSection.meshName == bestMeshFrame.Name && srcSection.submeshIdx == bestSubmeshIdx)
 								{
 									newSection.indices[i] = i;
 									newSection.normals[i] = srcSection.normals[bestIdx];
@@ -309,9 +316,9 @@ namespace PPD_Preview_Clothes
 		[Plugin]
 		public bool CopyToSubmesh(xxFrame meshFrame, int submeshIdx, bool positions, bool bones, bool normals, bool uvs)
 		{
-			foreach (sviexParser.SubmeshSection submeshSection in Parser.sections)
+			foreach (sviParser submeshSection in Parser.sections)
 			{
-				if (submeshSection.Name == meshFrame.Name && submeshSection.submeshIdx == submeshIdx)
+				if (submeshSection.meshName == meshFrame.Name && submeshSection.submeshIdx == submeshIdx)
 				{
 					xxSubmesh submesh = meshFrame.Mesh.SubmeshList[submeshIdx];
 					if (submeshSection.indices.Length != submesh.VertexList.Count)
@@ -319,14 +326,14 @@ namespace PPD_Preview_Clothes
 						Report.ReportLog(meshFrame.Name + "[" + submeshIdx + "] has a different number of vertices than defined in the sviex(" + submesh.VertexList.Count + "/" + submeshSection.indices.Length + ").");
 						return false;
 					}
-					if (positions && submeshSection.positions != null)
+					if (positions && submeshSection.positionsPresent == 1)
 					{
 						for (ushort i = 0; i < submeshSection.positions.Length; i++)
 						{
 							submesh.VertexList[submeshSection.indices[i]].Position = submeshSection.positions[i];
 						}
 					}
-					if (bones && submeshSection.boneWeights3 != null)
+					if (bones && submeshSection.bonesPresent == 1)
 					{
 						for (ushort i = 0; i < submeshSection.boneWeights3.Length; i++)
 						{
@@ -347,14 +354,14 @@ namespace PPD_Preview_Clothes
 							meshFrame.Mesh.BoneList.Add(bone);
 						}
 					}
-					if (normals && submeshSection.normals != null)
+					if (normals && submeshSection.normalsPresent == 1)
 					{
 						for (ushort i = 0; i < submeshSection.normals.Length; i++)
 						{
 							submesh.VertexList[submeshSection.indices[i]].Normal = submeshSection.normals[i];
 						}
 					}
-					if (uvs && submeshSection.uvs != null)
+					if (uvs && submeshSection.uvsPresent == 1)
 					{
 						for (ushort i = 0; i < submeshSection.uvs.Length; i++)
 						{
@@ -368,37 +375,42 @@ namespace PPD_Preview_Clothes
 		}
 
 		[Plugin]
-		public bool CopyIntoSVIEX(xxFrame meshFrame, int submeshIdx, bool positions, bool bones, bool normals, bool uvs, bool unrestricted, bool nearestPositions)
+		public bool CopyIntoSVI(xxFrame meshFrame, int submeshIdx, bool positions, bool bones, bool normals, bool uvs, bool unrestricted, bool nearestBones, bool nearestNormals, bool nearestUVs)
 		{
-			if (unrestricted || nearestPositions)
+			bool argPositions = positions, argBones = bones, argNormals = normals, argUVs = uvs;
+			foreach (sviParser submeshSection in Parser.sections)
 			{
-				positions = bones = normals = uvs = true;
-			}
-			foreach (sviexParser.SubmeshSection submeshSection in Parser.sections)
-			{
-				if (submeshSection.Name == meshFrame.Name && submeshSection.submeshIdx == submeshIdx)
+				if (submeshSection.meshName == meshFrame.Name && submeshSection.submeshIdx == submeshIdx)
 				{
 					xxSubmesh submesh = meshFrame.Mesh.SubmeshList[submeshIdx];
 					int[] nearestVertexIndices = null;
-					if (nearestPositions && submeshSection.positionsPresent == 1)
+					if (nearestBones || nearestNormals || nearestUVs)
 					{
-						nearestVertexIndices = new int[submesh.VertexList.Count];
-						for (ushort i = 0; i < submesh.VertexList.Count; i++)
+						if (submeshSection.positionsPresent == 1)
 						{
-							int bestIdx = -1;
-							double nearestDist = Double.MaxValue;
-							for (ushort j = 0; j < submeshSection.positions.Length; j++)
+							nearestVertexIndices = new int[submesh.VertexList.Count];
+							for (ushort i = 0; i < submesh.VertexList.Count; i++)
 							{
-								double distSquare = (submeshSection.positions[j].X - submesh.VertexList[i].Position.X) * (submeshSection.positions[j].X - submesh.VertexList[i].Position.X)
-									+ (submeshSection.positions[j].Y - submesh.VertexList[i].Position.Y) * (submeshSection.positions[j].Y - submesh.VertexList[i].Position.Y)
-									+ (submeshSection.positions[j].Z - submesh.VertexList[i].Position.Z) * (submeshSection.positions[j].Z - submesh.VertexList[i].Position.Z);
-								if (distSquare < nearestDist)
+								int bestIdx = -1;
+								double nearestDist = Double.MaxValue;
+								for (ushort j = 0; j < submeshSection.positions.Length; j++)
 								{
-									bestIdx = j;
-									nearestDist = distSquare;
+									double distSquare = (submeshSection.positions[j].X - submesh.VertexList[i].Position.X) * (submeshSection.positions[j].X - submesh.VertexList[i].Position.X)
+										+ (submeshSection.positions[j].Y - submesh.VertexList[i].Position.Y) * (submeshSection.positions[j].Y - submesh.VertexList[i].Position.Y)
+										+ (submeshSection.positions[j].Z - submesh.VertexList[i].Position.Z) * (submeshSection.positions[j].Z - submesh.VertexList[i].Position.Z);
+									if (distSquare < nearestDist)
+									{
+										bestIdx = j;
+										nearestDist = distSquare;
+									}
 								}
+								nearestVertexIndices[i] = bestIdx;
 							}
-							nearestVertexIndices[i] = bestIdx;
+						}
+						else
+						{
+							Report.ReportLog(meshFrame.Name + "[" + submeshIdx + "] has no positions in " + Parser.Name + ".");
+							return false;
 						}
 					}
 					Vector3[] newNormals = submeshSection.normals;
@@ -407,7 +419,7 @@ namespace PPD_Preview_Clothes
 					float[][] newBoneWeights3 = submeshSection.boneWeights3;
 					if (submeshSection.indices.Length != submesh.VertexList.Count)
 					{
-						if (unrestricted || nearestPositions)
+						if (unrestricted)
 						{
 							submeshSection.indices = new ushort[submesh.VertexList.Count];
 							for (ushort i = 0; i < submeshSection.indices.Length; i++)
@@ -431,6 +443,8 @@ namespace PPD_Preview_Clothes
 							{
 								newUVs = new Vector2[submesh.VertexList.Count];
 							}
+
+							positions = bones = normals = uvs = true;
 						}
 						else
 						{
@@ -447,15 +461,12 @@ namespace PPD_Preview_Clothes
 					}
 					if (bones && submeshSection.bonesPresent == 1)
 					{
-						if (nearestPositions)
+						if (nearestBones)
 						{
 							for (ushort i = 0; i < newBoneWeights3.Length; i++)
 							{
-								newBoneWeights3[i] = (float[])submeshSection.boneWeights3[nearestVertexIndices[i]].Clone();
-							}
-							for (ushort i = 0; i < newBoneIndices.Length; i++)
-							{
-								newBoneIndices[i] = (byte[])submeshSection.boneIndices[nearestVertexIndices[i]].Clone();
+								newBoneWeights3[i] = (float[])submeshSection.boneWeights3[nearestVertexIndices[submeshSection.indices[i]]].Clone();
+								newBoneIndices[i] = (byte[])submeshSection.boneIndices[nearestVertexIndices[submeshSection.indices[i]]].Clone();
 							}
 						}
 						else
@@ -463,32 +474,29 @@ namespace PPD_Preview_Clothes
 							for (ushort i = 0; i < newBoneWeights3.Length; i++)
 							{
 								newBoneWeights3[i] = (float[])submesh.VertexList[submeshSection.indices[i]].Weights3.Clone();
-							}
-							for (ushort i = 0; i < newBoneIndices.Length; i++)
-							{
 								newBoneIndices[i] = (byte[])submesh.VertexList[submeshSection.indices[i]].BoneIndices.Clone();
+							}
+
+							submeshSection.bones = new sviParser.sviBone[meshFrame.Mesh.BoneList.Count];
+							for (ushort i = 0; i < submeshSection.bones.Length; i++)
+							{
+								sviParser.sviBone bone = new sviParser.sviBone();
+								bone.name = (string)meshFrame.Mesh.BoneList[i].Name.Clone();
+								bone.boneIdx = meshFrame.Mesh.BoneList[i].Index;
+								bone.matrix = meshFrame.Mesh.BoneList[i].Matrix;
+								submeshSection.bones[i] = bone;
 							}
 						}
 						submeshSection.boneWeights3 = newBoneWeights3;
 						submeshSection.boneIndices = newBoneIndices;
-
-						submeshSection.bones = new sviexParser.SubmeshSection.SVIEX_Bone[meshFrame.Mesh.BoneList.Count];
-						for (ushort i = 0; i < submeshSection.bones.Length; i++)
-						{
-							sviexParser.SubmeshSection.SVIEX_Bone bone = new sviexParser.SubmeshSection.SVIEX_Bone();
-							bone.name = (string)meshFrame.Mesh.BoneList[i].Name.Clone();
-							bone.boneIdx = meshFrame.Mesh.BoneList[i].Index;
-							bone.matrix = meshFrame.Mesh.BoneList[i].Matrix;
-							submeshSection.bones[i] = bone;
-						}
 					}
 					if (normals && submeshSection.normalsPresent == 1)
 					{
-						if (nearestPositions)
+						if (nearestNormals)
 						{
 							for (ushort i = 0; i < submesh.VertexList.Count; i++)
 							{
-								newNormals[i] = submeshSection.normals[nearestVertexIndices[i]];
+								newNormals[i] = submeshSection.normals[nearestVertexIndices[submeshSection.indices[i]]];
 							}
 						}
 						else
@@ -502,11 +510,11 @@ namespace PPD_Preview_Clothes
 					}
 					if (uvs && submeshSection.uvsPresent == 1)
 					{
-						if (nearestPositions)
+						if (nearestUVs)
 						{
 							for (ushort i = 0; i < submesh.VertexList.Count; i++)
 							{
-								newUVs[i] = submeshSection.uvs[nearestVertexIndices[i]];
+								newUVs[i] = submeshSection.uvs[nearestVertexIndices[submeshSection.indices[i]]];
 							}
 						}
 						else

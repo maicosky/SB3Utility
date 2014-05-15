@@ -1,5 +1,28 @@
-﻿[0.6.3]
-  - PPD_Clothes_Preview Plugin added SVIEX functions for AA2 Trial
+﻿[0.6.9]
+  - Fix for bone selection after "Min Bones"
+  - Fix for display of Bones, added visible full skeleton
+  - Added deleting unused materials and textures with preview
+  - Added workspace "Automatic Material Translation" and "Append Missing Materials And Textures"
+  - Added synchronization of Workspaces
+  - Added frame and bone matrix correction after transformation changes
+
+[0.6.8]
+  - Fixed all SVI/SVIEX functions (PPD_Clothes_Preview Plugin)
+
+[0.6.7]
+  - Added SVI support in SVIEX functions (PPD_Clothes_Preview Plugin)
+
+[0.6.6]
+  - Added automatic "Update Bones & Frame" upon changes in a bone
+
+[0.6.5]
+  - Added automatic "Update Bones" upon changes in the skeleton
+
+[0.6.4]
+  - Fixed and improved SVIEX functions for AA2 Trial
+
+[0.6.3]
+  - PPD_Clothes_Preview Plugin got SVIEX functions added for AA2 Trial
   - Added support for SVIEX units in pp file format detection
 
 [0.6.2]

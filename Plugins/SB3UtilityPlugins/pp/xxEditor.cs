@@ -255,9 +255,19 @@ namespace SB3Utility
 		[Plugin]
 		public void AddFrame(xxFrame srcFrame, int srcFormat, int destParentId, int meshMatOffset)
 		{
-			var newFrame = srcFrame.Clone(true, true);
+			var newFrame = srcFrame.Clone(true, true, null);
 			xx.ConvertFormat(newFrame, srcFormat, Parser.Format);
 			MeshMatOffset(newFrame, meshMatOffset);
+
+			AddFrame(newFrame, destParentId);
+		}
+
+		[Plugin]
+		public void AddFrame(xxFrame srcFrame, int srcFormat, List<xxMaterial> srcMaterials, List<xxTexture> srcTextures, bool appendIfMissing, int destParentId)
+		{
+			int[] matTranslation = CreateMaterialTranslation(srcMaterials, srcFormat, srcTextures, appendIfMissing);
+			var newFrame = srcFrame.Clone(true, true, matTranslation);
+			xx.ConvertFormat(newFrame, srcFormat, Parser.Format);
 
 			AddFrame(newFrame, destParentId);
 		}
@@ -291,9 +301,19 @@ namespace SB3Utility
 		[Plugin]
 		public void ReplaceFrame(xxFrame srcFrame, int srcFormat, int destParentId, int meshMatOffset)
 		{
-			var newFrame = srcFrame.Clone(true, true);
+			var newFrame = srcFrame.Clone(true, true, null);
 			xx.ConvertFormat(newFrame, srcFormat, Parser.Format);
 			MeshMatOffset(newFrame, meshMatOffset);
+
+			ReplaceFrame(newFrame, destParentId);
+		}
+
+		[Plugin]
+		public void ReplaceFrame(xxFrame srcFrame, int srcFormat, List<xxMaterial> srcMaterials, List<xxTexture> srcTextures, bool appendIfMissing, int destParentId)
+		{
+			int[] matTranslation = CreateMaterialTranslation(srcMaterials, srcFormat, srcTextures, appendIfMissing);
+			var newFrame = srcFrame.Clone(true, true, matTranslation);
+			xx.ConvertFormat(newFrame, srcFormat, Parser.Format);
 
 			ReplaceFrame(newFrame, destParentId);
 		}
@@ -344,9 +364,19 @@ namespace SB3Utility
 		[Plugin]
 		public void MergeFrame(xxFrame srcFrame, int srcFormat, int destParentId, int meshMatOffset)
 		{
-			var newFrame = srcFrame.Clone(true, true);
+			var newFrame = srcFrame.Clone(true, true, null);
 			xx.ConvertFormat(newFrame, srcFormat, Parser.Format);
 			MeshMatOffset(newFrame, meshMatOffset);
+
+			MergeFrame(newFrame, destParentId);
+		}
+
+		[Plugin]
+		public void MergeFrame(xxFrame srcFrame, int srcFormat, List<xxMaterial> srcMaterials, List<xxTexture> srcTextures, bool appendIfMissing, int destParentId)
+		{
+			int[] matTranslation = CreateMaterialTranslation(srcMaterials, srcFormat, srcTextures, appendIfMissing);
+			var newFrame = srcFrame.Clone(true, true, matTranslation);
+			xx.ConvertFormat(newFrame, srcFormat, Parser.Format);
 
 			MergeFrame(newFrame, destParentId);
 		}
@@ -424,6 +454,14 @@ namespace SB3Utility
 
 		void MeshMatOffset(xxFrame frame, int offset)
 		{
+			if (offset != 0)
+			{
+				MeshMatOffsetIfNotZero(frame, offset);
+			}
+		}
+
+		void MeshMatOffsetIfNotZero(xxFrame frame, int offset)
+		{
 			if (frame.Mesh != null)
 			{
 				var submeshes = frame.Mesh.SubmeshList;
@@ -435,8 +473,55 @@ namespace SB3Utility
 
 			for (int i = 0; i < frame.Count; i++)
 			{
-				MeshMatOffset(frame[i], offset);
+				MeshMatOffsetIfNotZero(frame[i], offset);
 			}
+		}
+
+		private int[] CreateMaterialTranslation(List<xxMaterial> srcMaterials, int srcFormat, List<xxTexture> srcTextures, bool appendIfMissing)
+		{
+			int[] matTranslation = srcMaterials.Count > 0 ? new int[srcMaterials.Count] : null;
+			for (int i = 0; i < srcMaterials.Count; i++)
+			{
+				matTranslation[i] = -1;
+				for (int j = 0; j < Parser.MaterialList.Count; j++)
+				{
+					if (Parser.MaterialList[j].Name == srcMaterials[i].Name)
+					{
+						matTranslation[i] = j;
+						break;
+					}
+				}
+				if (appendIfMissing && matTranslation[i] == -1)
+				{
+					matTranslation[i] = Parser.MaterialList.Count;
+					MergeMaterial(srcMaterials[i], srcFormat);
+					for (int j = 0; j < Parser.MaterialList[matTranslation[i]].Textures.Length; j++)
+					{
+						xxMaterialTexture matTex = Parser.MaterialList[matTranslation[i]].Textures[j];
+						if (FindTexture(matTex.Name, Parser.TextureList) == null)
+						{
+							xxTexture tex = FindTexture(matTex.Name, srcTextures);
+							if (tex != null)
+							{
+								MergeTexture(tex);
+							}
+						}
+					}
+				}
+			}
+			return matTranslation;
+		}
+
+		private xxTexture FindTexture(string name, List<xxTexture> texList)
+		{
+			foreach (xxTexture tex in texList)
+			{
+				if (tex.Name == name)
+				{
+					return tex;
+				}
+			}
+			return null;
 		}
 
 		[Plugin]

@@ -60,7 +60,7 @@ namespace SB3Utility
 			}
 		}
 
-		public xxFrame Clone(bool mesh, bool childFrames)
+		public xxFrame Clone(bool mesh, bool childFrames, int[] matTranslations)
 		{
 			xxFrame frame = new xxFrame();
 			frame.InitChildren(children.Count);
@@ -77,12 +77,22 @@ namespace SB3Utility
 			if (mesh && (Mesh != null))
 			{
 				frame.Mesh = Mesh.Clone(true, true, true);
+				if (matTranslations != null)
+				{
+					foreach (xxSubmesh submesh in frame.Mesh.SubmeshList)
+					{
+						if (submesh.MaterialIndex >= 0)
+						{
+							submesh.MaterialIndex = matTranslations[submesh.MaterialIndex];
+						}
+					}
+				}
 			}
 			if (childFrames)
 			{
 				for (int i = 0; i < children.Count; i++)
 				{
-					frame.AddChild(children[i].Clone(mesh, true));
+					frame.AddChild(children[i].Clone(mesh, true, matTranslations));
 				}
 			}
 			return frame;

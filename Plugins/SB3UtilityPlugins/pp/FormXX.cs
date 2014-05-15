@@ -463,6 +463,7 @@ namespace SB3Utility
 				RenameListViewItems(Editor.Parser.TextureList, listViewMaterialTexture, tex, tex.Name);
 
 				InitTextures();
+				SyncWorkspaces(tex.Name, typeof(xxTexture), loadedTexture);
 				LoadMaterial(loadedMaterial);
 			}
 			catch (Exception ex)
@@ -578,6 +579,7 @@ namespace SB3Utility
 				RenameListViewItems(Editor.Parser.MaterialList, listViewTextureMaterial, mat, mat.Name);
 
 				InitMaterials();
+				SyncWorkspaces(mat.Name, typeof(xxMaterial), loadedMaterial);
 				LoadMaterial(loadedMaterial);
 			}
 			catch (Exception ex)
@@ -700,7 +702,16 @@ namespace SB3Utility
 
 			HighlightSubmeshes();
 			if (highlightedBone != null)
-				HighlightBone(highlightedBone, true);
+			{
+				if (highlightedBone[0] >= Editor.Meshes.Count || highlightedBone[1] >= Editor.Meshes[highlightedBone[0]].Mesh.BoneList.Count)
+				{
+					highlightedBone = null;
+				}
+				else
+				{
+					HighlightBone(highlightedBone, true);
+				}
+			}
 		}
 
 		void textBoxFrameName_AfterEditTextChanged(object sender, EventArgs e)
@@ -720,6 +731,7 @@ namespace SB3Utility
 				xxFrame frame = Editor.Frames[loadedFrame];
 				TreeNode node = FindFrameNode(frame, treeViewObjectTree.Nodes);
 				node.Text = frame.Name;
+				SyncWorkspaces(frame.Name, typeof(xxFrame), loadedFrame);
 
 				RenameListViewItems(Editor.Meshes, listViewMesh, frame, frame.Name);
 				RenameListViewItems(Editor.Meshes, listViewMaterialMesh, frame, frame.Name);
@@ -960,6 +972,11 @@ namespace SB3Utility
 
 		void InitMaterials()
 		{
+			HashSet<string> selectedItems = new HashSet<string>();
+			foreach (ListViewItem item in listViewMaterial.SelectedItems)
+			{
+				selectedItems.Add(item.Text);
+			}
 			List<Tuple<string, int>> columnMaterials = new List<Tuple<string, int>>(Editor.Parser.MaterialList.Count);
 			ListViewItem[] materialItems = new ListViewItem[Editor.Parser.MaterialList.Count];
 			for (int i = 0; i < Editor.Parser.MaterialList.Count; i++)
@@ -973,6 +990,18 @@ namespace SB3Utility
 			listViewMaterial.Items.Clear();
 			listViewMaterial.Items.AddRange(materialItems);
 			materiallistHeader.AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
+			if (selectedItems.Count > 0)
+			{
+				listViewTexture.BeginUpdate();
+				foreach (ListViewItem item in listViewMaterial.Items)
+				{
+					if (selectedItems.Contains(item.Text))
+					{
+						item.Selected = true;
+					}
+				}
+				listViewTexture.EndUpdate();
+			}
 
 			ColumnSubmeshMaterial.DataSource = columnMaterials;
 			SetComboboxEvent = false;
@@ -1004,6 +1033,11 @@ namespace SB3Utility
 				matTexNameCombo[i].Items.Add("(none)");
 			}
 
+			HashSet<string> selectedItems = new HashSet<string>();
+			foreach (ListViewItem item in listViewTexture.SelectedItems)
+			{
+				selectedItems.Add(item.Text);
+			}
 			ListViewItem[] textureItems = new ListViewItem[Editor.Parser.TextureList.Count];
 			for (int i = 0; i < Editor.Parser.TextureList.Count; i++)
 			{
@@ -1018,6 +1052,18 @@ namespace SB3Utility
 			listViewTexture.Items.Clear();
 			listViewTexture.Items.AddRange(textureItems);
 			texturelistHeader.AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
+			if (selectedItems.Count > 0)
+			{
+				listViewTexture.BeginUpdate();
+				foreach (ListViewItem item in listViewTexture.Items)
+				{
+					if (selectedItems.Contains(item.Text))
+					{
+						item.Selected = true;
+					}
+				}
+				listViewTexture.EndUpdate();
+			}
 
 			TreeNode texturesNode = new TreeNode("Textures");
 			TreeNode currentTexture = null;
@@ -2011,6 +2057,62 @@ namespace SB3Utility
 			return null;
 		}
 
+		TreeNode FindMaterialNode(string name)
+		{
+			foreach (TreeNode node in treeViewObjectTree.Nodes[1].Nodes)
+			{
+				var source = node.Tag as DragSource?;
+				if (Editor.Parser.MaterialList[(int)source.Value.Id].Name == name)
+				{
+					return node;
+				}
+			}
+
+			return null;
+		}
+
+		TreeNode FindMaterialNode(xxMaterial mat)
+		{
+			foreach (TreeNode node in treeViewObjectTree.Nodes[1].Nodes)
+			{
+				var source = node.Tag as DragSource?;
+				if (Editor.Parser.MaterialList[(int)source.Value.Id].Equals(mat))
+				{
+					return node;
+				}
+			}
+
+			return null;
+		}
+
+		TreeNode FindTextureNode(string name)
+		{
+			foreach (TreeNode node in treeViewObjectTree.Nodes[2].Nodes)
+			{
+				var source = node.Tag as DragSource?;
+				if (Editor.Parser.TextureList[(int)source.Value.Id].Name == name)
+				{
+					return node;
+				}
+			}
+
+			return null;
+		}
+
+		TreeNode FindTextureNode(xxTexture tex)
+		{
+			foreach (TreeNode node in treeViewObjectTree.Nodes[2].Nodes)
+			{
+				var source = node.Tag as DragSource?;
+				if (Editor.Parser.TextureList[(int)source.Value.Id].Equals(tex))
+				{
+					return node;
+				}
+			}
+
+			return null;
+		}
+
 		private void buttonBoneGotoFrame_Click(object sender, EventArgs e)
 		{
 			try
@@ -2290,9 +2392,12 @@ namespace SB3Utility
 					}
 					if (dragOptions.checkBoxOkContinue.Checked || dragOptions.ShowDialog() == DialogResult.OK)
 					{
-						Gui.Scripting.RunScript(EditorVar + "." + dragOptions.FrameMethod.GetName() + "(srcFrame=" + source.Variable + ".Frames[" + (int)source.Id + "], srcFormat=" + source.Variable + ".Parser.Format, destParentId=" + dragOptions.numericFrameId.Value + ", meshMatOffset=" + dragOptions.numericFrameMeshMatOffset.Value + ")");
+						Gui.Scripting.RunScript(EditorVar + "." + dragOptions.FrameMethod.GetName() + "(srcFrame=" + source.Variable + ".Frames[" + (int)source.Id + "], srcFormat=" + source.Variable + ".Parser.Format, srcMaterials=" + source.Variable + ".Parser.MaterialList, srcTextures=" + source.Variable + ".Parser.TextureList, appendIfMissing=" + dragOptions.checkBoxFrameAppend.Checked + ", destParentId=" + dragOptions.numericFrameId.Value + ")");
 						Changed = true;
 						RecreateFrames();
+						InitMaterials();
+						InitTextures();
+						SyncWorkspaces();
 					}
 				}
 				else if (source.Type == typeof(xxMaterial))
@@ -2318,9 +2423,10 @@ namespace SB3Utility
 					}
 					if (dragOptions.checkBoxOkContinue.Checked || dragOptions.ShowDialog() == DialogResult.OK)
 					{
-						Gui.Scripting.RunScript(EditorVar + "." + dragOptions.FrameMethod.GetName() + "(srcFrame=" + source.Variable + ".Frames[" + (int)source.Id + "], destParentId=" + dragOptions.numericFrameId.Value + ", meshMatOffset=" + dragOptions.numericFrameMeshMatOffset.Value + ")");
+						Gui.Scripting.RunScript(EditorVar + "." + dragOptions.FrameMethod.GetName() + "(srcFrame=" + source.Variable + ".Frames[" + (int)source.Id + "], destParentId=" + dragOptions.numericFrameId.Value + ", meshMatOffset=" + 0 + ")");
 						Changed = true;
 						RecreateFrames();
+						SyncWorkspaces();
 					}
 				}
 				else if (source.Type == typeof(WorkspaceMesh))
@@ -2440,6 +2546,134 @@ namespace SB3Utility
 					ProcessDragDropSources(child);
 				}
 			}
+		}
+
+		public void SyncWorkspaces()
+		{
+			SyncWorkspaces(null, null, 0);
+		}
+
+		public void SyncWorkspaces(string newName, Type type, int id)
+		{
+			List<DockContent> formWorkspaceList = FormWorkspace.GetWorkspacesOfForm(this);
+			foreach (FormWorkspace workspace in formWorkspaceList)
+			{
+				List<TreeNode> formNodes = workspace.ChildForms[this];
+				List<TreeNode> removeNodes = new List<TreeNode>();
+				HashSet<string> expanded = null;
+				TreeView wsTreeView = null;
+				foreach (TreeNode node in formNodes)
+				{
+					if (!NodeIsValid(node))
+					{
+						if (newName != null)
+						{
+							DragSource ds = (DragSource)node.Tag;
+							if (ds.Type == type && (int)ds.Id == id)
+							{
+								node.Text = newName;
+								continue;
+							}
+						}
+						removeNodes.Add(node);
+						if (expanded == null)
+						{
+							wsTreeView = node.TreeView;
+							expanded = ExpandedNodes(wsTreeView);
+						}
+					}
+				}
+				foreach (TreeNode node in removeNodes)
+				{
+					workspace.RemoveNode(node);
+					TreeNode newNode = null;
+					DragSource ds = (DragSource)node.Tag;
+					if (ds.Type == typeof(xxFrame))
+					{
+						newNode = FindFrameNode(node.Text, treeViewObjectTree.Nodes[0].Nodes);
+					}
+					else if (ds.Type == typeof(xxMaterial))
+					{
+						newNode = FindMaterialNode(node.Text);
+					}
+					else if (ds.Type == typeof(xxTexture))
+					{
+						newNode = FindTextureNode(node.Text);
+					}
+					if (newNode != null)
+					{
+						workspace.AddNode(newNode);
+					}
+				}
+				if (expanded != null)
+				{
+					ExpandNodes(wsTreeView, expanded);
+				}
+			}
+		}
+
+		private bool NodeIsValid(TreeNode node)
+		{
+			DragSource ds = (DragSource)node.Tag;
+			if (ds.Type == typeof(xxFrame))
+			{
+				int frameId = (int)ds.Id;
+				if (frameId >= Editor.Frames.Count)
+				{
+					return false;
+				}
+				xxFrame nodeFrame = Editor.Frames[frameId];
+				int realChilds = 0;
+				foreach (TreeNode child in node.Nodes)
+				{
+					if (child.Tag != null)
+					{
+						if (((DragSource)child.Tag).Type == typeof(xxFrame))
+						{
+							realChilds++;
+						}
+					}
+				}
+				if (nodeFrame.Name != node.Text || nodeFrame.Count != realChilds)
+				{
+					return false;
+				}
+				foreach (TreeNode child in node.Nodes)
+				{
+					if (!NodeIsValid(child))
+					{
+						return false;
+					}
+				}
+			}
+			else if (ds.Type == typeof(xxMaterial))
+			{
+				int matId = (int)ds.Id;
+				if (matId >= Editor.Parser.MaterialList.Count)
+				{
+					return false;
+				}
+				xxMaterial nodeMaterial = Editor.Parser.MaterialList[matId];
+				if (nodeMaterial.Name != node.Text)
+				{
+					return false;
+				}
+			}
+			else if (ds.Type == typeof(xxTexture))
+			{
+				int texId = (int)ds.Id;
+				if (texId >= Editor.Parser.TextureList.Count)
+				{
+					return false;
+				}
+				xxTexture nodeTexture = Editor.Parser.TextureList[texId];
+				if (nodeTexture.Name != node.Text)
+				{
+					return false;
+				}
+			}
+
+			return true;
 		}
 
 		public void RecreateFrames()
@@ -2566,7 +2800,7 @@ namespace SB3Utility
 			}
 		}
 
-		private void buttonCheckBones_Click(object sender, EventArgs e)
+		private void buttonObjectTreeCheckBones_Click(object sender, EventArgs e)
 		{
 			try
 			{
@@ -2592,6 +2826,168 @@ namespace SB3Utility
 			{
 				Utility.ReportException(ex);
 			}
+		}
+
+		private void buttonObjectTreeDeleteUnreferenced_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				RemoveUnusedMaterials();
+				RemoveUnusedTextures();
+
+				RecreateRenderObjects();
+				LoadMesh(loadedMesh);
+				InitMaterials();
+				InitTextures();
+				SyncWorkspaces();
+				RecreateCrossRefs();
+				LoadMaterial(loadedMaterial);
+				LoadTexture(loadedTexture);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void RemoveUnusedMaterials()
+		{
+			bool justMarkThem = (Control.ModifierKeys & Keys.Shift) == Keys.Shift;
+			if (justMarkThem)
+			{
+				listViewMaterial.BeginUpdate();
+			}
+			string oldLoadedMaterial = loadedMaterial >= 0 ? Editor.Parser.MaterialList[loadedMaterial].Name : null;
+			List<int> descendingIds = new List<int>(Editor.Parser.MaterialList.Count);
+			for (int i = 0; i < Editor.Parser.MaterialList.Count; i++)
+			{
+				if (!IsUsedMaterial(i))
+				{
+					descendingIds.Add(i);
+				}
+			}
+			descendingIds.Sort();
+			descendingIds.Reverse();
+			foreach (int id in descendingIds)
+			{
+				if (!justMarkThem)
+				{
+					Gui.Scripting.RunScript(EditorVar + ".RemoveMaterial(id=" + id + ")");
+					if (!Changed)
+					{
+						Changed = true;
+					}
+				}
+				else
+				{
+					for (int j = 0; j < listViewMaterial.Items.Count; j++)
+					{
+						if (listViewMaterial.Items[j].Text == Editor.Parser.MaterialList[id].Name)
+						{
+							listViewMaterial.Items[j].Selected = true;
+							break;
+						}
+					}
+				}
+			}
+			if (justMarkThem)
+			{
+				listViewMaterial.EndUpdate();
+			}
+			if (loadedMaterial >= 0)
+			{
+				loadedMaterial = -1;
+				for (int i = 0; i < Editor.Parser.MaterialList.Count; i++)
+				{
+					if (Editor.Parser.MaterialList[i].Name == oldLoadedMaterial)
+					{
+						loadedMaterial = i;
+						break;
+					}
+				}
+			}
+		}
+
+		private void RemoveUnusedTextures()
+		{
+			bool justMarkThem = (Control.ModifierKeys & Keys.Shift) == Keys.Shift;
+			if (justMarkThem)
+			{
+				listViewTexture.BeginUpdate();
+			}
+			string oldLoadedTexture = loadedTexture >= 0 ? Editor.Parser.TextureList[loadedTexture].Name : null;
+			for (int i = Editor.Parser.TextureList.Count - 1; i >= 0; i--)
+			{
+				if (!IsUsedTexture(i))
+				{
+					if (!justMarkThem)
+					{
+						Gui.Scripting.RunScript(EditorVar + ".RemoveTexture(id=" + i + ")");
+						if (!Changed)
+						{
+							Changed = true;
+						}
+					}
+					else
+					{
+						for (int j = 0; j < listViewTexture.Items.Count; j++)
+						{
+							if (listViewTexture.Items[j].Text == Editor.Parser.TextureList[i].Name)
+							{
+								listViewTexture.Items[j].Selected = true;
+								break;
+							}
+						}
+					}
+				}
+			}
+			if (justMarkThem)
+			{
+				listViewTexture.EndUpdate();
+			}
+			if (loadedTexture >= 0)
+			{
+				loadedTexture = -1;
+				for (int i = 0; i < Editor.Parser.TextureList.Count; i++)
+				{
+					if (Editor.Parser.TextureList[i].Name == oldLoadedTexture)
+					{
+						loadedTexture = i;
+						break;
+					}
+				}
+			}
+		}
+
+		private bool IsUsedMaterial(int matIdx)
+		{
+			foreach (xxFrame meshFrame in Editor.Meshes)
+			{
+				foreach (xxSubmesh submesh in meshFrame.Mesh.SubmeshList)
+				{
+					if (submesh.MaterialIndex == matIdx)
+					{
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		private bool IsUsedTexture(int texIdx)
+		{
+			string texture = Editor.Parser.TextureList[texIdx].Name;
+			foreach (xxMaterial mat in Editor.Parser.MaterialList)
+			{
+				foreach (xxMaterialTexture matTex in mat.Textures)
+				{
+					if (matTex.Name == texture)
+					{
+						return true;
+					}
+				}
+			}
+			return false;
 		}
 
 		private void buttonConvert_Click(object sender, EventArgs e)
@@ -2671,6 +3067,7 @@ namespace SB3Utility
 					var source = (DragSource)parentNode.Tag;
 					Gui.Scripting.RunScript(EditorVar + ".MoveFrame(id=" + loadedFrame + ", parent=" + (int)source.Id + ", index=" + (idx - 1) + ")");
 					Changed = true;
+					SyncWorkspaces();
 				}
 			}
 			catch (Exception ex)
@@ -2714,6 +3111,7 @@ namespace SB3Utility
 					var source = (DragSource)parentNode.Tag;
 					Gui.Scripting.RunScript(EditorVar + ".MoveFrame(id=" + loadedFrame + ", parent=" + (int)source.Id + ", index=" + (idx + 1) + ")");
 					Changed = true;
+					SyncWorkspaces();
 				}
 			}
 			catch (Exception ex)
@@ -2740,6 +3138,7 @@ namespace SB3Utility
 				Changed = true;
 
 				RecreateFrames();
+				SyncWorkspaces();
 			}
 			catch (Exception ex)
 			{
@@ -2874,6 +3273,35 @@ namespace SB3Utility
 				command += ")";
 				Gui.Scripting.RunScript(command);
 				Changed = true;
+				if (checkBoxFrameMatrixUpdate.Checked)
+				{
+					xxFrame frame = Editor.Frames[loadedFrame];
+					xxFrame parent = (xxFrame)frame.Parent;
+					while (parent != null)
+					{
+						m = m * parent.Matrix;
+						parent = parent.Parent;
+					}
+					m.Invert();
+
+					foreach (xxFrame meshFrame in Editor.Meshes)
+					{
+						xxBone bone = xx.FindBone(meshFrame.Mesh.BoneList, frame.Name);
+						if (bone != null)
+						{
+							command = EditorVar + ".SetBoneMatrix(meshId=" + Editor.Meshes.IndexOf(meshFrame) + ", boneId=" + meshFrame.Mesh.BoneList.IndexOf(bone);
+							for (int i = 0; i < 4; i++)
+							{
+								for (int j = 0; j < 4; j++)
+								{
+									command += ", m" + (i + 1) + (j + 1) + "=" + m[i, j].ToFloatString();
+								}
+							}
+							command += ")";
+							Gui.Scripting.RunScript(command);
+						}
+					}
+				}
 
 				RecreateRenderObjects();
 			}
@@ -3012,6 +3440,55 @@ namespace SB3Utility
 				command += ")";
 				Gui.Scripting.RunScript(command);
 				Changed = true;
+				if (checkBoxBoneMatrixUpdate.Checked)
+				{
+					Matrix newBoneMatrix = m;
+					xxFrame meshFrameFromBone = Editor.Meshes[loadedBone[0]];
+					xxFrame frame = xx.FindFrame(meshFrameFromBone.Mesh.BoneList[loadedBone[1]].Name, Editor.Parser.Frame);
+					m = Matrix.Identity;
+					xxFrame parent = (xxFrame)frame.Parent;
+					while (parent != null)
+					{
+						m = m * parent.Matrix;
+						parent = parent.Parent;
+					}
+					Matrix boneFrameMatrix = newBoneMatrix;
+					boneFrameMatrix.Invert();
+					m.Invert();
+					boneFrameMatrix = boneFrameMatrix * m;
+
+					command = EditorVar + ".SetFrameMatrix(id=" + Editor.Frames.IndexOf(frame);
+					for (int i = 0; i < 4; i++)
+					{
+						for (int j = 0; j < 4; j++)
+						{
+							command += ", m" + (i + 1) + (j + 1) + "=" + boneFrameMatrix[i, j].ToFloatString();
+						}
+					}
+					command += ")";
+					Gui.Scripting.RunScript(command);
+
+					foreach (xxFrame meshFrame in Editor.Meshes)
+					{
+						if (meshFrame != meshFrameFromBone)
+						{
+							xxBone bone = xx.FindBone(meshFrame.Mesh.BoneList, frame.Name);
+							if (bone != null)
+							{
+								command = EditorVar + ".SetBoneMatrix(meshId=" + Editor.Meshes.IndexOf(meshFrame) + ", boneId=" + meshFrame.Mesh.BoneList.IndexOf(bone);
+								for (int i = 0; i < 4; i++)
+								{
+									for (int j = 0; j < 4; j++)
+									{
+										command += ", m" + (i + 1) + (j + 1) + "=" + newBoneMatrix[i, j].ToFloatString();
+									}
+								}
+								command += ")";
+								Gui.Scripting.RunScript(command);
+							}
+						}
+					}
+				}
 
 				RecreateRenderObjects();
 			}
@@ -3355,6 +3832,7 @@ namespace SB3Utility
 				RecreateRenderObjects();
 				LoadMesh(loadedMesh);
 				InitMaterials();
+				SyncWorkspaces();
 				RecreateCrossRefs();
 				LoadMaterial(-1);
 			}
@@ -3386,7 +3864,7 @@ namespace SB3Utility
 			}
 		}
 
-		private void buttonTextureExternal_Click(object sender, EventArgs e)
+		private void buttonMaterialExternalTexture_Click(object sender, EventArgs e)
 		{
 			try
 			{
@@ -3400,6 +3878,25 @@ namespace SB3Utility
 				{
 					LoadMaterial(loadedMaterial);
 				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonMaterialDeleteUnref_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				RemoveUnusedMaterials();
+
+				RecreateRenderObjects();
+				LoadMesh(loadedMesh);
+				InitMaterials();
+				SyncWorkspaces();
+				RecreateCrossRefs();
+				LoadMaterial(loadedMaterial);
 			}
 			catch (Exception ex)
 			{
@@ -3450,6 +3947,7 @@ namespace SB3Utility
 
 				RecreateRenderObjects();
 				InitTextures();
+				SyncWorkspaces();
 				RecreateCrossRefs();
 				LoadMaterial(loadedMaterial);
 			}
@@ -3522,6 +4020,25 @@ namespace SB3Utility
 						break;
 					}
 				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonTextureDeleteUnref_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				RemoveUnusedTextures();
+
+				RecreateRenderObjects();
+				LoadMesh(loadedMesh);
+				InitTextures();
+				SyncWorkspaces();
+				RecreateCrossRefs();
+				LoadMaterial(loadedMaterial);
 			}
 			catch (Exception ex)
 			{

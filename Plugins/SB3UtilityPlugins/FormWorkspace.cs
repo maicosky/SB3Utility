@@ -25,7 +25,7 @@ namespace SB3Utility
 	[PluginTool("&Workspace", "Ctrl+W")]
 	public partial class FormWorkspace : DockContent
 	{
-		protected Dictionary<DockContent, List<TreeNode>> ChildForms = new Dictionary<DockContent, List<TreeNode>>();
+		public Dictionary<DockContent, List<TreeNode>> ChildForms = new Dictionary<DockContent, List<TreeNode>>();
 		protected string FormVar;
 
 		private FileSystemWatcher Watcher;
@@ -685,6 +685,28 @@ namespace SB3Utility
 			return null;
 		}
 
+		public static List<DockContent> GetWorkspacesOfForm(DockContent form)
+		{
+			List<DockContent> formWorkspaceList = null;
+			if (Gui.Docking.DockContents.TryGetValue(typeof(FormWorkspace), out formWorkspaceList))
+			{
+				for (int i = 0; i < formWorkspaceList.Count; i++)
+				{
+					FormWorkspace workspace = (FormWorkspace)formWorkspaceList[i];
+					if (!workspace.ChildForms.ContainsKey(form))
+					{
+						formWorkspaceList.RemoveAt(i);
+						i--;
+					}
+				}
+				if (formWorkspaceList.Count == 0)
+				{
+					formWorkspaceList = null;
+				}
+			}
+			return formWorkspaceList;
+		}
+
 		private void buttonRemove_Click(object sender, EventArgs e)
 		{
 			if (treeView.SelectedNode != null)
@@ -708,7 +730,7 @@ namespace SB3Utility
 			}
 		}
 
-		private void RemoveNode(TreeNode node)
+		public void RemoveNode(TreeNode node)
 		{
 			while (node.Nodes.Count > 0)
 			{

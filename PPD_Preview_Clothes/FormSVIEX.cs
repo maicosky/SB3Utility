@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using WeifenLuo.WinFormsUI.Docking;
 using System.Windows.Forms;
+using System.Drawing;
 using SlimDX;
 
 using SB3Utility;
@@ -217,18 +218,18 @@ namespace PPD_Preview_Clothes
 				{
 					sviexParser srcParser = PluginsPPD.OpenSVIEX((ppParser)Gui.Scripting.Variables[cbItem.ppForm.ParserVar], ((IWriteFile)comboBoxSourceSVIEXunits.Items[0]).Name);
 					Dictionary<string, ComboBoxItemMesh> meshFrameDic = new Dictionary<string, ComboBoxItemMesh>();
-					foreach (sviexParser.SubmeshSection section in srcParser.sections)
+					foreach (sviParser section in srcParser.sections)
 					{
 						ComboBoxItemMesh meshItem;
-						if (!meshFrameDic.TryGetValue(section.Name, out meshItem))
+						if (!meshFrameDic.TryGetValue(section.meshName, out meshItem))
 						{
 							foreach (xxFrame meshFrame in cbItem.xxForm.Editor.Meshes)
 							{
-								if (meshFrame.Name == section.Name)
+								if (meshFrame.Name == section.meshName)
 								{
 									meshItem = new ComboBoxItemMesh(meshFrame, section.submeshIdx.ToString());
 									comboBoxCorrectlyLitMeshes.Items.Add(meshItem);
-									meshFrameDic.Add(section.Name, meshItem);
+									meshFrameDic.Add(section.meshName, meshItem);
 									break;
 								}
 							}
@@ -321,6 +322,7 @@ namespace PPD_Preview_Clothes
 
 					comboBoxTargetSVIEXunits.SelectedItem = dstFile;
 				}
+				dstItem.ppForm.Changed = true;
 				Gui.Scripting.Variables.Remove(srcParserVar);
 				Gui.Scripting.Variables.Remove(dstParserVar);
 				Gui.Scripting.Variables.Remove(srcEditorVar);
@@ -362,18 +364,18 @@ namespace PPD_Preview_Clothes
 		{
 			Dictionary<xxVertex, Vector3> originalNormals = new Dictionary<xxVertex, Vector3>();
 			sviexParser targetParser = PluginsPPD.OpenSVIEX((ppParser)Gui.Scripting.Variables[cbItem.ppForm.ParserVar], sviexName);
-			foreach (sviexParser.SubmeshSection section in targetParser.sections)
+			foreach (sviParser section in targetParser.sections)
 			{
 				bool meshFound = false;
 				foreach (ComboBoxItemMesh itemMesh in cbItem.meshes)
 				{
-					if (section.Name == itemMesh.meshFrame.Name)
+					if (section.meshName == itemMesh.meshFrame.Name)
 					{
 						meshFound = true;
 						xxSubmesh submesh = itemMesh.meshFrame.Mesh.SubmeshList[section.submeshIdx];
 						if (section.indices.Length != submesh.VertexList.Count)
 						{
-							Report.ReportLog("Unmatching SVIEX mesh=" + section.Name + " submeshIdx=" + section.submeshIdx + " has " + section.indices.Length + " indices.");
+							Report.ReportLog("Unmatching SVIEX mesh=" + section.meshName + " submeshIdx=" + section.submeshIdx + " has " + section.indices.Length + " indices.");
 							break;
 						}
 						for (int i = 0; i < section.indices.Length; i++)
@@ -389,17 +391,17 @@ namespace PPD_Preview_Clothes
 				}
 				if (!meshFound)
 				{
-					Report.ReportLog("SVIEX Normals not copied for " + section.Name);
+					Report.ReportLog("SVIEX Normals not copied for " + section.meshName);
 				}
 			}
 
 			cbItem.xxForm.RecreateRenderObjects();
 
-			foreach (sviexParser.SubmeshSection section in targetParser.sections)
+			foreach (sviParser section in targetParser.sections)
 			{
 				foreach (ComboBoxItemMesh itemMesh in cbItem.meshes)
 				{
-					if (section.Name == itemMesh.meshFrame.Name)
+					if (section.meshName == itemMesh.meshFrame.Name)
 					{
 						xxSubmesh submesh = itemMesh.meshFrame.Mesh.SubmeshList[section.submeshIdx];
 						if (section.indices.Length != submesh.VertexList.Count)
@@ -480,6 +482,16 @@ namespace PPD_Preview_Clothes
 							srcEditorVarList.Add(srcEditorVar);
 							Gui.Scripting.RunScript(srcEditorVar + " = sviexEditor(parser=" + srcParserVar + ")");
 						}
+						else if (item.Text.ToLower().EndsWith(".svi"))
+						{
+							string srcParserVar = Gui.Scripting.GetNextVariable("sviParser");
+							srcParserVarList.Add(srcParserVar);
+							string parserCommand = srcParserVar + " = OpenSVI(parser=" + form.ParserVar + ", name=\"" + item.Text + "\")";
+							Gui.Scripting.RunScript(parserCommand);
+							string srcEditorVar = Gui.Scripting.GetNextVariable("sviexEditor");
+							srcEditorVarList.Add(srcEditorVar);
+							Gui.Scripting.RunScript(srcEditorVar + " = sviexEditor(parser=" + srcParserVar + ")");
+						}
 					}
 				}
 				foreach (FormXX xxForm in formXXList)
@@ -499,8 +511,8 @@ namespace PPD_Preview_Clothes
 									sviexEditor editor = (sviexEditor)Gui.Scripting.Variables[srcEditorVar];
 									for (ushort j = 0; j < editor.Parser.sections.Count; j++)
 									{
-										sviexParser.SubmeshSection submeshSection = editor.Parser.sections[j];
-										if (submeshSection.Name == meshFrame.Name && submeshSection.submeshIdx == i)
+										sviParser submeshSection = editor.Parser.sections[j];
+										if (submeshSection.meshName == meshFrame.Name && submeshSection.submeshIdx == i)
 										{
 											bool copied = (bool)Gui.Scripting.RunScript(srcEditorVar + ".CopyToSubmesh(meshFrame=" + xxForm.EditorVar + ".Meshes[" + (int)item.Tag + "], submeshIdx=" + i
 												+ ", positions=" + checkBoxElementsPositions.Checked + ", bones=" + checkBoxElementsBonesWeights.Checked + ", normals=" + checkBoxElementsNormals.Checked + ", uvs=" + checkBoxElementsUVs.Checked + ")");
@@ -576,6 +588,16 @@ namespace PPD_Preview_Clothes
 							srcEditorVarList.Add(srcEditorVar);
 							Gui.Scripting.RunScript(srcEditorVar + " = sviexEditor(parser=" + srcParserVar + ")");
 						}
+						else if (item.Text.ToLower().EndsWith(".svi"))
+						{
+							string srcParserVar = Gui.Scripting.GetNextVariable("sviParser");
+							srcParserVarList.Add(srcParserVar);
+							string parserCommand = srcParserVar + " = OpenSVI(parser=" + form.ParserVar + ", name=\"" + item.Text + "\")";
+							Gui.Scripting.RunScript(parserCommand);
+							string srcEditorVar = Gui.Scripting.GetNextVariable("sviexEditor");
+							srcEditorVarList.Add(srcEditorVar);
+							Gui.Scripting.RunScript(srcEditorVar + " = sviexEditor(parser=" + srcParserVar + ")");
+						}
 					}
 				}
 				foreach (string srcEditorVar in srcEditorVarList)
@@ -584,13 +606,13 @@ namespace PPD_Preview_Clothes
 					bool sviexChanged = false;
 					for (ushort j = 0; j < editor.Parser.sections.Count; j++)
 					{
-						sviexParser.SubmeshSection submeshSection = editor.Parser.sections[j];
+						sviParser submeshSection = editor.Parser.sections[j];
 						foreach (FormXX xxForm in formXXList)
 						{
 							foreach (ListViewItem item in xxForm.listViewMesh.SelectedItems)
 							{
 								xxFrame meshFrame = xxForm.Editor.Meshes[(int)item.Tag];
-								if (submeshSection.Name == meshFrame.Name)
+								if (submeshSection.meshName == meshFrame.Name)
 								{
 									for (ushort i = 0; i < meshFrame.Mesh.SubmeshList.Count; i++)
 									{
@@ -600,9 +622,9 @@ namespace PPD_Preview_Clothes
 										{
 											if (submeshSection.submeshIdx == i)
 											{
-												bool copied = (bool)Gui.Scripting.RunScript(srcEditorVar + ".CopyIntoSVIEX(meshFrame=" + xxForm.EditorVar + ".Meshes[" + (int)item.Tag + "], submeshIdx=" + i
+												bool copied = (bool)Gui.Scripting.RunScript(srcEditorVar + ".CopyIntoSVI(meshFrame=" + xxForm.EditorVar + ".Meshes[" + (int)item.Tag + "], submeshIdx=" + i
 													+ ", positions=" + checkBoxElementsPositions.Checked + ", bones=" + checkBoxElementsBonesWeights.Checked + ", normals=" + checkBoxElementsNormals.Checked + ", uvs=" + checkBoxElementsUVs.Checked
-													+ ", unrestricted=" + radioButtonUnrestricted.Checked + ", nearestPositions=" + radioButtonNearestPositions.Checked + ")");
+													+ ", unrestricted=" + checkBoxUnrestricted.Checked + ", nearestBones=" + checkBoxNearestBones.Checked + ", nearestNormals=" + checkBoxNearestNormals.Checked + ", nearestUVs=" + checkBoxNearestUVs.Checked + ")");
 												if (copied)
 												{
 													sviexChanged = true;
@@ -625,14 +647,9 @@ namespace PPD_Preview_Clothes
 								if (item.Text == editor.Parser.Name)
 								{
 									form.Changed = true;
-									foreach (string srcParserVar in srcParserVarList)
-									{
-										if (editor.Parser == Gui.Scripting.Variables[srcParserVar])
-										{
-											Gui.Scripting.RunScript(form.EditorVar + ".ReplaceSubfile(file=" + srcParserVar + ")");
-											break;
-										}
-									}
+									int index = srcEditorVarList.IndexOf(srcEditorVar);
+									string srcParserVar = srcParserVarList[index];
+									Gui.Scripting.RunScript(form.EditorVar + ".ReplaceSubfile(file=" + srcParserVar + ")");
 									break;
 								}
 							}

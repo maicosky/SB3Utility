@@ -311,31 +311,57 @@ namespace SB3Utility
 		{
 			meshFrames = new List<AnimationFrame>(meshNames.Count);
 			HashSet<string> extractFrames = xx.SearchHierarchy(parser.Frame, meshNames);
-			AnimationFrame rootFrame = CreateFrame(parser.Frame, parser, extractFrames, meshNames, device, Matrix.Identity, meshFrames);
+			Dictionary<string, Matrix> extractMatrices = new Dictionary<string, Matrix>();
+			CreateCombinedMatrices(parser.Frame, extractFrames, Matrix.Identity, extractMatrices);
+			AnimationFrame rootFrame = CreateFrame(parser.Frame, parser, extractFrames, meshNames, device, Matrix.Identity, meshFrames, extractMatrices);
 			SetupBoneMatrices(rootFrame, rootFrame);
 			return rootFrame;
 		}
 
-		private AnimationFrame CreateFrame(xxFrame frame, xxParser parser, HashSet<string> extractFrames, HashSet<string> meshNames, Device device, Matrix combinedParent, List<AnimationFrame> meshFrames)
+		private void CreateCombinedMatrices(xxFrame frame, HashSet<string> extractFrames, Matrix combinedParent, Dictionary<string, Matrix> extractMatrices)
+		{
+			Matrix combinedTransform = frame.Matrix * combinedParent;
+			extractMatrices.Add(frame.Name, combinedTransform);
+
+			for (int i = 0; i < frame.Count; i++)
+			{
+				xxFrame child = frame[i];
+				if (extractFrames.Contains(child.Name))
+				{
+					CreateCombinedMatrices(child, extractFrames, combinedTransform, extractMatrices);
+				}
+			}
+		}
+
+		private AnimationFrame CreateFrame(xxFrame frame, xxParser parser, HashSet<string> extractFrames, HashSet<string> meshNames, Device device, Matrix combinedParent, List<AnimationFrame> meshFrames, Dictionary<string, Matrix> extractMatrices)
 		{
 			AnimationFrame animationFrame = new AnimationFrame();
 			animationFrame.Name = frame.Name;
 			animationFrame.TransformationMatrix = frame.Matrix;
 			animationFrame.OriginalTransform = animationFrame.TransformationMatrix;
-			animationFrame.CombinedTransform = combinedParent * animationFrame.TransformationMatrix;
+			animationFrame.CombinedTransform = extractMatrices[frame.Name];
 
 			xxMesh mesh = frame.Mesh;
 			if (meshNames.Contains(frame.Name) && (mesh != null))
 			{
 				List<xxBone> boneList = mesh.BoneList;
 
-				string[] boneNames = new string[boneList.Count];
-				Matrix[] boneOffsets = new Matrix[boneList.Count];
+				string[] boneNames = new string[extractFrames.Count];
+				Matrix[] boneOffsets = new Matrix[extractFrames.Count];
+				string[] extractArray = new string[extractFrames.Count];
+				extractFrames.CopyTo(extractArray);
+				HashSet<string> extractCopy = new HashSet<string>(extractArray);
 				for (int i = 0; i < boneList.Count; i++)
 				{
 					xxBone bone = boneList[i];
 					boneNames[i] = bone.Name;
 					boneOffsets[i] = bone.Matrix;
+					extractCopy.Remove(bone.Name);
+				}
+				extractCopy.CopyTo(boneNames, boneList.Count);
+				for (int i = boneList.Count; i < extractFrames.Count; i++)
+				{
+					boneOffsets[i] = Matrix.Invert(extractMatrices[boneNames[i]]);
 				}
 
 				AnimationMeshContainer[] meshContainers = new AnimationMeshContainer[mesh.SubmeshList.Count];
@@ -446,6 +472,7 @@ namespace SB3Utility
 				{
 					meshContainers[i].BoneNames = boneNames;
 					meshContainers[i].BoneOffsets = boneOffsets;
+					meshContainers[i].RealBones = boneList.Count;
 				}
 
 				min = Vector3.TransformCoordinate(min, animationFrame.CombinedTransform);
@@ -460,7 +487,7 @@ namespace SB3Utility
 				xxFrame child = frame[i];
 				if (extractFrames.Contains(child.Name))
 				{
-					AnimationFrame childAnimationFrame = CreateFrame(child, parser, extractFrames, meshNames, device, animationFrame.CombinedTransform, meshFrames);
+					AnimationFrame childAnimationFrame = CreateFrame(child, parser, extractFrames, meshNames, device, animationFrame.CombinedTransform, meshFrames, extractMatrices);
 					childAnimationFrame.Parent = animationFrame;
 					animationFrame.AppendChild(childAnimationFrame);
 				}
@@ -565,6 +592,8 @@ namespace SB3Utility
 				{
 					boneFrames = new AnimationFrame[numBones];
 					var boneDic = new Dictionary<string, byte>();
+					int topBone = -1;
+					int topLevel = 100;
 					for (byte i = 0; i < numBones; i++)
 					{
 						string boneName = mesh.BoneNames[i];
@@ -572,55 +601,96 @@ namespace SB3Utility
 						boneFrames[i] = bone;
 
 						boneDic.Add(boneName, i);
+
+						if (i < mesh.RealBones)
+						{
+							int level = 0;
+							while (bone != root)
+							{
+								bone = bone.Parent;
+								level++;
+							}
+							if (level < topLevel)
+							{
+								topLevel = level;
+								topBone = i;
+							}
+						}
 					}
 
 					float boneWidth = 0.05f;
-					int boneColor = Color.CornflowerBlue.ToArgb();
-					boneLines = new PositionBlendWeightIndexedColored[numBones * BoneObjSize];
+					List<PositionBlendWeightIndexedColored> boneLineList = new List<PositionBlendWeightIndexedColored>(numBones * BoneObjSize);
 					for (byte i = 0; i < numBones; i++)
 					{
 						AnimationFrame bone = boneFrames[i];
-
-						byte boneParentId;
-						if ((bone != null) && (bone.Parent != null) && boneDic.TryGetValue(bone.Parent.Name, out boneParentId))
+						AnimationFrame parent = bone.Parent;
+						if (parent == null)
 						{
-							Matrix boneMatrix = Matrix.Invert(mesh.BoneOffsets[i]);
-							Matrix boneParentMatrix = Matrix.Invert(mesh.BoneOffsets[boneParentId]);
-
-							Vector3 bonePos = Vector3.TransformCoordinate(new Vector3(), boneMatrix);
-							Vector3 boneParentPos = Vector3.TransformCoordinate(new Vector3(), boneParentMatrix);
-
-							Vector3 direction = bonePos - boneParentPos;
-							float scale = boneWidth * (1 + direction.Length() / 2);
-							Vector3 perpendicular = direction.Perpendicular();
-							Vector3 cross = Vector3.Cross(direction, perpendicular);
-							perpendicular = Vector3.Normalize(perpendicular) * scale;
-							cross = Vector3.Normalize(cross) * scale;
-
-							Vector3 bottomLeft = -perpendicular + -cross + boneParentPos;
-							Vector3 bottomRight = -perpendicular + cross + boneParentPos;
-							Vector3 topLeft = perpendicular + -cross + boneParentPos;
-							Vector3 topRight = perpendicular + cross + boneParentPos;
-
-							boneLines[i * BoneObjSize] = new PositionBlendWeightIndexedColored(bottomLeft, boneParentId, boneColor);
-							boneLines[(i * BoneObjSize) + 1] = new PositionBlendWeightIndexedColored(bottomRight, boneParentId, boneColor);
-							boneLines[(i * BoneObjSize) + 2] = new PositionBlendWeightIndexedColored(bottomRight, boneParentId, boneColor);
-							boneLines[(i * BoneObjSize) + 3] = new PositionBlendWeightIndexedColored(topRight, boneParentId, boneColor);
-							boneLines[(i * BoneObjSize) + 4] = new PositionBlendWeightIndexedColored(topRight, boneParentId, boneColor);
-							boneLines[(i * BoneObjSize) + 5] = new PositionBlendWeightIndexedColored(topLeft, boneParentId, boneColor);
-							boneLines[(i * BoneObjSize) + 6] = new PositionBlendWeightIndexedColored(topLeft, boneParentId, boneColor);
-							boneLines[(i * BoneObjSize) + 7] = new PositionBlendWeightIndexedColored(bottomLeft, boneParentId, boneColor);
-
-							boneLines[(i * BoneObjSize) + 8] = new PositionBlendWeightIndexedColored(bottomLeft, boneParentId, boneColor);
-							boneLines[(i * BoneObjSize) + 9] = new PositionBlendWeightIndexedColored(bonePos, i, boneColor);
-							boneLines[(i * BoneObjSize) + 10] = new PositionBlendWeightIndexedColored(bottomRight, boneParentId, boneColor);
-							boneLines[(i * BoneObjSize) + 11] = new PositionBlendWeightIndexedColored(bonePos, i, boneColor);
-							boneLines[(i * BoneObjSize) + 12] = new PositionBlendWeightIndexedColored(topLeft, boneParentId, boneColor);
-							boneLines[(i * BoneObjSize) + 13] = new PositionBlendWeightIndexedColored(bonePos, i, boneColor);
-							boneLines[(i * BoneObjSize) + 14] = new PositionBlendWeightIndexedColored(topRight, boneParentId, boneColor);
-							boneLines[(i * BoneObjSize) + 15] = new PositionBlendWeightIndexedColored(bonePos, i, boneColor);
+							continue;
 						}
+
+						Matrix boneMatrix = Matrix.Invert(mesh.BoneOffsets[i]);
+						Vector3 bonePos = Vector3.TransformCoordinate(new Vector3(), boneMatrix);
+						if (bonePos.X == 0 && bonePos.Y == 0 && bonePos.Z == 0)
+						{
+							continue;
+						}
+						byte boneParentId;
+						Vector3 boneParentPos;
+						if (i != topBone)
+						{
+							boneDic.TryGetValue(parent.Name, out boneParentId);
+							Matrix boneParentMatrix = Matrix.Invert(mesh.BoneOffsets[boneParentId]);
+							boneParentPos = Vector3.TransformCoordinate(new Vector3(), boneParentMatrix);
+							if (boneParentPos.X == 0 && boneParentPos.Y == 0 && boneParentPos.Z == 0)
+							{
+								continue;
+							}
+						}
+						else
+						{
+							boneParentId = i;
+							boneParentPos = bonePos;
+						}
+
+						if ((bonePos - boneParentPos).LengthSquared() < 0.1)
+						{
+							bonePos.Y -= boneWidth;
+							boneParentPos.Y += boneWidth;
+						}
+
+						Vector3 direction = bonePos - boneParentPos;
+						float scale = boneWidth * (1 + direction.Length() / 2);
+						Vector3 perpendicular = direction.Perpendicular();
+						Vector3 cross = Vector3.Cross(direction, perpendicular);
+						perpendicular = Vector3.Normalize(perpendicular) * scale;
+						cross = Vector3.Normalize(cross) * scale;
+
+						Vector3 bottomLeft = -perpendicular + -cross + boneParentPos;
+						Vector3 bottomRight = -perpendicular + cross + boneParentPos;
+						Vector3 topLeft = perpendicular + -cross + boneParentPos;
+						Vector3 topRight = perpendicular + cross + boneParentPos;
+
+						int boneColor = i < mesh.RealBones ? Color.CornflowerBlue.ToArgb() : Color.BlueViolet.ToArgb();
+						boneLineList.Add(new PositionBlendWeightIndexedColored(bottomLeft, boneParentId, boneColor));
+						boneLineList.Add(new PositionBlendWeightIndexedColored(bottomRight, boneParentId, boneColor));
+						boneLineList.Add(new PositionBlendWeightIndexedColored(bottomRight, boneParentId, boneColor));
+						boneLineList.Add(new PositionBlendWeightIndexedColored(topRight, boneParentId, boneColor));
+						boneLineList.Add(new PositionBlendWeightIndexedColored(topRight, boneParentId, boneColor));
+						boneLineList.Add(new PositionBlendWeightIndexedColored(topLeft, boneParentId, boneColor));
+						boneLineList.Add(new PositionBlendWeightIndexedColored(topLeft, boneParentId, boneColor));
+						boneLineList.Add(new PositionBlendWeightIndexedColored(bottomLeft, boneParentId, boneColor));
+
+						boneLineList.Add(new PositionBlendWeightIndexedColored(bottomLeft, boneParentId, boneColor));
+						boneLineList.Add(new PositionBlendWeightIndexedColored(bonePos, i, boneColor));
+						boneLineList.Add(new PositionBlendWeightIndexedColored(bottomRight, boneParentId, boneColor));
+						boneLineList.Add(new PositionBlendWeightIndexedColored(bonePos, i, boneColor));
+						boneLineList.Add(new PositionBlendWeightIndexedColored(topLeft, boneParentId, boneColor));
+						boneLineList.Add(new PositionBlendWeightIndexedColored(bonePos, i, boneColor));
+						boneLineList.Add(new PositionBlendWeightIndexedColored(topRight, boneParentId, boneColor));
+						boneLineList.Add(new PositionBlendWeightIndexedColored(bonePos, i, boneColor));
 					}
+					boneLines = boneLineList.ToArray();
 				}
 
 				while (mesh != null)
@@ -1023,6 +1093,8 @@ namespace SB3Utility
 
 		public int MaterialIndex { get; set; }
 		public int TextureIndex { get; set; }
+
+		public int RealBones { get; set; }
 
 		public AnimationMeshContainer()
 		{

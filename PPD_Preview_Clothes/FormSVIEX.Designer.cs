@@ -58,8 +58,11 @@ namespace PPD_Preview_Clothes
 			this.groupBox5 = new System.Windows.Forms.GroupBox();
 			this.radioButtonSubmeshesSelected = new System.Windows.Forms.RadioButton();
 			this.radioButtonSubmeshesAll = new System.Windows.Forms.RadioButton();
-			this.radioButtonUnrestricted = new System.Windows.Forms.RadioButton();
-			this.radioButtonNearestPositions = new System.Windows.Forms.RadioButton();
+			this.checkBoxUnrestricted = new System.Windows.Forms.CheckBox();
+			this.groupBox4 = new System.Windows.Forms.GroupBox();
+			this.checkBoxNearestUVs = new System.Windows.Forms.CheckBox();
+			this.checkBoxNearestBones = new System.Windows.Forms.CheckBox();
+			this.checkBoxNearestNormals = new System.Windows.Forms.CheckBox();
 			this.label5 = new System.Windows.Forms.Label();
 			this.groupBoxAA2SVIEXJuggler = new System.Windows.Forms.GroupBox();
 			this.groupBoxElementsToCopy = new System.Windows.Forms.GroupBox();
@@ -69,12 +72,12 @@ namespace PPD_Preview_Clothes
 			this.checkBoxElementsPositions = new System.Windows.Forms.CheckBox();
 			this.buttonCopyToMeshes = new System.Windows.Forms.Button();
 			this.groupBox3 = new System.Windows.Forms.GroupBox();
-			this.radioButtonSimpleReplace = new System.Windows.Forms.RadioButton();
 			this.buttonCopyToSVIEXes = new System.Windows.Forms.Button();
 			this.groupBox1.SuspendLayout();
 			this.groupBox2.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDownNearVertexSqDist)).BeginInit();
 			this.groupBox5.SuspendLayout();
+			this.groupBox4.SuspendLayout();
 			this.groupBoxAA2SVIEXJuggler.SuspendLayout();
 			this.groupBoxElementsToCopy.SuspendLayout();
 			this.groupBox3.SuspendLayout();
@@ -372,30 +375,62 @@ namespace PPD_Preview_Clothes
 			this.radioButtonSubmeshesAll.Text = "All";
 			this.radioButtonSubmeshesAll.UseVisualStyleBackColor = true;
 			// 
-			// radioButtonUnrestricted
+			// checkBoxUnrestricted
 			// 
-			this.radioButtonUnrestricted.AutoSize = true;
-			this.radioButtonUnrestricted.Location = new System.Drawing.Point(7, 67);
-			this.radioButtonUnrestricted.Name = "radioButtonUnrestricted";
-			this.radioButtonUnrestricted.Size = new System.Drawing.Size(82, 17);
-			this.radioButtonUnrestricted.TabIndex = 166;
-			this.radioButtonUnrestricted.Text = "Unrestricted";
-			this.toolTip1.SetToolTip(this.radioButtonUnrestricted, "All elements are copied.");
-			this.radioButtonUnrestricted.UseVisualStyleBackColor = true;
+			this.checkBoxUnrestricted.AutoSize = true;
+			this.checkBoxUnrestricted.Location = new System.Drawing.Point(147, 17);
+			this.checkBoxUnrestricted.Name = "checkBoxUnrestricted";
+			this.checkBoxUnrestricted.Size = new System.Drawing.Size(83, 17);
+			this.checkBoxUnrestricted.TabIndex = 164;
+			this.checkBoxUnrestricted.Text = "Unrestricted";
+			this.toolTip1.SetToolTip(this.checkBoxUnrestricted, "Allows any number of vertices to be copied.\r\nCan ignore your choice of Elements!");
+			this.checkBoxUnrestricted.UseVisualStyleBackColor = true;
 			// 
-			// radioButtonNearestPositions
+			// groupBox4
 			// 
-			this.radioButtonNearestPositions.AutoSize = true;
-			this.radioButtonNearestPositions.Checked = true;
-			this.radioButtonNearestPositions.Location = new System.Drawing.Point(95, 67);
-			this.radioButtonNearestPositions.Name = "radioButtonNearestPositions";
-			this.radioButtonNearestPositions.Size = new System.Drawing.Size(105, 17);
-			this.radioButtonNearestPositions.TabIndex = 168;
-			this.radioButtonNearestPositions.TabStop = true;
-			this.radioButtonNearestPositions.Text = "Nearest Postions";
-			this.toolTip1.SetToolTip(this.radioButtonNearestPositions, "Copy all elements from the nearest positions in the SVIEX instead\r\nof the source " +
-        "submeshes (except for the positions themselves).");
-			this.radioButtonNearestPositions.UseVisualStyleBackColor = true;
+			this.groupBox4.Controls.Add(this.checkBoxNearestUVs);
+			this.groupBox4.Controls.Add(this.checkBoxNearestBones);
+			this.groupBox4.Controls.Add(this.checkBoxNearestNormals);
+			this.groupBox4.Location = new System.Drawing.Point(6, 40);
+			this.groupBox4.Name = "groupBox4";
+			this.groupBox4.Size = new System.Drawing.Size(224, 44);
+			this.groupBox4.TabIndex = 166;
+			this.groupBox4.TabStop = false;
+			this.groupBox4.Text = "Copy From Nearest Position";
+			this.toolTip1.SetToolTip(this.groupBox4, "Positions are always copied from the source submesh,\r\nif checked OR required (num" +
+        "bers of vertices differ).");
+			// 
+			// checkBoxNearestUVs
+			// 
+			this.checkBoxNearestUVs.AutoSize = true;
+			this.checkBoxNearestUVs.Location = new System.Drawing.Point(176, 19);
+			this.checkBoxNearestUVs.Name = "checkBoxNearestUVs";
+			this.checkBoxNearestUVs.Size = new System.Drawing.Size(46, 17);
+			this.checkBoxNearestUVs.TabIndex = 169;
+			this.checkBoxNearestUVs.Text = "UVs";
+			this.checkBoxNearestUVs.UseVisualStyleBackColor = true;
+			// 
+			// checkBoxNearestBones
+			// 
+			this.checkBoxNearestBones.AutoSize = true;
+			this.checkBoxNearestBones.Location = new System.Drawing.Point(6, 19);
+			this.checkBoxNearestBones.Name = "checkBoxNearestBones";
+			this.checkBoxNearestBones.Size = new System.Drawing.Size(107, 17);
+			this.checkBoxNearestBones.TabIndex = 167;
+			this.checkBoxNearestBones.Text = "Bones && Weights";
+			this.checkBoxNearestBones.UseVisualStyleBackColor = true;
+			// 
+			// checkBoxNearestNormals
+			// 
+			this.checkBoxNearestNormals.AutoSize = true;
+			this.checkBoxNearestNormals.Checked = true;
+			this.checkBoxNearestNormals.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.checkBoxNearestNormals.Location = new System.Drawing.Point(112, 19);
+			this.checkBoxNearestNormals.Name = "checkBoxNearestNormals";
+			this.checkBoxNearestNormals.Size = new System.Drawing.Size(64, 17);
+			this.checkBoxNearestNormals.TabIndex = 168;
+			this.checkBoxNearestNormals.Text = "Normals";
+			this.checkBoxNearestNormals.UseVisualStyleBackColor = true;
 			// 
 			// label5
 			// 
@@ -417,7 +452,7 @@ namespace PPD_Preview_Clothes
 			this.groupBoxAA2SVIEXJuggler.Size = new System.Drawing.Size(375, 159);
 			this.groupBoxAA2SVIEXJuggler.TabIndex = 150;
 			this.groupBoxAA2SVIEXJuggler.TabStop = false;
-			this.groupBoxAA2SVIEXJuggler.Text = "AA2 SVIEX Juggler";
+			this.groupBoxAA2SVIEXJuggler.Text = "SVI[EX] Juggler";
 			// 
 			// groupBoxElementsToCopy
 			// 
@@ -461,6 +496,7 @@ namespace PPD_Preview_Clothes
 			this.checkBoxElementsBonesWeights.AutoSize = true;
 			this.checkBoxElementsBonesWeights.Checked = true;
 			this.checkBoxElementsBonesWeights.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.checkBoxElementsBonesWeights.ForeColor = System.Drawing.SystemColors.ControlText;
 			this.checkBoxElementsBonesWeights.Location = new System.Drawing.Point(95, 20);
 			this.checkBoxElementsBonesWeights.Name = "checkBoxElementsBonesWeights";
 			this.checkBoxElementsBonesWeights.Size = new System.Drawing.Size(107, 17);
@@ -482,7 +518,7 @@ namespace PPD_Preview_Clothes
 			// 
 			// buttonCopyToMeshes
 			// 
-			this.buttonCopyToMeshes.Location = new System.Drawing.Point(28, 22);
+			this.buttonCopyToMeshes.Location = new System.Drawing.Point(19, 22);
 			this.buttonCopyToMeshes.Name = "buttonCopyToMeshes";
 			this.buttonCopyToMeshes.Size = new System.Drawing.Size(96, 23);
 			this.buttonCopyToMeshes.TabIndex = 154;
@@ -492,33 +528,22 @@ namespace PPD_Preview_Clothes
 			// 
 			// groupBox3
 			// 
-			this.groupBox3.Controls.Add(this.radioButtonNearestPositions);
-			this.groupBox3.Controls.Add(this.radioButtonUnrestricted);
-			this.groupBox3.Controls.Add(this.radioButtonSimpleReplace);
+			this.groupBox3.Controls.Add(this.groupBox4);
+			this.groupBox3.Controls.Add(this.checkBoxUnrestricted);
 			this.groupBox3.Controls.Add(this.buttonCopyToSVIEXes);
-			this.groupBox3.Location = new System.Drawing.Point(163, 9);
+			this.groupBox3.Location = new System.Drawing.Point(133, 9);
 			this.groupBox3.Name = "groupBox3";
-			this.groupBox3.Size = new System.Drawing.Size(206, 90);
+			this.groupBox3.Size = new System.Drawing.Size(236, 90);
 			this.groupBox3.TabIndex = 160;
 			this.groupBox3.TabStop = false;
 			// 
-			// radioButtonSimpleReplace
-			// 
-			this.radioButtonSimpleReplace.AutoSize = true;
-			this.radioButtonSimpleReplace.Location = new System.Drawing.Point(7, 44);
-			this.radioButtonSimpleReplace.Name = "radioButtonSimpleReplace";
-			this.radioButtonSimpleReplace.Size = new System.Drawing.Size(99, 17);
-			this.radioButtonSimpleReplace.TabIndex = 164;
-			this.radioButtonSimpleReplace.Text = "Simple Replace";
-			this.radioButtonSimpleReplace.UseVisualStyleBackColor = true;
-			// 
 			// buttonCopyToSVIEXes
 			// 
-			this.buttonCopyToSVIEXes.Location = new System.Drawing.Point(47, 13);
+			this.buttonCopyToSVIEXes.Location = new System.Drawing.Point(6, 13);
 			this.buttonCopyToSVIEXes.Name = "buttonCopyToSVIEXes";
-			this.buttonCopyToSVIEXes.Size = new System.Drawing.Size(105, 23);
+			this.buttonCopyToSVIEXes.Size = new System.Drawing.Size(135, 23);
 			this.buttonCopyToSVIEXes.TabIndex = 162;
-			this.buttonCopyToSVIEXes.Text = "Copy to SVIEXes";
+			this.buttonCopyToSVIEXes.Text = "Copy to SVI/SVIEX units";
 			this.buttonCopyToSVIEXes.UseVisualStyleBackColor = true;
 			this.buttonCopyToSVIEXes.Click += new System.EventHandler(this.buttonCopyToSVIEXes_Click);
 			// 
@@ -546,6 +571,8 @@ namespace PPD_Preview_Clothes
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDownNearVertexSqDist)).EndInit();
 			this.groupBox5.ResumeLayout(false);
 			this.groupBox5.PerformLayout();
+			this.groupBox4.ResumeLayout(false);
+			this.groupBox4.PerformLayout();
 			this.groupBoxAA2SVIEXJuggler.ResumeLayout(false);
 			this.groupBoxElementsToCopy.ResumeLayout(false);
 			this.groupBoxElementsToCopy.PerformLayout();
@@ -593,8 +620,10 @@ namespace PPD_Preview_Clothes
 		private System.Windows.Forms.RadioButton radioButtonSubmeshesSelected;
 		private System.Windows.Forms.RadioButton radioButtonSubmeshesAll;
 		private System.Windows.Forms.GroupBox groupBox3;
-		private System.Windows.Forms.RadioButton radioButtonNearestPositions;
-		private System.Windows.Forms.RadioButton radioButtonUnrestricted;
-		private System.Windows.Forms.RadioButton radioButtonSimpleReplace;
+		private System.Windows.Forms.CheckBox checkBoxUnrestricted;
+		private System.Windows.Forms.GroupBox groupBox4;
+		private System.Windows.Forms.CheckBox checkBoxNearestUVs;
+		private System.Windows.Forms.CheckBox checkBoxNearestBones;
+		private System.Windows.Forms.CheckBox checkBoxNearestNormals;
 	}
 }

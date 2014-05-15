@@ -44,12 +44,16 @@
 			this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.keepBackupToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+			this.buttonObjectTreeDeleteUnreferenced = new System.Windows.Forms.Button();
+			this.checkBoxFrameMatrixUpdate = new System.Windows.Forms.CheckBox();
 			this.buttonMeshRestPose = new System.Windows.Forms.Button();
 			this.checkBoxMeshNewSkin = new System.Windows.Forms.CheckBox();
 			this.checkBoxMeshExportMqoSortMeshes = new System.Windows.Forms.CheckBox();
 			this.checkBoxMeshExportFbxLinearInterpolation = new System.Windows.Forms.CheckBox();
 			this.checkBoxMeshExportEmbedMedia = new System.Windows.Forms.CheckBox();
 			this.checkBoxSubmeshReorder = new System.Windows.Forms.CheckBox();
+			this.buttonMaterialDeleteUnref = new System.Windows.Forms.Button();
+			this.buttonTextureDeleteUnref = new System.Windows.Forms.Button();
 			this.textBoxKeyframeRange = new SB3Utility.EditTextBox();
 			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
 			this.textBoxFormat = new SB3Utility.EditTextBox();
@@ -58,11 +62,11 @@
 			this.label26 = new System.Windows.Forms.Label();
 			this.tabControlLists = new System.Windows.Forms.TabControl();
 			this.tabPageObject = new System.Windows.Forms.TabPage();
-			this.treeViewObjectTree = new System.Windows.Forms.TreeView();
 			this.panelObjectTreeBottom = new System.Windows.Forms.Panel();
-			this.buttonCheckBones = new System.Windows.Forms.Button();
+			this.buttonObjectTreeCheckBones = new System.Windows.Forms.Button();
 			this.buttonObjectTreeCollapse = new System.Windows.Forms.Button();
 			this.buttonObjectTreeExpand = new System.Windows.Forms.Button();
+			this.treeViewObjectTree = new System.Windows.Forms.TreeView();
 			this.tabPageMesh = new System.Windows.Forms.TabPage();
 			this.splitContainerMesh = new System.Windows.Forms.SplitContainer();
 			this.listViewMesh = new System.Windows.Forms.ListView();
@@ -101,6 +105,7 @@
 			this.buttonAddToSkin = new System.Windows.Forms.Button();
 			this.buttonFrameEditHex = new System.Windows.Forms.Button();
 			this.groupBox3 = new System.Windows.Forms.GroupBox();
+			this.groupBox5 = new System.Windows.Forms.GroupBox();
 			this.buttonFrameMatrixApply = new System.Windows.Forms.Button();
 			this.numericFrameMatrixRatio = new System.Windows.Forms.NumericUpDown();
 			this.label5 = new System.Windows.Forms.Label();
@@ -128,7 +133,6 @@
 			this.tabPageBoneView = new System.Windows.Forms.TabPage();
 			this.buttonZeroWeights = new System.Windows.Forms.Button();
 			this.groupBox4 = new System.Windows.Forms.GroupBox();
-			this.buttonBoneMatrixApply = new System.Windows.Forms.Button();
 			this.numericBoneMatrixRatio = new System.Windows.Forms.NumericUpDown();
 			this.label9 = new System.Windows.Forms.Label();
 			this.numericBoneMatrixNumber = new System.Windows.Forms.NumericUpDown();
@@ -139,6 +143,9 @@
 			this.buttonBoneMatrixShrink = new System.Windows.Forms.Button();
 			this.buttonBoneMatrixIdentity = new System.Windows.Forms.Button();
 			this.buttonBoneMatrixInverse = new System.Windows.Forms.Button();
+			this.groupBox6 = new System.Windows.Forms.GroupBox();
+			this.buttonBoneMatrixApply = new System.Windows.Forms.Button();
+			this.checkBoxBoneMatrixUpdate = new System.Windows.Forms.CheckBox();
 			this.tabControlBoneMatrix = new System.Windows.Forms.TabControl();
 			this.tabPageBoneSRT = new System.Windows.Forms.TabPage();
 			this.dataGridViewBoneSRT = new SB3Utility.DataGridViewEditor();
@@ -188,7 +195,7 @@
 			this.textBoxMeshName = new SB3Utility.EditTextBox();
 			this.tabPageMaterialView = new System.Windows.Forms.TabPage();
 			this.buttonMaterialEditHex = new System.Windows.Forms.Button();
-			this.buttonTextureExternal = new System.Windows.Forms.Button();
+			this.buttonMaterialExternalTexture = new System.Windows.Forms.Button();
 			this.comboBoxMatTex4 = new System.Windows.Forms.ComboBox();
 			this.comboBoxMatTex3 = new System.Windows.Forms.ComboBox();
 			this.comboBoxMatTex2 = new System.Windows.Forms.ComboBox();
@@ -274,6 +281,7 @@
 			this.tabControlViews.SuspendLayout();
 			this.tabPageFrameView.SuspendLayout();
 			this.groupBox3.SuspendLayout();
+			this.groupBox5.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericFrameMatrixRatio)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericFrameMatrixNumber)).BeginInit();
 			this.tabControlFrameMatrix.SuspendLayout();
@@ -285,6 +293,7 @@
 			this.groupBox4.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericBoneMatrixRatio)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericBoneMatrixNumber)).BeginInit();
+			this.groupBox6.SuspendLayout();
 			this.tabControlBoneMatrix.SuspendLayout();
 			this.tabPageBoneSRT.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridViewBoneSRT)).BeginInit();
@@ -398,6 +407,29 @@
 			this.toolTip1.UseAnimation = false;
 			this.toolTip1.UseFading = false;
 			// 
+			// buttonObjectTreeDeleteUnreferenced
+			// 
+			this.buttonObjectTreeDeleteUnreferenced.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.buttonObjectTreeDeleteUnreferenced.Location = new System.Drawing.Point(134, 3);
+			this.buttonObjectTreeDeleteUnreferenced.Name = "buttonObjectTreeDeleteUnreferenced";
+			this.buttonObjectTreeDeleteUnreferenced.Size = new System.Drawing.Size(114, 23);
+			this.buttonObjectTreeDeleteUnreferenced.TabIndex = 18;
+			this.buttonObjectTreeDeleteUnreferenced.Text = "Delete Unreferenced";
+			this.toolTip1.SetToolTip(this.buttonObjectTreeDeleteUnreferenced, "Materials & Textures\r\nHolding SHIFT selects them instead");
+			this.buttonObjectTreeDeleteUnreferenced.UseVisualStyleBackColor = true;
+			this.buttonObjectTreeDeleteUnreferenced.Click += new System.EventHandler(this.buttonObjectTreeDeleteUnreferenced_Click);
+			// 
+			// checkBoxFrameMatrixUpdate
+			// 
+			this.checkBoxFrameMatrixUpdate.AutoSize = true;
+			this.checkBoxFrameMatrixUpdate.Location = new System.Drawing.Point(6, 13);
+			this.checkBoxFrameMatrixUpdate.Name = "checkBoxFrameMatrixUpdate";
+			this.checkBoxFrameMatrixUpdate.Size = new System.Drawing.Size(94, 17);
+			this.checkBoxFrameMatrixUpdate.TabIndex = 112;
+			this.checkBoxFrameMatrixUpdate.Text = "Update Bones";
+			this.toolTip1.SetToolTip(this.checkBoxFrameMatrixUpdate, "Automatically update bone matrix of all meshes in this xx.");
+			this.checkBoxFrameMatrixUpdate.UseVisualStyleBackColor = true;
+			// 
 			// buttonMeshRestPose
 			// 
 			this.buttonMeshRestPose.Location = new System.Drawing.Point(174, 198);
@@ -477,6 +509,28 @@
         " the submesh should be moved to.");
 			this.checkBoxSubmeshReorder.UseVisualStyleBackColor = true;
 			this.checkBoxSubmeshReorder.Click += new System.EventHandler(this.checkBoxMeshReorderSubmesh_Click);
+			// 
+			// buttonMaterialDeleteUnref
+			// 
+			this.buttonMaterialDeleteUnref.Location = new System.Drawing.Point(89, 338);
+			this.buttonMaterialDeleteUnref.Name = "buttonMaterialDeleteUnref";
+			this.buttonMaterialDeleteUnref.Size = new System.Drawing.Size(114, 23);
+			this.buttonMaterialDeleteUnref.TabIndex = 160;
+			this.buttonMaterialDeleteUnref.Text = "Delete Unreferenced";
+			this.toolTip1.SetToolTip(this.buttonMaterialDeleteUnref, "Materials only\r\nHolding SHIFT selects them instead");
+			this.buttonMaterialDeleteUnref.UseVisualStyleBackColor = true;
+			this.buttonMaterialDeleteUnref.Click += new System.EventHandler(this.buttonMaterialDeleteUnref_Click);
+			// 
+			// buttonTextureDeleteUnref
+			// 
+			this.buttonTextureDeleteUnref.Location = new System.Drawing.Point(176, 83);
+			this.buttonTextureDeleteUnref.Name = "buttonTextureDeleteUnref";
+			this.buttonTextureDeleteUnref.Size = new System.Drawing.Size(75, 23);
+			this.buttonTextureDeleteUnref.TabIndex = 40;
+			this.buttonTextureDeleteUnref.Text = "Delete Unref";
+			this.toolTip1.SetToolTip(this.buttonTextureDeleteUnref, "Textures only\r\nHolding SHIFT selects them instead");
+			this.buttonTextureDeleteUnref.UseVisualStyleBackColor = true;
+			this.buttonTextureDeleteUnref.Click += new System.EventHandler(this.buttonTextureDeleteUnref_Click);
 			// 
 			// textBoxKeyframeRange
 			// 
@@ -583,6 +637,49 @@
 			this.tabPageObject.Text = "Object Tree";
 			this.tabPageObject.UseVisualStyleBackColor = true;
 			// 
+			// panelObjectTreeBottom
+			// 
+			this.panelObjectTreeBottom.Controls.Add(this.buttonObjectTreeDeleteUnreferenced);
+			this.panelObjectTreeBottom.Controls.Add(this.buttonObjectTreeCheckBones);
+			this.panelObjectTreeBottom.Controls.Add(this.buttonObjectTreeCollapse);
+			this.panelObjectTreeBottom.Controls.Add(this.buttonObjectTreeExpand);
+			this.panelObjectTreeBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
+			this.panelObjectTreeBottom.Location = new System.Drawing.Point(0, 407);
+			this.panelObjectTreeBottom.Name = "panelObjectTreeBottom";
+			this.panelObjectTreeBottom.Size = new System.Drawing.Size(251, 57);
+			this.panelObjectTreeBottom.TabIndex = 10;
+			// 
+			// buttonObjectTreeCheckBones
+			// 
+			this.buttonObjectTreeCheckBones.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.buttonObjectTreeCheckBones.Location = new System.Drawing.Point(162, 32);
+			this.buttonObjectTreeCheckBones.Name = "buttonObjectTreeCheckBones";
+			this.buttonObjectTreeCheckBones.Size = new System.Drawing.Size(86, 23);
+			this.buttonObjectTreeCheckBones.TabIndex = 16;
+			this.buttonObjectTreeCheckBones.Text = "Check Bones";
+			this.buttonObjectTreeCheckBones.UseVisualStyleBackColor = true;
+			this.buttonObjectTreeCheckBones.Click += new System.EventHandler(this.buttonObjectTreeCheckBones_Click);
+			// 
+			// buttonObjectTreeCollapse
+			// 
+			this.buttonObjectTreeCollapse.Location = new System.Drawing.Point(81, 32);
+			this.buttonObjectTreeCollapse.Name = "buttonObjectTreeCollapse";
+			this.buttonObjectTreeCollapse.Size = new System.Drawing.Size(75, 23);
+			this.buttonObjectTreeCollapse.TabIndex = 14;
+			this.buttonObjectTreeCollapse.Text = "Collapse All";
+			this.buttonObjectTreeCollapse.UseVisualStyleBackColor = true;
+			this.buttonObjectTreeCollapse.Click += new System.EventHandler(this.buttonObjectTreeCollapse_Click);
+			// 
+			// buttonObjectTreeExpand
+			// 
+			this.buttonObjectTreeExpand.Location = new System.Drawing.Point(0, 32);
+			this.buttonObjectTreeExpand.Name = "buttonObjectTreeExpand";
+			this.buttonObjectTreeExpand.Size = new System.Drawing.Size(75, 23);
+			this.buttonObjectTreeExpand.TabIndex = 12;
+			this.buttonObjectTreeExpand.Text = "Expand All";
+			this.buttonObjectTreeExpand.UseVisualStyleBackColor = true;
+			this.buttonObjectTreeExpand.Click += new System.EventHandler(this.buttonObjectTreeExpand_Click);
+			// 
 			// treeViewObjectTree
 			// 
 			this.treeViewObjectTree.AllowDrop = true;
@@ -591,7 +688,7 @@
 			this.treeViewObjectTree.HideSelection = false;
 			this.treeViewObjectTree.Location = new System.Drawing.Point(0, 0);
 			this.treeViewObjectTree.Name = "treeViewObjectTree";
-			this.treeViewObjectTree.Size = new System.Drawing.Size(251, 435);
+			this.treeViewObjectTree.Size = new System.Drawing.Size(251, 407);
 			this.treeViewObjectTree.TabIndex = 1;
 			this.treeViewObjectTree.DrawNode += new System.Windows.Forms.DrawTreeNodeEventHandler(this.treeViewObjectTree_DrawNode);
 			this.treeViewObjectTree.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.treeViewObjectTree_ItemDrag);
@@ -602,48 +699,6 @@
 			this.treeViewObjectTree.DragOver += new System.Windows.Forms.DragEventHandler(this.treeViewObjectTree_DragOver);
 			this.treeViewObjectTree.DragLeave += new System.EventHandler(this.treeViewObjectTree_DragLeave);
 			this.treeViewObjectTree.KeyUp += new System.Windows.Forms.KeyEventHandler(this.treeViewObjectTree_KeyUp);
-			// 
-			// panelObjectTreeBottom
-			// 
-			this.panelObjectTreeBottom.Controls.Add(this.buttonCheckBones);
-			this.panelObjectTreeBottom.Controls.Add(this.buttonObjectTreeCollapse);
-			this.panelObjectTreeBottom.Controls.Add(this.buttonObjectTreeExpand);
-			this.panelObjectTreeBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.panelObjectTreeBottom.Location = new System.Drawing.Point(0, 435);
-			this.panelObjectTreeBottom.Name = "panelObjectTreeBottom";
-			this.panelObjectTreeBottom.Size = new System.Drawing.Size(251, 29);
-			this.panelObjectTreeBottom.TabIndex = 37;
-			// 
-			// buttonCheckBones
-			// 
-			this.buttonCheckBones.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.buttonCheckBones.Location = new System.Drawing.Point(162, 4);
-			this.buttonCheckBones.Name = "buttonCheckBones";
-			this.buttonCheckBones.Size = new System.Drawing.Size(86, 23);
-			this.buttonCheckBones.TabIndex = 5;
-			this.buttonCheckBones.Text = "Check Bones";
-			this.buttonCheckBones.UseVisualStyleBackColor = true;
-			this.buttonCheckBones.Click += new System.EventHandler(this.buttonCheckBones_Click);
-			// 
-			// buttonObjectTreeCollapse
-			// 
-			this.buttonObjectTreeCollapse.Location = new System.Drawing.Point(81, 4);
-			this.buttonObjectTreeCollapse.Name = "buttonObjectTreeCollapse";
-			this.buttonObjectTreeCollapse.Size = new System.Drawing.Size(75, 23);
-			this.buttonObjectTreeCollapse.TabIndex = 4;
-			this.buttonObjectTreeCollapse.Text = "Collapse All";
-			this.buttonObjectTreeCollapse.UseVisualStyleBackColor = true;
-			this.buttonObjectTreeCollapse.Click += new System.EventHandler(this.buttonObjectTreeCollapse_Click);
-			// 
-			// buttonObjectTreeExpand
-			// 
-			this.buttonObjectTreeExpand.Location = new System.Drawing.Point(0, 4);
-			this.buttonObjectTreeExpand.Name = "buttonObjectTreeExpand";
-			this.buttonObjectTreeExpand.Size = new System.Drawing.Size(75, 23);
-			this.buttonObjectTreeExpand.TabIndex = 3;
-			this.buttonObjectTreeExpand.Text = "Expand All";
-			this.buttonObjectTreeExpand.UseVisualStyleBackColor = true;
-			this.buttonObjectTreeExpand.Click += new System.EventHandler(this.buttonObjectTreeExpand_Click);
 			// 
 			// tabPageMesh
 			// 
@@ -1085,7 +1140,7 @@
 			// 
 			// groupBox3
 			// 
-			this.groupBox3.Controls.Add(this.buttonFrameMatrixApply);
+			this.groupBox3.Controls.Add(this.groupBox5);
 			this.groupBox3.Controls.Add(this.numericFrameMatrixRatio);
 			this.groupBox3.Controls.Add(this.label5);
 			this.groupBox3.Controls.Add(this.numericFrameMatrixNumber);
@@ -1104,13 +1159,22 @@
 			this.groupBox3.TabStop = false;
 			this.groupBox3.Text = "Matrix Operations";
 			// 
+			// groupBox5
+			// 
+			this.groupBox5.Controls.Add(this.buttonFrameMatrixApply);
+			this.groupBox5.Controls.Add(this.checkBoxFrameMatrixUpdate);
+			this.groupBox5.Location = new System.Drawing.Point(6, 105);
+			this.groupBox5.Name = "groupBox5";
+			this.groupBox5.Size = new System.Drawing.Size(238, 38);
+			this.groupBox5.TabIndex = 100;
+			this.groupBox5.TabStop = false;
+			// 
 			// buttonFrameMatrixApply
 			// 
-			this.buttonFrameMatrixApply.Anchor = System.Windows.Forms.AnchorStyles.Top;
-			this.buttonFrameMatrixApply.Location = new System.Drawing.Point(67, 114);
+			this.buttonFrameMatrixApply.Location = new System.Drawing.Point(120, 10);
 			this.buttonFrameMatrixApply.Name = "buttonFrameMatrixApply";
 			this.buttonFrameMatrixApply.Size = new System.Drawing.Size(112, 23);
-			this.buttonFrameMatrixApply.TabIndex = 80;
+			this.buttonFrameMatrixApply.TabIndex = 114;
 			this.buttonFrameMatrixApply.Text = "Apply Changes";
 			this.buttonFrameMatrixApply.UseVisualStyleBackColor = true;
 			this.buttonFrameMatrixApply.Click += new System.EventHandler(this.buttonFrameMatrixApply_Click);
@@ -1413,7 +1477,6 @@
 			// 
 			// groupBox4
 			// 
-			this.groupBox4.Controls.Add(this.buttonBoneMatrixApply);
 			this.groupBox4.Controls.Add(this.numericBoneMatrixRatio);
 			this.groupBox4.Controls.Add(this.label9);
 			this.groupBox4.Controls.Add(this.numericBoneMatrixNumber);
@@ -1424,23 +1487,13 @@
 			this.groupBox4.Controls.Add(this.buttonBoneMatrixShrink);
 			this.groupBox4.Controls.Add(this.buttonBoneMatrixIdentity);
 			this.groupBox4.Controls.Add(this.buttonBoneMatrixInverse);
+			this.groupBox4.Controls.Add(this.groupBox6);
 			this.groupBox4.Location = new System.Drawing.Point(0, 196);
 			this.groupBox4.Name = "groupBox4";
 			this.groupBox4.Size = new System.Drawing.Size(253, 149);
 			this.groupBox4.TabIndex = 60;
 			this.groupBox4.TabStop = false;
 			this.groupBox4.Text = "Matrix Operations";
-			// 
-			// buttonBoneMatrixApply
-			// 
-			this.buttonBoneMatrixApply.Anchor = System.Windows.Forms.AnchorStyles.Top;
-			this.buttonBoneMatrixApply.Location = new System.Drawing.Point(67, 114);
-			this.buttonBoneMatrixApply.Name = "buttonBoneMatrixApply";
-			this.buttonBoneMatrixApply.Size = new System.Drawing.Size(112, 23);
-			this.buttonBoneMatrixApply.TabIndex = 78;
-			this.buttonBoneMatrixApply.Text = "Apply Changes";
-			this.buttonBoneMatrixApply.UseVisualStyleBackColor = true;
-			this.buttonBoneMatrixApply.Click += new System.EventHandler(this.buttonBoneMatrixApply_Click);
 			// 
 			// numericBoneMatrixRatio
 			// 
@@ -1559,6 +1612,37 @@
 			this.buttonBoneMatrixInverse.Text = "Inverse";
 			this.buttonBoneMatrixInverse.UseVisualStyleBackColor = true;
 			this.buttonBoneMatrixInverse.Click += new System.EventHandler(this.buttonBoneMatrixInverse_Click);
+			// 
+			// groupBox6
+			// 
+			this.groupBox6.Controls.Add(this.buttonBoneMatrixApply);
+			this.groupBox6.Controls.Add(this.checkBoxBoneMatrixUpdate);
+			this.groupBox6.Location = new System.Drawing.Point(6, 105);
+			this.groupBox6.Name = "groupBox6";
+			this.groupBox6.Size = new System.Drawing.Size(238, 38);
+			this.groupBox6.TabIndex = 100;
+			this.groupBox6.TabStop = false;
+			// 
+			// buttonBoneMatrixApply
+			// 
+			this.buttonBoneMatrixApply.Anchor = System.Windows.Forms.AnchorStyles.Top;
+			this.buttonBoneMatrixApply.Location = new System.Drawing.Point(141, 10);
+			this.buttonBoneMatrixApply.Name = "buttonBoneMatrixApply";
+			this.buttonBoneMatrixApply.Size = new System.Drawing.Size(91, 23);
+			this.buttonBoneMatrixApply.TabIndex = 78;
+			this.buttonBoneMatrixApply.Text = "Apply Changes";
+			this.buttonBoneMatrixApply.UseVisualStyleBackColor = true;
+			this.buttonBoneMatrixApply.Click += new System.EventHandler(this.buttonBoneMatrixApply_Click);
+			// 
+			// checkBoxBoneMatrixUpdate
+			// 
+			this.checkBoxBoneMatrixUpdate.AutoSize = true;
+			this.checkBoxBoneMatrixUpdate.Location = new System.Drawing.Point(5, 13);
+			this.checkBoxBoneMatrixUpdate.Name = "checkBoxBoneMatrixUpdate";
+			this.checkBoxBoneMatrixUpdate.Size = new System.Drawing.Size(135, 17);
+			this.checkBoxBoneMatrixUpdate.TabIndex = 112;
+			this.checkBoxBoneMatrixUpdate.Text = "Update Bones && Frame";
+			this.checkBoxBoneMatrixUpdate.UseVisualStyleBackColor = true;
 			// 
 			// tabControlBoneMatrix
 			// 
@@ -2126,8 +2210,9 @@
 			// 
 			// tabPageMaterialView
 			// 
+			this.tabPageMaterialView.Controls.Add(this.buttonMaterialDeleteUnref);
 			this.tabPageMaterialView.Controls.Add(this.buttonMaterialEditHex);
-			this.tabPageMaterialView.Controls.Add(this.buttonTextureExternal);
+			this.tabPageMaterialView.Controls.Add(this.buttonMaterialExternalTexture);
 			this.tabPageMaterialView.Controls.Add(this.comboBoxMatTex4);
 			this.tabPageMaterialView.Controls.Add(this.comboBoxMatTex3);
 			this.tabPageMaterialView.Controls.Add(this.comboBoxMatTex2);
@@ -2180,15 +2265,15 @@
 			this.buttonMaterialEditHex.UseVisualStyleBackColor = true;
 			this.buttonMaterialEditHex.Click += new System.EventHandler(this.buttonMaterialEditHex_Click);
 			// 
-			// buttonTextureExternal
+			// buttonMaterialExternalTexture
 			// 
-			this.buttonTextureExternal.Location = new System.Drawing.Point(178, 310);
-			this.buttonTextureExternal.Name = "buttonTextureExternal";
-			this.buttonTextureExternal.Size = new System.Drawing.Size(75, 22);
-			this.buttonTextureExternal.TabIndex = 150;
-			this.buttonTextureExternal.Text = "External";
-			this.buttonTextureExternal.UseVisualStyleBackColor = true;
-			this.buttonTextureExternal.Click += new System.EventHandler(this.buttonTextureExternal_Click);
+			this.buttonMaterialExternalTexture.Location = new System.Drawing.Point(178, 310);
+			this.buttonMaterialExternalTexture.Name = "buttonMaterialExternalTexture";
+			this.buttonMaterialExternalTexture.Size = new System.Drawing.Size(75, 22);
+			this.buttonMaterialExternalTexture.TabIndex = 150;
+			this.buttonMaterialExternalTexture.Text = "External";
+			this.buttonMaterialExternalTexture.UseVisualStyleBackColor = true;
+			this.buttonMaterialExternalTexture.Click += new System.EventHandler(this.buttonMaterialExternalTexture_Click);
 			// 
 			// comboBoxMatTex4
 			// 
@@ -2473,6 +2558,7 @@
 			// 
 			// tabPageTextureView
 			// 
+			this.tabPageTextureView.Controls.Add(this.buttonTextureDeleteUnref);
 			this.tabPageTextureView.Controls.Add(this.label14);
 			this.tabPageTextureView.Controls.Add(this.buttonTextureEditHex);
 			this.tabPageTextureView.Controls.Add(this.buttonTextureAdd);
@@ -2660,6 +2746,8 @@
 			this.tabPageFrameView.PerformLayout();
 			this.groupBox3.ResumeLayout(false);
 			this.groupBox3.PerformLayout();
+			this.groupBox5.ResumeLayout(false);
+			this.groupBox5.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericFrameMatrixRatio)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericFrameMatrixNumber)).EndInit();
 			this.tabControlFrameMatrix.ResumeLayout(false);
@@ -2673,6 +2761,8 @@
 			this.groupBox4.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericBoneMatrixRatio)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericBoneMatrixNumber)).EndInit();
+			this.groupBox6.ResumeLayout(false);
+			this.groupBox6.PerformLayout();
 			this.tabControlBoneMatrix.ResumeLayout(false);
 			this.tabPageBoneSRT.ResumeLayout(false);
 			((System.ComponentModel.ISupportInitialize)(this.dataGridViewBoneSRT)).EndInit();
@@ -2880,7 +2970,7 @@
 		private System.Windows.Forms.Button buttonFrameEditHex;
 		private System.Windows.Forms.Button buttonMeshEditHex;
 		private System.Windows.Forms.Button buttonMeshNormals;
-		private System.Windows.Forms.Button buttonTextureExternal;
+		private System.Windows.Forms.Button buttonMaterialExternalTexture;
 		private System.Windows.Forms.MenuStrip menuStrip1;
 		private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem reopenToolStripMenuItem;
@@ -2907,8 +2997,15 @@
 		private System.Windows.Forms.CheckBox checkBoxMeshExportMqoSortMeshes;
 		private System.Windows.Forms.Label label14;
 		private System.Windows.Forms.Button buttonMeshRestPose;
-		private System.Windows.Forms.Button buttonCheckBones;
+		private System.Windows.Forms.Button buttonObjectTreeCheckBones;
 		public EditTextBox textBoxMeshName;
 		private System.Windows.Forms.TabPage tabPageMeshView;
+		private System.Windows.Forms.GroupBox groupBox5;
+		private System.Windows.Forms.CheckBox checkBoxFrameMatrixUpdate;
+		private System.Windows.Forms.GroupBox groupBox6;
+		private System.Windows.Forms.CheckBox checkBoxBoneMatrixUpdate;
+		private System.Windows.Forms.Button buttonObjectTreeDeleteUnreferenced;
+		private System.Windows.Forms.Button buttonMaterialDeleteUnref;
+		private System.Windows.Forms.Button buttonTextureDeleteUnref;
 	}
 }

@@ -168,6 +168,10 @@ namespace SB3Utility
 			{
 				tryFunc = new Func<ppSubfile, bool>(TryFileXA);
 			}
+			else if (ext == ".svi")
+			{
+				tryFunc = new Func<ppSubfile, bool>(TryFileSVI);
+			}
 			else if (ext == ".sviex")
 			{
 				tryFunc = new Func<ppSubfile, bool>(TryFileSVIEX);
@@ -384,6 +388,29 @@ namespace SB3Utility
 			}
 
 			return false;
+		}
+
+		public static bool TryFileSVI(ppSubfile subfile)
+		{
+			if (subfile.size < 32)
+			{
+				return false;
+			}
+			using (BinaryReader reader = new BinaryReader(subfile.CreateReadStream()))
+			{
+				int version = reader.ReadInt32();
+				if (version != 100)
+				{
+					return false;
+				}
+				int lenFirstMesh = reader.ReadInt32();
+				if (lenFirstMesh < 1 || lenFirstMesh > 50)
+				{
+					return false;
+				}
+			}
+
+			return true;
 		}
 
 		public static bool TryFileSVIEX(ppSubfile subfile)

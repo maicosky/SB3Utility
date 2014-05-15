@@ -31,9 +31,9 @@
 			this.components = new System.ComponentModel.Container();
 			this.buttonOK = new System.Windows.Forms.Button();
 			this.buttonCancel = new System.Windows.Forms.Button();
-			this.numericFrameMeshMatOffset = new System.Windows.Forms.NumericUpDown();
-			this.label4 = new System.Windows.Forms.Label();
 			this.panelFrame = new System.Windows.Forms.Panel();
+			this.checkBoxFrameAppend = new System.Windows.Forms.CheckBox();
+			this.checkBoxFrameDestinationLock = new System.Windows.Forms.CheckBox();
 			this.numericFrameId = new System.Windows.Forms.NumericUpDown();
 			this.panel2 = new System.Windows.Forms.Panel();
 			this.radioButtonFrameReplace = new System.Windows.Forms.RadioButton();
@@ -43,6 +43,9 @@
 			this.textBoxFrameName = new System.Windows.Forms.TextBox();
 			this.label2 = new System.Windows.Forms.Label();
 			this.panelMesh = new System.Windows.Forms.Panel();
+			this.checkBoxMeshBonesLock = new System.Windows.Forms.CheckBox();
+			this.checkBoxMeshNormalsLock = new System.Windows.Forms.CheckBox();
+			this.checkBoxMeshDestinationLock = new System.Windows.Forms.CheckBox();
 			this.panel5 = new System.Windows.Forms.Panel();
 			this.radioButtonNearestMesh = new System.Windows.Forms.RadioButton();
 			this.radioButtonNearestSubmesh = new System.Windows.Forms.RadioButton();
@@ -64,13 +67,8 @@
 			this.label3 = new System.Windows.Forms.Label();
 			this.label6 = new System.Windows.Forms.Label();
 			this.label7 = new System.Windows.Forms.Label();
-			this.checkBoxMeshDestinationLock = new System.Windows.Forms.CheckBox();
-			this.checkBoxMeshNormalsLock = new System.Windows.Forms.CheckBox();
-			this.checkBoxMeshBonesLock = new System.Windows.Forms.CheckBox();
-			this.checkBoxFrameDestinationLock = new System.Windows.Forms.CheckBox();
 			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
 			this.checkBoxOkContinue = new System.Windows.Forms.CheckBox();
-			((System.ComponentModel.ISupportInitialize)(this.numericFrameMeshMatOffset)).BeginInit();
 			this.panelFrame.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericFrameId)).BeginInit();
 			this.panel2.SuspendLayout();
@@ -102,46 +100,41 @@
 			this.buttonCancel.Text = "Cancel";
 			this.buttonCancel.UseVisualStyleBackColor = true;
 			// 
-			// numericFrameMeshMatOffset
-			// 
-			this.numericFrameMeshMatOffset.Location = new System.Drawing.Point(129, 66);
-			this.numericFrameMeshMatOffset.Maximum = new decimal(new int[] {
-            1000000,
-            0,
-            0,
-            0});
-			this.numericFrameMeshMatOffset.Minimum = new decimal(new int[] {
-            1000000,
-            0,
-            0,
-            -2147483648});
-			this.numericFrameMeshMatOffset.Name = "numericFrameMeshMatOffset";
-			this.numericFrameMeshMatOffset.Size = new System.Drawing.Size(58, 20);
-			this.numericFrameMeshMatOffset.TabIndex = 45;
-			// 
-			// label4
-			// 
-			this.label4.AutoSize = true;
-			this.label4.Location = new System.Drawing.Point(17, 69);
-			this.label4.Name = "label4";
-			this.label4.Size = new System.Drawing.Size(104, 13);
-			this.label4.TabIndex = 13;
-			this.label4.Text = "Mesh Material Offset";
-			// 
 			// panelFrame
 			// 
+			this.panelFrame.Controls.Add(this.checkBoxFrameAppend);
 			this.panelFrame.Controls.Add(this.checkBoxFrameDestinationLock);
 			this.panelFrame.Controls.Add(this.numericFrameId);
 			this.panelFrame.Controls.Add(this.panel2);
 			this.panelFrame.Controls.Add(this.label1);
-			this.panelFrame.Controls.Add(this.numericFrameMeshMatOffset);
 			this.panelFrame.Controls.Add(this.textBoxFrameName);
-			this.panelFrame.Controls.Add(this.label4);
 			this.panelFrame.Controls.Add(this.label2);
 			this.panelFrame.Location = new System.Drawing.Point(12, 12);
 			this.panelFrame.Name = "panelFrame";
 			this.panelFrame.Size = new System.Drawing.Size(423, 139);
 			this.panelFrame.TabIndex = 15;
+			// 
+			// checkBoxFrameAppend
+			// 
+			this.checkBoxFrameAppend.AutoSize = true;
+			this.checkBoxFrameAppend.Checked = true;
+			this.checkBoxFrameAppend.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.checkBoxFrameAppend.Location = new System.Drawing.Point(20, 68);
+			this.checkBoxFrameAppend.Name = "checkBoxFrameAppend";
+			this.checkBoxFrameAppend.Size = new System.Drawing.Size(212, 17);
+			this.checkBoxFrameAppend.TabIndex = 47;
+			this.checkBoxFrameAppend.Text = "Append Missing Materials And Textures";
+			this.checkBoxFrameAppend.UseVisualStyleBackColor = true;
+			// 
+			// checkBoxFrameDestinationLock
+			// 
+			this.checkBoxFrameDestinationLock.AutoSize = true;
+			this.checkBoxFrameDestinationLock.Location = new System.Drawing.Point(354, 16);
+			this.checkBoxFrameDestinationLock.Name = "checkBoxFrameDestinationLock";
+			this.checkBoxFrameDestinationLock.Size = new System.Drawing.Size(50, 17);
+			this.checkBoxFrameDestinationLock.TabIndex = 46;
+			this.checkBoxFrameDestinationLock.Text = "Lock";
+			this.checkBoxFrameDestinationLock.UseVisualStyleBackColor = true;
 			// 
 			// numericFrameId
 			// 
@@ -257,6 +250,39 @@
 			this.panelMesh.Name = "panelMesh";
 			this.panelMesh.Size = new System.Drawing.Size(423, 139);
 			this.panelMesh.TabIndex = 16;
+			// 
+			// checkBoxMeshBonesLock
+			// 
+			this.checkBoxMeshBonesLock.AutoSize = true;
+			this.checkBoxMeshBonesLock.Location = new System.Drawing.Point(354, 89);
+			this.checkBoxMeshBonesLock.Name = "checkBoxMeshBonesLock";
+			this.checkBoxMeshBonesLock.Size = new System.Drawing.Size(50, 17);
+			this.checkBoxMeshBonesLock.TabIndex = 58;
+			this.checkBoxMeshBonesLock.Text = "Lock";
+			this.toolTip1.SetToolTip(this.checkBoxMeshBonesLock, "Always use selected option");
+			this.checkBoxMeshBonesLock.UseVisualStyleBackColor = true;
+			// 
+			// checkBoxMeshNormalsLock
+			// 
+			this.checkBoxMeshNormalsLock.AutoSize = true;
+			this.checkBoxMeshNormalsLock.Location = new System.Drawing.Point(354, 65);
+			this.checkBoxMeshNormalsLock.Name = "checkBoxMeshNormalsLock";
+			this.checkBoxMeshNormalsLock.Size = new System.Drawing.Size(50, 17);
+			this.checkBoxMeshNormalsLock.TabIndex = 48;
+			this.checkBoxMeshNormalsLock.Text = "Lock";
+			this.toolTip1.SetToolTip(this.checkBoxMeshNormalsLock, "Always use selected option");
+			this.checkBoxMeshNormalsLock.UseVisualStyleBackColor = true;
+			// 
+			// checkBoxMeshDestinationLock
+			// 
+			this.checkBoxMeshDestinationLock.AutoSize = true;
+			this.checkBoxMeshDestinationLock.Location = new System.Drawing.Point(354, 11);
+			this.checkBoxMeshDestinationLock.Name = "checkBoxMeshDestinationLock";
+			this.checkBoxMeshDestinationLock.Size = new System.Drawing.Size(50, 17);
+			this.checkBoxMeshDestinationLock.TabIndex = 27;
+			this.checkBoxMeshDestinationLock.Text = "Lock";
+			this.toolTip1.SetToolTip(this.checkBoxMeshDestinationLock, "Disables searching for new destination");
+			this.checkBoxMeshDestinationLock.UseVisualStyleBackColor = true;
 			// 
 			// panel5
 			// 
@@ -476,49 +502,6 @@
 			this.label7.TabIndex = 16;
 			this.label7.Text = "Method";
 			// 
-			// checkBoxMeshDestinationLock
-			// 
-			this.checkBoxMeshDestinationLock.AutoSize = true;
-			this.checkBoxMeshDestinationLock.Location = new System.Drawing.Point(354, 11);
-			this.checkBoxMeshDestinationLock.Name = "checkBoxMeshDestinationLock";
-			this.checkBoxMeshDestinationLock.Size = new System.Drawing.Size(50, 17);
-			this.checkBoxMeshDestinationLock.TabIndex = 27;
-			this.checkBoxMeshDestinationLock.Text = "Lock";
-			this.toolTip1.SetToolTip(this.checkBoxMeshDestinationLock, "Disables searching for new destination");
-			this.checkBoxMeshDestinationLock.UseVisualStyleBackColor = true;
-			// 
-			// checkBoxMeshNormalsLock
-			// 
-			this.checkBoxMeshNormalsLock.AutoSize = true;
-			this.checkBoxMeshNormalsLock.Location = new System.Drawing.Point(354, 65);
-			this.checkBoxMeshNormalsLock.Name = "checkBoxMeshNormalsLock";
-			this.checkBoxMeshNormalsLock.Size = new System.Drawing.Size(50, 17);
-			this.checkBoxMeshNormalsLock.TabIndex = 48;
-			this.checkBoxMeshNormalsLock.Text = "Lock";
-			this.toolTip1.SetToolTip(this.checkBoxMeshNormalsLock, "Always use selected option");
-			this.checkBoxMeshNormalsLock.UseVisualStyleBackColor = true;
-			// 
-			// checkBoxMeshBonesLock
-			// 
-			this.checkBoxMeshBonesLock.AutoSize = true;
-			this.checkBoxMeshBonesLock.Location = new System.Drawing.Point(354, 89);
-			this.checkBoxMeshBonesLock.Name = "checkBoxMeshBonesLock";
-			this.checkBoxMeshBonesLock.Size = new System.Drawing.Size(50, 17);
-			this.checkBoxMeshBonesLock.TabIndex = 58;
-			this.checkBoxMeshBonesLock.Text = "Lock";
-			this.toolTip1.SetToolTip(this.checkBoxMeshBonesLock, "Always use selected option");
-			this.checkBoxMeshBonesLock.UseVisualStyleBackColor = true;
-			// 
-			// checkBoxFrameDestinationLock
-			// 
-			this.checkBoxFrameDestinationLock.AutoSize = true;
-			this.checkBoxFrameDestinationLock.Location = new System.Drawing.Point(354, 16);
-			this.checkBoxFrameDestinationLock.Name = "checkBoxFrameDestinationLock";
-			this.checkBoxFrameDestinationLock.Size = new System.Drawing.Size(50, 17);
-			this.checkBoxFrameDestinationLock.TabIndex = 46;
-			this.checkBoxFrameDestinationLock.Text = "Lock";
-			this.checkBoxFrameDestinationLock.UseVisualStyleBackColor = true;
-			// 
 			// checkBoxOkContinue
 			// 
 			this.checkBoxOkContinue.Appearance = System.Windows.Forms.Appearance.Button;
@@ -540,13 +523,12 @@
 			this.Controls.Add(this.checkBoxOkContinue);
 			this.Controls.Add(this.buttonCancel);
 			this.Controls.Add(this.buttonOK);
-			this.Controls.Add(this.panelMesh);
 			this.Controls.Add(this.panelFrame);
+			this.Controls.Add(this.panelMesh);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.Name = "FormXXDragDrop";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.Text = "Options";
-			((System.ComponentModel.ISupportInitialize)(this.numericFrameMeshMatOffset)).EndInit();
 			this.panelFrame.ResumeLayout(false);
 			this.panelFrame.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericFrameId)).EndInit();
@@ -572,7 +554,6 @@
 
 		private System.Windows.Forms.Button buttonOK;
 		private System.Windows.Forms.Button buttonCancel;
-		private System.Windows.Forms.Label label4;
 		private System.Windows.Forms.Panel panelFrame;
 		private System.Windows.Forms.Panel panelMesh;
 		private System.Windows.Forms.Panel panel4;
@@ -581,7 +562,6 @@
 		private System.Windows.Forms.Label label5;
 		private System.Windows.Forms.Label label3;
 		private System.Windows.Forms.Label label7;
-		public System.Windows.Forms.NumericUpDown numericFrameMeshMatOffset;
 		public System.Windows.Forms.RadioButton radioButtonBonesCopyNear;
 		public System.Windows.Forms.RadioButton radioButtonBonesReplace;
 		public System.Windows.Forms.RadioButton radioButtonBonesCopyOrder;
@@ -611,5 +591,6 @@
 		public System.Windows.Forms.CheckBox checkBoxMeshNormalsLock;
 		public System.Windows.Forms.CheckBox checkBoxMeshDestinationLock;
 		public System.Windows.Forms.CheckBox checkBoxOkContinue;
+		public System.Windows.Forms.CheckBox checkBoxFrameAppend;
 	}
 }

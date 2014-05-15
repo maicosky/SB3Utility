@@ -651,7 +651,7 @@ namespace SB3Utility
 
 				if (newChild == null)
 				{
-					newFrame.InsertChild(0, oldChild.Clone(true, true));
+					newFrame.InsertChild(0, oldChild.Clone(true, true, null));
 				}
 				else
 				{

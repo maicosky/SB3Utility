@@ -12,12 +12,12 @@ namespace PPD_Preview_Clothes
 		public string Name { get; set; }
 
 		public int version;
-		public List<SubmeshSection> sections;
+		public List<sviParser> sections;
 
 		public sviexParser()
 		{
 			version = 100;
-			sections = new List<SubmeshSection>();
+			sections = new List<sviParser>();
 		}
 
 		public sviexParser(Stream stream, string name)
@@ -37,10 +37,10 @@ namespace PPD_Preview_Clothes
 				}
 
 				int numSections = reader.ReadInt32();
-				sections = new List<SubmeshSection>(numSections);
+				sections = new List<sviParser>(numSections);
 				for (int secIdx = 0; secIdx < numSections; secIdx++)
 				{
-					SubmeshSection section = new SubmeshSection(reader.BaseStream);
+					sviParser section = new sviParser(reader.BaseStream);
 					sections.Add(section);
 				}
 			}
@@ -51,154 +51,161 @@ namespace PPD_Preview_Clothes
 			BinaryWriter writer = new BinaryWriter(stream);
 			writer.Write(version);
 			writer.Write(sections.Count);
-			foreach (SubmeshSection sec in sections)
+			foreach (sviParser sec in sections)
 			{
 				sec.WriteTo(stream);
 			}
 		}
+	}
 
-		public class SubmeshSection : IWriteFile
+	public class sviParser : IWriteFile
+	{
+		public string Name { get; set; }
+		public int version;
+		public string meshName;
+		public int submeshIdx;
+		public ushort[] indices;
+		public byte positionsPresent;
+		public Vector3[] positions;
+		public byte bonesPresent;
+		public float[][] boneWeights3;
+		public byte[][] boneIndices;
+		public class sviBone
 		{
-			public int version;
-			public string Name { get; set; }
-			public int submeshIdx;
-			public ushort[] indices;
-			public byte positionsPresent;
-			public Vector3[] positions;
-			public byte bonesPresent;
-			public float[][] boneWeights3;
-			public byte[][] boneIndices;
-			public class SVIEX_Bone
-			{
-				public string name;
-				public int boneIdx;
-				public Matrix matrix;
-			};
-			public SVIEX_Bone[] bones;
-			public byte normalsPresent;
-			public Vector3[] normals;
-			public byte uvsPresent;
-			public Vector2[] uvs;
-			public byte futureSectionPresent;
+			public string name;
+			public int boneIdx;
+			public Matrix matrix;
+		};
+		public sviBone[] bones;
+		public byte normalsPresent;
+		public Vector3[] normals;
+		public byte uvsPresent;
+		public Vector2[] uvs;
+		public byte futureSectionPresent;
 
-			public SubmeshSection()
+		public sviParser()
+		{
+			version = 100;
+		}
+
+		public sviParser(Stream stream, string name)
+			: this(stream)
+		{
+			this.Name = name;
+		}
+
+		public sviParser(Stream stream)
+		{
+			BinaryReader reader = new BinaryReader(stream);
+
+			version = reader.ReadInt32();
+			if (version != 100)
 			{
-				version = 100;
+				throw new Exception("SVI bad beginning: 0x" + version.ToString("X"));
+			}
+			meshName = reader.ReadName();
+			submeshIdx = reader.ReadInt32();
+			int numIndices = reader.ReadInt32();
+			indices = reader.ReadUInt16Array(numIndices);
+
+			positionsPresent = reader.ReadByte();
+			if (positionsPresent == 1)
+			{
+				positions = reader.ReadVector3Array(numIndices);
 			}
 
-			public SubmeshSection(Stream stream)
+			bonesPresent = reader.ReadByte();
+			if (bonesPresent == 1)
 			{
-				BinaryReader reader = new BinaryReader(stream);
-
-				version = reader.ReadInt32();
-				if (version != 100)
+				boneWeights3 = new float[numIndices][];
+				for (ushort i = 0; i < numIndices; i++)
 				{
-					throw new Exception("SVIEX submesh section bad beginning: 0x" + version.ToString("X"));
+					boneWeights3[i] = reader.ReadSingleArray(3);
 				}
-				Name = reader.ReadName();
-				submeshIdx = reader.ReadInt32();
-				int numIndices = reader.ReadInt32();
-				indices = reader.ReadUInt16Array(numIndices);
-
-				positionsPresent = reader.ReadByte();
-				if (positionsPresent == 1)
+				boneIndices = new byte[numIndices][];
+				for (ushort i = 0; i < numIndices; i++)
 				{
-					positions = reader.ReadVector3Array(numIndices);
+					boneIndices[i] = reader.ReadBytes(4);
 				}
 
-				bonesPresent = reader.ReadByte();
-				if (bonesPresent == 1)
+				int numBones = reader.ReadInt32();
+				bones = new sviBone[numBones];
+				for (int i = 0; i < numBones; i++)
 				{
-					boneWeights3 = new float[numIndices][];
-					for (ushort i = 0; i < numIndices; i++)
-					{
-						boneWeights3[i] = reader.ReadSingleArray(3);
-					}
-					boneIndices = new byte[numIndices][];
-					for (ushort i = 0; i < numIndices; i++)
-					{
-						boneIndices[i] = reader.ReadBytes(4);
-					}
-
-					int numBones = reader.ReadInt32();
-					bones = new SVIEX_Bone[numBones];
-					for (int i = 0; i < numBones; i++)
-					{
-						bones[i] = new SVIEX_Bone();
-						bones[i].name = reader.ReadName();
-						bones[i].boneIdx = reader.ReadInt32();
-						bones[i].matrix = reader.ReadMatrix();
-					}
-				}
-
-				normalsPresent = reader.ReadByte();
-				if (normalsPresent == 1)
-				{
-					normals = reader.ReadVector3Array(numIndices);
-				}
-
-				uvsPresent = reader.ReadByte();
-				if (uvsPresent == 1)
-				{
-					uvs = reader.ReadVector2Array(numIndices);
-				}
-
-				futureSectionPresent = reader.ReadByte();
-				if (futureSectionPresent != 0)
-				{
-					throw new Exception("SVIEX future section present");
+					bones[i] = new sviBone();
+					bones[i].name = reader.ReadName();
+					bones[i].boneIdx = reader.ReadInt32();
+					bones[i].matrix = reader.ReadMatrix();
 				}
 			}
 
-			public void WriteTo(Stream stream)
+			normalsPresent = reader.ReadByte();
+			if (normalsPresent == 1)
 			{
-				BinaryWriter writer = new BinaryWriter(stream);
-				writer.Write(version);
-				writer.WriteName(Name);
-				writer.Write(submeshIdx);
-				writer.Write(indices.Length);
-				writer.Write(indices);
-
-				writer.Write(positionsPresent);
-				if (positionsPresent == 1)
-				{
-					writer.Write(positions);
-				}
-
-				writer.Write(bonesPresent);
-				if (bonesPresent == 1)
-				{
-					for (ushort i = 0; i < indices.Length; i++)
-					{
-						writer.Write(boneWeights3[i]);
-					}
-					for (ushort i = 0; i < indices.Length; i++)
-					{
-						writer.Write(boneIndices[i]);
-					}
-					writer.Write(bones.Length);
-					for (int i = 0; i < bones.Length; i++)
-					{
-						writer.WriteName(bones[i].name);
-						writer.Write(bones[i].boneIdx);
-						writer.Write(bones[i].matrix);
-					}
-				}
-
-				writer.Write(normalsPresent);
-				if (normalsPresent == 1)
-				{
-					writer.Write(normals);
-				}
-
-				writer.Write(uvsPresent);
-				if (uvsPresent == 1)
-				{
-					writer.Write(uvs);
-				}
-
-				writer.Write(futureSectionPresent);
+				normals = reader.ReadVector3Array(numIndices);
 			}
+
+			uvsPresent = reader.ReadByte();
+			if (uvsPresent == 1)
+			{
+				uvs = reader.ReadVector2Array(numIndices);
+			}
+
+			futureSectionPresent = reader.ReadByte();
+			if (futureSectionPresent != 0)
+			{
+				throw new Exception("SVI future section present");
+			}
+		}
+
+		public void WriteTo(Stream stream)
+		{
+			BinaryWriter writer = new BinaryWriter(stream);
+			writer.Write(version);
+			writer.WriteName(meshName);
+			writer.Write(submeshIdx);
+			writer.Write(indices.Length);
+			writer.Write(indices);
+
+			writer.Write(positionsPresent);
+			if (positionsPresent == 1)
+			{
+				writer.Write(positions);
+			}
+
+			writer.Write(bonesPresent);
+			if (bonesPresent == 1)
+			{
+				for (ushort i = 0; i < indices.Length; i++)
+				{
+					writer.Write(boneWeights3[i]);
+				}
+				for (ushort i = 0; i < indices.Length; i++)
+				{
+					writer.Write(boneIndices[i]);
+				}
+				writer.Write(bones.Length);
+				for (int i = 0; i < bones.Length; i++)
+				{
+					writer.WriteName(bones[i].name);
+					writer.Write(bones[i].boneIdx);
+					writer.Write(bones[i].matrix);
+				}
+			}
+
+			writer.Write(normalsPresent);
+			if (normalsPresent == 1)
+			{
+				writer.Write(normals);
+			}
+
+			writer.Write(uvsPresent);
+			if (uvsPresent == 1)
+			{
+				writer.Write(uvs);
+			}
+
+			writer.Write(futureSectionPresent);
 		}
 	}
 }
