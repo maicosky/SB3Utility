@@ -14,6 +14,14 @@ namespace SB3Utility
 		public FormQuickAccess()
 		{
 			InitializeComponent();
+			float listViewFontSize = (float)Gui.Config["ListViewFontSize"];
+			if (listViewFontSize > 0)
+			{
+				archiveList.Font = new System.Drawing.Font(archiveList.Font.FontFamily, listViewFontSize);
+				meshList.Font = new System.Drawing.Font(meshList.Font.FontFamily, listViewFontSize);
+				animationList.Font = new System.Drawing.Font(animationList.Font.FontFamily, listViewFontSize);
+				otherList.Font = new System.Drawing.Font(otherList.Font.FontFamily, listViewFontSize);
+			}
 
 			this.FormClosing += new FormClosingEventHandler(FormOpenedFiles_FormClosing);
 		}

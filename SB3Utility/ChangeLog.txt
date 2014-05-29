@@ -1,4 +1,20 @@
-﻿[0.6.9]
+﻿[0.6.12]
+  - Fix for crash when meshes with invalid bones were selected
+  - Fix for crash when deleting unreferenced objects without having at least one workspace with an object of that xx in it
+  - Added customizable font sizes for TreeViews and ListViews, resizable Dialogs with scaling Controls and Fonts
+  - Added creating a new bone in the Frame Editor
+  - Fixed crash when an XX file was opened after an XA unit or file
+  - Added invalid Bones are marked red in the ObjectTree
+  - Added editable Morph Mask
+  - Fixed exporting the same morph keyframe several times in FBX
+
+[0.6.11]
+  - Fix for display of Bones
+
+[0.6.10]
+  - Fix for unskinned meshes which caused a hanging when selected
+
+[0.6.9]
   - Fix for bone selection after "Min Bones"
   - Fix for display of Bones, added visible full skeleton
   - Added deleting unused materials and textures with preview

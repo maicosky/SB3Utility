@@ -951,6 +951,63 @@ namespace SB3Utility
 		}
 	}
 
+	// from https://bitbucket.org/oc3/fxogrefbx/src/55d96c5d8ec4/Src/mesh.cpp?at=default
+	FbxColor Fbx::Importer::GetFBXColor(FbxMesh *pMesh, int polyIndex, int polyPointIndex)
+	{
+		int lControlPointIndex = pMesh->GetPolygonVertex(polyIndex, polyPointIndex);
+		int vertexId = polyIndex*3 + polyPointIndex;
+		FbxColor color;
+		for (int l = 0; l < pMesh->GetElementVertexColorCount(); l++)
+		{
+			FbxGeometryElementVertexColor* leVtxc = pMesh->GetElementVertexColor( l);
+
+			switch (leVtxc->GetMappingMode())
+			{
+			case FbxGeometryElement::eByControlPoint:
+				switch (leVtxc->GetReferenceMode())
+				{
+				case FbxGeometryElement::eDirect:
+					color = leVtxc->GetDirectArray().GetAt(lControlPointIndex);
+					break;
+				case FbxGeometryElement::eIndexToDirect:
+					{
+						int id = leVtxc->GetIndexArray().GetAt(lControlPointIndex);
+						color = leVtxc->GetDirectArray().GetAt(id);
+					}
+					break;
+				default:
+					break; // other reference modes not shown here!
+				}
+				break;
+
+			case FbxGeometryElement::eByPolygonVertex:
+				{
+					switch (leVtxc->GetReferenceMode())
+					{
+					case FbxGeometryElement::eDirect:
+						color = leVtxc->GetDirectArray().GetAt(vertexId);
+						break;
+					case FbxGeometryElement::eIndexToDirect:
+						{
+							int id = leVtxc->GetIndexArray().GetAt(vertexId);
+							color = leVtxc->GetDirectArray().GetAt(id);
+						}
+						break;
+					default:
+						break; // other reference modes not shown here!
+					}
+				}
+				break;
+
+			case FbxGeometryElement::eByPolygon: // doesn't make much sense for UVs
+			case FbxGeometryElement::eAllSame:   // doesn't make much sense for UVs
+			case FbxGeometryElement::eNone:       // doesn't make much sense for UVs
+				break;
+			}
+		}
+		return color;
+	}
+
 	void Fbx::Importer::ImportMorph(FbxArray<FbxNode*>* pMeshArray)
 	{
 		for (int i = 0; i < pMeshArray->GetCount(); i++)
@@ -1048,6 +1105,30 @@ namespace SB3Utility
 							vertInfo->Normal = Vector3((float)lNorm[0], (float)lNorm[1], (float)lNorm[2]);
 						}
 					}
+				}
+
+				FbxLayer* pLayerVertexColor = pMesh->GetLayer(0, FbxLayerElement::eVertexColor);
+				if (pLayerVertexColor != NULL)
+				{
+					FbxLayerElementVertexColor* pLayerElementVertexColor = pLayerVertexColor->GetVertexColors();
+					List<unsigned short>^ morphedVertexIndices = gcnew List<unsigned short>(pMesh->GetControlPointsCount());
+					for (int j = 0; j < pMesh->GetPolygonCount(); j++)
+					{
+						int polyVertIdxStart = pMesh->GetPolygonVertexIndex(j);
+						for (int k = 0; k < pMesh->GetPolygonSize(j); k++)
+						{
+							unsigned short controlPointIdx = pMesh->GetPolygonVertices()[polyVertIdxStart + k];
+							if (!morphedVertexIndices->Contains(controlPointIdx))
+							{
+								FbxColor c = GetFBXColor(pMesh, j, k);
+								if (c.mRed < 0.1 && c.mGreen < 0.1 && c.mBlue > 0.9)
+								{
+									morphedVertexIndices->Add(controlPointIdx);
+								}
+							}
+						}
+					}
+					morphList->MorphedVertexIndices = morphedVertexIndices;
 				}
 			}
 		}

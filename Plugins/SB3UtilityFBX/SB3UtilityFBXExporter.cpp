@@ -908,6 +908,7 @@ namespace SB3Utility
 					Vector3 normal = keyframe->NormalList[morphIndices[j]];
 					pLayerElementNormal->GetDirectArray().SetAt(meshIndices[j], FbxVector4(normal.X, normal.Y, normal.Z));
 				}
+				morphNames->Add(keyframe->Name);
 			}
 		}
 	}

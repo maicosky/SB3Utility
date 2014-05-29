@@ -121,20 +121,20 @@
             this.expandAllToolStripMenuItem,
             this.collapseAllToolStripMenuItem});
 			this.nodesToolStripMenuItem.Name = "nodesToolStripMenuItem";
-			this.nodesToolStripMenuItem.Size = new System.Drawing.Size(53, 20);
+			this.nodesToolStripMenuItem.Size = new System.Drawing.Size(49, 20);
 			this.nodesToolStripMenuItem.Text = "&Nodes";
 			// 
 			// expandAllToolStripMenuItem
 			// 
 			this.expandAllToolStripMenuItem.Name = "expandAllToolStripMenuItem";
-			this.expandAllToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+			this.expandAllToolStripMenuItem.Size = new System.Drawing.Size(128, 22);
 			this.expandAllToolStripMenuItem.Text = "&Expand All";
 			this.expandAllToolStripMenuItem.Click += new System.EventHandler(this.expandAllToolStripMenuItem_Click);
 			// 
 			// collapseAllToolStripMenuItem
 			// 
 			this.collapseAllToolStripMenuItem.Name = "collapseAllToolStripMenuItem";
-			this.collapseAllToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+			this.collapseAllToolStripMenuItem.Size = new System.Drawing.Size(128, 22);
 			this.collapseAllToolStripMenuItem.Text = "&Collapse All";
 			this.collapseAllToolStripMenuItem.Click += new System.EventHandler(this.collapseAllToolStripMenuItem_Click);
 			// 
@@ -145,21 +145,21 @@
             this.scriptingToolStripMenuItem,
             this.automaticReopenToolStripMenuItem});
 			this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-			this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
+			this.optionsToolStripMenuItem.Size = new System.Drawing.Size(56, 20);
 			this.optionsToolStripMenuItem.Text = "&Options";
 			// 
 			// logMessagesToolStripMenuItem
 			// 
 			this.logMessagesToolStripMenuItem.CheckOnClick = true;
 			this.logMessagesToolStripMenuItem.Name = "logMessagesToolStripMenuItem";
-			this.logMessagesToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
+			this.logMessagesToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
 			this.logMessagesToolStripMenuItem.Text = "&Log Messages";
 			// 
 			// scriptingToolStripMenuItem
 			// 
 			this.scriptingToolStripMenuItem.CheckOnClick = true;
 			this.scriptingToolStripMenuItem.Name = "scriptingToolStripMenuItem";
-			this.scriptingToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
+			this.scriptingToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
 			this.scriptingToolStripMenuItem.Text = "&Scripting";
 			// 
 			// automaticReopenToolStripMenuItem
@@ -168,7 +168,7 @@
 			this.automaticReopenToolStripMenuItem.CheckOnClick = true;
 			this.automaticReopenToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.automaticReopenToolStripMenuItem.Name = "automaticReopenToolStripMenuItem";
-			this.automaticReopenToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
+			this.automaticReopenToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
 			this.automaticReopenToolStripMenuItem.Text = "Automatic &Reopen";
 			// 
 			// contextMenuStripSubmesh
@@ -179,7 +179,7 @@
             this.materialNameToolStripMenuItem,
             this.worldCoordinatesToolStripMenuItem});
 			this.contextMenuStripSubmesh.Name = "contextMenuStripSubmesh";
-			this.contextMenuStripSubmesh.Size = new System.Drawing.Size(213, 92);
+			this.contextMenuStripSubmesh.Size = new System.Drawing.Size(198, 114);
 			this.contextMenuStripSubmesh.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStripSubmesh_Opening);
 			// 
 			// targetPositionToolStripMenuItem
@@ -187,13 +187,13 @@
 			this.targetPositionToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripTextBoxTargetPosition});
 			this.targetPositionToolStripMenuItem.Name = "targetPositionToolStripMenuItem";
-			this.targetPositionToolStripMenuItem.Size = new System.Drawing.Size(212, 22);
+			this.targetPositionToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
 			this.targetPositionToolStripMenuItem.Text = "Target Position";
 			// 
 			// toolStripTextBoxTargetPosition
 			// 
 			this.toolStripTextBoxTargetPosition.Name = "toolStripTextBoxTargetPosition";
-			this.toolStripTextBoxTargetPosition.Size = new System.Drawing.Size(22, 23);
+			this.toolStripTextBoxTargetPosition.Size = new System.Drawing.Size(22, 21);
 			this.toolStripTextBoxTargetPosition.AfterEditTextChanged += new System.EventHandler(this.toolStripTextBoxTargetPosition_AfterEditTextChanged);
 			// 
 			// replaceToolStripMenuItem
@@ -201,7 +201,7 @@
 			this.replaceToolStripMenuItem.Checked = true;
 			this.replaceToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.replaceToolStripMenuItem.Name = "replaceToolStripMenuItem";
-			this.replaceToolStripMenuItem.Size = new System.Drawing.Size(212, 22);
+			this.replaceToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
 			this.replaceToolStripMenuItem.Text = "Replace Original Submesh";
 			this.replaceToolStripMenuItem.Click += new System.EventHandler(this.replaceToolStripMenuItem_Click);
 			// 
@@ -210,7 +210,7 @@
 			this.materialNameToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripTextBoxMaterialName});
 			this.materialNameToolStripMenuItem.Name = "materialNameToolStripMenuItem";
-			this.materialNameToolStripMenuItem.Size = new System.Drawing.Size(212, 22);
+			this.materialNameToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
 			this.materialNameToolStripMenuItem.Text = "Material Name";
 			// 
 			// toolStripTextBoxMaterialName
@@ -218,13 +218,13 @@
 			this.toolStripTextBoxMaterialName.AcceptsReturn = true;
 			this.toolStripTextBoxMaterialName.MaxLength = 64;
 			this.toolStripTextBoxMaterialName.Name = "toolStripTextBoxMaterialName";
-			this.toolStripTextBoxMaterialName.Size = new System.Drawing.Size(120, 23);
+			this.toolStripTextBoxMaterialName.Size = new System.Drawing.Size(120, 21);
 			this.toolStripTextBoxMaterialName.AfterEditTextChanged += new System.EventHandler(this.toolStripTextBoxMaterialName_AfterEditTextChanged);
 			// 
 			// worldCoordinatesToolStripMenuItem
 			// 
 			this.worldCoordinatesToolStripMenuItem.Name = "worldCoordinatesToolStripMenuItem";
-			this.worldCoordinatesToolStripMenuItem.Size = new System.Drawing.Size(212, 22);
+			this.worldCoordinatesToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
 			this.worldCoordinatesToolStripMenuItem.Text = "World Coordinates";
 			this.worldCoordinatesToolStripMenuItem.Click += new System.EventHandler(this.worldCoordinatesToolStripMenuItem_Click);
 			// 
@@ -233,7 +233,7 @@
 			this.contextMenuStripMorphKeyframe.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.renameToToolStripMenuItem});
 			this.contextMenuStripMorphKeyframe.Name = "contextMenuStripMorphKeyframe";
-			this.contextMenuStripMorphKeyframe.Size = new System.Drawing.Size(132, 26);
+			this.contextMenuStripMorphKeyframe.Size = new System.Drawing.Size(127, 26);
 			this.contextMenuStripMorphKeyframe.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStripMorphKeyframe_Opening);
 			// 
 			// renameToToolStripMenuItem
@@ -241,7 +241,7 @@
 			this.renameToToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripEditTextBoxNewMorphKeyframeName});
 			this.renameToToolStripMenuItem.Name = "renameToToolStripMenuItem";
-			this.renameToToolStripMenuItem.Size = new System.Drawing.Size(131, 22);
+			this.renameToToolStripMenuItem.Size = new System.Drawing.Size(126, 22);
 			this.renameToToolStripMenuItem.Text = "Rename to";
 			// 
 			// toolStripEditTextBoxNewMorphKeyframeName
@@ -249,7 +249,7 @@
 			this.toolStripEditTextBoxNewMorphKeyframeName.AcceptsReturn = true;
 			this.toolStripEditTextBoxNewMorphKeyframeName.MaxLength = 64;
 			this.toolStripEditTextBoxNewMorphKeyframeName.Name = "toolStripEditTextBoxNewMorphKeyframeName";
-			this.toolStripEditTextBoxNewMorphKeyframeName.Size = new System.Drawing.Size(120, 23);
+			this.toolStripEditTextBoxNewMorphKeyframeName.Size = new System.Drawing.Size(120, 21);
 			this.toolStripEditTextBoxNewMorphKeyframeName.AfterEditTextChanged += new System.EventHandler(this.toolStripEditTextBoxNewMorphKeyframeName_AfterEditTextChanged);
 			// 
 			// treeView

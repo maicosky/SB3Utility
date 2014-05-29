@@ -84,6 +84,7 @@ namespace SB3Utility
 		{
 			this.Name = importedMorph.Name;
 			this.KeyframeList = importedMorph.KeyframeList;
+			this.MorphedVertexIndices = importedMorph.MorphedVertexIndices;
 
 			this.MorphKeyframeOptions = new Dictionary<ImportedMorphKeyframe, AdditionalMorphKeyframeOptions>(importedMorph.KeyframeList.Count);
 			foreach (ImportedMorphKeyframe keyframe in importedMorph.KeyframeList)

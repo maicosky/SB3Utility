@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 
@@ -10,9 +11,13 @@ namespace SB3Utility
 	{
 		int default_ppFormatIndex = -1;
 
+		private SizeF startSize;
+
 		public FormPPRegisterTool(string extension, int ppFormatIndex)
 		{
 			InitializeComponent();
+			startSize = new SizeF(Width, Height);
+			this.SaveDesignSizes();
 			comboBoxToolPath.DisplayMember = "ToolPath";
 
 			openFileDialog1.Filter = "Executable Files (*.exe;*.cmd;*.bat)|*.exe;*.cmd;*.bat|All Files (*.*)|*.*";
@@ -160,6 +165,43 @@ namespace SB3Utility
 				else
 				{
 					Report.ReportLog("Internal Error: cant find scripting variable for unregistering external tool");
+				}
+			}
+		}
+
+		private void FormPPRegisterTool_Shown(object sender, EventArgs e)
+		{
+			Size dialogSize = (Size)Gui.Config["DialogPPRegisterToolSize"];
+			if (dialogSize.Width != 0 && dialogSize.Height != 0)
+			{
+				Width = dialogSize.Width;
+				Height = dialogSize.Height;
+				this.ResizeControls(startSize);
+			}
+			else
+			{
+				Width = (int)startSize.Width;
+				Height = (int)startSize.Height;
+				this.ResetControls();
+			}
+		}
+
+		private void FormPPRegisterTool_Resize(object sender, EventArgs e)
+		{
+			this.ResizeControls(startSize);
+		}
+
+		private void FormPPRegisterTool_VisibleChanged(object sender, EventArgs e)
+		{
+			if (!Visible)
+			{
+				if (Width < (int)startSize.Width || Height < (int)startSize.Height)
+				{
+					Gui.Config["DialogPPRegisterToolSize"] = new Size(0, 0);
+				}
+				else
+				{
+					Gui.Config["DialogPPRegisterToolSize"] = this.Size;
 				}
 			}
 		}

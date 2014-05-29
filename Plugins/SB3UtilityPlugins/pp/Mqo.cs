@@ -163,11 +163,17 @@ namespace SB3Utility
 				public bool worldCoords = false;
 				public string name = null;
 				public string fullname = null;
+				public bool visible = false;
 			}
 
 			private class MqoVertex
 			{
 				public Vector3 coords;
+			}
+
+			private class MqoVertexWithColour : MqoVertex
+			{
+				public Color4 colour;
 			}
 
 			private class MqoFace
@@ -261,12 +267,22 @@ namespace SB3Utility
 							VertexMap vertMap;
 							if (!vertexMapDic[mqoFaceMatIdxOffset].TryGetValue(mqoFace.vertexIndices[i], out vertMap))
 							{
-								ImportedVertex vert = new ImportedVertex();
+								ImportedVertex vert;
+								MqoVertex mqoVert = mqoObject.vertices[mqoFace.vertexIndices[i]];
+								if (mqoVert is MqoVertexWithColour)
+								{
+									vert = new ImportedVertexWithColour();
+									((ImportedVertexWithColour)vert).Colour = ((MqoVertexWithColour)mqoVert).colour;
+								}
+								else
+								{
+									vert = new ImportedVertex();
+								}
 								vert.BoneIndices = new byte[4];
 								vert.Weights = new float[4];
 								vert.Normal = new Vector3();
 								vert.UV = mqoFace.UVs[i];
-								vert.Position = mqoObject.vertices[mqoFace.vertexIndices[i]].coords * scale;
+								vert.Position = mqoVert.coords * scale;
 
 								vertMap = new VertexMap { mqoIdx = mqoFace.vertexIndices[i], vert = vert };
 								vertexMapDic[mqoFaceMatIdxOffset].Add(mqoFace.vertexIndices[i], vertMap);
@@ -302,6 +318,7 @@ namespace SB3Utility
 							mesh.FaceList = new List<ImportedFace>(faceMap[i].Count);
 							mesh.Index = mqoObject.baseIdx;
 							mesh.WorldCoords = mqoObject.worldCoords;
+							mesh.Visible = mqoObject.visible;
 							int matIdx = i - 1;
 							if ((matIdx >= 0) && (matIdx < mqoMaterials.Count))
 							{
@@ -336,7 +353,17 @@ namespace SB3Utility
 				string line;
 				while ((line = reader.ReadLine()) != null)
 				{
-					int countStart = line.IndexOf("vertex");
+					int countStart = line.IndexOf("visible");
+					if (countStart >= 0)
+					{
+						int visible = Int32.Parse(line.Substring(countStart + 7 + 1));
+						if (visible > 0)
+						{
+							mqoObject.visible = true;
+						}
+						continue;
+					}
+					countStart = line.IndexOf("vertex");
 					if (countStart >= 0)
 					{
 						countStart += 7;
@@ -421,6 +448,22 @@ namespace SB3Utility
 											face.UVs[k] = new float[2] { Utility.ParseFloat(sArray[++j]), Utility.ParseFloat(sArray[++j]) };
 										}
 									}
+									else if (sArray[j].ToUpper() == "COL")
+									{
+										for (int k = 0; k < face.vertexIndices.Length; k++)
+										{
+											j++;
+											if (!(mqoObject.vertices[face.vertexIndices[k]] is MqoVertexWithColour))
+											{
+												MqoVertexWithColour vertCol = new MqoVertexWithColour();
+												vertCol.coords = mqoObject.vertices[face.vertexIndices[k]].coords;
+												uint abgr = uint.Parse(sArray[j]);
+												int argb = (int)(abgr & 0xFF00FF00) | (int)((abgr & 0x00FF0000) >> 16) | (int)((abgr & 0x000000FF) << 16);
+												vertCol.colour = new Color4(argb);
+												mqoObject.vertices[face.vertexIndices[k]] = vertCol;
+											}
+										}
+									}
 								}
 							}
 						}
@@ -502,6 +545,8 @@ namespace SB3Utility
 					ImportedMorph morphList = new ImportedMorph();
 					MorphList.Add(morphList);
 					morphList.KeyframeList = new List<ImportedMorphKeyframe>(importer.MeshList.Count);
+					ImportedSubmesh firstVisibleSubmesh = null;
+					string firstVisibleMorph = null;
 					foreach (ImportedMesh meshList in importer.MeshList)
 					{
 						foreach (ImportedSubmesh submesh in meshList.SubmeshList)
@@ -510,6 +555,34 @@ namespace SB3Utility
 							morph.Name = meshList.Name;
 							morph.VertexList = submesh.VertexList;
 							morphList.KeyframeList.Add(morph);
+
+							if (firstVisibleSubmesh == null && submesh.Visible)
+							{
+								firstVisibleSubmesh = submesh;
+								firstVisibleMorph = meshList.Name;
+							}
+						}
+					}
+					if (firstVisibleMorph == null && importer.MeshList.Count > 0 && importer.MeshList[0].SubmeshList.Count > 0)
+					{
+						firstVisibleSubmesh = importer.MeshList[0].SubmeshList[0];
+						firstVisibleMorph = importer.MeshList[0].Name;
+					}
+					if (firstVisibleMorph != null)
+					{
+						Report.ReportLog("Building morph mask from " + firstVisibleMorph);
+						morphList.MorphedVertexIndices = new List<ushort>();
+						List<ImportedVertex> vertList = firstVisibleSubmesh.VertexList;
+						for (ushort i = 0; i < vertList.Count; i++)
+						{
+							if (vertList[i] is ImportedVertexWithColour)
+							{
+								ImportedVertexWithColour vertCol = (ImportedVertexWithColour)vertList[i];
+								if (vertCol.Colour.Red < 0.1 && vertCol.Colour.Green < 0.1 && vertCol.Colour.Blue > 0.9)
+								{
+									morphList.MorphedVertexIndices.Add(i);
+								}
+							}
 						}
 					}
 

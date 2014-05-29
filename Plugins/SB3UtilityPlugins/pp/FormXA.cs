@@ -200,6 +200,18 @@ namespace SB3Utility
 
 		private void Init()
 		{
+			float treeViewFontSize = (float)Gui.Config["TreeViewFontSize"];
+			if (treeViewFontSize > 0)
+			{
+				treeViewMorphClip.Font = new System.Drawing.Font(treeViewMorphClip.Font.Name, treeViewFontSize);
+			}
+			float listViewFontSize = (float)Gui.Config["ListViewFontSize"];
+			if (listViewFontSize > 0)
+			{
+				listViewType1.Font = new System.Drawing.Font(listViewType1.Font.FontFamily, listViewFontSize);
+				listViewAnimationTrack.Font = new System.Drawing.Font(listViewAnimationTrack.Font.FontFamily, listViewFontSize);
+			}
+
 			for (int i = 0; i < 4; i++)
 			{
 				xaMaterialMatrixText[i] = new TextBox[4];
@@ -380,7 +392,8 @@ namespace SB3Utility
 			for (int i = 0; i < morphClipList.Count; i++)
 			{
 				xaMorphClip morphClip = morphClipList[i];
-				TreeNode morphClipNode = new TreeNode(morphClip.Name + " [" + morphClip.MeshName + "]");
+				xaMorphIndexSet idxSet = xa.FindMorphIndexSet(morphClip.Name, Editor.Parser.MorphSection);
+				TreeNode morphClipNode = new TreeNode(morphClip.Name + " [" + morphClip.MeshName + "]" + (idxSet != null ? " - Mask Size: " + idxSet.MeshIndices.Length : String.Empty));
 				morphClipNode.Checked = true;
 				morphClipNode.Tag = morphClip;
 				//*section3cItem.viewItems.Add(animationSetNode);
@@ -1082,34 +1095,33 @@ namespace SB3Utility
 		{
 			try
 			{
-				textBoxFrameNameRefID.AfterEditTextChanged -= textBoxFrameNameRefID_AfterEditTextChanged;
+				textBoxMorphFrameNameRefID.AfterEditTextChanged -= textBoxFrameNameRefID_AfterEditTextChanged;
 				editTextBoxMorphClipName.AfterEditTextChanged -= editTextBoxMorphClipName_AfterEditTextChanged;
 				editTextBoxMorphClipMesh.AfterEditTextChanged -= editTextBoxMorphClipMesh_AfterEditTextChanged;
+				xaMorphClip clip;
 				if (e.Node.Tag is xaMorphKeyframeRef)
 				{
 					xaMorphKeyframeRef keyframeRef = (xaMorphKeyframeRef)e.Node.Tag;
-					textBoxFrameNameRefID.Text = keyframeRef.Index.ToString();
-					textBoxFrameNameRefID.Enabled = true;
+					textBoxMorphFrameNameRefID.Text = keyframeRef.Index.ToString();
+					textBoxMorphFrameNameRefID.Enabled = true;
 
 					UpdateComboBoxRefKeyframe(keyframeRef.Name);
 
-					xaMorphClip clip = (xaMorphClip)e.Node.Parent.Tag;
-					editTextBoxMorphClipName.Text = clip.Name;
-					editTextBoxMorphClipMesh.Text = clip.MeshName;
+					clip = (xaMorphClip)e.Node.Parent.Tag;
 				}
 				else
 				{
-					textBoxFrameNameRefID.Text = String.Empty;
-					textBoxFrameNameRefID.Enabled = false;
+					textBoxMorphFrameNameRefID.Text = String.Empty;
+					textBoxMorphFrameNameRefID.Enabled = false;
 
-					comboBoxRefKeyframe.Items.Clear();
-					comboBoxRefKeyframe.Enabled = false;
+					comboBoxMorphRefKeyframe.Items.Clear();
+					comboBoxMorphRefKeyframe.Enabled = false;
 
-					xaMorphClip clip = (xaMorphClip)e.Node.Tag;
-					editTextBoxMorphClipName.Text = clip.Name;
-					editTextBoxMorphClipMesh.Text = clip.MeshName;
+					clip = (xaMorphClip)e.Node.Tag;
 				}
-				textBoxFrameNameRefID.AfterEditTextChanged += textBoxFrameNameRefID_AfterEditTextChanged;
+				editTextBoxMorphClipName.Text = clip.Name;
+				editTextBoxMorphClipMesh.Text = clip.MeshName;
+				textBoxMorphFrameNameRefID.AfterEditTextChanged += textBoxFrameNameRefID_AfterEditTextChanged;
 				editTextBoxMorphClipName.AfterEditTextChanged += editTextBoxMorphClipName_AfterEditTextChanged;
 				editTextBoxMorphClipMesh.AfterEditTextChanged += editTextBoxMorphClipMesh_AfterEditTextChanged;
 			}
@@ -1122,20 +1134,20 @@ namespace SB3Utility
 		private void UpdateComboBoxRefKeyframe(string keyframeName)
 		{
 			xaMorphKeyframe keyframe = xa.FindMorphKeyFrame(keyframeName, Editor.Parser.MorphSection);
-			comboBoxRefKeyframe.BeginUpdate();
-			comboBoxRefKeyframe.SelectedIndexChanged -= comboBoxRefKeyframe_SelectedIndexChanged;
-			comboBoxRefKeyframe.Items.Clear();
+			comboBoxMorphRefKeyframe.BeginUpdate();
+			comboBoxMorphRefKeyframe.SelectedIndexChanged -= comboBoxRefKeyframe_SelectedIndexChanged;
+			comboBoxMorphRefKeyframe.Items.Clear();
 			foreach (xaMorphKeyframe i in Editor.Parser.MorphSection.KeyframeList)
 			{
-				if (!checkBoxOnlyValidKeyframes.Checked || i.PositionList.Count == keyframe.PositionList.Count)
+				if (!checkBoxMorphOnlyValidKeyframes.Checked || i.PositionList.Count == keyframe.PositionList.Count)
 				{
-					comboBoxRefKeyframe.Items.Add(i.Name);
+					comboBoxMorphRefKeyframe.Items.Add(i.Name);
 				}
 			}
-			comboBoxRefKeyframe.SelectedItem = keyframe.Name;
-			comboBoxRefKeyframe.SelectedIndexChanged += comboBoxRefKeyframe_SelectedIndexChanged;
-			comboBoxRefKeyframe.EndUpdate();
-			comboBoxRefKeyframe.Enabled = true;
+			comboBoxMorphRefKeyframe.SelectedItem = keyframe.Name;
+			comboBoxMorphRefKeyframe.SelectedIndexChanged += comboBoxRefKeyframe_SelectedIndexChanged;
+			comboBoxMorphRefKeyframe.EndUpdate();
+			comboBoxMorphRefKeyframe.Enabled = true;
 
 			foreach (ListViewItem item in listViewMorphKeyframe.Items)
 			{
@@ -1241,7 +1253,7 @@ namespace SB3Utility
 								}
 							}
 							int numKeyframes = Editor.Parser.MorphSection.KeyframeList.Count;
-							Gui.Scripting.RunScript(EditorVar + ".ReplaceMorph(morph=" + source.Variable + ".Morphs[" + (int)source.Id + "], destMorphName=\"" + dragOptions.textBoxName.Text + "\", newName=\"" + dragOptions.textBoxNewName.Text + "\", replaceNormals=" + dragOptions.radioButtonReplaceNormalsYes.Checked + ", minSquaredDistance=" + ((float)dragOptions.numericUpDownMinimumDistanceSquared.Value).ToFloatString() + ")");
+							Gui.Scripting.RunScript(EditorVar + ".ReplaceMorph(morph=" + source.Variable + ".Morphs[" + (int)source.Id + "], destMorphName=\"" + dragOptions.textBoxName.Text + "\", newName=\"" + dragOptions.textBoxNewName.Text + "\", replaceMorphMask=" + dragOptions.checkBoxReplaceMorphMask.Checked + ", replaceNormals=" + dragOptions.radioButtonReplaceNormalsYes.Checked + ", minSquaredDistance=" + ((float)dragOptions.numericUpDownMinimumDistanceSquared.Value).ToFloatString() + ", minKeyframes=" + dragOptions.radioButtonMorphMaskSize.Checked + ")");
 							Changed = true;
 
 							UnloadXA();
@@ -1339,7 +1351,7 @@ namespace SB3Utility
 					TreeNode keyframeRefNode = treeViewMorphClip.SelectedNode;
 					xaMorphKeyframeRef keyframeRef = (xaMorphKeyframeRef)keyframeRefNode.Tag;
 					xaMorphClip clip = (xaMorphClip)keyframeRefNode.Parent.Tag;
-					int refId = Int32.Parse(textBoxFrameNameRefID.Text);
+					int refId = Int32.Parse(textBoxMorphFrameNameRefID.Text);
 					Gui.Scripting.RunScript(EditorVar + ".SetMorphKeyframeRefIndex(morphClip=\"" + clip.Name + "\", position=" + clip.KeyframeRefList.IndexOf(keyframeRef) + ", id=" + refId + ")");
 					Changed = true;
 
@@ -1359,7 +1371,7 @@ namespace SB3Utility
 				TreeNode keyframeRefNode = treeViewMorphClip.SelectedNode;
 				xaMorphKeyframeRef keyframeRef = (xaMorphKeyframeRef)keyframeRefNode.Tag;
 				xaMorphClip clip = (xaMorphClip)keyframeRefNode.Parent.Tag;
-				Gui.Scripting.RunScript(EditorVar + ".SetMorphKeyframeRefKeyframe(morphClip=\"" + clip.Name + "\", position=" + clip.KeyframeRefList.IndexOf(keyframeRef) + ", keyframe=\"" + comboBoxRefKeyframe.Items[comboBoxRefKeyframe.SelectedIndex] + "\")");
+				Gui.Scripting.RunScript(EditorVar + ".SetMorphKeyframeRefKeyframe(morphClip=\"" + clip.Name + "\", position=" + clip.KeyframeRefList.IndexOf(keyframeRef) + ", keyframe=\"" + comboBoxMorphRefKeyframe.Items[comboBoxMorphRefKeyframe.SelectedIndex] + "\")");
 				Changed = true;
 
 				keyframeRefNode.Text = keyframeRef.Index.ToString("D3") + " : " + keyframeRef.Name;
@@ -1546,11 +1558,11 @@ namespace SB3Utility
 					break;
 				case MorphExportFormat.Fbx:
 					path = Utility.GetDestFile(dir, clip.MeshName + "-" + clip.Name + "-", ".fbx");
-					Gui.Scripting.RunScript("ExportMorphFbx(xxparser=" + xxParserVar + ", path=\"" + path + "\", meshFrame=" + xxEditorVar + ".Frames[" + meshFrameId + "], xaparser=" + this.ParserVar + ", morphClip=" + this.ParserVar + ".MorphSection.ClipList[" + clipIdx + "], exportFormat=\"" + ".fbx" + "\", oneBlendShape=" + checkBoxFbxOptionOneBlendshape.Checked + ", embedMedia=" + checkBoxFbxOptionEmbedMedia.Checked + ", compatibility=" + false + ")");
+					Gui.Scripting.RunScript("ExportMorphFbx(xxparser=" + xxParserVar + ", path=\"" + path + "\", meshFrame=" + xxEditorVar + ".Frames[" + meshFrameId + "], xaparser=" + this.ParserVar + ", morphClip=" + this.ParserVar + ".MorphSection.ClipList[" + clipIdx + "], exportFormat=\"" + ".fbx" + "\", oneBlendShape=" + checkBoxMorphFbxOptionOneBlendshape.Checked + ", embedMedia=" + checkBoxMorphFbxOptionEmbedMedia.Checked + ", compatibility=" + false + ")");
 					break;
 				case MorphExportFormat.Fbx_2006:
 					path = Utility.GetDestFile(dir, clip.MeshName + "-" + clip.Name + "-", ".fbx");
-					Gui.Scripting.RunScript("ExportMorphFbx(xxparser=" + xxParserVar + ", path=\"" + path + "\", meshFrame=" + xxEditorVar + ".Frames[" + meshFrameId + "], xaparser=" + this.ParserVar + ", morphClip=" + this.ParserVar + ".MorphSection.ClipList[" + clipIdx + "], exportFormat=\"" + ".fbx" + "\", oneBlendShape=" + checkBoxFbxOptionOneBlendshape.Checked + ", embedMedia=" + checkBoxFbxOptionEmbedMedia.Checked + ", compatibility=" + true + ")");
+					Gui.Scripting.RunScript("ExportMorphFbx(xxparser=" + xxParserVar + ", path=\"" + path + "\", meshFrame=" + xxEditorVar + ".Frames[" + meshFrameId + "], xaparser=" + this.ParserVar + ", morphClip=" + this.ParserVar + ".MorphSection.ClipList[" + clipIdx + "], exportFormat=\"" + ".fbx" + "\", oneBlendShape=" + checkBoxMorphFbxOptionOneBlendshape.Checked + ", embedMedia=" + checkBoxMorphFbxOptionEmbedMedia.Checked + ", compatibility=" + true + ")");
 					break;
 				}
 			}
@@ -1562,24 +1574,24 @@ namespace SB3Utility
 
 		private void listViewMorphKeyframe_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
 		{
-			editTextBoxNewKeyframeName.AfterEditTextChanged -= editTextBoxNewKeyframeName_AfterEditTextChanged;
-			editTextBoxNewKeyframeName.Text = e.IsSelected ? ((xaMorphKeyframe)e.Item.Tag).Name : String.Empty;
-			editTextBoxNewKeyframeName.AfterEditTextChanged += editTextBoxNewKeyframeName_AfterEditTextChanged;
+			editTextBoxMorphNewKeyframeName.AfterEditTextChanged -= editTextBoxNewKeyframeName_AfterEditTextChanged;
+			editTextBoxMorphNewKeyframeName.Text = e.IsSelected ? ((xaMorphKeyframe)e.Item.Tag).Name : String.Empty;
+			editTextBoxMorphNewKeyframeName.AfterEditTextChanged += editTextBoxNewKeyframeName_AfterEditTextChanged;
 		}
 
 		private void editTextBoxNewKeyframeName_AfterEditTextChanged(object sender, EventArgs e)
 		{
 			try
 			{
-				if (listViewMorphKeyframe.SelectedIndices.Count < 1 || editTextBoxNewKeyframeName.Text == String.Empty)
+				if (listViewMorphKeyframe.SelectedIndices.Count < 1 || editTextBoxMorphNewKeyframeName.Text == String.Empty)
 					return;
-				if (xa.FindMorphKeyFrame(editTextBoxNewKeyframeName.Text, Editor.Parser.MorphSection) != null)
+				if (xa.FindMorphKeyFrame(editTextBoxMorphNewKeyframeName.Text, Editor.Parser.MorphSection) != null)
 				{
-					Report.ReportLog("Keyframe " + editTextBoxNewKeyframeName.Text + " already exists.");
+					Report.ReportLog("Keyframe " + editTextBoxMorphNewKeyframeName.Text + " already exists.");
 					return;
 				}
 
-				Gui.Scripting.RunScript(EditorVar + ".RenameMorphKeyframe(position=" + listViewMorphKeyframe.SelectedIndices[0] + ", newName=\"" + editTextBoxNewKeyframeName.Text + "\")");
+				Gui.Scripting.RunScript(EditorVar + ".RenameMorphKeyframe(position=" + listViewMorphKeyframe.SelectedIndices[0] + ", newName=\"" + editTextBoxMorphNewKeyframeName.Text + "\")");
 				Changed = true;
 
 				RefreshMorphs();
@@ -1643,13 +1655,13 @@ namespace SB3Utility
 					Tuple<RenderObjectXX, xxFrame, xaMorphIndexSet> tuple = (Tuple<RenderObjectXX, xxFrame, xaMorphIndexSet>)origin.Tag;
 					if (tuple != null)
 					{
-						float morphFactor = tuple.Item1.UnsetMorphKeyframe(tuple.Item2, tuple.Item3, sender == checkBoxStartKeyframe);
+						float morphFactor = tuple.Item1.UnsetMorphKeyframe(tuple.Item2, tuple.Item3, sender == checkBoxMorphStartKeyframe);
 						Gui.Renderer.Render();
 						trackBarMorphFactor.ValueChanged -= trackBarMorphFactor_ValueChanged;
 						trackBarMorphFactor.Value = (int)(trackBarMorphFactor.Maximum * morphFactor);
 						trackBarMorphFactor.ValueChanged += trackBarMorphFactor_ValueChanged;
 					}
-					origin.Text = sender == checkBoxStartKeyframe ? "Start" : "End";
+					origin.Text = sender == checkBoxMorphStartKeyframe ? "Start" : "End";
 					return;
 				}
 
@@ -1670,7 +1682,7 @@ namespace SB3Utility
 							{
 								xaMorphIndexSet idxSet = xa.FindMorphIndexSet(clip.Name, Editor.Parser.MorphSection);
 								xaMorphKeyframe keyframe = xa.FindMorphKeyFrame(morphRef.Name, Editor.Parser.MorphSection);
-								float morphFactor = renderObj.SetMorphKeyframe(form.Editor.Meshes[i], idxSet, keyframe, sender == checkBoxStartKeyframe);
+								float morphFactor = renderObj.SetMorphKeyframe(form.Editor.Meshes[i], idxSet, keyframe, sender == checkBoxMorphStartKeyframe);
 								origin.Tag = new Tuple<RenderObjectXX, xxFrame, xaMorphIndexSet>(renderObj, form.Editor.Meshes[i], idxSet);
 								Gui.Renderer.Render();
 								trackBarMorphFactor.ValueChanged -= trackBarMorphFactor_ValueChanged;
@@ -1695,7 +1707,7 @@ namespace SB3Utility
 		{
 			try
 			{
-				Tuple<RenderObjectXX, xxFrame, xaMorphIndexSet> tuple = (Tuple<RenderObjectXX, xxFrame, xaMorphIndexSet>)checkBoxStartKeyframe.Tag;
+				Tuple<RenderObjectXX, xxFrame, xaMorphIndexSet> tuple = (Tuple<RenderObjectXX, xxFrame, xaMorphIndexSet>)checkBoxMorphStartKeyframe.Tag;
 				if (tuple != null)
 				{
 					tuple.Item1.SetTweenFactor(tuple.Item2, tuple.Item3, trackBarMorphFactor.Value / (float)trackBarMorphFactor.Maximum);

@@ -1477,6 +1477,16 @@ namespace SB3Utility
 			}
 		}
 
+		public static void CreateBone(xxFrame boneFrame, xxMesh mesh)
+		{
+			xxBone bone = new xxBone();
+			bone.Name = boneFrame.Name;
+			Matrix m = boneFrame.WorldTransform();
+			bone.Matrix = Matrix.Invert(m);
+			bone.Index = mesh.BoneList.Count;
+			mesh.BoneList.Add(bone);
+		}
+
 		public static void SaveXX(xxParser parser, string destPath, bool keepBackup)
 		{
 			DirectoryInfo dir = new DirectoryInfo(Path.GetDirectoryName(destPath));

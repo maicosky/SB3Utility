@@ -39,6 +39,7 @@ namespace SB3Utility
 		public string Material { get; set; }
 		public int Index { get; set; }
 		public bool WorldCoords { get; set; }
+		public bool Visible { get; set; }
 	}
 
 	public class ImportedVertex
@@ -48,6 +49,11 @@ namespace SB3Utility
 		public byte[] BoneIndices { get; set; }
 		public Vector3 Normal { get; set; }
 		public float[] UV { get; set; }
+	}
+
+	public class ImportedVertexWithColour : ImportedVertex
+	{
+		public Color4 Colour { get; set; }
 	}
 
 	public class ImportedFace
@@ -191,6 +197,7 @@ namespace SB3Utility
 		/// </summary>
 		public string Name { get; set; }
 		public List<ImportedMorphKeyframe> KeyframeList { get; set; }
+		public List<ushort> MorphedVertexIndices { get; set; }
 	}
 
 	public class ImportedMorphKeyframe

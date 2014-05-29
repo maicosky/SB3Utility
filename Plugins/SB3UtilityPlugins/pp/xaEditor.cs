@@ -42,9 +42,9 @@ namespace SB3Utility
 		}
 
 		[Plugin]
-		public void ReplaceMorph(WorkspaceMorph morph, string destMorphName, string newName, bool replaceNormals, double minSquaredDistance)
+		public void ReplaceMorph(WorkspaceMorph morph, string destMorphName, string newName, bool replaceMorphMask, bool replaceNormals, double minSquaredDistance, bool minKeyframes)
 		{
-			xa.ReplaceMorph(destMorphName, Parser, morph, newName, replaceNormals, (float)minSquaredDistance);
+			xa.ReplaceMorph(destMorphName, Parser, morph, newName, replaceMorphMask, replaceNormals, (float)minSquaredDistance, minKeyframes);
 		}
 
 		[Plugin]

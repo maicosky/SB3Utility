@@ -62,11 +62,11 @@
 			this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.pluginsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.fbxImportAnimationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.eulerFilterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.filterPrecisionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripEditTextBoxFilterPrecision = new SB3Utility.ToolStripEditTextBox();
 			this.swapThresholdMBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripEditTextBoxSwapThesholdMB = new SB3Utility.ToolStripEditTextBox();
+			this.textSizesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.treeViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.listViewsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.windowsMenu = new System.Windows.Forms.ToolStripMenuItem();
 			this.helpMenu = new System.Windows.Forms.ToolStripMenuItem();
 			this.contentsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -76,6 +76,11 @@
 			this.toolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
 			this.dockPanel = new WeifenLuo.WinFormsUI.Docking.DockPanel();
 			this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+			this.eulerFilterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripEditTextBoxFilterPrecision = new SB3Utility.ToolStripEditTextBox();
+			this.toolStripEditTextBoxSwapThesholdMB = new SB3Utility.ToolStripEditTextBox();
+			this.toolStripEditTextBoxTreeViews = new SB3Utility.ToolStripEditTextBox();
+			this.toolStripEditTextBoxListViews = new SB3Utility.ToolStripEditTextBox();
 			this.menuStrip.SuspendLayout();
 			this.statusStrip.SuspendLayout();
 			this.SuspendLayout();
@@ -213,7 +218,8 @@
 			this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.pluginsToolStripMenuItem,
             this.fbxImportAnimationToolStripMenuItem,
-            this.swapThresholdMBToolStripMenuItem});
+            this.swapThresholdMBToolStripMenuItem,
+            this.textSizesToolStripMenuItem});
 			this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
 			this.optionsToolStripMenuItem.Size = new System.Drawing.Size(56, 20);
 			this.optionsToolStripMenuItem.Text = "&Options";
@@ -234,14 +240,6 @@
 			this.fbxImportAnimationToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
 			this.fbxImportAnimationToolStripMenuItem.Text = "Fbx Import Animation";
 			// 
-			// eulerFilterToolStripMenuItem
-			// 
-			this.eulerFilterToolStripMenuItem.Checked = global::SB3Utility.Properties.Settings.Default.FbxImportAnimationEulerFilter;
-			this.eulerFilterToolStripMenuItem.CheckOnClick = true;
-			this.eulerFilterToolStripMenuItem.Name = "eulerFilterToolStripMenuItem";
-			this.eulerFilterToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
-			this.eulerFilterToolStripMenuItem.Text = "Euler Filter";
-			// 
 			// filterPrecisionToolStripMenuItem
 			// 
 			this.filterPrecisionToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -249,12 +247,6 @@
 			this.filterPrecisionToolStripMenuItem.Name = "filterPrecisionToolStripMenuItem";
 			this.filterPrecisionToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
 			this.filterPrecisionToolStripMenuItem.Text = "Filter Precision";
-			// 
-			// toolStripEditTextBoxFilterPrecision
-			// 
-			this.toolStripEditTextBoxFilterPrecision.Name = "toolStripEditTextBoxFilterPrecision";
-			this.toolStripEditTextBoxFilterPrecision.Size = new System.Drawing.Size(50, 21);
-			this.toolStripEditTextBoxFilterPrecision.Text = "0.25";
 			// 
 			// swapThresholdMBToolStripMenuItem
 			// 
@@ -265,12 +257,30 @@
 			this.swapThresholdMBToolStripMenuItem.Text = "&Swap Threshold MB";
 			this.swapThresholdMBToolStripMenuItem.ToolTipText = "The threshold is checked when closing editors.";
 			// 
-			// toolStripEditTextBoxSwapThesholdMB
+			// textSizesToolStripMenuItem
 			// 
-			this.toolStripEditTextBoxSwapThesholdMB.Name = "toolStripEditTextBoxSwapThesholdMB";
-			this.toolStripEditTextBoxSwapThesholdMB.Size = new System.Drawing.Size(50, 21);
-			this.toolStripEditTextBoxSwapThesholdMB.Text = "200";
-			this.toolStripEditTextBoxSwapThesholdMB.ToolTipText = "Allocated memory of private workset.";
+			this.textSizesToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.treeViewToolStripMenuItem,
+            this.listViewsToolStripMenuItem});
+			this.textSizesToolStripMenuItem.Name = "textSizesToolStripMenuItem";
+			this.textSizesToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
+			this.textSizesToolStripMenuItem.Text = "&Text Sizes";
+			// 
+			// treeViewToolStripMenuItem
+			// 
+			this.treeViewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripEditTextBoxTreeViews});
+			this.treeViewToolStripMenuItem.Name = "treeViewToolStripMenuItem";
+			this.treeViewToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.treeViewToolStripMenuItem.Text = "TreeViews";
+			// 
+			// listViewsToolStripMenuItem
+			// 
+			this.listViewsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripEditTextBoxListViews});
+			this.listViewsToolStripMenuItem.Name = "listViewsToolStripMenuItem";
+			this.listViewsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.listViewsToolStripMenuItem.Text = "ListViews";
 			// 
 			// windowsMenu
 			// 
@@ -386,6 +396,39 @@
 			this.openFileDialog1.Multiselect = true;
 			this.openFileDialog1.RestoreDirectory = true;
 			// 
+			// eulerFilterToolStripMenuItem
+			// 
+			this.eulerFilterToolStripMenuItem.Checked = global::SB3Utility.Properties.Settings.Default.FbxImportAnimationEulerFilter;
+			this.eulerFilterToolStripMenuItem.CheckOnClick = true;
+			this.eulerFilterToolStripMenuItem.Name = "eulerFilterToolStripMenuItem";
+			this.eulerFilterToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+			this.eulerFilterToolStripMenuItem.Text = "Euler Filter";
+			// 
+			// toolStripEditTextBoxFilterPrecision
+			// 
+			this.toolStripEditTextBoxFilterPrecision.Name = "toolStripEditTextBoxFilterPrecision";
+			this.toolStripEditTextBoxFilterPrecision.Size = new System.Drawing.Size(50, 21);
+			this.toolStripEditTextBoxFilterPrecision.Text = "0.25";
+			// 
+			// toolStripEditTextBoxSwapThesholdMB
+			// 
+			this.toolStripEditTextBoxSwapThesholdMB.Name = "toolStripEditTextBoxSwapThesholdMB";
+			this.toolStripEditTextBoxSwapThesholdMB.Size = new System.Drawing.Size(50, 21);
+			this.toolStripEditTextBoxSwapThesholdMB.Text = "200";
+			this.toolStripEditTextBoxSwapThesholdMB.ToolTipText = "Allocated memory of private workset.";
+			// 
+			// toolStripEditTextBoxTreeViews
+			// 
+			this.toolStripEditTextBoxTreeViews.Name = "toolStripEditTextBoxTreeViews";
+			this.toolStripEditTextBoxTreeViews.Size = new System.Drawing.Size(50, 21);
+			this.toolStripEditTextBoxTreeViews.Text = "0";
+			// 
+			// toolStripEditTextBoxListViews
+			// 
+			this.toolStripEditTextBoxListViews.Name = "toolStripEditTextBoxListViews";
+			this.toolStripEditTextBoxListViews.Size = new System.Drawing.Size(50, 21);
+			this.toolStripEditTextBoxListViews.Text = "0";
+			// 
 			// MDIParent
 			// 
 			this.AllowDrop = true;
@@ -448,6 +491,11 @@
 		private System.Windows.Forms.ToolStripMenuItem definedVariablesToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem swapThresholdMBToolStripMenuItem;
 		private ToolStripEditTextBox toolStripEditTextBoxSwapThesholdMB;
+		private System.Windows.Forms.ToolStripMenuItem textSizesToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem treeViewToolStripMenuItem;
+		private ToolStripEditTextBox toolStripEditTextBoxTreeViews;
+		private System.Windows.Forms.ToolStripMenuItem listViewsToolStripMenuItem;
+		private ToolStripEditTextBox toolStripEditTextBoxListViews;
 	}
 }
 

@@ -89,5 +89,29 @@
     <Setting Name="PrivateMemSwapThresholdMB" Provider="PortableSettingsProvider" Type="System.Int64" Scope="Application">
       <Value Profile="(Default)">386</Value>
     </Setting>
+    <Setting Name="TreeViewFontSize" Provider="PortableSettingsProvider" Type="System.Single" Scope="Application">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="ListViewFontSize" Provider="PortableSettingsProvider" Type="System.Single" Scope="Application">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="DialogXXDragDropSize" Provider="PortableSettingsProvider" Type="System.Drawing.Size" Scope="Application">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="DialogXADragDropSize" Provider="PortableSettingsProvider" Type="System.Drawing.Size" Scope="Application">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="DialogXXNormalsSize" Provider="PortableSettingsProvider" Type="System.Drawing.Size" Scope="Application">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="DialogPPRenameSize" Provider="PortableSettingsProvider" Type="System.Drawing.Size" Scope="Application">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="DialogPPRegisterToolSize" Provider="PortableSettingsProvider" Type="System.Drawing.Size" Scope="Application">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="DialogXXConvertSize" Provider="PortableSettingsProvider" Type="System.Drawing.Size" Scope="Application">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

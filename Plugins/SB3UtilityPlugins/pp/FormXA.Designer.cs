@@ -78,24 +78,21 @@
 			this.tabPageMorph = new System.Windows.Forms.TabPage();
 			this.splitContainerMorph = new System.Windows.Forms.SplitContainer();
 			this.groupBox10 = new System.Windows.Forms.GroupBox();
-			this.buttonRefDown = new System.Windows.Forms.Button();
+			this.buttonMorphRefDown = new System.Windows.Forms.Button();
 			this.label8 = new System.Windows.Forms.Label();
-			this.buttonRefUp = new System.Windows.Forms.Button();
-			this.buttonDeleteRef = new System.Windows.Forms.Button();
-			this.textBoxFrameNameRefID = new SB3Utility.EditTextBox();
-			this.buttonNewRef = new System.Windows.Forms.Button();
-			this.checkBoxOnlyValidKeyframes = new System.Windows.Forms.CheckBox();
-			this.comboBoxRefKeyframe = new System.Windows.Forms.ComboBox();
+			this.buttonMorphRefUp = new System.Windows.Forms.Button();
+			this.buttonMorphDeleteRef = new System.Windows.Forms.Button();
+			this.buttonMorphNewRef = new System.Windows.Forms.Button();
+			this.checkBoxMorphOnlyValidKeyframes = new System.Windows.Forms.CheckBox();
+			this.comboBoxMorphRefKeyframe = new System.Windows.Forms.ComboBox();
 			this.label6 = new System.Windows.Forms.Label();
 			this.groupBox9 = new System.Windows.Forms.GroupBox();
-			this.editTextBoxMorphClipMesh = new SB3Utility.EditTextBox();
 			this.label10 = new System.Windows.Forms.Label();
 			this.label11 = new System.Windows.Forms.Label();
-			this.editTextBoxMorphClipName = new SB3Utility.EditTextBox();
 			this.groupBox5 = new System.Windows.Forms.GroupBox();
 			this.groupBox8 = new System.Windows.Forms.GroupBox();
-			this.checkBoxFbxOptionEmbedMedia = new System.Windows.Forms.CheckBox();
-			this.checkBoxFbxOptionOneBlendshape = new System.Windows.Forms.CheckBox();
+			this.checkBoxMorphFbxOptionEmbedMedia = new System.Windows.Forms.CheckBox();
+			this.checkBoxMorphFbxOptionOneBlendshape = new System.Windows.Forms.CheckBox();
 			this.comboBoxMorphExportFormat = new System.Windows.Forms.ComboBox();
 			this.buttonMorphClipExport = new System.Windows.Forms.Button();
 			this.label5 = new System.Windows.Forms.Label();
@@ -104,12 +101,11 @@
 			this.treeViewMorphClip = new System.Windows.Forms.TreeView();
 			this.label57 = new System.Windows.Forms.Label();
 			this.groupBox7 = new System.Windows.Forms.GroupBox();
-			this.checkBoxEndKeyframe = new System.Windows.Forms.CheckBox();
+			this.checkBoxMorphEndKeyframe = new System.Windows.Forms.CheckBox();
 			this.trackBarMorphFactor = new System.Windows.Forms.TrackBar();
-			this.checkBoxStartKeyframe = new System.Windows.Forms.CheckBox();
+			this.checkBoxMorphStartKeyframe = new System.Windows.Forms.CheckBox();
 			this.buttonDeleteKeyframe = new System.Windows.Forms.Button();
 			this.label9 = new System.Windows.Forms.Label();
-			this.editTextBoxNewKeyframeName = new SB3Utility.EditTextBox();
 			this.label3 = new System.Windows.Forms.Label();
 			this.listViewMorphKeyframe = new System.Windows.Forms.ListView();
 			this.columnHeaderMorphKeyframeName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -168,6 +164,10 @@
 			this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.keepBackupToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+			this.textBoxMorphFrameNameRefID = new SB3Utility.EditTextBox();
+			this.editTextBoxMorphClipMesh = new SB3Utility.EditTextBox();
+			this.editTextBoxMorphClipName = new SB3Utility.EditTextBox();
+			this.editTextBoxMorphNewKeyframeName = new SB3Utility.EditTextBox();
 			this.tabControlXA.SuspendLayout();
 			this.tabPageXAObjectView.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer7)).BeginInit();
@@ -217,7 +217,7 @@
 			this.tabControlXA.Location = new System.Drawing.Point(0, 18);
 			this.tabControlXA.Name = "tabControlXA";
 			this.tabControlXA.SelectedIndex = 0;
-			this.tabControlXA.Size = new System.Drawing.Size(524, 518);
+			this.tabControlXA.Size = new System.Drawing.Size(524, 525);
 			this.tabControlXA.TabIndex = 104;
 			// 
 			// tabPageXAObjectView
@@ -225,7 +225,7 @@
 			this.tabPageXAObjectView.Controls.Add(this.splitContainer7);
 			this.tabPageXAObjectView.Location = new System.Drawing.Point(4, 22);
 			this.tabPageXAObjectView.Name = "tabPageXAObjectView";
-			this.tabPageXAObjectView.Size = new System.Drawing.Size(516, 492);
+			this.tabPageXAObjectView.Size = new System.Drawing.Size(516, 499);
 			this.tabPageXAObjectView.TabIndex = 2;
 			this.tabPageXAObjectView.Text = "Object Tree";
 			this.tabPageXAObjectView.UseVisualStyleBackColor = true;
@@ -244,7 +244,7 @@
 			// 
 			this.splitContainer7.Panel2.Controls.Add(this.tableLayoutXAHex);
 			this.splitContainer7.Panel2.Controls.Add(this.label42);
-			this.splitContainer7.Size = new System.Drawing.Size(516, 492);
+			this.splitContainer7.Size = new System.Drawing.Size(516, 499);
 			this.splitContainer7.SplitterDistance = 227;
 			this.splitContainer7.TabIndex = 0;
 			// 
@@ -254,7 +254,7 @@
 			this.treeViewXA.HideSelection = false;
 			this.treeViewXA.Location = new System.Drawing.Point(0, 0);
 			this.treeViewXA.Name = "treeViewXA";
-			this.treeViewXA.Size = new System.Drawing.Size(227, 492);
+			this.treeViewXA.Size = new System.Drawing.Size(227, 499);
 			this.treeViewXA.TabIndex = 37;
 			// 
 			// tableLayoutXAHex
@@ -267,7 +267,7 @@
 			this.tableLayoutXAHex.Name = "tableLayoutXAHex";
 			this.tableLayoutXAHex.RowCount = 1;
 			this.tableLayoutXAHex.RowStyles.Add(new System.Windows.Forms.RowStyle());
-			this.tableLayoutXAHex.Size = new System.Drawing.Size(285, 472);
+			this.tableLayoutXAHex.Size = new System.Drawing.Size(285, 479);
 			this.tableLayoutXAHex.TabIndex = 92;
 			// 
 			// label42
@@ -319,7 +319,7 @@
 			this.tabPageMaterial.Controls.Add(this.label16);
 			this.tabPageMaterial.Location = new System.Drawing.Point(4, 22);
 			this.tabPageMaterial.Name = "tabPageMaterial";
-			this.tabPageMaterial.Size = new System.Drawing.Size(516, 492);
+			this.tabPageMaterial.Size = new System.Drawing.Size(516, 499);
 			this.tabPageMaterial.TabIndex = 3;
 			this.tabPageMaterial.Text = "Material";
 			this.tabPageMaterial.UseVisualStyleBackColor = true;
@@ -620,7 +620,7 @@
 			// 
 			this.tabPageType2.Location = new System.Drawing.Point(4, 22);
 			this.tabPageType2.Name = "tabPageType2";
-			this.tabPageType2.Size = new System.Drawing.Size(516, 492);
+			this.tabPageType2.Size = new System.Drawing.Size(516, 499);
 			this.tabPageType2.TabIndex = 4;
 			this.tabPageType2.Text = "Type2";
 			this.tabPageType2.UseVisualStyleBackColor = true;
@@ -631,7 +631,7 @@
 			this.tabPageMorph.Location = new System.Drawing.Point(4, 22);
 			this.tabPageMorph.Name = "tabPageMorph";
 			this.tabPageMorph.Padding = new System.Windows.Forms.Padding(3);
-			this.tabPageMorph.Size = new System.Drawing.Size(516, 492);
+			this.tabPageMorph.Size = new System.Drawing.Size(516, 499);
 			this.tabPageMorph.TabIndex = 0;
 			this.tabPageMorph.Text = "Morph";
 			this.tabPageMorph.UseVisualStyleBackColor = true;
@@ -656,41 +656,41 @@
 			// 
 			this.splitContainerMorph.Panel2.Controls.Add(this.buttonDeleteKeyframe);
 			this.splitContainerMorph.Panel2.Controls.Add(this.label9);
-			this.splitContainerMorph.Panel2.Controls.Add(this.editTextBoxNewKeyframeName);
+			this.splitContainerMorph.Panel2.Controls.Add(this.editTextBoxMorphNewKeyframeName);
 			this.splitContainerMorph.Panel2.Controls.Add(this.label3);
 			this.splitContainerMorph.Panel2.Controls.Add(this.listViewMorphKeyframe);
-			this.splitContainerMorph.Size = new System.Drawing.Size(510, 486);
-			this.splitContainerMorph.SplitterDistance = 374;
+			this.splitContainerMorph.Size = new System.Drawing.Size(510, 493);
+			this.splitContainerMorph.SplitterDistance = 379;
 			this.splitContainerMorph.TabIndex = 123;
 			// 
 			// groupBox10
 			// 
 			this.groupBox10.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.groupBox10.Controls.Add(this.buttonRefDown);
+			this.groupBox10.Controls.Add(this.buttonMorphRefDown);
 			this.groupBox10.Controls.Add(this.label8);
-			this.groupBox10.Controls.Add(this.buttonRefUp);
-			this.groupBox10.Controls.Add(this.buttonDeleteRef);
-			this.groupBox10.Controls.Add(this.textBoxFrameNameRefID);
-			this.groupBox10.Controls.Add(this.buttonNewRef);
-			this.groupBox10.Controls.Add(this.checkBoxOnlyValidKeyframes);
-			this.groupBox10.Controls.Add(this.comboBoxRefKeyframe);
+			this.groupBox10.Controls.Add(this.buttonMorphRefUp);
+			this.groupBox10.Controls.Add(this.buttonMorphDeleteRef);
+			this.groupBox10.Controls.Add(this.textBoxMorphFrameNameRefID);
+			this.groupBox10.Controls.Add(this.buttonMorphNewRef);
+			this.groupBox10.Controls.Add(this.checkBoxMorphOnlyValidKeyframes);
+			this.groupBox10.Controls.Add(this.comboBoxMorphRefKeyframe);
 			this.groupBox10.Controls.Add(this.label6);
-			this.groupBox10.Location = new System.Drawing.Point(322, 79);
+			this.groupBox10.Location = new System.Drawing.Point(321, 79);
 			this.groupBox10.Name = "groupBox10";
 			this.groupBox10.Size = new System.Drawing.Size(188, 161);
 			this.groupBox10.TabIndex = 100;
 			this.groupBox10.TabStop = false;
 			this.groupBox10.Text = "Morh Keyframe Reference";
 			// 
-			// buttonRefDown
+			// buttonMorphRefDown
 			// 
-			this.buttonRefDown.Location = new System.Drawing.Point(6, 134);
-			this.buttonRefDown.Name = "buttonRefDown";
-			this.buttonRefDown.Size = new System.Drawing.Size(75, 23);
-			this.buttonRefDown.TabIndex = 118;
-			this.buttonRefDown.Text = "Down";
-			this.buttonRefDown.UseVisualStyleBackColor = true;
-			this.buttonRefDown.Click += new System.EventHandler(this.buttonRefDown_Click);
+			this.buttonMorphRefDown.Location = new System.Drawing.Point(6, 134);
+			this.buttonMorphRefDown.Name = "buttonMorphRefDown";
+			this.buttonMorphRefDown.Size = new System.Drawing.Size(75, 23);
+			this.buttonMorphRefDown.TabIndex = 118;
+			this.buttonMorphRefDown.Text = "Down";
+			this.buttonMorphRefDown.UseVisualStyleBackColor = true;
+			this.buttonMorphRefDown.Click += new System.EventHandler(this.buttonRefDown_Click);
 			// 
 			// label8
 			// 
@@ -701,71 +701,62 @@
 			this.label8.TabIndex = 129;
 			this.label8.Text = "Reference ID";
 			// 
-			// buttonRefUp
+			// buttonMorphRefUp
 			// 
-			this.buttonRefUp.Location = new System.Drawing.Point(6, 105);
-			this.buttonRefUp.Name = "buttonRefUp";
-			this.buttonRefUp.Size = new System.Drawing.Size(75, 23);
-			this.buttonRefUp.TabIndex = 116;
-			this.buttonRefUp.Text = "Up";
-			this.buttonRefUp.UseVisualStyleBackColor = true;
-			this.buttonRefUp.Click += new System.EventHandler(this.buttonRefUp_Click);
+			this.buttonMorphRefUp.Location = new System.Drawing.Point(6, 105);
+			this.buttonMorphRefUp.Name = "buttonMorphRefUp";
+			this.buttonMorphRefUp.Size = new System.Drawing.Size(75, 23);
+			this.buttonMorphRefUp.TabIndex = 116;
+			this.buttonMorphRefUp.Text = "Up";
+			this.buttonMorphRefUp.UseVisualStyleBackColor = true;
+			this.buttonMorphRefUp.Click += new System.EventHandler(this.buttonRefUp_Click);
 			// 
-			// buttonDeleteRef
+			// buttonMorphDeleteRef
 			// 
-			this.buttonDeleteRef.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.buttonDeleteRef.Location = new System.Drawing.Point(107, 134);
-			this.buttonDeleteRef.Name = "buttonDeleteRef";
-			this.buttonDeleteRef.Size = new System.Drawing.Size(75, 23);
-			this.buttonDeleteRef.TabIndex = 122;
-			this.buttonDeleteRef.Text = "Delete";
-			this.buttonDeleteRef.UseVisualStyleBackColor = true;
-			this.buttonDeleteRef.Click += new System.EventHandler(this.buttonDeleteRef_Click);
+			this.buttonMorphDeleteRef.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.buttonMorphDeleteRef.Location = new System.Drawing.Point(107, 134);
+			this.buttonMorphDeleteRef.Name = "buttonMorphDeleteRef";
+			this.buttonMorphDeleteRef.Size = new System.Drawing.Size(75, 23);
+			this.buttonMorphDeleteRef.TabIndex = 122;
+			this.buttonMorphDeleteRef.Text = "Delete";
+			this.buttonMorphDeleteRef.UseVisualStyleBackColor = true;
+			this.buttonMorphDeleteRef.Click += new System.EventHandler(this.buttonDeleteRef_Click);
 			// 
-			// textBoxFrameNameRefID
+			// buttonMorphNewRef
 			// 
-			this.textBoxFrameNameRefID.Enabled = false;
-			this.textBoxFrameNameRefID.Location = new System.Drawing.Point(80, 13);
-			this.textBoxFrameNameRefID.Name = "textBoxFrameNameRefID";
-			this.textBoxFrameNameRefID.Size = new System.Drawing.Size(36, 20);
-			this.textBoxFrameNameRefID.TabIndex = 110;
-			this.textBoxFrameNameRefID.AfterEditTextChanged += new System.EventHandler(this.textBoxFrameNameRefID_AfterEditTextChanged);
+			this.buttonMorphNewRef.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.buttonMorphNewRef.Location = new System.Drawing.Point(107, 104);
+			this.buttonMorphNewRef.Name = "buttonMorphNewRef";
+			this.buttonMorphNewRef.Size = new System.Drawing.Size(75, 23);
+			this.buttonMorphNewRef.TabIndex = 120;
+			this.buttonMorphNewRef.Text = "New Ref";
+			this.buttonMorphNewRef.UseVisualStyleBackColor = true;
+			this.buttonMorphNewRef.Click += new System.EventHandler(this.buttonNewRef_Click);
 			// 
-			// buttonNewRef
+			// checkBoxMorphOnlyValidKeyframes
 			// 
-			this.buttonNewRef.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.buttonNewRef.Location = new System.Drawing.Point(107, 104);
-			this.buttonNewRef.Name = "buttonNewRef";
-			this.buttonNewRef.Size = new System.Drawing.Size(75, 23);
-			this.buttonNewRef.TabIndex = 120;
-			this.buttonNewRef.Text = "New Ref";
-			this.buttonNewRef.UseVisualStyleBackColor = true;
-			this.buttonNewRef.Click += new System.EventHandler(this.buttonNewRef_Click);
+			this.checkBoxMorphOnlyValidKeyframes.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.checkBoxMorphOnlyValidKeyframes.AutoSize = true;
+			this.checkBoxMorphOnlyValidKeyframes.Checked = true;
+			this.checkBoxMorphOnlyValidKeyframes.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.checkBoxMorphOnlyValidKeyframes.Location = new System.Drawing.Point(6, 82);
+			this.checkBoxMorphOnlyValidKeyframes.Name = "checkBoxMorphOnlyValidKeyframes";
+			this.checkBoxMorphOnlyValidKeyframes.Size = new System.Drawing.Size(125, 17);
+			this.checkBoxMorphOnlyValidKeyframes.TabIndex = 114;
+			this.checkBoxMorphOnlyValidKeyframes.Text = "Only Valid Keyframes";
+			this.checkBoxMorphOnlyValidKeyframes.UseVisualStyleBackColor = true;
+			this.checkBoxMorphOnlyValidKeyframes.CheckedChanged += new System.EventHandler(this.checkBoxOnlyValidKeyframes_CheckedChanged);
 			// 
-			// checkBoxOnlyValidKeyframes
+			// comboBoxMorphRefKeyframe
 			// 
-			this.checkBoxOnlyValidKeyframes.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.checkBoxOnlyValidKeyframes.AutoSize = true;
-			this.checkBoxOnlyValidKeyframes.Checked = true;
-			this.checkBoxOnlyValidKeyframes.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.checkBoxOnlyValidKeyframes.Location = new System.Drawing.Point(6, 82);
-			this.checkBoxOnlyValidKeyframes.Name = "checkBoxOnlyValidKeyframes";
-			this.checkBoxOnlyValidKeyframes.Size = new System.Drawing.Size(125, 17);
-			this.checkBoxOnlyValidKeyframes.TabIndex = 114;
-			this.checkBoxOnlyValidKeyframes.Text = "Only Valid Keyframes";
-			this.checkBoxOnlyValidKeyframes.UseVisualStyleBackColor = true;
-			this.checkBoxOnlyValidKeyframes.CheckedChanged += new System.EventHandler(this.checkBoxOnlyValidKeyframes_CheckedChanged);
-			// 
-			// comboBoxRefKeyframe
-			// 
-			this.comboBoxRefKeyframe.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.comboBoxRefKeyframe.Enabled = false;
-			this.comboBoxRefKeyframe.FormattingEnabled = true;
-			this.comboBoxRefKeyframe.Location = new System.Drawing.Point(6, 55);
-			this.comboBoxRefKeyframe.Name = "comboBoxRefKeyframe";
-			this.comboBoxRefKeyframe.Size = new System.Drawing.Size(179, 21);
-			this.comboBoxRefKeyframe.TabIndex = 112;
-			this.comboBoxRefKeyframe.SelectedIndexChanged += new System.EventHandler(this.comboBoxRefKeyframe_SelectedIndexChanged);
+			this.comboBoxMorphRefKeyframe.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.comboBoxMorphRefKeyframe.Enabled = false;
+			this.comboBoxMorphRefKeyframe.FormattingEnabled = true;
+			this.comboBoxMorphRefKeyframe.Location = new System.Drawing.Point(6, 55);
+			this.comboBoxMorphRefKeyframe.Name = "comboBoxMorphRefKeyframe";
+			this.comboBoxMorphRefKeyframe.Size = new System.Drawing.Size(179, 21);
+			this.comboBoxMorphRefKeyframe.TabIndex = 112;
+			this.comboBoxMorphRefKeyframe.SelectedIndexChanged += new System.EventHandler(this.comboBoxRefKeyframe_SelectedIndexChanged);
 			// 
 			// label6
 			// 
@@ -791,14 +782,6 @@
 			this.groupBox9.TabStop = false;
 			this.groupBox9.Text = "Morph Clip";
 			// 
-			// editTextBoxMorphClipMesh
-			// 
-			this.editTextBoxMorphClipMesh.Location = new System.Drawing.Point(48, 42);
-			this.editTextBoxMorphClipMesh.Name = "editTextBoxMorphClipMesh";
-			this.editTextBoxMorphClipMesh.Size = new System.Drawing.Size(134, 20);
-			this.editTextBoxMorphClipMesh.TabIndex = 94;
-			this.editTextBoxMorphClipMesh.AfterEditTextChanged += new System.EventHandler(this.editTextBoxMorphClipMesh_AfterEditTextChanged);
-			// 
 			// label10
 			// 
 			this.label10.AutoSize = true;
@@ -817,14 +800,6 @@
 			this.label11.TabIndex = 140;
 			this.label11.Text = "Mesh";
 			// 
-			// editTextBoxMorphClipName
-			// 
-			this.editTextBoxMorphClipName.Location = new System.Drawing.Point(48, 16);
-			this.editTextBoxMorphClipName.Name = "editTextBoxMorphClipName";
-			this.editTextBoxMorphClipName.Size = new System.Drawing.Size(134, 20);
-			this.editTextBoxMorphClipName.TabIndex = 92;
-			this.editTextBoxMorphClipName.AfterEditTextChanged += new System.EventHandler(this.editTextBoxMorphClipName_AfterEditTextChanged);
-			// 
 			// groupBox5
 			// 
 			this.groupBox5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
@@ -835,7 +810,7 @@
 			this.groupBox5.Controls.Add(this.label5);
 			this.groupBox5.Controls.Add(this.comboBoxMorphMesh);
 			this.groupBox5.Controls.Add(this.label4);
-			this.groupBox5.Location = new System.Drawing.Point(0, 292);
+			this.groupBox5.Location = new System.Drawing.Point(0, 297);
 			this.groupBox5.Name = "groupBox5";
 			this.groupBox5.Size = new System.Drawing.Size(509, 82);
 			this.groupBox5.TabIndex = 140;
@@ -845,8 +820,8 @@
 			// groupBox8
 			// 
 			this.groupBox8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.groupBox8.Controls.Add(this.checkBoxFbxOptionEmbedMedia);
-			this.groupBox8.Controls.Add(this.checkBoxFbxOptionOneBlendshape);
+			this.groupBox8.Controls.Add(this.checkBoxMorphFbxOptionEmbedMedia);
+			this.groupBox8.Controls.Add(this.checkBoxMorphFbxOptionOneBlendshape);
 			this.groupBox8.Location = new System.Drawing.Point(238, 40);
 			this.groupBox8.Name = "groupBox8";
 			this.groupBox8.Size = new System.Drawing.Size(215, 36);
@@ -854,30 +829,30 @@
 			this.groupBox8.TabStop = false;
 			this.groupBox8.Text = "Fbx Options";
 			// 
-			// checkBoxFbxOptionEmbedMedia
+			// checkBoxMorphFbxOptionEmbedMedia
 			// 
-			this.checkBoxFbxOptionEmbedMedia.AutoSize = true;
-			this.checkBoxFbxOptionEmbedMedia.Location = new System.Drawing.Point(119, 15);
-			this.checkBoxFbxOptionEmbedMedia.Name = "checkBoxFbxOptionEmbedMedia";
-			this.checkBoxFbxOptionEmbedMedia.Size = new System.Drawing.Size(91, 17);
-			this.checkBoxFbxOptionEmbedMedia.TabIndex = 145;
-			this.checkBoxFbxOptionEmbedMedia.Text = "Embed Media";
-			this.toolTip1.SetToolTip(this.checkBoxFbxOptionEmbedMedia, "Textures are stored inside the output file.");
-			this.checkBoxFbxOptionEmbedMedia.UseVisualStyleBackColor = true;
+			this.checkBoxMorphFbxOptionEmbedMedia.AutoSize = true;
+			this.checkBoxMorphFbxOptionEmbedMedia.Location = new System.Drawing.Point(119, 15);
+			this.checkBoxMorphFbxOptionEmbedMedia.Name = "checkBoxMorphFbxOptionEmbedMedia";
+			this.checkBoxMorphFbxOptionEmbedMedia.Size = new System.Drawing.Size(91, 17);
+			this.checkBoxMorphFbxOptionEmbedMedia.TabIndex = 145;
+			this.checkBoxMorphFbxOptionEmbedMedia.Text = "Embed Media";
+			this.toolTip1.SetToolTip(this.checkBoxMorphFbxOptionEmbedMedia, "Textures are stored inside the output file.");
+			this.checkBoxMorphFbxOptionEmbedMedia.UseVisualStyleBackColor = true;
 			// 
-			// checkBoxFbxOptionOneBlendshape
+			// checkBoxMorphFbxOptionOneBlendshape
 			// 
-			this.checkBoxFbxOptionOneBlendshape.AutoSize = true;
-			this.checkBoxFbxOptionOneBlendshape.Checked = true;
-			this.checkBoxFbxOptionOneBlendshape.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.checkBoxFbxOptionOneBlendshape.Location = new System.Drawing.Point(6, 15);
-			this.checkBoxFbxOptionOneBlendshape.Name = "checkBoxFbxOptionOneBlendshape";
-			this.checkBoxFbxOptionOneBlendshape.Size = new System.Drawing.Size(107, 17);
-			this.checkBoxFbxOptionOneBlendshape.TabIndex = 144;
-			this.checkBoxFbxOptionOneBlendshape.Text = "One BlendShape";
-			this.toolTip1.SetToolTip(this.checkBoxFbxOptionOneBlendshape, "If checked, all morph keyframes appear as channels in one common BlendShape.\r\nIf " +
+			this.checkBoxMorphFbxOptionOneBlendshape.AutoSize = true;
+			this.checkBoxMorphFbxOptionOneBlendshape.Checked = true;
+			this.checkBoxMorphFbxOptionOneBlendshape.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.checkBoxMorphFbxOptionOneBlendshape.Location = new System.Drawing.Point(6, 15);
+			this.checkBoxMorphFbxOptionOneBlendshape.Name = "checkBoxMorphFbxOptionOneBlendshape";
+			this.checkBoxMorphFbxOptionOneBlendshape.Size = new System.Drawing.Size(107, 17);
+			this.checkBoxMorphFbxOptionOneBlendshape.TabIndex = 144;
+			this.checkBoxMorphFbxOptionOneBlendshape.Text = "One BlendShape";
+			this.toolTip1.SetToolTip(this.checkBoxMorphFbxOptionOneBlendshape, "If checked, all morph keyframes appear as channels in one common BlendShape.\r\nIf " +
         "unchecked, each morph keyframe will appear as channel in it\'s own BlendShape.");
-			this.checkBoxFbxOptionOneBlendshape.UseVisualStyleBackColor = true;
+			this.checkBoxMorphFbxOptionOneBlendshape.UseVisualStyleBackColor = true;
 			// 
 			// comboBoxMorphExportFormat
 			// 
@@ -947,7 +922,7 @@
 			this.treeViewMorphClip.HideSelection = false;
 			this.treeViewMorphClip.Location = new System.Drawing.Point(0, 18);
 			this.treeViewMorphClip.Name = "treeViewMorphClip";
-			this.treeViewMorphClip.Size = new System.Drawing.Size(315, 263);
+			this.treeViewMorphClip.Size = new System.Drawing.Size(315, 268);
 			this.treeViewMorphClip.TabIndex = 80;
 			this.treeViewMorphClip.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.treeViewMorphClip_ItemDrag);
 			this.treeViewMorphClip.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewMorphClip_AfterSelect);
@@ -967,28 +942,28 @@
 			// groupBox7
 			// 
 			this.groupBox7.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.groupBox7.Controls.Add(this.checkBoxEndKeyframe);
+			this.groupBox7.Controls.Add(this.checkBoxMorphEndKeyframe);
 			this.groupBox7.Controls.Add(this.trackBarMorphFactor);
-			this.groupBox7.Controls.Add(this.checkBoxStartKeyframe);
-			this.groupBox7.Location = new System.Drawing.Point(322, 246);
+			this.groupBox7.Controls.Add(this.checkBoxMorphStartKeyframe);
+			this.groupBox7.Location = new System.Drawing.Point(321, 246);
 			this.groupBox7.Name = "groupBox7";
 			this.groupBox7.Size = new System.Drawing.Size(188, 65);
 			this.groupBox7.TabIndex = 130;
 			this.groupBox7.TabStop = false;
 			this.groupBox7.Text = "Morph Keyrame Preview";
 			// 
-			// checkBoxEndKeyframe
+			// checkBoxMorphEndKeyframe
 			// 
-			this.checkBoxEndKeyframe.Appearance = System.Windows.Forms.Appearance.Button;
-			this.checkBoxEndKeyframe.Location = new System.Drawing.Point(95, 15);
-			this.checkBoxEndKeyframe.Margin = new System.Windows.Forms.Padding(0);
-			this.checkBoxEndKeyframe.Name = "checkBoxEndKeyframe";
-			this.checkBoxEndKeyframe.Size = new System.Drawing.Size(89, 23);
-			this.checkBoxEndKeyframe.TabIndex = 134;
-			this.checkBoxEndKeyframe.Text = "End";
-			this.checkBoxEndKeyframe.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-			this.checkBoxEndKeyframe.UseVisualStyleBackColor = true;
-			this.checkBoxEndKeyframe.Click += new System.EventHandler(this.checkBoxStartEndKeyframe_Click);
+			this.checkBoxMorphEndKeyframe.Appearance = System.Windows.Forms.Appearance.Button;
+			this.checkBoxMorphEndKeyframe.Location = new System.Drawing.Point(95, 15);
+			this.checkBoxMorphEndKeyframe.Margin = new System.Windows.Forms.Padding(0);
+			this.checkBoxMorphEndKeyframe.Name = "checkBoxMorphEndKeyframe";
+			this.checkBoxMorphEndKeyframe.Size = new System.Drawing.Size(89, 23);
+			this.checkBoxMorphEndKeyframe.TabIndex = 134;
+			this.checkBoxMorphEndKeyframe.Text = "End";
+			this.checkBoxMorphEndKeyframe.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+			this.checkBoxMorphEndKeyframe.UseVisualStyleBackColor = true;
+			this.checkBoxMorphEndKeyframe.Click += new System.EventHandler(this.checkBoxStartEndKeyframe_Click);
 			// 
 			// trackBarMorphFactor
 			// 
@@ -1001,18 +976,18 @@
 			this.trackBarMorphFactor.TickStyle = System.Windows.Forms.TickStyle.None;
 			this.trackBarMorphFactor.ValueChanged += new System.EventHandler(this.trackBarMorphFactor_ValueChanged);
 			// 
-			// checkBoxStartKeyframe
+			// checkBoxMorphStartKeyframe
 			// 
-			this.checkBoxStartKeyframe.Appearance = System.Windows.Forms.Appearance.Button;
-			this.checkBoxStartKeyframe.Location = new System.Drawing.Point(4, 15);
-			this.checkBoxStartKeyframe.Margin = new System.Windows.Forms.Padding(0);
-			this.checkBoxStartKeyframe.Name = "checkBoxStartKeyframe";
-			this.checkBoxStartKeyframe.Size = new System.Drawing.Size(89, 23);
-			this.checkBoxStartKeyframe.TabIndex = 132;
-			this.checkBoxStartKeyframe.Text = "Start";
-			this.checkBoxStartKeyframe.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-			this.checkBoxStartKeyframe.UseVisualStyleBackColor = true;
-			this.checkBoxStartKeyframe.Click += new System.EventHandler(this.checkBoxStartEndKeyframe_Click);
+			this.checkBoxMorphStartKeyframe.Appearance = System.Windows.Forms.Appearance.Button;
+			this.checkBoxMorphStartKeyframe.Location = new System.Drawing.Point(4, 15);
+			this.checkBoxMorphStartKeyframe.Margin = new System.Windows.Forms.Padding(0);
+			this.checkBoxMorphStartKeyframe.Name = "checkBoxMorphStartKeyframe";
+			this.checkBoxMorphStartKeyframe.Size = new System.Drawing.Size(89, 23);
+			this.checkBoxMorphStartKeyframe.TabIndex = 132;
+			this.checkBoxMorphStartKeyframe.Text = "Start";
+			this.checkBoxMorphStartKeyframe.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+			this.checkBoxMorphStartKeyframe.UseVisualStyleBackColor = true;
+			this.checkBoxMorphStartKeyframe.Click += new System.EventHandler(this.checkBoxStartEndKeyframe_Click);
 			// 
 			// buttonDeleteKeyframe
 			// 
@@ -1034,15 +1009,6 @@
 			this.label9.Size = new System.Drawing.Size(63, 13);
 			this.label9.TabIndex = 136;
 			this.label9.Text = "Rename To";
-			// 
-			// editTextBoxNewKeyframeName
-			// 
-			this.editTextBoxNewKeyframeName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.editTextBoxNewKeyframeName.Location = new System.Drawing.Point(364, 33);
-			this.editTextBoxNewKeyframeName.Name = "editTextBoxNewKeyframeName";
-			this.editTextBoxNewKeyframeName.Size = new System.Drawing.Size(139, 20);
-			this.editTextBoxNewKeyframeName.TabIndex = 164;
-			this.editTextBoxNewKeyframeName.AfterEditTextChanged += new System.EventHandler(this.editTextBoxNewKeyframeName_AfterEditTextChanged);
 			// 
 			// label3
 			// 
@@ -1071,7 +1037,7 @@
 			this.listViewMorphKeyframe.Name = "listViewMorphKeyframe";
 			this.listViewMorphKeyframe.ShowGroups = false;
 			this.listViewMorphKeyframe.ShowItemToolTips = true;
-			this.listViewMorphKeyframe.Size = new System.Drawing.Size(358, 91);
+			this.listViewMorphKeyframe.Size = new System.Drawing.Size(358, 93);
 			this.listViewMorphKeyframe.TabIndex = 160;
 			this.listViewMorphKeyframe.UseCompatibleStateImageBehavior = false;
 			this.listViewMorphKeyframe.View = System.Windows.Forms.View.Details;
@@ -1091,7 +1057,7 @@
 			// 
 			this.tabPageType4.Location = new System.Drawing.Point(4, 22);
 			this.tabPageType4.Name = "tabPageType4";
-			this.tabPageType4.Size = new System.Drawing.Size(516, 492);
+			this.tabPageType4.Size = new System.Drawing.Size(516, 499);
 			this.tabPageType4.TabIndex = 5;
 			this.tabPageType4.Text = "Type4";
 			this.tabPageType4.UseVisualStyleBackColor = true;
@@ -1102,7 +1068,7 @@
 			this.tabPageAnimation.Location = new System.Drawing.Point(4, 22);
 			this.tabPageAnimation.Name = "tabPageAnimation";
 			this.tabPageAnimation.Padding = new System.Windows.Forms.Padding(3);
-			this.tabPageAnimation.Size = new System.Drawing.Size(516, 492);
+			this.tabPageAnimation.Size = new System.Drawing.Size(516, 499);
 			this.tabPageAnimation.TabIndex = 1;
 			this.tabPageAnimation.Text = "Animation";
 			this.tabPageAnimation.UseVisualStyleBackColor = true;
@@ -1130,8 +1096,8 @@
 			this.splitContainerAnimation.Panel2.Controls.Add(this.groupBox3);
 			this.splitContainerAnimation.Panel2.Controls.Add(this.groupBox2);
 			this.splitContainerAnimation.Panel2.Controls.Add(this.groupBox1);
-			this.splitContainerAnimation.Size = new System.Drawing.Size(510, 486);
-			this.splitContainerAnimation.SplitterDistance = 197;
+			this.splitContainerAnimation.Size = new System.Drawing.Size(510, 493);
+			this.splitContainerAnimation.SplitterDistance = 199;
 			this.splitContainerAnimation.TabIndex = 159;
 			// 
 			// label1
@@ -1173,7 +1139,7 @@
 			this.listViewAnimationTrack.Name = "listViewAnimationTrack";
 			this.listViewAnimationTrack.ShowGroups = false;
 			this.listViewAnimationTrack.ShowItemToolTips = true;
-			this.listViewAnimationTrack.Size = new System.Drawing.Size(403, 180);
+			this.listViewAnimationTrack.Size = new System.Drawing.Size(403, 182);
 			this.listViewAnimationTrack.Sorting = System.Windows.Forms.SortOrder.Ascending;
 			this.listViewAnimationTrack.TabIndex = 137;
 			this.listViewAnimationTrack.UseCompatibleStateImageBehavior = false;
@@ -1283,7 +1249,7 @@
 			// 
 			this.buttonAnimationClipEditHex.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.buttonAnimationClipEditHex.Enabled = false;
-			this.buttonAnimationClipEditHex.Location = new System.Drawing.Point(436, 258);
+			this.buttonAnimationClipEditHex.Location = new System.Drawing.Point(436, 263);
 			this.buttonAnimationClipEditHex.Name = "buttonAnimationClipEditHex";
 			this.buttonAnimationClipEditHex.Size = new System.Drawing.Size(73, 23);
 			this.buttonAnimationClipEditHex.TabIndex = 212;
@@ -1320,7 +1286,7 @@
 			this.dataGridViewAnimationClip.RowTemplate.Height = 18;
 			this.dataGridViewAnimationClip.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
 			this.dataGridViewAnimationClip.ShowCellToolTips = false;
-			this.dataGridViewAnimationClip.Size = new System.Drawing.Size(509, 203);
+			this.dataGridViewAnimationClip.Size = new System.Drawing.Size(509, 208);
 			this.dataGridViewAnimationClip.StandardTab = true;
 			this.dataGridViewAnimationClip.TabIndex = 170;
 			this.dataGridViewAnimationClip.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewAnimationClip_CellValueChanged);
@@ -1403,7 +1369,7 @@
 			this.groupBox3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.groupBox3.Controls.Add(this.buttonAnimationClipDelete);
 			this.groupBox3.Controls.Add(this.buttonAnimationClipCopy);
-			this.groupBox3.Location = new System.Drawing.Point(346, 220);
+			this.groupBox3.Location = new System.Drawing.Point(346, 225);
 			this.groupBox3.Name = "groupBox3";
 			this.groupBox3.Size = new System.Drawing.Size(75, 65);
 			this.groupBox3.TabIndex = 200;
@@ -1434,7 +1400,7 @@
 			this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.groupBox2.Controls.Add(this.buttonAnimationClipMoveUp);
 			this.groupBox2.Controls.Add(this.buttonAnimationClipMoveDown);
-			this.groupBox2.Location = new System.Drawing.Point(280, 220);
+			this.groupBox2.Location = new System.Drawing.Point(280, 225);
 			this.groupBox2.Name = "groupBox2";
 			this.groupBox2.Size = new System.Drawing.Size(63, 65);
 			this.groupBox2.TabIndex = 190;
@@ -1470,7 +1436,7 @@
 			this.groupBox1.Controls.Add(this.numericAnimationClipKeyframe);
 			this.groupBox1.Controls.Add(this.labelSkeletalRender);
 			this.groupBox1.Controls.Add(this.label30);
-			this.groupBox1.Location = new System.Drawing.Point(0, 220);
+			this.groupBox1.Location = new System.Drawing.Point(0, 225);
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.Size = new System.Drawing.Size(277, 65);
 			this.groupBox1.TabIndex = 180;
@@ -1660,11 +1626,45 @@
 			// 
 			this.saveFileDialog1.Filter = ".xa Files (*.xa)|*.xa|All Files (*.*)|*.*";
 			// 
+			// textBoxMorphFrameNameRefID
+			// 
+			this.textBoxMorphFrameNameRefID.Enabled = false;
+			this.textBoxMorphFrameNameRefID.Location = new System.Drawing.Point(80, 13);
+			this.textBoxMorphFrameNameRefID.Name = "textBoxMorphFrameNameRefID";
+			this.textBoxMorphFrameNameRefID.Size = new System.Drawing.Size(36, 20);
+			this.textBoxMorphFrameNameRefID.TabIndex = 110;
+			this.textBoxMorphFrameNameRefID.AfterEditTextChanged += new System.EventHandler(this.textBoxFrameNameRefID_AfterEditTextChanged);
+			// 
+			// editTextBoxMorphClipMesh
+			// 
+			this.editTextBoxMorphClipMesh.Location = new System.Drawing.Point(48, 42);
+			this.editTextBoxMorphClipMesh.Name = "editTextBoxMorphClipMesh";
+			this.editTextBoxMorphClipMesh.Size = new System.Drawing.Size(134, 20);
+			this.editTextBoxMorphClipMesh.TabIndex = 94;
+			this.editTextBoxMorphClipMesh.AfterEditTextChanged += new System.EventHandler(this.editTextBoxMorphClipMesh_AfterEditTextChanged);
+			// 
+			// editTextBoxMorphClipName
+			// 
+			this.editTextBoxMorphClipName.Location = new System.Drawing.Point(48, 16);
+			this.editTextBoxMorphClipName.Name = "editTextBoxMorphClipName";
+			this.editTextBoxMorphClipName.Size = new System.Drawing.Size(134, 20);
+			this.editTextBoxMorphClipName.TabIndex = 92;
+			this.editTextBoxMorphClipName.AfterEditTextChanged += new System.EventHandler(this.editTextBoxMorphClipName_AfterEditTextChanged);
+			// 
+			// editTextBoxMorphNewKeyframeName
+			// 
+			this.editTextBoxMorphNewKeyframeName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.editTextBoxMorphNewKeyframeName.Location = new System.Drawing.Point(364, 33);
+			this.editTextBoxMorphNewKeyframeName.Name = "editTextBoxMorphNewKeyframeName";
+			this.editTextBoxMorphNewKeyframeName.Size = new System.Drawing.Size(139, 20);
+			this.editTextBoxMorphNewKeyframeName.TabIndex = 164;
+			this.editTextBoxMorphNewKeyframeName.AfterEditTextChanged += new System.EventHandler(this.editTextBoxNewKeyframeName_AfterEditTextChanged);
+			// 
 			// FormXA
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(524, 536);
+			this.ClientSize = new System.Drawing.Size(524, 543);
 			this.Controls.Add(this.tabControlXA);
 			this.Controls.Add(this.menuStrip1);
 			this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -1807,24 +1807,24 @@
 		private System.Windows.Forms.ListView listViewMorphKeyframe;
 		private System.Windows.Forms.Label label8;
 		private System.Windows.Forms.Label label6;
-		private System.Windows.Forms.ComboBox comboBoxRefKeyframe;
-		private System.Windows.Forms.Button buttonRefDown;
-		private System.Windows.Forms.Button buttonRefUp;
-		private System.Windows.Forms.Button buttonDeleteRef;
-		private System.Windows.Forms.Button buttonNewRef;
-		private EditTextBox textBoxFrameNameRefID;
-		private EditTextBox editTextBoxNewKeyframeName;
+		private System.Windows.Forms.ComboBox comboBoxMorphRefKeyframe;
+		private System.Windows.Forms.Button buttonMorphRefDown;
+		private System.Windows.Forms.Button buttonMorphRefUp;
+		private System.Windows.Forms.Button buttonMorphDeleteRef;
+		private System.Windows.Forms.Button buttonMorphNewRef;
+		private EditTextBox textBoxMorphFrameNameRefID;
+		private EditTextBox editTextBoxMorphNewKeyframeName;
 		private System.Windows.Forms.Button buttonDeleteKeyframe;
 		private System.Windows.Forms.Label label9;
-		private System.Windows.Forms.CheckBox checkBoxOnlyValidKeyframes;
+		private System.Windows.Forms.CheckBox checkBoxMorphOnlyValidKeyframes;
 		private System.Windows.Forms.ToolTip toolTip1;
 		private System.Windows.Forms.TrackBar trackBarMorphFactor;
-		private System.Windows.Forms.CheckBox checkBoxStartKeyframe;
-		private System.Windows.Forms.CheckBox checkBoxEndKeyframe;
+		private System.Windows.Forms.CheckBox checkBoxMorphStartKeyframe;
+		private System.Windows.Forms.CheckBox checkBoxMorphEndKeyframe;
 		private System.Windows.Forms.GroupBox groupBox7;
 		private System.Windows.Forms.GroupBox groupBox8;
-		private System.Windows.Forms.CheckBox checkBoxFbxOptionEmbedMedia;
-		private System.Windows.Forms.CheckBox checkBoxFbxOptionOneBlendshape;
+		private System.Windows.Forms.CheckBox checkBoxMorphFbxOptionEmbedMedia;
+		private System.Windows.Forms.CheckBox checkBoxMorphFbxOptionOneBlendshape;
 		private System.Windows.Forms.DataGridView dataGridViewAnimationClip;
 		private System.Windows.Forms.Button buttonAnimationClipDelete;
 		private System.Windows.Forms.Button buttonAnimationClipEditHex;

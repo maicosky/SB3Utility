@@ -159,6 +159,7 @@ namespace SB3Utility
 				EditorVar = Gui.Scripting.GetNextVariable("xxEditor");
 				FormVar = variable;
 				ReopenXX();
+				Gui.Docking.ShowDockContent(this, Gui.Docking.DockEditors, ContentCategory.Meshes);
 
 				FormClosing += FormXXFile_FormClosing;
 			}
@@ -195,6 +196,7 @@ namespace SB3Utility
 				this.exportDir = Path.GetDirectoryName(ppParser.FilePath) + @"\" + Path.GetFileNameWithoutExtension(ppParser.FilePath) + @"\" + Path.GetFileNameWithoutExtension(parser.Name);
 
 				ParserVar = xxParserVar;
+				Gui.Docking.ShowDockContent(this, Gui.Docking.DockEditors, ContentCategory.Meshes);
 
 				EditorVar = Gui.Scripting.GetNextVariable("xxEditor");
 				Editor = (xxEditor)Gui.Scripting.RunScript(EditorVar + " = xxEditor(parser=" + ParserVar + ")");
@@ -320,6 +322,25 @@ namespace SB3Utility
 
 		void Init()
 		{
+			float treeViewFontSize = (float)Gui.Config["TreeViewFontSize"];
+			if (treeViewFontSize > 0)
+			{
+				treeViewObjectTree.Font = new System.Drawing.Font(treeViewObjectTree.Font.Name, treeViewFontSize);
+			}
+			float listViewFontSize = (float)Gui.Config["ListViewFontSize"];
+			if (listViewFontSize > 0)
+			{
+				listViewMesh.Font = new System.Drawing.Font(listViewMesh.Font.Name, listViewFontSize);
+				listViewMeshMaterial.Font = new System.Drawing.Font(listViewMeshMaterial.Font.Name, listViewFontSize);
+				listViewMeshTexture.Font = new System.Drawing.Font(listViewMeshMaterial.Font.Name, listViewFontSize);
+				listViewMaterial.Font = new System.Drawing.Font(listViewMaterial.Font.Name, listViewFontSize);
+				listViewMaterialMesh.Font = new System.Drawing.Font(listViewMaterialMesh.Font.Name, listViewFontSize);
+				listViewMaterialTexture.Font = new System.Drawing.Font(listViewMaterialTexture.Font.Name, listViewFontSize);
+				listViewTexture.Font = new System.Drawing.Font(listViewTexture.Font.Name, listViewFontSize);
+				listViewTextureMesh.Font = new System.Drawing.Font(listViewTextureMesh.Font.Name, listViewFontSize);
+				listViewTextureMaterial.Font = new System.Drawing.Font(listViewTextureMaterial.Font.Name, listViewFontSize);
+			}
+
 			panelTexturePic.Resize += new EventHandler(panelTexturePic_Resize);
 			splitContainer1.Panel2MinSize = tabControlViews.Width;
 
@@ -372,8 +393,6 @@ namespace SB3Utility
 
 			checkBoxMeshExportMqoSortMeshes.Checked = (bool)Gui.Config["ExportMqoSortMeshes"];
 			checkBoxMeshExportMqoSortMeshes.CheckedChanged += checkBoxMeshExportMqoSortMeshes_CheckedChanged;
-
-			Gui.Docking.ShowDockContent(this, Gui.Docking.DockEditors, ContentCategory.Meshes);
 
 			keepBackupToolStripMenuItem.Checked = (bool)Gui.Config["KeepBackupOfXX"];
 			keepBackupToolStripMenuItem.CheckedChanged += keepBackupToolStripMenuItem_CheckedChanged;
@@ -875,6 +894,10 @@ namespace SB3Utility
 						xxBone bone = frame.Mesh.BoneList[i];
 						TreeNode boneNode = new TreeNode(bone.Name);
 						boneNode.Tag = new DragSource(EditorVar, typeof(xxBone), new int[] { meshId, i });
+						if (xx.FindFrame(bone.Name, Editor.Parser.Frame) == null)
+						{
+							boneNode.ForeColor = Color.OrangeRed;
+						}
 						boneListNode.Nodes.Add(boneNode);
 					}
 				}
@@ -1633,9 +1656,9 @@ namespace SB3Utility
 					{
 						tabControlViews.SelectTabWithoutLoosingFocus(tabPageFrameView);
 						LoadFrame((int)tag.Id);
-						if (buttonAddToSkin.Enabled)
+						if (checkBoxMeshNewSkin.Checked)
 						{
-							buttonAddToSkin.Text = SkinFrames.Contains(Editor.Frames[loadedFrame].Name) ? "Remove From Skin" : "Add To Skin";
+							buttonFrameAddBone.Text = SkinFrames.Contains(Editor.Frames[loadedFrame].Name) ? "Remove From Skin" : "Add To Skin";
 						}
 					}
 					else if (tag.Type == typeof(xxMesh))
@@ -2556,6 +2579,10 @@ namespace SB3Utility
 		public void SyncWorkspaces(string newName, Type type, int id)
 		{
 			List<DockContent> formWorkspaceList = FormWorkspace.GetWorkspacesOfForm(this);
+			if (formWorkspaceList == null)
+			{
+				return;
+			}
 			foreach (FormWorkspace workspace in formWorkspaceList)
 			{
 				List<TreeNode> formNodes = workspace.ChildForms[this];
@@ -4520,7 +4547,7 @@ namespace SB3Utility
 			{
 				if (checkBoxMeshNewSkin.Checked)
 				{
-					buttonAddToSkin.Enabled = true;
+					buttonFrameAddBone.Text = "Add To / Rem From Skin";
 				}
 				else
 				{
@@ -4543,7 +4570,7 @@ namespace SB3Utility
 						LoadMesh(loadedMesh);
 						SkinFrames.Clear();
 					}
-					buttonAddToSkin.Enabled = false;
+					buttonFrameAddBone.Text = "Add Bone to Selected Meshes";
 				}
 			}
 			catch (Exception ex)
@@ -4552,7 +4579,7 @@ namespace SB3Utility
 			}
 		}
 
-		private void buttonAddToSkin_Click(object sender, EventArgs e)
+		private void buttonFrameAddBone_Click(object sender, EventArgs e)
 		{
 			try
 			{
@@ -4561,18 +4588,43 @@ namespace SB3Utility
 					return;
 				}
 
-				if (SkinFrames.Add(Editor.Frames[loadedFrame].Name))
+				if (checkBoxMeshNewSkin.Checked)
 				{
-					Report.ReportLog("Frame " + Editor.Frames[loadedFrame].Name + " added to skin definition.");
-					treeViewObjectTree.SelectedNode.BackColor = Color.SteelBlue;
-					buttonAddToSkin.Text = "Remove From Skin";
+					if (SkinFrames.Add(Editor.Frames[loadedFrame].Name))
+					{
+						Report.ReportLog("Frame " + Editor.Frames[loadedFrame].Name + " added to skin definition.");
+						treeViewObjectTree.SelectedNode.BackColor = Color.SteelBlue;
+						buttonFrameAddBone.Text = "Remove From Skin";
+					}
+					else
+					{
+						SkinFrames.Remove(Editor.Frames[loadedFrame].Name);
+						Report.ReportLog("Frame " + Editor.Frames[loadedFrame].Name + " removed from skin definition.");
+						treeViewObjectTree.SelectedNode.BackColor = Color.White;
+						buttonFrameAddBone.Text = "Add To Skin";
+					}
 				}
 				else
 				{
-					SkinFrames.Remove(Editor.Frames[loadedFrame].Name);
-					Report.ReportLog("Frame " + Editor.Frames[loadedFrame].Name + " removed from skin definition.");
-					treeViewObjectTree.SelectedNode.BackColor = Color.White;
-					buttonAddToSkin.Text = "Add To Skin";
+					if (listViewMesh.SelectedItems.Count == 0)
+					{
+						return;
+					}
+					string meshNames = String.Empty;
+					List<int> reselect = new List<int>(listViewMesh.SelectedIndices.Count);
+					for (int i = 0; i < listViewMesh.SelectedItems.Count; i++)
+					{
+						int meshId = (int)listViewMesh.SelectedItems[i].Tag;
+						meshNames += "\"" + Editor.Meshes[meshId].Name + "\", ";
+						reselect.Add(meshId);
+					}
+					meshNames = "{ " + meshNames.Substring(0, meshNames.Length - 2) + " }";
+
+					Gui.Scripting.RunScript(EditorVar + ".AddBone(id=" + loadedFrame + ", meshes=" + meshNames + ")");
+					Changed = true;
+
+					InitFrames();
+					RecreateRenderObjects();
 				}
 			}
 			catch (Exception ex)

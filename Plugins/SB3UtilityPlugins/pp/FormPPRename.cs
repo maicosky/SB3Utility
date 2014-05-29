@@ -15,9 +15,13 @@ namespace SB3Utility
 
 		ListViewItem item = null;
 
+		private SizeF startSize;
+
 		public FormPPRename(ListViewItem item)
 		{
 			InitializeComponent();
+			startSize = new SizeF(Width, Height);
+			this.SaveDesignSizes();
 			this.item = item;
 			this.textBox1.Text = item.Text;
 			NewName = null;
@@ -58,6 +62,43 @@ namespace SB3Utility
 			NewName = textBox1.Text;
 			this.DialogResult = DialogResult.OK;
 			this.Close();
+		}
+
+		private void FormPPRename_Shown(object sender, EventArgs e)
+		{
+			Size dialogSize = (Size)Gui.Config["DialogPPRenameSize"];
+			if (dialogSize.Width != 0 && dialogSize.Height != 0)
+			{
+				Width = dialogSize.Width;
+				Height = dialogSize.Height;
+				this.ResizeControls(startSize);
+			}
+			else
+			{
+				Width = (int)startSize.Width;
+				Height = (int)startSize.Height;
+				this.ResetControls();
+			}
+		}
+
+		private void FormPPRename_Resize(object sender, EventArgs e)
+		{
+			this.ResizeControls(startSize);
+		}
+
+		private void FormPPRename_VisibleChanged(object sender, EventArgs e)
+		{
+			if (!Visible)
+			{
+				if (Width < (int)startSize.Width || Height < (int)startSize.Height)
+				{
+					Gui.Config["DialogPPRenameSize"] = new Size(0, 0);
+				}
+				else
+				{
+					Gui.Config["DialogPPRenameSize"] = this.Size;
+				}
+			}
 		}
 	}
 }

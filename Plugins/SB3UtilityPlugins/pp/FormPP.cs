@@ -105,6 +105,15 @@ namespace SB3Utility
 			try
 			{
 				InitializeComponent();
+				float listViewFontSize = (float)Gui.Config["ListViewFontSize"];
+				if (listViewFontSize > 0)
+				{
+					xxSubfilesList.Font = new Font(xxSubfilesList.Font.FontFamily, listViewFontSize);
+					xaSubfilesList.Font = new Font(xaSubfilesList.Font.FontFamily, listViewFontSize);
+					imageSubfilesList.Font = new Font(imageSubfilesList.Font.FontFamily, listViewFontSize);
+					soundSubfilesList.Font = new Font(soundSubfilesList.Font.FontFamily, listViewFontSize);
+					otherSubfilesList.Font = new Font(otherSubfilesList.Font.FontFamily, listViewFontSize);
+				}
 
 				FormVariable = variable;
 

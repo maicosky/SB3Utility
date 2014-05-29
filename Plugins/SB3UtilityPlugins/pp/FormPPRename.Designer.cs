@@ -61,7 +61,7 @@ namespace SB3Utility
 			this.buttonCancel.UseVisualStyleBackColor = true;
 			this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
 			// 
-			// SubfileRename
+			// FormPPRename
 			// 
 			this.AcceptButton = this.buttonOK;
 			this.CancelButton = this.buttonCancel;
@@ -71,12 +71,13 @@ namespace SB3Utility
 			this.Controls.Add(this.buttonOK);
 			this.Controls.Add(this.textBox1);
 			this.DoubleBuffered = true;
-			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-			this.Name = "SubfileRename";
+			this.Name = "FormPPRename";
 			this.ShowInTaskbar = false;
-			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "Rename File";
+			this.Shown += new System.EventHandler(this.FormPPRename_Shown);
+			this.VisibleChanged += new System.EventHandler(this.FormPPRename_VisibleChanged);
+			this.Resize += new System.EventHandler(this.FormPPRename_Resize);
 			this.ResumeLayout(false);
 			this.PerformLayout();
 

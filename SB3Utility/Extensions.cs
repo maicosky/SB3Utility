@@ -30,6 +30,79 @@ namespace SB3Utility
 			tab.Enabled = true;
 		}
 
+		public static void SaveDesignSizes(this Form f)
+		{
+			SaveDesignSizes(f.Controls);
+		}
+
+		private static void SaveDesignSizes(Control.ControlCollection controls)
+		{
+			foreach (Control c in controls)
+			{
+				c.Tag = new Tuple<int, int, int, int, float>(c.Left, c.Top, c.Width, c.Height, c.Font.Size);
+
+				if (c.HasChildren)
+				{
+					SaveDesignSizes(c.Controls);
+				}
+			}
+		}
+
+		public static void ResizeControls(this Form f, System.Drawing.SizeF startSize)
+		{
+			if (startSize.Width != 0 && startSize.Height != 0)
+			{
+				f.Opacity = 0.75;
+				f.ResetControls();
+				System.Drawing.SizeF resize = new System.Drawing.SizeF(f.Width / startSize.Width, f.Height / startSize.Height);
+				foreach (Control child in f.Controls)
+				{
+					child.Scale(resize);
+				}
+				float factor = f.Width - startSize.Width < f.Height - startSize.Height ?
+					f.Width / startSize.Width : f.Height / startSize.Height;
+				ResizeFont(f.Controls, factor);
+				f.Opacity = 1;
+			}
+		}
+
+		public static void ResetControls(this Form f)
+		{
+			ResetControls(f.Controls);
+		}
+
+		private static void ResetControls(Control.ControlCollection controls)
+		{
+			foreach (Control c in controls)
+			{
+				c.Hide();
+				c.Left = ((Tuple<int, int, int, int, float>)c.Tag).Item1;
+				c.Top = ((Tuple<int, int, int, int, float>)c.Tag).Item2;
+				c.Width = ((Tuple<int, int, int, int, float>)c.Tag).Item3;
+				c.Height = ((Tuple<int, int, int, int, float>)c.Tag).Item4;
+				c.Font = new System.Drawing.Font(c.Font.FontFamily.Name, ((Tuple<int, int, int, int, float>)c.Tag).Item5);
+				c.Show();
+
+				if (c.HasChildren)
+				{
+					ResetControls(c.Controls);
+				}
+			}
+		}
+
+		public static void ResizeFont(Control.ControlCollection controls, float scaleFactor)
+		{
+			foreach (Control c in controls)
+			{
+				c.Font = new System.Drawing.Font(c.Font.FontFamily.Name, c.Font.Size * scaleFactor);
+
+				if (c.HasChildren)
+				{
+					ResizeFont(c.Controls, scaleFactor);
+				}
+			}
+		}
+
 		public static string GenericName(this Type type)
 		{
 			string s = String.Empty;

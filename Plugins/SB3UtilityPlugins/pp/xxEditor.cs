@@ -243,6 +243,20 @@ namespace SB3Utility
 		}
 
 		[Plugin]
+		public void AddBone(int id, object[] meshes)
+		{
+			string[] meshFrameNames = Utility.Convert<string>(meshes);
+			foreach (string meshName in meshFrameNames)
+			{
+				xxFrame meshFrame = xx.FindFrame(meshName, Parser.Frame);
+				if (xx.FindBone(meshFrame.Mesh.BoneList, Frames[id].Name) == null)
+				{
+					xx.CreateBone(Frames[id], meshFrame.Mesh);
+				}
+			}
+		}
+
+		[Plugin]
 		public void AddFrame(ImportedFrame srcFrame, int destParentId, int meshMatOffset)
 		{
 			xxFrame newFrame = xx.CreateFrame(srcFrame);

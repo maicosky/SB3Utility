@@ -14,9 +14,13 @@ namespace SB3Utility
 
 		private xaEditor editor;
 
+		private SizeF startSize;
+
 		public FormXADragDrop(xaEditor destEditor, bool morphOrAnimation)
 		{
 			InitializeComponent();
+			startSize = new SizeF(Width, Height);
+			this.SaveDesignSizes();
 			editor = destEditor;
 
 			if (morphOrAnimation)
@@ -42,6 +46,43 @@ namespace SB3Utility
 				if (numericPosition.Value == 10)
 				{
 					numericPosition.Value = 0;
+				}
+			}
+		}
+
+		private void FormXADragDrop_Shown(object sender, EventArgs e)
+		{
+			Size dialogSize = (Size)Gui.Config["DialogXADragDropSize"];
+			if (dialogSize.Width != 0 && dialogSize.Height != 0)
+			{
+				Width = dialogSize.Width;
+				Height = dialogSize.Height;
+				this.ResizeControls(startSize);
+			}
+			else
+			{
+				Width = (int)startSize.Width;
+				Height = (int)startSize.Height;
+				this.ResetControls();
+			}
+		}
+
+		private void FormXADragDrop_Resize(object sender, EventArgs e)
+		{
+			this.ResizeControls(startSize);
+		}
+
+		private void FormXADragDrop_VisibleChanged(object sender, EventArgs e)
+		{
+			if (!Visible)
+			{
+				if (Width < (int)startSize.Width || Height < (int)startSize.Height)
+				{
+					Gui.Config["DialogXADragDropSize"] = new Size(0, 0);
+				}
+				else
+				{
+					Gui.Config["DialogXADragDropSize"] = this.Size;
 				}
 			}
 		}

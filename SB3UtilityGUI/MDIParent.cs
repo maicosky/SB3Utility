@@ -82,6 +82,10 @@ namespace SB3Utility
 				toolStripEditTextBoxFilterPrecision.AfterEditTextChanged += toolStripEditTextBoxFilterPrecision_AfterEditTextChanged;
 				toolStripEditTextBoxSwapThesholdMB.Text = ((long)Gui.Config["PrivateMemSwapThresholdMB"]).ToString();
 				toolStripEditTextBoxSwapThesholdMB.AfterEditTextChanged += toolStripEditTextBoxSwapThesholdMB_AfterEditTextChanged;
+				toolStripEditTextBoxTreeViews.Text = ((float)Gui.Config["TreeViewFontSize"]).ToFloatString();
+				toolStripEditTextBoxTreeViews.AfterEditTextChanged += toolStripEditTextBoxTreeViews_AfterEditTextChanged;
+				toolStripEditTextBoxListViews.Text = ((float)Gui.Config["ListViewFontSize"]).ToFloatString();
+				toolStripEditTextBoxListViews.AfterEditTextChanged += toolStripEditTextBoxListViews_AfterEditTextChanged;
 			}
 			catch (Exception ex)
 			{
@@ -692,6 +696,16 @@ namespace SB3Utility
 		private void toolStripEditTextBoxSwapThesholdMB_AfterEditTextChanged(object sender, EventArgs e)
 		{
 			Properties.Settings.Default["PrivateMemSwapThresholdMB"] = long.Parse(toolStripEditTextBoxSwapThesholdMB.Text);
+		}
+
+		private void toolStripEditTextBoxTreeViews_AfterEditTextChanged(object sender, EventArgs e)
+		{
+			Properties.Settings.Default["TreeViewFontSize"] = Single.Parse(toolStripEditTextBoxTreeViews.Text);
+		}
+
+		private void toolStripEditTextBoxListViews_AfterEditTextChanged(object sender, EventArgs e)
+		{
+			Properties.Settings.Default["ListViewFontSize"] = Single.Parse(toolStripEditTextBoxListViews.Text);
 		}
 
 		private void definedVariablesToolStripMenuItem_Click(object sender, EventArgs e)

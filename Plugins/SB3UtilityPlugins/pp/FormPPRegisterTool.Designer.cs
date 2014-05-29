@@ -228,7 +228,9 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.CancelButton = this.buttonClose;
 			this.ClientSize = new System.Drawing.Size(430, 333);
+			this.ControlBox = false;
 			this.Controls.Add(this.comboBoxToolPath);
 			this.Controls.Add(this.groupBoxUsedFor);
 			this.Controls.Add(this.buttonClose);
@@ -238,10 +240,13 @@
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.comboBoxExtension);
-			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.Name = "FormPPRegisterTool";
+			this.ShowInTaskbar = false;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "External Tool Registration";
+			this.Shown += new System.EventHandler(this.FormPPRegisterTool_Shown);
+			this.VisibleChanged += new System.EventHandler(this.FormPPRegisterTool_VisibleChanged);
+			this.Resize += new System.EventHandler(this.FormPPRegisterTool_Resize);
 			this.groupBoxUsedFor.ResumeLayout(false);
 			this.groupBoxUsedFor.PerformLayout();
 			this.ResumeLayout(false);

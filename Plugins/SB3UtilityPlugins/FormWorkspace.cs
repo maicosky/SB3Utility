@@ -48,6 +48,11 @@ namespace SB3Utility
 
 		private void Init()
 		{
+			float treeViewFontSize = (float)Gui.Config["TreeViewFontSize"];
+			if (treeViewFontSize > 0)
+			{
+				treeView.Font = new Font(treeView.Font.Name, treeViewFontSize);
+			}
 			logMessagesToolStripMenuItem.Checked = (bool)Gui.Config["WorkspaceLogMessages"];
 			logMessagesToolStripMenuItem.CheckedChanged += logMessagesToolStripMenuItem_CheckedChanged;
 			scriptingToolStripMenuItem.Checked = (bool)Gui.Config["WorkspaceScripting"];
@@ -180,6 +185,9 @@ namespace SB3Utility
 					else if (item is WorkspaceMorph)
 					{
 						WorkspaceMorph morph = item;
+						string extraInfo = morph.MorphedVertexIndices != null ? " (morphed vertices: " + morph.MorphedVertexIndices.Count : String.Empty;
+						extraInfo += (extraInfo.Length == 0 ? " (" : ", ") + "keyframes: " + morph.KeyframeList.Count + ")";
+						node.Text += extraInfo;
 						for (int j = 0; j < morph.KeyframeList.Count; j++)
 						{
 							ImportedMorphKeyframe keyframe = morph.KeyframeList[j];

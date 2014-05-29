@@ -116,7 +116,7 @@ namespace SB3Utility
 			}
 		}
 
-		public static void ReplaceMorph(string destMorphName, xaParser parser, WorkspaceMorph wsMorphList, string newMorphName, bool replaceNormals, float minSquaredDistance)
+		public static void ReplaceMorph(string destMorphName, xaParser parser, WorkspaceMorph wsMorphList, string newMorphName, bool replaceMorphMask, bool replaceNormals, float minSquaredDistance, bool minKeyframes)
 		{
 			if (parser.MorphSection == null)
 			{
@@ -130,6 +130,31 @@ namespace SB3Utility
 			{
 				Report.ReportLog("Couldn't find morph clip " + destMorphName + ". Skipping these morphs");
 				return;
+			}
+			if (replaceMorphMask && wsMorphList.MorphedVertexIndices != null)
+			{
+				int index = morphSection.IndexSetList.IndexOf(indices);
+				xaMorphIndexSet newIndices = new xaMorphIndexSet();
+				newIndices.Name = indices.Name;
+				int numMorphedVertices = wsMorphList.MorphedVertexIndices.Count;
+				newIndices.MeshIndices = new ushort[numMorphedVertices];
+				wsMorphList.MorphedVertexIndices.CopyTo(newIndices.MeshIndices);
+				newIndices.MorphIndices = new ushort[numMorphedVertices];
+				if (minKeyframes)
+				{
+					for (ushort i = 0; i < numMorphedVertices; i++)
+					{
+						newIndices.MorphIndices[i] = i;
+					}
+				}
+				else
+				{
+					wsMorphList.MorphedVertexIndices.CopyTo(newIndices.MorphIndices);
+				}
+				newIndices.Unknown1 = indices.Unknown1;
+				morphSection.IndexSetList.RemoveAt(index);
+				morphSection.IndexSetList.Insert(index, newIndices);
+				indices = newIndices;
 			}
 
 			Report.ReportLog("Replacing morphs ...");
@@ -146,10 +171,12 @@ namespace SB3Utility
 					xaMorphKeyframe keyframe = FindMorphKeyFrame(wsMorph.Name, morphSection);
 					if (keyframe == null)
 					{
+						Report.ReportLog("Adding new Keyframe " + wsMorph.Name);
 						keyframe = new xaMorphKeyframe();
 						keyframe.Name = wsMorph.Name;
-						keyframe.PositionList = new List<Vector3>(new Vector3[wsMorph.VertexList.Count]);
-						keyframe.NormalList = new List<Vector3>(new Vector3[wsMorph.VertexList.Count]);
+						int numVertices = minKeyframes ? meshIndices.Length : wsMorph.VertexList.Count;
+						keyframe.PositionList = new List<Vector3>(new Vector3[numVertices]);
+						keyframe.NormalList = new List<Vector3>(new Vector3[numVertices]);
 						for (int i = 0; i < meshIndices.Length; i++)
 						{
 							keyframe.PositionList[morphIndices[i]] = vertList[meshIndices[i]].Position;
@@ -159,16 +186,45 @@ namespace SB3Utility
 					}
 					else
 					{
-						for (int i = 0; i < meshIndices.Length; i++)
+						if (!minKeyframes && keyframe.PositionList.Count != vertList.Count ||
+							minKeyframes && keyframe.PositionList.Count != meshIndices.Length)
 						{
-							Vector3 orgPos = new Vector3(keyframe.PositionList[morphIndices[i]].X, keyframe.PositionList[morphIndices[i]].Y, keyframe.PositionList[morphIndices[i]].Z),
-								newPos = new Vector3(vertList[meshIndices[i]].Position.X, vertList[meshIndices[i]].Position.Y, vertList[meshIndices[i]].Position.Z);
-							if ((orgPos - newPos).LengthSquared() >= minSquaredDistance)
+							Report.ReportLog("Adapting Keyframe " + wsMorph.Name + " to new length.");
+							int length = minKeyframes ? meshIndices.Length : vertList.Count;
+							Vector3[] newPositions = new Vector3[length];
+							Vector3[] newNormals = new Vector3[length];
+							if (!minKeyframes)
 							{
-								keyframe.PositionList[morphIndices[i]] = vertList[meshIndices[i]].Position;
-								if (replaceNormals)
+								for (int i = 0; i < vertList.Count; i++)
 								{
-									keyframe.NormalList[morphIndices[i]] = vertList[meshIndices[i]].Normal;
+									newPositions[i] = vertList[i].Position;
+									newNormals[i] = vertList[i].Normal;
+								}
+							}
+							for (int i = 0; i < meshIndices.Length; i++)
+							{
+								newPositions[morphIndices[i]] = vertList[meshIndices[i]].Position;
+								newNormals[morphIndices[i]] = vertList[meshIndices[i]].Normal;
+							}
+							keyframe.PositionList.Clear();
+							keyframe.NormalList.Clear();
+							keyframe.PositionList.AddRange(newPositions);
+							keyframe.NormalList.AddRange(newNormals);
+						}
+						else
+						{
+							Report.ReportLog("Replacing Keyframe " + wsMorph.Name);
+							for (int i = 0; i < meshIndices.Length; i++)
+							{
+								Vector3 orgPos = new Vector3(keyframe.PositionList[morphIndices[i]].X, keyframe.PositionList[morphIndices[i]].Y, keyframe.PositionList[morphIndices[i]].Z),
+									newPos = new Vector3(vertList[meshIndices[i]].Position.X, vertList[meshIndices[i]].Position.Y, vertList[meshIndices[i]].Position.Z);
+								if ((orgPos - newPos).LengthSquared() >= minSquaredDistance)
+								{
+									keyframe.PositionList[morphIndices[i]] = vertList[meshIndices[i]].Position;
+									if (replaceNormals)
+									{
+										keyframe.NormalList[morphIndices[i]] = vertList[meshIndices[i]].Normal;
+									}
 								}
 							}
 						}

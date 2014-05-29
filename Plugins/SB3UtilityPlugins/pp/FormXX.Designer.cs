@@ -62,11 +62,11 @@
 			this.label26 = new System.Windows.Forms.Label();
 			this.tabControlLists = new System.Windows.Forms.TabControl();
 			this.tabPageObject = new System.Windows.Forms.TabPage();
+			this.treeViewObjectTree = new System.Windows.Forms.TreeView();
 			this.panelObjectTreeBottom = new System.Windows.Forms.Panel();
 			this.buttonObjectTreeCheckBones = new System.Windows.Forms.Button();
 			this.buttonObjectTreeCollapse = new System.Windows.Forms.Button();
 			this.buttonObjectTreeExpand = new System.Windows.Forms.Button();
-			this.treeViewObjectTree = new System.Windows.Forms.TreeView();
 			this.tabPageMesh = new System.Windows.Forms.TabPage();
 			this.splitContainerMesh = new System.Windows.Forms.SplitContainer();
 			this.listViewMesh = new System.Windows.Forms.ListView();
@@ -102,7 +102,7 @@
 			this.label74 = new System.Windows.Forms.Label();
 			this.tabControlViews = new System.Windows.Forms.TabControl();
 			this.tabPageFrameView = new System.Windows.Forms.TabPage();
-			this.buttonAddToSkin = new System.Windows.Forms.Button();
+			this.buttonFrameAddBone = new System.Windows.Forms.Button();
 			this.buttonFrameEditHex = new System.Windows.Forms.Button();
 			this.groupBox3 = new System.Windows.Forms.GroupBox();
 			this.groupBox5 = new System.Windows.Forms.GroupBox();
@@ -637,6 +637,26 @@
 			this.tabPageObject.Text = "Object Tree";
 			this.tabPageObject.UseVisualStyleBackColor = true;
 			// 
+			// treeViewObjectTree
+			// 
+			this.treeViewObjectTree.AllowDrop = true;
+			this.treeViewObjectTree.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.treeViewObjectTree.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawText;
+			this.treeViewObjectTree.HideSelection = false;
+			this.treeViewObjectTree.Location = new System.Drawing.Point(0, 0);
+			this.treeViewObjectTree.Name = "treeViewObjectTree";
+			this.treeViewObjectTree.Size = new System.Drawing.Size(251, 407);
+			this.treeViewObjectTree.TabIndex = 1;
+			this.treeViewObjectTree.DrawNode += new System.Windows.Forms.DrawTreeNodeEventHandler(this.treeViewObjectTree_DrawNode);
+			this.treeViewObjectTree.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.treeViewObjectTree_ItemDrag);
+			this.treeViewObjectTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewObjectTree_AfterSelect);
+			this.treeViewObjectTree.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.treeViewObjectTree_NodeMouseClick);
+			this.treeViewObjectTree.DragDrop += new System.Windows.Forms.DragEventHandler(this.treeViewObjectTree_DragDrop);
+			this.treeViewObjectTree.DragEnter += new System.Windows.Forms.DragEventHandler(this.treeViewObjectTree_DragEnter);
+			this.treeViewObjectTree.DragOver += new System.Windows.Forms.DragEventHandler(this.treeViewObjectTree_DragOver);
+			this.treeViewObjectTree.DragLeave += new System.EventHandler(this.treeViewObjectTree_DragLeave);
+			this.treeViewObjectTree.KeyUp += new System.Windows.Forms.KeyEventHandler(this.treeViewObjectTree_KeyUp);
+			// 
 			// panelObjectTreeBottom
 			// 
 			this.panelObjectTreeBottom.Controls.Add(this.buttonObjectTreeDeleteUnreferenced);
@@ -679,26 +699,6 @@
 			this.buttonObjectTreeExpand.Text = "Expand All";
 			this.buttonObjectTreeExpand.UseVisualStyleBackColor = true;
 			this.buttonObjectTreeExpand.Click += new System.EventHandler(this.buttonObjectTreeExpand_Click);
-			// 
-			// treeViewObjectTree
-			// 
-			this.treeViewObjectTree.AllowDrop = true;
-			this.treeViewObjectTree.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.treeViewObjectTree.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawText;
-			this.treeViewObjectTree.HideSelection = false;
-			this.treeViewObjectTree.Location = new System.Drawing.Point(0, 0);
-			this.treeViewObjectTree.Name = "treeViewObjectTree";
-			this.treeViewObjectTree.Size = new System.Drawing.Size(251, 407);
-			this.treeViewObjectTree.TabIndex = 1;
-			this.treeViewObjectTree.DrawNode += new System.Windows.Forms.DrawTreeNodeEventHandler(this.treeViewObjectTree_DrawNode);
-			this.treeViewObjectTree.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.treeViewObjectTree_ItemDrag);
-			this.treeViewObjectTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewObjectTree_AfterSelect);
-			this.treeViewObjectTree.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.treeViewObjectTree_NodeMouseClick);
-			this.treeViewObjectTree.DragDrop += new System.Windows.Forms.DragEventHandler(this.treeViewObjectTree_DragDrop);
-			this.treeViewObjectTree.DragEnter += new System.Windows.Forms.DragEventHandler(this.treeViewObjectTree_DragEnter);
-			this.treeViewObjectTree.DragOver += new System.Windows.Forms.DragEventHandler(this.treeViewObjectTree_DragOver);
-			this.treeViewObjectTree.DragLeave += new System.EventHandler(this.treeViewObjectTree_DragLeave);
-			this.treeViewObjectTree.KeyUp += new System.Windows.Forms.KeyEventHandler(this.treeViewObjectTree_KeyUp);
 			// 
 			// tabPageMesh
 			// 
@@ -1099,7 +1099,7 @@
 			// 
 			// tabPageFrameView
 			// 
-			this.tabPageFrameView.Controls.Add(this.buttonAddToSkin);
+			this.tabPageFrameView.Controls.Add(this.buttonFrameAddBone);
 			this.tabPageFrameView.Controls.Add(this.buttonFrameEditHex);
 			this.tabPageFrameView.Controls.Add(this.groupBox3);
 			this.tabPageFrameView.Controls.Add(this.label15);
@@ -1117,16 +1117,15 @@
 			this.tabPageFrameView.Text = "Frame";
 			this.tabPageFrameView.UseVisualStyleBackColor = true;
 			// 
-			// buttonAddToSkin
+			// buttonFrameAddBone
 			// 
-			this.buttonAddToSkin.Enabled = false;
-			this.buttonAddToSkin.Location = new System.Drawing.Point(88, 100);
-			this.buttonAddToSkin.Name = "buttonAddToSkin";
-			this.buttonAddToSkin.Size = new System.Drawing.Size(162, 23);
-			this.buttonAddToSkin.TabIndex = 18;
-			this.buttonAddToSkin.Text = "Add To / Rem From Skin";
-			this.buttonAddToSkin.UseVisualStyleBackColor = true;
-			this.buttonAddToSkin.Click += new System.EventHandler(this.buttonAddToSkin_Click);
+			this.buttonFrameAddBone.Location = new System.Drawing.Point(88, 100);
+			this.buttonFrameAddBone.Name = "buttonFrameAddBone";
+			this.buttonFrameAddBone.Size = new System.Drawing.Size(162, 23);
+			this.buttonFrameAddBone.TabIndex = 18;
+			this.buttonFrameAddBone.Text = "Add Bone to Selected Meshes";
+			this.buttonFrameAddBone.UseVisualStyleBackColor = true;
+			this.buttonFrameAddBone.Click += new System.EventHandler(this.buttonFrameAddBone_Click);
 			// 
 			// buttonFrameEditHex
 			// 
@@ -2992,7 +2991,7 @@
 		private System.Windows.Forms.CheckBox checkBoxMeshExportNoMesh;
 		private System.Windows.Forms.Button buttonZeroWeights;
 		private System.Windows.Forms.CheckBox checkBoxMeshExportFbxLinearInterpolation;
-		private System.Windows.Forms.Button buttonAddToSkin;
+		private System.Windows.Forms.Button buttonFrameAddBone;
 		private System.Windows.Forms.CheckBox checkBoxMeshNewSkin;
 		private System.Windows.Forms.CheckBox checkBoxMeshExportMqoSortMeshes;
 		private System.Windows.Forms.Label label14;

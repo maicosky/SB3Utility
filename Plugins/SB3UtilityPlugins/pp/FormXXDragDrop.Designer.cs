@@ -119,7 +119,7 @@
 			this.checkBoxFrameAppend.AutoSize = true;
 			this.checkBoxFrameAppend.Checked = true;
 			this.checkBoxFrameAppend.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.checkBoxFrameAppend.Location = new System.Drawing.Point(20, 68);
+			this.checkBoxFrameAppend.Location = new System.Drawing.Point(20, 76);
 			this.checkBoxFrameAppend.Name = "checkBoxFrameAppend";
 			this.checkBoxFrameAppend.Size = new System.Drawing.Size(212, 17);
 			this.checkBoxFrameAppend.TabIndex = 47;
@@ -164,15 +164,15 @@
 			this.panel2.Controls.Add(this.radioButtonFrameReplace);
 			this.panel2.Controls.Add(this.radioButtonFrameMerge);
 			this.panel2.Controls.Add(this.radioButtonFrameAdd);
-			this.panel2.Location = new System.Drawing.Point(66, 39);
+			this.panel2.Location = new System.Drawing.Point(66, 41);
 			this.panel2.Name = "panel2";
-			this.panel2.Size = new System.Drawing.Size(232, 21);
+			this.panel2.Size = new System.Drawing.Size(232, 25);
 			this.panel2.TabIndex = 15;
 			// 
 			// radioButtonFrameReplace
 			// 
 			this.radioButtonFrameReplace.AutoSize = true;
-			this.radioButtonFrameReplace.Location = new System.Drawing.Point(120, 2);
+			this.radioButtonFrameReplace.Location = new System.Drawing.Point(136, 4);
 			this.radioButtonFrameReplace.Name = "radioButtonFrameReplace";
 			this.radioButtonFrameReplace.Size = new System.Drawing.Size(65, 17);
 			this.radioButtonFrameReplace.TabIndex = 37;
@@ -184,7 +184,7 @@
 			// 
 			this.radioButtonFrameMerge.AutoSize = true;
 			this.radioButtonFrameMerge.Checked = true;
-			this.radioButtonFrameMerge.Location = new System.Drawing.Point(9, 2);
+			this.radioButtonFrameMerge.Location = new System.Drawing.Point(9, 4);
 			this.radioButtonFrameMerge.Name = "radioButtonFrameMerge";
 			this.radioButtonFrameMerge.Size = new System.Drawing.Size(55, 17);
 			this.radioButtonFrameMerge.TabIndex = 33;
@@ -196,7 +196,7 @@
 			// radioButtonFrameAdd
 			// 
 			this.radioButtonFrameAdd.AutoSize = true;
-			this.radioButtonFrameAdd.Location = new System.Drawing.Point(70, 2);
+			this.radioButtonFrameAdd.Location = new System.Drawing.Point(78, 4);
 			this.radioButtonFrameAdd.Name = "radioButtonFrameAdd";
 			this.radioButtonFrameAdd.Size = new System.Drawing.Size(44, 17);
 			this.radioButtonFrameAdd.TabIndex = 35;
@@ -206,8 +206,7 @@
 			// 
 			// label1
 			// 
-			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(17, 17);
+			this.label1.Location = new System.Drawing.Point(4, 17);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(126, 13);
 			this.label1.TabIndex = 7;
@@ -224,7 +223,7 @@
 			// label2
 			// 
 			this.label2.AutoSize = true;
-			this.label2.Location = new System.Drawing.Point(17, 43);
+			this.label2.Location = new System.Drawing.Point(4, 47);
 			this.label2.Name = "label2";
 			this.label2.Size = new System.Drawing.Size(43, 13);
 			this.label2.TabIndex = 11;
@@ -296,7 +295,7 @@
 			// radioButtonNearestMesh
 			// 
 			this.radioButtonNearestMesh.AutoSize = true;
-			this.radioButtonNearestMesh.Location = new System.Drawing.Point(77, 2);
+			this.radioButtonNearestMesh.Location = new System.Drawing.Point(80, 2);
 			this.radioButtonNearestMesh.Name = "radioButtonNearestMesh";
 			this.radioButtonNearestMesh.Size = new System.Drawing.Size(51, 17);
 			this.radioButtonNearestMesh.TabIndex = 62;
@@ -318,7 +317,7 @@
 			// label8
 			// 
 			this.label8.AutoSize = true;
-			this.label8.Location = new System.Drawing.Point(17, 118);
+			this.label8.Location = new System.Drawing.Point(9, 118);
 			this.label8.Name = "label8";
 			this.label8.Size = new System.Drawing.Size(44, 13);
 			this.label8.TabIndex = 25;
@@ -358,7 +357,7 @@
 			// radioButtonBonesCopyNear
 			// 
 			this.radioButtonBonesCopyNear.AutoSize = true;
-			this.radioButtonBonesCopyNear.Location = new System.Drawing.Point(77, 2);
+			this.radioButtonBonesCopyNear.Location = new System.Drawing.Point(80, 2);
 			this.radioButtonBonesCopyNear.Name = "radioButtonBonesCopyNear";
 			this.radioButtonBonesCopyNear.Size = new System.Drawing.Size(89, 17);
 			this.radioButtonBonesCopyNear.TabIndex = 52;
@@ -382,7 +381,7 @@
 			// radioButtonBonesCopyOrder
 			// 
 			this.radioButtonBonesCopyOrder.AutoSize = true;
-			this.radioButtonBonesCopyOrder.Location = new System.Drawing.Point(173, 2);
+			this.radioButtonBonesCopyOrder.Location = new System.Drawing.Point(179, 2);
 			this.radioButtonBonesCopyOrder.Name = "radioButtonBonesCopyOrder";
 			this.radioButtonBonesCopyOrder.Size = new System.Drawing.Size(90, 17);
 			this.radioButtonBonesCopyOrder.TabIndex = 54;
@@ -403,7 +402,7 @@
 			// radioButtonNormalsCopyNear
 			// 
 			this.radioButtonNormalsCopyNear.AutoSize = true;
-			this.radioButtonNormalsCopyNear.Location = new System.Drawing.Point(77, 2);
+			this.radioButtonNormalsCopyNear.Location = new System.Drawing.Point(80, 2);
 			this.radioButtonNormalsCopyNear.Name = "radioButtonNormalsCopyNear";
 			this.radioButtonNormalsCopyNear.Size = new System.Drawing.Size(89, 17);
 			this.radioButtonNormalsCopyNear.TabIndex = 42;
@@ -427,7 +426,7 @@
 			// radioButtonNormalsCopyOrder
 			// 
 			this.radioButtonNormalsCopyOrder.AutoSize = true;
-			this.radioButtonNormalsCopyOrder.Location = new System.Drawing.Point(173, 2);
+			this.radioButtonNormalsCopyOrder.Location = new System.Drawing.Point(179, 2);
 			this.radioButtonNormalsCopyOrder.Name = "radioButtonNormalsCopyOrder";
 			this.radioButtonNormalsCopyOrder.Size = new System.Drawing.Size(90, 17);
 			this.radioButtonNormalsCopyOrder.TabIndex = 44;
@@ -459,7 +458,7 @@
 			// radioButtonMeshMerge
 			// 
 			this.radioButtonMeshMerge.AutoSize = true;
-			this.radioButtonMeshMerge.Location = new System.Drawing.Point(77, 2);
+			this.radioButtonMeshMerge.Location = new System.Drawing.Point(80, 2);
 			this.radioButtonMeshMerge.Name = "radioButtonMeshMerge";
 			this.radioButtonMeshMerge.Size = new System.Drawing.Size(55, 17);
 			this.radioButtonMeshMerge.TabIndex = 32;
@@ -469,7 +468,7 @@
 			// label5
 			// 
 			this.label5.AutoSize = true;
-			this.label5.Location = new System.Drawing.Point(17, 93);
+			this.label5.Location = new System.Drawing.Point(9, 93);
 			this.label5.Name = "label5";
 			this.label5.Size = new System.Drawing.Size(37, 13);
 			this.label5.TabIndex = 18;
@@ -478,7 +477,7 @@
 			// label3
 			// 
 			this.label3.AutoSize = true;
-			this.label3.Location = new System.Drawing.Point(17, 66);
+			this.label3.Location = new System.Drawing.Point(9, 66);
 			this.label3.Name = "label3";
 			this.label3.Size = new System.Drawing.Size(45, 13);
 			this.label3.TabIndex = 17;
@@ -487,7 +486,7 @@
 			// label6
 			// 
 			this.label6.AutoSize = true;
-			this.label6.Location = new System.Drawing.Point(17, 13);
+			this.label6.Location = new System.Drawing.Point(9, 13);
 			this.label6.Name = "label6";
 			this.label6.Size = new System.Drawing.Size(92, 13);
 			this.label6.TabIndex = 15;
@@ -496,7 +495,7 @@
 			// label7
 			// 
 			this.label7.AutoSize = true;
-			this.label7.Location = new System.Drawing.Point(17, 39);
+			this.label7.Location = new System.Drawing.Point(9, 39);
 			this.label7.Name = "label7";
 			this.label7.Size = new System.Drawing.Size(43, 13);
 			this.label7.TabIndex = 16;
@@ -519,16 +518,21 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.CancelButton = this.buttonCancel;
 			this.ClientSize = new System.Drawing.Size(446, 192);
+			this.ControlBox = false;
 			this.Controls.Add(this.checkBoxOkContinue);
 			this.Controls.Add(this.buttonCancel);
 			this.Controls.Add(this.buttonOK);
 			this.Controls.Add(this.panelFrame);
 			this.Controls.Add(this.panelMesh);
-			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.Name = "FormXXDragDrop";
+			this.ShowInTaskbar = false;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.Text = "Options";
+			this.Shown += new System.EventHandler(this.FormXXDragDrop_Shown);
+			this.VisibleChanged += new System.EventHandler(this.FormXXDragDrop_VisibleChanged);
+			this.Resize += new System.EventHandler(this.FormXXDragDrop_Resize);
 			this.panelFrame.ResumeLayout(false);
 			this.panelFrame.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericFrameId)).EndInit();

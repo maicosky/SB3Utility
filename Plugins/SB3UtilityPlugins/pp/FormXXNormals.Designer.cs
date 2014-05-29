@@ -141,7 +141,9 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.CancelButton = this.buttonCancel;
 			this.ClientSize = new System.Drawing.Size(243, 155);
+			this.ControlBox = false;
 			this.Controls.Add(this.checkBoxNormalsForSelectedMeshes);
 			this.Controls.Add(this.checkBoxSelectedItemsOnly);
 			this.Controls.Add(this.checkBoxCalculateNormalsInXAs);
@@ -149,10 +151,13 @@
 			this.Controls.Add(this.numericThreshold);
 			this.Controls.Add(this.buttonCancel);
 			this.Controls.Add(this.buttonOK);
-			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.Name = "FormXXNormals";
+			this.ShowInTaskbar = false;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "Calculate Normals";
+			this.Shown += new System.EventHandler(this.FormXXDragDrop_Shown);
+			this.VisibleChanged += new System.EventHandler(this.FormXXDragDrop_VisibleChanged);
+			this.Resize += new System.EventHandler(this.FormXXDragDrop_Resize);
 			((System.ComponentModel.ISupportInitialize)(this.numericThreshold)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();

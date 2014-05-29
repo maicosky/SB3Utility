@@ -74,6 +74,7 @@ namespace SB3Utility {
 			void ImportAnimation(FbxAnimLayer* pAnimLayer, FbxNode* pNode, ImportedSampledAnimation^ wsAnimation);
 			Type^ GetAnimationType(FbxAnimLayer* pAnimLayer, FbxNode* pNode);
 			template <class T> void GetVector(FbxLayerElementTemplate<T>* pLayerElement, T& pVector, int controlPointIdx, int vertexIdx);
+			FbxColor Fbx::Importer::GetFBXColor(FbxMesh *pMesh, int polyIndex, int polyPointIndex);
 			void ImportMorph(FbxArray<FbxNode*>* pMeshArray);
 
 			ref class Vertex
