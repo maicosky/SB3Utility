@@ -34,6 +34,8 @@ namespace SB3Utility
 		CharacolleAlicesoft,
 		CharacolleBaseson,
 		CharacolleKey,
+		CharacolleLumpOfSugar,
+		CharacolleWhirlpool,
 		BestCollection,
 		AATrial,
 		AARetail,
@@ -48,7 +50,7 @@ namespace SB3Utility
 		ImmoralWard,
 		RealPlayTrial,
 		RealPlay,
-		AA2Trial
+		AA2
 	}
 
 	public abstract class ppFormat
@@ -77,6 +79,8 @@ namespace SB3Utility
 			new ppFormat_CharacolleAlicesoft(),
 			new ppFormat_CharacolleBaseson(),
 			new ppFormat_CharacolleKey(),
+			new ppFormat_CharacolleLumpOfSugar(),
+			new ppFormat_CharacolleWhirlpool(),
 			new ppFormat_BestCollection(),
 			new ppFormat_AATrial(),
 			new ppFormat_AARetail(),
@@ -91,7 +95,7 @@ namespace SB3Utility
 			new ppFormat_ImmoralWard(),
 			new ppFormat_RealPlayTrial(),
 			new ppFormat_RealPlay(),
-			new ppFormat_AA2Trial()
+			new ppFormat_AA2()
 		};
 
 		public abstract Stream ReadStream(Stream stream);
@@ -791,6 +795,34 @@ namespace SB3Utility
 		}
 	}
 
+	public class ppFormat_CharacolleLumpOfSugar : ppFormat_SMHeader
+	{
+		public ppFormat_CharacolleLumpOfSugar() : base("Characolle Lump of Sugar", ppFormatIdx.CharacolleLumpOfSugar) { }
+
+		protected override ICryptoTransform CryptoTransform()
+		{
+			return new CryptoTransformOneCode(new byte[] {
+				0xCD,0xF2,0x6B,0x29,0x03,0x1F,0xA9,0x2C,
+				0x41,0x7B,0xEF,0xBB,0xCE,0x2C,0xFC,0x4C,
+				0x33,0x09,0xD5,0xBE,0x7B,0x69,0x45,0x06,
+				0x47,0x6D,0x8E,0x25,0x15,0x78,0x05,0x53 });
+		}
+	}
+
+	public class ppFormat_CharacolleWhirlpool : ppFormat_SMHeader
+	{
+		public ppFormat_CharacolleWhirlpool() : base("Characolle Whirlpool", ppFormatIdx.CharacolleWhirlpool) { }
+
+		protected override ICryptoTransform CryptoTransform()
+		{
+			return new CryptoTransformOneCode(new byte[] {
+				0xDF,0x9F,0x6B,0x29,0x15,0xCC,0xA8,0x2C,
+				0x53,0x28,0xEF,0xBB,0xE0,0xD9,0xFB,0x4C,
+				0x45,0xB6,0xD4,0xBE,0x8D,0x16,0x45,0x06,
+				0x59,0x1A,0x8E,0x25,0x27,0x25,0x05,0x53 });
+		}
+	}
+
 	public class ppFormat_BestCollection : ppFormat_AG3Header
 	{
 		public ppFormat_BestCollection() : base("Best Collection", ppFormatIdx.BestCollection) { }
@@ -993,9 +1025,9 @@ namespace SB3Utility
 		}
 	}
 
-	public class ppFormat_AA2Trial : ppFormat_WakeariHeader
+	public class ppFormat_AA2 : ppFormat_WakeariHeader
 	{
-		public ppFormat_AA2Trial() : base("AA2 Trial", ppFormatIdx.AA2Trial) { }
+		public ppFormat_AA2() : base("AA2", ppFormatIdx.AA2) { }
 
 		protected override ICryptoTransform CryptoTransform()
 		{

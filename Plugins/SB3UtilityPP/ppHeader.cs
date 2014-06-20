@@ -436,6 +436,8 @@ namespace SB3Utility
 					ppFormat.Array[(int)ppFormatIdx.CharacolleAlicesoft],
 					ppFormat.Array[(int)ppFormatIdx.CharacolleBaseson],
 					ppFormat.Array[(int)ppFormatIdx.CharacolleKey],
+					ppFormat.Array[(int)ppFormatIdx.CharacolleLumpOfSugar],
+					ppFormat.Array[(int)ppFormatIdx.CharacolleWhirlpool],
 					ppFormat.Array[(int)ppFormatIdx.AATrial],
 					ppFormat.Array[(int)ppFormatIdx.AARetail]
 				};
@@ -501,7 +503,7 @@ namespace SB3Utility
 					ppFormat.Array[(int)ppFormatIdx.ImmoralWard],
 					ppFormat.Array[(int)ppFormatIdx.RealPlayTrial],
 					ppFormat.Array[(int)ppFormatIdx.RealPlay],
-					ppFormat.Array[(int)ppFormatIdx.AA2Trial]
+					ppFormat.Array[(int)ppFormatIdx.AA2]
 				};
 			}
 		}

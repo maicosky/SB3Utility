@@ -26,7 +26,8 @@ namespace SB3Utility.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Configuration.SettingsProviderAttribute(typeof(PortableSettingsProvider))]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("libfbxsdk.dll;msvcr110.dll;SB3UtilityFBX.dll;SB3UtilityPP.dll;")]
+        [global::System.Configuration.DefaultSettingValueAttribute("msvcp110.dll;msvcr110.dll;libfbxsdk.dll;SB3UtilityFBX.dll;SB3UtilityPP.dll;niflib" +
+            ".dll;SB3UtilityNIF.dll;SyntaxHighlightingTextBox.dll")]
         public string PluginsDoNotLoad {
             get {
                 return ((string)(this["PluginsDoNotLoad"]));
@@ -56,7 +57,7 @@ namespace SB3Utility.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Configuration.SettingsProviderAttribute(typeof(PortableSettingsProvider))]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool ShowNormals {
             get {
                 return ((bool)(this["ShowNormals"]));
@@ -66,7 +67,7 @@ namespace SB3Utility.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Configuration.SettingsProviderAttribute(typeof(PortableSettingsProvider))]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool ShowBones {
             get {
                 return ((bool)(this["ShowBones"]));
@@ -390,6 +391,16 @@ namespace SB3Utility.Properties {
         public global::System.Drawing.Size DialogXXConvertSize {
             get {
                 return ((global::System.Drawing.Size)(this["DialogXXConvertSize"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(PortableSettingsProvider))]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0, 0")]
+        public global::System.Drawing.Size DialogPPSubfileChangeSize {
+            get {
+                return ((global::System.Drawing.Size)(this["DialogPPSubfileChangeSize"]));
             }
         }
     }

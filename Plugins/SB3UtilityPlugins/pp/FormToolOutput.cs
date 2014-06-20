@@ -6,7 +6,7 @@ using UrielGuy.SyntaxHighlightingTextBox;
 
 namespace SB3Utility
 {
-	public partial class FormToolOutput : DockContent
+	public partial class FormToolOutput : DockContent, EditedContent
 	{
 		public ToolOutputEditor Editor { get; protected set; }
 		public string EditorVar { get; protected set; }
@@ -45,6 +45,28 @@ namespace SB3Utility
 			Gui.Docking.ShowDockContent(this, Gui.Docking.DockEditors, ContentCategory.Others);
 		}
 
+		public bool Changed
+		{
+			get { return Editor.Changed; }
+
+			set
+			{
+				if (value)
+				{
+					if (!Text.EndsWith("*"))
+					{
+						Text += "*";
+					}
+				}
+				else if (Text.EndsWith("*"))
+				{
+					lstParser parser = (lstParser)Gui.Scripting.Variables[ParserVar];
+					Text = parser.Name;
+				}
+				Editor.Changed = value;
+			}
+		}
+
 		private void checkBoxWordWrap_Click(object sender, EventArgs e)
 		{
 			syntaxHighlightingTextBoxToolOutput.WordWrap = !syntaxHighlightingTextBoxToolOutput.WordWrap;
@@ -59,6 +81,7 @@ namespace SB3Utility
 
 			this.Text += '*';
 			edited = true;
+			Changed = true;
 		}
 
 		private void buttonApply_Click(object sender, EventArgs e)

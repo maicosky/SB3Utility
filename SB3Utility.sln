@@ -12,6 +12,7 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SB3UtilityPlugins", "Plugins\SB3UtilityPlugins\SB3UtilityPlugins.csproj", "{76C12FB4-AEBF-4271-9CCA-6F04A25ED266}"
 	ProjectSection(ProjectDependencies) = postProject
 		{120B541E-0A9D-4871-9315-679CB97109E2} = {120B541E-0A9D-4871-9315-679CB97109E2}
+		{5B6EAC43-1947-4B58-9C52-C42810B0F301} = {5B6EAC43-1947-4B58-9C52-C42810B0F301}
 		{A351DFAB-3235-4CEA-9916-1BAE973B65AE} = {A351DFAB-3235-4CEA-9916-1BAE973B65AE}
 	EndProjectSection
 EndProject
@@ -41,6 +42,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PPD_Preview_Clothes", "PPD_Preview_Clothes\PPD_Preview_Clothes.csproj", "{2B7FE5F1-FCA8-4821-A5AD-9EED3F995730}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SyntaxHighlightingTextBox", "Plugins\SyntaxHighlightingTextBox\SyntaxHighlightingTextBox.csproj", "{93EC5C55-84BB-4FA4-8599-A6C85841E982}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SB3UtilityNIF", "Plugins\SB3UtilityNIF\SB3UtilityNIF.vcxproj", "{5B6EAC43-1947-4B58-9C52-C42810B0F301}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -198,6 +201,20 @@ Global
 		{93EC5C55-84BB-4FA4-8599-A6C85841E982}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{93EC5C55-84BB-4FA4-8599-A6C85841E982}.Release|Win32.ActiveCfg = Release|Any CPU
 		{93EC5C55-84BB-4FA4-8599-A6C85841E982}.Release|x86.ActiveCfg = Release|Any CPU
+		{5B6EAC43-1947-4B58-9C52-C42810B0F301}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{5B6EAC43-1947-4B58-9C52-C42810B0F301}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{5B6EAC43-1947-4B58-9C52-C42810B0F301}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{5B6EAC43-1947-4B58-9C52-C42810B0F301}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5B6EAC43-1947-4B58-9C52-C42810B0F301}.Debug|Win32.Build.0 = Debug|Win32
+		{5B6EAC43-1947-4B58-9C52-C42810B0F301}.Debug|x86.ActiveCfg = Debug|Win32
+		{5B6EAC43-1947-4B58-9C52-C42810B0F301}.Debug|x86.Build.0 = Debug|Win32
+		{5B6EAC43-1947-4B58-9C52-C42810B0F301}.Release|Any CPU.ActiveCfg = Release|Win32
+		{5B6EAC43-1947-4B58-9C52-C42810B0F301}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{5B6EAC43-1947-4B58-9C52-C42810B0F301}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{5B6EAC43-1947-4B58-9C52-C42810B0F301}.Release|Win32.ActiveCfg = Release|Win32
+		{5B6EAC43-1947-4B58-9C52-C42810B0F301}.Release|Win32.Build.0 = Release|Win32
+		{5B6EAC43-1947-4B58-9C52-C42810B0F301}.Release|x86.ActiveCfg = Release|Win32
+		{5B6EAC43-1947-4B58-9C52-C42810B0F301}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -169,6 +169,7 @@
     </Compile>
     <None Include="app.config">
       <SubType>Designer</SubType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -199,6 +200,7 @@ if not exist SlimDX.dll (echo SlimDX.dll missing! &amp;&amp; copy ..\SB3UtilityE
 if not exist Jolt.dll (echo Jolt.dll missing! &amp;&amp; copy ..\SB3UtilityExternalLibraries\Jolt.dll)
 if not exist Jolt.Testing.GeneratedTypes.dll (echo Jolt.Testing.GeneratedTypes.dll missing! &amp;&amp; copy ..\SB3UtilityExternalLibraries\Jolt.Testing.GeneratedTypes.dll)
 if not exist WeifenLuo.WinFormsUI.Docking.dll (echo WeifenLuo.WinFormsUI.Docking.dll missing! &amp;&amp; copy ..\SB3UtilityExternalLibraries\WeifenLuo.WinFormsUI.Docking.dll)
+if not exist plugins\niflib.dll (echo plugins\niflib.dll missing! &amp;&amp; copy ..\SB3UtilityExternalLibraries\niflib.dll)
 if not exist plugins\libfbxsdk.dll (echo plugins\libfbxsdk.dll missing! &amp;&amp; copy ..\SB3UtilityExternalLibraries\libfbxsdk.dll plugins)
 REM The following DLLs are needed for the dependency check of SB3UtilityFBX. Not needed to be deployed.
 REM if exist plugins\Jolt.dll del plugins\Jolt.dll

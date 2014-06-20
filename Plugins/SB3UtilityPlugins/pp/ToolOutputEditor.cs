@@ -5,7 +5,7 @@ using System.IO;
 namespace SB3Utility
 {
 	[Plugin]
-	public class ToolOutputEditor
+	public class ToolOutputEditor : EditedContent
 	{
 		public ToolOutputParser Parser { get; protected set; }
 		public string Text { get; protected set; }
@@ -13,12 +13,20 @@ namespace SB3Utility
 		string extension;
 		int ppFormatIndex;
 
+		protected bool contentChanged;
+
 		public ToolOutputEditor(ToolOutputParser parser, int ppFormatIndex)
 		{
 			Parser = parser;
 			this.ppFormatIndex = ppFormatIndex;
 			extension = Path.GetExtension(parser.Name);
 			Text = GetData();
+		}
+
+		public bool Changed
+		{
+			get { return contentChanged; }
+			set { contentChanged = value; }
 		}
 
 		public static ExternalTool SelectTool(string extension, int ppFormatIndex, bool forDecoding)

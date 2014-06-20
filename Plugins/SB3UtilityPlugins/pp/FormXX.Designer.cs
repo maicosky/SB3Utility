@@ -725,7 +725,7 @@
 			// 
 			this.splitContainerMesh.Panel2.Controls.Add(this.splitContainerMeshCrossRef);
 			this.splitContainerMesh.Size = new System.Drawing.Size(251, 464);
-			this.splitContainerMesh.SplitterDistance = 264;
+			this.splitContainerMesh.SplitterDistance = 263;
 			this.splitContainerMesh.TabIndex = 3;
 			this.splitContainerMesh.TabStop = false;
 			// 
@@ -740,7 +740,7 @@
 			this.listViewMesh.LabelWrap = false;
 			this.listViewMesh.Location = new System.Drawing.Point(0, 0);
 			this.listViewMesh.Name = "listViewMesh";
-			this.listViewMesh.Size = new System.Drawing.Size(251, 264);
+			this.listViewMesh.Size = new System.Drawing.Size(251, 263);
 			this.listViewMesh.Sorting = System.Windows.Forms.SortOrder.Ascending;
 			this.listViewMesh.TabIndex = 1;
 			this.listViewMesh.UseCompatibleStateImageBehavior = false;
@@ -764,7 +764,7 @@
 			// 
 			this.splitContainerMeshCrossRef.Panel2.Controls.Add(this.listViewMeshTexture);
 			this.splitContainerMeshCrossRef.Panel2.Controls.Add(this.label70);
-			this.splitContainerMeshCrossRef.Size = new System.Drawing.Size(251, 196);
+			this.splitContainerMeshCrossRef.Size = new System.Drawing.Size(251, 197);
 			this.splitContainerMeshCrossRef.SplitterDistance = 94;
 			this.splitContainerMeshCrossRef.TabIndex = 2;
 			this.splitContainerMeshCrossRef.TabStop = false;
@@ -809,7 +809,7 @@
 			this.listViewMeshTexture.LabelWrap = false;
 			this.listViewMeshTexture.Location = new System.Drawing.Point(0, 13);
 			this.listViewMeshTexture.Name = "listViewMeshTexture";
-			this.listViewMeshTexture.Size = new System.Drawing.Size(251, 85);
+			this.listViewMeshTexture.Size = new System.Drawing.Size(251, 86);
 			this.listViewMeshTexture.Sorting = System.Windows.Forms.SortOrder.Ascending;
 			this.listViewMeshTexture.TabIndex = 3;
 			this.listViewMeshTexture.UseCompatibleStateImageBehavior = false;
@@ -852,7 +852,7 @@
 			// 
 			this.splitContainerMaterial.Panel2.Controls.Add(this.splitContainerMaterialCrossRef);
 			this.splitContainerMaterial.Size = new System.Drawing.Size(251, 464);
-			this.splitContainerMaterial.SplitterDistance = 264;
+			this.splitContainerMaterial.SplitterDistance = 263;
 			this.splitContainerMaterial.TabIndex = 4;
 			this.splitContainerMaterial.TabStop = false;
 			// 
@@ -867,7 +867,7 @@
 			this.listViewMaterial.LabelWrap = false;
 			this.listViewMaterial.Location = new System.Drawing.Point(0, 0);
 			this.listViewMaterial.Name = "listViewMaterial";
-			this.listViewMaterial.Size = new System.Drawing.Size(251, 264);
+			this.listViewMaterial.Size = new System.Drawing.Size(251, 263);
 			this.listViewMaterial.Sorting = System.Windows.Forms.SortOrder.Ascending;
 			this.listViewMaterial.TabIndex = 1;
 			this.listViewMaterial.UseCompatibleStateImageBehavior = false;
@@ -891,7 +891,7 @@
 			// 
 			this.splitContainerMaterialCrossRef.Panel2.Controls.Add(this.listViewMaterialTexture);
 			this.splitContainerMaterialCrossRef.Panel2.Controls.Add(this.label72);
-			this.splitContainerMaterialCrossRef.Size = new System.Drawing.Size(251, 196);
+			this.splitContainerMaterialCrossRef.Size = new System.Drawing.Size(251, 197);
 			this.splitContainerMaterialCrossRef.SplitterDistance = 94;
 			this.splitContainerMaterialCrossRef.TabIndex = 2;
 			this.splitContainerMaterialCrossRef.TabStop = false;
@@ -936,7 +936,7 @@
 			this.listViewMaterialTexture.LabelWrap = false;
 			this.listViewMaterialTexture.Location = new System.Drawing.Point(0, 13);
 			this.listViewMaterialTexture.Name = "listViewMaterialTexture";
-			this.listViewMaterialTexture.Size = new System.Drawing.Size(251, 85);
+			this.listViewMaterialTexture.Size = new System.Drawing.Size(251, 86);
 			this.listViewMaterialTexture.Sorting = System.Windows.Forms.SortOrder.Ascending;
 			this.listViewMaterialTexture.TabIndex = 3;
 			this.listViewMaterialTexture.UseCompatibleStateImageBehavior = false;
@@ -979,7 +979,7 @@
 			// 
 			this.splitContainerTexture.Panel2.Controls.Add(this.splitContainerTextureCrossRef);
 			this.splitContainerTexture.Size = new System.Drawing.Size(251, 464);
-			this.splitContainerTexture.SplitterDistance = 264;
+			this.splitContainerTexture.SplitterDistance = 263;
 			this.splitContainerTexture.TabIndex = 3;
 			this.splitContainerTexture.TabStop = false;
 			// 
@@ -994,7 +994,7 @@
 			this.listViewTexture.LabelWrap = false;
 			this.listViewTexture.Location = new System.Drawing.Point(0, 0);
 			this.listViewTexture.Name = "listViewTexture";
-			this.listViewTexture.Size = new System.Drawing.Size(251, 264);
+			this.listViewTexture.Size = new System.Drawing.Size(251, 263);
 			this.listViewTexture.Sorting = System.Windows.Forms.SortOrder.Ascending;
 			this.listViewTexture.TabIndex = 1;
 			this.listViewTexture.UseCompatibleStateImageBehavior = false;
@@ -1018,7 +1018,7 @@
 			// 
 			this.splitContainerTextureCrossRef.Panel2.Controls.Add(this.listViewTextureMaterial);
 			this.splitContainerTextureCrossRef.Panel2.Controls.Add(this.label74);
-			this.splitContainerTextureCrossRef.Size = new System.Drawing.Size(251, 196);
+			this.splitContainerTextureCrossRef.Size = new System.Drawing.Size(251, 197);
 			this.splitContainerTextureCrossRef.SplitterDistance = 94;
 			this.splitContainerTextureCrossRef.TabIndex = 2;
 			this.splitContainerTextureCrossRef.TabStop = false;
@@ -1063,7 +1063,7 @@
 			this.listViewTextureMaterial.LabelWrap = false;
 			this.listViewTextureMaterial.Location = new System.Drawing.Point(0, 13);
 			this.listViewTextureMaterial.Name = "listViewTextureMaterial";
-			this.listViewTextureMaterial.Size = new System.Drawing.Size(251, 85);
+			this.listViewTextureMaterial.Size = new System.Drawing.Size(251, 86);
 			this.listViewTextureMaterial.Sorting = System.Windows.Forms.SortOrder.Ascending;
 			this.listViewTextureMaterial.TabIndex = 3;
 			this.listViewTextureMaterial.UseCompatibleStateImageBehavior = false;
@@ -1083,18 +1083,16 @@
 			// 
 			// tabControlViews
 			// 
-			this.tabControlViews.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
 			this.tabControlViews.Controls.Add(this.tabPageFrameView);
 			this.tabControlViews.Controls.Add(this.tabPageBoneView);
 			this.tabControlViews.Controls.Add(this.tabPageMeshView);
 			this.tabControlViews.Controls.Add(this.tabPageMaterialView);
 			this.tabControlViews.Controls.Add(this.tabPageTextureView);
+			this.tabControlViews.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.tabControlViews.Location = new System.Drawing.Point(0, 0);
 			this.tabControlViews.Name = "tabControlViews";
 			this.tabControlViews.SelectedIndex = 0;
-			this.tabControlViews.Size = new System.Drawing.Size(261, 518);
+			this.tabControlViews.Size = new System.Drawing.Size(260, 518);
 			this.tabControlViews.TabIndex = 133;
 			// 
 			// tabPageFrameView
@@ -1112,7 +1110,7 @@
 			this.tabPageFrameView.Controls.Add(this.textBoxFrameName);
 			this.tabPageFrameView.Location = new System.Drawing.Point(4, 22);
 			this.tabPageFrameView.Name = "tabPageFrameView";
-			this.tabPageFrameView.Size = new System.Drawing.Size(253, 492);
+			this.tabPageFrameView.Size = new System.Drawing.Size(252, 492);
 			this.tabPageFrameView.TabIndex = 2;
 			this.tabPageFrameView.Text = "Frame";
 			this.tabPageFrameView.UseVisualStyleBackColor = true;
@@ -1459,7 +1457,7 @@
 			this.tabPageBoneView.Controls.Add(this.textBoxBoneName);
 			this.tabPageBoneView.Location = new System.Drawing.Point(4, 22);
 			this.tabPageBoneView.Name = "tabPageBoneView";
-			this.tabPageBoneView.Size = new System.Drawing.Size(253, 492);
+			this.tabPageBoneView.Size = new System.Drawing.Size(252, 492);
 			this.tabPageBoneView.TabIndex = 8;
 			this.tabPageBoneView.Text = "Bone";
 			this.tabPageBoneView.UseVisualStyleBackColor = true;
@@ -1785,7 +1783,7 @@
 			this.tabPageMeshView.Controls.Add(this.textBoxMeshName);
 			this.tabPageMeshView.Location = new System.Drawing.Point(4, 22);
 			this.tabPageMeshView.Name = "tabPageMeshView";
-			this.tabPageMeshView.Size = new System.Drawing.Size(253, 492);
+			this.tabPageMeshView.Size = new System.Drawing.Size(252, 492);
 			this.tabPageMeshView.TabIndex = 0;
 			this.tabPageMeshView.Text = "Mesh";
 			this.tabPageMeshView.UseVisualStyleBackColor = true;
@@ -2249,7 +2247,7 @@
 			this.tabPageMaterialView.Controls.Add(this.textBoxMatName);
 			this.tabPageMaterialView.Location = new System.Drawing.Point(4, 22);
 			this.tabPageMaterialView.Name = "tabPageMaterialView";
-			this.tabPageMaterialView.Size = new System.Drawing.Size(253, 492);
+			this.tabPageMaterialView.Size = new System.Drawing.Size(252, 492);
 			this.tabPageMaterialView.TabIndex = 1;
 			this.tabPageMaterialView.Text = "Material";
 			this.tabPageMaterialView.UseVisualStyleBackColor = true;
@@ -2570,7 +2568,7 @@
 			this.tabPageTextureView.Controls.Add(this.textBoxTexName);
 			this.tabPageTextureView.Location = new System.Drawing.Point(4, 22);
 			this.tabPageTextureView.Name = "tabPageTextureView";
-			this.tabPageTextureView.Size = new System.Drawing.Size(253, 492);
+			this.tabPageTextureView.Size = new System.Drawing.Size(252, 492);
 			this.tabPageTextureView.TabIndex = 3;
 			this.tabPageTextureView.Text = "Texture";
 			this.tabPageTextureView.UseVisualStyleBackColor = true;

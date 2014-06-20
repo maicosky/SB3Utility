@@ -11,7 +11,7 @@ using UrielGuy.SyntaxHighlightingTextBox;
 
 namespace SB3Utility
 {
-	public partial class FormLST : DockContent, CanIncludeEditedContent
+	public partial class FormLST : DockContent, EditedContent
 	{
 		public string ParserVar { get; protected set; }
 

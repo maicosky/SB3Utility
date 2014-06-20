@@ -14,7 +14,7 @@ namespace SB3Utility
 {
 	[Plugin]
 	[PluginOpensFile(".xa")]
-	public partial class FormXA : DockContent, CanIncludeEditedContent
+	public partial class FormXA : DockContent, EditedContent
 	{
 		private enum MorphExportFormat
 		{
@@ -31,7 +31,6 @@ namespace SB3Utility
 		public string ParserVar { get; protected set; }
 		public string FormVar { get; protected set; }
 
-		private bool contentChanged = false;
 		private bool propertiesChanged = false;
 
 		private TextBox[][] xaMaterialMatrixText = new TextBox[6][];
@@ -129,22 +128,22 @@ namespace SB3Utility
 
 		public bool Changed
 		{
-			get { return contentChanged; }
+			get { return Editor.Changed; }
 
 			set
 			{
 				if (value)
 				{
-					if (!contentChanged)
+					if (!Text.EndsWith("*"))
 					{
 						Text += "*";
 					}
 				}
-				else if (contentChanged)
+				else if (Text.EndsWith("*"))
 				{
 					Text = Path.GetFileName(ToolTipText);
 				}
-				contentChanged = value;
+				Editor.Changed = value;
 			}
 		}
 
@@ -912,7 +911,7 @@ namespace SB3Utility
 				string unknown6 = ScriptHelper.Bytes("unknown6", Utility.BytesToString(clip.Unknown6));
 				string unknown7 = ScriptHelper.Bytes("unknown7", Utility.BytesToString(clip.Unknown7));
 				Gui.Scripting.RunScript(EditorVar + ".SetAnimationClipUnknowns(clipId=" + e.RowIndex + ", " + unknown1 + ", " + unknown2 + ", " + unknown3 + ", " + unknown4 + ", " + unknown5 + ", " + unknown6 + ", " + unknown7 + ")");
-				Changed = true;
+				Changed = Changed;
 
 				createAnimationClipDataGridView();
 			}
@@ -931,7 +930,7 @@ namespace SB3Utility
 
 				xaAnimationClip clip = (xaAnimationClip)loadedAnimationClip.Tag;
 				Gui.Scripting.RunScript(EditorVar + ".MoveAnimationClip(clip=" + EditorVar + ".Parser.AnimationSection.ClipList[" + loadedAnimationClip.Index + "], position=" + (loadedAnimationClip.Index - 1) + ")");
-				Changed = true;
+				Changed = Changed;
 
 				createAnimationClipDataGridView();
 			}
@@ -950,7 +949,7 @@ namespace SB3Utility
 
 				xaAnimationClip clip = (xaAnimationClip)loadedAnimationClip.Tag;
 				Gui.Scripting.RunScript(EditorVar + ".MoveAnimationClip(clip=" + EditorVar + ".Parser.AnimationSection.ClipList[" + loadedAnimationClip.Index + "], position=" + (loadedAnimationClip.Index + 1) + ")");
-				Changed = true;
+				Changed = Changed;
 
 				createAnimationClipDataGridView();
 			}
@@ -969,7 +968,7 @@ namespace SB3Utility
 
 				xaAnimationClip clip = (xaAnimationClip)loadedAnimationClip.Tag;
 				Gui.Scripting.RunScript(EditorVar + ".CopyAnimationClip(clip=" + EditorVar + ".Parser.AnimationSection.ClipList[" + loadedAnimationClip.Index + "], position=" + dataGridViewAnimationClip.Rows.Count + ")");
-				Changed = true;
+				Changed = Changed;
 
 				createAnimationClipDataGridView();
 				dataGridViewAnimationClip.Rows[dataGridViewAnimationClip.Rows.Count - 1].Selected = true;
@@ -989,7 +988,7 @@ namespace SB3Utility
 
 				xaAnimationClip clip = (xaAnimationClip)loadedAnimationClip.Tag;
 				Gui.Scripting.RunScript(EditorVar + ".DeleteAnimationClip(clip=" + EditorVar + ".Parser.AnimationSection.ClipList[" + loadedAnimationClip.Index + "])");
-				Changed = true;
+				Changed = Changed;
 
 				createAnimationClipDataGridView();
 			}
@@ -1254,7 +1253,7 @@ namespace SB3Utility
 							}
 							int numKeyframes = Editor.Parser.MorphSection.KeyframeList.Count;
 							Gui.Scripting.RunScript(EditorVar + ".ReplaceMorph(morph=" + source.Variable + ".Morphs[" + (int)source.Id + "], destMorphName=\"" + dragOptions.textBoxName.Text + "\", newName=\"" + dragOptions.textBoxNewName.Text + "\", replaceMorphMask=" + dragOptions.checkBoxReplaceMorphMask.Checked + ", replaceNormals=" + dragOptions.radioButtonReplaceNormalsYes.Checked + ", minSquaredDistance=" + ((float)dragOptions.numericUpDownMinimumDistanceSquared.Value).ToFloatString() + ", minKeyframes=" + dragOptions.radioButtonMorphMaskSize.Checked + ")");
-							Changed = true;
+							Changed = Changed;
 
 							UnloadXA();
 							LoadXA();
@@ -1312,7 +1311,7 @@ namespace SB3Utility
 				TreeNode clipNode = treeViewMorphClip.SelectedNode.Tag is xaMorphClip ? treeViewMorphClip.SelectedNode : treeViewMorphClip.SelectedNode.Parent;
 				xaMorphClip clip = (xaMorphClip)clipNode.Tag;
 				Gui.Scripting.RunScript(EditorVar + ".SetMorphClipName(position=" + Editor.Parser.MorphSection.ClipList.IndexOf(clip) + ", newName=\"" + editTextBoxMorphClipName.Text + "\")");
-				Changed = true;
+				Changed = Changed;
 
 				clipNode.Text = clip.Name + " [" + clip.MeshName + "]";
 			}
@@ -1332,7 +1331,7 @@ namespace SB3Utility
 				TreeNode clipNode = treeViewMorphClip.SelectedNode.Tag is xaMorphClip ? treeViewMorphClip.SelectedNode : treeViewMorphClip.SelectedNode.Parent;
 				xaMorphClip clip = (xaMorphClip)clipNode.Tag;
 				Gui.Scripting.RunScript(EditorVar + ".SetMorphClipMesh(position=" + Editor.Parser.MorphSection.ClipList.IndexOf(clip) + ", mesh=\"" + editTextBoxMorphClipMesh.Text + "\")");
-				Changed = true;
+				Changed = Changed;
 
 				clipNode.Text = clip.Name + " [" + clip.MeshName + "]";
 			}
@@ -1353,7 +1352,7 @@ namespace SB3Utility
 					xaMorphClip clip = (xaMorphClip)keyframeRefNode.Parent.Tag;
 					int refId = Int32.Parse(textBoxMorphFrameNameRefID.Text);
 					Gui.Scripting.RunScript(EditorVar + ".SetMorphKeyframeRefIndex(morphClip=\"" + clip.Name + "\", position=" + clip.KeyframeRefList.IndexOf(keyframeRef) + ", id=" + refId + ")");
-					Changed = true;
+					Changed = Changed;
 
 					keyframeRefNode.Text = keyframeRef.Index.ToString("D3") + " : " + keyframeRef.Name;
 				}
@@ -1372,7 +1371,7 @@ namespace SB3Utility
 				xaMorphKeyframeRef keyframeRef = (xaMorphKeyframeRef)keyframeRefNode.Tag;
 				xaMorphClip clip = (xaMorphClip)keyframeRefNode.Parent.Tag;
 				Gui.Scripting.RunScript(EditorVar + ".SetMorphKeyframeRefKeyframe(morphClip=\"" + clip.Name + "\", position=" + clip.KeyframeRefList.IndexOf(keyframeRef) + ", keyframe=\"" + comboBoxMorphRefKeyframe.Items[comboBoxMorphRefKeyframe.SelectedIndex] + "\")");
-				Changed = true;
+				Changed = Changed;
 
 				keyframeRefNode.Text = keyframeRef.Index.ToString("D3") + " : " + keyframeRef.Name;
 			}
@@ -1424,7 +1423,7 @@ namespace SB3Utility
 					pos = 0;
 				}
 				Gui.Scripting.RunScript(EditorVar + ".CreateMorphKeyframeRef(morphClip=\"" + clip.Name + "\", position=" + pos + ", keyframe=\"" + clip.KeyframeRefList[0].Name + "\")");
-				Changed = true;
+				Changed = Changed;
 
 				RefreshMorphs();
 				treeViewMorphClip.SelectedNode = treeViewMorphClip.SelectedNode.Tag is xaMorphClip
@@ -1449,7 +1448,7 @@ namespace SB3Utility
 				xaMorphKeyframeRef morphRef = (xaMorphKeyframeRef)treeViewMorphClip.SelectedNode.Tag;
 				int pos = clip.KeyframeRefList.IndexOf(morphRef);
 				Gui.Scripting.RunScript(EditorVar + ".RemoveMorphKeyframeRef(morphClip=\"" + clip.Name + "\", position=" + pos + ")");
-				Changed = true;
+				Changed = Changed;
 
 				RefreshMorphs();
 			}
@@ -1473,7 +1472,7 @@ namespace SB3Utility
 				if (pos > 0)
 				{
 					Gui.Scripting.RunScript(EditorVar + ".MoveMorphKeyframeRef(morphClip=\"" + clip.Name + "\", fromPos=" + pos + ", toPos=" + (pos - 1) + ")");
-					Changed = true;
+					Changed = Changed;
 
 					RefreshMorphs();
 				}
@@ -1498,7 +1497,7 @@ namespace SB3Utility
 				if (pos < clip.KeyframeRefList.Count - 1)
 				{
 					Gui.Scripting.RunScript(EditorVar + ".MoveMorphKeyframeRef(morphClip=\"" + clip.Name + "\", fromPos=" + pos + ", toPos=" + (pos + 1) + ")");
-					Changed = true;
+					Changed = Changed;
 
 					RefreshMorphs();
 				}
@@ -1592,7 +1591,7 @@ namespace SB3Utility
 				}
 
 				Gui.Scripting.RunScript(EditorVar + ".RenameMorphKeyframe(position=" + listViewMorphKeyframe.SelectedIndices[0] + ", newName=\"" + editTextBoxMorphNewKeyframeName.Text + "\")");
-				Changed = true;
+				Changed = Changed;
 
 				RefreshMorphs();
 			}
@@ -1748,7 +1747,7 @@ namespace SB3Utility
 				}
 
 				Gui.Scripting.RunScript(EditorVar + ".RemoveMorphKeyframe(name=\"" + keyframe.Name + "\")");
-				Changed = true;
+				Changed = Changed;
 
 				RefreshMorphs();
 			}
@@ -1869,7 +1868,7 @@ namespace SB3Utility
 								}
 							}
 							Gui.Scripting.RunScript(EditorVar + ".ReplaceAnimation(animation=" + source.Variable + ".Animations[" + (int)source.Id + "], resampleCount=" + dragOptions.numericResample.Value + ", method=\"" + dragOptions.comboBoxMethod.SelectedItem + "\", insertPos=" + dragOptions.numericPosition.Value + ")");
-							Changed = true;
+							Changed = Changed;
 
 							UnloadXA();
 							LoadXA();
@@ -1924,7 +1923,7 @@ namespace SB3Utility
 					{
 						xaAnimationTrack keyframeList = (xaAnimationTrack)listViewAnimationTrack.Items[e.Item].Tag;
 						Gui.Scripting.RunScript(EditorVar + ".RenameTrack(track=\"" + keyframeList.Name + "\", newName=\"" + name + "\")");
-						Changed = true;
+						Changed = Changed;
 
 						UnloadXA();
 						LoadXA();
@@ -1989,7 +1988,7 @@ namespace SB3Utility
 				{
 					Gui.Scripting.RunScript(EditorVar + ".RemoveTrack(track=\"" + ((xaAnimationTrack)item.Tag).Name + "\")");
 				}
-				Changed = true;
+				Changed = Changed;
 
 				UnloadXA();
 				LoadXA();
@@ -2020,7 +2019,7 @@ namespace SB3Utility
 			try
 			{
 				Gui.Scripting.RunScript(EditorVar + ".SaveXA(path=\"" + this.ToolTipText + "\", backup=" + keepBackupToolStripMenuItem.Checked + ")");
-				Changed = false;
+				Changed = Changed;
 			}
 			catch (Exception ex)
 			{
@@ -2035,7 +2034,7 @@ namespace SB3Utility
 				if (saveFileDialog1.ShowDialog() == DialogResult.OK)
 				{
 					Gui.Scripting.RunScript(EditorVar + ".SaveXA(path=\"" + saveFileDialog1.FileName + "\", backup=" + keepBackupToolStripMenuItem.Checked + ")");
-					Changed = false;
+					Changed = Changed;
 				}
 			}
 			catch (Exception ex)

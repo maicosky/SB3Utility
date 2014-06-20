@@ -1,4 +1,19 @@
-﻿[0.6.12]
+﻿[0.8.0]
+  - Added NIF Importer
+  - Fix for external tools of pp units not closing when the pp file is closed
+  - Fix in XX format conversion. Submesh Unknown5 in formats 5 to 7 must not be converted to 8.
+  - Fix for unrecognized changes by scripting leading to loss of work when a form was closed.
+  - Changed keeping FormXX editor panel constant
+  - Fix for error in the GUI after CopyMaterial
+  - Added closing open editors when adding or removing subfiles
+  - Fix for crashes because of invalid bones or duplicate frames in the skeleton
+  - Fix for not finding frames "behind" meshes with "Goto Frame" in the Bone Editor,
+       dragging a Bone into a workspace, reselecting a node after many operations
+  - Fix for pp subfile names being displayed elliptical
+  - Added first non-empty pp subfiles tab gets selected upon opening a pp file
+  - Support for Characolle Lump Of Sugar & Characolle Whirlpool
+
+[0.6.12]
   - Fix for crash when meshes with invalid bones were selected
   - Fix for crash when deleting unreferenced objects without having at least one workspace with an object of that xx in it
   - Added customizable font sizes for TreeViews and ListViews, resizable Dialogs with scaling Controls and Fonts

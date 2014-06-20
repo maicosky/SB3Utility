@@ -8,12 +8,14 @@ using SlimDX;
 namespace SB3Utility
 {
 	[Plugin]
-	public class xxEditor : IDisposable
+	public class xxEditor : IDisposable, EditedContent
 	{
 		public List<xxFrame> Frames { get; protected set; }
 		public List<xxFrame> Meshes { get; protected set; }
 
 		public xxParser Parser { get; protected set; }
+
+		protected bool contentChanged = false;
 
 		public xxEditor(xxParser parser)
 		{
@@ -44,6 +46,12 @@ namespace SB3Utility
 			Frames.Clear();
 			Meshes.Clear();
 			Parser = null;
+		}
+
+		public bool Changed
+		{
+			get { return contentChanged; }
+			set { contentChanged = value; }
 		}
 
 		[Plugin]
@@ -108,6 +116,7 @@ namespace SB3Utility
 			xxFrame frame = Frames[id];
 			frame.Unknown1 = (byte[])unknown1.Clone();
 			frame.Unknown2 = (byte[])unknown2.Clone();
+			Changed = true;
 		}
 
 		[Plugin]
@@ -116,6 +125,7 @@ namespace SB3Utility
 			xxFrame frame = Meshes[id];
 			xx.SetNumVector2PerVertex(frame.Mesh, numVector2[0]);
 			frame.Mesh.VertexListDuplicateUnknown = (byte[])vertListDup.Clone();
+			Changed = true;
 		}
 
 		[Plugin]
@@ -144,6 +154,7 @@ namespace SB3Utility
 			{
 				submesh.Unknown6 = (byte[])unknown6.Clone();
 			}
+			Changed = true;
 		}
 
 		[Plugin]
@@ -155,6 +166,7 @@ namespace SB3Utility
 			mat.Textures[1].Unknown1 = (byte[])tex2.Clone();
 			mat.Textures[2].Unknown1 = (byte[])tex3.Clone();
 			mat.Textures[3].Unknown1 = (byte[])tex4.Clone();
+			Changed = true;
 		}
 
 		[Plugin]
@@ -162,6 +174,7 @@ namespace SB3Utility
 		{
 			xxTexture tex = Parser.TextureList[id];
 			tex.Unknown1 = (byte[])unknown1.Clone();
+			Changed = true;
 		}
 
 		[Plugin]
@@ -172,6 +185,7 @@ namespace SB3Utility
 			var destParent = Frames[parent];
 			srcParent.RemoveChild(srcFrame);
 			destParent.InsertChild(index, srcFrame);
+			Changed = true;
 		}
 
 		[Plugin]
@@ -189,24 +203,28 @@ namespace SB3Utility
 			Frames.Clear();
 			Meshes.Clear();
 			InitFrames(Parser.Frame);
+			Changed = true;
 		}
 
 		[Plugin]
 		public void SetFrameName(int id, string name)
 		{
 			Frames[id].Name = name;
+			Changed = true;
 		}
 
 		[Plugin]
 		public void SetFrameName2(int id, string name)
 		{
 			Frames[id].Name2 = name;
+			Changed = true;
 		}
 
 		[Plugin]
 		public void SetFrameSRT(int id, double sX, double sY, double sZ, double rX, double rY, double rZ, double tX, double tY, double tZ)
 		{
 			Frames[id].Matrix = FbxUtility.SRTToMatrix(new Vector3((float)sX, (float)sY, (float)sZ), new Vector3((float)rX, (float)rY, (float)rZ), new Vector3((float)tX, (float)tY, (float)tZ));
+			Changed = true;
 		}
 
 		[Plugin]
@@ -240,6 +258,7 @@ namespace SB3Utility
 			m.M44 = (float)m44;
 
 			frame.Matrix = m;
+			Changed = true;
 		}
 
 		[Plugin]
@@ -254,6 +273,7 @@ namespace SB3Utility
 					xx.CreateBone(Frames[id], meshFrame.Mesh);
 				}
 			}
+			Changed = true;
 		}
 
 		[Plugin]
@@ -300,6 +320,7 @@ namespace SB3Utility
 			Frames.Clear();
 			Meshes.Clear();
 			InitFrames(Parser.Frame);
+			Changed = true;
 		}
 
 		[Plugin]
@@ -363,6 +384,7 @@ namespace SB3Utility
 			Frames.Clear();
 			Meshes.Clear();
 			InitFrames(Parser.Frame);
+			Changed = true;
 		}
 
 		[Plugin]
@@ -424,6 +446,7 @@ namespace SB3Utility
 			Frames.Clear();
 			Meshes.Clear();
 			InitFrames(Parser.Frame);
+			Changed = true;
 		}
 
 		void MergeFrame(xxFrame srcParent, xxFrame destParent)
@@ -548,6 +571,7 @@ namespace SB3Utility
 			Frames.Clear();
 			Meshes.Clear();
 			InitFrames(Parser.Frame);
+			Changed = true;
 		}
 
 		[Plugin]
@@ -561,6 +585,7 @@ namespace SB3Utility
 			}
 			bone = boneList[boneId];
 			bone.Name = name;
+			Changed = true;
 		}
 
 		[Plugin]
@@ -568,6 +593,7 @@ namespace SB3Utility
 		{
 			xxBone bone = Meshes[meshId].Mesh.BoneList[boneId];
 			bone.Matrix = FbxUtility.SRTToMatrix(new Vector3((float)sX, (float)sY, (float)sZ), new Vector3((float)rX, (float)rY, (float)rZ), new Vector3((float)tX, (float)tY, (float)tZ));
+			Changed = true;
 		}
 
 		[Plugin]
@@ -601,6 +627,7 @@ namespace SB3Utility
 			m.M44 = (float)m44;
 
 			bone.Matrix = m;
+			Changed = true;
 		}
 
 		[Plugin]
@@ -667,6 +694,7 @@ namespace SB3Utility
 			{
 				frame.Mesh.VertexListDuplicate = xx.CreateVertexListDup(frame.Mesh.SubmeshList);
 			}
+			Changed = true;
 		}
 
 		[Plugin]
@@ -681,6 +709,7 @@ namespace SB3Utility
 			copy.Name = Frames[0].Name;
 			copy.Index = boneList.Count;
 			boneList.Add(copy);
+			Changed = true;
 		}
 
 		[Plugin]
@@ -726,12 +755,14 @@ namespace SB3Utility
 					}
 				}
 			}
+			Changed = true;
 		}
 
 		[Plugin]
 		public void SetMaterialName(int id, string name)
 		{
 			Parser.MaterialList[id].Name = name;
+			Changed = true;
 		}
 
 		[Plugin]
@@ -743,6 +774,7 @@ namespace SB3Utility
 			mat.Specular = new Color4((float)(double)specular[3], (float)(double)specular[0], (float)(double)specular[1], (float)(double)specular[2]);
 			mat.Emissive = new Color4((float)(double)emissive[3], (float)(double)emissive[0], (float)(double)emissive[1], (float)(double)emissive[2]);
 			mat.Power = (float)shininess;
+			Changed = true;
 		}
 
 		[Plugin]
@@ -776,18 +808,21 @@ namespace SB3Utility
 			}
 
 			Parser.MaterialList.RemoveAt(id);
+			Changed = true;
 		}
 
 		[Plugin]
 		public void CopyMaterial(int id)
 		{
 			Parser.MaterialList.Add(Parser.MaterialList[id].Clone());
+			Changed = true;
 		}
 
 		[Plugin]
 		public void MergeMaterial(ImportedMaterial mat)
 		{
 			xx.ReplaceMaterial(Parser, mat);
+			Changed = true;
 		}
 
 		[Plugin]
@@ -818,12 +853,14 @@ namespace SB3Utility
 			{
 				Parser.MaterialList.Add(newMat);
 			}
+			Changed = true;
 		}
 
 		[Plugin]
 		public void SetMaterialTexture(int id, int index, string name)
 		{
 			Parser.MaterialList[id].Textures[index].Name = name;
+			Changed = true;
 		}
 
 		[Plugin]
@@ -836,6 +873,7 @@ namespace SB3Utility
 			Frames.Clear();
 			Meshes.Clear();
 			InitFrames(Parser.Frame);
+			Changed = true;
 		}
 
 		[Plugin]
@@ -850,6 +888,7 @@ namespace SB3Utility
 			{
 				submeshList.RemoveAt(submeshId);
 			}
+			Changed = true;
 		}
 
 		[Plugin]
@@ -859,6 +898,7 @@ namespace SB3Utility
 			xxSubmesh src = mesh.SubmeshList[submeshId];
 			mesh.SubmeshList.Remove(src);
 			mesh.SubmeshList.Insert(newPosition, src);
+			Changed = true;
 		}
 
 		[Plugin]
@@ -866,18 +906,21 @@ namespace SB3Utility
 		{
 			xxSubmesh submesh = Meshes[meshId].Mesh.SubmeshList[submeshId];
 			submesh.MaterialIndex = material;
+			Changed = true;
 		}
 
 		[Plugin]
 		public void MinBones(int id)
 		{
 			xx.RemoveUnusedBones(Meshes[id].Mesh);
+			Changed = true;
 		}
 
 		[Plugin]
 		public void CalculateNormals(int id, double threshold)
 		{
 			xx.CalculateNormals(Meshes[id].Mesh.SubmeshList, (float)threshold);
+			Changed = true;
 		}
 
 		[Plugin]
@@ -903,6 +946,7 @@ namespace SB3Utility
 				submeshList.AddRange(editor.Meshes[(int)(double)id].Mesh.SubmeshList);
 			}
 			xx.CalculateNormals(submeshList, (float)threshold);
+			Changed = true;
 		}
 
 		[Plugin]
@@ -915,6 +959,7 @@ namespace SB3Utility
 				skeletonFrames.Add(Frames[GetFrameId(root)]);
 			}
 			xx.CreateSkin(Meshes[meshId], skeletonFrames);
+			Changed = true;
 		}
 
 		[Plugin]
@@ -931,6 +976,7 @@ namespace SB3Utility
 			{
 				xx.ComputeBoneMatrices(meshFrame.Mesh.BoneList, Parser.Frame);
 			}
+			Changed = true;
 		}
 
 		[Plugin]
@@ -946,6 +992,7 @@ namespace SB3Utility
 			xx.CreateUnknowns(tex);
 
 			Parser.TextureList.Add(tex);
+			Changed = true;
 		}
 
 		[Plugin]
@@ -971,12 +1018,14 @@ namespace SB3Utility
 					}
 				}
 			}
+			Changed = true;
 		}
 
 		[Plugin]
 		public void MergeTexture(ImportedTexture tex)
 		{
 			xx.ReplaceTexture(Parser, tex);
+			Changed = true;
 		}
 
 		[Plugin]
@@ -1001,6 +1050,7 @@ namespace SB3Utility
 			{
 				Parser.TextureList.Add(newTex);
 			}
+			Changed = true;
 		}
 
 		[Plugin]
@@ -1022,6 +1072,7 @@ namespace SB3Utility
 			}
 
 			Parser.TextureList.RemoveAt(id);
+			Changed = true;
 		}
 
 		[Plugin]
@@ -1043,12 +1094,14 @@ namespace SB3Utility
 			}
 
 			tex.Name = name;
+			Changed = true;
 		}
 
 		[Plugin]
 		public void SaveXX(string path, bool backup)
 		{
 			xx.SaveXX(Parser, path, backup);
+			Changed = false;
 		}
 	}
 }

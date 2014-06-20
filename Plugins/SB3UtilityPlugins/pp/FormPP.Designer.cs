@@ -40,7 +40,7 @@
 			this.imageSubfilesListHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.tabPageSoundSubfiles = new System.Windows.Forms.TabPage();
 			this.soundSubfilesList = new System.Windows.Forms.ListView();
-			this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.soundSubfilesListHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.tabPageOtherSubfiles = new System.Windows.Forms.TabPage();
 			this.otherSubfilesList = new System.Windows.Forms.ListView();
 			this.otherSubfilesListHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -221,7 +221,7 @@
 			// 
 			this.soundSubfilesList.AutoArrange = false;
 			this.soundSubfilesList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader1});
+            this.soundSubfilesListHeader});
 			this.soundSubfilesList.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.soundSubfilesList.FullRowSelect = true;
 			this.soundSubfilesList.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
@@ -600,7 +600,7 @@
 		private System.Windows.Forms.ToolStripMenuItem closeToolStripMenuItem;
 		private System.Windows.Forms.TabPage tabPageSoundSubfiles;
 		private System.Windows.Forms.ListView soundSubfilesList;
-		private System.Windows.Forms.ColumnHeader columnHeader1;
+		private System.Windows.Forms.ColumnHeader soundSubfilesListHeader;
 		private System.Windows.Forms.ToolStripMenuItem backupExtensionToolStripMenuItem;
 		private SB3Utility.ToolStripEditTextBox backupExtensionToolStripEditTextBox;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;

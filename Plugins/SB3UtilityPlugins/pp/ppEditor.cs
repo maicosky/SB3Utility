@@ -11,12 +11,19 @@ using System.Xml;
 
 namespace SB3Utility
 {
+	public interface EditedContent
+	{
+		bool Changed { get; set; }
+	}
+
 	[Plugin]
-	public class ppEditor
+	public class ppEditor : EditedContent
 	{
 		public ppParser Parser { get; protected set; }
 
 		public static Dictionary<string, List<ExternalTool>> ExternalTools;
+
+		protected bool contentChanged = false;
 
 		public ppEditor(ppParser parser)
 		{
@@ -49,22 +56,36 @@ namespace SB3Utility
 			throw new Exception("Either use OpenPP(path, format) or use ppEditor(path, header).");
 		}
 
+		public bool Changed
+		{
+			get { return contentChanged; }
+			set { contentChanged = value; }
+		}
+
 		[Plugin]
 		public void SetFormat(int id)
 		{
-			Parser.Format = ppFormat.Array[id];
+			if (Parser.Format != ppFormat.Array[id])
+			{
+				Parser.Format = ppFormat.Array[id];
+				Changed = true;
+			}
 		}
 
 		[Plugin]
 		public void SetFormat(int sourceId, int destinationId)
 		{
-			Parser.Format = ppFormat.Array[destinationId];
-			foreach (IWriteFile subfile in Parser.Subfiles)
+			if (Parser.Format != ppFormat.Array[destinationId])
 			{
-				if (subfile is ppSubfile)
+				Parser.Format = ppFormat.Array[destinationId];
+				foreach (IWriteFile subfile in Parser.Subfiles)
 				{
-					((ppSubfile)subfile).ppFormat = ppFormat.Array[sourceId];
+					if (subfile is ppSubfile)
+					{
+						((ppSubfile)subfile).ppFormat = ppFormat.Array[sourceId];
+					}
 				}
+				Changed = true;
 			}
 		}
 
@@ -97,6 +118,7 @@ namespace SB3Utility
 		public void AddSubfile(string path)
 		{
 			Parser.Subfiles.Add(new RawFile(path));
+			Changed = true;
 		}
 
 		[Plugin]
@@ -110,6 +132,7 @@ namespace SB3Utility
 			}
 			Parser.Subfiles.RemoveAt(index);
 			Parser.Subfiles.Insert(index, new RawFile(path));
+			Changed = true;
 		}
 
 		[Plugin]
@@ -131,6 +154,7 @@ namespace SB3Utility
 			}
 
 			Parser.Subfiles.RemoveAt(index);
+			Changed = true;
 		}
 
 		[Plugin]
@@ -154,6 +178,7 @@ namespace SB3Utility
 			}
 
 			Parser.Subfiles[index].Name = newName;
+			Changed = true;
 			return newName;
 		}
 

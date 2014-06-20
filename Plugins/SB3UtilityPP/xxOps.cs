@@ -808,19 +808,13 @@ namespace SB3Utility
 					{
 						submesh.Unknown5 = new byte[20];
 					}
-					else if ((srcFormat < 5) && (destFormat >= 8))
+					else if ((srcFormat < 8) && (destFormat >= 8))
 					{
 						submesh.Unknown5 = new byte[21];
 					}
 					else if (((srcFormat >= 5) && (srcFormat < 8)) && (destFormat < 5))
 					{
 						submesh.Unknown5 = null;
-					}
-					else if (((srcFormat >= 5) && (srcFormat < 8)) && (destFormat >= 8))
-					{
-						byte[] unknown5 = submesh.Unknown5;
-						submesh.Unknown5 = new byte[21];
-						Array.Copy(unknown5, submesh.Unknown5, unknown5.Length);
 					}
 					else if ((srcFormat >= 8) && (destFormat < 5))
 					{

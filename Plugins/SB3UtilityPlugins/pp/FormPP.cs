@@ -10,21 +10,14 @@ using WeifenLuo.WinFormsUI.Docking;
 
 namespace SB3Utility
 {
-	public interface CanIncludeEditedContent
-	{
-		bool Changed { get; set; }
-	}
-
 	[Plugin]
 	[PluginOpensFile(".pp")]
-	public partial class FormPP : DockContent, CanIncludeEditedContent
+	public partial class FormPP : DockContent, EditedContent
 	{
 		public string FormVariable { get; protected set; }
 		public ppEditor Editor { get; protected set; }
 		public string EditorVar { get; protected set; }
 		public string ParserVar { get; protected set; }
-
-		private bool contentChanged = false;
 
 		List<ListView> subfileListViews = new List<ListView>();
 
@@ -146,7 +139,7 @@ namespace SB3Utility
 				subfileListViews.Add(soundSubfilesList);
 				subfileListViews.Add(otherSubfilesList);
 
-				InitSubfileLists();
+				InitSubfileLists(true);
 
 				ppHeader header = result as ppHeader;
 				foreach (ppFormat format in ppFormat.Array)
@@ -186,22 +179,22 @@ namespace SB3Utility
 
 		public bool Changed
 		{
-			get { return contentChanged; }
+			get { return Editor.Changed; }
 
 			set
 			{
 				if (value)
 				{
-					if (!contentChanged)
+					if (!Text.EndsWith("*"))
 					{
 						Text += "*";
 					}
 				}
-				else if (contentChanged)
+				else if (Text.EndsWith("*"))
 				{
 					Text = Path.GetFileName(ToolTipText);
 				}
-				contentChanged = value;
+				Editor.Changed = value;
 			}
 		}
 
@@ -223,7 +216,7 @@ namespace SB3Utility
 						ppParser parser = (ppParser)Gui.Scripting.Variables[ParserVar];
 						foreach (IWriteFile subfile in parser.Subfiles)
 						{
-							if (!(subfile is ppSubfile) && (!ChildForms.ContainsKey(subfile.Name) || ((CanIncludeEditedContent)ChildForms[subfile.Name]).Changed))
+							if (!(subfile is ppSubfile) && (!ChildForms.ContainsKey(subfile.Name) || ((EditedContent)ChildForms[subfile.Name]).Changed))
 							{
 								confirm = true;
 								break;
@@ -272,7 +265,7 @@ namespace SB3Utility
 			}
 		}
 
-		private void InitSubfileLists()
+		private void InitSubfileLists(bool opening)
 		{
 			adjustSubfileListsEnabled(false);
 			int[] selectedXX = new int[xxSubfilesList.SelectedIndices.Count];
@@ -291,12 +284,12 @@ namespace SB3Utility
 			otherSubfilesList.SelectedIndices.CopyTo(selectedOther, 0);
 			otherSubfilesList.Items.Clear();
 
-			int longestXX = -1, longestXA = -1, longestImg = -1, longestSnd = -1, longestOther = -1;
 			List<ListViewItem> xxFiles = new List<ListViewItem>(Editor.Parser.Subfiles.Count);
 			List<ListViewItem> xaFiles = new List<ListViewItem>(Editor.Parser.Subfiles.Count);
 			List<ListViewItem> imageFiles = new List<ListViewItem>(Editor.Parser.Subfiles.Count);
 			List<ListViewItem> soundFiles = new List<ListViewItem>(Editor.Parser.Subfiles.Count);
 			List<ListViewItem> otherFiles = new List<ListViewItem>(Editor.Parser.Subfiles.Count);
+			Font bold = new Font(xxSubfilesList.Font, FontStyle.Bold);
 			for (int i = 0; i < Editor.Parser.Subfiles.Count; i++)
 			{
 				IWriteFile subfile = Editor.Parser.Subfiles[i];
@@ -304,40 +297,41 @@ namespace SB3Utility
 				item.Tag = subfile;
 				if (!(subfile is ppSubfile))
 				{
-					item.Font = new Font(item.Font, subfile is ppSwapfile || subfile is RawFile ? FontStyle.Italic : FontStyle.Bold);
+					item.Font = new Font(xxSubfilesList.Font, subfile is ppSwapfile || subfile is RawFile ? FontStyle.Italic : FontStyle.Bold);
 				}
+				int itemWidth = (int)Math.Ceiling(Graphics.FromHwnd(Handle).MeasureString(item.Text, bold).Width) + 16;
 
 				string ext = Path.GetExtension(subfile.Name).ToLower();
 				if (ext.Equals(".xx"))
 				{
 					xxFiles.Add(item);
-					if (longestXX < 0 || subfile.Name.Length > ((IWriteFile)xxFiles[longestXX].Tag).Name.Length)
+					if (itemWidth > xxSubfilesListHeader.Width)
 					{
-						longestXX = xxFiles.Count - 1;
+						xxSubfilesListHeader.Width = itemWidth;
 					}
 				}
 				else if (ext.Equals(".xa"))
 				{
 					xaFiles.Add(item);
-					if (longestXA < 0 || subfile.Name.Length > ((IWriteFile)xaFiles[longestXA].Tag).Name.Length)
+					if (itemWidth > xaSubfilesListHeader.Width)
 					{
-						longestXA = xaFiles.Count - 1;
+						xaSubfilesListHeader.Width = itemWidth;
 					}
 				}
 				else if (ext.Equals(".ema") || Utility.ImageSupported(ext))
 				{
 					imageFiles.Add(item);
-					if (longestImg < 0 || subfile.Name.Length > ((IWriteFile)imageFiles[longestImg].Tag).Name.Length)
+					if (itemWidth > imageSubfilesListHeader.Width)
 					{
-						longestImg = imageFiles.Count - 1;
+						imageSubfilesListHeader.Width = itemWidth;
 					}
 				}
 				else if (ext.Equals(".ogg") || ext.Equals(".wav"))
 				{
 					soundFiles.Add(item);
-					if (longestSnd < 0 || subfile.Name.Length > ((IWriteFile)soundFiles[longestSnd].Tag).Name.Length)
+					if (itemWidth > soundSubfilesListHeader.Width)
 					{
-						longestSnd = soundFiles.Count - 1;
+						soundSubfilesListHeader.Width = itemWidth;
 					}
 				}
 				else
@@ -348,39 +342,19 @@ namespace SB3Utility
 						item.BackColor = Color.LightCoral;
 					}
 					otherFiles.Add(item);
-					if (longestOther < 0 || subfile.Name.Length > ((IWriteFile)otherFiles[longestOther].Tag).Name.Length)
+					if (itemWidth > otherSubfilesListHeader.Width)
 					{
-						longestOther = otherFiles.Count - 1;
+						otherSubfilesListHeader.Width = itemWidth;
 					}
 				}
 			}
 			xxSubfilesList.Items.AddRange(xxFiles.ToArray());
-			if (longestXX >= 0)
-			{
-				xxSubfilesList.Items[longestXX].EnsureVisible();
-			}
 			xaSubfilesList.Items.AddRange(xaFiles.ToArray());
-			if (longestXA >= 0)
-			{
-				xaSubfilesList.Items[longestXA].EnsureVisible();
-			}
 			imageSubfilesList.Items.AddRange(imageFiles.ToArray());
-			if (longestImg >= 0)
-			{
-				imageSubfilesList.Items[longestImg].EnsureVisible();
-			}
 			soundSubfilesList.Items.AddRange(soundFiles.ToArray());
-			if (longestSnd >= 0)
-			{
-				soundSubfilesList.Items[longestSnd].EnsureVisible();
-			}
 			otherSubfilesList.Items.AddRange(otherFiles.ToArray());
-			if (longestOther >= 0)
-			{
-				otherSubfilesList.Items[longestOther].EnsureVisible();
-			}
 			adjustSubfileListsEnabled(true);
-			adjustSubfileLists();
+			adjustSubfileLists(opening);
 			ReselectItems(xxSubfilesList, selectedXX);
 			ReselectItems(xaSubfilesList, selectedXA);
 			ReselectItems(imageSubfilesList, selectedImg);
@@ -423,12 +397,11 @@ namespace SB3Utility
 			}
 		}
 
-		private void adjustSubfileLists()
+		private void adjustSubfileLists(bool opening)
 		{
+			bool first = true;
 			for (int i = 0; i < subfileListViews.Count; i++)
 			{
-				subfileListViews[i].AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
-
 				TabPage tabPage = (TabPage)subfileListViews[i].Parent;
 				int countIdx = tabPage.Text.IndexOf('[');
 				if (countIdx > 0)
@@ -438,6 +411,11 @@ namespace SB3Utility
 				else
 				{
 					tabPage.Text += " [" + subfileListViews[i].Items.Count + "]";
+				}
+				if (opening && subfileListViews[i].Items.Count > 0 && first)
+				{
+					tabControlSubfiles.SelectTabWithoutLoosingFocus(tabPage);
+					first = false;
 				}
 			}
 		}
@@ -549,7 +527,6 @@ namespace SB3Utility
 						if (((IWriteFile)item.Tag).Name.Equals(name, StringComparison.InvariantCultureIgnoreCase))
 						{
 							item.Font = new Font(item.Font, FontStyle.Bold);
-							xxSubfilesList.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
 							changed = item.Tag is ppSwapfile || item.Tag is RawFile;
 							item.Tag = Gui.Scripting.Variables[childParserVar];
 							break;
@@ -578,7 +555,6 @@ namespace SB3Utility
 				list.Add(formXA);
 
 				item.Font = new Font(item.Font, FontStyle.Bold);
-				xaSubfilesList.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
 			}
 			return list;
 		}
@@ -603,7 +579,6 @@ namespace SB3Utility
 						if (((IWriteFile)item.Tag).Name.Equals(name, StringComparison.InvariantCultureIgnoreCase))
 						{
 							item.Font = new Font(item.Font, FontStyle.Bold);
-							xaSubfilesList.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
 							changed = item.Tag is ppSwapfile || item.Tag is RawFile;
 							item.Tag = Gui.Scripting.Variables[childParserVar];
 							break;
@@ -645,11 +620,16 @@ namespace SB3Utility
 					FormLST formLST = (FormLST)form;
 					parserVar = formLST.ParserVar;
 				}
+				else if (form is FormToolOutput)
+				{
+					FormToolOutput formToolOutput = (FormToolOutput)form;
+					parserVar = formToolOutput.ParserVar;
+				}
 
 				bool dontSwap = false;
-				if (form is CanIncludeEditedContent)
+				if (form is EditedContent)
 				{
-					CanIncludeEditedContent editorForm = (CanIncludeEditedContent)form;
+					EditedContent editorForm = (EditedContent)form;
 					if (!editorForm.Changed)
 					{
 						List<IWriteFile> headerFromFile = Editor.Parser.Format.ppHeader.ReadHeader(Editor.Parser.FilePath, Editor.Parser.Format);
@@ -662,7 +642,7 @@ namespace SB3Utility
 
 								ChildParserVars.Remove((string)form.Tag);
 								Gui.Scripting.RunScript(parserVar + "=null");
-								InitSubfileLists();
+								InitSubfileLists(false);
 								dontSwap = true;
 								break;
 							}
@@ -682,7 +662,7 @@ namespace SB3Utility
 						ChildParserVars.Remove((string)form.Tag);
 						Gui.Scripting.RunScript(swapfileVar + "=null");
 						Gui.Scripting.RunScript(parserVar + "=null");
-						InitSubfileLists();
+						InitSubfileLists(false);
 					}
 				}
 			}
@@ -834,7 +814,7 @@ namespace SB3Utility
 				}
 				else if (ChildForms.ContainsKey(unit.Name))
 				{
-					var editorForm = ChildForms[unit.Name] as CanIncludeEditedContent;
+					var editorForm = ChildForms[unit.Name] as EditedContent;
 					if (editorForm != null)
 					{
 						editorForm.Changed = false;
@@ -865,7 +845,7 @@ namespace SB3Utility
 						}
 					}
 				}
-				InitSubfileLists();
+				InitSubfileLists(false);
 			}
 			Changed = false;
 		}
@@ -893,7 +873,7 @@ namespace SB3Utility
 				ppParser = (ppParser)Gui.Scripting.RunScript(ParserVar + " = OpenPP(path=\"" + ppParser.FilePath + "\", format=" + (int)format.ppFormatIdx + ")");
 				Editor = (ppEditor)Gui.Scripting.RunScript(EditorVar + " = ppEditor(parser=" + ParserVar + ")");
 
-				InitSubfileLists();
+				InitSubfileLists(true);
 			}
 			catch (Exception ex)
 			{
@@ -907,19 +887,59 @@ namespace SB3Utility
 			{
 				if (openFileDialog1.ShowDialog() == DialogResult.OK)
 				{
+					List<string> editors = new List<string>(openFileDialog1.FileNames.Length);
+					foreach (string path in openFileDialog1.FileNames)
+					{
+						DockContent content;
+						if (ChildForms.TryGetValue(Path.GetFileName(path), out content))
+						{
+							EditedContent editor = content as EditedContent;
+							if (editor != null)
+							{
+								editors.Add(Path.GetFileName(path));
+							}
+						}
+					}
+					if (!CloseEditors(subfilesToolStripMenuItem.Text + "/" + addFilesToolStripMenuItem.Text, editors))
+					{
+						return;
+					}
 					foreach (string path in openFileDialog1.FileNames)
 					{
 						Gui.Scripting.RunScript(EditorVar + ".AddSubfile(path=\"" + path + "\", replace=True)");
-						Changed = true;
+						Changed = Changed;
 					}
 
-					InitSubfileLists();
+					InitSubfileLists(false);
 				}
 			}
 			catch (Exception ex)
 			{
 				Utility.ReportException(ex);
 			}
+		}
+
+		bool CloseEditors(string title, List<string> editors)
+		{
+			if (editors.Count > 0)
+			{
+				FormPPSubfileChange dialog = new FormPPSubfileChange(title, editors.ToArray(), ChildForms);
+				if (dialog.ShowDialog() == DialogResult.Cancel)
+				{
+					return false;
+				}
+				foreach (string editorName in editors)
+				{
+					DockContent content;
+					if (ChildForms.TryGetValue(editorName, out content))
+					{
+						EditedContent editor = content as EditedContent;
+						editor.Changed = false;
+						content.Close();
+					}
+				}
+			}
+			return true;
 		}
 
 		private void removeToolStripMenuItem_Click(object sender, EventArgs e)
@@ -930,6 +950,10 @@ namespace SB3Utility
 
 				if (tabControlSubfiles.SelectedTab == tabPageXXSubfiles)
 				{
+					if (!FindAndCloseEditorsForRemoval(xxSubfilesList))
+					{
+						return;
+					}
 					foreach (ListViewItem item in xxSubfilesList.SelectedItems)
 					{
 						IWriteFile writeFile = (IWriteFile)item.Tag;
@@ -950,6 +974,10 @@ namespace SB3Utility
 				}
 				else if (tabControlSubfiles.SelectedTab == tabPageXASubfiles)
 				{
+					if (!FindAndCloseEditorsForRemoval(xaSubfilesList))
+					{
+						return;
+					}
 					foreach (ListViewItem item in xaSubfilesList.SelectedItems)
 					{
 						IWriteFile writeFile = (IWriteFile)item.Tag;
@@ -989,6 +1017,10 @@ namespace SB3Utility
 				}
 				else if (tabControlSubfiles.SelectedTab == tabPageOtherSubfiles)
 				{
+					if (!FindAndCloseEditorsForRemoval(otherSubfilesList))
+					{
+						return;
+					}
 					foreach (ListViewItem item in otherSubfilesList.SelectedItems)
 					{
 						IWriteFile writeFile = (IWriteFile)item.Tag;
@@ -999,14 +1031,32 @@ namespace SB3Utility
 
 				if (removed)
 				{
-					Changed = true;
-					InitSubfileLists();
+					Changed = Changed;
+					InitSubfileLists(false);
 				}
 			}
 			catch (Exception ex)
 			{
 				Utility.ReportException(ex);
 			}
+		}
+
+		private bool FindAndCloseEditorsForRemoval(ListView listView)
+		{
+			List<string> editors = new List<string>(listView.SelectedItems.Count);
+			foreach (ListViewItem item in listView.SelectedItems)
+			{
+				DockContent content;
+				if (ChildForms.TryGetValue(item.Text, out content))
+				{
+					EditedContent editor = content as EditedContent;
+					if (editor != null)
+					{
+						editors.Add(item.Text);
+					}
+				}
+			}
+			return CloseEditors(subfilesToolStripMenuItem.Text + "/" + removeToolStripMenuItem.Text, editors);
 		}
 
 		private void renameToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1059,10 +1109,9 @@ namespace SB3Utility
 							IWriteFile subfile = (IWriteFile)item.Tag;
 							string oldName = subfile.Name;
 							string newName = (string)Gui.Scripting.RunScript(EditorVar + ".RenameSubfile(subfile=\"" + subfile.Name + "\", newName=\"" + renameForm.NewName + "\")");
-							Changed = true;
+							Changed = Changed;
 
 							item.Text = newName;
-							item.ListView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
 
 							if (tabControlSubfiles.SelectedTab == tabPageXXSubfiles ||
 								tabControlSubfiles.SelectedTab == tabPageXASubfiles ||
@@ -1085,7 +1134,7 @@ namespace SB3Utility
 								}
 							}
 
-							InitSubfileLists();
+							InitSubfileLists(false);
 						}
 					}
 				}
@@ -1346,7 +1395,6 @@ namespace SB3Utility
 						if (((IWriteFile)item.Tag).Name.Equals(name, StringComparison.InvariantCultureIgnoreCase))
 						{
 							item.Font = new Font(item.Font, FontStyle.Bold);
-							otherSubfilesList.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
 							changed = item.Tag is ppSwapfile || item.Tag is RawFile;
 							item.Tag = Gui.Scripting.Variables[childParserVar];
 							break;
@@ -1396,7 +1444,6 @@ namespace SB3Utility
 						if (((IWriteFile)item.Tag).Name.Equals(name, StringComparison.InvariantCultureIgnoreCase))
 						{
 							item.Font = new Font(item.Font, FontStyle.Bold);
-							otherSubfilesList.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
 							break;
 						}
 					}

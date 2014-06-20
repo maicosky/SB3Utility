@@ -517,7 +517,7 @@ namespace SB3Utility
 							ScriptHelper.Bytes("unknown1", row[2]),
 							ScriptHelper.Bytes("unknown2", row[3]) }) + ")");
 				}
-				formXX.Changed = true;
+				formXX.Changed = formXX.Changed;
 			}
 
 			var meshTableChanges = meshTable.GetChanges();
@@ -531,7 +531,7 @@ namespace SB3Utility
 							ScriptHelper.Bytes("numVector2", row[2]),
 							ScriptHelper.Bytes("vertListDup", row[3]) }) + ")");
 				}
-				formXX.Changed = true;
+				formXX.Changed = formXX.Changed;
 			}
 
 			var submeshTableChanges = submeshTable.GetChanges();
@@ -551,7 +551,7 @@ namespace SB3Utility
 							ScriptHelper.Bytes("unknown5", row[6]),
 							ScriptHelper.Bytes("unknown6", row[7]) }) + ")");
 				}
-				formXX.Changed = true;
+				formXX.Changed = formXX.Changed;
 			}
 
 			var materialTableChanges = materialTable.GetChanges();
@@ -568,7 +568,7 @@ namespace SB3Utility
 							ScriptHelper.Bytes("tex3", row[5]),
 							ScriptHelper.Bytes("tex4", row[6]) }) + ")");
 				}
-				formXX.Changed = true;
+				formXX.Changed = formXX.Changed;
 			}
 
 			var textureTableChanges = textureTable.GetChanges();
@@ -581,7 +581,7 @@ namespace SB3Utility
 							"id=" + row[0],
 							ScriptHelper.Bytes("unknown1", row[2]) }) + ")");
 				}
-				formXX.Changed = true;
+				formXX.Changed = formXX.Changed;
 			}
 		}
 

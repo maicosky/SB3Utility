@@ -6,9 +6,11 @@ using SlimDX;
 namespace SB3Utility
 {
 	[Plugin]
-	public class xaEditor : IDisposable
+	public class xaEditor : IDisposable, EditedContent
 	{
 		public xaParser Parser { get; protected set; }
+
+		protected bool contentChanged = false;
 
 		public xaEditor(xaParser parser)
 		{
@@ -20,10 +22,17 @@ namespace SB3Utility
 			Parser = null;
 		}
 
+		public bool Changed
+		{
+			get { return contentChanged; }
+			set { contentChanged = value; }
+		}
+
 		[Plugin]
 		public void SaveXA(string path, bool backup)
 		{
 			xa.SaveXA(Parser, path, backup);
+			Changed = false;
 		}
 
 		[Plugin]
@@ -33,24 +42,28 @@ namespace SB3Utility
 			xaMorphIndexSet set = xa.FindMorphIndexSet(oldName, Parser.MorphSection);
 			set.Name = newName;
 			Parser.MorphSection.ClipList[position].Name = newName;
+			Changed = true;
 		}
 
 		[Plugin]
 		public void SetMorphClipMesh(int position, string mesh)
 		{
 			Parser.MorphSection.ClipList[position].MeshName = mesh;
+			Changed = true;
 		}
 
 		[Plugin]
 		public void ReplaceMorph(WorkspaceMorph morph, string destMorphName, string newName, bool replaceMorphMask, bool replaceNormals, double minSquaredDistance, bool minKeyframes)
 		{
 			xa.ReplaceMorph(destMorphName, Parser, morph, newName, replaceMorphMask, replaceNormals, (float)minSquaredDistance, minKeyframes);
+			Changed = true;
 		}
 
 		[Plugin]
 		public void CalculateNormals(xxFrame meshFrame, string morphClip, string keyframe, double threshold)
 		{
 			xa.CalculateNormals(Parser, meshFrame, morphClip, keyframe, (float)threshold);
+			Changed = true;
 		}
 
 		[Plugin]
@@ -65,6 +78,7 @@ namespace SB3Utility
 					morphRef.Index = -1;
 					morphRef.Name = keyframe;
 					clip.KeyframeRefList.Insert(position, morphRef);
+					Changed = true;
 					return;
 				}
 			}
@@ -78,6 +92,7 @@ namespace SB3Utility
 				if (clip.Name == morphClip)
 				{
 					clip.KeyframeRefList.RemoveAt(position);
+					Changed = true;
 					return;
 				}
 			}
@@ -93,6 +108,7 @@ namespace SB3Utility
 					xaMorphKeyframeRef morphRef = clip.KeyframeRefList[fromPos];
 					clip.KeyframeRefList.RemoveAt(fromPos);
 					clip.KeyframeRefList.Insert(toPos, morphRef);
+					Changed = true;
 					return;
 				}
 			}
@@ -103,6 +119,7 @@ namespace SB3Utility
 		{
 			xaMorphKeyframe keyframe = xa.FindMorphKeyFrame(name, Parser.MorphSection);
 			Parser.MorphSection.KeyframeList.Remove(keyframe);
+			Changed = true;
 		}
 
 		[Plugin]
@@ -113,6 +130,7 @@ namespace SB3Utility
 				if (clip.Name == morphClip)
 				{
 					clip.KeyframeRefList[position].Name = keyframe;
+					Changed = true;
 					return;
 				}
 			}
@@ -126,6 +144,7 @@ namespace SB3Utility
 				if (clip.Name == morphClip)
 				{
 					clip.KeyframeRefList[position].Index = id;
+					Changed = true;
 					return;
 				}
 			}
@@ -147,6 +166,7 @@ namespace SB3Utility
 				}
 			}
 			keyframe.Name = newName;
+			Changed = true;
 		}
 
 		[Plugin]
@@ -154,6 +174,7 @@ namespace SB3Utility
 		{
 			var replaceMethod = (ReplaceAnimationMethod)Enum.Parse(typeof(ReplaceAnimationMethod), method);
 			ReplaceAnimation(animation, Parser, resampleCount, replaceMethod, insertPos);
+			Changed = true;
 		}
 
 		public static void ReplaceAnimation(WorkspaceAnimation wsAnimation, xaParser parser, int resampleCount, ReplaceAnimationMethod replaceMethod, int insertPos)
@@ -367,6 +388,7 @@ namespace SB3Utility
 		{
 			xaAnimationTrack xaTrack = xa.FindTrack(track, Parser);
 			xaTrack.Name = newName;
+			Changed = true;
 		}
 
 		[Plugin]
@@ -374,6 +396,7 @@ namespace SB3Utility
 		{
 			xaAnimationTrack xaTrack = xa.FindTrack(track, Parser);
 			Parser.AnimationSection.TrackList.Remove(xaTrack);
+			Changed = true;
 		}
 
 		[Plugin]
@@ -384,6 +407,7 @@ namespace SB3Utility
 			clip.End = end;
 			clip.Next = next;
 			clip.Speed = (float)speed;
+			Changed = true;
 		}
 
 		[Plugin]
@@ -397,6 +421,7 @@ namespace SB3Utility
 			clip.Unknown5 = (byte[])unknown5.Clone();
 			clip.Unknown6 = (byte[])unknown6.Clone();
 			clip.Unknown7 = (byte[])unknown7.Clone();
+			Changed = true;
 		}
 
 		[Plugin]
@@ -404,6 +429,7 @@ namespace SB3Utility
 		{
 			Parser.AnimationSection.ClipList.Remove(clip);
 			Parser.AnimationSection.ClipList.Insert(position, clip);
+			Changed = true;
 		}
 
 		[Plugin]
@@ -416,6 +442,7 @@ namespace SB3Utility
 			newClip.Next = clip.Next;
 			newClip.Speed = clip.Speed;
 			xa.CopyUnknowns(clip, newClip);
+			Changed = true;
 		}
 
 		[Plugin]
@@ -427,6 +454,7 @@ namespace SB3Utility
 			clip.Next = 0;
 			clip.Speed = 0;
 			xa.CreateUnknowns(clip);
+			Changed = true;
 		}
 	}
 }

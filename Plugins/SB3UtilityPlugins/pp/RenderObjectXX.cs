@@ -337,7 +337,14 @@ namespace SB3Utility
 		private void CreateCombinedMatrices(xxFrame frame, HashSet<string> extractFrames, Matrix combinedParent, Dictionary<string, Tuple<Matrix, Matrix>> extractMatrices)
 		{
 			Matrix combinedTransform = frame.Matrix * combinedParent;
-			extractMatrices.Add(frame.Name, new Tuple<Matrix, Matrix>(combinedTransform, Matrix.Invert(combinedTransform)));
+			try
+			{
+				extractMatrices.Add(frame.Name, new Tuple<Matrix, Matrix>(combinedTransform, Matrix.Invert(combinedTransform)));
+			}
+			catch (ArgumentException)
+			{
+				Report.ReportLog("A frame named " + frame.Name + " already exists.");
+			}
 
 			for (int i = 0; i < frame.Count; i++)
 			{
@@ -624,23 +631,26 @@ namespace SB3Utility
 					for (byte i = 0; i < numBones; i++)
 					{
 						string boneName = mesh.BoneNames[i];
-						AnimationFrame bone = (AnimationFrame)root.FindChild(boneName);
-						boneFrames[i] = bone;
-
-						boneDic.Add(boneName, i);
-
-						if (i < mesh.RealBones)
+						if (boneName != null)
 						{
-							int level = 0;
-							while (bone != root)
+							AnimationFrame bone = (AnimationFrame)root.FindChild(boneName);
+							boneFrames[i] = bone;
+
+							boneDic.Add(boneName, i);
+
+							if (i < mesh.RealBones)
 							{
-								bone = bone.Parent;
-								level++;
-							}
-							if (level < topLevel)
-							{
-								topLevel = level;
-								topBone = i;
+								int level = 0;
+								while (bone != root)
+								{
+									bone = bone.Parent;
+									level++;
+								}
+								if (level < topLevel)
+								{
+									topLevel = level;
+									topBone = i;
+								}
 							}
 						}
 					}
@@ -650,6 +660,10 @@ namespace SB3Utility
 					for (byte i = 0; i < numBones; i++)
 					{
 						AnimationFrame bone = boneFrames[i];
+						if (bone == null)
+						{
+							continue;
+						}
 						AnimationFrame parent = bone.Parent;
 						if (parent == null)
 						{
