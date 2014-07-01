@@ -907,6 +907,220 @@ namespace SB3Utility
 			}
 		}
 
+		public static void SnapBorders(List<xxMesh> sourceMeshList, xxMesh targetMesh, List<xxSubmesh> targetSubmeshes, float tolerance, bool position, bool normal, bool bonesAndWeights, bool uv)
+		{
+			List<xxVertex> targetVertices = new List<xxVertex>();
+			foreach (xxSubmesh submesh in targetSubmeshes)
+			{
+				SortedDictionary<UInt32, int> edges = new SortedDictionary<UInt32, int>();
+				foreach (xxFace face in submesh.FaceList)
+				{
+					List<ushort> sortedIndices = new List<ushort>(3);
+					sortedIndices.AddRange(face.VertexIndices);
+					sortedIndices.Sort();
+					for (ushort i = 0; i < 3; i++)
+					{
+						ushort v1;
+						ushort v2;
+						if (i < 2)
+						{
+							v1 = sortedIndices[i];
+							v2 = sortedIndices[i + 1];
+						}
+						else
+						{
+							v1 = sortedIndices[0];
+							v2 = sortedIndices[2];
+						}
+						UInt32 edge = ((UInt32)v2 << 16) | v1;
+						if (edges.ContainsKey(edge))
+						{
+							edges[edge]++;
+						}
+						else
+						{
+							edges.Add(edge, 1);
+						}
+					}
+				}
+				HashSet<ushort> vertIndices = new HashSet<ushort>();
+				foreach (KeyValuePair<UInt32, int> edge in edges)
+				{
+					if (edge.Value == 1)
+					{
+						vertIndices.Add((ushort)(edge.Key >> 16));
+						vertIndices.Add((ushort)edge.Key);
+					}
+				}
+				foreach (ushort idx in vertIndices)
+				{
+					targetVertices.Add(submesh.VertexList[idx]);
+				}
+			}
+
+			xxVertex[] nearestVertMap = new xxVertex[targetVertices.Count];
+			float[] nearestSqrDist = new float[targetVertices.Count];
+			List<xxBone>[] nearestBoneList = new List<xxBone>[targetVertices.Count];
+			foreach (xxMesh srcMesh in sourceMeshList)
+			{
+				if (srcMesh.VertexListDuplicate != null)
+				{
+					FindNearestVerticesForSnapping(srcMesh.VertexListDuplicate, srcMesh.BoneList, targetVertices, tolerance, nearestVertMap, nearestSqrDist, nearestBoneList);
+				}
+				else
+				{
+					foreach (xxSubmesh srcSubmesh in srcMesh.SubmeshList)
+					{
+						FindNearestVerticesForSnapping(srcSubmesh.VertexList, srcMesh.BoneList, targetVertices, tolerance, nearestVertMap, nearestSqrDist, nearestBoneList);
+					}
+				}
+			}
+			ushort count = 0;
+			foreach (xxVertex vert in nearestVertMap)
+			{
+				if (vert == null)
+				{
+					count++;
+				}
+			}
+			if (count > 0)
+			{
+				Report.ReportLog("Warning! No vertex found in source mesh(es) for " + count + " of " + targetVertices.Count + " target vertices leaving those unsnapped.");
+			}
+
+			if (position)
+			{
+				for (int i = 0; i < targetVertices.Count; i++)
+				{
+					if (nearestVertMap[i] != null)
+					{
+						targetVertices[i].Position = nearestVertMap[i].Position;
+					}
+				}
+			}
+			if (bonesAndWeights)
+			{
+				foreach (xxMesh srcMesh in sourceMeshList)
+				{
+					byte[] boneMap = null;
+					foreach (List<xxBone> boneList in nearestBoneList)
+					{
+						if (srcMesh.BoneList == boneList)
+						{
+							boneMap = new byte[srcMesh.BoneList.Count];
+							for (byte i = 0; i < boneList.Count; i++)
+							{
+								xxBone srcBone = boneList[i];
+								boneMap[i] = 0xFF;
+								for (byte j = 0; j < targetMesh.BoneList.Count; j++)
+								{
+									xxBone bone = targetMesh.BoneList[j];
+									if (srcBone.Name == bone.Name)
+									{
+										boneMap[i] = j;
+										break;
+									}
+								}
+							}
+							break;
+						}
+					}
+					if (boneMap == null)
+					{
+						continue;
+					}
+
+					for (int i = 0; i < targetVertices.Count; i++)
+					{
+						if (nearestBoneList[i] == srcMesh.BoneList)
+						{
+							xxVertex srcVert = nearestVertMap[i];
+							xxVertex vert = targetVertices[i];
+							for (int j = 0; j < 4; j++)
+							{
+								byte boneIdx = srcVert.BoneIndices[j];
+								if (boneIdx != 0xFF)
+								{
+									if (boneMap[boneIdx] == 0xFF)
+									{
+										xxBone srcBone = srcMesh.BoneList[boneIdx];
+										xxBone newBone = new xxBone();
+										newBone.Index = targetMesh.BoneList.Count;
+										newBone.Name = (string)srcBone.Name.Clone();
+										newBone.Matrix = srcBone.Matrix;
+										targetMesh.BoneList.Add(newBone);
+										boneMap[boneIdx] = (byte)newBone.Index;
+									}
+									boneIdx = boneMap[boneIdx];
+								}
+								vert.BoneIndices[j] = boneIdx;
+							}
+							vert.Weights3 = (float[])srcVert.Weights3.Clone();
+						}
+					}
+				}
+			}
+			if (normal)
+			{
+				for (int i = 0; i < targetVertices.Count; i++)
+				{
+					if (nearestVertMap[i] != null)
+					{
+						targetVertices[i].Normal = nearestVertMap[i].Normal;
+					}
+				}
+			}
+			if (uv)
+			{
+				for (int i = 0; i < targetVertices.Count; i++)
+				{
+					if (nearestVertMap[i] != null)
+					{
+						targetVertices[i].UV = (float[])nearestVertMap[i].UV.Clone();
+					}
+				}
+			}
+			targetMesh.VertexListDuplicate = CreateVertexListDup(targetMesh.SubmeshList);
+		}
+
+		private static void FindNearestVerticesForSnapping(List<xxVertex> srcVertices, List<xxBone> srcBoneList, List<xxVertex> targetVertices, float tolerance, xxVertex[] nearestVertMap, float[] nearestSqrDist, List<xxBone>[] nearestBoneList)
+		{
+			for (int i = 0; i < targetVertices.Count; i++)
+			{
+				if (nearestVertMap[i] != null && nearestSqrDist[i] == 0)
+				{
+					continue;
+				}
+				xxVertex vert = targetVertices[i];
+				foreach (xxVertex srcVert in srcVertices)
+				{
+					float srcDist = (vert.Position - srcVert.Position).LengthSquared();
+					if (srcDist < tolerance)
+					{
+						if (nearestVertMap[i] == null)
+						{
+							nearestVertMap[i] = srcVert;
+							nearestSqrDist[i] = srcDist;
+							nearestBoneList[i] = srcBoneList;
+						}
+						else
+						{
+							if (srcDist < nearestSqrDist[i])
+							{
+								nearestVertMap[i] = srcVert;
+								nearestSqrDist[i] = srcDist;
+								nearestBoneList[i] = srcBoneList;
+							}
+						}
+						if (srcDist == 0)
+						{
+							break;
+						}
+					}
+				}
+			}
+		}
+
 		public static void SetNumVector2PerVertex(xxMesh mesh, byte value)
 		{
 			int diff = value - mesh.NumVector2PerVertex;

@@ -5,6 +5,7 @@ namespace SB3Utility
 	public class ToolOutputParser : IWriteFile
 	{
 		public byte[] contents;
+		public bool readFromOtherParser;
 
 		public ToolOutputParser(Stream stream, string name)
 			: this(stream)
@@ -43,7 +44,18 @@ namespace SB3Utility
 					{
 						return new ToolOutputParser(subfile.CreateReadStream(), subfile.Name);
 					}
-
+					IWriteFile writeFile = parser.Subfiles[i] as IWriteFile;
+					if (writeFile != null)
+					{
+						using (MemoryStream memStream = new MemoryStream())
+						{
+							writeFile.WriteTo(memStream);
+							memStream.Position = 0;
+							ToolOutputParser outParser = new ToolOutputParser(memStream, writeFile.Name);
+							outParser.readFromOtherParser = true;
+							return outParser;
+						}
+					}
 					break;
 				}
 			}

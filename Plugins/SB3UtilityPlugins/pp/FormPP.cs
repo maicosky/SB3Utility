@@ -638,7 +638,11 @@ namespace SB3Utility
 							if (subfile.Name == (string)form.Tag)
 							{
 								headerFromFile.Remove(subfile);
-								Editor.ReplaceSubfile(subfile);
+								int subfileIdx = Editor.FindSubfile(subfile.Name);
+								if (Editor.Parser.Subfiles[subfileIdx] == Gui.Scripting.Variables[parserVar])
+								{
+									Editor.ReplaceSubfile(subfile);
+								}
 
 								ChildParserVars.Remove((string)form.Tag);
 								Gui.Scripting.RunScript(parserVar + "=null");
@@ -1422,8 +1426,8 @@ namespace SB3Utility
 				if (!ChildParserVars.TryGetValue(name, out childParserVar))
 				{
 					childParserVar = Gui.Scripting.GetNextVariable("toolOutputParser");
-					Gui.Scripting.RunScript(childParserVar + " = OpenToolOutput(parser=" + ParserVar + ", name=\"" + name + "\")");
-					if (Gui.Scripting.Variables[childParserVar] == null)
+					ToolOutputParser outParser = (ToolOutputParser)Gui.Scripting.RunScript(childParserVar + " = OpenToolOutput(parser=" + ParserVar + ", name=\"" + name + "\")");
+					if (outParser == null)
 					{
 						string type = String.Empty;
 						foreach (IWriteFile subfile in Editor.Parser.Subfiles)
@@ -1436,7 +1440,10 @@ namespace SB3Utility
 						}
 						throw new Exception("Unable to create parser for " + name + " type=" + type);
 					}
-					Gui.Scripting.RunScript(EditorVar + ".ReplaceSubfile(file=" + childParserVar + ")");
+					if (!outParser.readFromOtherParser)
+					{
+						Gui.Scripting.RunScript(EditorVar + ".ReplaceSubfile(file=" + childParserVar + ")");
+					}
 					ChildParserVars.Add(name, childParserVar);
 
 					foreach (ListViewItem item in otherSubfilesList.Items)

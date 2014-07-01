@@ -3826,6 +3826,87 @@ namespace SB3Utility
 			}
 		}
 
+		private void buttonMeshSnapBorders_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedMesh < 0)
+				{
+					return;
+				}
+
+				string targetSubmeshes = Editor.Meshes[loadedMesh].Name;
+				if (dataGridViewMesh.SelectedRows.Count > 0)
+				{
+					for (int i = 0; i < dataGridViewMesh.SelectedRows.Count; i++)
+					{
+						targetSubmeshes += (i == 0 ? "[" : ", ") + dataGridViewMesh.SelectedRows[i].Index;
+					}
+					targetSubmeshes += "]";
+				}
+				else
+				{
+					targetSubmeshes += "[all]";
+				}
+				using (var snapBorders = new FormXXSnapBorders(targetSubmeshes))
+				{
+					if (snapBorders.ShowDialog() == DialogResult.OK)
+					{
+						string editors = "editors={";
+						string numMeshes = "numMeshes={";
+						string meshes = "meshes={";
+						List<DockContent> xxList = null;
+						Gui.Docking.DockContents.TryGetValue(typeof(FormXX), out xxList);
+						foreach (FormXX xx in xxList)
+						{
+							if (xx.listViewMesh.SelectedItems.Count == 0 || xx == this && xx.listViewMesh.SelectedItems.Count == 1)
+							{
+								continue;
+							}
+
+							editors += xx.EditorVar + ", ";
+							numMeshes += (xx != this ? xx.listViewMesh.SelectedItems.Count : xx.listViewMesh.SelectedItems.Count - 1) + ", ";
+							foreach (ListViewItem item in xx.listViewMesh.SelectedItems)
+							{
+								if (xx != this || (int)item.Tag != loadedMesh)
+								{
+									meshes += (int)item.Tag + ", ";
+								}
+							}
+						}
+						string idArgs = editors.Length > 9
+							? editors.Substring(0, editors.Length - 2) + "}, " + numMeshes.Substring(0, numMeshes.Length - 2) + "}, " + meshes.Substring(0, meshes.Length - 2) + "}"
+							: editors.Substring(0, 8) + "null, " + numMeshes.Substring(0, 10) + "null, " + meshes.Substring(0, 7) + "null";
+						targetSubmeshes = String.Empty;
+						if (dataGridViewMesh.SelectedRows.Count > 0)
+						{
+							for (int i = 0; i < dataGridViewMesh.SelectedRows.Count; i++)
+							{
+								targetSubmeshes += (i == 0 ? "{" : ", ") + dataGridViewMesh.SelectedRows[i].Index;
+							}
+							targetSubmeshes += "}";
+						}
+						else
+						{
+							targetSubmeshes += "null";
+						}
+
+						Gui.Scripting.RunScript(EditorVar + ".SnapBorders(" + idArgs + ", targetMesh=" + loadedMesh + ", targetSubmeshes=" + targetSubmeshes + ", tolerance=" + ((float)snapBorders.numericSnapTolerance.Value).ToFloatString() + ", position=" + snapBorders.checkBoxPosition.Checked + ", normal=" + snapBorders.checkBoxNormal.Checked + ", bonesAndWeights=" + snapBorders.checkBoxBonesWeights.Checked + ", uv=" + snapBorders.checkBoxUV.Checked + ")");
+						Changed = Changed;
+
+						treeViewObjectTree.AfterSelect -= treeViewObjectTree_AfterSelect;
+						InitFrames();
+						treeViewObjectTree.AfterSelect += treeViewObjectTree_AfterSelect;
+						RecreateRenderObjects();
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
 		private void buttonMaterialRemove_Click(object sender, EventArgs e)
 		{
 			try

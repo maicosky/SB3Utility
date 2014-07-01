@@ -20,6 +20,10 @@ namespace SB3Utility
 			InitializeComponent();
 
 			ToolOutputParser parser = (ToolOutputParser)Gui.Scripting.Variables[toolOutputParserVar];
+			if (parser.readFromOtherParser)
+			{
+				syntaxHighlightingTextBoxToolOutput.ReadOnly = true;
+			}
 
 			this.ShowHint = DockState.Document;
 			this.Text = parser.Name;

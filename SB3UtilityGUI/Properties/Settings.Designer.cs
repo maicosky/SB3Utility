@@ -403,5 +403,15 @@ namespace SB3Utility.Properties {
                 return ((global::System.Drawing.Size)(this["DialogPPSubfileChangeSize"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(PortableSettingsProvider))]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0, 0")]
+        public global::System.Drawing.Size DialogXXSnapBordersSize {
+            get {
+                return ((global::System.Drawing.Size)(this["DialogXXSnapBordersSize"]));
+            }
+        }
     }
 }

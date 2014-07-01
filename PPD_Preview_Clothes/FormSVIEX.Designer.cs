@@ -33,6 +33,7 @@ namespace PPD_Preview_Clothes
 		private void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormSVIEX));
 			this.comboBoxTargetXX = new System.Windows.Forms.ComboBox();
 			this.label2 = new System.Windows.Forms.Label();
 			this.label3 = new System.Windows.Forms.Label();
@@ -40,7 +41,6 @@ namespace PPD_Preview_Clothes
 			this.checkBoxShowTargetNormals = new System.Windows.Forms.CheckBox();
 			this.comboBoxTargetMeshes = new System.Windows.Forms.ComboBox();
 			this.comboBoxTargetSVIEXunits = new System.Windows.Forms.ComboBox();
-			this.textBoxTargetedSubmeshes = new SB3Utility.EditTextBox();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
 			this.checkBoxShowSourceNormals = new System.Windows.Forms.CheckBox();
 			this.comboBoxCorrectlyLitMeshes = new System.Windows.Forms.ComboBox();
@@ -48,7 +48,6 @@ namespace PPD_Preview_Clothes
 			this.label1 = new System.Windows.Forms.Label();
 			this.comboBoxCorrectlyLitXX = new System.Windows.Forms.ComboBox();
 			this.label4 = new System.Windows.Forms.Label();
-			this.textBoxSourceSubmeshes = new SB3Utility.EditTextBox();
 			this.buttonApproximateNormals = new System.Windows.Forms.Button();
 			this.progressBarApproximation = new System.Windows.Forms.ProgressBar();
 			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
@@ -73,6 +72,11 @@ namespace PPD_Preview_Clothes
 			this.buttonCopyToMeshes = new System.Windows.Forms.Button();
 			this.groupBox3 = new System.Windows.Forms.GroupBox();
 			this.buttonCopyToSVIEXes = new System.Windows.Forms.Button();
+			this.textBoxSourceSubmeshes = new SB3Utility.EditTextBox();
+			this.textBoxTargetedSubmeshes = new SB3Utility.EditTextBox();
+			this.buttonRemoveSVIs = new System.Windows.Forms.Button();
+			this.buttonAddSVIs = new System.Windows.Forms.Button();
+			this.buttonSelectMeshes = new System.Windows.Forms.Button();
 			this.groupBox1.SuspendLayout();
 			this.groupBox2.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDownNearVertexSqDist)).BeginInit();
@@ -167,17 +171,6 @@ namespace PPD_Preview_Clothes
 			this.comboBoxTargetSVIEXunits.TabIndex = 16;
 			this.toolTip1.SetToolTip(this.comboBoxTargetSVIEXunits, "Non existing units will be generated");
 			// 
-			// textBoxTargetedSubmeshes
-			// 
-			this.textBoxTargetedSubmeshes.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.textBoxTargetedSubmeshes.Location = new System.Drawing.Point(222, 71);
-			this.textBoxTargetedSubmeshes.Name = "textBoxTargetedSubmeshes";
-			this.textBoxTargetedSubmeshes.Size = new System.Drawing.Size(147, 20);
-			this.textBoxTargetedSubmeshes.TabIndex = 18;
-			this.toolTip1.SetToolTip(this.textBoxTargetedSubmeshes, "Submeshes to create normals for.\r\nProvide a comma seperated list or\r\n-1 for all s" +
-        "ubmeshes.");
-			this.textBoxTargetedSubmeshes.AfterEditTextChanged += new System.EventHandler(this.textBoxTargetedSubmeshes_AfterEditTextChanged);
-			// 
 			// groupBox2
 			// 
 			this.groupBox2.Controls.Add(this.checkBoxShowSourceNormals);
@@ -262,16 +255,6 @@ namespace PPD_Preview_Clothes
 			this.label4.Size = new System.Drawing.Size(100, 13);
 			this.label4.TabIndex = 2;
 			this.label4.Text = "Source SVIEX units";
-			// 
-			// textBoxSourceSubmeshes
-			// 
-			this.textBoxSourceSubmeshes.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.textBoxSourceSubmeshes.Location = new System.Drawing.Point(222, 71);
-			this.textBoxSourceSubmeshes.Name = "textBoxSourceSubmeshes";
-			this.textBoxSourceSubmeshes.ReadOnly = true;
-			this.textBoxSourceSubmeshes.Size = new System.Drawing.Size(147, 20);
-			this.textBoxSourceSubmeshes.TabIndex = 28;
-			this.textBoxSourceSubmeshes.AfterEditTextChanged += new System.EventHandler(this.textBoxSourceSubmeshes_AfterEditTextChanged);
 			// 
 			// buttonApproximateNormals
 			// 
@@ -443,13 +426,16 @@ namespace PPD_Preview_Clothes
 			// 
 			// groupBoxAA2SVIEXJuggler
 			// 
+			this.groupBoxAA2SVIEXJuggler.Controls.Add(this.buttonSelectMeshes);
+			this.groupBoxAA2SVIEXJuggler.Controls.Add(this.buttonAddSVIs);
+			this.groupBoxAA2SVIEXJuggler.Controls.Add(this.buttonRemoveSVIs);
 			this.groupBoxAA2SVIEXJuggler.Controls.Add(this.groupBox5);
 			this.groupBoxAA2SVIEXJuggler.Controls.Add(this.groupBoxElementsToCopy);
 			this.groupBoxAA2SVIEXJuggler.Controls.Add(this.buttonCopyToMeshes);
 			this.groupBoxAA2SVIEXJuggler.Controls.Add(this.groupBox3);
-			this.groupBoxAA2SVIEXJuggler.Location = new System.Drawing.Point(14, 408);
+			this.groupBoxAA2SVIEXJuggler.Location = new System.Drawing.Point(14, 404);
 			this.groupBoxAA2SVIEXJuggler.Name = "groupBoxAA2SVIEXJuggler";
-			this.groupBoxAA2SVIEXJuggler.Size = new System.Drawing.Size(375, 159);
+			this.groupBoxAA2SVIEXJuggler.Size = new System.Drawing.Size(375, 188);
 			this.groupBoxAA2SVIEXJuggler.TabIndex = 150;
 			this.groupBoxAA2SVIEXJuggler.TabStop = false;
 			this.groupBoxAA2SVIEXJuggler.Text = "SVI[EX] Juggler";
@@ -465,7 +451,7 @@ namespace PPD_Preview_Clothes
 			this.groupBoxElementsToCopy.Size = new System.Drawing.Size(363, 49);
 			this.groupBoxElementsToCopy.TabIndex = 180;
 			this.groupBoxElementsToCopy.TabStop = false;
-			this.groupBoxElementsToCopy.Text = "Elements to Copy when Present";
+			this.groupBoxElementsToCopy.Text = "Elements to Copy/Add when Present";
 			// 
 			// checkBoxElementsUVs
 			// 
@@ -547,11 +533,67 @@ namespace PPD_Preview_Clothes
 			this.buttonCopyToSVIEXes.UseVisualStyleBackColor = true;
 			this.buttonCopyToSVIEXes.Click += new System.EventHandler(this.buttonCopyToSVIEXes_Click);
 			// 
+			// textBoxSourceSubmeshes
+			// 
+			this.textBoxSourceSubmeshes.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.textBoxSourceSubmeshes.Location = new System.Drawing.Point(222, 71);
+			this.textBoxSourceSubmeshes.Name = "textBoxSourceSubmeshes";
+			this.textBoxSourceSubmeshes.ReadOnly = true;
+			this.textBoxSourceSubmeshes.Size = new System.Drawing.Size(147, 20);
+			this.textBoxSourceSubmeshes.TabIndex = 28;
+			this.textBoxSourceSubmeshes.AfterEditTextChanged += new System.EventHandler(this.textBoxSourceSubmeshes_AfterEditTextChanged);
+			// 
+			// textBoxTargetedSubmeshes
+			// 
+			this.textBoxTargetedSubmeshes.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.textBoxTargetedSubmeshes.Location = new System.Drawing.Point(222, 71);
+			this.textBoxTargetedSubmeshes.Name = "textBoxTargetedSubmeshes";
+			this.textBoxTargetedSubmeshes.Size = new System.Drawing.Size(147, 20);
+			this.textBoxTargetedSubmeshes.TabIndex = 18;
+			this.toolTip1.SetToolTip(this.textBoxTargetedSubmeshes, "Submeshes to create normals for.\r\nProvide a comma seperated list or\r\n-1 for all s" +
+        "ubmeshes.");
+			this.textBoxTargetedSubmeshes.AfterEditTextChanged += new System.EventHandler(this.textBoxTargetedSubmeshes_AfterEditTextChanged);
+			// 
+			// buttonRemoveSVIs
+			// 
+			this.buttonRemoveSVIs.Location = new System.Drawing.Point(124, 159);
+			this.buttonRemoveSVIs.Name = "buttonRemoveSVIs";
+			this.buttonRemoveSVIs.Size = new System.Drawing.Size(96, 23);
+			this.buttonRemoveSVIs.TabIndex = 201;
+			this.buttonRemoveSVIs.Text = "Remove SVIs";
+			this.toolTip1.SetToolTip(this.buttonRemoveSVIs, resources.GetString("buttonRemoveSVIs.ToolTip"));
+			this.buttonRemoveSVIs.UseVisualStyleBackColor = true;
+			this.buttonRemoveSVIs.Click += new System.EventHandler(this.buttonRemoveSVIs_Click);
+			// 
+			// buttonAddSVIs
+			// 
+			this.buttonAddSVIs.Location = new System.Drawing.Point(6, 159);
+			this.buttonAddSVIs.Name = "buttonAddSVIs";
+			this.buttonAddSVIs.Size = new System.Drawing.Size(94, 23);
+			this.buttonAddSVIs.TabIndex = 202;
+			this.buttonAddSVIs.Text = "Add SVIs";
+			this.toolTip1.SetToolTip(this.buttonAddSVIs, "Select one target submesh and any number of SVIEX units\r\nto add one SVI unit with" +
+        " the selected elements.");
+			this.buttonAddSVIs.UseVisualStyleBackColor = true;
+			this.buttonAddSVIs.Click += new System.EventHandler(this.buttonAddSVIs_Click);
+			// 
+			// buttonSelectMeshes
+			// 
+			this.buttonSelectMeshes.Location = new System.Drawing.Point(273, 159);
+			this.buttonSelectMeshes.Name = "buttonSelectMeshes";
+			this.buttonSelectMeshes.Size = new System.Drawing.Size(96, 23);
+			this.buttonSelectMeshes.TabIndex = 203;
+			this.buttonSelectMeshes.Text = "Select Meshes";
+			this.toolTip1.SetToolTip(this.buttonSelectMeshes, "Selects all meshes in XX units which are targeted by any SVI.\r\n\r\nPress CTRL to se" +
+        "lect only invalid meshes.");
+			this.buttonSelectMeshes.UseVisualStyleBackColor = true;
+			this.buttonSelectMeshes.Click += new System.EventHandler(this.buttonSelectMeshes_Click);
+			// 
 			// FormSVIEX
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(403, 579);
+			this.ClientSize = new System.Drawing.Size(403, 606);
 			this.Controls.Add(this.groupBoxAA2SVIEXJuggler);
 			this.Controls.Add(this.checkBoxAutomatic);
 			this.Controls.Add(this.checkBoxNearestNormal);
@@ -625,5 +667,8 @@ namespace PPD_Preview_Clothes
 		private System.Windows.Forms.CheckBox checkBoxNearestUVs;
 		private System.Windows.Forms.CheckBox checkBoxNearestBones;
 		private System.Windows.Forms.CheckBox checkBoxNearestNormals;
+		private System.Windows.Forms.Button buttonSelectMeshes;
+		private System.Windows.Forms.Button buttonAddSVIs;
+		private System.Windows.Forms.Button buttonRemoveSVIs;
 	}
 }

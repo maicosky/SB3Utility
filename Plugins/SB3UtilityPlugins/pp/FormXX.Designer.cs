@@ -51,10 +51,11 @@
 			this.checkBoxMeshExportMqoSortMeshes = new System.Windows.Forms.CheckBox();
 			this.checkBoxMeshExportFbxLinearInterpolation = new System.Windows.Forms.CheckBox();
 			this.checkBoxMeshExportEmbedMedia = new System.Windows.Forms.CheckBox();
+			this.textBoxKeyframeRange = new SB3Utility.EditTextBox();
 			this.checkBoxSubmeshReorder = new System.Windows.Forms.CheckBox();
 			this.buttonMaterialDeleteUnref = new System.Windows.Forms.Button();
 			this.buttonTextureDeleteUnref = new System.Windows.Forms.Button();
-			this.textBoxKeyframeRange = new SB3Utility.EditTextBox();
+			this.buttonMeshSnapBorders = new System.Windows.Forms.Button();
 			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
 			this.textBoxFormat = new SB3Utility.EditTextBox();
 			this.buttonConvert = new System.Windows.Forms.Button();
@@ -495,11 +496,24 @@
 			this.toolTip1.SetToolTip(this.checkBoxMeshExportEmbedMedia, "Textures are stored inside the output file.");
 			this.checkBoxMeshExportEmbedMedia.UseVisualStyleBackColor = true;
 			// 
+			// textBoxKeyframeRange
+			// 
+			this.textBoxKeyframeRange.Location = new System.Drawing.Point(133, 23);
+			this.textBoxKeyframeRange.MaxLength = 10;
+			this.textBoxKeyframeRange.Name = "textBoxKeyframeRange";
+			this.textBoxKeyframeRange.Size = new System.Drawing.Size(45, 20);
+			this.textBoxKeyframeRange.TabIndex = 268;
+			this.textBoxKeyframeRange.TabStop = false;
+			this.textBoxKeyframeRange.Text = "-1-0";
+			this.toolTip1.SetToolTip(this.textBoxKeyframeRange, "Starting with -1 exports all keyframes without interpolation.\r\nStarting with 0 or" +
+        " higher also interpolates.");
+			// 
 			// checkBoxSubmeshReorder
 			// 
+			this.checkBoxSubmeshReorder.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.checkBoxSubmeshReorder.Appearance = System.Windows.Forms.Appearance.Button;
 			this.checkBoxSubmeshReorder.AutoCheck = false;
-			this.checkBoxSubmeshReorder.Location = new System.Drawing.Point(174, 18);
+			this.checkBoxSubmeshReorder.Location = new System.Drawing.Point(174, 206);
 			this.checkBoxSubmeshReorder.Name = "checkBoxSubmeshReorder";
 			this.checkBoxSubmeshReorder.Size = new System.Drawing.Size(73, 23);
 			this.checkBoxSubmeshReorder.TabIndex = 146;
@@ -532,17 +546,18 @@
 			this.buttonTextureDeleteUnref.UseVisualStyleBackColor = true;
 			this.buttonTextureDeleteUnref.Click += new System.EventHandler(this.buttonTextureDeleteUnref_Click);
 			// 
-			// textBoxKeyframeRange
+			// buttonMeshSnapBorders
 			// 
-			this.textBoxKeyframeRange.Location = new System.Drawing.Point(133, 23);
-			this.textBoxKeyframeRange.MaxLength = 10;
-			this.textBoxKeyframeRange.Name = "textBoxKeyframeRange";
-			this.textBoxKeyframeRange.Size = new System.Drawing.Size(45, 20);
-			this.textBoxKeyframeRange.TabIndex = 268;
-			this.textBoxKeyframeRange.TabStop = false;
-			this.textBoxKeyframeRange.Text = "-1-0";
-			this.toolTip1.SetToolTip(this.textBoxKeyframeRange, "Starting with -1 exports all keyframes without interpolation.\r\nStarting with 0 or" +
-        " higher also interpolates.");
+			this.buttonMeshSnapBorders.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.buttonMeshSnapBorders.Location = new System.Drawing.Point(138, 235);
+			this.buttonMeshSnapBorders.Name = "buttonMeshSnapBorders";
+			this.buttonMeshSnapBorders.Size = new System.Drawing.Size(110, 23);
+			this.buttonMeshSnapBorders.TabIndex = 142;
+			this.buttonMeshSnapBorders.Text = "Snap Borders";
+			this.toolTip1.SetToolTip(this.buttonMeshSnapBorders, "1. Select surrounding meshes with the same skeleton.\r\n2. Select target mesh last " +
+        "and the target submeshes.\r\n3. Click \"Snap Borders\".");
+			this.buttonMeshSnapBorders.UseVisualStyleBackColor = true;
+			this.buttonMeshSnapBorders.Click += new System.EventHandler(this.buttonMeshSnapBorders_Click);
 			// 
 			// splitContainer1
 			// 
@@ -2115,6 +2130,7 @@
 			// 
 			this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
+			this.groupBox1.Controls.Add(this.buttonMeshSnapBorders);
 			this.groupBox1.Controls.Add(this.checkBoxSubmeshReorder);
 			this.groupBox1.Controls.Add(this.dataGridViewMesh);
 			this.groupBox1.Controls.Add(this.buttonSubmeshEditHex);
@@ -2139,11 +2155,11 @@
             this.ColumnSubmeshVerts,
             this.ColumnSubmeshFaces,
             this.ColumnSubmeshMaterial});
-			this.dataGridViewMesh.Location = new System.Drawing.Point(3, 48);
+			this.dataGridViewMesh.Location = new System.Drawing.Point(3, 19);
 			this.dataGridViewMesh.Name = "dataGridViewMesh";
 			this.dataGridViewMesh.RowHeadersVisible = false;
 			this.dataGridViewMesh.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-			this.dataGridViewMesh.Size = new System.Drawing.Size(246, 215);
+			this.dataGridViewMesh.Size = new System.Drawing.Size(246, 179);
 			this.dataGridViewMesh.TabIndex = 152;
 			this.dataGridViewMesh.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewMesh_CellClick);
 			this.dataGridViewMesh.EditingControlShowing += new System.Windows.Forms.DataGridViewEditingControlShowingEventHandler(this.dataGridViewMesh_EditingControlShowing);
@@ -2178,7 +2194,8 @@
 			// 
 			// buttonSubmeshEditHex
 			// 
-			this.buttonSubmeshEditHex.Location = new System.Drawing.Point(5, 18);
+			this.buttonSubmeshEditHex.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.buttonSubmeshEditHex.Location = new System.Drawing.Point(5, 206);
 			this.buttonSubmeshEditHex.Name = "buttonSubmeshEditHex";
 			this.buttonSubmeshEditHex.Size = new System.Drawing.Size(73, 23);
 			this.buttonSubmeshEditHex.TabIndex = 142;
@@ -2189,7 +2206,8 @@
 			// 
 			// buttonSubmeshRemove
 			// 
-			this.buttonSubmeshRemove.Location = new System.Drawing.Point(90, 18);
+			this.buttonSubmeshRemove.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.buttonSubmeshRemove.Location = new System.Drawing.Point(90, 206);
 			this.buttonSubmeshRemove.Name = "buttonSubmeshRemove";
 			this.buttonSubmeshRemove.Size = new System.Drawing.Size(73, 23);
 			this.buttonSubmeshRemove.TabIndex = 144;
@@ -3004,5 +3022,6 @@
 		private System.Windows.Forms.Button buttonObjectTreeDeleteUnreferenced;
 		private System.Windows.Forms.Button buttonMaterialDeleteUnref;
 		private System.Windows.Forms.Button buttonTextureDeleteUnref;
+		private System.Windows.Forms.Button buttonMeshSnapBorders;
 	}
 }

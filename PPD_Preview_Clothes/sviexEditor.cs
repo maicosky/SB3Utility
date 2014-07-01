@@ -368,6 +368,7 @@ namespace PPD_Preview_Clothes
 							submesh.VertexList[submeshSection.indices[i]].UV = new float[2] { submeshSection.uvs[i].X, submeshSection.uvs[i].Y };
 						}
 					}
+					meshFrame.Mesh.VertexListDuplicate = xx.CreateVertexListDup(meshFrame.Mesh.SubmeshList);
 					return true;
 				}
 			}
@@ -531,6 +532,120 @@ namespace PPD_Preview_Clothes
 				}
 			}
 			return false;
+		}
+
+		[Plugin]
+		public bool AddSVI(xxFrame meshFrame, int submeshIdx, bool positions, bool bones, bool normals, bool uvs)
+		{
+			sviParser svi = FindSVI(meshFrame.Name, submeshIdx);
+			if (svi != null)
+			{
+				return false;
+			}
+
+			svi = new sviParser();
+			svi.meshName = meshFrame.Name;
+			svi.submeshIdx = submeshIdx;
+			svi.indices = new ushort[meshFrame.Mesh.SubmeshList[submeshIdx].VertexList.Count];
+			for (ushort i = 0; i < svi.indices.Length; i++)
+			{
+				svi.indices[i] = i;
+			}
+			if (positions)
+			{
+				svi.positionsPresent = 1;
+				svi.positions = new Vector3[svi.indices.Length];
+				List<xxVertex> verts = meshFrame.Mesh.SubmeshList[submeshIdx].VertexList;
+				for (int i = 0; i < svi.positions.Length; i++)
+				{
+					svi.positions[i] = verts[i].Position;
+				}
+			}
+			if (bones)
+			{
+				svi.bonesPresent = 1;
+				svi.boneWeights3 = new float[svi.indices.Length][];
+				svi.boneIndices = new byte[svi.indices.Length][];
+				List<xxVertex> verts = meshFrame.Mesh.SubmeshList[submeshIdx].VertexList;
+				for (int i = 0; i < svi.boneWeights3.Length; i++)
+				{
+					svi.boneWeights3[i] = (float[])verts[i].Weights3.Clone();
+					svi.boneIndices[i] = (byte[])verts[i].BoneIndices.Clone();
+				}
+				svi.bones = new sviParser.sviBone[meshFrame.Mesh.BoneList.Count];
+				for (ushort i = 0; i < svi.bones.Length; i++)
+				{
+					sviParser.sviBone bone = new sviParser.sviBone();
+					bone.name = (string)meshFrame.Mesh.BoneList[i].Name.Clone();
+					bone.boneIdx = meshFrame.Mesh.BoneList[i].Index;
+					bone.matrix = meshFrame.Mesh.BoneList[i].Matrix;
+					svi.bones[i] = bone;
+				}
+			}
+			if (normals)
+			{
+				svi.normalsPresent = 1;
+				svi.normals = new Vector3[svi.indices.Length];
+				List<xxVertex> verts = meshFrame.Mesh.SubmeshList[submeshIdx].VertexList;
+				for (int i = 0; i < svi.normals.Length; i++)
+				{
+					svi.normals[i] = verts[i].Normal;
+				}
+			}
+			if (uvs)
+			{
+				svi.uvsPresent = 1;
+				svi.uvs = new Vector2[svi.indices.Length];
+				List<xxVertex> verts = meshFrame.Mesh.SubmeshList[submeshIdx].VertexList;
+				for (int i = 0; i < svi.uvs.Length; i++)
+				{
+					svi.uvs[i].X = verts[i].UV[0];
+					svi.uvs[i].Y = verts[i].UV[1];
+				}
+			}
+			Parser.sections.Add(svi);
+			return true;
+		}
+
+		public sviParser FindSVI(string meshName, int submeshIdx)
+		{
+			foreach (sviParser svi in Parser.sections)
+			{
+				if (svi.meshName == meshName && svi.submeshIdx == submeshIdx)
+				{
+					return svi;
+				}
+			}
+			return null;
+		}
+
+		[Plugin]
+		public bool RemoveSVI(xxFrame meshFrame, int submeshIdx)
+		{
+			sviParser svi = FindSVI(meshFrame.Name, submeshIdx);
+			if (svi == null)
+			{
+				return false;
+			}
+
+			return Parser.sections.Remove(svi);
+		}
+
+		[Plugin]
+		public bool RemoveSVI(xxFrame meshFrame)
+		{
+			bool removed = false;
+			for (int i = 0; i < Parser.sections.Count; i++)
+			{
+				sviParser svi = Parser.sections[i];
+				if (svi.meshName == meshFrame.Name)
+				{
+					Parser.sections.Remove(svi);
+					i--;
+					removed = true;
+				}
+			}
+			return removed;
 		}
 	}
 }

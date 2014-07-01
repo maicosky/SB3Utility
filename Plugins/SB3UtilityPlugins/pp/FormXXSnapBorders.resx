@@ -117,20 +117,4 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>17, 17</value>
-  </metadata>
-  <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>17, 17</value>
-  </metadata>
-  <data name="buttonRemoveSVIs.ToolTip" xml:space="preserve">
-    <value>Select any numbers of submeshes and SVIEX units to
-remove the SVI units from.
-
-Select a frame and any number of SVIEX units to
-remove all SVI units for a mesh with the frame's name.
-(e.g. when the mesh had been removed).
-
-Ensure that only submesh(es) *OR* a frame is selected!</value>
-  </data>
 </root>

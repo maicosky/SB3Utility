@@ -902,6 +902,49 @@ namespace SB3Utility
 		}
 
 		[Plugin]
+		public void SnapBorders(object[] editors, object[] numMeshes, object[] meshes, int targetMesh, object[] targetSubmeshes, double tolerance, bool position, bool normal, bool bonesAndWeights, bool uv)
+		{
+			List<xxMesh> srcMeshes = new List<xxMesh>();
+			xxMesh mesh = Meshes[targetMesh].Mesh;
+			List<xxSubmesh> submeshList = new List<xxSubmesh>(targetSubmeshes != null ? targetSubmeshes.Length : mesh.SubmeshList.Count);
+			if (editors != null && numMeshes != null && meshes != null)
+			{
+				srcMeshes.Capacity = meshes.Length;
+				xxEditor editor = null;
+				int editorIdx = -1;
+				int i = 1;
+				foreach (object id in meshes)
+				{
+					if (--i == 0)
+					{
+						editorIdx++;
+						i = (int)(double)numMeshes[editorIdx];
+						editor = (xxEditor)editors[editorIdx];
+					}
+					srcMeshes.Add(editor.Meshes[(int)(double)id].Mesh);
+				}
+
+				if (targetSubmeshes != null)
+				{
+					foreach (object id in targetSubmeshes)
+					{
+						submeshList.Add(mesh.SubmeshList[(int)(double)id]);
+					}
+				}
+				else
+				{
+					submeshList.AddRange(mesh.SubmeshList);
+				}
+				xx.SnapBorders(srcMeshes, mesh, submeshList, (float)tolerance, position, normal, bonesAndWeights, uv);
+			}
+			else
+			{
+				Report.ReportLog("Snapping inside of one mesh not implemented yet.");
+				return;
+			}
+		}
+
+		[Plugin]
 		public void SetSubmeshMaterial(int meshId, int submeshId, int material)
 		{
 			xxSubmesh submesh = Meshes[meshId].Mesh.SubmeshList[submeshId];

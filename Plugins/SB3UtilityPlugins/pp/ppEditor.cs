@@ -182,7 +182,7 @@ namespace SB3Utility
 			return newName;
 		}
 
-		int FindSubfile(string name)
+		public int FindSubfile(string name)
 		{
 			for (int i = 0; i < Parser.Subfiles.Count; i++)
 			{

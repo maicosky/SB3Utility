@@ -1,4 +1,13 @@
-﻿[0.8.0]
+﻿[0.8.2]
+  - Fixed update of the unit name in the pp file's Other tab after SVIEX replacements.
+  - Fix for external tools integration. Already edited (SVIEX) units couldn't be opened.
+  - Fixed missing update of VertexListDuplicate in SVIEX Juggler's CopyToSubmesh
+  - Added "Snap Borders" in Mesh Editor
+
+[0.8.1]
+  - Added SVI adding, removing and select/check mesh functions to the "SVI[EX] Juggler"
+
+[0.8.0]
   - Added NIF Importer
   - Fix for external tools of pp units not closing when the pp file is closed
   - Fix in XX format conversion. Submesh Unknown5 in formats 5 to 7 must not be converted to 8.
