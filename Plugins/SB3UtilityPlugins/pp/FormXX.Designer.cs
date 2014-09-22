@@ -46,16 +46,22 @@
 			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
 			this.buttonObjectTreeDeleteUnreferenced = new System.Windows.Forms.Button();
 			this.checkBoxFrameMatrixUpdate = new System.Windows.Forms.CheckBox();
+			this.groupBox7 = new System.Windows.Forms.GroupBox();
+			this.buttonBoneRenameBonesTracks = new System.Windows.Forms.Button();
+			this.label24 = new System.Windows.Forms.Label();
+			this.label16 = new System.Windows.Forms.Label();
+			this.textBoxBoneReplaceWith = new SB3Utility.EditTextBox();
+			this.textBoxBoneFrameTrackSubstring = new SB3Utility.EditTextBox();
 			this.buttonMeshRestPose = new System.Windows.Forms.Button();
 			this.checkBoxMeshNewSkin = new System.Windows.Forms.CheckBox();
 			this.checkBoxMeshExportMqoSortMeshes = new System.Windows.Forms.CheckBox();
 			this.checkBoxMeshExportFbxLinearInterpolation = new System.Windows.Forms.CheckBox();
 			this.checkBoxMeshExportEmbedMedia = new System.Windows.Forms.CheckBox();
 			this.textBoxKeyframeRange = new SB3Utility.EditTextBox();
+			this.buttonMeshSnapBorders = new System.Windows.Forms.Button();
 			this.checkBoxSubmeshReorder = new System.Windows.Forms.CheckBox();
 			this.buttonMaterialDeleteUnref = new System.Windows.Forms.Button();
 			this.buttonTextureDeleteUnref = new System.Windows.Forms.Button();
-			this.buttonMeshSnapBorders = new System.Windows.Forms.Button();
 			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
 			this.textBoxFormat = new SB3Utility.EditTextBox();
 			this.buttonConvert = new System.Windows.Forms.Button();
@@ -132,7 +138,7 @@
 			this.label4 = new System.Windows.Forms.Label();
 			this.textBoxFrameName = new SB3Utility.EditTextBox();
 			this.tabPageBoneView = new System.Windows.Forms.TabPage();
-			this.buttonZeroWeights = new System.Windows.Forms.Button();
+			this.buttonBoneZeroWeights = new System.Windows.Forms.Button();
 			this.groupBox4 = new System.Windows.Forms.GroupBox();
 			this.numericBoneMatrixRatio = new System.Windows.Forms.NumericUpDown();
 			this.label9 = new System.Windows.Forms.Label();
@@ -245,6 +251,7 @@
 			this.textBoxTexSize = new SB3Utility.EditTextBox();
 			this.textBoxTexName = new SB3Utility.EditTextBox();
 			this.menuStrip1.SuspendLayout();
+			this.groupBox7.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
 			this.splitContainer1.Panel1.SuspendLayout();
 			this.splitContainer1.Panel2.SuspendLayout();
@@ -431,6 +438,65 @@
 			this.toolTip1.SetToolTip(this.checkBoxFrameMatrixUpdate, "Automatically update bone matrix of all meshes in this xx.");
 			this.checkBoxFrameMatrixUpdate.UseVisualStyleBackColor = true;
 			// 
+			// groupBox7
+			// 
+			this.groupBox7.Controls.Add(this.buttonBoneRenameBonesTracks);
+			this.groupBox7.Controls.Add(this.label24);
+			this.groupBox7.Controls.Add(this.label16);
+			this.groupBox7.Controls.Add(this.textBoxBoneReplaceWith);
+			this.groupBox7.Controls.Add(this.textBoxBoneFrameTrackSubstring);
+			this.groupBox7.Location = new System.Drawing.Point(3, 391);
+			this.groupBox7.Name = "groupBox7";
+			this.groupBox7.Size = new System.Drawing.Size(247, 98);
+			this.groupBox7.TabIndex = 100;
+			this.groupBox7.TabStop = false;
+			this.groupBox7.Text = "Rename Multiple Bones && Animation Tracks";
+			this.toolTip1.SetToolTip(this.groupBox7, "All skeletons from opened XX units are considered.\r\nAll tracks from opened XA uni" +
+        "ts are considered.");
+			// 
+			// buttonBoneRenameBonesTracks
+			// 
+			this.buttonBoneRenameBonesTracks.Location = new System.Drawing.Point(64, 70);
+			this.buttonBoneRenameBonesTracks.Name = "buttonBoneRenameBonesTracks";
+			this.buttonBoneRenameBonesTracks.Size = new System.Drawing.Size(112, 23);
+			this.buttonBoneRenameBonesTracks.TabIndex = 106;
+			this.buttonBoneRenameBonesTracks.Text = "Rename";
+			this.toolTip1.SetToolTip(this.buttonBoneRenameBonesTracks, "Uses Regular Expression syntax from both fields");
+			this.buttonBoneRenameBonesTracks.UseVisualStyleBackColor = true;
+			this.buttonBoneRenameBonesTracks.Click += new System.EventHandler(this.buttonBoneRenameBonesTracks_Click);
+			// 
+			// label24
+			// 
+			this.label24.AutoSize = true;
+			this.label24.Location = new System.Drawing.Point(6, 48);
+			this.label24.Name = "label24";
+			this.label24.Size = new System.Drawing.Size(84, 13);
+			this.label24.TabIndex = 111;
+			this.label24.Text = "Replace Pattern";
+			// 
+			// label16
+			// 
+			this.label16.AutoSize = true;
+			this.label16.Location = new System.Drawing.Point(6, 22);
+			this.label16.Name = "label16";
+			this.label16.Size = new System.Drawing.Size(106, 13);
+			this.label16.TabIndex = 109;
+			this.label16.Text = "Frame/Track Pattern";
+			// 
+			// textBoxBoneReplaceWith
+			// 
+			this.textBoxBoneReplaceWith.Location = new System.Drawing.Point(138, 45);
+			this.textBoxBoneReplaceWith.Name = "textBoxBoneReplaceWith";
+			this.textBoxBoneReplaceWith.Size = new System.Drawing.Size(103, 20);
+			this.textBoxBoneReplaceWith.TabIndex = 104;
+			// 
+			// textBoxBoneFrameTrackSubstring
+			// 
+			this.textBoxBoneFrameTrackSubstring.Location = new System.Drawing.Point(138, 19);
+			this.textBoxBoneFrameTrackSubstring.Name = "textBoxBoneFrameTrackSubstring";
+			this.textBoxBoneFrameTrackSubstring.Size = new System.Drawing.Size(103, 20);
+			this.textBoxBoneFrameTrackSubstring.TabIndex = 102;
+			// 
 			// buttonMeshRestPose
 			// 
 			this.buttonMeshRestPose.Location = new System.Drawing.Point(174, 198);
@@ -508,6 +574,19 @@
 			this.toolTip1.SetToolTip(this.textBoxKeyframeRange, "Starting with -1 exports all keyframes without interpolation.\r\nStarting with 0 or" +
         " higher also interpolates.");
 			// 
+			// buttonMeshSnapBorders
+			// 
+			this.buttonMeshSnapBorders.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.buttonMeshSnapBorders.Location = new System.Drawing.Point(138, 235);
+			this.buttonMeshSnapBorders.Name = "buttonMeshSnapBorders";
+			this.buttonMeshSnapBorders.Size = new System.Drawing.Size(110, 23);
+			this.buttonMeshSnapBorders.TabIndex = 142;
+			this.buttonMeshSnapBorders.Text = "Snap Borders";
+			this.toolTip1.SetToolTip(this.buttonMeshSnapBorders, "1. Select surrounding meshes with the same skeleton.\r\n2. Select target mesh last " +
+        "and the target submeshes.\r\n3. Click \"Snap Borders\".");
+			this.buttonMeshSnapBorders.UseVisualStyleBackColor = true;
+			this.buttonMeshSnapBorders.Click += new System.EventHandler(this.buttonMeshSnapBorders_Click);
+			// 
 			// checkBoxSubmeshReorder
 			// 
 			this.checkBoxSubmeshReorder.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
@@ -545,19 +624,6 @@
 			this.toolTip1.SetToolTip(this.buttonTextureDeleteUnref, "Textures only\r\nHolding SHIFT selects them instead");
 			this.buttonTextureDeleteUnref.UseVisualStyleBackColor = true;
 			this.buttonTextureDeleteUnref.Click += new System.EventHandler(this.buttonTextureDeleteUnref_Click);
-			// 
-			// buttonMeshSnapBorders
-			// 
-			this.buttonMeshSnapBorders.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.buttonMeshSnapBorders.Location = new System.Drawing.Point(138, 235);
-			this.buttonMeshSnapBorders.Name = "buttonMeshSnapBorders";
-			this.buttonMeshSnapBorders.Size = new System.Drawing.Size(110, 23);
-			this.buttonMeshSnapBorders.TabIndex = 142;
-			this.buttonMeshSnapBorders.Text = "Snap Borders";
-			this.toolTip1.SetToolTip(this.buttonMeshSnapBorders, "1. Select surrounding meshes with the same skeleton.\r\n2. Select target mesh last " +
-        "and the target submeshes.\r\n3. Click \"Snap Borders\".");
-			this.buttonMeshSnapBorders.UseVisualStyleBackColor = true;
-			this.buttonMeshSnapBorders.Click += new System.EventHandler(this.buttonMeshSnapBorders_Click);
 			// 
 			// splitContainer1
 			// 
@@ -1462,7 +1528,8 @@
 			// 
 			// tabPageBoneView
 			// 
-			this.tabPageBoneView.Controls.Add(this.buttonZeroWeights);
+			this.tabPageBoneView.Controls.Add(this.groupBox7);
+			this.tabPageBoneView.Controls.Add(this.buttonBoneZeroWeights);
 			this.tabPageBoneView.Controls.Add(this.groupBox4);
 			this.tabPageBoneView.Controls.Add(this.tabControlBoneMatrix);
 			this.tabPageBoneView.Controls.Add(this.buttonBoneRemove);
@@ -1477,15 +1544,15 @@
 			this.tabPageBoneView.Text = "Bone";
 			this.tabPageBoneView.UseVisualStyleBackColor = true;
 			// 
-			// buttonZeroWeights
+			// buttonBoneZeroWeights
 			// 
-			this.buttonZeroWeights.Location = new System.Drawing.Point(67, 361);
-			this.buttonZeroWeights.Name = "buttonZeroWeights";
-			this.buttonZeroWeights.Size = new System.Drawing.Size(112, 23);
-			this.buttonZeroWeights.TabIndex = 107;
-			this.buttonZeroWeights.Text = "Zero Weights";
-			this.buttonZeroWeights.UseVisualStyleBackColor = true;
-			this.buttonZeroWeights.Click += new System.EventHandler(this.buttonZeroWeights_Click);
+			this.buttonBoneZeroWeights.Location = new System.Drawing.Point(67, 356);
+			this.buttonBoneZeroWeights.Name = "buttonBoneZeroWeights";
+			this.buttonBoneZeroWeights.Size = new System.Drawing.Size(112, 23);
+			this.buttonBoneZeroWeights.TabIndex = 90;
+			this.buttonBoneZeroWeights.Text = "Zero Weights";
+			this.buttonBoneZeroWeights.UseVisualStyleBackColor = true;
+			this.buttonBoneZeroWeights.Click += new System.EventHandler(this.buttonBoneZeroWeights_Click);
 			// 
 			// groupBox4
 			// 
@@ -1632,7 +1699,7 @@
 			this.groupBox6.Location = new System.Drawing.Point(6, 105);
 			this.groupBox6.Name = "groupBox6";
 			this.groupBox6.Size = new System.Drawing.Size(238, 38);
-			this.groupBox6.TabIndex = 100;
+			this.groupBox6.TabIndex = 80;
 			this.groupBox6.TabStop = false;
 			// 
 			// buttonBoneMatrixApply
@@ -1641,7 +1708,7 @@
 			this.buttonBoneMatrixApply.Location = new System.Drawing.Point(141, 10);
 			this.buttonBoneMatrixApply.Name = "buttonBoneMatrixApply";
 			this.buttonBoneMatrixApply.Size = new System.Drawing.Size(91, 23);
-			this.buttonBoneMatrixApply.TabIndex = 78;
+			this.buttonBoneMatrixApply.TabIndex = 84;
 			this.buttonBoneMatrixApply.Text = "Apply Changes";
 			this.buttonBoneMatrixApply.UseVisualStyleBackColor = true;
 			this.buttonBoneMatrixApply.Click += new System.EventHandler(this.buttonBoneMatrixApply_Click);
@@ -1652,7 +1719,7 @@
 			this.checkBoxBoneMatrixUpdate.Location = new System.Drawing.Point(5, 13);
 			this.checkBoxBoneMatrixUpdate.Name = "checkBoxBoneMatrixUpdate";
 			this.checkBoxBoneMatrixUpdate.Size = new System.Drawing.Size(135, 17);
-			this.checkBoxBoneMatrixUpdate.TabIndex = 112;
+			this.checkBoxBoneMatrixUpdate.TabIndex = 82;
 			this.checkBoxBoneMatrixUpdate.Text = "Update Bones && Frame";
 			this.checkBoxBoneMatrixUpdate.UseVisualStyleBackColor = true;
 			// 
@@ -1696,7 +1763,7 @@
 			this.dataGridViewBoneSRT.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
 			this.dataGridViewBoneSRT.ShowRowIndex = false;
 			this.dataGridViewBoneSRT.Size = new System.Drawing.Size(239, 80);
-			this.dataGridViewBoneSRT.TabIndex = 144;
+			this.dataGridViewBoneSRT.TabIndex = 42;
 			this.dataGridViewBoneSRT.TabStop = false;
 			this.dataGridViewBoneSRT.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewSRT_CellValueChanged);
 			// 
@@ -1731,7 +1798,7 @@
 			this.dataGridViewBoneMatrix.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
 			this.dataGridViewBoneMatrix.ShowRowIndex = false;
 			this.dataGridViewBoneMatrix.Size = new System.Drawing.Size(239, 80);
-			this.dataGridViewBoneMatrix.TabIndex = 145;
+			this.dataGridViewBoneMatrix.TabIndex = 44;
 			this.dataGridViewBoneMatrix.TabStop = false;
 			this.dataGridViewBoneMatrix.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewMatrix_CellValueChanged);
 			// 
@@ -2715,6 +2782,8 @@
 			this.Text = "FormXX";
 			this.menuStrip1.ResumeLayout(false);
 			this.menuStrip1.PerformLayout();
+			this.groupBox7.ResumeLayout(false);
+			this.groupBox7.PerformLayout();
 			this.splitContainer1.Panel1.ResumeLayout(false);
 			this.splitContainer1.Panel1.PerformLayout();
 			this.splitContainer1.Panel2.ResumeLayout(false);
@@ -3005,7 +3074,7 @@
 		private System.Windows.Forms.CheckBox checkBoxSubmeshReorder;
 		public System.Windows.Forms.DataGridView dataGridViewMesh;
 		private System.Windows.Forms.CheckBox checkBoxMeshExportNoMesh;
-		private System.Windows.Forms.Button buttonZeroWeights;
+		private System.Windows.Forms.Button buttonBoneZeroWeights;
 		private System.Windows.Forms.CheckBox checkBoxMeshExportFbxLinearInterpolation;
 		private System.Windows.Forms.Button buttonFrameAddBone;
 		private System.Windows.Forms.CheckBox checkBoxMeshNewSkin;
@@ -3023,5 +3092,11 @@
 		private System.Windows.Forms.Button buttonMaterialDeleteUnref;
 		private System.Windows.Forms.Button buttonTextureDeleteUnref;
 		private System.Windows.Forms.Button buttonMeshSnapBorders;
+		private System.Windows.Forms.GroupBox groupBox7;
+		private System.Windows.Forms.Button buttonBoneRenameBonesTracks;
+		private System.Windows.Forms.Label label24;
+		private System.Windows.Forms.Label label16;
+		private EditTextBox textBoxBoneReplaceWith;
+		private EditTextBox textBoxBoneFrameTrackSubstring;
 	}
 }

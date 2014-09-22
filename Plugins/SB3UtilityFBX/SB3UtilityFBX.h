@@ -48,7 +48,7 @@ namespace SB3Utility {
 			virtual property List<ImportedAnimation^>^ AnimationList;
 			virtual property List<ImportedMorph^>^ MorphList;
 
-			Importer(String^ path, bool EulerFilter, float filterPrecision);
+			Importer(String^ path, bool negateQuaternionFlips);
 
 		private:
 			FbxArray<FbxSurfacePhong*>* pMaterials;
@@ -60,9 +60,7 @@ namespace SB3Utility {
 			FbxScene* pScene;
 			FbxImporter* pImporter;
 
-			FbxAnimCurveFilterUnroll* lFilter;
-			bool EulerFilter;
-			float filterPrecision;
+			bool negateQuaternionFlips;
 
 			void ImportNode(ImportedFrame^ parent, FbxNode* pNode);
 			ImportedFrame^ ImportFrame(ImportedFrame^ parent, FbxNode* pNode);
@@ -96,7 +94,7 @@ namespace SB3Utility {
 		ref class Exporter
 		{
 		public:
-			static void Export(String^ path, xxParser^ xxParser, List<xxFrame^>^ meshParents, List<xaParser^>^ xaSubfileList, int startKeyframe, int endKeyframe, bool linear, String^ exportFormat, bool allFrames, bool skins, bool embedMedia, bool compatibility);
+			static void Export(String^ path, xxParser^ xxParser, List<xxFrame^>^ meshParents, List<xaParser^>^ xaSubfileList, int startKeyframe, int endKeyframe, bool linear, bool EulerFilter, float filterPrecision, String^ exportFormat, bool allFrames, bool skins, bool embedMedia, bool compatibility);
 			static void ExportMorph(String^ path, xxParser^ xxParser, xxFrame^ meshFrame, xaMorphClip^ morphClip, xaParser^ xaparser, String^ exportFormat, bool oneBlendShape, bool embedMedia, bool compatibility);
 
 			static void Export(String^ path, IImported^ imported, int startKeyframe, int endKeyframe, bool linear, bool EulerFilter, float filterPrecision, String^ exportFormat, bool allFrames, bool skins, bool compatibility);
@@ -105,6 +103,8 @@ namespace SB3Utility {
 			HashSet<String^>^ frameNames;
 			HashSet<String^>^ meshNames;
 			List<xxFrame^>^ meshFrames;
+			bool EulerFilter;
+			float filterPrecision;
 			bool exportSkins;
 			bool embedMedia;
 			xxParser^ xxparser;
@@ -126,7 +126,7 @@ namespace SB3Utility {
 			void ExportFrame(FbxNode* pParentNode, xxFrame^ frame);
 			void ExportMesh(FbxNode* pFrameNode, xxFrame^ frame);
 			FbxFileTexture* ExportTexture(xxMaterialTexture^ matTex, FbxLayerElementTexture*& pLayerTexture, FbxMesh* pMesh);
-			void ExportAnimations(List<xaParser^>^ xaSubfileList, int startKeyframe, int endKeyframe, bool linear);
+			void ExportAnimations(List<xaParser^>^ xaSubfileList, int startKeyframe, int endKeyframe, bool linear, bool EulerFilter, float filterPrecision);
 			void SetJoints();
 			void SetJointsNode(FbxNode* pNode, HashSet<String^>^ boneNames);
 			void ExportMorphs(xxFrame^ baseFrame, xaMorphClip^ morphClip, xaParser^ xaparser, bool oneBlendShape);

@@ -4,7 +4,7 @@
 
 namespace SB3Utility
 {
-	void Fbx::Exporter::Export(String^ path, xxParser^ xxParser, List<xxFrame^>^ meshParents, List<xaParser^>^ xaSubfileList, int startKeyframe, int endKeyframe, bool linear, String^ exportFormat, bool allFrames, bool skins, bool embedMedia, bool compatibility)
+	void Fbx::Exporter::Export(String^ path, xxParser^ xxParser, List<xxFrame^>^ meshParents, List<xaParser^>^ xaSubfileList, int startKeyframe, int endKeyframe, bool linear, bool EulerFilter, float filterPrecision, String^ exportFormat, bool allFrames, bool skins, bool embedMedia, bool compatibility)
 	{
 		FileInfo^ file = gcnew FileInfo(path);
 		DirectoryInfo^ dir = file->Directory;
@@ -17,7 +17,7 @@ namespace SB3Utility
 		path = Path::GetFileName(path);
 
 		Exporter^ exporter = gcnew Exporter(path, xxParser, meshParents, exportFormat, allFrames, skins, embedMedia, compatibility);
-		exporter->ExportAnimations(xaSubfileList, startKeyframe, endKeyframe, linear);
+		exporter->ExportAnimations(xaSubfileList, startKeyframe, endKeyframe, linear, EulerFilter, filterPrecision);
 		exporter->pExporter->Export(exporter->pScene);
 		delete exporter;
 
@@ -533,7 +533,7 @@ namespace SB3Utility
 									}
 								}
 
-								FbxAMatrix lMeshMatrix = pScene->GetEvaluator()->GetNodeGlobalTransform(pMeshNode);
+								FbxAMatrix lMeshMatrix = pMeshNode->EvaluateGlobalTransform();
 
 								pCluster->SetTransformMatrix(lMeshMatrix);
 								pCluster->SetTransformLinkMatrix(lMeshMatrix * lBoneMatrix.Inverse());
@@ -639,7 +639,7 @@ namespace SB3Utility
 		return pTex;
 	}
 
-	void Fbx::Exporter::ExportAnimations(List<xaParser^>^ xaSubfileList, int startKeyframe, int endKeyframe, bool linear)
+	void Fbx::Exporter::ExportAnimations(List<xaParser^>^ xaSubfileList, int startKeyframe, int endKeyframe, bool linear, bool EulerFilter, float filterPrecision)
 	{
 		if (xaSubfileList == nullptr)
 		{
@@ -651,6 +651,8 @@ namespace SB3Utility
 		FbxPropertyT<FbxDouble3> scale = FbxProperty::Create(pScene, FbxDouble3DT, InterpolationHelper::pScaleName);
 		FbxPropertyT<FbxDouble4> rotate = FbxProperty::Create(pScene, FbxDouble4DT, InterpolationHelper::pRotateName);
 		FbxPropertyT<FbxDouble3> translate = FbxProperty::Create(pScene, FbxDouble3DT, InterpolationHelper::pTranslateName);
+
+		FbxAnimCurveFilterUnroll* lFilter = EulerFilter ? new FbxAnimCurveFilterUnroll() : NULL;
 
 		for (int i = 0; i < xaSubfileList->Count; i++)
 		{
@@ -778,6 +780,18 @@ namespace SB3Utility
 					lCurveTX->KeyModifyEnd();
 					lCurveTY->KeyModifyEnd();
 					lCurveTZ->KeyModifyEnd();
+
+					if (EulerFilter)
+					{
+						FbxAnimCurve* lCurve [3];
+						lCurve[0] = lCurveRX;
+						lCurve[1] = lCurveRY;
+						lCurve[2] = lCurveRZ;
+						lFilter->Reset();
+						lFilter->SetTestForPath(true);
+						lFilter->SetQualityTolerance(filterPrecision);
+						lFilter->Apply((FbxAnimCurve**)lCurve, 3);
+					}
 				}
 			}
 		}

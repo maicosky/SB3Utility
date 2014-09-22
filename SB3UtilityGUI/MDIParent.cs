@@ -77,9 +77,10 @@ namespace SB3Utility
 				Gui.Scripting.Variables.Add(MainVar, this);
 				PluginManager.RegisterFunctions(Assembly.GetExecutingAssembly());
 
-				eulerFilterToolStripMenuItem.CheckedChanged += eulerFilterToolStripMenuItem_Click;
-				toolStripEditTextBoxFilterPrecision.Text = ((Single)Gui.Config["FbxImportAnimationFilterPrecision"]).ToString();
+				eulerFilterToolStripMenuItem.CheckedChanged += eulerFilterToolStripMenuItem_CheckChanged;
+				toolStripEditTextBoxFilterPrecision.Text = ((Single)Gui.Config["FbxExportAnimationFilterPrecision"]).ToString();
 				toolStripEditTextBoxFilterPrecision.AfterEditTextChanged += toolStripEditTextBoxFilterPrecision_AfterEditTextChanged;
+				negateQuaternionFlipsToolStripMenuItem.CheckedChanged += negateQuaternionFlipsToolStripMenuItem_CheckedChanged;
 				toolStripEditTextBoxSwapThesholdMB.Text = ((long)Gui.Config["PrivateMemSwapThresholdMB"]).ToString();
 				toolStripEditTextBoxSwapThesholdMB.AfterEditTextChanged += toolStripEditTextBoxSwapThesholdMB_AfterEditTextChanged;
 				toolStripEditTextBoxTreeViews.Text = ((float)Gui.Config["TreeViewFontSize"]).ToFloatString();
@@ -683,14 +684,19 @@ namespace SB3Utility
 			}
 		}
 
-		private void eulerFilterToolStripMenuItem_Click(object sender, EventArgs e)
+		private void eulerFilterToolStripMenuItem_CheckChanged(object sender, EventArgs e)
 		{
-			Properties.Settings.Default["FbxImportAnimationEulerFilter"] = eulerFilterToolStripMenuItem.Checked;
+			Properties.Settings.Default["FbxExportAnimationEulerFilter"] = eulerFilterToolStripMenuItem.Checked;
 		}
 
 		private void toolStripEditTextBoxFilterPrecision_AfterEditTextChanged(object sender, EventArgs e)
 		{
-			Properties.Settings.Default["FbxImportAnimationFilterPrecision"] = Single.Parse(toolStripEditTextBoxFilterPrecision.Text);
+			Properties.Settings.Default["FbxExportAnimationFilterPrecision"] = Single.Parse(toolStripEditTextBoxFilterPrecision.Text);
+		}
+
+		private void negateQuaternionFlipsToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+		{
+			Properties.Settings.Default["FbxImportAnimationNegateQuaternionFlips"] = negateQuaternionFlipsToolStripMenuItem.Checked;
 		}
 
 		private void toolStripEditTextBoxSwapThesholdMB_AfterEditTextChanged(object sender, EventArgs e)

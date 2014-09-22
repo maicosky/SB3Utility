@@ -178,9 +178,9 @@ namespace SB3Utility.Properties {
         [global::System.Configuration.SettingsProviderAttribute(typeof(PortableSettingsProvider))]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool FbxImportAnimationEulerFilter {
+        public bool FbxExportAnimationEulerFilter {
             get {
-                return ((bool)(this["FbxImportAnimationEulerFilter"]));
+                return ((bool)(this["FbxExportAnimationEulerFilter"]));
             }
         }
         
@@ -188,9 +188,9 @@ namespace SB3Utility.Properties {
         [global::System.Configuration.SettingsProviderAttribute(typeof(PortableSettingsProvider))]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0.25")]
-        public float FbxImportAnimationFilterPrecision {
+        public float FbxExportAnimationFilterPrecision {
             get {
-                return ((float)(this["FbxImportAnimationFilterPrecision"]));
+                return ((float)(this["FbxExportAnimationFilterPrecision"]));
             }
         }
         
@@ -277,7 +277,7 @@ namespace SB3Utility.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Configuration.SettingsProviderAttribute(typeof(PortableSettingsProvider))]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("FBX 2014.1")]
+        [global::System.Configuration.DefaultSettingValueAttribute("FBX 2015.1")]
         public string MeshExportFormat {
             get {
                 return ((string)(this["MeshExportFormat"]));
@@ -411,6 +411,26 @@ namespace SB3Utility.Properties {
         public global::System.Drawing.Size DialogXXSnapBordersSize {
             get {
                 return ((global::System.Drawing.Size)(this["DialogXXSnapBordersSize"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(PortableSettingsProvider))]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("FF0A0A3C")]
+        public string RendererBackgroundARGB {
+            get {
+                return ((string)(this["RendererBackgroundARGB"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(PortableSettingsProvider))]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool FbxImportAnimationNegateQuaternionFlips {
+            get {
+                return ((bool)(this["FbxImportAnimationNegateQuaternionFlips"]));
             }
         }
     }

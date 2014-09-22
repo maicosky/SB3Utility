@@ -1,4 +1,22 @@
-﻿[0.8.2]
+﻿[1.0.0]
+  - Updated to Fbx SDK 2015.1
+  - Deleted Fbx Import Euler Filter usage
+  - Added Fbx Import Negate Quaternion Flips
+  - Added Fbx Export Euler Filter usage
+  - Fixed texture dimensions display
+  - Added that Renderer's background colour is persistent
+  - Changed export meshes to include only the locked XA or all unlocked XAs
+  - Added "XX Lock & Map" in XA editor
+  - Added keyframe editor, sync play, bone highlighting and track compare in XA editor
+  - Added "Renaming of Bones & Animation Tracks" in XX editor
+  - Fixed crash in "Delete Unreferenced" when a material or texture was selected
+  - Changed logging of script commands based on Settings
+  - Changed order of calls for recreation of the GUI after Merge/Append/Replace of xxFrames
+  - Fixed crash when a mesh had only invalid bones
+  - Changed renaming mesh frames, materials and textures re-sorts their list views and cross reference views.
+    This fixes the different selection of meshes after "SVI[EX] Juggler"'s "Copy to Meshes".
+
+[0.8.2]
   - Fixed update of the unit name in the pp file's Other tab after SVIEX replacements.
   - Fix for external tools integration. Already edited (SVIEX) units couldn't be opened.
   - Fixed missing update of VertexListDuplicate in SVIEX Juggler's CopyToSubmesh

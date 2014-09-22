@@ -79,7 +79,7 @@ namespace SB3Utility
 		{
 			var mem = new MemoryStream(Encoding.UTF8.GetBytes(command));
 
-			if (captureCommandsToolStripMenuItem.Checked)
+			if ((bool)Gui.Config["CaptureCommands"])
 			{
 				richTextBoxScript.SuspendLayout();
 				Color color = (show) ? Color.Empty : SystemColors.GrayText;

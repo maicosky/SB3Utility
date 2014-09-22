@@ -6,7 +6,7 @@ using namespace System::Reflection;
 
 namespace SB3Utility
 {
-	Fbx::Importer::Importer(String^ path, bool EulerFilter, float filterPrecision)
+	Fbx::Importer::Importer(String^ path, bool negateQuaternionFlips)
 	{
 		String^ currentDir;
 
@@ -61,8 +61,7 @@ namespace SB3Utility
 				ImportNode(nullptr, pRootNode);
 			}
 
-			this->EulerFilter = EulerFilter;
-			this->filterPrecision = filterPrecision;
+			this->negateQuaternionFlips = negateQuaternionFlips;
 			ImportAnimation();
 		}
 		finally
@@ -175,7 +174,7 @@ namespace SB3Utility
 			parent->AddChild(frame);
 		}
 
-		FbxAMatrix lNodeMatrix = pScene->GetEvaluator()->GetNodeLocalTransform(pNode);
+		FbxAMatrix lNodeMatrix = pNode->EvaluateLocalTransform();
 		Matrix matrix;
 		for (int m = 0; m < 4; m++)
 		{
@@ -651,11 +650,6 @@ namespace SB3Utility
 
 	void Fbx::Importer::ImportAnimation()
 	{
-		if (EulerFilter)
-		{
-			lFilter = new FbxAnimCurveFilterUnroll();
-		}
-
 		for (int i = 0; i < pScene->GetSrcObjectCount<FbxAnimStack>(); i++)
 		{
 			FbxAnimStack* pAnimStack = FbxCast<FbxAnimStack>(pScene->GetSrcObject<FbxAnimStack>(i));
@@ -756,30 +750,42 @@ namespace SB3Utility
 			(pAnimCurveRX != NULL) && (pAnimCurveRY != NULL) && (pAnimCurveRZ != NULL) &&
 			(pAnimCurveSX != NULL) && (pAnimCurveSY != NULL) && (pAnimCurveSZ != NULL))
 		{
-			if (EulerFilter)
-			{
-				FbxAnimCurve* lCurve [3];
-				lCurve[0] = pAnimCurveRX;
-				lCurve[1] = pAnimCurveRY;
-				lCurve[2] = pAnimCurveRZ;
-				lFilter->Reset();
-				lFilter->SetTestForPath(true);
-				lFilter->SetQualityTolerance(filterPrecision);
-				lFilter->Apply((FbxAnimCurve**)lCurve, 3);
-			}
-
 			int numKeys = pAnimCurveSX->KeyGetCount();
 			FbxTime FbxTime = pAnimCurveSX->KeyGetTime(numKeys - 1);
 			int keyIndex = (int)Math::Round((double)(FbxTime.GetSecondDouble() * 24.0), 0);
 			array<ImportedAnimationKeyframe^>^ keyArray = gcnew array<ImportedAnimationKeyframe^>(keyIndex + 1);
-			for (int i = 0; i < numKeys; i++)
+			Quaternion lastQ = Quaternion::Identity;
+			for (int i = 0, lastUsed_keyIndex = -1; i < numKeys; i++)
 			{
 				FbxTime = pAnimCurveSX->KeyGetTime(i);
 				keyIndex = (int)Math::Round((double)(FbxTime.GetSecondDouble() * 24.0), 0);
 				keyArray[keyIndex] = gcnew ImportedAnimationKeyframe();
+
 				keyArray[keyIndex]->Scaling = Vector3(pAnimCurveSX->KeyGetValue(i), pAnimCurveSY->KeyGetValue(i), pAnimCurveSZ->KeyGetValue(i));
+
 				Vector3 rotation = Vector3(pAnimCurveRX->KeyGetValue(i), pAnimCurveRY->KeyGetValue(i), pAnimCurveRZ->KeyGetValue(i));
-				keyArray[keyIndex]->Rotation = Fbx::EulerToQuaternion(rotation);
+				Quaternion q = Fbx::EulerToQuaternion(rotation);
+				if (negateQuaternionFlips)
+				{
+					if (lastUsed_keyIndex >= 0)
+					{
+						bool diffX = Math::Sign(lastQ.X) != Math::Sign(q.X);
+//						bool diffY = Math::Sign(lastQ.Y) != Math::Sign(q.Y);
+						bool diffZ = Math::Sign(lastQ.Z) != Math::Sign(q.Z);
+						bool diffW = Math::Sign(lastQ.W) != Math::Sign(q.W);
+						if ((diffX || /*diffY ||*/ diffZ) && diffW)
+						{
+							q.X = -q.X;
+							q.Y = -q.Y;
+							q.Z = -q.Z;
+							q.W = -q.W;
+						}
+					}
+					lastQ = q;
+					lastUsed_keyIndex = keyIndex;
+				}
+				keyArray[keyIndex]->Rotation = q;
+
 				keyArray[keyIndex]->Translation = Vector3(pAnimCurveTX->KeyGetValue(i), pAnimCurveTY->KeyGetValue(i), pAnimCurveTZ->KeyGetValue(i));
 			}
 
@@ -811,18 +817,6 @@ namespace SB3Utility
 			(pAnimCurveRX != NULL) && (pAnimCurveRY != NULL) && (pAnimCurveRZ != NULL) &&
 			(pAnimCurveSX != NULL) && (pAnimCurveSY != NULL) && (pAnimCurveSZ != NULL))
 		{
-			if (EulerFilter)
-			{
-				FbxAnimCurve* lCurve [3];
-				lCurve[0] = pAnimCurveRX;
-				lCurve[1] = pAnimCurveRY;
-				lCurve[2] = pAnimCurveRZ;
-				lFilter->Reset();
-				lFilter->SetTestForPath(true);
-				lFilter->SetQualityTolerance(filterPrecision);
-				lFilter->Apply((FbxAnimCurve**)lCurve, 3);
-			}
-
 			int numKeys = pAnimCurveSX->KeyGetCount();
 			FbxTime FbxTime = pAnimCurveSX->KeyGetTime(numKeys - 1);
 			int keyIndex = (int)Math::Round((double)(FbxTime.GetSecondDouble() * 24.0), 0);
@@ -838,12 +832,33 @@ namespace SB3Utility
 			FbxTime = pAnimCurveRX->KeyGetTime(numKeys - 1);
 			keyIndex = (int)Math::Round((double)(FbxTime.GetSecondDouble() * 24.0), 0);
 			array<Nullable<Quaternion>>^ rotations = gcnew array<Nullable<Quaternion>>(keyIndex + 1);
-			for (int i = 0; i < numKeys; i++)
+			Quaternion lastQ = Quaternion::Identity;
+			for (int i = 0, lastUsed_keyIndex = -1; i < numKeys; i++)
 			{
 				FbxTime = pAnimCurveRX->KeyGetTime(i);
 				keyIndex = (int)Math::Round((double)(FbxTime.GetSecondDouble() * 24.0), 0);
 				Vector3 rotation = Vector3(pAnimCurveRX->KeyGetValue(i), pAnimCurveRY->KeyGetValue(i), pAnimCurveRZ->KeyGetValue(i));
-				rotations[keyIndex] = Fbx::EulerToQuaternion(rotation);
+				Quaternion q = EulerToQuaternion(rotation);
+				if (negateQuaternionFlips)
+				{
+					if (lastUsed_keyIndex >= 0)
+					{
+						bool diffX = Math::Sign(lastQ.X) != Math::Sign(q.X);
+//						bool diffY = Math::Sign(lastQ.Y) != Math::Sign(q.Y);
+						bool diffZ = Math::Sign(lastQ.Z) != Math::Sign(q.Z);
+						bool diffW = Math::Sign(lastQ.W) != Math::Sign(q.W);
+						if ((diffX || /*diffY ||*/ diffZ) && diffW)
+						{
+							q.X = -q.X;
+							q.Y = -q.Y;
+							q.Z = -q.Z;
+							q.W = -q.W;
+						}
+					}
+					lastQ = q;
+					lastUsed_keyIndex = keyIndex;
+				}
+				rotations[keyIndex] = q;
 			}
 
 			numKeys = pAnimCurveTX->KeyGetCount();

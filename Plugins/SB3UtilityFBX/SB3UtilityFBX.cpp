@@ -71,21 +71,19 @@ namespace SB3Utility
 		curveW->KeySet(keyIndex, time, vec.W, interpolationMethod); \
 	}
 
-#define GET_CHANNEL_VALUE_VECTOR3(prop, time, vec) \
+#define GET_KEY_VECTOR3(curveX, curveY, curveZ, time, vec) \
 	{ \
-		FbxAnimCurveNode& val = pAnimEvaluator->GetPropertyValue(prop, time); \
-		vec.X = (float)val.GetChannelValue<double>(0U, 0.0); \
-		vec.Y = (float)val.GetChannelValue<double>(1U, 0.0); \
-		vec.Z = (float)val.GetChannelValue<double>(2U, 0.0); \
+		vec.X = curveX->Evaluate(time); \
+		vec.Y = curveY->Evaluate(time); \
+		vec.Z = curveZ->Evaluate(time); \
 	}
 
-#define GET_CHANNEL_VALUE_VECTOR4(prop, time, vec) \
+#define GET_KEY_VECTOR4(curveX, curveY, curveZ, curveW, time, vec) \
 	{ \
-		FbxAnimCurveNode& val = pAnimEvaluator->GetPropertyValue(prop, time); \
-		vec.X = (float)val.GetChannelValue<double>(0U, 0.0); \
-		vec.Y = (float)val.GetChannelValue<double>(1U, 0.0); \
-		vec.Z = (float)val.GetChannelValue<double>(2U, 0.0); \
-		vec.W = (float)val.GetChannelValue<double>(3U, 0.0); \
+		vec.X = curveX->Evaluate(time); \
+		vec.Y = curveY->Evaluate(time); \
+		vec.Z = curveZ->Evaluate(time); \
+		vec.W = curveW->Evaluate(time); \
 	}
 
 	void Fbx::InterpolateKeyframes(List<Tuple<ImportedAnimationTrack^, array<xaAnimationKeyframe^>^>^>^ extendedTrackList, int resampleCount)
@@ -100,14 +98,12 @@ namespace SB3Utility
 		FbxAnimLayer* pAnimLayer = FbxAnimLayer::Create(pScene, NULL);
 		pAnimStack->AddMember(pAnimLayer);
 
-		FbxAnimEvaluator* pAnimEvaluator = pScene->GetEvaluator();
-
 		const FbxAnimCurveDef::EInterpolationType interpolationMethod = FbxAnimCurveDef::eInterpolationLinear; // eINTERPOLATION_CUBIC ?
 
 		// S
 		const char* pScaleName = "Scale";
 		FbxPropertyT<FbxDouble3> scale = FbxProperty::Create(pScene, FbxDouble3DT, pScaleName);
-		scale.ModifyFlag(FbxPropertyAttr::eAnimatable, true);
+		scale.ModifyFlag(FbxPropertyFlags::eAnimatable, true);
 		FbxAnimCurveNode* pScaleCurveNode = scale.GetCurveNode(pAnimLayer, true);
 		pAnimLayer->AddMember(pScaleCurveNode);
 		scale.ConnectSrcObject(pScaleCurveNode);
@@ -118,7 +114,7 @@ namespace SB3Utility
 		// R
 		const char* pRotateName = "Rotate";
 		FbxPropertyT<FbxDouble3> rotate = FbxProperty::Create(pScene, FbxDouble3DT, pRotateName);
-		rotate.ModifyFlag(FbxPropertyAttr::eAnimatable, true);
+		rotate.ModifyFlag(FbxPropertyFlags::eAnimatable, true);
 		FbxAnimCurveNode* pRotateCurveNode = rotate.GetCurveNode(pAnimLayer, true);
 		pAnimLayer->AddMember(pRotateCurveNode);
 		rotate.ConnectSrcObject(pRotateCurveNode);
@@ -129,7 +125,7 @@ namespace SB3Utility
 		// T
 		const char* pTranslateName = "Translate";
 		FbxPropertyT<FbxDouble3> translate = FbxProperty::Create(pScene, FbxDouble3DT, pTranslateName);
-		translate.ModifyFlag(FbxPropertyAttr::eAnimatable, true);
+		translate.ModifyFlag(FbxPropertyFlags::eAnimatable, true);
 		FbxAnimCurveNode* pTranslateCurveNode = translate.GetCurveNode(pAnimLayer, true);
 		pAnimLayer->AddMember(pTranslateCurveNode);
 		translate.ConnectSrcObject(pTranslateCurveNode);
@@ -170,11 +166,11 @@ namespace SB3Utility
 
 				time.SetSecondDouble(i);
 				Vector3 s, r, t;
-				GET_CHANNEL_VALUE_VECTOR3(scale, time, s);
+				GET_KEY_VECTOR3(pScaleCurveX, pScaleCurveY, pScaleCurveZ, time, s);
 				newKeyframes[i]->Scaling = s;
-				GET_CHANNEL_VALUE_VECTOR3(rotate, time, r);
+				GET_KEY_VECTOR3(pRotateCurveX, pRotateCurveY, pRotateCurveZ, time, r);
 				newKeyframes[i]->Rotation = EulerToQuaternion(r);
-				GET_CHANNEL_VALUE_VECTOR3(translate, time, t);
+				GET_KEY_VECTOR3(pTranslateCurveX, pTranslateCurveY, pTranslateCurveZ, time, t);
 				newKeyframes[i]->Translation = t;
 			}
 
@@ -276,13 +272,11 @@ namespace SB3Utility
 		pScene = scene;
 		pAnimLayer = layer;
 
-		pAnimEvaluator = pScene->GetEvaluator();
-
 		this->interpolationMethod = interpolationMethod;
 
 		// S
 		this->scale = scale;
-		scale->ModifyFlag(FbxPropertyAttr::eAnimatable, true);
+		scale->ModifyFlag(FbxPropertyFlags::eAnimatable, true);
 		FbxAnimCurveNode* pScaleCurveNode = scale->GetCurveNode(pAnimLayer, true);
 		pAnimLayer->AddMember(pScaleCurveNode);
 		scale->ConnectSrcObject(pScaleCurveNode);
@@ -292,7 +286,7 @@ namespace SB3Utility
 
 		// R
 		this->rotate = rotate;
-		rotate->ModifyFlag(FbxPropertyAttr::eAnimatable, true);
+		rotate->ModifyFlag(FbxPropertyFlags::eAnimatable, true);
 		FbxAnimCurveNode* pRotateCurveNode = rotate->GetCurveNode(pAnimLayer, true);
 		pAnimLayer->AddMember(pRotateCurveNode);
 		rotate->ConnectSrcObject(pRotateCurveNode);
@@ -303,7 +297,7 @@ namespace SB3Utility
 
 		// T
 		this->translate = translate;
-		translate->ModifyFlag(FbxPropertyAttr::eAnimatable, true);
+		translate->ModifyFlag(FbxPropertyFlags::eAnimatable, true);
 		FbxAnimCurveNode* pTranslateCurveNode = translate->GetCurveNode(pAnimLayer, true);
 		pAnimLayer->AddMember(pTranslateCurveNode);
 		translate->ConnectSrcObject(pTranslateCurveNode);
@@ -344,11 +338,11 @@ namespace SB3Utility
 
 			time.SetSecondDouble(i * (endIdx - startIdx) / animationLen);
 			Vector3 s, r, t;
-			GET_CHANNEL_VALUE_VECTOR3(*scale, time, s);
+			GET_KEY_VECTOR3(pScaleCurveX, pScaleCurveY, pScaleCurveZ, time, s);
 			newKeyframe->Scaling = s;
-			GET_CHANNEL_VALUE_VECTOR3(*rotate, time, r);
+			GET_KEY_VECTOR3(pRotateCurveX, pRotateCurveY, pRotateCurveZ, time, r);
 			newKeyframe->Rotation = EulerToQuaternion(r);
-			GET_CHANNEL_VALUE_VECTOR3(*translate, time, t);
+			GET_KEY_VECTOR3(pTranslateCurveX, pTranslateCurveY, pTranslateCurveZ, time, t);
 			newKeyframe->Translation = t;
 
 			newKeyframes->Add(newKeyframe);
@@ -388,12 +382,12 @@ namespace SB3Utility
 
 			time.SetSecondDouble(i * endIdx / animationLen);
 			Vector3 s, t;
-			GET_CHANNEL_VALUE_VECTOR3(*scale, time, s);
+			GET_KEY_VECTOR3(pScaleCurveX, pScaleCurveY, pScaleCurveZ, time, s);
 			newKeyframe->Scaling = s;
 			Quaternion q;
-			GET_CHANNEL_VALUE_VECTOR4(*rotate, time, q);
+			GET_KEY_VECTOR4(pRotateCurveX, pRotateCurveY, pRotateCurveZ, pRotateCurveW, time, q);
 			newKeyframe->Rotation = q;
-			GET_CHANNEL_VALUE_VECTOR3(*translate, time, t);
+			GET_KEY_VECTOR3(pTranslateCurveX, pTranslateCurveY, pTranslateCurveZ, time, t);
 			newKeyframe->Translation = t;
 
 			newKeyframes[i] = newKeyframe;
@@ -477,12 +471,12 @@ namespace SB3Utility
 		{
 			time.SetSecondDouble(i * endIdx / animationLen);
 			Vector3 s, t;
-			GET_CHANNEL_VALUE_VECTOR3(*scale, time, s);
+			GET_KEY_VECTOR3(pScaleCurveX, pScaleCurveY, pScaleCurveZ, time, s);
 			newTrack->Scalings[i] = s;
 			Quaternion q;
-			GET_CHANNEL_VALUE_VECTOR4(*rotate, time, q);
+			GET_KEY_VECTOR4(pRotateCurveX, pRotateCurveY, pRotateCurveZ, pRotateCurveW, time, q);
 			newTrack->Rotations[i] = q;
-			GET_CHANNEL_VALUE_VECTOR3(*translate, time, t);
+			GET_KEY_VECTOR3(pTranslateCurveX, pTranslateCurveY, pTranslateCurveZ, time, t);
 			newTrack->Translations[i] = t;
 		}
 

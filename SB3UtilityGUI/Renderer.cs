@@ -60,7 +60,19 @@ namespace SB3Utility
 			set { Gui.Config["Culling"] = culling = value; }
 		}
 
-		public Color Background { get; set; }
+		Color background;
+		public Color Background
+		{
+			get
+			{
+				return background;
+			}
+			set
+			{
+				background = value;
+				Gui.Config["RendererBackgroundARGB"] = value.ToArgb().ToString("X8");
+			}
+		}
 
 		public Color Diffuse
 		{
@@ -214,7 +226,7 @@ namespace SB3Utility
 			}
 			wireframe = (bool)Gui.Config["Wireframe"];
 			culling = (bool)Gui.Config["Culling"];
-			Background = Color.FromArgb(255, 10, 10, 60);
+			Background = Color.FromArgb(int.Parse((string)Gui.Config["RendererBackgroundARGB"], System.Globalization.NumberStyles.AllowHexSpecifier));
 
 			isInitialized = true;
 			camera = new Camera(control);
@@ -527,7 +539,7 @@ namespace SB3Utility
 			CursorMaterial.Diffuse = new Color4(1, 0.6f, 1, 0.3f);
 
 			Culling = true;
-			Background = Color.FromArgb(255, 10, 10, 60);
+			Background = Color.FromArgb(int.Parse((string)Gui.Config["RendererBackgroundARGB"], System.Globalization.NumberStyles.AllowHexSpecifier));
 
 			RenderControl = renderControl;
 		}

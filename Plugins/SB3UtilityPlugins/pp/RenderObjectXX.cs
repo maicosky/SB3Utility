@@ -227,7 +227,7 @@ namespace SB3Utility
 				device.DrawUserPrimitives(PrimitiveType.LineList, meshContainer.NormalLines.Length / 2, meshContainer.NormalLines);
 			}
 
-			if (Gui.Renderer.ShowBones && (meshContainer.BoneLines != null))
+			if (Gui.Renderer.ShowBones && (meshContainer.BoneLines != null) && meshContainer.BoneLines.Length > 0)
 			{
 				device.SetRenderState(RenderState.ZEnable, ZBufferType.DontUseZBuffer);
 				device.SetRenderState(RenderState.VertexBlend, VertexBlend.Weights1);

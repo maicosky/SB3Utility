@@ -459,7 +459,7 @@ namespace SB3Utility
 									}
 								}
 
-								FbxAMatrix lMeshMatrix = pScene->GetEvaluator()->GetNodeGlobalTransform(pMeshNode);
+								FbxAMatrix lMeshMatrix = pMeshNode->EvaluateGlobalTransform();
 
 								pCluster->SetTransformMatrix(lMeshMatrix);
 								pCluster->SetTransformLinkMatrix(lMeshMatrix * lBoneMatrix.Inverse());

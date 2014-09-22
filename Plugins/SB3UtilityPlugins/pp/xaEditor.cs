@@ -392,6 +392,24 @@ namespace SB3Utility
 		}
 
 		[Plugin]
+		public bool RenameTrackProfile(string pattern, string replacement)
+		{
+			bool anyRenaming = false;
+			for (int i = 0; i < Parser.AnimationSection.TrackList.Count; i++)
+			{
+				xaAnimationTrack keyframeList = Parser.AnimationSection.TrackList[i];
+				string name = System.Text.RegularExpressions.Regex.Replace(keyframeList.Name, pattern, replacement, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+				if (name != keyframeList.Name)
+				{
+					RenameTrack(keyframeList.Name, name);
+					Changed = true;
+					anyRenaming = true;
+				}
+			}
+			return anyRenaming;
+		}
+
+		[Plugin]
 		public void RemoveTrack(string track)
 		{
 			xaAnimationTrack xaTrack = xa.FindTrack(track, Parser);
@@ -454,6 +472,95 @@ namespace SB3Utility
 			clip.Next = 0;
 			clip.Speed = 0;
 			xa.CreateUnknowns(clip);
+			Changed = true;
+		}
+
+		[Plugin]
+		public xaAnimationKeyframe NewKeyframe(xaAnimationTrack track, int index)
+		{
+			for (int i = 0; i < track.KeyframeList.Count; i++)
+			{
+				if (track.KeyframeList[i].Index == index)
+				{
+					throw new Exception(track.Name + " already has a keyframe at " + index);
+				}
+				if (track.KeyframeList[i].Index > index)
+				{
+					xaAnimationKeyframe keyframe = new xaAnimationKeyframe();
+					keyframe.Index = index;
+					xa.CreateUnknowns(keyframe);
+					if (i > 0)
+					{
+						int predIdx = track.KeyframeList[i - 1].Index;
+						float indexPosition = (float)(index - predIdx) / (track.KeyframeList[i].Index - predIdx);
+						keyframe.Scaling = track.KeyframeList[i - 1].Scaling + (track.KeyframeList[i].Scaling - track.KeyframeList[i - 1].Scaling) * indexPosition;
+						keyframe.Rotation = track.KeyframeList[i - 1].Rotation + (track.KeyframeList[i].Rotation - track.KeyframeList[i - 1].Rotation) * indexPosition;
+						keyframe.Translation = track.KeyframeList[i - 1].Translation + (track.KeyframeList[i].Translation - track.KeyframeList[i - 1].Translation) * indexPosition;
+					}
+					else
+					{
+						keyframe.Scaling = track.KeyframeList[i].Scaling;
+						keyframe.Rotation = track.KeyframeList[i].Rotation;
+						keyframe.Translation = track.KeyframeList[i].Translation;
+					}
+					track.KeyframeList.Insert(i, keyframe);
+					Changed = true;
+					return keyframe;
+				}
+			}
+			return null;
+		}
+
+		[Plugin]
+		public void RemoveKeyframe(xaAnimationTrack track, int index)
+		{
+			for (int i = 0; i < track.KeyframeList.Count; i++)
+			{
+				if (track.KeyframeList[i].Index == index)
+				{
+					track.KeyframeList.RemoveAt(i);
+					Changed = true;
+					return;
+				}
+			}
+		}
+
+		[Plugin]
+		public void SetKeyframeTranslation(xaAnimationTrack track, int keyframeIdx, object translation)
+		{
+			xaAnimationKeyframe keyframe = track.KeyframeList[keyframeIdx];
+			Vector3 trans = new Vector3((float)(double)((object[])translation)[0], (float)(double)((object[])translation)[1], (float)(double)((object[])translation)[2]);
+			keyframe.Translation = trans;
+			Changed = true;
+		}
+
+		[Plugin]
+		public void SetKeyframeRotation(xaAnimationTrack track, int keyframeIdx, object rotation)
+		{
+			xaAnimationKeyframe keyframe = track.KeyframeList[keyframeIdx];
+			if (((object[])rotation).Length == 3)
+			{
+				Vector3 rot = new Vector3((float)(double)((object[])rotation)[0], (float)(double)((object[])rotation)[1], (float)(double)((object[])rotation)[2]);
+				keyframe.Rotation = FbxUtility.EulerToQuaternion(rot);
+			}
+			else if (((object[])rotation).Length == 4)
+			{
+				Quaternion rot = new Quaternion((float)(double)((object[])rotation)[0], (float)(double)((object[])rotation)[1], (float)(double)((object[])rotation)[2], (float)(double)((object[])rotation)[3]);
+				keyframe.Rotation = rot;
+			}
+			else
+			{
+				throw new Exception("SetKeyframeRotation must be called with three or four arguments");
+			}
+			Changed = true;
+		}
+
+		[Plugin]
+		public void SetKeyframeScaling(xaAnimationTrack track, int keyframeIdx, object scaling)
+		{
+			xaAnimationKeyframe keyframe = track.KeyframeList[keyframeIdx];
+			Vector3 scale = new Vector3((float)(double)((object[])scaling)[0], (float)(double)((object[])scaling)[1], (float)(double)((object[])scaling)[2]);
+			keyframe.Scaling = scale;
 			Changed = true;
 		}
 	}

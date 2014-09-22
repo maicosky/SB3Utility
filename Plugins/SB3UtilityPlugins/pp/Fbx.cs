@@ -16,7 +16,7 @@ namespace SB3Utility
 		public static void WorkspaceFbx(string path, string variable)
 		{
 			string importVar = Gui.Scripting.GetNextVariable("importFbx");
-			var importer = (Fbx.Importer)Gui.Scripting.RunScript(importVar + " = ImportFbx(path=\"" + path + "\", EulerFilter=" + (bool)Gui.Config["FbxImportAnimationEulerFilter"] + ", filterPrecision=" + ((float)Gui.Config["FbxImportAnimationFilterPrecision"]).ToFloatString() + ")");
+			var importer = (Fbx.Importer)Gui.Scripting.RunScript(importVar + " = ImportFbx(path=\"" + path + "\", negateQuaternionFlips=" + (bool)Gui.Config["FbxImportAnimationNegateQuaternionFlips"] + ")");
 
 			string editorVar = Gui.Scripting.GetNextVariable("importedEditor");
 			var editor = (ImportedEditor)Gui.Scripting.RunScript(editorVar + " = ImportedEditor(" + importVar + ")");
@@ -25,7 +25,7 @@ namespace SB3Utility
 		}
 
 		[Plugin]
-		public static void ExportFbx([DefaultVar]xxParser xxParser, object[] meshNames, object[] xaParsers, int startKeyframe, int endKeyframe, bool linear, string path, string exportFormat, bool allFrames, bool skins, bool embedMedia, bool compatibility)
+		public static void ExportFbx([DefaultVar]xxParser xxParser, object[] meshNames, object[] xaParsers, int startKeyframe, int endKeyframe, bool linear, bool EulerFilter, double filterPrecision, string path, string exportFormat, bool allFrames, bool skins, bool embedMedia, bool compatibility)
 		{
 			List<xaParser> xaParserList = null;
 			if (xaParsers != null)
@@ -34,7 +34,7 @@ namespace SB3Utility
 			}
 
 			List<xxFrame> meshFrames = meshNames != null ? xx.FindMeshFrames(xxParser.Frame, new List<string>(Utility.Convert<string>(meshNames))) : null;
-			Fbx.Exporter.Export(path, xxParser, meshFrames, xaParserList, startKeyframe, endKeyframe, linear, exportFormat, allFrames, skins, embedMedia, compatibility);
+			Fbx.Exporter.Export(path, xxParser, meshFrames, xaParserList, startKeyframe, endKeyframe, linear, EulerFilter, (float)filterPrecision, exportFormat, allFrames, skins, embedMedia, compatibility);
 		}
 
 		[Plugin]
@@ -44,9 +44,9 @@ namespace SB3Utility
 		}
 
 		[Plugin]
-		public static Fbx.Importer ImportFbx([DefaultVar]string path, bool EulerFilter, double filterPrecision)
+		public static Fbx.Importer ImportFbx([DefaultVar]string path, bool negateQuaternionFlips)
 		{
-			return new Fbx.Importer(path, EulerFilter, (float)filterPrecision);
+			return new Fbx.Importer(path, negateQuaternionFlips);
 		}
 	}
 

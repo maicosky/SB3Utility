@@ -562,6 +562,42 @@ namespace SB3Utility
 		}
 
 		[Plugin]
+		public bool RenameSkeletonProfile(string pattern, string replacement)
+		{
+			bool anyRenaming = false;
+			for (int i = 0; i < Frames.Count; i++)
+			{
+				xxFrame frame = Frames[i];
+				string name = System.Text.RegularExpressions.Regex.Replace(frame.Name, pattern, replacement, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+				if (name != frame.Name)
+				{
+					SetFrameName(i, name);
+					Changed = true;
+					anyRenaming = true;
+				}
+			}
+			if (anyRenaming)
+			{
+				for (int i = 0; i < Meshes.Count; i++)
+				{
+					xxFrame meshFrame = Meshes[i];
+					for (int j = 0; j < meshFrame.Mesh.BoneList.Count; j++)
+					{
+						xxBone bone = meshFrame.Mesh.BoneList[j];
+						string name = System.Text.RegularExpressions.Regex.Replace(bone.Name, pattern, replacement, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+						if (name != bone.Name)
+						{
+							SetBoneName(i, j, name);
+							Changed = true;
+							anyRenaming = true;
+						}
+					}
+				}
+			}
+			return anyRenaming;
+		}
+
+		[Plugin]
 		public void ReplaceMesh(WorkspaceMesh mesh, int frameId, bool merge, string normals, string bones, bool targetFullMesh)
 		{
 			var normalsMethod = (CopyMeshMethod)Enum.Parse(typeof(CopyMeshMethod), normals);

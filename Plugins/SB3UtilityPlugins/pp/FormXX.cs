@@ -25,9 +25,9 @@ namespace SB3Utility
 			DirectXSDK,
 			[Description("Collada")]
 			Collada,
-			[Description("Collada (FBX 2014.1)")]
+			[Description("Collada (FBX 2015.1)")]
 			ColladaFbx,
-			[Description("FBX 2014.1")]
+			[Description("FBX 2015.1")]
 			Fbx,
 			[Description("AutoCAD DXF")]
 			Dxf,
@@ -350,10 +350,10 @@ namespace SB3Utility
 			matMatrixText[3] = new EditTextBox[4] { textBoxMatEmissiveR, textBoxMatEmissiveG, textBoxMatEmissiveB, textBoxMatEmissiveA };
 			matMatrixText[4] = new EditTextBox[1] { textBoxMatSpecularPower };
 
-			InitDataGridViewSRT(dataGridViewFrameSRT, dataGridViewFrameMatrix);
-			InitDataGridViewMatrix(dataGridViewFrameMatrix, dataGridViewFrameSRT);
-			InitDataGridViewSRT(dataGridViewBoneSRT, dataGridViewBoneMatrix);
-			InitDataGridViewMatrix(dataGridViewBoneMatrix, dataGridViewBoneSRT);
+			DataGridViewEditor.InitDataGridViewSRT(dataGridViewFrameSRT, dataGridViewFrameMatrix);
+			DataGridViewEditor.InitDataGridViewMatrix(dataGridViewFrameMatrix, dataGridViewFrameSRT);
+			DataGridViewEditor.InitDataGridViewSRT(dataGridViewBoneSRT, dataGridViewBoneMatrix);
+			DataGridViewEditor.InitDataGridViewMatrix(dataGridViewBoneMatrix, dataGridViewBoneSRT);
 
 			textBoxFrameName.AfterEditTextChanged += new EventHandler(textBoxFrameName_AfterEditTextChanged);
 			textBoxFrameName2.AfterEditTextChanged += new EventHandler(textBoxFrameName2_AfterEditTextChanged);
@@ -605,98 +605,14 @@ namespace SB3Utility
 			}
 		}
 
-		void InitDataGridViewSRT(DataGridViewEditor viewSRT, DataGridViewEditor viewMatrix)
-		{
-			DataTable tableSRT = new DataTable();
-			tableSRT.Columns.Add(" ", typeof(string));
-			tableSRT.Columns[0].ReadOnly = true;
-			tableSRT.Columns.Add("X", typeof(float));
-			tableSRT.Columns.Add("Y", typeof(float));
-			tableSRT.Columns.Add("Z", typeof(float));
-			tableSRT.Rows.Add(new object[] { "Translate", 0f, 0f, 0f });
-			tableSRT.Rows.Add(new object[] { "Rotate", 0f, 0f, 0f });
-			tableSRT.Rows.Add(new object[] { "Scale", 1f, 1f, 1f });
-			viewSRT.Initialize(tableSRT, new DataGridViewEditor.ValidateCellDelegate(ValidateCellSRT), 3);
-			viewSRT.Scroll += new ScrollEventHandler(dataGridViewEditor_Scroll);
-
-			viewSRT.Columns[0].DefaultCellStyle = viewSRT.ColumnHeadersDefaultCellStyle;
-			for (int i = 0; i < viewSRT.Columns.Count; i++)
-			{
-				viewSRT.Columns[i].SortMode = DataGridViewColumnSortMode.NotSortable;
-			}
-
-			viewSRT.Tag = viewMatrix;
-		}
-
 		private void dataGridViewSRT_CellValueChanged(object sender, DataGridViewCellEventArgs e)
 		{
-			DataGridView viewSRT = (DataGridView)sender;
-			Vector3[] srt = GetSRT(viewSRT);
-			Matrix mat = FbxUtility.SRTToMatrix(srt[0], srt[1], srt[2]);
-			LoadMatrix(mat, null, (DataGridView)viewSRT.Tag);
+			DataGridViewEditor.dataGridViewSRT_CellValueChanged(sender, e);
 		}
 
 		private void dataGridViewMatrix_CellValueChanged(object sender, DataGridViewCellEventArgs e)
 		{
-			DataGridView viewMatrix = (DataGridView)sender;
-			Matrix mat = GetMatrix(viewMatrix);
-			LoadMatrix(mat, (DataGridView)viewMatrix.Tag, null);
-		}
-
-		void InitDataGridViewMatrix(DataGridViewEditor viewMatrix, DataGridViewEditor viewSRT)
-		{
-			DataTable tableMatrix = new DataTable();
-			tableMatrix.Columns.Add("1", typeof(float));
-			tableMatrix.Columns.Add("2", typeof(float));
-			tableMatrix.Columns.Add("3", typeof(float));
-			tableMatrix.Columns.Add("4", typeof(float));
-			tableMatrix.Rows.Add(new object[] { 1f, 0f, 0f, 0f });
-			tableMatrix.Rows.Add(new object[] { 0f, 1f, 0f, 0f });
-			tableMatrix.Rows.Add(new object[] { 0f, 0f, 1f, 0f });
-			tableMatrix.Rows.Add(new object[] { 0f, 0f, 0f, 1f });
-			viewMatrix.Initialize(tableMatrix, new DataGridViewEditor.ValidateCellDelegate(ValidateCellSingle), 4);
-			viewMatrix.Scroll += new ScrollEventHandler(dataGridViewEditor_Scroll);
-
-			for (int i = 0; i < viewMatrix.Columns.Count; i++)
-			{
-				viewMatrix.Columns[i].SortMode = DataGridViewColumnSortMode.NotSortable;
-			}
-
-			viewMatrix.Tag = viewSRT;
-		}
-
-		void dataGridViewEditor_Scroll(object sender, ScrollEventArgs e)
-		{
-			try
-			{
-				e.NewValue = e.OldValue;
-			}
-			catch (Exception ex)
-			{
-				Utility.ReportException(ex);
-			}
-		}
-
-		bool ValidateCellSRT(string s, int row, int col)
-		{
-			if (col == 0)
-			{
-				return true;
-			}
-			else
-			{
-				return ValidateCellSingle(s, row, col);
-			}
-		}
-
-		bool ValidateCellSingle(string s, int row, int col)
-		{
-			float f;
-			if (Single.TryParse(s, out f))
-			{
-				return true;
-			}
-			return false;
+			DataGridViewEditor.dataGridViewMatrix_CellValueChanged(sender, e);
 		}
 
 		public void RecreateRenderObjects()
@@ -771,6 +687,7 @@ namespace SB3Utility
 				}
 			}
 			listView.Columns[0].AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
+			listView.Sort();
 		}
 
 		void textBoxFrameName2_AfterEditTextChanged(object sender, EventArgs e)
@@ -1013,7 +930,8 @@ namespace SB3Utility
 			materiallistHeader.AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
 			if (selectedItems.Count > 0)
 			{
-				listViewTexture.BeginUpdate();
+				listViewMaterial.ItemSelectionChanged -= listViewMaterial_ItemSelectionChanged;
+				listViewMaterial.BeginUpdate();
 				foreach (ListViewItem item in listViewMaterial.Items)
 				{
 					if (selectedItems.Contains(item.Text))
@@ -1021,7 +939,8 @@ namespace SB3Utility
 						item.Selected = true;
 					}
 				}
-				listViewTexture.EndUpdate();
+				listViewMaterial.EndUpdate();
+				listViewMaterial.ItemSelectionChanged += listViewMaterial_ItemSelectionChanged;
 			}
 
 			ColumnSubmeshMaterial.DataSource = columnMaterials;
@@ -1075,6 +994,7 @@ namespace SB3Utility
 			texturelistHeader.AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
 			if (selectedItems.Count > 0)
 			{
+				listViewTexture.ItemSelectionChanged -= listViewTexture_ItemSelectionChanged;
 				listViewTexture.BeginUpdate();
 				foreach (ListViewItem item in listViewTexture.Items)
 				{
@@ -1084,6 +1004,7 @@ namespace SB3Utility
 					}
 				}
 				listViewTexture.EndUpdate();
+				listViewTexture.ItemSelectionChanged += listViewTexture_ItemSelectionChanged;
 			}
 
 			TreeNode texturesNode = new TreeNode("Textures");
@@ -1116,7 +1037,7 @@ namespace SB3Utility
 			{
 				textBoxFrameName.Text = String.Empty;
 				textBoxFrameName2.Text = String.Empty;
-				LoadMatrix(Matrix.Identity, dataGridViewFrameSRT, dataGridViewFrameMatrix);
+				DataGridViewEditor.LoadMatrix(Matrix.Identity, dataGridViewFrameSRT, dataGridViewFrameMatrix);
 			}
 			else
 			{
@@ -1128,36 +1049,9 @@ namespace SB3Utility
 					textBoxFrameName2.Text = frame.Name2;
 				}
 
-				LoadMatrix(frame.Matrix, dataGridViewFrameSRT, dataGridViewFrameMatrix);
+				DataGridViewEditor.LoadMatrix(frame.Matrix, dataGridViewFrameSRT, dataGridViewFrameMatrix);
 			}
 			loadedFrame = id;
-		}
-
-		void LoadMatrix(Matrix matrix, DataGridView viewSRT, DataGridView viewMatrix)
-		{
-			if (viewSRT != null)
-			{
-				Vector3[] srt = FbxUtility.MatrixToSRT(matrix);
-				DataTable tableSRT = (DataTable)viewSRT.DataSource;
-				for (int i = 0; i < 3; i++)
-				{
-					tableSRT.Rows[0][i + 1] = srt[2][i];
-					tableSRT.Rows[1][i + 1] = srt[1][i];
-					tableSRT.Rows[2][i + 1] = srt[0][i];
-				}
-			}
-
-			if (viewMatrix != null)
-			{
-				DataTable tableMatrix = (DataTable)viewMatrix.DataSource;
-				for (int i = 0; i < 4; i++)
-				{
-					for (int j = 0; j < 4; j++)
-					{
-						tableMatrix.Rows[i][j] = matrix[i, j];
-					}
-				}
-			}
 		}
 
 		void LoadBone(int[] id)
@@ -1165,13 +1059,13 @@ namespace SB3Utility
 			if (id == null)
 			{
 				textBoxBoneName.Text = String.Empty;
-				LoadMatrix(Matrix.Identity, dataGridViewBoneSRT, dataGridViewBoneMatrix);
+				DataGridViewEditor.LoadMatrix(Matrix.Identity, dataGridViewBoneSRT, dataGridViewBoneMatrix);
 			}
 			else
 			{
 				xxBone bone = Editor.Meshes[id[0]].Mesh.BoneList[id[1]];
 				textBoxBoneName.Text = bone.Name;
-				LoadMatrix(bone.Matrix, dataGridViewBoneSRT, dataGridViewBoneMatrix);
+				DataGridViewEditor.LoadMatrix(bone.Matrix, dataGridViewBoneSRT, dataGridViewBoneMatrix);
 			}
 			loadedBone = id;
 
@@ -2415,9 +2309,9 @@ namespace SB3Utility
 					{
 						Gui.Scripting.RunScript(EditorVar + "." + dragOptions.FrameMethod.GetName() + "(srcFrame=" + source.Variable + ".Frames[" + (int)source.Id + "], srcFormat=" + source.Variable + ".Parser.Format, srcMaterials=" + source.Variable + ".Parser.MaterialList, srcTextures=" + source.Variable + ".Parser.TextureList, appendIfMissing=" + dragOptions.checkBoxFrameAppend.Checked + ", destParentId=" + dragOptions.numericFrameId.Value + ")");
 						Changed = Changed;
-						RecreateFrames();
 						InitMaterials();
 						InitTextures();
+						RecreateFrames();
 						SyncWorkspaces();
 					}
 				}
@@ -3169,7 +3063,7 @@ namespace SB3Utility
 		{
 			try
 			{
-				LoadMatrix(Matrix.Identity, dataGridViewFrameSRT, dataGridViewFrameMatrix);
+				DataGridViewEditor.LoadMatrix(Matrix.Identity, dataGridViewFrameSRT, dataGridViewFrameMatrix);
 			}
 			catch (Exception ex)
 			{
@@ -3194,7 +3088,7 @@ namespace SB3Utility
 					m = m * parent.Matrix;
 					parent = parent.Parent;
 				}
-				LoadMatrix(m, dataGridViewFrameSRT, dataGridViewFrameMatrix);
+				DataGridViewEditor.LoadMatrix(m, dataGridViewFrameSRT, dataGridViewFrameMatrix);
 			}
 			catch (Exception ex)
 			{
@@ -3206,8 +3100,8 @@ namespace SB3Utility
 		{
 			try
 			{
-				Matrix m = GetMatrix(dataGridViewFrameMatrix);
-				LoadMatrix(Matrix.Invert(m), dataGridViewFrameSRT, dataGridViewFrameMatrix);
+				Matrix m = DataGridViewEditor.GetMatrix(dataGridViewFrameMatrix);
+				DataGridViewEditor.LoadMatrix(Matrix.Invert(m), dataGridViewFrameSRT, dataGridViewFrameMatrix);
 			}
 			catch (Exception ex)
 			{
@@ -3220,10 +3114,10 @@ namespace SB3Utility
 			try
 			{
 				float ratio = Decimal.ToSingle(numericFrameMatrixRatio.Value);
-				Vector3[] srt = GetSRT(dataGridViewFrameSRT);
+				Vector3[] srt = DataGridViewEditor.GetSRT(dataGridViewFrameSRT);
 				srt[0] = srt[0] * ratio;
 				srt[2] = srt[2] * ratio;
-				LoadMatrix(FbxUtility.SRTToMatrix(srt[0], srt[1], srt[2]), dataGridViewFrameSRT, dataGridViewFrameMatrix);
+				DataGridViewEditor.LoadMatrix(FbxUtility.SRTToMatrix(srt[0], srt[1], srt[2]), dataGridViewFrameSRT, dataGridViewFrameMatrix);
 			}
 			catch (Exception ex)
 			{
@@ -3236,10 +3130,10 @@ namespace SB3Utility
 			try
 			{
 				float ratio = Decimal.ToSingle(numericFrameMatrixRatio.Value);
-				Vector3[] srt = GetSRT(dataGridViewFrameSRT);
+				Vector3[] srt = DataGridViewEditor.GetSRT(dataGridViewFrameSRT);
 				srt[0] = srt[0] / ratio;
 				srt[2] = srt[2] / ratio;
-				LoadMatrix(FbxUtility.SRTToMatrix(srt[0], srt[1], srt[2]), dataGridViewFrameSRT, dataGridViewFrameMatrix);
+				DataGridViewEditor.LoadMatrix(FbxUtility.SRTToMatrix(srt[0], srt[1], srt[2]), dataGridViewFrameSRT, dataGridViewFrameMatrix);
 			}
 			catch (Exception ex)
 			{
@@ -3251,7 +3145,7 @@ namespace SB3Utility
 		{
 			try
 			{
-				copyMatrices[Decimal.ToInt32(numericFrameMatrixNumber.Value) - 1] = GetMatrix(dataGridViewFrameMatrix);
+				copyMatrices[Decimal.ToInt32(numericFrameMatrixNumber.Value) - 1] = DataGridViewEditor.GetMatrix(dataGridViewFrameMatrix);
 			}
 			catch (Exception ex)
 			{
@@ -3263,7 +3157,7 @@ namespace SB3Utility
 		{
 			try
 			{
-				LoadMatrix(copyMatrices[Decimal.ToInt32(numericFrameMatrixNumber.Value) - 1], dataGridViewFrameSRT, dataGridViewFrameMatrix);
+				DataGridViewEditor.LoadMatrix(copyMatrices[Decimal.ToInt32(numericFrameMatrixNumber.Value) - 1], dataGridViewFrameSRT, dataGridViewFrameMatrix);
 			}
 			catch (Exception ex)
 			{
@@ -3280,7 +3174,7 @@ namespace SB3Utility
 					return;
 				}
 
-				Matrix m = GetMatrix(dataGridViewFrameMatrix);
+				Matrix m = DataGridViewEditor.GetMatrix(dataGridViewFrameMatrix);
 				string command = EditorVar + ".SetFrameMatrix(id=" + loadedFrame;
 				for (int i = 0; i < 4; i++)
 				{
@@ -3330,38 +3224,11 @@ namespace SB3Utility
 			}
 		}
 
-		Matrix GetMatrix(DataGridView viewMatrix)
-		{
-			Matrix m = new Matrix();
-			DataTable table = (DataTable)viewMatrix.DataSource;
-			for (int i = 0; i < 4; i++)
-			{
-				for (int j = 0; j < 4; j++)
-				{
-					m[i, j] = (float)table.Rows[i][j];
-				}
-			}
-			return m;
-		}
-
-		Vector3[] GetSRT(DataGridView viewSRT)
-		{
-			DataTable table = (DataTable)viewSRT.DataSource;
-			Vector3[] srt = new Vector3[3];
-			for (int i = 0; i < 3; i++)
-			{
-				srt[0][i] = (float)table.Rows[2][i + 1];
-				srt[1][i] = (float)table.Rows[1][i + 1];
-				srt[2][i] = (float)table.Rows[0][i + 1];
-			}
-			return srt;
-		}
-
 		private void buttonBoneMatrixIdentity_Click(object sender, EventArgs e)
 		{
 			try
 			{
-				LoadMatrix(Matrix.Identity, dataGridViewBoneSRT, dataGridViewBoneMatrix);
+				DataGridViewEditor.LoadMatrix(Matrix.Identity, dataGridViewBoneSRT, dataGridViewBoneMatrix);
 			}
 			catch (Exception ex)
 			{
@@ -3373,8 +3240,8 @@ namespace SB3Utility
 		{
 			try
 			{
-				Matrix m = GetMatrix(dataGridViewBoneMatrix);
-				LoadMatrix(Matrix.Invert(m), dataGridViewBoneSRT, dataGridViewBoneMatrix);
+				Matrix m = DataGridViewEditor.GetMatrix(dataGridViewBoneMatrix);
+				DataGridViewEditor.LoadMatrix(Matrix.Invert(m), dataGridViewBoneSRT, dataGridViewBoneMatrix);
 			}
 			catch (Exception ex)
 			{
@@ -3387,10 +3254,10 @@ namespace SB3Utility
 			try
 			{
 				float ratio = Decimal.ToSingle(numericBoneMatrixRatio.Value);
-				Vector3[] srt = GetSRT(dataGridViewBoneSRT);
+				Vector3[] srt = DataGridViewEditor.GetSRT(dataGridViewBoneSRT);
 				srt[0] = srt[0] * ratio;
 				srt[2] = srt[2] * ratio;
-				LoadMatrix(FbxUtility.SRTToMatrix(srt[0], srt[1], srt[2]), dataGridViewBoneSRT, dataGridViewBoneMatrix);
+				DataGridViewEditor.LoadMatrix(FbxUtility.SRTToMatrix(srt[0], srt[1], srt[2]), dataGridViewBoneSRT, dataGridViewBoneMatrix);
 			}
 			catch (Exception ex)
 			{
@@ -3403,10 +3270,10 @@ namespace SB3Utility
 			try
 			{
 				float ratio = Decimal.ToSingle(numericBoneMatrixRatio.Value);
-				Vector3[] srt = GetSRT(dataGridViewBoneSRT);
+				Vector3[] srt = DataGridViewEditor.GetSRT(dataGridViewBoneSRT);
 				srt[0] = srt[0] / ratio;
 				srt[2] = srt[2] / ratio;
-				LoadMatrix(FbxUtility.SRTToMatrix(srt[0], srt[1], srt[2]), dataGridViewBoneSRT, dataGridViewBoneMatrix);
+				DataGridViewEditor.LoadMatrix(FbxUtility.SRTToMatrix(srt[0], srt[1], srt[2]), dataGridViewBoneSRT, dataGridViewBoneMatrix);
 			}
 			catch (Exception ex)
 			{
@@ -3418,7 +3285,7 @@ namespace SB3Utility
 		{
 			try
 			{
-				copyMatrices[Decimal.ToInt32(numericBoneMatrixNumber.Value) - 1] = GetMatrix(dataGridViewBoneMatrix);
+				copyMatrices[Decimal.ToInt32(numericBoneMatrixNumber.Value) - 1] = DataGridViewEditor.GetMatrix(dataGridViewBoneMatrix);
 			}
 			catch (Exception ex)
 			{
@@ -3430,7 +3297,7 @@ namespace SB3Utility
 		{
 			try
 			{
-				LoadMatrix(copyMatrices[Decimal.ToInt32(numericBoneMatrixNumber.Value) - 1], dataGridViewBoneSRT, dataGridViewBoneMatrix);
+				DataGridViewEditor.LoadMatrix(copyMatrices[Decimal.ToInt32(numericBoneMatrixNumber.Value) - 1], dataGridViewBoneSRT, dataGridViewBoneMatrix);
 			}
 			catch (Exception ex)
 			{
@@ -3447,7 +3314,7 @@ namespace SB3Utility
 					return;
 				}
 
-				Matrix m = GetMatrix(dataGridViewBoneMatrix);
+				Matrix m = DataGridViewEditor.GetMatrix(dataGridViewBoneMatrix);
 				string command = EditorVar + ".SetBoneMatrix(meshId=" + loadedBone[0] + ", boneId=" + loadedBone[1];
 				for (int i = 0; i < 4; i++)
 				{
@@ -3583,7 +3450,7 @@ namespace SB3Utility
 			}
 		}
 
-		private void buttonZeroWeights_Click(object sender, EventArgs e)
+		private void buttonBoneZeroWeights_Click(object sender, EventArgs e)
 		{
 			try
 			{
@@ -3602,6 +3469,61 @@ namespace SB3Utility
 			{
 				Utility.ReportException(ex);
 			}
+		}
+
+		private void buttonBoneRenameBonesTracks_Click(object sender, EventArgs e)
+		{
+			if (textBoxBoneReplaceWith.Text == String.Empty)
+			{
+				return;
+			}
+
+			buttonBoneRenameBonesTracks.Enabled = false;
+			try
+			{
+				List<DockContent> xxList = null;
+				Gui.Docking.DockContents.TryGetValue(typeof(FormXX), out xxList);
+				foreach (FormXX xx in xxList)
+				{
+					if (xx.Editor.RenameSkeletonProfile(textBoxBoneFrameTrackSubstring.Text, textBoxBoneReplaceWith.Text))
+					{
+						xx.EndRenameSkeletonProfile();
+					}
+				}
+
+				List<DockContent> xaList = null;
+				Gui.Docking.DockContents.TryGetValue(typeof(FormXA), out xaList);
+				if (xaList != null)
+				{
+					foreach (FormXA xa in xaList)
+					{
+						if (xa.Editor.RenameTrackProfile(textBoxBoneFrameTrackSubstring.Text, textBoxBoneReplaceWith.Text))
+						{
+							xa.EndRenameTrackProfile();
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+			buttonBoneRenameBonesTracks.Enabled = true;
+		}
+
+		public void EndRenameSkeletonProfile()
+		{
+			int[] meshIndices = new int[listViewMesh.SelectedItems.Count];
+			listViewMesh.SelectedIndices.CopyTo(meshIndices, 0);
+			int[] selectedBone = loadedBone;
+			RecreateFrames();
+			SyncWorkspaces();
+			foreach (int i in meshIndices)
+			{
+				listViewMesh.Items[i].Selected = true;
+			}
+			LoadBone(selectedBone);
+			Changed = Changed;
 		}
 
 		private void buttonMeshRemove_Click(object sender, EventArgs e)
@@ -4277,16 +4199,37 @@ namespace SB3Utility
 				List<DockContent> formXAList;
 				if (Gui.Docking.DockContents.TryGetValue(typeof(FormXA), out formXAList))
 				{
+					bool unlockedXX = true;
 					foreach (FormXA form in formXAList)
 					{
-						var xaParser = (xaParser)Gui.Scripting.Variables[form.ParserVar];
-						if (xaParser.AnimationSection != null)
+						Tuple<string, FormXX> t = (Tuple<string, FormXX>)form.comboBoxAnimationXXLock.SelectedItem;
+						if (t.Item2 == this)
 						{
-							xaVars += form.ParserVar + ", ";
+							unlockedXX = false;
+							var xaParser = (xaParser)Gui.Scripting.Variables[form.ParserVar];
+							if (xaParser.AnimationSection != null)
+							{
+								xaVars += form.ParserVar + ", ";
+							}
+							break;
+						}
+					}
+					if (unlockedXX)
+					{
+						foreach (FormXA form in formXAList)
+						{
+							Tuple<string, FormXX> t = (Tuple<string, FormXX>)form.comboBoxAnimationXXLock.SelectedItem;
+							if (t.Item2 == null)
+							{
+								var xaParser = (xaParser)Gui.Scripting.Variables[form.ParserVar];
+								if (xaParser.AnimationSection != null)
+								{
+									xaVars += form.ParserVar + ", ";
+								}
+							}
 						}
 					}
 				}
-
 				if (xaVars.Length > 0)
 				{
 					xaVars = "{ " + xaVars.Substring(0, xaVars.Length - 2) + " }";
@@ -4314,19 +4257,19 @@ namespace SB3Utility
 						Gui.Scripting.RunScript("ExportDae(path=\"" + Utility.GetDestFile(dir, "meshes", ".dae") + "\", xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", allFrames=" + checkBoxMeshExportColladaAllFrames.Checked + ")");
 						break;
 					case MeshExportFormat.ColladaFbx:
-						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".dae") + "\", exportFormat=\".dae\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", embedMedia=" + checkBoxMeshExportEmbedMedia.Checked + ", compatibility=" + false + ")");
+						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + (bool)Gui.Config["FbxExportAnimationEulerFilter"] + ", filterPrecision=" + ((float)Gui.Config["FbxExportAnimationFilterPrecision"]).ToFloatString() + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".dae") + "\", exportFormat=\".dae\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", embedMedia=" + checkBoxMeshExportEmbedMedia.Checked + ", compatibility=" + false + ")");
 						break;
 					case MeshExportFormat.Fbx:
-						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".fbx") + "\", exportFormat=\".fbx\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", embedMedia=" + checkBoxMeshExportEmbedMedia.Checked + ", compatibility=" + false + ")");
+						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + (bool)Gui.Config["FbxExportAnimationEulerFilter"] + ", filterPrecision=" + ((float)Gui.Config["FbxExportAnimationFilterPrecision"]).ToFloatString() + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".fbx") + "\", exportFormat=\".fbx\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", embedMedia=" + checkBoxMeshExportEmbedMedia.Checked + ", compatibility=" + false + ")");
 						break;
 					case MeshExportFormat.Fbx_2006:
-						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".fbx") + "\", exportFormat=\".fbx\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", embedMedia=" + checkBoxMeshExportEmbedMedia.Checked + ", compatibility=" + true + ")");
+						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + (bool)Gui.Config["FbxExportAnimationEulerFilter"] + ", filterPrecision=" + ((float)Gui.Config["FbxExportAnimationFilterPrecision"]).ToFloatString() + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".fbx") + "\", exportFormat=\".fbx\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", embedMedia=" + checkBoxMeshExportEmbedMedia.Checked + ", compatibility=" + true + ")");
 						break;
 					case MeshExportFormat.Dxf:
-						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".dxf") + "\", exportFormat=\".dxf\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", embedMedia=" + checkBoxMeshExportEmbedMedia.Checked + ", compatibility=" + false + ")");
+						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + (bool)Gui.Config["FbxExportAnimationEulerFilter"] + ", filterPrecision=" + ((float)Gui.Config["FbxExportAnimationFilterPrecision"]).ToFloatString() + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".dxf") + "\", exportFormat=\".dxf\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", embedMedia=" + checkBoxMeshExportEmbedMedia.Checked + ", compatibility=" + false + ")");
 						break;
 					case MeshExportFormat.Obj:
-						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".obj") + "\", exportFormat=\".obj\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", embedMedia=" + checkBoxMeshExportEmbedMedia.Checked + ", compatibility=" + false + ")");
+						Gui.Scripting.RunScript("ExportFbx(xxParser=" + ParserVar + ", meshNames=" + meshNames + ", xaParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + (bool)Gui.Config["FbxExportAnimationEulerFilter"] + ", filterPrecision=" + ((float)Gui.Config["FbxExportAnimationFilterPrecision"]).ToFloatString() + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".obj") + "\", exportFormat=\".obj\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", embedMedia=" + checkBoxMeshExportEmbedMedia.Checked + ", compatibility=" + false + ")");
 						break;
 					default:
 						throw new Exception("Unexpected ExportFormat");

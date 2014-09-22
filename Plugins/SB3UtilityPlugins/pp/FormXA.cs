@@ -20,7 +20,7 @@ namespace SB3Utility
 		{
 			[Description("Metasequoia")]
 			Mqo,
-			[Description("FBX 2014.1")]
+			[Description("FBX 2015.1")]
 			Fbx,
 			[Description("FBX 2006")]
 			Fbx_2006
@@ -238,6 +238,8 @@ namespace SB3Utility
 
 			comboBoxMorphMesh.DisplayMember = "Item1";
 			comboBoxMorphMesh.ValueMember = "Item2";
+			comboBoxAnimationXXLock.DisplayMember = "Item1";
+			comboBoxAnimationXXLock.ValueMember = "Item2";
 			List<DockContent> formXXList;
 			if (Gui.Docking.DockContents.TryGetValue(typeof(FormXX), out formXXList))
 			{
@@ -248,6 +250,11 @@ namespace SB3Utility
 			}
 			Gui.Docking.DockContentAdded += DockContentAdded;
 			Gui.Docking.DockContentRemoved += DockContentRemoved;
+			Tuple<string, FormXX> unlocked = new Tuple<string, FormXX>("UNLOCKED", null);
+			comboBoxAnimationXXLock.Sorted = true;
+			comboBoxAnimationXXLock.Sorted = false;
+			comboBoxAnimationXXLock.Items.Insert(0, unlocked);
+			comboBoxAnimationXXLock.SelectedItem = unlocked;
 
 			MorphExportFormat[] values = Enum.GetValues(typeof(MorphExportFormat)) as MorphExportFormat[];
 			string[] descriptions = new string[values.Length];
@@ -262,6 +269,20 @@ namespace SB3Utility
 
 			AnimationSpeed = Decimal.ToSingle(numericAnimationClipSpeed.Value);
 			FollowSequence = checkBoxAnimationClipLoadNextClip.Checked;
+			DataGridViewEditor.InitDataGridViewSRT(dataGridViewAnimationKeyframeSRT, dataGridViewAnimationKeyframeMatrix);
+			DataGridViewEditor.InitDataGridViewMatrix(dataGridViewAnimationKeyframeMatrix, dataGridViewAnimationKeyframeSRT);
+			DataTable tableRotQ = new DataTable();
+			tableRotQ.Columns.Add("X", typeof(float));
+			tableRotQ.Columns.Add("Y", typeof(float));
+			tableRotQ.Columns.Add("Z", typeof(float));
+			tableRotQ.Columns.Add("W", typeof(float));
+			tableRotQ.Rows.Add(new object[] { 0f, 0f, 0f, 0f });
+			dataGridViewAnimationKeyframeRotQ.Initialize(tableRotQ, new DataGridViewEditor.ValidateCellDelegate(DataGridViewEditor.ValidateCellSingle), 1);
+			dataGridViewAnimationKeyframeRotQ.Scroll += new ScrollEventHandler(DataGridViewEditor.dataGridViewEditor_Scroll);
+			for (int i = 0; i < dataGridViewAnimationKeyframeRotQ.Columns.Count; i++)
+			{
+				dataGridViewAnimationKeyframeRotQ.Columns[i].SortMode = DataGridViewColumnSortMode.NotSortable;
+			}
 
 			keepBackupToolStripMenuItem.Checked = (bool)Gui.Config["KeepBackupOfXA"];
 			Gui.Docking.ShowDockContent(this, Gui.Docking.DockEditors, ContentCategory.Animations);
@@ -269,39 +290,99 @@ namespace SB3Utility
 
 		void DockContentAdded(object sender, DockContentEventArgs e)
 		{
-			FormXX formXX = e.DockContent as FormXX;
-			if (formXX != null)
+			try
 			{
-				var xxParser = (xxParser)Gui.Scripting.Variables[formXX.ParserVar];
-				string xxDir = Path.GetDirectoryName(formXX.ToolTipText);
-				string xxPath = xxDir.ToLower().EndsWith(".pp") ? xxDir : formXX.ToolTipText;
-				comboBoxMorphMesh.Items.Add(new Tuple<string, FormXX>(xxParser.Name + " " + xxPath, formXX));
-				if (comboBoxMorphMesh.Items.Count == 1)
+				FormXX formXX = e.DockContent as FormXX;
+				if (formXX != null)
 				{
-					comboBoxMorphMesh.SelectedIndex = 0;
+					var xxParser = (xxParser)Gui.Scripting.Variables[formXX.ParserVar];
+					string xxDir = Path.GetDirectoryName(formXX.ToolTipText);
+					string xxPath = xxDir.ToLower().EndsWith(".pp") ? xxDir : formXX.ToolTipText;
+					comboBoxMorphMesh.Items.Add(new Tuple<string, FormXX>(xxParser.Name + " " + xxPath, formXX));
+					if (comboBoxMorphMesh.Items.Count == 1)
+					{
+						comboBoxMorphMesh.SelectedIndex = 0;
+					}
+
+					comboBoxAnimationXXLock.SelectedIndexChanged -= comboBoxAnimationXXLock_SelectedIndexChanged;
+					object selected = comboBoxAnimationXXLock.SelectedItem;
+					int index = comboBoxAnimationXXLock.FindString("UNLOCKED");
+					object unlocked = null;
+					if (index >= 0)
+					{
+						unlocked = comboBoxAnimationXXLock.Items[index];
+						comboBoxAnimationXXLock.Items.Remove(unlocked);
+					}
+					comboBoxAnimationXXLock.Items.Add(new Tuple<string, FormXX>(xxParser.Name + " " + xxPath, formXX));
+					comboBoxAnimationXXLock.Sorted = true;
+					comboBoxAnimationXXLock.Sorted = false;
+					if (unlocked != null)
+					{
+						comboBoxAnimationXXLock.Items.Insert(0, unlocked);
+					}
+					comboBoxAnimationXXLock.SelectedItem = selected;
+					comboBoxAnimationXXLock.SelectedIndexChanged += comboBoxAnimationXXLock_SelectedIndexChanged;
 				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
 			}
 		}
 
 		void DockContentRemoved(object sender, DockContentEventArgs e)
 		{
-			FormXX formXX = e.DockContent as FormXX;
-			if (formXX != null)
+			try
 			{
-				for (int i = 0; i < comboBoxMorphMesh.Items.Count; i++)
+				FormXX formXX = e.DockContent as FormXX;
+				if (formXX != null)
 				{
-					Tuple<string, FormXX> tuple = (Tuple<string, FormXX>)comboBoxMorphMesh.Items[i];
-					if (tuple.Item2 == formXX)
+					for (int i = 0; i < comboBoxMorphMesh.Items.Count; i++)
 					{
-						bool current = comboBoxMorphMesh.SelectedIndex == i;
-						comboBoxMorphMesh.Items.RemoveAt(i);
-						if (current && comboBoxMorphMesh.Items.Count > 0)
+						Tuple<string, FormXX> tuple = (Tuple<string, FormXX>)comboBoxMorphMesh.Items[i];
+						if (tuple.Item2 == formXX)
 						{
-							comboBoxMorphMesh.SelectedIndex = 0;
+							bool current = comboBoxMorphMesh.SelectedIndex == i;
+							comboBoxMorphMesh.Items.RemoveAt(i);
+							if (current && comboBoxMorphMesh.Items.Count > 0)
+							{
+								comboBoxMorphMesh.SelectedIndex = 0;
+							}
+
+							bool unlock = false;
+							object unlocked = null, remove = null;
+							foreach (object obj in comboBoxAnimationXXLock.Items)
+							{
+								tuple = (Tuple<string, FormXX>)obj;
+								if (tuple.Item2 == formXX)
+								{
+									if (comboBoxAnimationXXLock.SelectedItem == obj)
+									{
+										unlock = true;
+									}
+									remove = obj;
+								}
+								else if (tuple.Item1 == "UNLOCKED")
+								{
+									unlocked = obj;
+								}
+							}
+							if (remove != null)
+							{
+								comboBoxAnimationXXLock.Items.Remove(remove);
+								if (unlock)
+								{
+									comboBoxAnimationXXLock.SelectedItem = unlocked;
+								}
+							}
+							break;
 						}
-						break;
 					}
 				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
 			}
 		}
 
@@ -354,6 +435,7 @@ namespace SB3Utility
 				List<xaAnimationTrack> animationTrackList = Editor.Parser.AnimationSection.TrackList;
 				createAnimationTrackListView(animationTrackList);
 				animationSetMaxKeyframes(animationTrackList);
+				DisableKeyframeTabControl();
 
 				dataGridViewAnimationClip.SelectionChanged -= dataGridViewAnimationClip_SelectionChanged;
 				tabControlXA.SelectTabWithoutLoosingFocus(tabPageAnimation);
@@ -364,6 +446,37 @@ namespace SB3Utility
 				dataGridViewAnimationClip.SelectionChanged += dataGridViewAnimationClip_SelectionChanged;
 
 				Gui.Renderer.RenderObjectAdded += new EventHandler(Renderer_RenderObjectAdded);
+
+				List<DockContent> xaList = null;
+				Gui.Docking.DockContents.TryGetValue(typeof(FormXA), out xaList);
+				if (xaList != null && xaList.Count > 0)
+				{
+					FormXA syncXA = (FormXA)xaList[0];
+					if (syncXA.checkBoxAnimationKeyframeSyncPlay.Checked)
+					{
+						checkBoxAnimationKeyframeSyncPlay.CheckedChanged -= checkBoxAnimationKeyframeSyncPlay_CheckedChanged;
+						checkBoxAnimationKeyframeSyncPlay.Checked = syncXA.checkBoxAnimationKeyframeSyncPlay.Checked;
+						checkBoxAnimationKeyframeSyncPlay.CheckedChanged += checkBoxAnimationKeyframeSyncPlay_CheckedChanged;
+						numericAnimationClipSpeed.ValueChanged -= numericAnimationClipSpeed_ValueChanged;
+						numericAnimationClipSpeed.Value = syncXA.numericAnimationClipSpeed.Value;
+						numericAnimationClipSpeed.ValueChanged += numericAnimationClipSpeed_ValueChanged;
+						checkBoxAnimationClipLoadNextClip.CheckedChanged -= checkBoxAnimationClipLoadNextClip_CheckedChanged;
+						checkBoxAnimationClipLoadNextClip.Checked = syncXA.checkBoxAnimationClipLoadNextClip.Checked;
+						checkBoxAnimationClipLoadNextClip.CheckedChanged += checkBoxAnimationClipLoadNextClip_CheckedChanged;
+						buttonAnimationClipPlayPause.ImageIndex = syncXA.buttonAnimationClipPlayPause.ImageIndex;
+
+						play = syncXA.play;
+						if (syncXA.dataGridViewAnimationClip.SelectedRows.Count > 0)
+						{
+							AnimationSetClip(syncXA.dataGridViewAnimationClip.SelectedRows[0].Index);
+						}
+						else if (syncXA.loadedAnimationClip != null)
+						{
+							loadedAnimationClip = dataGridViewAnimationClip.Rows[syncXA.loadedAnimationClip.Index];
+						}
+						SetKeyframeNum((int)syncXA.numericAnimationClipKeyframe.Value);
+					}
+				}
 			}
 			else
 			{
@@ -468,6 +581,11 @@ namespace SB3Utility
 					}
 
 					Gui.Renderer.RenderObjectAdded -= new EventHandler(Renderer_RenderObjectAdded);
+
+					while (listViewAnimationTrack.SelectedItems.Count > 0)
+					{
+						listViewAnimationTrack.SelectedItems[0].Selected = false;
+					}
 				}
 				setType1View(-1);
 			}
@@ -606,10 +724,10 @@ namespace SB3Utility
 			{
 				foreach (xaAnimationTrack animationTrack in animationTrackList)
 				{
-					int numKeyframes = animationTrack.KeyframeList.Count - 1;
-					if (numKeyframes > max)
+					int timeLength = animationTrack.KeyframeList[animationTrack.KeyframeList.Count - 1].Index;
+					if (timeLength > max)
 					{
-						max = numKeyframes;
+						max = timeLength;
 					}
 				}
 			}
@@ -617,8 +735,6 @@ namespace SB3Utility
 			labelSkeletalRender.Text = "/ " + max;
 			numericAnimationClipKeyframe.Maximum = max;
 			trackBarAnimationClipKeyframe.Maximum = max;
-			numericAnimationKeyframeStart.Maximum = max;
-			numericAnimationKeyframeEnd.Maximum = max;
 		}
 
 		private void createAnimationTrackListView(List<xaAnimationTrack> animationTrackList)
@@ -634,6 +750,9 @@ namespace SB3Utility
 					item.Tag = track;
 					listViewAnimationTrack.Items.Add(item);
 				}
+				columnHeader3.AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
+				listViewAnimationTrack.Columns[1].TextAlign = HorizontalAlignment.Right;
+				listViewAnimationTrack.Columns[2].TextAlign = HorizontalAlignment.Right;
 				listViewAnimationTrack.EndUpdate();
 			}
 		}
@@ -859,16 +978,31 @@ namespace SB3Utility
 
 		private void dataGridViewAnimationClip_SelectionChanged(object sender, EventArgs e)
 		{
-			if (dataGridViewAnimationClip.SelectedRows.Count > 0)
+			List<DockContent> xaList = null;
+			if (checkBoxAnimationKeyframeSyncPlay.Checked)
 			{
-				AnimationSetClip(dataGridViewAnimationClip.SelectedRows[0].Index);
+				Gui.Docking.DockContents.TryGetValue(typeof(FormXA), out xaList);
 			}
 			else
 			{
-				if (loadedAnimationClip != null)
+				xaList = new List<DockContent>();
+				xaList.Add(this);
+			}
+
+			foreach (FormXA xa in xaList)
+			{
+				if (dataGridViewAnimationClip.SelectedRows.Count > 0)
 				{
-					AnimationSetClip(-1);
+					xa.AnimationSetClip(dataGridViewAnimationClip.SelectedRows[0].Index);
 				}
+				else
+				{
+					if (xa.loadedAnimationClip != null)
+					{
+						xa.AnimationSetClip(-1);
+					}
+				}
+				xa.DisplayNewKeyframe(true);
 			}
 
 			string clipRange = "-1-0";
@@ -1030,44 +1164,197 @@ namespace SB3Utility
 			}
 		}
 
+		private void checkBoxAnimationKeyframeSyncPlay_CheckedChanged(object sender, EventArgs e)
+		{
+			List<DockContent> xaList = null;
+			Gui.Docking.DockContents.TryGetValue(typeof(FormXA), out xaList);
+
+			foreach (FormXA xa in xaList)
+			{
+				xa.checkBoxAnimationKeyframeSyncPlay.CheckedChanged -= xa.checkBoxAnimationKeyframeSyncPlay_CheckedChanged;
+				xa.checkBoxAnimationKeyframeSyncPlay.Checked = checkBoxAnimationKeyframeSyncPlay.Checked;
+				xa.checkBoxAnimationKeyframeSyncPlay.CheckedChanged += xa.checkBoxAnimationKeyframeSyncPlay_CheckedChanged;
+			}
+		}
+
 		private void checkBoxAnimationClipLoadNextClip_CheckedChanged(object sender, EventArgs e)
 		{
-			FollowSequence = checkBoxAnimationClipLoadNextClip.Checked;
+			List<DockContent> xaList = null;
+			if (checkBoxAnimationKeyframeSyncPlay.Checked)
+			{
+				Gui.Docking.DockContents.TryGetValue(typeof(FormXA), out xaList);
+			}
+			else
+			{
+				xaList = new List<DockContent>();
+				xaList.Add(this);
+			}
+
+			foreach (FormXA xa in xaList)
+			{
+				xa.checkBoxAnimationClipLoadNextClip.CheckedChanged -= xa.checkBoxAnimationClipLoadNextClip_CheckedChanged;
+				xa.checkBoxAnimationClipLoadNextClip.Checked = checkBoxAnimationClipLoadNextClip.Checked;
+				xa.FollowSequence = checkBoxAnimationClipLoadNextClip.Checked;
+				xa.checkBoxAnimationClipLoadNextClip.CheckedChanged += xa.checkBoxAnimationClipLoadNextClip_CheckedChanged;
+			}
 		}
 
 		private void numericAnimationClipSpeed_ValueChanged(object sender, EventArgs e)
 		{
-			AnimationSpeed = Decimal.ToSingle(numericAnimationClipSpeed.Value);
+			List<DockContent> xaList = null;
+			if (checkBoxAnimationKeyframeSyncPlay.Checked)
+			{
+				Gui.Docking.DockContents.TryGetValue(typeof(FormXA), out xaList);
+			}
+			else
+			{
+				xaList = new List<DockContent>();
+				xaList.Add(this);
+			}
+
+			foreach (FormXA xa in xaList)
+			{
+				xa.numericAnimationClipSpeed.ValueChanged -= xa.numericAnimationClipSpeed_ValueChanged;
+				xa.numericAnimationClipSpeed.Value = numericAnimationClipSpeed.Value;
+				xa.AnimationSpeed = Decimal.ToSingle(numericAnimationClipSpeed.Value);
+				xa.numericAnimationClipSpeed.ValueChanged += xa.numericAnimationClipSpeed_ValueChanged;
+			}
 		}
 
 		private void buttonAnimationClipPlayPause_Click(object sender, EventArgs e)
 		{
-			if (this.play)
+			List<DockContent> xaList = null;
+			if (checkBoxAnimationKeyframeSyncPlay.Checked)
 			{
-				Pause();
+				Gui.Docking.DockContents.TryGetValue(typeof(FormXA), out xaList);
 			}
 			else
 			{
-				Play();
+				xaList = new List<DockContent>();
+				xaList.Add(this);
 			}
+
+			if (this.play)
+			{
+				foreach (FormXA xa in xaList)
+				{
+					xa.DisableKeyframeTabControl();
+					xa.Pause();
+					xa.DisplayNewKeyframe(false);
+				}
+			}
+			else
+			{
+				foreach (FormXA xa in xaList)
+				{
+					if (dataGridViewAnimationClip.SelectedRows.Count > 0)
+					{
+						xa.dataGridViewAnimationClip.Rows[dataGridViewAnimationClip.SelectedRows[0].Index].Selected = true;
+					}
+					xa.trackBarAnimationClipKeyframe.Value = trackBarAnimationClipKeyframe.Value;
+					xa.DisableKeyframeTabControl();
+					xa.Play();
+				}
+			}
+		}
+
+		private void DisplayNewKeyframe(bool disable)
+		{
+			if (!this.play && listViewAnimationTrack.SelectedItems.Count == 1)
+			{
+				xaAnimationTrack track = (xaAnimationTrack)listViewAnimationTrack.SelectedItems[0].Tag;
+				xaAnimationKeyframe keyframe = FindAnimationKeyframe(track, (int)numericAnimationClipKeyframe.Value);
+				if (keyframe != null && keyframe.Index == (int)numericAnimationClipKeyframe.Value)
+				{
+					Matrix mat = FbxUtility.SRTToMatrix(keyframe.Scaling, FbxUtility.QuaternionToEuler(keyframe.Rotation), keyframe.Translation);
+					DataGridViewEditor.LoadMatrix(mat, dataGridViewAnimationKeyframeSRT, dataGridViewAnimationKeyframeMatrix);
+					LoadRotQ(keyframe.Rotation);
+
+					EnableKeyframeTabControl();
+				}
+				else if (disable)
+				{
+					DisableKeyframeTabControl();
+				}
+			}
+			else if (disable)
+			{
+				DisableKeyframeTabControl();
+			}
+		}
+
+		private void EnableKeyframeTabControl()
+		{
+			tabControlAnimationKeyframeMatrix.Enabled = true;
+			dataGridViewAnimationKeyframeSRT.DefaultCellStyle.BackColor = SystemColors.Window;
+			dataGridViewAnimationKeyframeMatrix.DefaultCellStyle.BackColor = SystemColors.Window;
+			dataGridViewAnimationKeyframeRotQ.DefaultCellStyle.BackColor = SystemColors.Window;
+		}
+
+		private void DisableKeyframeTabControl()
+		{
+			tabControlAnimationKeyframeMatrix.Enabled = false;
+			dataGridViewAnimationKeyframeSRT.DefaultCellStyle.BackColor = SystemColors.InactiveCaptionText;
+			dataGridViewAnimationKeyframeMatrix.DefaultCellStyle.BackColor = SystemColors.InactiveCaptionText;
+			dataGridViewAnimationKeyframeRotQ.DefaultCellStyle.BackColor = SystemColors.InactiveCaptionText;
+		}
+
+		private xaAnimationKeyframe FindAnimationKeyframe(xaAnimationTrack track, int index)
+		{
+			for (int i = 0; i < track.KeyframeList.Count; i++)
+			{
+				xaAnimationKeyframe keyframe = track.KeyframeList[i];
+				if (keyframe.Index == index)
+				{
+					return keyframe;
+				}
+				else if (keyframe.Index > index)
+				{
+					return i > 0 ? track.KeyframeList[i - 1] : null;
+				}
+			}
+			return track.KeyframeList[track.KeyframeList.Count - 1];
 		}
 
 		private void trackBarAnimationClipKeyframe_ValueChanged(object sender, EventArgs e)
 		{
 			if (userTrackBar && (Editor.Parser.AnimationSection != null))
 			{
-				Pause();
+				SelectKeyframe(this, trackBarAnimationClipKeyframe.Value);
+			}
+		}
 
-				if (!trackEnabled)
+		private static void SelectKeyframe(FormXA initiator, int position)
+		{
+			List<DockContent> xaList = null;
+			if (initiator.checkBoxAnimationKeyframeSyncPlay.Checked)
+			{
+				Gui.Docking.DockContents.TryGetValue(typeof(FormXA), out xaList);
+			}
+			else
+			{
+				xaList = new List<DockContent>();
+				xaList.Add(initiator);
+			}
+
+			foreach (FormXA xa in xaList)
+			{
+				xa.Pause();
+				xa.loadedAnimationClip = null;
+
+				if (!xa.trackEnabled)
 				{
-					EnableTrack();
+					xa.EnableTrack();
 				}
-				SetTrackPosition(Decimal.ToDouble(trackBarAnimationClipKeyframe.Value));
-				AdvanceTime(0);
+				xa.SetTrackPosition(Decimal.ToDouble(position));
+				xa.AdvanceTime(0);
 
-				userTrackBar = false;
-				numericAnimationClipKeyframe.Value = trackBarAnimationClipKeyframe.Value;
-				userTrackBar = true;
+				xa.userTrackBar = false;
+				xa.numericAnimationClipKeyframe.Value = position;
+				xa.trackBarAnimationClipKeyframe.Value = position;
+				xa.userTrackBar = true;
+
+				xa.DisplayNewKeyframe(true);
 			}
 		}
 
@@ -1075,18 +1362,7 @@ namespace SB3Utility
 		{
 			if (userTrackBar && (Editor.Parser.AnimationSection != null))
 			{
-				Pause();
-
-				if (!trackEnabled)
-				{
-					EnableTrack();
-				}
-				SetTrackPosition((double)numericAnimationClipKeyframe.Value);
-				AdvanceTime(0);
-
-				userTrackBar = false;
-				trackBarAnimationClipKeyframe.Value = Decimal.ToInt32(numericAnimationClipKeyframe.Value);
-				userTrackBar = true;
+				SelectKeyframe(this, Decimal.ToInt32(numericAnimationClipKeyframe.Value));
 			}
 		}
 
@@ -1906,6 +2182,43 @@ namespace SB3Utility
 
 		private void listViewAnimationTrack_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
 		{
+			try
+			{
+				List<DockContent> xxList = null;
+				if (Gui.Docking.DockContents.TryGetValue(typeof(FormXX), out xxList))
+				{
+					bool render = false;
+					foreach (FormXX xx in xxList)
+					{
+						foreach (ListViewItem item in xx.listViewMesh.SelectedItems)
+						{
+							int i = (int)item.Tag;
+							xxMesh mesh = xx.Editor.Meshes[i].Mesh;
+							for (int j = 0; j < mesh.BoneList.Count; j++)
+							{
+								xxBone bone = mesh.BoneList[j];
+								if (bone.Name == e.Item.Text)
+								{
+									RenderObjectXX renderObj = xx.renderObjectMeshes[i];
+									renderObj.HighlightBone(mesh, j, e.IsSelected);
+									render = true;
+									break;
+								}
+							}
+						}
+					}
+					if (render)
+					{
+						Gui.Renderer.Render();
+					}
+				}
+
+				DisplayNewKeyframe(true);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
 		}
 
 		private void listViewAnimationTrack_AfterLabelEdit(object sender, LabelEditEventArgs e)
@@ -1992,6 +2305,540 @@ namespace SB3Utility
 
 				UnloadXA();
 				LoadXA();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonAnimationTrackCompare_Click(object sender, EventArgs e)
+		{
+			if (listViewAnimationTrack.SelectedItems.Count < 2)
+			{
+				return;
+			}
+
+			try
+			{
+				xaAnimationTrack t1 = (xaAnimationTrack)listViewAnimationTrack.SelectedItems[0].Tag;
+				string length = String.Empty;
+				string matrix = String.Empty;
+				string equal = String.Empty;
+				for (int i = 1; i < listViewAnimationTrack.SelectedItems.Count; i++)
+				{
+					ListViewItem item = listViewAnimationTrack.SelectedItems[i];
+					xaAnimationTrack t = (xaAnimationTrack)item.Tag;
+					if (t.KeyframeList.Count != t1.KeyframeList.Count)
+					{
+						length += (length.Length > 0 ? ", " : " ") + item.Text;
+					}
+					else
+					{
+						string restore = equal;
+						equal += (equal.Length > 0 ? ", " : " ") + item.Text;
+						for (int j = 0; j < t.KeyframeList.Count; j++)
+						{
+							xaAnimationKeyframe k1 = t1.KeyframeList[j];
+							xaAnimationKeyframe k = t.KeyframeList[j];
+							if (k1.Index != k.Index || k1.Rotation != k.Rotation || k1.Translation != k.Translation || k1.Scaling != k.Scaling)
+							{
+								matrix += (matrix.Length > 0 ? ", " : " ") + item.Text;
+								equal = restore;
+								break;
+							}
+						}
+					}
+				}
+				Report.ReportLog(t1.Name + " compared to other tracks:");
+				if (equal.Length > 0)
+				{
+					Report.ReportLog("Equal tracks:" + equal);
+				}
+				if (length.Length > 0)
+				{
+					Report.ReportLog("Different Length:" + length);
+				}
+				if (matrix.Length > 0)
+				{
+					Report.ReportLog("Different Matrix:" + matrix);
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void comboBoxAnimationXXLock_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				if (listViewAnimationTrack.Items.Count == 0)
+				{
+					return;
+				}
+
+				Tuple<string, FormXX> t = (Tuple<string, FormXX>)comboBoxAnimationXXLock.SelectedItem;
+				toolTip1.SetToolTip(comboBoxAnimationXXLock, t.Item1);
+
+				bool endRenameTrackProfileNeeded = false;
+				if (listViewAnimationTrack.Items[0].SubItems[0].Text.StartsWith(Path.GetFileNameWithoutExtension(Text)))
+				{
+					Gui.Scripting.RunScript(EditorVar + ".RenameTrackProfile(pattern=\"^" + Path.GetFileNameWithoutExtension(Text) + "-(.+)\", replacement=\"$1\")");
+					endRenameTrackProfileNeeded = true;
+
+					List<DockContent> xxList = null;
+					Gui.Docking.DockContents.TryGetValue(typeof(FormXX), out xxList);
+					foreach (FormXX xx in xxList)
+					{
+						if (xx.Editor.Frames[0].Name.StartsWith(Path.GetFileNameWithoutExtension(Text)))
+						{
+							Gui.Scripting.RunScript(xx.EditorVar + ".RenameSkeletonProfile(pattern=\"^" + Path.GetFileNameWithoutExtension(Text) + "-(.+)\", replacement=\"$1\")");
+							if (editTextBoxAnimationBonePattern.Text.Length > 0)
+							{
+								bool moved = false;
+								foreach (xaAnimationTrack track in Editor.Parser.AnimationSection.TrackList)
+								{
+									if (System.Text.RegularExpressions.Regex.IsMatch(track.Name, editTextBoxAnimationBonePattern.Text, System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+									{
+										if (xx.Editor.GetFrameId(track.Name) >= 0)
+										{
+											string searchName = System.Text.RegularExpressions.Regex.Replace(track.Name, editTextBoxAnimationBonePattern.Text, editTextBoxAnimationBoneReplacement.Text, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+											Gui.Scripting.RunScript(xx.EditorVar + ".RenameSkeletonProfile(pattern=\"^" + track.Name + "$\", replacement=\"" + searchName + "\")");
+											if (xx.Editor.GetFrameId("(" + track.Name + ")") >= 0)
+											{
+												moved = true;
+											}
+										}
+									}
+								}
+								if (moved)
+								{
+									Gui.Scripting.RunScript(xx.EditorVar + ".RenameSkeletonProfile(pattern=\"^\\((.+)\\)$\", replacement=\"$1\")");
+								}
+							}
+							xx.EndRenameSkeletonProfile();
+							break;
+						}
+					}
+				}
+
+				FormXX xxLock = t.Item2;
+				if (xxLock != null)
+				{
+					if (editTextBoxAnimationBonePattern.Text.Length > 0)
+					{
+						foreach (ListViewItem item in listViewAnimationTrack.Items)
+						{
+							xaAnimationTrack track = (xaAnimationTrack)item.Tag;
+							if (System.Text.RegularExpressions.Regex.IsMatch(track.Name, editTextBoxAnimationBonePattern.Text, System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+							{
+								string searchName = System.Text.RegularExpressions.Regex.Replace(track.Name, editTextBoxAnimationBonePattern.Text, editTextBoxAnimationBoneReplacement.Text, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+								if (xxLock.Editor.GetFrameId(searchName) >= 0)
+								{
+									if (xxLock.Editor.GetFrameId(track.Name) >= 0)
+									{
+										Gui.Scripting.RunScript(xxLock.EditorVar + ".RenameSkeletonProfile(pattern=\"^" + track.Name + "$\", replacement=\"(" + track.Name + ")\")");
+									}
+									Gui.Scripting.RunScript(xxLock.EditorVar + ".RenameSkeletonProfile(pattern=\"^" + searchName + "$\", replacement=\"" + track.Name + "\")");
+								}
+							}
+						}
+					}
+					if (!xxLock.Editor.Parser.Frame[0].Name.StartsWith(Path.GetFileNameWithoutExtension(Text)))
+					{
+						Gui.Scripting.RunScript(xxLock.EditorVar + ".RenameSkeletonProfile(pattern=\"(.+)\", replacement=\"" + Path.GetFileNameWithoutExtension(Text) + "-$1\")");
+					}
+					xxLock.EndRenameSkeletonProfile();
+
+					Gui.Scripting.RunScript(EditorVar + ".RenameTrackProfile(pattern=\"(.+)\", replacement=\"" + Path.GetFileNameWithoutExtension(Text) + "-$1\")");
+					endRenameTrackProfileNeeded = true;
+				}
+				if (endRenameTrackProfileNeeded)
+				{
+					EndRenameTrackProfile();
+				}
+
+				listViewAnimationTrack.BeginUpdate();
+				if (xxLock != null)
+				{
+					HashSet<string> meshFrames = new HashSet<string>();
+					foreach (xxFrame meshFrame in xxLock.Editor.Meshes)
+					{
+						meshFrames.Add(meshFrame.Name);
+					}
+					HashSet<string> usedFrames = xx.SearchHierarchy(xxLock.Editor.Parser.Frame, meshFrames);
+					foreach (ListViewItem item in listViewAnimationTrack.Items)
+					{
+						item.ForeColor = SystemColors.WindowText;
+						xaAnimationTrack track = (xaAnimationTrack)item.Tag;
+						if (!usedFrames.Contains(track.Name))
+						{
+							item.ForeColor = Color.OrangeRed;
+						}
+					}
+				}
+				else
+				{
+					foreach (ListViewItem item in listViewAnimationTrack.Items)
+					{
+						item.ForeColor = SystemColors.WindowText;
+					}
+				}
+				listViewAnimationTrack.EndUpdate();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		public void EndRenameTrackProfile()
+		{
+			Changed = Changed;
+			UnloadXA();
+			LoadXA();
+		}
+
+		private string editTextBoxAnimationBoneExtension_OldValue = null;
+
+		private void editTextBoxAnimationBoneExtension_AfterEditTextChanged(object sender, EventArgs e)
+		{
+			editTextBoxAnimationBoneExtension_OldValue = editTextBoxAnimationBonePattern.Text;
+		}
+
+		private void comboBoxAnimationEditedTracks_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				ListViewItem item = listViewAnimationTrack.FindItemWithText((string)comboBoxAnimationEditedTracks.SelectedItem, true, 0);
+				if (item != null && !item.Selected)
+				{
+					while (listViewAnimationTrack.SelectedIndices.Count > 0)
+					{
+						listViewAnimationTrack.SelectedItems[0].Selected = false;
+					}
+					item.Selected = true;
+					item.EnsureVisible();
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void AddTrackToEditedTracks(xaAnimationTrack track)
+		{
+			if (!comboBoxAnimationEditedTracks.Items.Contains(track.Name))
+			{
+				comboBoxAnimationEditedTracks.Items.Add(track.Name);
+				if (comboBoxAnimationEditedTracks.SelectedIndex == -1)
+				{
+					comboBoxAnimationEditedTracks.SelectedIndexChanged -= comboBoxAnimationEditedTracks_SelectedIndexChanged;
+					comboBoxAnimationEditedTracks.SelectedIndex = 0;
+					comboBoxAnimationEditedTracks.SelectedIndexChanged += comboBoxAnimationEditedTracks_SelectedIndexChanged;
+				}
+			}
+		}
+
+		private void dataGridViewAnimationKeyframeSRT_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+		{
+			try
+			{
+				DataGridViewEditor.dataGridViewSRT_CellValueChanged(sender, e);
+
+				xaAnimationTrack track = (xaAnimationTrack)listViewAnimationTrack.SelectedItems[0].Tag;
+				int animation = Editor.Parser.AnimationSection.TrackList.IndexOf(track);
+				int timeIndex = (int)numericAnimationClipKeyframe.Value;
+				xaAnimationKeyframe keyframe = FindAnimationKeyframe(track, timeIndex);
+				int key = track.KeyframeList.IndexOf(keyframe);
+
+				Vector3[] srt = DataGridViewEditor.GetSRT(dataGridViewAnimationKeyframeSRT);
+				switch (e.RowIndex)
+				{
+				case 0:
+					Gui.Scripting.RunScript(EditorVar + ".SetKeyframeTranslation(track=" + EditorVar + ".Parser.AnimationSection.TrackList[" + animation + "], keyframeIdx=" + key + ", translation={X=" + srt[2].X.ToFloatString() + ", Y=" + srt[2].Y.ToFloatString() + ", Z=" + srt[2].Z.ToFloatString() + "})");
+
+					TranslationKey trans = animationSet.GetTranslationKey(animation, key);
+					trans.Value = keyframe.Translation;
+					animationSet.SetTranslationKey(animation, key, trans);
+					break;
+				case 1:
+					Gui.Scripting.RunScript(EditorVar + ".SetKeyframeRotation(track=" + EditorVar + ".Parser.AnimationSection.TrackList[" + animation + "], keyframeIdx=" + key + ", rotation={X=" + srt[1].X.ToFloatString() + ", Y=" + srt[1].Y.ToFloatString() + ", Z=" + srt[1].Z.ToFloatString() + "})");
+
+					RotationKey rot = animationSet.GetRotationKey(animation, key);
+					rot.Value = keyframe.Rotation;
+					animationSet.SetRotationKey(animation, key, rot);
+
+					LoadRotQ(keyframe.Rotation);
+					break;
+				case 2:
+					Gui.Scripting.RunScript(EditorVar + ".SetKeyframeScaling(track=" + EditorVar + ".Parser.AnimationSection.TrackList[" + animation + "], keyframeIdx=" + key + ", scaling={X=" + srt[0].X.ToFloatString() + ", Y=" + srt[0].Y.ToFloatString() + ", Z=" + srt[0].Z.ToFloatString() + "})");
+
+					ScaleKey scale = animationSet.GetScaleKey(animation, key);
+					scale.Value = keyframe.Scaling;
+					animationSet.SetScaleKey(animation, key, scale);
+					break;
+				}
+				Changed = Changed;
+
+				AdvanceTime(0);
+				AddTrackToEditedTracks(track);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void dataGridViewAnimationKeyframeMatrix_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+		{
+			try
+			{
+				DataGridViewEditor.dataGridViewMatrix_CellValueChanged(sender, e);
+
+				xaAnimationTrack track = (xaAnimationTrack)listViewAnimationTrack.SelectedItems[0].Tag;
+				int animation = Editor.Parser.AnimationSection.TrackList.IndexOf(track);
+				int timeIndex = (int)numericAnimationClipKeyframe.Value;
+				xaAnimationKeyframe keyframe = FindAnimationKeyframe(track, timeIndex);
+				int key = track.KeyframeList.IndexOf(keyframe);
+
+				Vector3[] srt = DataGridViewEditor.GetSRT(dataGridViewAnimationKeyframeSRT);
+
+				Gui.Scripting.RunScript(EditorVar + ".SetKeyframeTranslation(track=" + EditorVar + ".Parser.AnimationSection.TrackList[" + animation + "], keyframeIdx=" + key + ", translation={X=" + srt[2].X.ToFloatString() + ", Y=" + srt[2].Y.ToFloatString() + ", Z=" + srt[2].Z.ToFloatString() + "})");
+				TranslationKey trans = animationSet.GetTranslationKey(animation, key);
+				trans.Value = keyframe.Translation;
+				animationSet.SetTranslationKey(animation, key, trans);
+
+				Gui.Scripting.RunScript(EditorVar + ".SetKeyframeRotation(track=" + EditorVar + ".Parser.AnimationSection.TrackList[" + animation + "], keyframeIdx=" + key + ", rotation={X=" + srt[1].X.ToFloatString() + ", Y=" + srt[1].Y.ToFloatString() + ", Z=" + srt[1].Z.ToFloatString() + "})");
+				RotationKey rot = animationSet.GetRotationKey(animation, key);
+				rot.Value = Quaternion.Invert(keyframe.Rotation);
+				animationSet.SetRotationKey(animation, key, rot);
+				LoadRotQ(keyframe.Rotation);
+
+				Gui.Scripting.RunScript(EditorVar + ".SetKeyframeScaling(track=" + EditorVar + ".Parser.AnimationSection.TrackList[" + animation + "], keyframeIdx=" + key + ", scaling={X=" + srt[0].X.ToFloatString() + ", Y=" + srt[0].Y.ToFloatString() + ", Z=" + srt[0].Z.ToFloatString() + "})");
+				Changed = Changed;
+				ScaleKey scale = animationSet.GetScaleKey(animation, key);
+				scale.Value = keyframe.Scaling;
+				animationSet.SetScaleKey(animation, key, scale);
+
+				AdvanceTime(0);
+				AddTrackToEditedTracks(track);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void LoadRotQ(Quaternion rot)
+		{
+			DataTable tableRotQ = (DataTable)dataGridViewAnimationKeyframeRotQ.DataSource;
+			tableRotQ.Rows[0][0] = rot.X;
+			tableRotQ.Rows[0][1] = rot.Y;
+			tableRotQ.Rows[0][2] = rot.Z;
+			tableRotQ.Rows[0][3] = rot.W;
+		}
+
+		private Quaternion GetRotQ()
+		{
+			DataTable tableRotQ = (DataTable)dataGridViewAnimationKeyframeRotQ.DataSource;
+			return new Quaternion((float)tableRotQ.Rows[0][0], (float)tableRotQ.Rows[0][1], (float)tableRotQ.Rows[0][2], (float)tableRotQ.Rows[0][3]);
+		}
+
+		private void dataGridViewAnimationKeyframeRotQ_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+		{
+			xaAnimationTrack track = (xaAnimationTrack)listViewAnimationTrack.SelectedItems[0].Tag;
+			int animation = Editor.Parser.AnimationSection.TrackList.IndexOf(track);
+			int timeIndex = (int)numericAnimationClipKeyframe.Value;
+			xaAnimationKeyframe keyframe = FindAnimationKeyframe(track, timeIndex);
+			int key = track.KeyframeList.IndexOf(keyframe);
+
+			Quaternion q = GetRotQ();
+			q.Normalize();
+			Matrix m = Matrix.Scaling(keyframe.Scaling) * Matrix.RotationQuaternion(q) * Matrix.Translation(keyframe.Translation);
+			DataGridViewEditor.LoadMatrix(m, dataGridViewAnimationKeyframeSRT, dataGridViewAnimationKeyframeMatrix);
+
+			Gui.Scripting.RunScript(EditorVar + ".SetKeyframeRotation(track=" + EditorVar + ".Parser.AnimationSection.TrackList[" + animation + "], keyframeIdx=" + key + ", rotation={X=" + q.X.ToFloatString() + ", Y=" + q.Y.ToFloatString() + ", Z=" + q.Z.ToFloatString() + ", W=" + q.W.ToFloatString() + "})");
+			Changed = Changed;
+
+			RotationKey rot = animationSet.GetRotationKey(animation, key);
+			rot.Value = Quaternion.Invert(keyframe.Rotation);
+			animationSet.SetRotationKey(animation, key, rot);
+
+			AdvanceTime(0);
+			AddTrackToEditedTracks(track);
+		}
+
+		private void buttonAnimationKeyframeRotQInvert_Click(object sender, EventArgs e)
+		{
+			Quaternion q = GetRotQ();
+			q.Invert();
+			LoadRotQ(q);
+			dataGridViewAnimationKeyframeRotQ_CellValueChanged(null, null);
+		}
+
+		private void buttonAnimationKeyframeRotQFlip_Click(object sender, EventArgs e)
+		{
+			Quaternion q = GetRotQ();
+			q.X = -q.X;
+			q.Y = -q.Y;
+			q.Z = -q.Z;
+			q.W = -q.W;
+			LoadRotQ(q);
+			dataGridViewAnimationKeyframeRotQ_CellValueChanged(null, null);
+		}
+
+		private bool startCaptureCommandsState;
+		private Point startCaptureLocation;
+		private Quaternion startValue;
+
+		private void dataGridViewAnimationKeyframeSRT_MouseDown(object sender, MouseEventArgs e)
+		{
+			if (e.Button == MouseButtons.Left && dataGridViewAnimationKeyframeSRT.Capture)
+			{
+				if (dataGridViewAnimationKeyframeSRT.SelectedCells.Count == 1)
+				{
+					dataGridViewAnimationKeyframeSRT.SelectedCells[0].Selected = false;
+				}
+				startCaptureLocation = e.Location;
+				startCaptureCommandsState = (bool)Gui.Config["CaptureCommands"];
+				Gui.Config["CaptureCommands"] = false;
+			}
+		}
+
+		private void dataGridViewAnimationKeyframeSRT_SelectionChanged(object sender, EventArgs e)
+		{
+			if (dataGridViewAnimationKeyframeSRT.Capture && dataGridViewAnimationKeyframeSRT.SelectedCells.Count == 1 && dataGridViewAnimationKeyframeSRT.SelectedCells[0].ColumnIndex > 0)
+			{
+				dataGridViewAnimationKeyframeSRT.MouseMove += dataGridViewAnimationKeyframeSRT_MouseMove;
+				startValue = GetRotQ();
+			}
+		}
+
+		private void dataGridViewAnimationKeyframeSRT_MouseCaptureChanged(object sender, EventArgs e)
+		{
+			dataGridViewAnimationKeyframeSRT.MouseMove -= dataGridViewAnimationKeyframeSRT_MouseMove;
+			Gui.Config["CaptureCommands"] = startCaptureCommandsState;
+		}
+
+		private void dataGridViewAnimationKeyframeSRT_KeyDown(object sender, KeyEventArgs e)
+		{
+			Quaternion q;
+			if (e.KeyData == Keys.Escape && dataGridViewAnimationKeyframeSRT.SelectedCells.Count == 1 && (q = GetRotQ()) != startValue)
+			{
+				LoadRotQ(startValue);
+				dataGridViewAnimationKeyframeRotQ_CellValueChanged(null, null);
+			}
+		}
+
+		private void dataGridViewAnimationKeyframeSRT_MouseMove(object sender, MouseEventArgs e)
+		{
+			try
+			{
+				int dx = e.Location.X - startCaptureLocation.X, dy = e.Location.Y - startCaptureLocation.Y;
+				Quaternion q = startValue;
+				float degScale = (dx / 3) * 0.01f + dy * 0.001f;
+				switch (dataGridViewAnimationKeyframeSRT.SelectedCells[0].ColumnIndex)
+				{
+				case 1:
+					q.X += degScale;
+					break;
+				case 2:
+					q.Y += degScale;
+					break;
+				case 3:
+					q.Z += degScale;
+					break;
+				}
+				q.Normalize();
+				LoadRotQ(q);
+				dataGridViewAnimationKeyframeRotQ_CellValueChanged(null, null);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonAnimationKeyframeNew_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (listViewAnimationTrack.SelectedItems.Count != 1)
+				{
+					return;
+				}
+
+				xaAnimationTrack track = (xaAnimationTrack)listViewAnimationTrack.SelectedItems[0].Tag;
+				int animation = Editor.Parser.AnimationSection.TrackList.IndexOf(track);
+				int timeIndex = (int)numericAnimationClipKeyframe.Value;
+				xaAnimationKeyframe keyframe = (xaAnimationKeyframe)Gui.Scripting.RunScript(EditorVar + ".NewKeyframe(track=" + EditorVar + ".Parser.AnimationSection.TrackList[" + animation + "], index=" + timeIndex + ")");
+				Changed = Changed;
+				int key = track.KeyframeList.IndexOf(keyframe);
+
+				float time = timeIndex;
+
+				ScaleKey scale = new ScaleKey();
+				scale.Time = time;
+				scale.Value = keyframe.Scaling;
+				animationSet.SetScaleKey(animation, key, scale);
+
+				RotationKey rotation = new RotationKey();
+				rotation.Time = time;
+				rotation.Value = Quaternion.Invert(keyframe.Rotation);
+				animationSet.SetRotationKey(animation, key, rotation);
+
+				TranslationKey translation = new TranslationKey();
+				translation.Time = time;
+				translation.Value = keyframe.Translation;
+				animationSet.SetTranslationKey(animation, key, translation);
+
+				AdvanceTime(0);
+
+				AddTrackToEditedTracks(track);
+				listViewAnimationTrack.SelectedItems[0].SubItems[1].Text = track.KeyframeList.Count.ToString();
+				DisplayNewKeyframe(true);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonAnimationKeyframeRemove_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (listViewAnimationTrack.SelectedItems.Count != 1)
+				{
+					return;
+				}
+
+				xaAnimationTrack track = (xaAnimationTrack)listViewAnimationTrack.SelectedItems[0].Tag;
+				int animation = Editor.Parser.AnimationSection.TrackList.IndexOf(track);
+				int timeIndex = (int)numericAnimationClipKeyframe.Value;
+				xaAnimationKeyframe keyframe = FindAnimationKeyframe(track, timeIndex);
+				int key = track.KeyframeList.IndexOf(keyframe);
+				if (keyframe.Index != timeIndex || keyframe == track.KeyframeList[0] || key == track.KeyframeList.Count - 1)
+				{
+					return;
+				}
+
+				Gui.Scripting.RunScript(EditorVar + ".RemoveKeyframe(track=" + EditorVar + ".Parser.AnimationSection.TrackList[" + animation + "], index=" + timeIndex + ")");
+				Changed = Changed;
+
+				animationSet.UnregisterScaleKey(animation, key);
+				animationSet.UnregisterRotationKey(animation, key);
+				animationSet.UnregisterTranslationKey(animation, key);
+
+				AdvanceTime(0);
+
+				AddTrackToEditedTracks(track);
+				listViewAnimationTrack.SelectedItems[0].SubItems[1].Text = track.KeyframeList.Count.ToString();
+				DisplayNewKeyframe(true);
 			}
 			catch (Exception ex)
 			{

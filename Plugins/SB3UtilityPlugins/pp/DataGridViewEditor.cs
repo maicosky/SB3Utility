@@ -4,6 +4,7 @@ using System.Text;
 using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
+using SlimDX;
 
 namespace SB3Utility
 {
@@ -344,5 +345,154 @@ namespace SB3Utility
 				}
 			}
 		}
+
+		public static void InitDataGridViewSRT(DataGridViewEditor viewSRT, DataGridViewEditor viewMatrix)
+		{
+			DataTable tableSRT = new DataTable();
+			tableSRT.Columns.Add(" ", typeof(string));
+			tableSRT.Columns[0].ReadOnly = true;
+			tableSRT.Columns.Add("X", typeof(float));
+			tableSRT.Columns.Add("Y", typeof(float));
+			tableSRT.Columns.Add("Z", typeof(float));
+			tableSRT.Rows.Add(new object[] { "Translate", 0f, 0f, 0f });
+			tableSRT.Rows.Add(new object[] { "Rotate", 0f, 0f, 0f });
+			tableSRT.Rows.Add(new object[] { "Scale", 1f, 1f, 1f });
+			viewSRT.Initialize(tableSRT, new DataGridViewEditor.ValidateCellDelegate(ValidateCellSRT), 3);
+			viewSRT.Scroll += new ScrollEventHandler(dataGridViewEditor_Scroll);
+
+			viewSRT.Columns[0].DefaultCellStyle = viewSRT.ColumnHeadersDefaultCellStyle;
+			for (int i = 0; i < viewSRT.Columns.Count; i++)
+			{
+				viewSRT.Columns[i].SortMode = DataGridViewColumnSortMode.NotSortable;
+			}
+
+			viewSRT.Tag = viewMatrix;
+		}
+
+		public static void dataGridViewSRT_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+		{
+			DataGridView viewSRT = (DataGridView)sender;
+			Vector3[] srt = GetSRT(viewSRT);
+			Matrix mat = FbxUtility.SRTToMatrix(srt[0], srt[1], srt[2]);
+			LoadMatrix(mat, null, (DataGridView)viewSRT.Tag);
+		}
+
+		public static void dataGridViewMatrix_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+		{
+			DataGridView viewMatrix = (DataGridView)sender;
+			Matrix mat = GetMatrix(viewMatrix);
+			LoadMatrix(mat, (DataGridView)viewMatrix.Tag, null);
+		}
+
+		public static void InitDataGridViewMatrix(DataGridViewEditor viewMatrix, DataGridViewEditor viewSRT)
+		{
+			DataTable tableMatrix = new DataTable();
+			tableMatrix.Columns.Add("1", typeof(float));
+			tableMatrix.Columns.Add("2", typeof(float));
+			tableMatrix.Columns.Add("3", typeof(float));
+			tableMatrix.Columns.Add("4", typeof(float));
+			tableMatrix.Rows.Add(new object[] { 1f, 0f, 0f, 0f });
+			tableMatrix.Rows.Add(new object[] { 0f, 1f, 0f, 0f });
+			tableMatrix.Rows.Add(new object[] { 0f, 0f, 1f, 0f });
+			tableMatrix.Rows.Add(new object[] { 0f, 0f, 0f, 1f });
+			viewMatrix.Initialize(tableMatrix, new DataGridViewEditor.ValidateCellDelegate(ValidateCellSingle), 4);
+			viewMatrix.Scroll += new ScrollEventHandler(dataGridViewEditor_Scroll);
+
+			for (int i = 0; i < viewMatrix.Columns.Count; i++)
+			{
+				viewMatrix.Columns[i].SortMode = DataGridViewColumnSortMode.NotSortable;
+			}
+
+			viewMatrix.Tag = viewSRT;
+		}
+
+		public static void dataGridViewEditor_Scroll(object sender, ScrollEventArgs e)
+		{
+			try
+			{
+				e.NewValue = e.OldValue;
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		public static bool ValidateCellSRT(string s, int row, int col)
+		{
+			if (col == 0)
+			{
+				return true;
+			}
+			else
+			{
+				return ValidateCellSingle(s, row, col);
+			}
+		}
+
+		public static bool ValidateCellSingle(string s, int row, int col)
+		{
+			float f;
+			if (Single.TryParse(s, out f))
+			{
+				return true;
+			}
+			return false;
+		}
+
+		public static Matrix GetMatrix(DataGridView viewMatrix)
+		{
+			Matrix m = new Matrix();
+			DataTable table = (DataTable)viewMatrix.DataSource;
+			for (int i = 0; i < 4; i++)
+			{
+				for (int j = 0; j < 4; j++)
+				{
+					m[i, j] = (float)table.Rows[i][j];
+				}
+			}
+			return m;
+		}
+
+		public static Vector3[] GetSRT(DataGridView viewSRT)
+		{
+			DataTable table = (DataTable)viewSRT.DataSource;
+			Vector3[] srt = new Vector3[3];
+			for (int i = 0; i < 3; i++)
+			{
+				srt[0][i] = (float)table.Rows[2][i + 1];
+				srt[1][i] = (float)table.Rows[1][i + 1];
+				srt[2][i] = (float)table.Rows[0][i + 1];
+			}
+			return srt;
+		}
+
+		public static void LoadMatrix(Matrix matrix, DataGridView viewSRT, DataGridView viewMatrix)
+		{
+			if (viewSRT != null)
+			{
+				Vector3[] srt = FbxUtility.MatrixToSRT(matrix);
+				DataTable tableSRT = (DataTable)viewSRT.DataSource;
+				for (int i = 0; i < 3; i++)
+				{
+					tableSRT.Rows[0][i + 1] = srt[2][i];
+					tableSRT.Rows[1][i + 1] = srt[1][i];
+					tableSRT.Rows[2][i + 1] = srt[0][i];
+				}
+			}
+
+			if (viewMatrix != null)
+			{
+				DataTable tableMatrix = (DataTable)viewMatrix.DataSource;
+				for (int i = 0; i < 4; i++)
+				{
+					for (int j = 0; j < 4; j++)
+					{
+						tableMatrix.Rows[i][j] = matrix[i, j];
+					}
+				}
+			}
+		}
+
 	}
 }
