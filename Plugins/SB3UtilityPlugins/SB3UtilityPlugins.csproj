@@ -92,6 +92,12 @@
     <Compile Include="pp\Collada.cs" />
     <Compile Include="pp\ColladaConditioner.cs" />
     <Compile Include="pp\ColladaDocument.cs" />
+    <Compile Include="pp\FormPPMultiRename.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="pp\FormPPMultiRename.Designer.cs">
+      <DependentUpon>FormPPMultiRename.cs</DependentUpon>
+    </Compile>
     <Compile Include="pp\FormLST.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -273,6 +279,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FormWorkspace.resx">
       <DependentUpon>FormWorkspace.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="pp\FormPPMultiRename.resx">
+      <DependentUpon>FormPPMultiRename.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="pp\FormLST.resx">
       <DependentUpon>FormLST.cs</DependentUpon>

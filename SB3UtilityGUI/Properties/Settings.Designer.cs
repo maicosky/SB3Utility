@@ -433,5 +433,15 @@ namespace SB3Utility.Properties {
                 return ((bool)(this["FbxImportAnimationNegateQuaternionFlips"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(PortableSettingsProvider))]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0, 0")]
+        public global::System.Drawing.Size DialogPPMultiRenameSize {
+            get {
+                return ((global::System.Drawing.Size)(this["DialogPPMultiRenameSize"]));
+            }
+        }
     }
 }

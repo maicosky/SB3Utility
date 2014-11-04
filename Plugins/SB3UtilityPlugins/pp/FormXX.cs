@@ -298,6 +298,7 @@ namespace SB3Utility
 			foreach (ListViewItem item in listViewMesh.SelectedItems)
 			{
 				Gui.Renderer.RemoveRenderObject(renderObjectIds[(int)item.Tag]);
+				renderObjectIds[(int)item.Tag] = -1;
 			}
 
 			for (int i = 0; i < renderObjectMeshes.Count; i++)
@@ -620,7 +621,11 @@ namespace SB3Utility
 			DisposeRenderObjects();
 
 			renderObjectMeshes = new List<RenderObjectXX>(new RenderObjectXX[Editor.Meshes.Count]);
-			renderObjectIds = new List<int>(new int[Editor.Meshes.Count]);
+			renderObjectIds = new List<int>(Editor.Meshes.Count);
+			for (int i = 0; i < Editor.Meshes.Count; i++)
+			{
+				renderObjectIds.Add(-1);
+			}
 
 			foreach (ListViewItem item in listViewMesh.SelectedItems)
 			{
@@ -711,7 +716,11 @@ namespace SB3Utility
 		void LoadXX()
 		{
 			renderObjectMeshes = new List<RenderObjectXX>(new RenderObjectXX[Editor.Meshes.Count]);
-			renderObjectIds = new List<int>(new int[Editor.Meshes.Count]);
+			renderObjectIds = new List<int>(Editor.Meshes.Count);
+			for (int i = 0; i < Editor.Meshes.Count; i++)
+			{
+				renderObjectIds.Add(-1);
+			}
 
 			InitFormat();
 
@@ -1682,7 +1691,10 @@ namespace SB3Utility
 							renderObjectMeshes[id] = new RenderObjectXX(Editor.Parser, meshNames);
 						}
 						RenderObjectXX renderObj = renderObjectMeshes[id];
-						renderObjectIds[id] = Gui.Renderer.AddRenderObject(renderObj);
+						if (renderObjectIds[id] == -1)
+						{
+							renderObjectIds[id] = Gui.Renderer.AddRenderObject(renderObj);
+						}
 						if (!Gui.Docking.DockRenderer.IsHidden)
 						{
 							Gui.Docking.DockRenderer.Enabled = false;
@@ -1704,6 +1716,7 @@ namespace SB3Utility
 						CrossRefRemoveItem(crossRefMeshTextures[id], crossRefMeshTexturesCount, listViewMeshTexture);
 
 						Gui.Renderer.RemoveRenderObject(renderObjectIds[id]);
+						renderObjectIds[id] = -1;
 					}
 
 					CrossRefSetSelected(e.IsSelected, listViewMesh, id);

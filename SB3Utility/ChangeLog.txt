@@ -1,4 +1,19 @@
-﻿[1.0.0]
+﻿[1.0.4]
+  - Added Preview for Multi-Renaming pp subfiles
+
+[1.0.3]
+  - Added Multi-Renaming pp subfiles
+  - Fixed error message when reopening a pp file with changed content
+
+[1.0.2]
+  - Fixed crash after meshes were selected while the XX editor was being undocked
+  - Fixed crash when a not existing animation clip was selected (Sync Play)
+  - Added hiding default docks "Files" and "Editors" upon docking another DockContent
+
+[1.0.1]
+  - Added script commands for editing keyframes
+
+[1.0.0]
   - Updated to Fbx SDK 2015.1
   - Deleted Fbx Import Euler Filter usage
   - Added Fbx Import Negate Quaternion Flips

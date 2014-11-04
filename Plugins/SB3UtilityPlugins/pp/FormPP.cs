@@ -1149,6 +1149,80 @@ namespace SB3Utility
 			}
 		}
 
+		private void multiRenameToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				using (FormPPMultiRename renameForm = new FormPPMultiRename(Editor.Parser.Subfiles))
+				{
+					if (renameForm.ShowDialog() == DialogResult.OK)
+					{
+						foreach (ListViewItem item in xxSubfilesList.Items)
+						{
+							multiRenameItem(renameForm, item, true);
+						}
+						foreach (ListViewItem item in xaSubfilesList.Items)
+						{
+							multiRenameItem(renameForm, item, true);
+						}
+						foreach (ListViewItem item in imageSubfilesList.Items)
+						{
+							multiRenameItem(renameForm, item, false);
+						}
+						foreach (ListViewItem item in soundSubfilesList.Items)
+						{
+							multiRenameItem(renameForm, item, false);
+						}
+						foreach (ListViewItem item in otherSubfilesList.Items)
+						{
+							multiRenameItem(renameForm, item, true);
+						}
+
+						InitSubfileLists(false);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void multiRenameItem(FormPPMultiRename renameForm, ListViewItem item, bool checkParserVarsAndForms)
+		{
+			IWriteFile subfile = (IWriteFile)item.Tag;
+			string oldName = subfile.Name;
+			string pattern = renameForm.textBoxSearchFor.Text;
+			string replacement = renameForm.textBoxReplaceWith.Text;
+			string name = System.Text.RegularExpressions.Regex.Replace(oldName, pattern, replacement, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+			if (name != oldName)
+			{
+				string newName = (string)Gui.Scripting.RunScript(EditorVar + ".RenameSubfile(subfile=\"" + oldName + "\", newName=\"" + name + "\")");
+				Changed = Changed;
+
+				item.Text = newName;
+
+				if (checkParserVarsAndForms)
+				{
+					if (ChildParserVars.ContainsKey(oldName))
+					{
+						string value = ChildParserVars[oldName];
+						ChildParserVars.Remove(oldName);
+						ChildParserVars.Add(newName, value);
+					}
+
+					if (ChildForms.ContainsKey(oldName))
+					{
+						DockContent value = ChildForms[oldName];
+						ChildForms.Remove(oldName);
+						ChildForms.Add(newName, value);
+						value.Text = newName;
+						value.ToolTipText = Editor.Parser.FilePath + @"\" + newName;
+					}
+				}
+			}
+		}
+
 		private void exportPPToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			try

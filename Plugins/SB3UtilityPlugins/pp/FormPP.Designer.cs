@@ -78,6 +78,7 @@
 			this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
 			this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
 			this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
+			this.multiRenameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.tabControlSubfiles.SuspendLayout();
 			this.tabPageXXSubfiles.SuspendLayout();
 			this.tabPageXASubfiles.SuspendLayout();
@@ -409,6 +410,7 @@
             this.removeToolStripMenuItem,
             this.toolStripSeparator3,
             this.renameToolStripMenuItem,
+            this.multiRenameToolStripMenuItem,
             this.toolStripSeparator7,
             this.registerToolToolStripMenuItem,
             this.unregisterToolsToolStripMenuItem});
@@ -532,6 +534,13 @@
 			this.openFileDialog1.Multiselect = true;
 			this.openFileDialog1.RestoreDirectory = true;
 			// 
+			// multiRenameToolStripMenuItem
+			// 
+			this.multiRenameToolStripMenuItem.Name = "multiRenameToolStripMenuItem";
+			this.multiRenameToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.multiRenameToolStripMenuItem.Text = "&Multi Rename...";
+			this.multiRenameToolStripMenuItem.Click += new System.EventHandler(this.multiRenameToolStripMenuItem_Click);
+			// 
 			// FormPP
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -611,6 +620,7 @@
 		private System.Windows.Forms.ToolStripMenuItem newSourceFormatToolStripMenuItem;
 		private System.Windows.Forms.ColumnHeader xxSubfilesListHeader;
 		public System.Windows.Forms.ListView otherSubfilesList;
+		private System.Windows.Forms.ToolStripMenuItem multiRenameToolStripMenuItem;
 
 	}
 }

@@ -145,9 +145,11 @@ namespace SB3Utility
 			{
 				SetDockDefault(DockFiles, "Files");
 				DockFiles.Show(dockPanel, DockState.Document);
+				DockFiles.PanelPane.Layout += PanelPane_Layout;
 
 				SetDockDefault(DockEditors, "Editors");
 				DockEditors.Show(DockFiles.Pane, DockAlignment.Right, 0.7);
+				DockEditors.PanelPane.Layout += PanelPane_Layout;
 
 				SetDockDefault(DockQuickAccess, "Quick Access");
 				DockQuickAccess.Show(DockFiles.Pane, DockAlignment.Top, 0.3);
@@ -212,6 +214,31 @@ namespace SB3Utility
 			catch (Exception ex)
 			{
 				Utility.ReportException(ex);
+			}
+		}
+
+		private void PanelPane_Layout(object sender, LayoutEventArgs e)
+		{
+			DockPane panelPane = (DockPane)sender;
+			int floating = 0;
+			DockContent defaultDock = null;
+			foreach (DockContent cont in panelPane.Contents)
+			{
+				if (cont.Name != String.Empty)
+				{
+					if (cont.IsFloat)
+					{
+						floating++;
+					}
+				}
+				else
+				{
+					defaultDock = cont;
+				}
+			}
+			if (panelPane.Contents.Count - floating > 1 && defaultDock != null && !defaultDock.IsHidden)
+			{
+				defaultDock.Hide();
 			}
 		}
 
@@ -405,11 +432,15 @@ namespace SB3Utility
 				{
 					if (viewFilesToolStripMenuItem.Checked && (dock.Pane == DockFiles.Pane))
 					{
+						DockFiles.PanelPane.Layout -= PanelPane_Layout;
 						DockFiles.Show();
+						DockFiles.PanelPane.Layout += PanelPane_Layout;
 					}
 					else if (viewEditorsToolStripMenuItem.Checked && (dock.Pane == DockEditors.Pane))
 					{
+						DockEditors.PanelPane.Layout -= PanelPane_Layout;
 						DockEditors.Show();
+						DockEditors.PanelPane.Layout += PanelPane_Layout;
 					}
 				}
 			}

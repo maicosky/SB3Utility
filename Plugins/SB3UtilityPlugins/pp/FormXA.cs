@@ -927,7 +927,7 @@ namespace SB3Utility
 				dataGridViewAnimationClip.SelectionChanged += dataGridViewAnimationClip_SelectionChanged;
 			}
 
-			if (idx < 0)
+			if (idx < 0 || idx >= dataGridViewAnimationClip.Rows.Count)
 			{
 				loadedAnimationClip = null;
 				DisableTrack();

@@ -170,6 +170,20 @@ namespace SB3Utility
 		}
 
 		[Plugin]
+		public int GetTrackId(string name)
+		{
+			for (int i = 0; i < Parser.AnimationSection.TrackList.Count; i++)
+			{
+				xaAnimationTrack track = Parser.AnimationSection.TrackList[i];
+				if (track.Name == name)
+				{
+					return i;
+				}
+			}
+			return -1;
+		}
+
+		[Plugin]
 		public void ReplaceAnimation(WorkspaceAnimation animation, int resampleCount, string method, int insertPos)
 		{
 			var replaceMethod = (ReplaceAnimationMethod)Enum.Parse(typeof(ReplaceAnimationMethod), method);
@@ -535,6 +549,13 @@ namespace SB3Utility
 		}
 
 		[Plugin]
+		public void SetKeyframeTranslation(string trackName, int keyframeIdx, object translation)
+		{
+			xaAnimationTrack track = Parser.AnimationSection.TrackList[GetTrackId(trackName)];
+			SetKeyframeTranslation(track, keyframeIdx, translation);
+		}
+
+		[Plugin]
 		public void SetKeyframeRotation(xaAnimationTrack track, int keyframeIdx, object rotation)
 		{
 			xaAnimationKeyframe keyframe = track.KeyframeList[keyframeIdx];
@@ -556,12 +577,26 @@ namespace SB3Utility
 		}
 
 		[Plugin]
+		public void SetKeyframeRotation(string trackName, int keyframeIdx, object rotation)
+		{
+			xaAnimationTrack track = Parser.AnimationSection.TrackList[GetTrackId(trackName)];
+			SetKeyframeRotation(track, keyframeIdx, rotation);
+		}
+
+		[Plugin]
 		public void SetKeyframeScaling(xaAnimationTrack track, int keyframeIdx, object scaling)
 		{
 			xaAnimationKeyframe keyframe = track.KeyframeList[keyframeIdx];
 			Vector3 scale = new Vector3((float)(double)((object[])scaling)[0], (float)(double)((object[])scaling)[1], (float)(double)((object[])scaling)[2]);
 			keyframe.Scaling = scale;
 			Changed = true;
+		}
+
+		[Plugin]
+		public void SetKeyframeScaling(string trackName, int keyframeIdx, object scaling)
+		{
+			xaAnimationTrack track = Parser.AnimationSection.TrackList[GetTrackId(trackName)];
+			SetKeyframeScaling(track, keyframeIdx, scaling);
 		}
 	}
 }
