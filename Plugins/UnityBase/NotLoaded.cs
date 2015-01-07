@@ -1,0 +1,53 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+
+using SB3Utility;
+
+namespace UnityPlugin
+{
+	public interface NeedsSourceStreamForWriting
+	{
+		Stream SourceStream { get; set; }
+	}
+
+	public class NotLoaded : NeedsSourceStreamForWriting, Component
+	{
+		public uint offset;
+		public uint size;
+
+		public AssetCabinet file { get; set; }
+		public int pathID
+		{
+			get { return replacement != null ? replacement.pathID : _pathID; }
+			set { _pathID = value; }
+		}
+		private int _pathID { get; set; }
+		public UnityClassID classID1 { get; set; }
+		public UnityClassID classID2 { get; set; }
+		public Component replacement { get; set; }
+
+		public string Name { get; set; }
+
+		public Stream SourceStream { get; set; }
+
+		public void LoadFrom(Stream stream)
+		{
+			throw new NotImplementedException();
+		}
+
+		public void WriteTo(Stream stream)
+		{
+			BinaryWriter writer = new BinaryWriter(stream);
+			BinaryReader reader = new BinaryReader(SourceStream);
+			SourceStream.Position = offset;
+			for (uint count = 0; count < size; )
+			{
+				uint len = count + Utility.BufSize > size ? size - count : Utility.BufSize;
+				byte[] buf = reader.ReadBytes(len);
+				writer.Write(buf);
+				count += len;
+			}
+		}
+	}
+}
