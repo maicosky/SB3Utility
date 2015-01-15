@@ -76,9 +76,9 @@ namespace SB3Utility
 			return srt;
 		}
 
-		public static void Export(String path, IImported imp, int startKeyframe, int endKeyframe, bool linear, bool EulerFilter, float filterPrecision, String exportFormat, bool allFrames, bool skins, bool compatibility)
+		public static void Export(String path, IImported imp, int startKeyframe, int endKeyframe, bool linear, bool EulerFilter, float filterPrecision, String exportFormat, bool allFrames, bool allBones, bool skins, bool compatibility)
 		{
-			Fbx.Exporter.Export(path, imp, startKeyframe, endKeyframe, linear, EulerFilter, filterPrecision, exportFormat, allFrames, skins, compatibility);
+			Fbx.Exporter.Export(path, imp, startKeyframe, endKeyframe, linear, EulerFilter, filterPrecision, exportFormat, allFrames, allBones, skins, compatibility);
 		}
 
 		public static List<KeyValuePair<string, ImportedAnimationKeyframe[]>> CopyKeyframedAnimation(WorkspaceAnimation wsAnimation, int resampleCount, bool linear)

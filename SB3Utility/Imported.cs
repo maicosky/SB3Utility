@@ -49,6 +49,7 @@ namespace SB3Utility
 		public byte[] BoneIndices { get; set; }
 		public Vector3 Normal { get; set; }
 		public float[] UV { get; set; }
+		public Vector4 Tangent { get; set; }
 	}
 
 	public class ImportedVertexWithColour : ImportedVertex

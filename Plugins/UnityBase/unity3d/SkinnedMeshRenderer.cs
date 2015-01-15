@@ -7,26 +7,10 @@ using SB3Utility;
 
 namespace UnityPlugin
 {
-	public class SkinnedMeshRenderer : Component, StoresReferences
+	public class SkinnedMeshRenderer : Component, LinkedByGameObject, StoresReferences
 	{
 		public AssetCabinet file { get; set; }
-		public int pathID
-		{
-			get
-			{
-				return _pathID;
-			}
-
-			set
-			{
-				if (m_GameObject != null)
-				{
-					m_GameObject.instance.UpdateComponentRef(this);
-				}
-				_pathID = value;
-			}
-		}
-		private int _pathID;
+		public int pathID {get;set;}
 		public UnityClassID classID1 { get; set; }
 		public UnityClassID classID2 { get; set; }
 
@@ -60,6 +44,25 @@ namespace UnityPlugin
 			this.classID2 = classID2;
 		}
 
+		public SkinnedMeshRenderer(AssetCabinet file) :
+			this(file, 0, UnityClassID.SkinnedMeshRenderer, UnityClassID.SkinnedMeshRenderer)
+		{
+			file.ReplaceSubfile(-1, this, null);
+
+			m_Enabled = true;
+			m_CastShadows = true;
+			m_ReceiveShadows = true;
+			m_LightmapIndex = 255;
+			m_LightmapTilingOffset = new Vector4(1, 1, 0, 0);
+			m_Materials = new List<PPtr<Material>>(1);
+			m_SubsetIndices = new List<uint>();
+			m_StaticBatchRoot = new PPtr<Transform>((Component)null);
+			m_LightProbeAnchor = new PPtr<Transform>((Component)null);
+			m_UpdateWhenOffScreen = true;
+			m_BlendShapeWeights = new List<float>();
+			m_AABB = new AABB();
+		}
+
 		public void LoadFrom(Stream stream)
 		{
 			BinaryReader reader = new BinaryReader(stream);
@@ -69,8 +72,8 @@ namespace UnityPlugin
 			m_ReceiveShadows = reader.ReadBoolean();
 			m_LightmapIndex = reader.ReadByte();
 			m_LightmapTilingOffset = reader.ReadVector4();
-			int numMaterials = reader.ReadInt32();
 
+			int numMaterials = reader.ReadInt32();
 			m_Materials = new List<PPtr<Material>>(numMaterials);
 			for (int i = 0; i < numMaterials; i++)
 			{

@@ -1,4 +1,15 @@
-﻿[1.0.4]
+﻿[1.0.7]
+  - Fixed XA parser dropping items in Type4 (SB3Format)
+
+[1.0.6]
+  - Fixed saving pp files of AA2 with original version
+
+[1.0.5]
+  - Fixed renaming a mesh frame; didn't update the Mesh Editor's Name textbox
+  - Fixed selecting unused materials and textures; didn't unselect beforehand
+  - Fixed animation wasn't shown when no clip was selected after "XX Lock & Map" or replacing animation
+
+[1.0.4]
   - Added Preview for Multi-Renaming pp subfiles
 
 [1.0.3]

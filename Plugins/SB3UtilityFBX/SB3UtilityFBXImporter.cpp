@@ -255,6 +255,13 @@ namespace SB3Utility
 					pLayerElementUV = pLayerUV->GetUVs();
 				}
 
+				FbxLayer* pLayerTangent = pMesh->GetLayer(0, FbxLayerElement::eTangent);
+				FbxLayerElementTangent* pLayerElementTangent = NULL;
+				if (pLayerTangent != NULL)
+				{
+					pLayerElementTangent = pLayerTangent->GetTangents();
+				}
+
 				int numVerts = pMesh->GetControlPointsCount();
 				array<List<Vertex^>^>^ vertMap = gcnew array<List<Vertex^>^>(numVerts);
 				for (int j = 0; j < numVerts; j++)
@@ -295,6 +302,13 @@ namespace SB3Utility
 							FbxVector2 uv;
 							GetVector(pLayerElementUV, uv, controlPointIdx, vertCount);
 							vert->uv = gcnew array<float>(2) { (float)uv[0], -(float)uv[1] };
+						}
+
+						if (pLayerElementTangent != NULL)
+						{
+							FbxVector4 tang;
+							GetVector(pLayerElementTangent, tang, controlPointIdx, vertCount);
+							vert->tangent = gcnew array<float>(4) { (float)tang[0], (float)tang[1], (float)tang[2], (float)tang[3] };
 						}
 
 						List<Vertex^>^ vertMapList = vertMap[controlPointIdx];
@@ -492,6 +506,10 @@ namespace SB3Utility
 
 						vertInfo->Normal = Vector3(vert->normal[0], vert->normal[1], vert->normal[2]);
 						vertInfo->UV = gcnew array<float>(2) { vert->uv[0], vert->uv[1] };
+						if (vert->tangent)
+						{
+							vertInfo->Tangent = Vector4(vert->tangent[0], vert->tangent[1], vert->tangent[2], vert->tangent[3]);
+						}
 
 						vertIdx++;
 					}

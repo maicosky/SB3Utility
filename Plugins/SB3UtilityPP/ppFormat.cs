@@ -119,14 +119,14 @@ namespace SB3Utility
 		}
 
 		#region GetFormat
-		public static ppFormat GetFormat(string path, out ppHeader header)
+		public static ppFormat GetFormat(FileStream stream, out ppHeader header)
 		{
 			header = null;
 			for (int i = 0; i < ppHeader.Array.Length; i++)
 			{
 				try
 				{
-					if ((header = ppHeader.Array[i].TryHeader(path)) != null)
+					if ((header = ppHeader.Array[i].TryHeader(stream)) != null)
 					{
 						break;
 					}
@@ -145,10 +145,10 @@ namespace SB3Utility
 				}
 				else
 				{
-					List<IWriteFile> subfiles = header.ReadHeader(path, null);
+					List<IWriteFile> subfiles = header.ReadHeader(stream, null);
 					for (int i = 0; i < subfiles.Count; i++)
 					{
-						if ((resultFormat = TryFile((ppSubfile)subfiles[i], header.ppFormats)) != null)
+						if ((resultFormat = TryFile(stream, (ppSubfile)subfiles[i], header.ppFormats)) != null)
 						{
 							break;
 						}
@@ -159,50 +159,50 @@ namespace SB3Utility
 			return resultFormat;
 		}
 
-		private static ppFormat TryFile(ppSubfile subfile, ppFormat[] formats)
+		private static ppFormat TryFile(Stream stream, ppSubfile subfile, ppFormat[] formats)
 		{
-			Func<ppSubfile, bool> tryFunc = null;
+			Func<Stream, ppSubfile, bool> tryFunc = null;
 
 			string ext = Path.GetExtension(subfile.Name).ToLower();
 			if (ext == ".xx")
 			{
-				tryFunc = new Func<ppSubfile, bool>(TryFileXX);
+				tryFunc = new Func<Stream, ppSubfile, bool>(TryFileXX);
 			}
 			else if (ext == ".xa")
 			{
-				tryFunc = new Func<ppSubfile, bool>(TryFileXA);
+				tryFunc = new Func<Stream, ppSubfile, bool>(TryFileXA);
 			}
 			else if (ext == ".svi")
 			{
-				tryFunc = new Func<ppSubfile, bool>(TryFileSVI);
+				tryFunc = new Func<Stream, ppSubfile, bool>(TryFileSVI);
 			}
 			else if (ext == ".sviex")
 			{
-				tryFunc = new Func<ppSubfile, bool>(TryFileSVIEX);
+				tryFunc = new Func<Stream, ppSubfile, bool>(TryFileSVIEX);
 			}
 			else if (ext == ".bmp")
 			{
-				tryFunc = new Func<ppSubfile, bool>(TryFileBMP);
+				tryFunc = new Func<Stream, ppSubfile, bool>(TryFileBMP);
 			}
 			else if (ext == ".tga")
 			{
-				tryFunc = new Func<ppSubfile, bool>(TryFileTGA);
+				tryFunc = new Func<Stream, ppSubfile, bool>(TryFileTGA);
 			}
 			else if (ext == ".ema")
 			{
-				tryFunc = new Func<ppSubfile, bool>(TryFileEMA);
+				tryFunc = new Func<Stream, ppSubfile, bool>(TryFileEMA);
 			}
 			else if (Utility.ImageSupported(ext))
 			{
-				tryFunc = new Func<ppSubfile, bool>(TryFileImage);
+				tryFunc = new Func<Stream, ppSubfile, bool>(TryFileImage);
 			}
 			else if (ext == ".lst")
 			{
-				tryFunc = new Func<ppSubfile, bool>(TryFileLst);
+				tryFunc = new Func<Stream, ppSubfile, bool>(TryFileLst);
 			}
 			else if (ext == ".wav" || ext == ".ogg")
 			{
-				tryFunc = new Func<ppSubfile, bool>(TryFileSound);
+				tryFunc = new Func<Stream, ppSubfile, bool>(TryFileSound);
 			}
 
 			if (tryFunc != null)
@@ -210,7 +210,8 @@ namespace SB3Utility
 				for (int i = 0; i < formats.Length; i++)
 				{
 					subfile.ppFormat = formats[i];
-					if (tryFunc(subfile))
+					stream.Position = subfile.offset;
+					if (tryFunc(subfile.ppFormat.ReadStream(new PartialStream(stream, subfile.size)), subfile))
 					{
 						return subfile.ppFormat;
 					}
@@ -220,92 +221,86 @@ namespace SB3Utility
 			return null;
 		}
 
-		private static bool TryFileXX(ppSubfile subfile)
+		private static bool TryFileXX(Stream stream, ppSubfile subfile)
 		{
-			using (BinaryReader reader = new BinaryReader(subfile.CreateReadStream()))
+			BinaryReader reader = new BinaryReader(stream);
+
+			byte[] buf = reader.ReadBytes(5);
+			if ((buf[0] >= 0x01) && (BitConverter.ToInt32(buf, 1) == 0))
 			{
-				byte[] buf = reader.ReadBytes(5);
-				if ((buf[0] >= 0x01) && (BitConverter.ToInt32(buf, 1) == 0))
-				{
-					return true;
-				}
+				return true;
 			}
 
 			return false;
 		}
 
-		private static bool TryFileXA(ppSubfile subfile)
+		private static bool TryFileXA(Stream stream, ppSubfile subfile)
 		{
-			using (BinaryReader reader = new BinaryReader(subfile.CreateReadStream()))
+			BinaryReader reader = new BinaryReader(stream);
+
+			byte type = reader.ReadByte();
+			if ((type == 0x00) || (type == 0x01) || (type == 0x02) || (type == 0x03))
 			{
-				byte type = reader.ReadByte();
-				if ((type == 0x00) || (type == 0x01) || (type == 0x02) || (type == 0x03))
-				{
-					return true;
-				}
+				return true;
 			}
 
 			return false;
 		}
 
-		private static bool TryFileBMP(ppSubfile subfile)
+		private static bool TryFileBMP(Stream stream, ppSubfile subfile)
 		{
-			using (BinaryReader reader = new BinaryReader(subfile.CreateReadStream()))
+			BinaryReader reader = new BinaryReader(stream);
+
+			byte[] buf = reader.ReadBytes(2);
+			if ((buf[0] == 'B') && (buf[1] == 'M'))
 			{
-				byte[] buf = reader.ReadBytes(2);
-				if ((buf[0] == 'B') && (buf[1] == 'M'))
-				{
-					return true;
-				}
+				return true;
 			}
 
 			return false;
 		}
 
-		private static bool TryFileTGA(ppSubfile subfile)
+		private static bool TryFileTGA(Stream stream, ppSubfile subfile)
 		{
-			using (BinaryReader reader = new BinaryReader(subfile.CreateReadStream()))
-			{
-				byte[] buf = reader.ReadBytes(8);
-				int bufSum = 0;
-				for (int i = 0; i < buf.Length; i++)
-				{
-					bufSum += buf[i];
-				}
+			BinaryReader reader = new BinaryReader(stream);
 
-				if ((buf[2] == 0x02) && (bufSum == 0x02))
-				{
-					return true;
-				}
+			byte[] buf = reader.ReadBytes(8);
+			int bufSum = 0;
+			for (int i = 0; i < buf.Length; i++)
+			{
+				bufSum += buf[i];
+			}
+
+			if ((buf[2] == 0x02) && (bufSum == 0x02))
+			{
+				return true;
 			}
 
 			return false;
 		}
 
-		private static bool TryFileEMA(ppSubfile subfile)
+		private static bool TryFileEMA(Stream stream, ppSubfile subfile)
 		{
-			using (BinaryReader reader = new BinaryReader(subfile.CreateReadStream()))
+			BinaryReader reader = new BinaryReader(stream);
+
+			reader.ReadBytes(8);
+			string imgExt = Encoding.ASCII.GetString(reader.ReadBytes(4)).ToLower();
+			if ((imgExt == ".bmp") || (imgExt == ".tga"))
 			{
-				reader.ReadBytes(8);
-				string imgExt = Encoding.ASCII.GetString(reader.ReadBytes(4)).ToLower();
-				if ((imgExt == ".bmp") || (imgExt == ".tga"))
-				{
-					return true;
-				}
+				return true;
 			}
 
 			return false;
 		}
 
-		private static bool TryFileImage(ppSubfile subfile)
+		private static bool TryFileImage(Stream stream, ppSubfile subfile)
 		{
+			BinaryReader reader = new BinaryReader(stream);
+
 			try
 			{
-				using (BinaryReader reader = new BinaryReader(subfile.CreateReadStream()))
-				{
-					byte[] data = reader.ReadToEnd();
-					var imgInfo = ImageInformation.FromMemory(data);
-				}
+				byte[] data = reader.ReadToEnd();
+				var imgInfo = ImageInformation.FromMemory(data);
 			}
 			catch
 			{
@@ -315,61 +310,60 @@ namespace SB3Utility
 			return true;
 		}
 
-		private static bool TryFileLst(ppSubfile subfile)
+		private static bool TryFileLst(Stream stream, ppSubfile subfile)
 		{
+			BinaryReader reader = new BinaryReader(stream);
+
 			try
 			{
-				using (BinaryReader reader = new BinaryReader(subfile.CreateReadStream()))
-				{
-					byte[] buf = reader.ReadBytes(128);
-					string ascii = Utility.EncodingShiftJIS.GetString(buf);
+				byte[] buf = reader.ReadBytes(128);
+				string ascii = Utility.EncodingShiftJIS.GetString(buf);
 
-					int i = 0, numbersInLine = 0, stringsInLine = 0;
-					while (i < buf.Length)
+				int i = 0, numbersInLine = 0, stringsInLine = 0;
+				while (i < buf.Length)
+				{
+					if (i < ascii.Length && ascii[i] == '-')
+						i++;
+					int startPos = i;
+					while (i < ascii.Length && char.IsDigit(ascii[i]))
+						i++;
+					if (i > startPos)
+						numbersInLine++;
+					if (ascii[i] == '\t')
 					{
-						if (i < ascii.Length && ascii[i] == '-')
-							i++;
-						int startPos = i;
-						while (i < ascii.Length && char.IsDigit(ascii[i]))
-							i++;
-						if (i > startPos)
-							numbersInLine++;
-						if (ascii[i] == '\t')
-						{
-							i++;
-							continue;
-						}
-						else if (ascii[i] == '\r')
-						{
-							return (numbersInLine > 0 || stringsInLine > 0) && ascii[++i] == '\n';
-						}
-						else
-						{
-							startPos = i;
-							while (i < ascii.Length)
-							{
-								if (ascii[i] == '\t')
-								{
-									i++;
-									break;
-								}
-								if (ascii[i] == '\r')
-								{
-									if (ascii[++i] == '\n')
-										break;
-									return false;
-								}
-								if (char.IsControl(ascii[i]) || (byte)ascii[i] >= (byte)'\xe0')
-									return false;
-								i++;
-							}
-							if (i > startPos)
-								stringsInLine++;
-						}
+						i++;
+						continue;
 					}
-					if (numbersInLine == 0 && stringsInLine == 0)
-						return false;
+					else if (ascii[i] == '\r')
+					{
+						return (numbersInLine > 0 || stringsInLine > 0) && ascii[++i] == '\n';
+					}
+					else
+					{
+						startPos = i;
+						while (i < ascii.Length)
+						{
+							if (ascii[i] == '\t')
+							{
+								i++;
+								break;
+							}
+							if (ascii[i] == '\r')
+							{
+								if (ascii[++i] == '\n')
+									break;
+								return false;
+							}
+							if (char.IsControl(ascii[i]) || (byte)ascii[i] >= (byte)'\xe0')
+								return false;
+							i++;
+						}
+						if (i > startPos)
+							stringsInLine++;
+					}
 				}
+				if (numbersInLine == 0 && stringsInLine == 0)
+					return false;
 			}
 			catch
 			{
@@ -379,72 +373,69 @@ namespace SB3Utility
 			return true;
 		}
 
-		public static bool TryFileSound(ppSubfile subfile)
+		public static bool TryFileSound(Stream stream, ppSubfile subfile)
 		{
-			using (BinaryReader reader = new BinaryReader(subfile.CreateReadStream()))
+			BinaryReader reader = new BinaryReader(stream);
+
+			byte[] buf = reader.ReadBytes(4);
+			if (buf[0] == 'O' && buf[1] == 'g' && buf[2] == 'g' && buf[3] == 'S' ||
+				buf[0] == 'R' && buf[1] == 'I' && buf[2] == 'F' && buf[3] == 'F')
 			{
-				byte[] buf = reader.ReadBytes(4);
-				if (buf[0] == 'O' && buf[1] == 'g' && buf[2] == 'g' && buf[3] == 'S' ||
-					buf[0] == 'R' && buf[1] == 'I' && buf[2] == 'F' && buf[3] == 'F')
-				{
-					return true;
-				}
+				return true;
 			}
 
 			return false;
 		}
 
-		public static bool TryFileSVI(ppSubfile subfile)
+		public static bool TryFileSVI(Stream stream, ppSubfile subfile)
 		{
+			BinaryReader reader = new BinaryReader(stream);
+
 			if (subfile.size < 32)
 			{
 				return false;
 			}
-			using (BinaryReader reader = new BinaryReader(subfile.CreateReadStream()))
+			int version = reader.ReadInt32();
+			if (version != 100)
 			{
-				int version = reader.ReadInt32();
-				if (version != 100)
-				{
-					return false;
-				}
-				int lenFirstMesh = reader.ReadInt32();
-				if (lenFirstMesh < 1 || lenFirstMesh > 50)
-				{
-					return false;
-				}
+				return false;
+			}
+			int lenFirstMesh = reader.ReadInt32();
+			if (lenFirstMesh < 1 || lenFirstMesh > 50)
+			{
+				return false;
 			}
 
 			return true;
 		}
 
-		public static bool TryFileSVIEX(ppSubfile subfile)
+		public static bool TryFileSVIEX(Stream stream, ppSubfile subfile)
 		{
+			BinaryReader reader = new BinaryReader(stream);
+
 			if (subfile.size < 32)
 			{
 				return false;
 			}
-			using (BinaryReader reader = new BinaryReader(subfile.CreateReadStream()))
+			int version = reader.ReadInt32();
+			if (version != 100)
 			{
-				int version = reader.ReadInt32();
-				if (version != 100)
-				{
-					return false;
-				}
-				int numSections = reader.ReadInt32();
-				if (numSections < 1 || numSections > 1000)
-				{
-					return false;
-				}
-				version = reader.ReadInt32();
-				if (version != 100)
-				{
-					return false;
-				}
-				int lenFirstMesh = reader.ReadInt32();
-				if (lenFirstMesh < 1 || lenFirstMesh > 50)
-				{
-					return false;
-				}
+				return false;
+			}
+			int numSections = reader.ReadInt32();
+			if (numSections < 1 || numSections > 1000)
+			{
+				return false;
+			}
+			version = reader.ReadInt32();
+			if (version != 100)
+			{
+				return false;
+			}
+			int lenFirstMesh = reader.ReadInt32();
+			if (lenFirstMesh < 1 || lenFirstMesh > 50)
+			{
+				return false;
 			}
 
 			return true;

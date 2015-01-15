@@ -222,6 +222,60 @@ namespace SB3Utility
 			writer.Write(nameBuf);
 		}
 
+		public static string ReadName0(this BinaryReader reader)
+		{
+			byte[] buffer = new byte[100];
+			int len = 0;
+			for (; (buffer[len] = reader.ReadByte()) != 0; len++)
+			{
+			}
+			return System.Text.Encoding.ASCII.GetString(buffer, 0, len);
+		}
+
+		public static void WriteName0(this BinaryWriter writer, string s)
+		{
+			writer.Write(System.Text.ASCIIEncoding.ASCII.GetBytes(s));
+			writer.Write((byte)0);
+		}
+
+		public static string ReadNameA4(this BinaryReader reader)
+		{
+			int len = reader.ReadInt32();
+			int align4 = (len & 3) > 0 ? 4 - (len & 3) : 0;
+			byte[] buffer = reader.ReadBytes(len + align4);
+			return System.Text.ASCIIEncoding.ASCII.GetString(buffer, 0, len);
+		}
+
+		public static void WriteNameA4(this BinaryWriter writer, string name)
+		{
+			byte[] bytes = System.Text.ASCIIEncoding.ASCII.GetBytes(name);
+			writer.Write(bytes.Length);
+			writer.Write(bytes);
+			if ((name.Length & 3) != 0)
+			{
+				writer.Write(new byte[4 - (name.Length & 3)]);
+			}
+		}
+
+		public static string ReadNameA4U8(this BinaryReader reader)
+		{
+			int len = reader.ReadInt32();
+			int align4 = (len & 3) > 0 ? 4 - (len & 3) : 0;
+			byte[] buffer = reader.ReadBytes(len + align4);
+			return System.Text.UTF8Encoding.UTF8.GetString(buffer, 0, len);
+		}
+
+		public static void WriteNameA4U8(this BinaryWriter writer, string name)
+		{
+			byte[] bytes = System.Text.UTF8Encoding.UTF8.GetBytes(name);
+			writer.Write(bytes.Length);
+			writer.Write(bytes);
+			if ((bytes.Length & 3) != 0)
+			{
+				writer.Write(new byte[4 - (bytes.Length & 3)]);
+			}
+		}
+
 		public static Matrix ReadMatrix(this BinaryReader reader)
 		{
 			Matrix m = new Matrix();
@@ -274,6 +328,24 @@ namespace SB3Utility
 			writer.Write(v.X);
 			writer.Write(v.Y);
 			writer.Write(v.Z);
+		}
+
+		public static Vector4 ReadVector4(this BinaryReader reader)
+		{
+			Vector4 v = new Vector4();
+			v.X = reader.ReadSingle();
+			v.Y = reader.ReadSingle();
+			v.Z = reader.ReadSingle();
+			v.W = reader.ReadSingle();
+			return v;
+		}
+
+		public static void Write(this BinaryWriter writer, Vector4 v)
+		{
+			writer.Write(v.X);
+			writer.Write(v.Y);
+			writer.Write(v.Z);
+			writer.Write(v.W);
 		}
 
 		public static Quaternion ReadQuaternion(this BinaryReader reader)
@@ -368,6 +440,16 @@ namespace SB3Utility
 			WriteArray<int>(new Action<int>(writer.Write), array);
 		}
 
+		public static uint[] ReadUInt32Array(this BinaryReader reader, int length)
+		{
+			return ReadArray<uint>(reader, new Func<uint>(reader.ReadUInt32), length);
+		}
+
+		public static void Write(this BinaryWriter writer, uint[] array)
+		{
+			WriteArray<uint>(new Action<uint>(writer.Write), array);
+		}
+
 		public static Vector2[] ReadVector2Array(this BinaryReader reader, int length)
 		{
 			return ReadArray<Vector2>(reader, new Func<Vector2>(reader.ReadVector2), length);
@@ -425,5 +507,43 @@ namespace SB3Utility
 			}
 		}
 		#endregion
+
+		public static Int32 ReadInt32BE(this BinaryReader reader)
+		{
+			byte[] bytes = reader.ReadBytes(4);
+			return bytes[0] << 24 | bytes[1] << 16 | bytes[2] << 8 | bytes[3];
+		}
+
+		public static void WriteInt32BE(this BinaryWriter writer, int val)
+		{
+			byte[] bytes = BitConverter.GetBytes(val);
+			byte swap = bytes[0];
+			bytes[0] = bytes[3];
+			bytes[3] = swap;
+			swap = bytes[1];
+			bytes[1] = bytes[2];
+			bytes[2] = swap;
+			writer.Write(bytes);
+		}
+
+		public static List<T> ReadList<T>(BinaryReader reader, Func<T> del)
+		{
+			int numElements = reader.ReadInt32();
+			List<T> list = new List<T>(numElements);
+			for (int i = 0; i < numElements; i++)
+			{
+				list.Add(del());
+			}
+			return list;
+		}
+
+		public static void WriteList<T>(BinaryWriter writer, Action<T> del, List<T> list)
+		{
+			writer.Write(list.Count);
+			for (int i = 0; i < list.Count; i++)
+			{
+				del(list[i]);
+			}
+		}
 	}
 }

@@ -206,13 +206,13 @@ namespace SB3Utility
 			}
 		}
 
-		SetJointsNode(pScene->GetRootNode()->GetChild(0), boneNames);
+		SetJointsNode(pScene->GetRootNode()->GetChild(0), boneNames, false);
 	}
 
-	void Fbx::Exporter::SetJointsNode(FbxNode* pNode, HashSet<String^>^ boneNames)
+	void Fbx::Exporter::SetJointsNode(FbxNode* pNode, HashSet<String^>^ boneNames, bool allBones)
 	{
 		String^ nodeName = gcnew String(pNode->GetName());
-		if (boneNames->Contains(nodeName))
+		if (allBones || boneNames->Contains(nodeName))
 		{
 			FbxSkeleton* pJoint = FbxSkeleton::Create(pSdkManager, "");
 			pJoint->SetSkeletonType(FbxSkeleton::eLimbNode);
@@ -231,7 +231,7 @@ namespace SB3Utility
 
 		for (int i = 0; i < pNode->GetChildCount(); i++)
 		{
-			SetJointsNode(pNode->GetChild(i), boneNames);
+			SetJointsNode(pNode->GetChild(i), boneNames, allBones);
 		}
 	}
 

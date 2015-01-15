@@ -301,6 +301,7 @@ namespace SB3Utility
 					item.Unknown1 = reader.ReadBytes(104);
 					item.Unknown2 = reader.ReadBytes(4);
 					item.Unknown3 = reader.ReadBytes(64);
+					itemList.Add(item);
 				}
 			}
 

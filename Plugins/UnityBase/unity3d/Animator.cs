@@ -6,7 +6,7 @@ using SB3Utility;
 
 namespace UnityPlugin
 {
-	public class Animator : Component, StoresReferences
+	public class Animator : Component, LinkedByGameObject, StoresReferences
 	{
 		public AssetCabinet file { get; set; }
 		public int pathID { get; set; }

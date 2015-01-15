@@ -15,17 +15,20 @@ namespace SB3Utility
 		[Plugin]
 		public static object OpenPP([DefaultVar]string path)
 		{
-			ppHeader header;
-			ppFormat format = ppFormat.GetFormat(path, out header);
-			if (format == null)
+			using (FileStream stream = File.OpenRead(path))
 			{
-				if (header == null)
+				ppHeader header;
+				ppFormat format = ppFormat.GetFormat(stream, out header);
+				if (format == null)
 				{
-					throw new Exception("Couldn't auto-detect the ppFormat");
+					if (header == null)
+					{
+						throw new Exception("Couldn't auto-detect the ppFormat");
+					}
+					return header;
 				}
-				return header;
+				return new ppParser(stream, format);
 			}
-			return new ppParser(path, format);
 		}
 
 		/// <summary>
@@ -37,7 +40,10 @@ namespace SB3Utility
 		[Plugin]
 		public static ppParser OpenPP([DefaultVar]string path, double format)
 		{
-			return new ppParser(path, ppFormat.Array[(int)format]);
+			using (FileStream stream = File.OpenRead(path))
+			{
+				return new ppParser(stream, ppFormat.Array[(int)format]);
+			}
 		}
 
 		/// <summary>
@@ -62,7 +68,17 @@ namespace SB3Utility
 
 					using (FileStream fs = file.Create())
 					{
-						parser.Subfiles[i].WriteTo(fs);
+						IWriteFile subfile = parser.Subfiles[i];
+						ppSubfile ppSubfile = subfile as ppSubfile;
+						if (ppSubfile != null)
+						{
+							ppSubfile.SourceStream = ppSubfile.CreateReadStream();
+						}
+						subfile.WriteTo(fs);
+						if (ppSubfile != null)
+						{
+							ppSubfile.SourceStream = null;
+						}
 					}
 					break;
 				}
@@ -82,12 +98,25 @@ namespace SB3Utility
 				dir.Create();
 			}
 
-			for (int i = 0; i < parser.Subfiles.Count; i++)
+			using (Stream src = File.OpenRead(parser.FilePath))
 			{
-				var subfile = parser.Subfiles[i];
-				using (FileStream fs = File.Create(dir.FullName + @"\" + subfile.Name))
+				for (int i = 0; i < parser.Subfiles.Count; i++)
 				{
-					subfile.WriteTo(fs);
+					var subfile = parser.Subfiles[i];
+					using (FileStream fs = File.Create(dir.FullName + @"\" + subfile.Name))
+					{
+						ppSubfile ppSubfile = subfile as ppSubfile;
+						if (ppSubfile != null)
+						{
+							src.Position = ppSubfile.offset;
+							ppSubfile.SourceStream = ppSubfile.ppFormat.ReadStream(new PartialStream(src, ppSubfile.size));
+						}
+						subfile.WriteTo(fs);
+						if (ppSubfile != null)
+						{
+							ppSubfile.SourceStream = null;
+						}
+					}
 				}
 			}
 		}

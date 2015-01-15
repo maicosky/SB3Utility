@@ -20,7 +20,17 @@ namespace SB3Utility
 		{
 			this.Format = format;
 			this.FilePath = path;
-			this.Subfiles = format.ppHeader.ReadHeader(path, format);
+			using (FileStream stream = File.OpenRead(path))
+			{
+				this.Subfiles = format.ppHeader.ReadHeader(stream, format);
+			}
+		}
+
+		public ppParser(FileStream stream, ppFormat format)
+		{
+			this.Format = format;
+			this.FilePath = stream.Name;
+			this.Subfiles = format.ppHeader.ReadHeader(stream, format);
 		}
 
 		public BackgroundWorker WriteArchive(string destPath, bool keepBackup, string backupExtension, bool background)
@@ -69,10 +79,10 @@ namespace SB3Utility
 					for (int i = 0; i < Subfiles.Count; i++)
 					{
 						ppSubfile subfile = Subfiles[i] as ppSubfile;
-						if ((subfile != null) && subfile.ppPath.Equals(this.FilePath, StringComparison.InvariantCultureIgnoreCase))
+						/*if ((subfile != null) && subfile.ppPath.Equals(this.FilePath, StringComparison.InvariantCultureIgnoreCase))
 						{
 							subfile.ppPath = backup;
-						}
+						}*/
 					}
 				}
 			}
@@ -86,20 +96,20 @@ namespace SB3Utility
 					uint[] sizes = new uint[Subfiles.Count];
 					object[] metadata = new object[Subfiles.Count];
 
-					for (int i = 0; i < Subfiles.Count; i++)
+					using (BinaryReader reader = new BinaryReader(File.OpenRead(backup != null ? backup : FilePath)))
 					{
-						if (worker.CancellationPending)
+						for (int i = 0; i < Subfiles.Count; i++)
 						{
-							e.Cancel = true;
-							break;
-						}
+							if (worker.CancellationPending)
+							{
+								e.Cancel = true;
+								break;
+							}
 
-						worker.ReportProgress(i * 100 / Subfiles.Count);
+							worker.ReportProgress(i * 100 / Subfiles.Count);
 
-						ppSubfile subfile = Subfiles[i] as ppSubfile;
-						if ((subfile != null) && (subfile.ppFormat == this.Format))
-						{
-							using (BinaryReader reader = new BinaryReader(File.OpenRead(subfile.ppPath)))
+							ppSubfile subfile = Subfiles[i] as ppSubfile;
+							if ((subfile != null) && (subfile.ppFormat == this.Format))
 							{
 								reader.BaseStream.Seek(subfile.offset, SeekOrigin.Begin);
 
@@ -109,19 +119,29 @@ namespace SB3Utility
 									writer.Write(reader.ReadBytes(Utility.BufSize));
 								}
 								writer.Write(reader.ReadBytes(subfile.size % Utility.BufSize));
-							}
-							metadata[i] = subfile.Metadata;
-						}
-						else
-						{
-							Stream stream = Format.WriteStream(writer.BaseStream);
-							Subfiles[i].WriteTo(stream);
-							metadata[i] = Format.FinishWriteTo(stream);
-						}
 
-						uint pos = (uint)writer.BaseStream.Position;
-						sizes[i] = pos - offset;
-						offset = pos;
+								metadata[i] = subfile.Metadata;
+							}
+							else
+							{
+								if (subfile != null)
+								{
+									reader.BaseStream.Seek(subfile.offset, SeekOrigin.Begin);
+									subfile.SourceStream = subfile.ppFormat.ReadStream(new PartialStream(reader.BaseStream, subfile.size));
+								}
+								Stream stream = Format.WriteStream(writer.BaseStream);
+								Subfiles[i].WriteTo(stream);
+								metadata[i] = Format.FinishWriteTo(stream);
+								if (subfile != null)
+								{
+									subfile.SourceStream = null;
+								}
+							}
+
+							uint pos = (uint)writer.BaseStream.Position;
+							sizes[i] = pos - offset;
+							offset = pos;
+						}
 					}
 
 					if (!e.Cancel)
@@ -153,10 +173,10 @@ namespace SB3Utility
 						for (int i = 0; i < Subfiles.Count; i++)
 						{
 							ppSubfile subfile = Subfiles[i] as ppSubfile;
-							if ((subfile != null) && subfile.ppPath.Equals(backup, StringComparison.InvariantCultureIgnoreCase))
+							/*if ((subfile != null) && subfile.ppPath.Equals(backup, StringComparison.InvariantCultureIgnoreCase))
 							{
 								subfile.ppPath = this.FilePath;
-							}
+							}*/
 						}
 					}
 					else
@@ -192,10 +212,10 @@ namespace SB3Utility
 						for (int i = 0; i < Subfiles.Count; i++)
 						{
 							ppSubfile subfile = Subfiles[i] as ppSubfile;
-							if ((subfile != null) && subfile.ppPath.Equals(backup, StringComparison.InvariantCultureIgnoreCase))
+							/*if ((subfile != null) && subfile.ppPath.Equals(backup, StringComparison.InvariantCultureIgnoreCase))
 							{
 								subfile.ppPath = this.FilePath;
-							}
+							}*/
 						}
 					}
 				}

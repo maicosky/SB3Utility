@@ -632,23 +632,26 @@ namespace SB3Utility
 					EditedContent editorForm = (EditedContent)form;
 					if (!editorForm.Changed)
 					{
-						List<IWriteFile> headerFromFile = Editor.Parser.Format.ppHeader.ReadHeader(Editor.Parser.FilePath, Editor.Parser.Format);
-						foreach (ppSubfile subfile in headerFromFile)
+						using (FileStream stream = File.OpenRead(Editor.Parser.FilePath))
 						{
-							if (subfile.Name == (string)form.Tag)
+							List<IWriteFile> headerFromFile = Editor.Parser.Format.ppHeader.ReadHeader(stream, Editor.Parser.Format);
+							foreach (ppSubfile subfile in headerFromFile)
 							{
-								headerFromFile.Remove(subfile);
-								int subfileIdx = Editor.FindSubfile(subfile.Name);
-								if (Editor.Parser.Subfiles[subfileIdx] == Gui.Scripting.Variables[parserVar])
+								if (subfile.Name == (string)form.Tag)
 								{
-									Editor.ReplaceSubfile(subfile);
-								}
+									headerFromFile.Remove(subfile);
+									int subfileIdx = Editor.FindSubfile(subfile.Name);
+									if (Editor.Parser.Subfiles[subfileIdx] == Gui.Scripting.Variables[parserVar])
+									{
+										Editor.ReplaceSubfile(subfile);
+									}
 
-								ChildParserVars.Remove((string)form.Tag);
-								Gui.Scripting.RunScript(parserVar + "=null");
-								InitSubfileLists(false);
-								dontSwap = true;
-								break;
+									ChildParserVars.Remove((string)form.Tag);
+									Gui.Scripting.RunScript(parserVar + "=null");
+									InitSubfileLists(false);
+									dontSwap = true;
+									break;
+								}
 							}
 						}
 					}
@@ -808,48 +811,51 @@ namespace SB3Utility
 
 		void ClearChanges()
 		{
-			List<IWriteFile> headerFromFile = Editor.Parser.Format.ppHeader.ReadHeader(Editor.Parser.FilePath, Editor.Parser.Format);
-			List<IWriteFile> swapped = new List<IWriteFile>(Editor.Parser.Subfiles.Count);
-			foreach (IWriteFile unit in Editor.Parser.Subfiles)
+			using (FileStream stream = File.OpenRead(Editor.Parser.FilePath))
 			{
-				if (unit is ppSwapfile || unit is RawFile)
+				List<IWriteFile> headerFromFile = Editor.Parser.Format.ppHeader.ReadHeader(stream, Editor.Parser.Format);
+				List<IWriteFile> swapped = new List<IWriteFile>(Editor.Parser.Subfiles.Count);
+				foreach (IWriteFile unit in Editor.Parser.Subfiles)
 				{
-					swapped.Add(unit);
-				}
-				else if (ChildForms.ContainsKey(unit.Name))
-				{
-					var editorForm = ChildForms[unit.Name] as EditedContent;
-					if (editorForm != null)
+					if (unit is ppSwapfile || unit is RawFile)
 					{
-						editorForm.Changed = false;
+						swapped.Add(unit);
 					}
-				}
-				else if (!(unit is ppSubfile))
-				{
-					swapped.Add(unit);
-					string parserVar = null;
-					if (ChildParserVars.TryGetValue(unit.Name, out parserVar))
+					else if (ChildForms.ContainsKey(unit.Name))
 					{
-						ChildParserVars.Remove(unit.Name);
-						Gui.Scripting.RunScript(parserVar + "=null");
-					}
-				}
-			}
-			if (swapped.Count > 0)
-			{
-				foreach (IWriteFile swapfile in swapped)
-				{
-					foreach (ppSubfile subfile in headerFromFile)
-					{
-						if (subfile.Name == swapfile.Name)
+						var editorForm = ChildForms[unit.Name] as EditedContent;
+						if (editorForm != null)
 						{
-							headerFromFile.Remove(subfile);
-							Editor.ReplaceSubfile(subfile);
-							break;
+							editorForm.Changed = false;
+						}
+					}
+					else if (!(unit is ppSubfile))
+					{
+						swapped.Add(unit);
+						string parserVar = null;
+						if (ChildParserVars.TryGetValue(unit.Name, out parserVar))
+						{
+							ChildParserVars.Remove(unit.Name);
+							Gui.Scripting.RunScript(parserVar + "=null");
 						}
 					}
 				}
-				InitSubfileLists(false);
+				if (swapped.Count > 0)
+				{
+					foreach (IWriteFile swapfile in swapped)
+					{
+						foreach (ppSubfile subfile in headerFromFile)
+						{
+							if (subfile.Name == swapfile.Name)
+							{
+								headerFromFile.Remove(subfile);
+								Editor.ReplaceSubfile(subfile);
+								break;
+							}
+						}
+					}
+					InitSubfileLists(false);
+				}
 			}
 			Changed = false;
 		}

@@ -4,7 +4,7 @@
 
 namespace SB3Utility
 {
-	void Fbx::Exporter::Export(String^ path, IImported^ imported, int startKeyframe, int endKeyframe, bool linear, bool EulerFilter, float filterPrecision, String^ exportFormat, bool allFrames, bool skins, bool compatibility)
+	void Fbx::Exporter::Export(String^ path, IImported^ imported, int startKeyframe, int endKeyframe, bool linear, bool EulerFilter, float filterPrecision, String^ exportFormat, bool allFrames, bool allBones, bool skins, bool compatibility)
 	{
 		FileInfo^ file = gcnew FileInfo(path);
 		DirectoryInfo^ dir = file->Directory;
@@ -16,14 +16,14 @@ namespace SB3Utility
 		Directory::SetCurrentDirectory(dir->FullName);
 		path = Path::GetFileName(path);
 
-		Exporter^ exporter = gcnew Exporter(path, imported, exportFormat, allFrames, skins, compatibility);
+		Exporter^ exporter = gcnew Exporter(path, imported, exportFormat, allFrames, allBones, skins, compatibility);
 		exporter->ExportAnimations(startKeyframe, endKeyframe, linear, EulerFilter, filterPrecision);
 		exporter->pExporter->Export(exporter->pScene);
 
 		Directory::SetCurrentDirectory(currentDir);
 	}
 
-	Fbx::Exporter::Exporter(String^ path, IImported^ imported, String^ exportFormat, bool allFrames, bool skins, bool compatibility)
+	Fbx::Exporter::Exporter(String^ path, IImported^ imported, String^ exportFormat, bool allFrames, bool allBones, bool skins, bool compatibility)
 	{
 		this->imported = imported;
 		exportSkins = skins;
@@ -98,7 +98,7 @@ namespace SB3Utility
 		pMeshNodes = new FbxArray<FbxNode*>();
 		ExportFrame(pScene->GetRootNode(), imported->FrameList[0]);
 
-		SetJointsFromImportedMeshes();
+		SetJointsFromImportedMeshes(allBones);
 
 		for (int i = 0; i < pMeshNodes->GetCount(); i++)
 		{
@@ -148,8 +148,12 @@ namespace SB3Utility
 		}
 	}
 
-	void Fbx::Exporter::SetJointsFromImportedMeshes()
+	void Fbx::Exporter::SetJointsFromImportedMeshes(bool allBones)
 	{
+		if (!exportSkins)
+		{
+			return;
+		}
 		HashSet<String^>^ boneNames = gcnew HashSet<String^>();
 		for (int i = 0; i < imported->MeshList->Count; i++)
 		{
@@ -162,7 +166,7 @@ namespace SB3Utility
 			}
 		}
 
-		SetJointsNode(pScene->GetRootNode()->GetChild(0), boneNames);
+		SetJointsNode(pScene->GetRootNode()->GetChild(0), boneNames, allBones);
 	}
 
 	void Fbx::Exporter::ExportFrame(FbxNode* pParentNode, ImportedFrame^ frame)
@@ -296,6 +300,11 @@ namespace SB3Utility
 					pUVLayer->SetReferenceMode(FbxLayerElement::eDirect);
 					pLayer->SetUVs(pUVLayer, FbxLayerElement::eTextureDiffuse);
 
+					FbxLayerElementTangent* pLayerElementTangent = FbxLayerElementTangent::Create(pMesh, "");
+					pLayerElementTangent->SetMappingMode(FbxLayerElement::eByControlPoint);
+					pLayerElementTangent->SetReferenceMode(FbxLayerElement::eDirect);
+					pLayer->SetTangents(pLayerElementTangent);
+
 					FbxNode* pMeshNode = FbxNode::Create(pSdkManager, pName);
 					pMeshNode->SetNodeAttribute(pMesh);
 					pFrameNode->AddChild(pMeshNode);
@@ -411,6 +420,8 @@ namespace SB3Utility
 						pLayerElementNormal->GetDirectArray().Add(FbxVector4(normal.X, normal.Y, normal.Z));
 						array<float>^ uv = vertex->UV;
 						pUVLayer->GetDirectArray().Add(FbxVector2(uv[0], -uv[1]));
+						Vector4 tangent = vertex->Tangent;
+						pLayerElementTangent->GetDirectArray().Add(FbxVector4(tangent.X, tangent.Y, tangent.Z, tangent.W));
 
 						if (hasBones)
 						{

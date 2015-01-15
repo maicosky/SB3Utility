@@ -6,6 +6,11 @@ using SB3Utility;
 
 namespace UnityPlugin
 {
+	public interface LinkedByGameObject : Component
+	{
+		PPtr<GameObject> m_GameObject { get; set; }
+	}
+
 	public class GameObject : Component, StoresReferences
 	{
 		public AssetCabinet file { get; set; }
@@ -25,6 +30,15 @@ namespace UnityPlugin
 			this.pathID = pathID;
 			this.classID1 = classID1;
 			this.classID2 = classID2;
+		}
+
+		public GameObject(AssetCabinet file) :
+			this(file, 0, UnityClassID.GameObject, UnityClassID.GameObject)
+		{
+			file.ReplaceSubfile(-1, this, null);
+			m_Component = new List<KeyValuePair<UnityClassID, PPtr<Component>>>(1);
+			m_Layer = 20;
+			m_isActive = true;
 		}
 
 		public void LoadFrom(Stream stream)
@@ -87,12 +101,35 @@ namespace UnityPlugin
 		{
 			for (int i = 0; i < m_Component.Count; i++)
 			{
-				if (m_Component[i].Value.asset != null && m_Component[i].Value.asset.classID1 == classID1)
+				if (m_Component[i].Value.asset != null && m_Component[i].Value.asset.classID1 == classID)
 				{
 					return m_Component[i].Value.asset;
 				}
 			}
 			return null;
+		}
+
+		public void AddLinkedComponent(LinkedByGameObject asset)
+		{
+			m_Component.Add(new KeyValuePair<UnityClassID, PPtr<Component>>(asset.classID1, new PPtr<Component>(asset)));
+			asset.m_GameObject = new PPtr<GameObject>(this);
+		}
+
+		public void RemoveLinkedComponent(LinkedByGameObject asset)
+		{
+			for (int i = 0; i < m_Component.Count; i++)
+			{
+				if (m_Component[i].Value.asset == asset)
+				{
+					m_Component.RemoveAt(i);
+					break;
+				}
+			}
+			if (m_Component.Count == 0)
+			{
+				file.RemoveSubfile(this);
+			}
+			asset.m_GameObject = new PPtr<GameObject>((LinkedByGameObject)null);
 		}
 
 		public void UpdateComponentRef(Component component)

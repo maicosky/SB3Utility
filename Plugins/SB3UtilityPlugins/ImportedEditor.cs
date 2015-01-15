@@ -85,6 +85,18 @@ namespace SB3Utility
 		}
 
 		[Plugin]
+		public ImportedFrame FindFrame(string name)
+		{
+			return Frames.Find
+			(
+				delegate(ImportedFrame frame)
+				{
+					return frame.Name == name;
+				}
+			);
+		}
+
+		[Plugin]
 		public void setSubmeshEnabled(int meshId, int id, bool enabled)
 		{
 			ImportedSubmesh submesh = this.Meshes[meshId].SubmeshList[id];

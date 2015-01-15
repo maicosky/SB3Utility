@@ -21,6 +21,11 @@ namespace UnityPlugin
 			LoadFrom(stream);
 		}
 
+		public SubMesh()
+		{
+			localAABB = new AABB();
+		}
+
 		public void LoadFrom(Stream stream)
 		{
 			BinaryReader reader = new BinaryReader(stream);
@@ -54,6 +59,14 @@ namespace UnityPlugin
 		public BlendShapeData(Stream stream)
 		{
 			LoadFrom(stream);
+		}
+
+		public BlendShapeData()
+		{
+			vertices = new List<BlendShapeVertex>();
+			shapes = new List<MeshBlendShape>();
+			channels = new List<MeshBlendShapeChannel>();
+			fullWeights = new List<float>();
 		}
 
 		public void LoadFrom(Stream stream)
@@ -223,6 +236,12 @@ namespace UnityPlugin
 			LoadFrom(stream);
 		}
 
+		public BoneInfluence()
+		{
+			weight = new float[4];
+			boneIndex = new int[4];
+		}
+
 		public void LoadFrom(Stream stream)
 		{
 			BinaryReader reader = new BinaryReader(stream);
@@ -244,11 +263,39 @@ namespace UnityPlugin
 		public uint m_VertexCount { get; set; }
 		public List<ChannelInfo> m_Channels { get; set; }
 		public List<StreamInfo> m_Streams { get; set; }
-		public byte[] m_DataSize { get; set; }
+		public byte[/*m_VertexCount * 48*/] m_DataSize { get; set; }
 
 		public VertexData(Stream stream)
 		{
 			LoadFrom(stream);
+		}
+
+		public VertexData(uint vertexCount)
+		{
+			m_CurrentChannels = 0x2B;
+			m_VertexCount = vertexCount;
+			m_Channels = new List<ChannelInfo>
+			(
+				new ChannelInfo[]
+				{
+					new ChannelInfo(0, 0, 0, 3),
+					new ChannelInfo(0, 12, 0, 3),
+					new ChannelInfo(0, 0, 0, 0),
+					new ChannelInfo(1, 0, 0, 2),
+					new ChannelInfo(0, 0, 0, 0),
+					new ChannelInfo(0, 24, 0, 4)
+				}
+			);
+			m_Streams = new List<StreamInfo>
+			(
+				new StreamInfo[]
+				{
+					new StreamInfo(35, 0, 40, 0, 0),
+					new StreamInfo(8, vertexCount * 40, 8, 0, 0),
+					new StreamInfo(0, 0, 0, 0, 0),
+					new StreamInfo(0, 0, 0, 0, 0)
+				}
+			);
 		}
 
 		public void LoadFrom(Stream stream)
@@ -318,6 +365,14 @@ namespace UnityPlugin
 			LoadFrom(stream);
 		}
 
+		public ChannelInfo(byte stream, byte offset, byte format, byte dimension)
+		{
+			this.stream = stream;
+			this.offset = offset;
+			this.format = format;
+			this.dimension = dimension;
+		}
+
 		public void LoadFrom(Stream stream)
 		{
 			BinaryReader reader = new BinaryReader(stream);
@@ -348,6 +403,15 @@ namespace UnityPlugin
 		public StreamInfo(Stream stream)
 		{
 			LoadFrom(stream);
+		}
+
+		public StreamInfo(uint channelMask, uint offset, byte stride, byte dividerOp, UInt16 frequency)
+		{
+			this.channelMask = channelMask;
+			this.offset = offset;
+			this.stride = stride;
+			this.dividerOp = dividerOp;
+			this.frequency = frequency;
 		}
 
 		public void LoadFrom(Stream stream)
@@ -388,6 +452,21 @@ namespace UnityPlugin
 		public CompressedMesh(Stream stream)
 		{
 			LoadFrom(stream);
+		}
+
+		public CompressedMesh()
+		{
+			m_Vertices = new PackedBitVector();
+			m_UV = new PackedBitVector();
+			m_BindPoses = new PackedBitVector();
+			m_Normals = new PackedBitVector();
+			m_Tangents = new PackedBitVector();
+			m_Weights = new PackedBitVector2();
+			m_NormalSigns = new PackedBitVector2();
+			m_TangentSigns = new PackedBitVector2();
+			m_BoneIndices = new PackedBitVector2();
+			m_Triangles = new PackedBitVector2();
+			m_Colors = new PackedBitVector2();
 		}
 
 		public void LoadFrom(Stream stream)
@@ -434,6 +513,11 @@ namespace UnityPlugin
 			LoadFrom(stream);
 		}
 
+		public PackedBitVector()
+		{
+			m_Data = new byte[0];
+		}
+
 		public void LoadFrom(Stream stream)
 		{
 			BinaryReader reader = new BinaryReader(stream);
@@ -478,6 +562,11 @@ namespace UnityPlugin
 		public PackedBitVector2(Stream stream)
 		{
 			LoadFrom(stream);
+		}
+
+		public PackedBitVector2()
+		{
+			m_Data = new byte[0];
 		}
 
 		public void LoadFrom(Stream stream)
@@ -542,6 +631,25 @@ namespace UnityPlugin
 			this.pathID = pathID;
 			this.classID1 = classID1;
 			this.classID2 = classID2;
+		}
+
+		public Mesh(AssetCabinet file) :
+			this(file, 0, UnityClassID.Mesh, UnityClassID.Mesh)
+		{
+			file.ReplaceSubfile(-1, this, null);
+
+			m_SubMeshes = new List<SubMesh>(1);
+			m_Shapes = new BlendShapeData();
+			m_BindPose = new List<Matrix>();
+			m_BoneNameHashes = new List<uint>();
+			m_IsReadable = true;
+			m_KeepVertices = true;
+			m_KeepIndices = true;
+			m_Skin = new List<BoneInfluence>();
+			m_VertexData = new VertexData(0);
+			m_CompressedMesh = new CompressedMesh();
+			m_LocalAABB = new AABB();
+			m_MeshUsageFlags = 1;
 		}
 
 		public void LoadFrom(Stream stream)

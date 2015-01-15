@@ -674,6 +674,10 @@ namespace SB3Utility
 				RenameListViewItems(Editor.Meshes, listViewMesh, frame, frame.Name);
 				RenameListViewItems(Editor.Meshes, listViewMaterialMesh, frame, frame.Name);
 				RenameListViewItems(Editor.Meshes, listViewTextureMesh, frame, frame.Name);
+				if (loadedMesh >= 0 && Editor.Meshes[loadedMesh] == Editor.Frames[loadedFrame])
+				{
+					textBoxMeshName.Text = Editor.Meshes[loadedMesh].Name;
+				}
 			}
 			catch (Exception ex)
 			{
@@ -2785,11 +2789,15 @@ namespace SB3Utility
 		private void RemoveUnusedMaterials()
 		{
 			bool justMarkThem = (Control.ModifierKeys & Keys.Shift) == Keys.Shift;
+			string oldLoadedMaterial = loadedMaterial >= 0 ? Editor.Parser.MaterialList[loadedMaterial].Name : null;
 			if (justMarkThem)
 			{
 				listViewMaterial.BeginUpdate();
+				while (listViewMaterial.SelectedItems.Count > 0)
+				{
+					listViewMaterial.SelectedItems[0].Selected = false;
+				}
 			}
-			string oldLoadedMaterial = loadedMaterial >= 0 ? Editor.Parser.MaterialList[loadedMaterial].Name : null;
 			List<int> descendingIds = new List<int>(Editor.Parser.MaterialList.Count);
 			for (int i = 0; i < Editor.Parser.MaterialList.Count; i++)
 			{
@@ -2840,11 +2848,15 @@ namespace SB3Utility
 		private void RemoveUnusedTextures()
 		{
 			bool justMarkThem = (Control.ModifierKeys & Keys.Shift) == Keys.Shift;
+			string oldLoadedTexture = loadedTexture >= 0 ? Editor.Parser.TextureList[loadedTexture].Name : null;
 			if (justMarkThem)
 			{
 				listViewTexture.BeginUpdate();
+				while (listViewTexture.SelectedItems.Count > 0)
+				{
+					listViewTexture.SelectedItems[0].Selected = false;
+				}
 			}
-			string oldLoadedTexture = loadedTexture >= 0 ? Editor.Parser.TextureList[loadedTexture].Name : null;
 			for (int i = Editor.Parser.TextureList.Count - 1; i >= 0; i--)
 			{
 				if (!IsUsedTexture(i))

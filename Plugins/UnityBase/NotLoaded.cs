@@ -6,11 +6,6 @@ using SB3Utility;
 
 namespace UnityPlugin
 {
-	public interface NeedsSourceStreamForWriting
-	{
-		Stream SourceStream { get; set; }
-	}
-
 	public class NotLoaded : NeedsSourceStreamForWriting, Component
 	{
 		public uint offset;

@@ -303,6 +303,8 @@ namespace UnityPlugin
 			LoadFrom(stream);
 		}
 
+		public AABB() { }
+
 		public void LoadFrom(Stream stream)
 		{
 			BinaryReader reader = new BinaryReader(stream);
@@ -359,7 +361,7 @@ namespace UnityPlugin
 					throw new Exception("Unsupported Unity3d file");
 				}
 
-				Cabinet = new AssetCabinet(reader.BaseStream, path);
+				Cabinet = new AssetCabinet(reader.BaseStream, this);
 			}
 
 			Textures = new List<Component>();
@@ -370,85 +372,6 @@ namespace UnityPlugin
 					Textures.Add(asset);
 				}
 			}
-		}
-
-		public dynamic LoadAsset(int pathID)
-		{
-			return Cabinet.LoadComponent(pathID);
-		}
-
-		public Texture2D GetTexture(string name)
-		{
-			Stream stream = null;
-			try
-			{
-				foreach (Component asset in Textures)
-				{
-					if (asset is Texture2D)
-					{
-						Texture2D tex = (Texture2D)asset;
-						if (name.Contains(tex.m_Name))
-						{
-							return tex;
-						}
-					}
-					else
-					{
-						NotLoaded comp = (NotLoaded)asset;
-						if (comp.Name == null)
-						{
-							if (stream == null)
-							{
-								stream = File.OpenRead(FilePath);
-							}
-							stream.Position = comp.offset;
-							comp.Name = Texture2D.LoadName(stream);
-						}
-						if (name.Contains(comp.Name))
-						{
-							return LoadTexture(stream, comp);
-						}
-					}
-				}
-				return null;
-			}
-			finally
-			{
-				if (stream != null)
-				{
-					stream.Close();
-					stream.Dispose();
-					stream = null;
-				}
-			}
-		}
-
-		public Texture2D GetTexture(int index)
-		{
-			Texture2D tex = Textures[index] as Texture2D;
-			if (tex != null)
-			{
-				return tex;
-			}
-
-			NotLoaded comp = (NotLoaded)Textures[index];
-			using (Stream stream = File.OpenRead(FilePath))
-			{
-				tex = LoadTexture(stream, comp);
-			}
-			return tex;
-		}
-
-		public Texture2D LoadTexture(Stream stream, NotLoaded comp)
-		{
-			Texture2D tex = Cabinet.LoadComponent(stream, comp);
-			if (tex != null)
-			{
-				int index = Textures.IndexOf(comp);
-				Textures.RemoveAt(index);
-				Textures.Insert(index, tex);
-			}
-			return tex;
 		}
 
 		public BackgroundWorker WriteArchive(string destPath, bool keepBackup)
@@ -556,6 +479,94 @@ namespace UnityPlugin
 				Console.WriteLine(ex);
 			}
 			return null;
+		}
+
+		public dynamic LoadAsset(int pathID)
+		{
+			return Cabinet.LoadComponent(pathID);
+		}
+
+		public Texture2D GetTexture(string name)
+		{
+			Stream stream = null;
+			try
+			{
+				foreach (Component asset in Textures)
+				{
+					if (asset is Texture2D)
+					{
+						Texture2D tex = (Texture2D)asset;
+						if (name.Contains(tex.m_Name))
+						{
+							return tex;
+						}
+					}
+					else
+					{
+						NotLoaded comp = (NotLoaded)asset;
+						if (comp.Name == null)
+						{
+							if (stream == null)
+							{
+								stream = File.OpenRead(FilePath);
+							}
+							stream.Position = comp.offset;
+							comp.Name = Texture2D.LoadName(stream);
+						}
+						if (name.Contains(comp.Name))
+						{
+							return LoadTexture(stream, comp);
+						}
+					}
+				}
+				return null;
+			}
+			finally
+			{
+				if (stream != null)
+				{
+					stream.Close();
+					stream.Dispose();
+					stream = null;
+				}
+			}
+		}
+
+		public Texture2D GetTexture(int index)
+		{
+			Texture2D tex = Textures[index] as Texture2D;
+			if (tex != null)
+			{
+				return tex;
+			}
+
+			NotLoaded comp = (NotLoaded)Textures[index];
+			using (Stream stream = File.OpenRead(FilePath))
+			{
+				tex = LoadTexture(stream, comp);
+			}
+			return tex;
+		}
+
+		public Texture2D LoadTexture(Stream stream, NotLoaded comp)
+		{
+			Texture2D tex = comp.replacement != null ? (Texture2D)comp.replacement : Cabinet.LoadComponent(stream, comp);
+			if (tex != null)
+			{
+				int index = Textures.IndexOf(comp);
+				Textures.RemoveAt(index);
+				Textures.Insert(index, tex);
+			}
+			return tex;
+		}
+
+		public Texture2D AddTexture(ImportedTexture texture)
+		{
+			Texture2D tex = new Texture2D(Cabinet, 0, UnityClassID.Texture2D, UnityClassID.Texture2D);
+			tex.LoadFrom(texture);
+			Cabinet.ReplaceSubfile(-1, tex, null);
+			Textures.Add(tex);
+			return tex;
 		}
 	}
 }

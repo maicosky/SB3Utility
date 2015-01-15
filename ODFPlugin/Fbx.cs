@@ -76,7 +76,7 @@ namespace ODFPlugin
 				}
 			}
 
-			FbxUtility.Export(path, imp, startKeyframe, endKeyframe, linear, EulerFilter, (float)filterPrecision, exportFormat, allFrames, skins, compatibility);
+			FbxUtility.Export(path, imp, startKeyframe, endKeyframe, linear, EulerFilter, (float)filterPrecision, exportFormat, allFrames, false, skins, compatibility);
 		}
 
 		public class ODFConverter : IImported

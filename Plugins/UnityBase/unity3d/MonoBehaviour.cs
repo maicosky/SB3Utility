@@ -60,6 +60,7 @@ namespace UnityPlugin
 			switch (unknown1[4])
 			{
 			case 2:
+			case 29:
 				m_Lines = new List<Line>(numLines);
 				for (int i = 0; i < numLines; i++)
 				{

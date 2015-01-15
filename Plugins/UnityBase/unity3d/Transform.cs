@@ -7,26 +7,10 @@ using SB3Utility;
 
 namespace UnityPlugin
 {
-	public class Transform : ObjChildren<Transform>, IObjChild, Component, StoresReferences
+	public class Transform : ObjChildren<Transform>, IObjChild, Component, LinkedByGameObject, StoresReferences
 	{
 		public AssetCabinet file { get; set; }
-		public int pathID
-		{
-			get
-			{
-				return _pathID;
-			}
-
-			set
-			{
-				if (m_GameObject != null)
-				{
-					m_GameObject.instance.UpdateComponentRef(this);
-				}
-				_pathID = value;
-			}
-		}
-		private int _pathID;
+		public int pathID { get; set; }
 		public UnityClassID classID1 { get; set; }
 		public UnityClassID classID2 { get; set; }
 
@@ -36,8 +20,8 @@ namespace UnityPlugin
 		public Quaternion m_LocalRotation { get; set; }
 		public Vector3 m_LocalPosition { get; set; }
 		public Vector3 m_LocalScale { get; set; }
-		public List<PPtr<Transform>> m_Children { get; protected set; }
-		public PPtr<Transform> m_Father { get; protected set; }
+		//public List<PPtr<Transform>> m_Children { get; protected set; }
+		//public PPtr<Transform> m_Father { get; protected set; }
 
 		public Transform(AssetCabinet file, int pathID, UnityClassID classID1, UnityClassID classID2)
 		{
@@ -45,6 +29,12 @@ namespace UnityPlugin
 			this.pathID = pathID;
 			this.classID1 = classID1;
 			this.classID2 = classID2;
+		}
+
+		public Transform(AssetCabinet file) :
+			this(file, 0, UnityClassID.Transform, UnityClassID.Transform)
+		{
+			file.ReplaceSubfile(-1, this, null);
 		}
 
 		public void LoadFrom(Stream stream)
@@ -56,19 +46,20 @@ namespace UnityPlugin
 			m_LocalScale = reader.ReadVector3();
 
 			int numChildren = reader.ReadInt32();
-			m_Children = new List<PPtr<Transform>>(numChildren);
+			//m_Children = new List<PPtr<Transform>>(numChildren);
 			InitChildren(numChildren);
 			for (int i = 0; i < numChildren; i++)
 			{
 				PPtr<Transform> transPtr = new PPtr<Transform>(stream, file);
-				m_Children.Add(transPtr);
+				//m_Children.Add(transPtr);
 				if (transPtr.instance != null)
 				{
 					AddChild(transPtr.instance);
 				}
 			}
 
-			m_Father = new PPtr<Transform>(stream, file);
+			//m_Father = 
+				new PPtr<Transform>(stream, file);
 		}
 
 		public void WriteTo(Stream stream)
@@ -79,13 +70,24 @@ namespace UnityPlugin
 			writer.Write(m_LocalPosition);
 			writer.Write(m_LocalScale);
 
-			writer.Write(m_Children.Count);
-			for (int i = 0; i < m_Children.Count; i++)
+			writer.Write(/*m_Children.*/Count);
+			for (int i = 0; i < /*m_Children.*/Count; i++)
 			{
-				file.WritePPtr(m_Children[i].asset, false, stream);
+				file.WritePPtr(/*m_Children*/this[i]/*.asset*/, false, stream);
 			}
 
-			file.WritePPtr(m_Father.asset, false, stream);
+			file.WritePPtr(/*m_Father.asset*/Parent, false, stream);
+		}
+
+		public static Matrix WorldTransform(Transform frame)
+		{
+			Matrix world = Matrix.Identity;
+			while (frame != null)
+			{
+				world = world * Matrix.Scaling(frame.m_LocalScale) * Matrix.RotationQuaternion(frame.m_LocalRotation) * Matrix.Translation(frame.m_LocalPosition);
+				frame = frame.Parent;
+			}
+			return world;
 		}
 	}
 }

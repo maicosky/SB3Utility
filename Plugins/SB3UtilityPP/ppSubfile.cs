@@ -9,7 +9,7 @@ namespace SB3Utility
 	/// If removed from a ppParser, CreateReadStream() is no longer guaranteed to work. The .pp file may have changed,
 	/// so you have to transfer the ppSubfile's data when removing.
 	/// </summary>
-	public class ppSubfile : IReadFile, IWriteFile
+	public class ppSubfile : NeedsSourceStreamForWriting, IReadFile, IWriteFile
 	{
 		public string ppPath;
 		public uint offset;
@@ -17,6 +17,7 @@ namespace SB3Utility
 		public ppFormat ppFormat;
 
 		public object Metadata { get; set; }
+		public Stream SourceStream { get; set; }
 
 		public ppSubfile(string ppPath)
 		{
@@ -27,14 +28,10 @@ namespace SB3Utility
 
 		public void WriteTo(Stream stream)
 		{
-			using (BinaryReader reader = new BinaryReader(CreateReadStream()))
+			BinaryReader reader = new BinaryReader(SourceStream);
+			BinaryWriter writer = new BinaryWriter(stream);
+			for (byte[] buf; (buf = reader.ReadBytes(Utility.BufSize)).Length > 0; )
 			{
-				BinaryWriter writer = new BinaryWriter(stream);
-				byte[] buf;
-				while ((buf = reader.ReadBytes(Utility.BufSize)).Length == Utility.BufSize)
-				{
-					writer.Write(buf);
-				}
 				writer.Write(buf);
 			}
 		}

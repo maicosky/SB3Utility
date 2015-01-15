@@ -14,6 +14,11 @@ namespace UnityPlugin
 
 		private AssetCabinet file;
 
+		public AssetInfo(AssetCabinet file)
+		{
+			this.file = file;
+		}
+
 		public AssetInfo(AssetCabinet file, Stream stream)
 		{
 			this.file = file;
@@ -24,6 +29,11 @@ namespace UnityPlugin
 			if (objPtr.m_PathID != 0)
 			{
 				Component comp = file.FindComponent(objPtr.m_PathID);
+				if (comp == null)
+				{
+					Console.WriteLine(objPtr.m_PathID + " not found!");
+					comp = new NotLoaded();
+				}
 				asset = new PPtr<Object>(comp);
 			}
 			else
@@ -106,8 +116,26 @@ namespace UnityPlugin
 					comp = new NotLoaded();
 				}
 				PPtr<Object> assetPtr = new PPtr<Object>(comp);
+				//if (comp.classID1 != UnityClassID.GameObject && comp.classID1 != UnityClassID.Transform)
+				//Console.WriteLine(i + " " + comp.pathID + " " + comp.classID1);
 				m_PreloadTable.Add(assetPtr);
 			}
+			/*for (int i = 0; i < file.Components.Count; i++)
+			{
+				Component asset = file.Components[i];
+				int pos = m_PreloadTable.FindIndex
+					(
+						delegate(PPtr<Object> assetPtr)
+						{
+							return assetPtr.asset == asset;
+						}
+					);
+				if (pos == -1)
+				{
+					Console.WriteLine(asset.classID1 + " " + asset.pathID + " not found");
+				}
+			}
+			Console.WriteLine("PreloadTable Check " + m_PreloadTable.Count + " entries checked (from " + file.Components.Count + " components).");*/
 
 			int numAInfos = reader.ReadInt32();
 			m_Container = new List<KeyValuePair<string, AssetInfo>>(numAInfos);
@@ -120,7 +148,27 @@ namespace UnityPlugin
 						reader.ReadNameA4(), new AssetInfo(file, stream)
 					)
 				);
+				//Console.WriteLine(i + " " + m_Container[i].Key + " " + m_Container[i].Value.asset.m_PathID + " i=" + m_Container[i].Value.preloadIndex + " s=" + m_Container[i].Value.preloadSize + " " + ((Component)file.FindComponent(m_Container[i].Value.asset.m_PathID)).classID1);
 			}
+			/*Console.WriteLine("Mesh Check");
+			for (int i = 0; i < file.Components.Count; i++)
+			{
+				Component asset = file.Components[i];
+				if (asset.classID1 == UnityClassID.Mesh)
+				{
+
+					if (m_Container.Find
+					(
+						delegate(KeyValuePair<string, AssetInfo> pair)
+						{
+							return pair.Value.asset.asset == asset;
+						}
+					).Value == null)
+					{
+						Console.WriteLine(asset.classID1 + " " + asset.pathID + " not found");
+					}
+				}
+			}*/
 
 			m_MainAsset = new AssetInfo(file, stream);
 
@@ -180,11 +228,11 @@ namespace UnityPlugin
 			writer.Write(m_RuntimeCompatibility);
 		}
 
-		public void DeleteComponent(int pathID)
+		public void DeleteComponent(Component asset)
 		{
 			for (int i = 0; i < m_PreloadTable.Count; i++)
 			{
-				if (m_PreloadTable[i] != null && m_PreloadTable[i].asset.pathID == pathID)
+				if (m_PreloadTable[i] != null && m_PreloadTable[i].asset == asset)
 				{
 					m_PreloadTable.RemoveAt(i--);
 				}
@@ -192,7 +240,7 @@ namespace UnityPlugin
 
 			for (int i = 0; i < m_Container.Count; i++)
 			{
-				if (m_Container[i].Value.asset.asset.pathID == pathID)
+				if (m_Container[i].Value.asset.asset == asset)
 				{
 					m_Container.RemoveAt(i--);
 				}

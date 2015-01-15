@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using SlimDX;
 
 using SB3Utility;
@@ -546,6 +547,70 @@ namespace UnityPlugin
 				}
 			}
 			return null;
+		}
+
+		public string BonePath(string boneName)
+		{
+			return m_TOS.Find
+			(
+				delegate(KeyValuePair<uint, string> data)
+				{
+					return data.Value.Substring(data.Value.LastIndexOf('/') + 1) == boneName;
+				}
+			).Value;
+		}
+
+		public uint BoneHash(string boneName)
+		{
+			return m_TOS.Find
+			(
+				delegate(KeyValuePair<uint, string> data)
+				{
+					return data.Value.Substring(data.Value.LastIndexOf('/') + 1) == boneName;
+				}
+			).Key;
+		}
+
+		public void AddBone(Transform parent, Transform bone)
+		{
+			string parentPath = BonePath(parent.m_GameObject.instance.m_Name);
+			StringBuilder sb = new StringBuilder(parentPath);
+			sb.Append("/");
+			sb.Append(bone.m_GameObject.instance.m_Name);
+			string bonePath = sb.ToString();
+			for (uint boneHash = (uint)bonePath.GetHashCode(); ; boneHash += 7327)
+			{
+				uint freeHash = m_TOS.Find
+				(
+					delegate(KeyValuePair<uint, string> data)
+					{
+						return data.Key == boneHash;
+					}
+				).Key;
+				if (freeHash == 0)
+				{
+					m_TOS.Add(new KeyValuePair<uint, string>(boneHash, bonePath));
+					break;
+				}
+			}
+		}
+
+		public void RenameBone(string oldName, string newName)
+		{
+			for (int i = 0; i < m_TOS.Count; i++)
+			{
+				var pair = m_TOS[i];
+				int beginPos = pair.Value.IndexOf(oldName);
+				if (beginPos >= 0)
+				{
+					string begin = pair.Value.Substring(0, beginPos);
+					string end = pair.Value.Substring(beginPos + oldName.Length);
+					var newPair = new KeyValuePair<uint, string>(pair.Key, begin + newName + end);
+					m_TOS.RemoveAt(i);
+					m_TOS.Insert(i, newPair);
+					i--;
+				}
+			}
 		}
 	}
 }

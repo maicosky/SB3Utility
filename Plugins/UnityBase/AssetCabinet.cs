@@ -47,14 +47,14 @@ namespace UnityPlugin
 		}
 		public Reference[] References { get; protected set; }
 
-		public string FilePath { get; set; }
 		public Stream SourceStream { get; set; }
+		public UnityParser Parser { get; set; }
 		public bool loadingReferencials { get; set; }
 		public List<NotLoaded> RemovedList { get; set; }
 
-		public AssetCabinet(Stream stream, string filePath)
+		public AssetCabinet(Stream stream, UnityParser parser)
 		{
-			FilePath = filePath;
+			Parser = parser;
 			BinaryReader reader = new BinaryReader(stream);
 			Unknown1 = reader.ReadInt32BE();
 			Name = reader.ReadName0();
@@ -262,54 +262,32 @@ namespace UnityPlugin
 			{
 				return asset;
 			}
-			Component c = asset;
-			int i = index + 1;
 			try
 			{
-				for (; c.pathID < pathID; i++)
+				int i;
+				for (i = index + 1; asset.pathID < pathID; i++)
 				{
-					c = Components[i];
+					asset = Components[i];
+				}
+				if (asset.pathID == pathID)
+				{
+					index = i - 1;
+					return asset;
+				}
+				for (i = index - 1; asset.pathID == 0 || asset.pathID > pathID; i--)
+				{
+					asset = Components[i];
+				}
+				if (asset.pathID == pathID)
+				{
+					index = i + 1;
+					return asset;
 				}
 			}
-			catch
-			{
-				index = -1;
-				return null;
-			}
-			if (c.pathID == pathID)
-			{
-				index = i - 1;
-				return c;
-			}
-			try
-			{
-				for (i = index - 1; c.pathID == 0 || c.pathID > pathID; i--)
-				{
-					c = Components[i];
-				}
-			}
-			catch
-			{
-				index = -1;
-				return null;
-			}
-			if (c.pathID == pathID)
-			{
-				index = i + 1;
-				return c;
-			}
+			catch { }
 
 			index = -1;
 			return null;
-			/*for (i = 0; i < Components.Count; i++)
-			{
-				c = Components[i];
-				if (c.pathID == pathID)
-				{
-					throw new Exception("slow! " + pathID + " found at " + i);
-				}
-			}
-			throw new Exception("Implementation problem in FindComponent(" + pathID + ") found " + asset.pathID + " instead");*/
 		}
 
 		public dynamic FindComponent(int pathID)
@@ -333,7 +311,7 @@ namespace UnityPlugin
 				return subfile;
 			}
 
-			using (Stream stream = File.OpenRead(FilePath))
+			using (Stream stream = File.OpenRead(Parser.FilePath))
 			{
 				//stream.Position = comp.offset;
 				//using (PartialStream ps = new PartialStream(stream, comp.size))
@@ -500,6 +478,7 @@ namespace UnityPlugin
 						{
 							replaced.replacement = null;
 							replaced.pathID = 0;
+							break;
 						}
 					}
 				}

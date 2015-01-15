@@ -477,6 +477,10 @@ namespace SB3Utility
 						SetKeyframeNum((int)syncXA.numericAnimationClipKeyframe.Value);
 					}
 				}
+				if (loadedAnimationClip == null && trackBarAnimationClipKeyframe.Value > 0)
+				{
+					SelectKeyframe(this, trackBarAnimationClipKeyframe.Value);
+				}
 			}
 			else
 			{
@@ -1342,10 +1346,7 @@ namespace SB3Utility
 				xa.Pause();
 				xa.loadedAnimationClip = null;
 
-				if (!xa.trackEnabled)
-				{
-					xa.EnableTrack();
-				}
+				xa.EnableTrack();
 				xa.SetTrackPosition(Decimal.ToDouble(position));
 				xa.AdvanceTime(0);
 

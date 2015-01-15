@@ -84,6 +84,7 @@ namespace SB3Utility {
 				array<float>^ uv;
 				List<Byte>^ boneIndices;
 				List<float>^ weights;
+				array<float>^ tangent;
 
 				bool Equals(Vertex^ vertex);
 
@@ -97,7 +98,7 @@ namespace SB3Utility {
 			static void Export(String^ path, xxParser^ xxParser, List<xxFrame^>^ meshParents, List<xaParser^>^ xaSubfileList, int startKeyframe, int endKeyframe, bool linear, bool EulerFilter, float filterPrecision, String^ exportFormat, bool allFrames, bool skins, bool embedMedia, bool compatibility);
 			static void ExportMorph(String^ path, xxParser^ xxParser, xxFrame^ meshFrame, xaMorphClip^ morphClip, xaParser^ xaparser, String^ exportFormat, bool oneBlendShape, bool embedMedia, bool compatibility);
 
-			static void Export(String^ path, IImported^ imported, int startKeyframe, int endKeyframe, bool linear, bool EulerFilter, float filterPrecision, String^ exportFormat, bool allFrames, bool skins, bool compatibility);
+			static void Export(String^ path, IImported^ imported, int startKeyframe, int endKeyframe, bool linear, bool EulerFilter, float filterPrecision, String^ exportFormat, bool allFrames, bool allBones, bool skins, bool compatibility);
 
 		private:
 			HashSet<String^>^ frameNames;
@@ -128,13 +129,13 @@ namespace SB3Utility {
 			FbxFileTexture* ExportTexture(xxMaterialTexture^ matTex, FbxLayerElementTexture*& pLayerTexture, FbxMesh* pMesh);
 			void ExportAnimations(List<xaParser^>^ xaSubfileList, int startKeyframe, int endKeyframe, bool linear, bool EulerFilter, float filterPrecision);
 			void SetJoints();
-			void SetJointsNode(FbxNode* pNode, HashSet<String^>^ boneNames);
+			void SetJointsNode(FbxNode* pNode, HashSet<String^>^ boneNames, bool allBones);
 			void ExportMorphs(xxFrame^ baseFrame, xaMorphClip^ morphClip, xaParser^ xaparser, bool oneBlendShape);
 
-			Exporter(String^ path, IImported^ imported, String^ exportFormat, bool allFrames, bool skins, bool compatibility);
+			Exporter(String^ path, IImported^ imported, String^ exportFormat, bool allFrames, bool allBones, bool skins, bool compatibility);
 			HashSet<String^>^ SearchHierarchy();
 			void SearchHierarchy(ImportedFrame^ frame, HashSet<String^>^ exportFrames);
-			void SetJointsFromImportedMeshes();
+			void SetJointsFromImportedMeshes(bool allBones);
 			void ExportFrame(FbxNode* pParentNode, ImportedFrame^ frame);
 			void ExportMesh(FbxNode* pFrameNode, ImportedMesh^ meshList);
 			FbxFileTexture* ExportTexture(ImportedTexture^ matTex, FbxLayerElementTexture*& pTextureLayer, FbxMesh* pMesh);

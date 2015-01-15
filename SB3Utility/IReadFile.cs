@@ -10,4 +10,9 @@ namespace SB3Utility
 		string Name { get; set; }
 		Stream CreateReadStream();
 	}
+
+	public interface NeedsSourceStreamForWriting
+	{
+		Stream SourceStream { get; set; }
+	}
 }
