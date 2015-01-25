@@ -227,7 +227,6 @@ namespace UnityPlugin
 									break;
 								case 5:
 									writer.Write(vert.Tangent);
-									Console.WriteLine("t=" + vert.Tangent);
 									break;
 								}
 							}
@@ -537,7 +536,7 @@ namespace UnityPlugin
 					continue;
 				}
 				mat.m_SavedProperties.m_Colors.RemoveAt(i);
-				col = new KeyValuePair<FastPropertyName, SlimDX.Color4>(col.Key, att);
+				col = new KeyValuePair<FastPropertyName, Color4>(col.Key, att);
 				mat.m_SavedProperties.m_Colors.Insert(i, col);
 			}
 
@@ -576,7 +575,7 @@ namespace UnityPlugin
 				}
 				catch (Exception e)
 				{
-					Console.WriteLine(e);
+					Report.ReportLog(e.ToString());
 				}
 			}
 		}

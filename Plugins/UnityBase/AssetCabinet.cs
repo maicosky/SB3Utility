@@ -110,12 +110,12 @@ namespace UnityPlugin
 			}
 			if (stream.Position != UsedLength + 0x83)
 			{
-				Console.WriteLine("Unexpected Length");
+				Report.ReportLog("Unexpected Length");
 			}
 			long padding = (stream.Position + 16) & ~(long)15;
 			if (padding != 0x70 + DataPosition)
 			{
-				Console.WriteLine("Unexpected DataPosition");
+				Report.ReportLog("Unexpected DataPosition");
 			}
 
 			RemovedList = new List<NotLoaded>();
@@ -194,6 +194,7 @@ namespace UnityPlugin
 				{
 					writer.Write(align, 0, rest);
 				}
+				Parser.worker.ReportProgress(50 + i * 49 / Components.Count);
 			}
 			ContentLength = ContentLengthCopy = (int)stream.Position - 0x70;
 
@@ -218,6 +219,10 @@ namespace UnityPlugin
 				writer.Write(sizes[i]);
 				writer.Write((int)comp.classID1);
 				writer.Write((int)comp.classID2);
+				if (comp is NotLoaded)
+				{
+					((NotLoaded)comp).offset = offsets[i];
+				}
 			}
 		}
 

@@ -16,7 +16,7 @@ namespace UnityPlugin
 		[Plugin]
 		public static void WriteUnity3d([DefaultVar]UnityParser parser)
 		{
-			parser.WriteArchive(parser.FilePath, true);
+			parser.WriteArchive(parser.FilePath, true, ".unit-y3d", false);
 		}
 
 		/// <summary>

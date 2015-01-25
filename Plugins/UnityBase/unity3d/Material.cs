@@ -43,6 +43,11 @@ namespace UnityPlugin
 			LoadFrom(stream);
 		}
 
+		public UnityTexEnv(AssetCabinet file)
+		{
+			this.file = file;
+		}
+
 		public void LoadFrom(Stream stream)
 		{
 			BinaryReader reader = new BinaryReader(stream);
@@ -58,6 +63,21 @@ namespace UnityPlugin
 			writer.Write(m_Scale);
 			writer.Write(m_Offset);
 		}
+
+		public void CopyTo(UnityTexEnv dest)
+		{
+			if (file != dest.file)
+			{
+				Texture2D destTex = dest.file.Parser.GetTexture(m_Texture.instance.m_Name);
+				dest.m_Texture = new PPtr<Texture2D>(destTex);
+			}
+			else
+			{
+				dest.m_Texture = new PPtr<Texture2D>(m_Texture.asset);
+			}
+			dest.m_Scale = m_Scale;
+			dest.m_Offset = m_Offset;
+		}
 	}
 
 	public class UnityPropertySheet : IObjInfo
@@ -72,6 +92,14 @@ namespace UnityPlugin
 		{
 			this.file = file;
 			LoadFrom(stream);
+		}
+
+		public UnityPropertySheet(AssetCabinet file)
+		{
+			this.file = file;
+			m_TexEnvs = new List<KeyValuePair<FastPropertyName, UnityTexEnv>>();
+			m_Floats = new List<KeyValuePair<FastPropertyName, float>>();
+			m_Colors = new List<KeyValuePair<FastPropertyName, Color4>>();
 		}
 
 		public void LoadFrom(Stream stream)
@@ -147,6 +175,29 @@ namespace UnityPlugin
 				writer.Write(m_Colors[i].Value.Alpha);
 			}
 		}
+
+		public void CopyTo(Material dest)
+		{
+			dest.m_SavedProperties.m_TexEnvs = new List<KeyValuePair<FastPropertyName, UnityTexEnv>>(m_TexEnvs.Count);
+			foreach (var src in m_TexEnvs)
+			{
+				UnityTexEnv texEnv = new UnityTexEnv(dest.file);
+				src.Value.CopyTo(texEnv);
+				dest.m_SavedProperties.m_TexEnvs.Add(new KeyValuePair<FastPropertyName, UnityTexEnv>(src.Key, texEnv));
+			}
+
+			dest.m_SavedProperties.m_Floats = new List<KeyValuePair<FastPropertyName, float>>(m_Floats.Count);
+			foreach (var src in m_Floats)
+			{
+				dest.m_SavedProperties.m_Floats.Add(src);
+			}
+
+			dest.m_SavedProperties.m_Colors = new List<KeyValuePair<FastPropertyName, Color4>>(m_Colors.Count);
+			foreach (var src in m_Colors)
+			{
+				dest.m_SavedProperties.m_Colors.Add(src);
+			}
+		}
 	}
 
 	public class Material : Component, StoresReferences
@@ -168,6 +219,13 @@ namespace UnityPlugin
 			this.pathID = pathID;
 			this.classID1 = classID1;
 			this.classID2 = classID2;
+		}
+
+		public Material(AssetCabinet file) :
+			this(file, 0, UnityClassID.Material, UnityClassID.Material)
+		{
+			file.ReplaceSubfile(-1, this, null);
+			m_SavedProperties = new UnityPropertySheet(file);
 		}
 
 		public void LoadFrom(Stream stream)
@@ -201,6 +259,29 @@ namespace UnityPlugin
 
 			writer.Write(m_CustomRenderQueue);
 			m_SavedProperties.WriteTo(stream);
+		}
+
+		public Material Clone(AssetCabinet file)
+		{
+			Material mat = new Material(file);
+			CopyTo(mat);
+			return mat;
+		}
+
+		public void CopyTo(Material dest)
+		{
+			try
+			{
+				dest.m_Name = m_Name;
+				dest.m_Shader = dest.file == file ? m_Shader : new PPtr<Shader>((Component)null);
+				dest.m_ShaderKeywords = new List<string>(m_ShaderKeywords);
+				dest.m_CustomRenderQueue = m_CustomRenderQueue;
+				m_SavedProperties.CopyTo(dest);
+			}
+			catch (Exception e)
+			{
+				Report.ReportLog(e.ToString());
+			}
 		}
 	}
 }

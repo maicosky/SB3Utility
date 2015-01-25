@@ -11,46 +11,46 @@ namespace SB3Utility
 {
 	public enum ppFormatIdx
 	{
-		SB3,
-		SMFigure,
-		SMTrial,
-		SMRetail,
-		AG3Welcome,
-		AG3Retail,
-		DG,
-		HakoTrial,
-		HakoRetail,
-		SMSweets,
-		EskMate,
-		AHMFigure,
-		AHMTrial,
-		AHMRetail,
-		YuushaTrial,
-		YuushaRetail,
-		RGF,
-		SM2Trial,
-		SM2Retail,
-		SBZ,
-		CharacolleAlicesoft,
-		CharacolleBaseson,
-		CharacolleKey,
-		CharacolleLumpOfSugar,
-		CharacolleWhirlpool,
-		BestCollection,
-		AATrial,
-		AARetail,
-		AAJCH,
-		Wakeari,
-		LoveGirl,
-		Hero,
-		HET,
-		HETDTL,
-		PPD,
-		Musumakeup,
-		ImmoralWard,
-		RealPlayTrial,
-		RealPlay,
-		AA2
+		SB3 = 0,
+		SMFigure = 1,
+		SMTrial = 2,
+		SMRetail = 3,
+		AG3Welcome = 4,
+		AG3Retail = 5,
+		DG = 6,
+		HakoTrial = 7,
+		HakoRetail = 8,
+		SMSweets = 9,
+		EskMate = 10,
+		AHMFigure = 11,
+		AHMTrial = 12,
+		AHMRetail = 13,
+		YuushaTrial = 14,
+		YuushaRetail = 15,
+		RGF = 16,
+		SM2Trial = 17,
+		SM2Retail = 18,
+		SBZ = 19,
+		CharacolleAlicesoft = 20,
+		CharacolleBaseson = 21,
+		CharacolleKey = 22,
+		CharacolleLumpOfSugar = 23,
+		CharacolleWhirlpool = 24,
+		BestCollection = 25,
+		AATrial = 26,
+		AARetail = 27,
+		AAJCH = 28,
+		Wakeari = 29,
+		LoveGirl = 30,
+		Hero = 31,
+		HET = 32,
+		HETDTL = 33,
+		PPD = 34,
+		Musumakeup = 35,
+		ImmoralWard = 36,
+		RealPlayTrial = 37,
+		RealPlay = 38,
+		AA2 = 39
 	}
 
 	public abstract class ppFormat
@@ -317,53 +317,75 @@ namespace SB3Utility
 			try
 			{
 				byte[] buf = reader.ReadBytes(128);
-				string ascii = Utility.EncodingShiftJIS.GetString(buf);
-
 				int i = 0, numbersInLine = 0, stringsInLine = 0;
 				while (i < buf.Length)
 				{
-					if (i < ascii.Length && ascii[i] == '-')
+					if (buf[i] == '-')
+					{
 						i++;
+					}
 					int startPos = i;
-					while (i < ascii.Length && char.IsDigit(ascii[i]))
+					while (i < buf.Length && buf[i] >= '0' && buf[i] <= '9')
+					{
 						i++;
+					}
 					if (i > startPos)
+					{
 						numbersInLine++;
-					if (ascii[i] == '\t')
+					}
+					if (buf[i] == '\t')
 					{
 						i++;
 						continue;
 					}
-					else if (ascii[i] == '\r')
+					else if (buf[i] == '\r')
 					{
-						return (numbersInLine > 0 || stringsInLine > 0) && ascii[++i] == '\n';
+						return (numbersInLine > 0 || stringsInLine > 0) && buf[++i] == '\n';
 					}
 					else
 					{
 						startPos = i;
-						while (i < ascii.Length)
+						while (i < buf.Length)
 						{
-							if (ascii[i] == '\t')
+							if (buf[i] == '\t')
 							{
 								i++;
 								break;
 							}
-							if (ascii[i] == '\r')
+							if (buf[i] == '\r')
 							{
-								if (ascii[++i] == '\n')
+								i++;
+								if (buf[i] == '\n')
+								{
+									i++;
 									break;
+								}
 								return false;
 							}
-							if (char.IsControl(ascii[i]) || (byte)ascii[i] >= (byte)'\xe0')
+							if (buf[i] < 0x20 || buf[i] == '\x80' || buf[i] == '\xA0' || buf[i] >= '\xF0')
+							{
 								return false;
+							}
+							if ((buf[i] >= '\x81' && buf[i] <= '\x84' || buf[i] >= '\x87' && buf[i] <= '\x9F' || buf[i] >= '\xE0' && buf[i] <= '\xEF') && i + 1 < buf.Length)
+							{
+								if (buf[i + 1] < '\x40' || buf[i + 1] == '\x7F' || buf[i + 1] > '\xFC')
+								{
+									return false;
+								}
+								i++;
+							}
 							i++;
 						}
 						if (i > startPos)
+						{
 							stringsInLine++;
+						}
 					}
 				}
 				if (numbersInLine == 0 && stringsInLine == 0)
+				{
 					return false;
+				}
 			}
 			catch
 			{

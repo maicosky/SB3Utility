@@ -187,7 +187,6 @@
     </Compile>
     <Compile Include="pp\lst.cs" />
     <Compile Include="pp\Mqo.cs" />
-    <Compile Include="pp\Nif.cs" />
     <Compile Include="pp\ppEditor.cs" />
     <Compile Include="pp\RenderObjectXX.cs" />
     <Compile Include="pp\FormPPRename.cs">
@@ -235,10 +234,6 @@
       <Project>{120B541E-0A9D-4871-9315-679CB97109E2}</Project>
       <Name>SB3UtilityFBX</Name>
       <Private>False</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\SB3UtilityNIF\SB3UtilityNIF.vcxproj">
-      <Project>{5b6eac43-1947-4b58-9c52-c42810b0f301}</Project>
-      <Name>SB3UtilityNIF</Name>
     </ProjectReference>
     <ProjectReference Include="..\SB3UtilityPP\SB3UtilityPP.csproj">
       <Project>{5647B104-8F58-4867-B849-DAC65D5243BD}</Project>

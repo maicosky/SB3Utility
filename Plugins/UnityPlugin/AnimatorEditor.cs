@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using SlimDX;
 
 using SB3Utility;
 
@@ -28,17 +29,6 @@ namespace UnityPlugin
 			Materials = new List<Material>();
 			Textures = new List<Texture2D>();
 			InitLists(parser.RootTransform);
-
-			foreach (SkinnedMeshRenderer smr in Meshes)
-			{
-				string mats = " mat=(";
-				foreach (PPtr<Material> matPtr in smr.m_Materials)
-				{
-					mats += matPtr.instance.m_Name + ",";
-				}
-				mats = mats.Substring(0, mats.Length - 1) + ")";
-				Console.WriteLine(smr.m_GameObject.instance.m_Name + " pathID=" + smr.pathID + " mesh=" + (smr.m_Mesh.instance != null ? smr.m_Mesh.instance.m_Name : "null") + " pathID=" + smr.m_Mesh.m_PathID + " mat="+ mats);
-			}
 		}
 
 		private void InitLists()
@@ -55,6 +45,35 @@ namespace UnityPlugin
 			{
 				if (!Frames.Contains(trans))
 				{
+					foreach (SkinnedMeshRenderer smr in Meshes)
+					{
+						for (int i = 0; i < smr.m_Bones.Count; i++)
+						{
+							PPtr<Transform> bonePtr = smr.m_Bones[i];
+							string boneName = bonePtr.instance.m_GameObject.instance.m_Name;
+							if (bonePtr.instance == trans)
+							{
+								Transform newBone = Frames.Find
+								(
+									delegate(Transform t)
+									{
+										return t.m_GameObject.instance.m_Name == boneName;
+									}
+								);
+								if (newBone == null)
+								{
+									Report.ReportLog("Bone " + boneName + " in SMR " + smr.m_GameObject.instance.m_Name + " lost");
+								}
+								else
+								{
+									smr.m_Bones.RemoveAt(i);
+									smr.m_Bones.Insert(i, new PPtr<Transform>(newBone));
+								}
+								break;
+							}
+						}
+					}
+
 					SkinnedMeshRenderer sMesh = trans.m_GameObject.instance.FindLinkedComponent(UnityClassID.SkinnedMeshRenderer);
 					if (sMesh != null)
 					{
@@ -194,7 +213,7 @@ namespace UnityPlugin
 			}
 
 			parent.RemoveChild(frame);
-			Console.WriteLine("Warning! Avatar not updated");
+			Report.ReportLog("Warning! Avatar not updated");
 
 			InitLists();
 			Changed = true;
@@ -220,7 +239,8 @@ namespace UnityPlugin
 			AddFrame(newFrame, destParentId);
 		}
 
-		void AddFrame(Transform newFrame, int destParentId)
+		[Plugin]
+		public void AddFrame(Transform newFrame, int destParentId)
 		{
 			if (destParentId < 0)
 			{
@@ -236,6 +256,12 @@ namespace UnityPlugin
 		}
 
 		[Plugin]
+		public void AddFrame(Transform srcFrame, List<Material> srcMaterials, List<Texture2D> srcTextures, bool appendIfMissing, int destParentId)
+		{
+			AddFrame(srcFrame, destParentId);
+		}
+
+		[Plugin]
 		public void MergeFrame(ImportedFrame srcFrame, int destParentId)
 		{
 			Transform destParent = destParentId >= 0 ? Frames[destParentId] : Parser.RootTransform;
@@ -245,19 +271,20 @@ namespace UnityPlugin
 			MergeFrame(newFrame, destParentId);
 		}
 
-		void MergeFrame(Transform newFrame, int destParentId)
+		[Plugin]
+		public void MergeFrame(Transform srcFrame, int destParentId)
 		{
-			Transform srcParent = new Transform(newFrame.file);
-			GameObject srcGameObj = new GameObject(newFrame.file);
+			Transform srcParent = new Transform(srcFrame.file);
+			GameObject srcGameObj = new GameObject(srcFrame.file);
 			srcGameObj.AddLinkedComponent(srcParent);
 			srcParent.InitChildren(1);
-			srcParent.AddChild(newFrame);
+			srcParent.AddChild(srcFrame);
 
 			Transform destParent;
 			if (destParentId < 0)
 			{
-				destParent = new Transform(newFrame.file);
-				GameObject destGameObj = new GameObject(newFrame.file);
+				destParent = new Transform(srcFrame.file);
+				GameObject destGameObj = new GameObject(srcFrame.file);
 				destGameObj.AddLinkedComponent(destParent);
 				destParent.InitChildren(1);
 				destParent.AddChild(Parser.RootTransform);
@@ -276,16 +303,22 @@ namespace UnityPlugin
 				Parser.RootTransform.m_GameObject.instance.AddLinkedComponent(Parser);
 				srcParent.RemoveChild(0);
 				destParent.m_GameObject.instance.RemoveLinkedComponent(destParent);
-				newFrame.file.RemoveSubfile(destParent.m_GameObject.instance);
-				newFrame.file.RemoveSubfile(destParent);
+				srcFrame.file.RemoveSubfile(destParent.m_GameObject.instance);
+				srcFrame.file.RemoveSubfile(destParent);
 			}
 
 			srcGameObj.RemoveLinkedComponent(srcParent);
-			newFrame.file.RemoveSubfile(srcGameObj);
-			newFrame.file.RemoveSubfile(srcParent);
+			srcFrame.file.RemoveSubfile(srcGameObj);
+			srcFrame.file.RemoveSubfile(srcParent);
 
 			InitLists();
 			Changed = true;
+		}
+
+		[Plugin]
+		public void MergeFrame(Transform srcFrame, List<Material> srcMaterials, List<Texture2D> srcTextures, bool appendIfMissing, int destParentId)
+		{
+			MergeFrame(srcFrame, destParentId);
 		}
 
 		void MergeFrame(Transform srcParent, Transform destParent)
@@ -329,6 +362,24 @@ namespace UnityPlugin
 		}
 
 		[Plugin]
+		public void ReplaceFrame(ImportedFrame srcFrame, int destParentId)
+		{
+			throw new NotImplementedException();
+		}
+
+		[Plugin]
+		public void ReplaceFrame(Transform srcFrame, int destParentId)
+		{
+			throw new NotImplementedException();
+		}
+
+		[Plugin]
+		public void ReplaceFrame(Transform srcFrame, List<Material> srcMaterials, List<Texture2D> srcTextures, bool appendIfMissing, int destParentId)
+		{
+			throw new NotImplementedException();
+		}
+
+		[Plugin]
 		public void ReplaceSkinnedMeshRenderer(WorkspaceMesh mesh, int frameId, int rootBoneId, bool merge, string normals, string bones)
 		{
 			var normalsMethod = (CopyMeshMethod)Enum.Parse(typeof(CopyMeshMethod), normals);
@@ -344,33 +395,177 @@ namespace UnityPlugin
 		public void RemoveSkinnedMeshRenderer(int id)
 		{
 			SkinnedMeshRenderer sMesh = Meshes[id];
-			HashSet<Mesh> meshesForRemoval = new HashSet<Mesh>();
-			meshesForRemoval.Add(sMesh.m_Mesh.instance);
-			RemoveUnlinkedMeshes(meshesForRemoval);
+			if (sMesh.m_Mesh.instance != null)
+			{
+				HashSet<Mesh> meshesForRemoval = new HashSet<Mesh>();
+				meshesForRemoval.Add(sMesh.m_Mesh.instance);
+				sMesh.m_Mesh = new PPtr<Mesh>((Component)null);
+				RemoveUnlinkedMeshes(meshesForRemoval);
+			}
 			sMesh.m_GameObject.instance.RemoveLinkedComponent(sMesh);
 			Parser.file.RemoveSubfile(sMesh);
+
 			InitLists();
+			Changed = true;
 		}
 
 		[Plugin]
 		public void SetMesh(SkinnedMeshRenderer sMesh, Mesh mesh)
 		{
-			sMesh.m_Mesh = new PPtr<Mesh>(mesh);
+			if (sMesh.m_Mesh.instance != mesh)
+			{
+				sMesh.m_Mesh = new PPtr<Mesh>(mesh);
+				Changed = true;
+			}
 		}
 
 		[Plugin]
-		public void MergeMaterial(ImportedMaterial material)
+		public void SetMaterialName(int id, string name)
 		{
-			Material mat = Operations.FindMaterial(Materials, material.Name);
-			Operations.ReplaceMaterial(mat, material);
+			Materials[id].m_Name = name;
 			Changed = true;
 		}
 
 		[Plugin]
-		public void MergeTexture(ImportedTexture texture)
+		public void SetMaterialPhong(int id, object[] diffuse, object[] ambient, object[] specular, object[] emissive, double shininess)
 		{
-			Operations.ReplaceTexture(Parser.file.Parser, texture);
+			Material mat = Materials[id];
+			for (int i = 0; i < mat.m_SavedProperties.m_Colors.Count; i++)
+			{
+				var col = mat.m_SavedProperties.m_Colors[i];
+				object[] newVal = null;
+				switch (col.Key.name)
+				{
+				case "_Color":
+					newVal = diffuse;
+					break;
+				case "_SColor":
+					newVal = ambient;
+					break;
+				case "_ReflectColor":
+					newVal = emissive;
+					break;
+				case "_SpecColor":
+					newVal = specular;
+					break;
+				case "_RimColor":
+				case "_OutlineColor":
+				case "_ShadowColor":
+				default:
+					continue;
+				}
+				mat.m_SavedProperties.m_Colors.RemoveAt(i);
+				col =  new KeyValuePair<FastPropertyName, Color4>(col.Key, new Color4((float)(double)newVal[3], (float)(double)newVal[0], (float)(double)newVal[1], (float)(double)newVal[2]));
+				mat.m_SavedProperties.m_Colors.Insert(i, col);
+			}
+
+			for (int i = 0; i < mat.m_SavedProperties.m_Floats.Count; i++)
+			{
+				var flt = mat.m_SavedProperties.m_Floats[i];
+				float newVal;
+				switch (flt.Key.name)
+				{
+				case "_Shininess":
+					newVal = (float)shininess;
+					break;
+				case "_RimPower":
+				case "_Outline":
+				default:
+					continue;
+				}
+				mat.m_SavedProperties.m_Floats.RemoveAt(i);
+				mat.m_SavedProperties.m_Floats.Insert(i, new KeyValuePair<FastPropertyName,float>(flt.Key, newVal));
+			}
 			Changed = true;
+		}
+
+		[Plugin]
+		public void RemoveMaterial(int id)
+		{
+			Parser.file.RemoveSubfile(Materials[id]);
+			Materials.RemoveAt(id);
+			Changed = true;
+		}
+
+		[Plugin]
+		public void CopyMaterial(int id)
+		{
+			Material newMat = Materials[id].Clone(Parser.file);
+			newMat.m_Name += "_Copy";
+			Materials.Add(newMat);
+			Changed = true;
+		}
+
+		[Plugin]
+		public void MergeMaterial(ImportedMaterial mat)
+		{
+			Material dest = Operations.FindMaterial(Materials, mat.Name);
+			Operations.ReplaceMaterial(dest, mat);
+			Changed = true;
+		}
+
+		[Plugin]
+		public void MergeMaterial(Material mat)
+		{
+			Material oldMat = Operations.FindMaterial(Materials, mat.m_Name);
+			if (oldMat != null)
+			{
+				mat.CopyTo(oldMat);
+			}
+			else
+			{
+				Material newMat = mat.Clone(Parser.file);
+				Materials.Add(newMat);
+			}
+			Changed = true;
+		}
+
+		[Plugin]
+		public void SetMaterialTexture(int id, int index, string name)
+		{
+			Texture2D tex = Parser.file.Parser.GetTexture(name);
+			if (tex != null)
+			{
+				var texEnv = Materials[id].m_SavedProperties.m_TexEnvs[index].Value;
+				texEnv.m_Texture = new PPtr<Texture2D>(tex);
+				Changed = true;
+			}
+		}
+
+		[Plugin]
+		public void MergeTexture(ImportedTexture tex)
+		{
+			Texture2D oldTex = Parser.file.Parser.GetTexture(tex.Name);
+			if (oldTex == null)
+			{
+				oldTex = new Texture2D(Parser.file);
+				Textures.Add(oldTex);
+			}
+			oldTex.LoadFrom(tex);
+			Changed = true;
+		}
+
+		[Plugin]
+		public void MergeTexture(Texture2D tex)
+		{
+			if (tex.file != Parser.file)
+			{
+				Texture2D oldTex = Parser.file.Parser.GetTexture(tex.m_Name);
+				if (oldTex == null)
+				{
+					oldTex = new Texture2D(Parser.file);
+					Textures.Add(oldTex);
+				}
+				tex.CopyAttributesTo(oldTex);
+				tex.CopyImageTo(oldTex);
+				Changed = true;
+			}
+		}
+
+		[Plugin]
+		public void SetTextureName(int id, string name)
+		{
+			Textures[id].m_Name = name;
 		}
 	}
 }

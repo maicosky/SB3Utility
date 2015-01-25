@@ -123,6 +123,14 @@ namespace UnityPlugin
 			this.classID2 = classID2;
 		}
 
+		public Texture2D(AssetCabinet file) :
+			this(file, 0, UnityClassID.Texture2D, UnityClassID.Texture2D)
+		{
+			file.ReplaceSubfile(-1, this, null);
+			file.Parser.Textures.Add(this);
+			m_TextureSettings = new GLTextureSettings();
+		}
+
 		public void LoadFrom(Stream stream)
 		{
 			BinaryReader reader = new BinaryReader(stream);
@@ -142,7 +150,6 @@ namespace UnityPlugin
 			m_ColorSpace = reader.ReadInt32();
 			int size = reader.ReadInt32();
 			image_data = reader.ReadBytes(size);
-			Console.WriteLine(m_Name + " " + m_Width + "x" + m_Height + " size=" + m_CompleteImageSize + " form=" + m_TextureFormat + (m_MipMap ? " MipMap" : "") + (m_isReadable ? " isReadable" : "") + (!m_ReadAllowed ? " ReadAllowed=FALSE" : "") + (m_ImageCount != 1 ? " imCount=" + m_ImageCount : "") + (m_TextureDimension != 2 ? " dim=" + m_TextureDimension : "") + " settings=(" + (m_TextureSettings.m_FilterMode != 1 ? "filtM=" + m_TextureSettings.m_FilterMode : "") + (Math.Abs(m_TextureSettings.m_MipBias) > 1e-20 ? ", bias=" + m_TextureSettings.m_MipBias : "") + (m_TextureSettings.m_Aniso != 0 ? ", aniso=" + m_TextureSettings.m_Aniso : "") + (m_TextureSettings.m_WrapMode != 1 ? ", wrap=" + m_TextureSettings.m_WrapMode : "") + ")" + (m_LightmapFormat != 0 ? " LightMF=" + m_LightmapFormat : "") + (m_ColorSpace != 1 ? " colSp=" + m_ColorSpace : ""));
 		}
 
 		public static string LoadName(Stream stream)
@@ -179,7 +186,6 @@ namespace UnityPlugin
 				{
 					throw new Exception("Unknown format " + imageInfo.Format);
 				}
-				Console.WriteLine(tex.Name + " " + m_Width + "x" + m_Height + " format=" + imageInfo.Format.ToString() + ">" + m_TextureFormat);
 
 				m_MipMap = imageInfo.MipLevels > 1;
 				m_ReadAllowed = true;
@@ -280,6 +286,18 @@ namespace UnityPlugin
 			dst.m_TextureSettings.m_WrapMode = m_TextureSettings.m_WrapMode;
 			dst.m_LightmapFormat = m_LightmapFormat;
 			dst.m_ColorSpace = m_ColorSpace;
+		}
+
+		public void CopyImageTo(Texture2D dst)
+		{
+			dst.m_Name = m_Name;
+			dst.m_Width = m_Width;
+			dst.m_Height = m_Height;
+			dst.m_CompleteImageSize = m_CompleteImageSize;
+			dst.m_TextureFormat = m_TextureFormat;
+			dst.m_ImageCount = m_ImageCount;
+			dst.m_TextureDimension = m_TextureDimension;
+			dst.image_data = (byte[])image_data.Clone();
 		}
 
 		public void Export(string path)

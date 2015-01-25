@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace SB3Utility
+using SB3Utility;
+
+namespace NIFPlugin
 {
 	public static partial class Plugins
 	{

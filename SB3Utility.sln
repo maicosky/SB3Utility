@@ -49,6 +49,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityBase", "Plugins\UnityB
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityPlugin", "Plugins\UnityPlugin\UnityPlugin.csproj", "{AA5F87F2-921D-4909-B55C-5A257CBD5A58}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NIFPlugin", "Plugins\NIFPlugin\NIFPlugin.csproj", "{65E454CD-C240-4C5E-B0D6-42A604DF30FB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -243,6 +245,18 @@ Global
 		{AA5F87F2-921D-4909-B55C-5A257CBD5A58}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{AA5F87F2-921D-4909-B55C-5A257CBD5A58}.Release|Win32.ActiveCfg = Release|Any CPU
 		{AA5F87F2-921D-4909-B55C-5A257CBD5A58}.Release|x86.ActiveCfg = Release|Any CPU
+		{65E454CD-C240-4C5E-B0D6-42A604DF30FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{65E454CD-C240-4C5E-B0D6-42A604DF30FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65E454CD-C240-4C5E-B0D6-42A604DF30FB}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{65E454CD-C240-4C5E-B0D6-42A604DF30FB}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{65E454CD-C240-4C5E-B0D6-42A604DF30FB}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{65E454CD-C240-4C5E-B0D6-42A604DF30FB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{65E454CD-C240-4C5E-B0D6-42A604DF30FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{65E454CD-C240-4C5E-B0D6-42A604DF30FB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{65E454CD-C240-4C5E-B0D6-42A604DF30FB}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{65E454CD-C240-4C5E-B0D6-42A604DF30FB}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{65E454CD-C240-4C5E-B0D6-42A604DF30FB}.Release|Win32.ActiveCfg = Release|Any CPU
+		{65E454CD-C240-4C5E-B0D6-42A604DF30FB}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

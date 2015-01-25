@@ -31,7 +31,6 @@ namespace UnityPlugin
 				Component comp = file.FindComponent(objPtr.m_PathID);
 				if (comp == null)
 				{
-					Console.WriteLine(objPtr.m_PathID + " not found!");
 					comp = new NotLoaded();
 				}
 				asset = new PPtr<Object>(comp);

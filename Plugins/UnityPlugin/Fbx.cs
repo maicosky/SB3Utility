@@ -35,7 +35,6 @@ namespace UnityPlugin
 						SkinnedMeshRenderer sMesh = parser.Cabinet.LoadComponent(sMeshID);
 						if (sMesh == null)
 						{
-							Console.WriteLine("SkinnedMeshRenderer " + sMeshID + " not found");
 							continue;
 						}
 						sMeshes.Add(sMesh);
@@ -46,7 +45,6 @@ namespace UnityPlugin
 					SkinnedMeshRenderer sMesh = parser.Cabinet.LoadComponent(sMeshID);
 					if (sMesh == null)
 					{
-						Console.WriteLine("SkinnedMeshRenderer " + sMeshID + " not found");
 						continue;
 					}
 					sMeshes.Add(sMesh);

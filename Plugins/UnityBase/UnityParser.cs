@@ -338,11 +338,14 @@ namespace UnityPlugin
 
 		public List<Component> Textures { get; set; }
 
-		public List<Component> StoreRefs { get; set; }
+		private string destPath;
+		private bool keepBackup;
+		private string backupExt;
+		public BackgroundWorker worker;
 
 		public UnityParser(string path)
 		{
-			this.FilePath = path;
+			FilePath = path;
 			using (BinaryReader reader = new BinaryReader(File.OpenRead(path)))
 			{
 				ExtendedSignature = reader.ReadBytes(27);
@@ -374,7 +377,27 @@ namespace UnityPlugin
 			}
 		}
 
-		public BackgroundWorker WriteArchive(string destPath, bool keepBackup)
+		public BackgroundWorker WriteArchive(string destPath, bool keepBackup, string backupExtension, bool background)
+		{
+			this.destPath = destPath;
+			this.keepBackup = keepBackup;
+			this.backupExt = backupExtension;
+
+			worker = new BackgroundWorker();
+			worker.WorkerSupportsCancellation = true;
+			worker.WorkerReportsProgress = true;
+
+			worker.DoWork += new DoWorkEventHandler(writeArchiveWorker_DoWork);
+
+			if (!background)
+			{
+				writeArchiveWorker_DoWork(worker, new DoWorkEventArgs(null));
+			}
+
+			return worker;
+		}
+
+		void writeArchiveWorker_DoWork(object sender, DoWorkEventArgs e)
 		{
 			string dirName = Path.GetDirectoryName(destPath);
 			if (dirName == String.Empty)
@@ -394,7 +417,6 @@ namespace UnityPlugin
 				{
 					writer.BaseStream.Position = 27 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 1;
 
-					Console.WriteLine("checking referential integrity");
 					bool needsLoadingRefs = false;
 					for (int i = 0; i < Cabinet.Components.Count; i++)
 					{
@@ -405,11 +427,11 @@ namespace UnityPlugin
 						needsLoadingRefs = true;
 						break;
 					}
+					worker.ReportProgress(1);
 					using (Stream stream = File.OpenRead(FilePath))
 					{
 						if (needsLoadingRefs)
 						{
-							Console.WriteLine("loading assets to maintain referential integrity");
 							List<UnityClassID> storeRefClasses = new List<UnityClassID>
 							(
 								new UnityClassID[]
@@ -432,6 +454,7 @@ namespace UnityPlugin
 								if (asset != null && storeRefClasses.Contains(asset.classID1))
 								{
 									Cabinet.LoadComponent(stream, i, asset);
+									worker.ReportProgress(1 + i * 49 / Cabinet.Components.Count);
 								}
 							}
 							for (int i = 0; i < Cabinet.Components.Count; i++)
@@ -440,7 +463,6 @@ namespace UnityPlugin
 							}
 							Cabinet.loadingReferencials = false;
 						}
-						Console.WriteLine("writing contents");
 						Cabinet.SourceStream = stream;
 						Cabinet.WriteTo(writer.BaseStream);
 					}
@@ -461,24 +483,26 @@ namespace UnityPlugin
 					writer.Write(LastByte);
 				}
 
-				if (keepBackup)
+				if (FilePath == destPath)
 				{
-					string backup = Utility.GetDestFile(dir, Path.GetFileNameWithoutExtension(destPath) + ".bak", ".unit-y3d");
-					File.Move(destPath, backup);
-				}
-				else
-				{
-					File.Delete(this.FilePath);
+					if (keepBackup)
+					{
+						string backup = Utility.GetDestFile(dir, Path.GetFileNameWithoutExtension(destPath) + ".bak", backupExt);
+						File.Move(FilePath, backup);
+					}
+					else
+					{
+						File.Delete(FilePath);
+					}
 				}
 				File.Move(newName, destPath);
-				this.FilePath = destPath;
+				FilePath = destPath;
 			}
 			catch (Exception ex)
 			{
 				File.Delete(newName);
-				Console.WriteLine(ex);
+				Utility.ReportException(ex);
 			}
-			return null;
 		}
 
 		public dynamic LoadAsset(int pathID)
@@ -515,6 +539,10 @@ namespace UnityPlugin
 						}
 						if (name.Contains(comp.Name))
 						{
+							if (stream == null)
+							{
+								stream = File.OpenRead(FilePath);
+							}
 							return LoadTexture(stream, comp);
 						}
 					}

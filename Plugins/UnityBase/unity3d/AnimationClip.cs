@@ -829,8 +829,6 @@ namespace UnityPlugin
 			{
 				genericBindings.Add(new GenericBinding(file, stream));
 			}
-			GenericBinding bind = genericBindings[0];
-			Console.WriteLine(0 + " x" + bind.path.ToString("X"));
 
 			int numMappings = reader.ReadInt32();
 			pptrCurveMapping = new List<PPtr<Object>>(numMappings);
