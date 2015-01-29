@@ -605,10 +605,30 @@ namespace UnityPlugin
 				{
 					string begin = pair.Value.Substring(0, beginPos);
 					string end = pair.Value.Substring(beginPos + oldName.Length);
-					var newPair = new KeyValuePair<uint, string>(pair.Key, begin + newName + end);
-					m_TOS.RemoveAt(i);
-					m_TOS.Insert(i, newPair);
-					i--;
+					if ((beginPos == 0 || beginPos > 0 && begin[0] == '/') && (end.Length == 0 || end[0] == '/'))
+					{
+						var newPair = new KeyValuePair<uint, string>(pair.Key, begin + newName + end);
+						m_TOS.RemoveAt(i);
+						m_TOS.Insert(i, newPair);
+					}
+				}
+			}
+		}
+
+		public void RemoveBone(string name)
+		{
+			string bonePath = "/" + name;
+			for (int i = 0; i < m_TOS.Count; i++)
+			{
+				var pair = m_TOS[i];
+				int beginPos = pair.Value.IndexOf(bonePath);
+				if (beginPos >= 0)
+				{
+					if (pair.Value.Length == beginPos + bonePath.Length || pair.Value[beginPos + bonePath.Length] == '/')
+					{
+						Report.ReportLog(pair.Value + " removed from Avatar");
+						m_TOS.RemoveAt(i);
+					}
 				}
 			}
 		}

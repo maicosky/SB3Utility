@@ -28,18 +28,21 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
+			this.components = new System.ComponentModel.Container();
+			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+			this.buttonObjectTreeExpand = new System.Windows.Forms.Button();
 			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
 			this.tabControlLists = new System.Windows.Forms.TabControl();
 			this.tabPageObject = new System.Windows.Forms.TabPage();
 			this.treeViewObjectTree = new System.Windows.Forms.TreeView();
 			this.panelObjectTreeBottom = new System.Windows.Forms.Panel();
-			this.buttonObjectTreeCheckBones = new System.Windows.Forms.Button();
+			this.buttonObjectTreeRefresh = new System.Windows.Forms.Button();
 			this.buttonObjectTreeCollapse = new System.Windows.Forms.Button();
-			this.buttonObjectTreeExpand = new System.Windows.Forms.Button();
 			this.tabPageMesh = new System.Windows.Forms.TabPage();
 			this.splitContainerMesh = new System.Windows.Forms.SplitContainer();
 			this.listViewMesh = new System.Windows.Forms.ListView();
-			this.meshlistHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.meshlistHeaderNames = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.meshListHeaderType = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.splitContainerMeshCrossRef = new System.Windows.Forms.SplitContainer();
 			this.listViewMeshMaterial = new System.Windows.Forms.ListView();
 			this.listViewMeshMaterialHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -72,7 +75,6 @@
 			this.tabControlViews = new System.Windows.Forms.TabControl();
 			this.tabPageFrameView = new System.Windows.Forms.TabPage();
 			this.buttonFrameAddBone = new System.Windows.Forms.Button();
-			this.buttonFrameEditHex = new System.Windows.Forms.Button();
 			this.groupBox3 = new System.Windows.Forms.GroupBox();
 			this.groupBox5 = new System.Windows.Forms.GroupBox();
 			this.buttonFrameMatrixApply = new System.Windows.Forms.Button();
@@ -88,8 +90,6 @@
 			this.buttonFrameMatrixIdentity = new System.Windows.Forms.Button();
 			this.buttonFrameMatrixInverse = new System.Windows.Forms.Button();
 			this.buttonFrameMatrixCombined = new System.Windows.Forms.Button();
-			this.label15 = new System.Windows.Forms.Label();
-			this.textBoxFrameName2 = new SB3Utility.EditTextBox();
 			this.tabControlFrameMatrix = new System.Windows.Forms.TabControl();
 			this.tabPageFrameSRT = new System.Windows.Forms.TabPage();
 			this.dataGridViewFrameSRT = new SB3Utility.DataGridViewEditor();
@@ -128,15 +128,15 @@
 			this.tabPageBoneMatrix = new System.Windows.Forms.TabPage();
 			this.dataGridViewBoneMatrix = new SB3Utility.DataGridViewEditor();
 			this.buttonBoneRemove = new System.Windows.Forms.Button();
-			this.buttonBoneCopy = new System.Windows.Forms.Button();
 			this.buttonBoneGotoFrame = new System.Windows.Forms.Button();
 			this.label25 = new System.Windows.Forms.Label();
 			this.textBoxBoneName = new SB3Utility.EditTextBox();
 			this.tabPageMeshView = new System.Windows.Forms.TabPage();
-			this.buttonMeshRestPose = new System.Windows.Forms.Button();
+			this.checkBoxRendererEnabled = new System.Windows.Forms.CheckBox();
+			this.label27 = new System.Windows.Forms.Label();
 			this.checkBoxMeshNewSkin = new System.Windows.Forms.CheckBox();
 			this.buttonMeshNormals = new System.Windows.Forms.Button();
-			this.buttonMeshEditHex = new System.Windows.Forms.Button();
+			this.buttonSkinnedMeshRendererAttributes = new System.Windows.Forms.Button();
 			this.buttonMeshMinBones = new System.Windows.Forms.Button();
 			this.buttonMeshGotoFrame = new System.Windows.Forms.Button();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
@@ -158,29 +158,39 @@
 			this.panelMeshExportOptionsFbx = new System.Windows.Forms.Panel();
 			this.checkBoxMeshExportFbxLinearInterpolation = new System.Windows.Forms.CheckBox();
 			this.checkBoxMeshExportNoMesh = new System.Windows.Forms.CheckBox();
-			this.checkBoxMeshExportEmbedMedia = new System.Windows.Forms.CheckBox();
+			this.checkBoxMeshExportAllBones = new System.Windows.Forms.CheckBox();
 			this.checkBoxMeshExportFbxSkins = new System.Windows.Forms.CheckBox();
 			this.label13 = new System.Windows.Forms.Label();
 			this.textBoxKeyframeRange = new SB3Utility.EditTextBox();
 			this.checkBoxMeshExportFbxAllFrames = new System.Windows.Forms.CheckBox();
-			this.checkBoxMeshSkinned = new System.Windows.Forms.CheckBox();
-			this.label8 = new System.Windows.Forms.Label();
 			this.label1 = new System.Windows.Forms.Label();
 			this.buttonMeshRemove = new System.Windows.Forms.Button();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.label26 = new System.Windows.Forms.Label();
+			this.buttonMeshRestPose = new System.Windows.Forms.Button();
+			this.editTextBoxMeshName = new SB3Utility.EditTextBox();
+			this.label15 = new System.Windows.Forms.Label();
 			this.buttonMeshSnapBorders = new System.Windows.Forms.Button();
-			this.checkBoxSubmeshReorder = new System.Windows.Forms.CheckBox();
 			this.dataGridViewMesh = new System.Windows.Forms.DataGridView();
 			this.ColumnSubmeshVerts = new System.Windows.Forms.DataGridViewTextBoxColumn();
 			this.ColumnSubmeshFaces = new System.Windows.Forms.DataGridViewTextBoxColumn();
 			this.ColumnSubmeshMaterial = new System.Windows.Forms.DataGridViewComboBoxColumn();
-			this.buttonSubmeshEditHex = new System.Windows.Forms.Button();
-			this.buttonSubmeshRemove = new System.Windows.Forms.Button();
-			this.textBoxMeshName = new SB3Utility.EditTextBox();
+			this.buttonMeshAttributes = new System.Windows.Forms.Button();
+			this.checkBoxMeshSkinned = new System.Windows.Forms.CheckBox();
+			this.label8 = new System.Windows.Forms.Label();
+			this.textBoxRendererName = new SB3Utility.EditTextBox();
 			this.tabPageMaterialView = new System.Windows.Forms.TabPage();
-			this.buttonMaterialDeleteUnref = new System.Windows.Forms.Button();
-			this.buttonMaterialEditHex = new System.Windows.Forms.Button();
-			this.buttonMaterialExternalTexture = new System.Windows.Forms.Button();
+			this.editTextBoxMatShader = new SB3Utility.EditTextBox();
+			this.labelMatTex4 = new System.Windows.Forms.Label();
+			this.labelMatTex3 = new System.Windows.Forms.Label();
+			this.labelMatTex2 = new System.Windows.Forms.Label();
+			this.labelMatTex1 = new System.Windows.Forms.Label();
+			this.labelExtra = new System.Windows.Forms.Label();
+			this.labelOutline = new System.Windows.Forms.Label();
+			this.labelRimPower = new System.Windows.Forms.Label();
+			this.label30 = new System.Windows.Forms.Label();
+			this.comboBoxMatShaderKeywords = new System.Windows.Forms.ComboBox();
+			this.label29 = new System.Windows.Forms.Label();
 			this.comboBoxMatTex4 = new System.Windows.Forms.ComboBox();
 			this.comboBoxMatTex3 = new System.Windows.Forms.ComboBox();
 			this.comboBoxMatTex2 = new System.Windows.Forms.ComboBox();
@@ -193,11 +203,29 @@
 			this.label10 = new System.Windows.Forms.Label();
 			this.label7 = new System.Windows.Forms.Label();
 			this.label2 = new System.Windows.Forms.Label();
-			this.label22 = new System.Windows.Forms.Label();
-			this.label21 = new System.Windows.Forms.Label();
-			this.label20 = new System.Windows.Forms.Label();
-			this.label19 = new System.Windows.Forms.Label();
-			this.label18 = new System.Windows.Forms.Label();
+			this.labelShininess = new System.Windows.Forms.Label();
+			this.labelShadow = new System.Windows.Forms.Label();
+			this.labelOutlineColour = new System.Windows.Forms.Label();
+			this.labelRim = new System.Windows.Forms.Label();
+			this.labelEmissive = new System.Windows.Forms.Label();
+			this.labelSpecular = new System.Windows.Forms.Label();
+			this.labelAmbient = new System.Windows.Forms.Label();
+			this.labelDiffuse = new System.Windows.Forms.Label();
+			this.textBoxMatExtra = new SB3Utility.EditTextBox();
+			this.textBoxMatShadowA = new SB3Utility.EditTextBox();
+			this.textBoxMatShadowB = new SB3Utility.EditTextBox();
+			this.textBoxMatShadowG = new SB3Utility.EditTextBox();
+			this.textBoxMatShadowR = new SB3Utility.EditTextBox();
+			this.textBoxMatOutlineA = new SB3Utility.EditTextBox();
+			this.textBoxMatOutlineB = new SB3Utility.EditTextBox();
+			this.textBoxMatOutlineG = new SB3Utility.EditTextBox();
+			this.textBoxMatOutlineR = new SB3Utility.EditTextBox();
+			this.textBoxMatRimA = new SB3Utility.EditTextBox();
+			this.textBoxMatRimB = new SB3Utility.EditTextBox();
+			this.textBoxMatRimG = new SB3Utility.EditTextBox();
+			this.textBoxMatRimR = new SB3Utility.EditTextBox();
+			this.textBoxMatOutline = new SB3Utility.EditTextBox();
+			this.textBoxMatRimPower = new SB3Utility.EditTextBox();
 			this.textBoxMatSpecularPower = new SB3Utility.EditTextBox();
 			this.textBoxMatEmissiveA = new SB3Utility.EditTextBox();
 			this.textBoxMatEmissiveB = new SB3Utility.EditTextBox();
@@ -217,9 +245,9 @@
 			this.textBoxMatDiffuseR = new SB3Utility.EditTextBox();
 			this.textBoxMatName = new SB3Utility.EditTextBox();
 			this.tabPageTextureView = new System.Windows.Forms.TabPage();
-			this.buttonTextureDeleteUnref = new System.Windows.Forms.Button();
+			this.checkBoxTextureMipMap = new System.Windows.Forms.CheckBox();
+			this.labelTextureFormat = new System.Windows.Forms.Label();
 			this.label14 = new System.Windows.Forms.Label();
-			this.buttonTextureEditHex = new System.Windows.Forms.Button();
 			this.buttonTextureAdd = new System.Windows.Forms.Button();
 			this.panelTexturePic = new System.Windows.Forms.Panel();
 			this.pictureBoxTexture = new System.Windows.Forms.PictureBox();
@@ -301,6 +329,17 @@
 			((System.ComponentModel.ISupportInitialize)(this.pictureBoxTexture)).BeginInit();
 			this.SuspendLayout();
 			// 
+			// buttonObjectTreeExpand
+			// 
+			this.buttonObjectTreeExpand.Location = new System.Drawing.Point(0, 6);
+			this.buttonObjectTreeExpand.Name = "buttonObjectTreeExpand";
+			this.buttonObjectTreeExpand.Size = new System.Drawing.Size(75, 23);
+			this.buttonObjectTreeExpand.TabIndex = 12;
+			this.buttonObjectTreeExpand.Text = "Expand All";
+			this.toolTip1.SetToolTip(this.buttonObjectTreeExpand, "All except Bone nodes");
+			this.buttonObjectTreeExpand.UseVisualStyleBackColor = true;
+			this.buttonObjectTreeExpand.Click += new System.EventHandler(this.buttonObjectTreeExpand_Click);
+			// 
 			// splitContainer1
 			// 
 			this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -359,6 +398,7 @@
 			this.treeViewObjectTree.TabIndex = 1;
 			this.treeViewObjectTree.DrawNode += new System.Windows.Forms.DrawTreeNodeEventHandler(this.treeViewObjectTree_DrawNode);
 			this.treeViewObjectTree.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.treeViewObjectTree_ItemDrag);
+			this.treeViewObjectTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeViewObjectTree_AfterSelect);
 			this.treeViewObjectTree.DragDrop += new System.Windows.Forms.DragEventHandler(this.treeViewObjectTree_DragDrop);
 			this.treeViewObjectTree.DragEnter += new System.Windows.Forms.DragEventHandler(this.treeViewObjectTree_DragEnter);
 			this.treeViewObjectTree.DragOver += new System.Windows.Forms.DragEventHandler(this.treeViewObjectTree_DragOver);
@@ -366,7 +406,7 @@
 			// 
 			// panelObjectTreeBottom
 			// 
-			this.panelObjectTreeBottom.Controls.Add(this.buttonObjectTreeCheckBones);
+			this.panelObjectTreeBottom.Controls.Add(this.buttonObjectTreeRefresh);
 			this.panelObjectTreeBottom.Controls.Add(this.buttonObjectTreeCollapse);
 			this.panelObjectTreeBottom.Controls.Add(this.buttonObjectTreeExpand);
 			this.panelObjectTreeBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
@@ -375,16 +415,16 @@
 			this.panelObjectTreeBottom.Size = new System.Drawing.Size(247, 35);
 			this.panelObjectTreeBottom.TabIndex = 10;
 			// 
-			// buttonObjectTreeCheckBones
+			// buttonObjectTreeRefresh
 			// 
-			this.buttonObjectTreeCheckBones.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.buttonObjectTreeCheckBones.Enabled = false;
-			this.buttonObjectTreeCheckBones.Location = new System.Drawing.Point(158, 6);
-			this.buttonObjectTreeCheckBones.Name = "buttonObjectTreeCheckBones";
-			this.buttonObjectTreeCheckBones.Size = new System.Drawing.Size(86, 23);
-			this.buttonObjectTreeCheckBones.TabIndex = 16;
-			this.buttonObjectTreeCheckBones.Text = "Check Bones";
-			this.buttonObjectTreeCheckBones.UseVisualStyleBackColor = true;
+			this.buttonObjectTreeRefresh.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.buttonObjectTreeRefresh.Location = new System.Drawing.Point(169, 6);
+			this.buttonObjectTreeRefresh.Name = "buttonObjectTreeRefresh";
+			this.buttonObjectTreeRefresh.Size = new System.Drawing.Size(75, 23);
+			this.buttonObjectTreeRefresh.TabIndex = 16;
+			this.buttonObjectTreeRefresh.Text = "Refresh";
+			this.buttonObjectTreeRefresh.UseVisualStyleBackColor = true;
+			this.buttonObjectTreeRefresh.Click += new System.EventHandler(this.buttonObjectTreeRefresh_Click);
 			// 
 			// buttonObjectTreeCollapse
 			// 
@@ -395,16 +435,6 @@
 			this.buttonObjectTreeCollapse.Text = "Collapse All";
 			this.buttonObjectTreeCollapse.UseVisualStyleBackColor = true;
 			this.buttonObjectTreeCollapse.Click += new System.EventHandler(this.buttonObjectTreeCollapse_Click);
-			// 
-			// buttonObjectTreeExpand
-			// 
-			this.buttonObjectTreeExpand.Location = new System.Drawing.Point(0, 6);
-			this.buttonObjectTreeExpand.Name = "buttonObjectTreeExpand";
-			this.buttonObjectTreeExpand.Size = new System.Drawing.Size(75, 23);
-			this.buttonObjectTreeExpand.TabIndex = 12;
-			this.buttonObjectTreeExpand.Text = "Expand All";
-			this.buttonObjectTreeExpand.UseVisualStyleBackColor = true;
-			this.buttonObjectTreeExpand.Click += new System.EventHandler(this.buttonObjectTreeExpand_Click);
 			// 
 			// tabPageMesh
 			// 
@@ -439,9 +469,10 @@
 			// 
 			this.listViewMesh.AutoArrange = false;
 			this.listViewMesh.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.meshlistHeader});
+            this.meshlistHeaderNames,
+            this.meshListHeaderType});
 			this.listViewMesh.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.listViewMesh.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
+			this.listViewMesh.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
 			this.listViewMesh.HideSelection = false;
 			this.listViewMesh.LabelWrap = false;
 			this.listViewMesh.Location = new System.Drawing.Point(0, 0);
@@ -451,6 +482,17 @@
 			this.listViewMesh.TabIndex = 1;
 			this.listViewMesh.UseCompatibleStateImageBehavior = false;
 			this.listViewMesh.View = System.Windows.Forms.View.Details;
+			this.listViewMesh.ItemSelectionChanged += new System.Windows.Forms.ListViewItemSelectionChangedEventHandler(this.listViewMesh_ItemSelectionChanged);
+			// 
+			// meshlistHeaderNames
+			// 
+			this.meshlistHeaderNames.Text = "Name";
+			this.meshlistHeaderNames.Width = 157;
+			// 
+			// meshListHeaderType
+			// 
+			this.meshListHeaderType.Text = "Type";
+			this.meshListHeaderType.Width = 47;
 			// 
 			// splitContainerMeshCrossRef
 			// 
@@ -572,6 +614,7 @@
 			this.listViewMaterial.TabIndex = 1;
 			this.listViewMaterial.UseCompatibleStateImageBehavior = false;
 			this.listViewMaterial.View = System.Windows.Forms.View.Details;
+			this.listViewMaterial.ItemSelectionChanged += new System.Windows.Forms.ListViewItemSelectionChangedEventHandler(this.listViewMaterial_ItemSelectionChanged);
 			// 
 			// splitContainerMaterialCrossRef
 			// 
@@ -693,6 +736,8 @@
 			this.listViewTexture.TabIndex = 1;
 			this.listViewTexture.UseCompatibleStateImageBehavior = false;
 			this.listViewTexture.View = System.Windows.Forms.View.Details;
+			this.listViewTexture.ItemSelectionChanged += new System.Windows.Forms.ListViewItemSelectionChangedEventHandler(this.listViewTexture_ItemSelectionChanged);
+			this.listViewTexture.KeyUp += new System.Windows.Forms.KeyEventHandler(this.listViewTexture_KeyUp);
 			// 
 			// splitContainerTextureCrossRef
 			// 
@@ -777,7 +822,6 @@
 			this.tabControlViews.Controls.Add(this.tabPageMaterialView);
 			this.tabControlViews.Controls.Add(this.tabPageTextureView);
 			this.tabControlViews.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.tabControlViews.Enabled = false;
 			this.tabControlViews.Location = new System.Drawing.Point(0, 0);
 			this.tabControlViews.Name = "tabControlViews";
 			this.tabControlViews.SelectedIndex = 0;
@@ -787,10 +831,7 @@
 			// tabPageFrameView
 			// 
 			this.tabPageFrameView.Controls.Add(this.buttonFrameAddBone);
-			this.tabPageFrameView.Controls.Add(this.buttonFrameEditHex);
 			this.tabPageFrameView.Controls.Add(this.groupBox3);
-			this.tabPageFrameView.Controls.Add(this.label15);
-			this.tabPageFrameView.Controls.Add(this.textBoxFrameName2);
 			this.tabPageFrameView.Controls.Add(this.tabControlFrameMatrix);
 			this.tabPageFrameView.Controls.Add(this.buttonFrameMoveUp);
 			this.tabPageFrameView.Controls.Add(this.buttonFrameRemove);
@@ -806,21 +847,13 @@
 			// 
 			// buttonFrameAddBone
 			// 
-			this.buttonFrameAddBone.Location = new System.Drawing.Point(88, 100);
+			this.buttonFrameAddBone.Enabled = false;
+			this.buttonFrameAddBone.Location = new System.Drawing.Point(88, 93);
 			this.buttonFrameAddBone.Name = "buttonFrameAddBone";
 			this.buttonFrameAddBone.Size = new System.Drawing.Size(162, 23);
 			this.buttonFrameAddBone.TabIndex = 18;
 			this.buttonFrameAddBone.Text = "Add Bone to Selected Meshes";
 			this.buttonFrameAddBone.UseVisualStyleBackColor = true;
-			// 
-			// buttonFrameEditHex
-			// 
-			this.buttonFrameEditHex.Location = new System.Drawing.Point(88, 67);
-			this.buttonFrameEditHex.Name = "buttonFrameEditHex";
-			this.buttonFrameEditHex.Size = new System.Drawing.Size(75, 23);
-			this.buttonFrameEditHex.TabIndex = 12;
-			this.buttonFrameEditHex.Text = "Edit Hex";
-			this.buttonFrameEditHex.UseVisualStyleBackColor = true;
 			// 
 			// groupBox3
 			// 
@@ -836,7 +869,8 @@
 			this.groupBox3.Controls.Add(this.buttonFrameMatrixIdentity);
 			this.groupBox3.Controls.Add(this.buttonFrameMatrixInverse);
 			this.groupBox3.Controls.Add(this.buttonFrameMatrixCombined);
-			this.groupBox3.Location = new System.Drawing.Point(0, 253);
+			this.groupBox3.Enabled = false;
+			this.groupBox3.Location = new System.Drawing.Point(0, 246);
 			this.groupBox3.Name = "groupBox3";
 			this.groupBox3.Size = new System.Drawing.Size(253, 149);
 			this.groupBox3.TabIndex = 60;
@@ -993,27 +1027,11 @@
 			this.buttonFrameMatrixCombined.Text = "Combined";
 			this.buttonFrameMatrixCombined.UseVisualStyleBackColor = true;
 			// 
-			// label15
-			// 
-			this.label15.AutoSize = true;
-			this.label15.Location = new System.Drawing.Point(1, 35);
-			this.label15.Name = "label15";
-			this.label15.Size = new System.Drawing.Size(41, 13);
-			this.label15.TabIndex = 157;
-			this.label15.Text = "Name2";
-			// 
-			// textBoxFrameName2
-			// 
-			this.textBoxFrameName2.Location = new System.Drawing.Point(43, 32);
-			this.textBoxFrameName2.Name = "textBoxFrameName2";
-			this.textBoxFrameName2.Size = new System.Drawing.Size(207, 20);
-			this.textBoxFrameName2.TabIndex = 3;
-			// 
 			// tabControlFrameMatrix
 			// 
 			this.tabControlFrameMatrix.Controls.Add(this.tabPageFrameSRT);
 			this.tabControlFrameMatrix.Controls.Add(this.tabPageFrameMatrix);
-			this.tabControlFrameMatrix.Location = new System.Drawing.Point(0, 135);
+			this.tabControlFrameMatrix.Location = new System.Drawing.Point(0, 128);
 			this.tabControlFrameMatrix.Name = "tabControlFrameMatrix";
 			this.tabControlFrameMatrix.SelectedIndex = 0;
 			this.tabControlFrameMatrix.Size = new System.Drawing.Size(253, 112);
@@ -1044,6 +1062,7 @@
 			this.dataGridViewFrameSRT.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.dataGridViewFrameSRT.Location = new System.Drawing.Point(3, 3);
 			this.dataGridViewFrameSRT.Name = "dataGridViewFrameSRT";
+			this.dataGridViewFrameSRT.ReadOnly = true;
 			this.dataGridViewFrameSRT.RowHeadersVisible = false;
 			this.dataGridViewFrameSRT.ScrollBars = System.Windows.Forms.ScrollBars.None;
 			this.dataGridViewFrameSRT.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
@@ -1078,6 +1097,7 @@
 			this.dataGridViewFrameMatrix.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.dataGridViewFrameMatrix.Location = new System.Drawing.Point(3, 3);
 			this.dataGridViewFrameMatrix.Name = "dataGridViewFrameMatrix";
+			this.dataGridViewFrameMatrix.ReadOnly = true;
 			this.dataGridViewFrameMatrix.RowHeadersVisible = false;
 			this.dataGridViewFrameMatrix.ScrollBars = System.Windows.Forms.ScrollBars.None;
 			this.dataGridViewFrameMatrix.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
@@ -1088,7 +1108,8 @@
 			// 
 			// buttonFrameMoveUp
 			// 
-			this.buttonFrameMoveUp.Location = new System.Drawing.Point(2, 67);
+			this.buttonFrameMoveUp.Enabled = false;
+			this.buttonFrameMoveUp.Location = new System.Drawing.Point(2, 60);
 			this.buttonFrameMoveUp.Name = "buttonFrameMoveUp";
 			this.buttonFrameMoveUp.Size = new System.Drawing.Size(75, 23);
 			this.buttonFrameMoveUp.TabIndex = 10;
@@ -1097,16 +1118,18 @@
 			// 
 			// buttonFrameRemove
 			// 
-			this.buttonFrameRemove.Location = new System.Drawing.Point(175, 67);
+			this.buttonFrameRemove.Location = new System.Drawing.Point(175, 60);
 			this.buttonFrameRemove.Name = "buttonFrameRemove";
 			this.buttonFrameRemove.Size = new System.Drawing.Size(75, 23);
 			this.buttonFrameRemove.TabIndex = 14;
 			this.buttonFrameRemove.Text = "Remove";
 			this.buttonFrameRemove.UseVisualStyleBackColor = true;
+			this.buttonFrameRemove.Click += new System.EventHandler(this.buttonFrameRemove_Click);
 			// 
 			// buttonFrameMoveDown
 			// 
-			this.buttonFrameMoveDown.Location = new System.Drawing.Point(2, 100);
+			this.buttonFrameMoveDown.Enabled = false;
+			this.buttonFrameMoveDown.Location = new System.Drawing.Point(2, 93);
 			this.buttonFrameMoveDown.Name = "buttonFrameMoveDown";
 			this.buttonFrameMoveDown.Size = new System.Drawing.Size(75, 23);
 			this.buttonFrameMoveDown.TabIndex = 16;
@@ -1116,17 +1139,17 @@
 			// label4
 			// 
 			this.label4.AutoSize = true;
-			this.label4.Location = new System.Drawing.Point(7, 9);
+			this.label4.Location = new System.Drawing.Point(-2, 4);
 			this.label4.Name = "label4";
-			this.label4.Size = new System.Drawing.Size(35, 13);
+			this.label4.Size = new System.Drawing.Size(85, 13);
 			this.label4.TabIndex = 85;
-			this.label4.Text = "Name";
+			this.label4.Text = "Transform Name";
 			// 
 			// textBoxFrameName
 			// 
-			this.textBoxFrameName.Location = new System.Drawing.Point(43, 6);
+			this.textBoxFrameName.Location = new System.Drawing.Point(0, 19);
 			this.textBoxFrameName.Name = "textBoxFrameName";
-			this.textBoxFrameName.Size = new System.Drawing.Size(207, 20);
+			this.textBoxFrameName.Size = new System.Drawing.Size(249, 20);
 			this.textBoxFrameName.TabIndex = 1;
 			// 
 			// tabPageBoneView
@@ -1136,7 +1159,6 @@
 			this.tabPageBoneView.Controls.Add(this.groupBox4);
 			this.tabPageBoneView.Controls.Add(this.tabControlBoneMatrix);
 			this.tabPageBoneView.Controls.Add(this.buttonBoneRemove);
-			this.tabPageBoneView.Controls.Add(this.buttonBoneCopy);
 			this.tabPageBoneView.Controls.Add(this.buttonBoneGotoFrame);
 			this.tabPageBoneView.Controls.Add(this.label25);
 			this.tabPageBoneView.Controls.Add(this.textBoxBoneName);
@@ -1154,6 +1176,7 @@
 			this.groupBox7.Controls.Add(this.label16);
 			this.groupBox7.Controls.Add(this.textBoxBoneReplaceWith);
 			this.groupBox7.Controls.Add(this.textBoxBoneFrameTrackSubstring);
+			this.groupBox7.Enabled = false;
 			this.groupBox7.Location = new System.Drawing.Point(3, 391);
 			this.groupBox7.Name = "groupBox7";
 			this.groupBox7.Size = new System.Drawing.Size(247, 98);
@@ -1204,7 +1227,8 @@
 			// 
 			// buttonBoneZeroWeights
 			// 
-			this.buttonBoneZeroWeights.Location = new System.Drawing.Point(67, 356);
+			this.buttonBoneZeroWeights.Enabled = false;
+			this.buttonBoneZeroWeights.Location = new System.Drawing.Point(67, 358);
 			this.buttonBoneZeroWeights.Name = "buttonBoneZeroWeights";
 			this.buttonBoneZeroWeights.Size = new System.Drawing.Size(112, 23);
 			this.buttonBoneZeroWeights.TabIndex = 90;
@@ -1224,7 +1248,8 @@
 			this.groupBox4.Controls.Add(this.buttonBoneMatrixIdentity);
 			this.groupBox4.Controls.Add(this.buttonBoneMatrixInverse);
 			this.groupBox4.Controls.Add(this.groupBox6);
-			this.groupBox4.Location = new System.Drawing.Point(0, 196);
+			this.groupBox4.Enabled = false;
+			this.groupBox4.Location = new System.Drawing.Point(0, 200);
 			this.groupBox4.Name = "groupBox4";
 			this.groupBox4.Size = new System.Drawing.Size(253, 149);
 			this.groupBox4.TabIndex = 60;
@@ -1377,7 +1402,7 @@
 			// 
 			this.tabControlBoneMatrix.Controls.Add(this.tabPageBoneSRT);
 			this.tabControlBoneMatrix.Controls.Add(this.tabPageBoneMatrix);
-			this.tabControlBoneMatrix.Location = new System.Drawing.Point(0, 78);
+			this.tabControlBoneMatrix.Location = new System.Drawing.Point(0, 84);
 			this.tabControlBoneMatrix.Name = "tabControlBoneMatrix";
 			this.tabControlBoneMatrix.SelectedIndex = 0;
 			this.tabControlBoneMatrix.Size = new System.Drawing.Size(253, 112);
@@ -1408,6 +1433,7 @@
 			this.dataGridViewBoneSRT.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.dataGridViewBoneSRT.Location = new System.Drawing.Point(3, 3);
 			this.dataGridViewBoneSRT.Name = "dataGridViewBoneSRT";
+			this.dataGridViewBoneSRT.ReadOnly = true;
 			this.dataGridViewBoneSRT.RowHeadersVisible = false;
 			this.dataGridViewBoneSRT.ScrollBars = System.Windows.Forms.ScrollBars.None;
 			this.dataGridViewBoneSRT.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
@@ -1442,6 +1468,7 @@
 			this.dataGridViewBoneMatrix.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.dataGridViewBoneMatrix.Location = new System.Drawing.Point(3, 3);
 			this.dataGridViewBoneMatrix.Name = "dataGridViewBoneMatrix";
+			this.dataGridViewBoneMatrix.ReadOnly = true;
 			this.dataGridViewBoneMatrix.RowHeadersVisible = false;
 			this.dataGridViewBoneMatrix.ScrollBars = System.Windows.Forms.ScrollBars.None;
 			this.dataGridViewBoneMatrix.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
@@ -1452,62 +1479,55 @@
 			// 
 			// buttonBoneRemove
 			// 
-			this.buttonBoneRemove.Location = new System.Drawing.Point(89, 41);
+			this.buttonBoneRemove.Location = new System.Drawing.Point(89, 49);
 			this.buttonBoneRemove.Name = "buttonBoneRemove";
 			this.buttonBoneRemove.Size = new System.Drawing.Size(75, 23);
 			this.buttonBoneRemove.TabIndex = 22;
 			this.buttonBoneRemove.Text = "Remove";
 			this.buttonBoneRemove.UseVisualStyleBackColor = true;
-			// 
-			// buttonBoneCopy
-			// 
-			this.buttonBoneCopy.Location = new System.Drawing.Point(176, 41);
-			this.buttonBoneCopy.Name = "buttonBoneCopy";
-			this.buttonBoneCopy.Size = new System.Drawing.Size(75, 23);
-			this.buttonBoneCopy.TabIndex = 24;
-			this.buttonBoneCopy.Text = "Copy->New";
-			this.buttonBoneCopy.UseVisualStyleBackColor = true;
+			this.buttonBoneRemove.Click += new System.EventHandler(this.buttonBoneRemove_Click);
 			// 
 			// buttonBoneGotoFrame
 			// 
-			this.buttonBoneGotoFrame.Location = new System.Drawing.Point(2, 41);
+			this.buttonBoneGotoFrame.Location = new System.Drawing.Point(2, 49);
 			this.buttonBoneGotoFrame.Name = "buttonBoneGotoFrame";
 			this.buttonBoneGotoFrame.Size = new System.Drawing.Size(75, 23);
 			this.buttonBoneGotoFrame.TabIndex = 20;
 			this.buttonBoneGotoFrame.Text = "Goto Frame";
 			this.buttonBoneGotoFrame.UseVisualStyleBackColor = true;
+			this.buttonBoneGotoFrame.Click += new System.EventHandler(this.buttonBoneGotoFrame_Click);
 			// 
 			// label25
 			// 
 			this.label25.AutoSize = true;
-			this.label25.Location = new System.Drawing.Point(-2, 9);
+			this.label25.Location = new System.Drawing.Point(-2, 5);
 			this.label25.Name = "label25";
-			this.label25.Size = new System.Drawing.Size(35, 13);
+			this.label25.Size = new System.Drawing.Size(82, 13);
 			this.label25.TabIndex = 106;
-			this.label25.Text = "Name";
+			this.label25.Text = "Bone Transform";
 			// 
 			// textBoxBoneName
 			// 
-			this.textBoxBoneName.Location = new System.Drawing.Point(35, 6);
+			this.textBoxBoneName.Location = new System.Drawing.Point(0, 19);
 			this.textBoxBoneName.Name = "textBoxBoneName";
-			this.textBoxBoneName.Size = new System.Drawing.Size(215, 20);
+			this.textBoxBoneName.ReadOnly = true;
+			this.textBoxBoneName.Size = new System.Drawing.Size(251, 20);
 			this.textBoxBoneName.TabIndex = 1;
 			// 
 			// tabPageMeshView
 			// 
-			this.tabPageMeshView.Controls.Add(this.buttonMeshRestPose);
+			this.tabPageMeshView.Controls.Add(this.checkBoxRendererEnabled);
+			this.tabPageMeshView.Controls.Add(this.label27);
 			this.tabPageMeshView.Controls.Add(this.checkBoxMeshNewSkin);
 			this.tabPageMeshView.Controls.Add(this.buttonMeshNormals);
-			this.tabPageMeshView.Controls.Add(this.buttonMeshEditHex);
+			this.tabPageMeshView.Controls.Add(this.buttonSkinnedMeshRendererAttributes);
 			this.tabPageMeshView.Controls.Add(this.buttonMeshMinBones);
 			this.tabPageMeshView.Controls.Add(this.buttonMeshGotoFrame);
 			this.tabPageMeshView.Controls.Add(this.groupBox2);
-			this.tabPageMeshView.Controls.Add(this.checkBoxMeshSkinned);
-			this.tabPageMeshView.Controls.Add(this.label8);
 			this.tabPageMeshView.Controls.Add(this.label1);
 			this.tabPageMeshView.Controls.Add(this.buttonMeshRemove);
 			this.tabPageMeshView.Controls.Add(this.groupBox1);
-			this.tabPageMeshView.Controls.Add(this.textBoxMeshName);
+			this.tabPageMeshView.Controls.Add(this.textBoxRendererName);
 			this.tabPageMeshView.Location = new System.Drawing.Point(4, 22);
 			this.tabPageMeshView.Name = "tabPageMeshView";
 			this.tabPageMeshView.Size = new System.Drawing.Size(252, 509);
@@ -1515,19 +1535,32 @@
 			this.tabPageMeshView.Text = "Mesh";
 			this.tabPageMeshView.UseVisualStyleBackColor = true;
 			// 
-			// buttonMeshRestPose
+			// checkBoxRendererEnabled
 			// 
-			this.buttonMeshRestPose.Location = new System.Drawing.Point(174, 198);
-			this.buttonMeshRestPose.Name = "buttonMeshRestPose";
-			this.buttonMeshRestPose.Size = new System.Drawing.Size(73, 23);
-			this.buttonMeshRestPose.TabIndex = 141;
-			this.buttonMeshRestPose.Text = "Rest Pose";
-			this.buttonMeshRestPose.UseVisualStyleBackColor = true;
+			this.checkBoxRendererEnabled.AutoCheck = false;
+			this.checkBoxRendererEnabled.AutoSize = true;
+			this.checkBoxRendererEnabled.Enabled = false;
+			this.checkBoxRendererEnabled.Location = new System.Drawing.Point(218, 23);
+			this.checkBoxRendererEnabled.Name = "checkBoxRendererEnabled";
+			this.checkBoxRendererEnabled.Size = new System.Drawing.Size(15, 14);
+			this.checkBoxRendererEnabled.TabIndex = 5;
+			this.checkBoxRendererEnabled.TabStop = false;
+			this.checkBoxRendererEnabled.UseVisualStyleBackColor = true;
+			// 
+			// label27
+			// 
+			this.label27.AutoSize = true;
+			this.label27.Location = new System.Drawing.Point(201, 4);
+			this.label27.Name = "label27";
+			this.label27.Size = new System.Drawing.Size(46, 13);
+			this.label27.TabIndex = 157;
+			this.label27.Text = "Enabled";
 			// 
 			// checkBoxMeshNewSkin
 			// 
 			this.checkBoxMeshNewSkin.Appearance = System.Windows.Forms.Appearance.Button;
-			this.checkBoxMeshNewSkin.Location = new System.Drawing.Point(174, 169);
+			this.checkBoxMeshNewSkin.Enabled = false;
+			this.checkBoxMeshNewSkin.Location = new System.Drawing.Point(174, 173);
 			this.checkBoxMeshNewSkin.Name = "checkBoxMeshNewSkin";
 			this.checkBoxMeshNewSkin.Size = new System.Drawing.Size(73, 23);
 			this.checkBoxMeshNewSkin.TabIndex = 50;
@@ -1537,25 +1570,28 @@
 			// 
 			// buttonMeshNormals
 			// 
-			this.buttonMeshNormals.Location = new System.Drawing.Point(90, 169);
+			this.buttonMeshNormals.Enabled = false;
+			this.buttonMeshNormals.Location = new System.Drawing.Point(90, 173);
 			this.buttonMeshNormals.Name = "buttonMeshNormals";
 			this.buttonMeshNormals.Size = new System.Drawing.Size(73, 23);
 			this.buttonMeshNormals.TabIndex = 45;
 			this.buttonMeshNormals.Text = "Normals...";
 			this.buttonMeshNormals.UseVisualStyleBackColor = true;
 			// 
-			// buttonMeshEditHex
+			// buttonSkinnedMeshRendererAttributes
 			// 
-			this.buttonMeshEditHex.Location = new System.Drawing.Point(5, 169);
-			this.buttonMeshEditHex.Name = "buttonMeshEditHex";
-			this.buttonMeshEditHex.Size = new System.Drawing.Size(73, 23);
-			this.buttonMeshEditHex.TabIndex = 42;
-			this.buttonMeshEditHex.Text = "Frame Hex";
-			this.buttonMeshEditHex.UseVisualStyleBackColor = true;
+			this.buttonSkinnedMeshRendererAttributes.Enabled = false;
+			this.buttonSkinnedMeshRendererAttributes.Location = new System.Drawing.Point(5, 173);
+			this.buttonSkinnedMeshRendererAttributes.Name = "buttonSkinnedMeshRendererAttributes";
+			this.buttonSkinnedMeshRendererAttributes.Size = new System.Drawing.Size(73, 23);
+			this.buttonSkinnedMeshRendererAttributes.TabIndex = 42;
+			this.buttonSkinnedMeshRendererAttributes.Text = "Attributes";
+			this.buttonSkinnedMeshRendererAttributes.UseVisualStyleBackColor = true;
 			// 
 			// buttonMeshMinBones
 			// 
-			this.buttonMeshMinBones.Location = new System.Drawing.Point(174, 140);
+			this.buttonMeshMinBones.Enabled = false;
+			this.buttonMeshMinBones.Location = new System.Drawing.Point(174, 144);
 			this.buttonMeshMinBones.Name = "buttonMeshMinBones";
 			this.buttonMeshMinBones.Size = new System.Drawing.Size(73, 23);
 			this.buttonMeshMinBones.TabIndex = 40;
@@ -1564,12 +1600,13 @@
 			// 
 			// buttonMeshGotoFrame
 			// 
-			this.buttonMeshGotoFrame.Location = new System.Drawing.Point(5, 140);
+			this.buttonMeshGotoFrame.Location = new System.Drawing.Point(5, 144);
 			this.buttonMeshGotoFrame.Name = "buttonMeshGotoFrame";
 			this.buttonMeshGotoFrame.Size = new System.Drawing.Size(73, 23);
 			this.buttonMeshGotoFrame.TabIndex = 30;
 			this.buttonMeshGotoFrame.Text = "Goto Frame";
 			this.buttonMeshGotoFrame.UseVisualStyleBackColor = true;
+			this.buttonMeshGotoFrame.Click += new System.EventHandler(this.buttonMeshGotoFrame_Click);
 			// 
 			// groupBox2
 			// 
@@ -1604,6 +1641,7 @@
 			this.comboBoxMeshExportFormat.Name = "comboBoxMeshExportFormat";
 			this.comboBoxMeshExportFormat.Size = new System.Drawing.Size(126, 21);
 			this.comboBoxMeshExportFormat.TabIndex = 22;
+			this.comboBoxMeshExportFormat.SelectedIndexChanged += new System.EventHandler(this.comboBoxMeshExportFormat_SelectedIndexChanged);
 			// 
 			// buttonMeshExport
 			// 
@@ -1613,6 +1651,7 @@
 			this.buttonMeshExport.TabIndex = 24;
 			this.buttonMeshExport.Text = "Export";
 			this.buttonMeshExport.UseVisualStyleBackColor = true;
+			this.buttonMeshExport.Click += new System.EventHandler(this.buttonMeshExport_Click);
 			// 
 			// panelMeshExportOptionsDefault
 			// 
@@ -1768,7 +1807,7 @@
 			// 
 			this.panelMeshExportOptionsFbx.Controls.Add(this.checkBoxMeshExportFbxLinearInterpolation);
 			this.panelMeshExportOptionsFbx.Controls.Add(this.checkBoxMeshExportNoMesh);
-			this.panelMeshExportOptionsFbx.Controls.Add(this.checkBoxMeshExportEmbedMedia);
+			this.panelMeshExportOptionsFbx.Controls.Add(this.checkBoxMeshExportAllBones);
 			this.panelMeshExportOptionsFbx.Controls.Add(this.checkBoxMeshExportFbxSkins);
 			this.panelMeshExportOptionsFbx.Controls.Add(this.label13);
 			this.panelMeshExportOptionsFbx.Controls.Add(this.textBoxKeyframeRange);
@@ -1784,6 +1823,7 @@
 			this.checkBoxMeshExportFbxLinearInterpolation.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
 			this.checkBoxMeshExportFbxLinearInterpolation.Checked = true;
 			this.checkBoxMeshExportFbxLinearInterpolation.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.checkBoxMeshExportFbxLinearInterpolation.Enabled = false;
 			this.checkBoxMeshExportFbxLinearInterpolation.Location = new System.Drawing.Point(185, 25);
 			this.checkBoxMeshExportFbxLinearInterpolation.Name = "checkBoxMeshExportFbxLinearInterpolation";
 			this.checkBoxMeshExportFbxLinearInterpolation.Size = new System.Drawing.Size(55, 17);
@@ -1804,17 +1844,19 @@
 			this.checkBoxMeshExportNoMesh.Text = "No Mesh";
 			this.checkBoxMeshExportNoMesh.UseVisualStyleBackColor = true;
 			// 
-			// checkBoxMeshExportEmbedMedia
+			// checkBoxMeshExportAllBones
 			// 
-			this.checkBoxMeshExportEmbedMedia.AutoSize = true;
-			this.checkBoxMeshExportEmbedMedia.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
-			this.checkBoxMeshExportEmbedMedia.Location = new System.Drawing.Point(149, 2);
-			this.checkBoxMeshExportEmbedMedia.Name = "checkBoxMeshExportEmbedMedia";
-			this.checkBoxMeshExportEmbedMedia.Size = new System.Drawing.Size(91, 17);
-			this.checkBoxMeshExportEmbedMedia.TabIndex = 266;
-			this.checkBoxMeshExportEmbedMedia.TabStop = false;
-			this.checkBoxMeshExportEmbedMedia.Text = "Embed Media";
-			this.checkBoxMeshExportEmbedMedia.UseVisualStyleBackColor = true;
+			this.checkBoxMeshExportAllBones.AutoSize = true;
+			this.checkBoxMeshExportAllBones.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
+			this.checkBoxMeshExportAllBones.Checked = true;
+			this.checkBoxMeshExportAllBones.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.checkBoxMeshExportAllBones.Location = new System.Drawing.Point(149, 2);
+			this.checkBoxMeshExportAllBones.Name = "checkBoxMeshExportAllBones";
+			this.checkBoxMeshExportAllBones.Size = new System.Drawing.Size(70, 17);
+			this.checkBoxMeshExportAllBones.TabIndex = 266;
+			this.checkBoxMeshExportAllBones.TabStop = false;
+			this.checkBoxMeshExportAllBones.Text = "All Bones";
+			this.checkBoxMeshExportAllBones.UseVisualStyleBackColor = true;
 			// 
 			// checkBoxMeshExportFbxSkins
 			// 
@@ -1841,6 +1883,7 @@
 			// 
 			// textBoxKeyframeRange
 			// 
+			this.textBoxKeyframeRange.Enabled = false;
 			this.textBoxKeyframeRange.Location = new System.Drawing.Point(133, 23);
 			this.textBoxKeyframeRange.MaxLength = 10;
 			this.textBoxKeyframeRange.Name = "textBoxKeyframeRange";
@@ -1861,82 +1904,90 @@
 			this.checkBoxMeshExportFbxAllFrames.Text = "All Frames";
 			this.checkBoxMeshExportFbxAllFrames.UseVisualStyleBackColor = true;
 			// 
-			// checkBoxMeshSkinned
-			// 
-			this.checkBoxMeshSkinned.AutoCheck = false;
-			this.checkBoxMeshSkinned.AutoSize = true;
-			this.checkBoxMeshSkinned.Location = new System.Drawing.Point(221, 23);
-			this.checkBoxMeshSkinned.Name = "checkBoxMeshSkinned";
-			this.checkBoxMeshSkinned.Size = new System.Drawing.Size(15, 14);
-			this.checkBoxMeshSkinned.TabIndex = 10;
-			this.checkBoxMeshSkinned.TabStop = false;
-			this.checkBoxMeshSkinned.UseVisualStyleBackColor = true;
-			// 
-			// label8
-			// 
-			this.label8.AutoSize = true;
-			this.label8.Location = new System.Drawing.Point(204, 4);
-			this.label8.Name = "label8";
-			this.label8.Size = new System.Drawing.Size(46, 13);
-			this.label8.TabIndex = 125;
-			this.label8.Text = "Skinned";
-			// 
 			// label1
 			// 
 			this.label1.AutoSize = true;
 			this.label1.Location = new System.Drawing.Point(-2, 4);
 			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(35, 13);
+			this.label1.Size = new System.Drawing.Size(82, 13);
 			this.label1.TabIndex = 123;
-			this.label1.Text = "Name";
+			this.label1.Text = "Renderer Name";
 			// 
 			// buttonMeshRemove
 			// 
-			this.buttonMeshRemove.Location = new System.Drawing.Point(90, 140);
+			this.buttonMeshRemove.Location = new System.Drawing.Point(90, 144);
 			this.buttonMeshRemove.Name = "buttonMeshRemove";
 			this.buttonMeshRemove.Size = new System.Drawing.Size(73, 23);
 			this.buttonMeshRemove.TabIndex = 35;
 			this.buttonMeshRemove.Text = "Remove";
 			this.buttonMeshRemove.UseVisualStyleBackColor = true;
+			this.buttonMeshRemove.Click += new System.EventHandler(this.buttonMeshRemove_Click);
 			// 
 			// groupBox1
 			// 
-			this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
+			this.groupBox1.Controls.Add(this.label26);
+			this.groupBox1.Controls.Add(this.buttonMeshRestPose);
+			this.groupBox1.Controls.Add(this.editTextBoxMeshName);
+			this.groupBox1.Controls.Add(this.label15);
 			this.groupBox1.Controls.Add(this.buttonMeshSnapBorders);
-			this.groupBox1.Controls.Add(this.checkBoxSubmeshReorder);
 			this.groupBox1.Controls.Add(this.dataGridViewMesh);
-			this.groupBox1.Controls.Add(this.buttonSubmeshEditHex);
-			this.groupBox1.Controls.Add(this.buttonSubmeshRemove);
-			this.groupBox1.Location = new System.Drawing.Point(0, 229);
+			this.groupBox1.Controls.Add(this.buttonMeshAttributes);
+			this.groupBox1.Controls.Add(this.checkBoxMeshSkinned);
+			this.groupBox1.Controls.Add(this.label8);
+			this.groupBox1.Location = new System.Drawing.Point(0, 216);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(253, 267);
+			this.groupBox1.Size = new System.Drawing.Size(253, 203);
 			this.groupBox1.TabIndex = 140;
 			this.groupBox1.TabStop = false;
-			this.groupBox1.Text = "Submeshes";
+			this.groupBox1.Text = "Mesh";
+			// 
+			// label26
+			// 
+			this.label26.AutoSize = true;
+			this.label26.Location = new System.Drawing.Point(6, 16);
+			this.label26.Name = "label26";
+			this.label26.Size = new System.Drawing.Size(64, 13);
+			this.label26.TabIndex = 155;
+			this.label26.Text = "Mesh Name";
+			// 
+			// buttonMeshRestPose
+			// 
+			this.buttonMeshRestPose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.buttonMeshRestPose.Enabled = false;
+			this.buttonMeshRestPose.Location = new System.Drawing.Point(175, 172);
+			this.buttonMeshRestPose.Name = "buttonMeshRestPose";
+			this.buttonMeshRestPose.Size = new System.Drawing.Size(73, 23);
+			this.buttonMeshRestPose.TabIndex = 168;
+			this.buttonMeshRestPose.Text = "Rest Pose";
+			this.buttonMeshRestPose.UseVisualStyleBackColor = true;
+			// 
+			// editTextBoxMeshName
+			// 
+			this.editTextBoxMeshName.BackColor = System.Drawing.SystemColors.Window;
+			this.editTextBoxMeshName.Location = new System.Drawing.Point(3, 31);
+			this.editTextBoxMeshName.Name = "editTextBoxMeshName";
+			this.editTextBoxMeshName.Size = new System.Drawing.Size(197, 20);
+			this.editTextBoxMeshName.TabIndex = 154;
+			// 
+			// label15
+			// 
+			this.label15.AutoSize = true;
+			this.label15.Location = new System.Drawing.Point(6, 54);
+			this.label15.Name = "label15";
+			this.label15.Size = new System.Drawing.Size(62, 13);
+			this.label15.TabIndex = 153;
+			this.label15.Text = "Submeshes";
 			// 
 			// buttonMeshSnapBorders
 			// 
 			this.buttonMeshSnapBorders.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.buttonMeshSnapBorders.Location = new System.Drawing.Point(138, 235);
+			this.buttonMeshSnapBorders.Enabled = false;
+			this.buttonMeshSnapBorders.Location = new System.Drawing.Point(85, 172);
 			this.buttonMeshSnapBorders.Name = "buttonMeshSnapBorders";
-			this.buttonMeshSnapBorders.Size = new System.Drawing.Size(110, 23);
-			this.buttonMeshSnapBorders.TabIndex = 142;
+			this.buttonMeshSnapBorders.Size = new System.Drawing.Size(84, 23);
+			this.buttonMeshSnapBorders.TabIndex = 164;
 			this.buttonMeshSnapBorders.Text = "Snap Borders";
 			this.buttonMeshSnapBorders.UseVisualStyleBackColor = true;
-			// 
-			// checkBoxSubmeshReorder
-			// 
-			this.checkBoxSubmeshReorder.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.checkBoxSubmeshReorder.Appearance = System.Windows.Forms.Appearance.Button;
-			this.checkBoxSubmeshReorder.AutoCheck = false;
-			this.checkBoxSubmeshReorder.Location = new System.Drawing.Point(174, 206);
-			this.checkBoxSubmeshReorder.Name = "checkBoxSubmeshReorder";
-			this.checkBoxSubmeshReorder.Size = new System.Drawing.Size(73, 23);
-			this.checkBoxSubmeshReorder.TabIndex = 146;
-			this.checkBoxSubmeshReorder.Text = "Reorder";
-			this.checkBoxSubmeshReorder.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-			this.checkBoxSubmeshReorder.UseVisualStyleBackColor = true;
 			// 
 			// dataGridViewMesh
 			// 
@@ -1951,12 +2002,16 @@
             this.ColumnSubmeshVerts,
             this.ColumnSubmeshFaces,
             this.ColumnSubmeshMaterial});
-			this.dataGridViewMesh.Location = new System.Drawing.Point(3, 19);
+			this.dataGridViewMesh.Location = new System.Drawing.Point(3, 70);
 			this.dataGridViewMesh.Name = "dataGridViewMesh";
 			this.dataGridViewMesh.RowHeadersVisible = false;
 			this.dataGridViewMesh.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-			this.dataGridViewMesh.Size = new System.Drawing.Size(246, 179);
-			this.dataGridViewMesh.TabIndex = 152;
+			this.dataGridViewMesh.Size = new System.Drawing.Size(246, 86);
+			this.dataGridViewMesh.TabIndex = 158;
+			this.dataGridViewMesh.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewMesh_CellClick);
+			this.dataGridViewMesh.EditingControlShowing += new System.Windows.Forms.DataGridViewEditingControlShowingEventHandler(this.dataGridViewMesh_EditingControlShowing);
+			this.dataGridViewMesh.SelectionChanged += new System.EventHandler(this.dataGridViewMesh_SelectionChanged);
+			this.dataGridViewMesh.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dataGridViewMesh_KeyDown);
 			// 
 			// ColumnSubmeshVerts
 			// 
@@ -1984,40 +2039,60 @@
 			this.ColumnSubmeshMaterial.HeaderText = "Material";
 			this.ColumnSubmeshMaterial.Name = "ColumnSubmeshMaterial";
 			// 
-			// buttonSubmeshEditHex
+			// buttonMeshAttributes
 			// 
-			this.buttonSubmeshEditHex.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.buttonSubmeshEditHex.Location = new System.Drawing.Point(5, 206);
-			this.buttonSubmeshEditHex.Name = "buttonSubmeshEditHex";
-			this.buttonSubmeshEditHex.Size = new System.Drawing.Size(73, 23);
-			this.buttonSubmeshEditHex.TabIndex = 142;
-			this.buttonSubmeshEditHex.TabStop = false;
-			this.buttonSubmeshEditHex.Text = "Edit Hex";
-			this.buttonSubmeshEditHex.UseVisualStyleBackColor = true;
+			this.buttonMeshAttributes.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.buttonMeshAttributes.Enabled = false;
+			this.buttonMeshAttributes.Location = new System.Drawing.Point(5, 172);
+			this.buttonMeshAttributes.Name = "buttonMeshAttributes";
+			this.buttonMeshAttributes.Size = new System.Drawing.Size(73, 23);
+			this.buttonMeshAttributes.TabIndex = 160;
+			this.buttonMeshAttributes.TabStop = false;
+			this.buttonMeshAttributes.Text = "Attributes";
+			this.buttonMeshAttributes.UseVisualStyleBackColor = true;
 			// 
-			// buttonSubmeshRemove
+			// checkBoxMeshSkinned
 			// 
-			this.buttonSubmeshRemove.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.buttonSubmeshRemove.Location = new System.Drawing.Point(90, 206);
-			this.buttonSubmeshRemove.Name = "buttonSubmeshRemove";
-			this.buttonSubmeshRemove.Size = new System.Drawing.Size(73, 23);
-			this.buttonSubmeshRemove.TabIndex = 144;
-			this.buttonSubmeshRemove.Text = "Remove";
-			this.buttonSubmeshRemove.UseVisualStyleBackColor = true;
+			this.checkBoxMeshSkinned.AutoCheck = false;
+			this.checkBoxMeshSkinned.AutoSize = true;
+			this.checkBoxMeshSkinned.Enabled = false;
+			this.checkBoxMeshSkinned.Location = new System.Drawing.Point(218, 35);
+			this.checkBoxMeshSkinned.Name = "checkBoxMeshSkinned";
+			this.checkBoxMeshSkinned.Size = new System.Drawing.Size(15, 14);
+			this.checkBoxMeshSkinned.TabIndex = 156;
+			this.checkBoxMeshSkinned.TabStop = false;
+			this.checkBoxMeshSkinned.UseVisualStyleBackColor = true;
 			// 
-			// textBoxMeshName
+			// label8
 			// 
-			this.textBoxMeshName.Location = new System.Drawing.Point(0, 19);
-			this.textBoxMeshName.Name = "textBoxMeshName";
-			this.textBoxMeshName.ReadOnly = true;
-			this.textBoxMeshName.Size = new System.Drawing.Size(200, 20);
-			this.textBoxMeshName.TabIndex = 1;
+			this.label8.AutoSize = true;
+			this.label8.Location = new System.Drawing.Point(201, 16);
+			this.label8.Name = "label8";
+			this.label8.Size = new System.Drawing.Size(46, 13);
+			this.label8.TabIndex = 125;
+			this.label8.Text = "Skinned";
+			// 
+			// textBoxRendererName
+			// 
+			this.textBoxRendererName.Location = new System.Drawing.Point(0, 19);
+			this.textBoxRendererName.Name = "textBoxRendererName";
+			this.textBoxRendererName.ReadOnly = true;
+			this.textBoxRendererName.Size = new System.Drawing.Size(200, 20);
+			this.textBoxRendererName.TabIndex = 1;
 			// 
 			// tabPageMaterialView
 			// 
-			this.tabPageMaterialView.Controls.Add(this.buttonMaterialDeleteUnref);
-			this.tabPageMaterialView.Controls.Add(this.buttonMaterialEditHex);
-			this.tabPageMaterialView.Controls.Add(this.buttonMaterialExternalTexture);
+			this.tabPageMaterialView.Controls.Add(this.editTextBoxMatShader);
+			this.tabPageMaterialView.Controls.Add(this.labelMatTex4);
+			this.tabPageMaterialView.Controls.Add(this.labelMatTex3);
+			this.tabPageMaterialView.Controls.Add(this.labelMatTex2);
+			this.tabPageMaterialView.Controls.Add(this.labelMatTex1);
+			this.tabPageMaterialView.Controls.Add(this.labelExtra);
+			this.tabPageMaterialView.Controls.Add(this.labelOutline);
+			this.tabPageMaterialView.Controls.Add(this.labelRimPower);
+			this.tabPageMaterialView.Controls.Add(this.label30);
+			this.tabPageMaterialView.Controls.Add(this.comboBoxMatShaderKeywords);
+			this.tabPageMaterialView.Controls.Add(this.label29);
 			this.tabPageMaterialView.Controls.Add(this.comboBoxMatTex4);
 			this.tabPageMaterialView.Controls.Add(this.comboBoxMatTex3);
 			this.tabPageMaterialView.Controls.Add(this.comboBoxMatTex2);
@@ -2030,11 +2105,29 @@
 			this.tabPageMaterialView.Controls.Add(this.label10);
 			this.tabPageMaterialView.Controls.Add(this.label7);
 			this.tabPageMaterialView.Controls.Add(this.label2);
-			this.tabPageMaterialView.Controls.Add(this.label22);
-			this.tabPageMaterialView.Controls.Add(this.label21);
-			this.tabPageMaterialView.Controls.Add(this.label20);
-			this.tabPageMaterialView.Controls.Add(this.label19);
-			this.tabPageMaterialView.Controls.Add(this.label18);
+			this.tabPageMaterialView.Controls.Add(this.labelShininess);
+			this.tabPageMaterialView.Controls.Add(this.labelShadow);
+			this.tabPageMaterialView.Controls.Add(this.labelOutlineColour);
+			this.tabPageMaterialView.Controls.Add(this.labelRim);
+			this.tabPageMaterialView.Controls.Add(this.labelEmissive);
+			this.tabPageMaterialView.Controls.Add(this.labelSpecular);
+			this.tabPageMaterialView.Controls.Add(this.labelAmbient);
+			this.tabPageMaterialView.Controls.Add(this.labelDiffuse);
+			this.tabPageMaterialView.Controls.Add(this.textBoxMatExtra);
+			this.tabPageMaterialView.Controls.Add(this.textBoxMatShadowA);
+			this.tabPageMaterialView.Controls.Add(this.textBoxMatShadowB);
+			this.tabPageMaterialView.Controls.Add(this.textBoxMatShadowG);
+			this.tabPageMaterialView.Controls.Add(this.textBoxMatShadowR);
+			this.tabPageMaterialView.Controls.Add(this.textBoxMatOutlineA);
+			this.tabPageMaterialView.Controls.Add(this.textBoxMatOutlineB);
+			this.tabPageMaterialView.Controls.Add(this.textBoxMatOutlineG);
+			this.tabPageMaterialView.Controls.Add(this.textBoxMatOutlineR);
+			this.tabPageMaterialView.Controls.Add(this.textBoxMatRimA);
+			this.tabPageMaterialView.Controls.Add(this.textBoxMatRimB);
+			this.tabPageMaterialView.Controls.Add(this.textBoxMatRimG);
+			this.tabPageMaterialView.Controls.Add(this.textBoxMatRimR);
+			this.tabPageMaterialView.Controls.Add(this.textBoxMatOutline);
+			this.tabPageMaterialView.Controls.Add(this.textBoxMatRimPower);
 			this.tabPageMaterialView.Controls.Add(this.textBoxMatSpecularPower);
 			this.tabPageMaterialView.Controls.Add(this.textBoxMatEmissiveA);
 			this.tabPageMaterialView.Controls.Add(this.textBoxMatEmissiveB);
@@ -2060,86 +2153,159 @@
 			this.tabPageMaterialView.Text = "Material";
 			this.tabPageMaterialView.UseVisualStyleBackColor = true;
 			// 
-			// buttonMaterialDeleteUnref
+			// editTextBoxMatShader
 			// 
-			this.buttonMaterialDeleteUnref.Location = new System.Drawing.Point(89, 338);
-			this.buttonMaterialDeleteUnref.Name = "buttonMaterialDeleteUnref";
-			this.buttonMaterialDeleteUnref.Size = new System.Drawing.Size(114, 23);
-			this.buttonMaterialDeleteUnref.TabIndex = 160;
-			this.buttonMaterialDeleteUnref.Text = "Delete Unreferenced";
-			this.buttonMaterialDeleteUnref.UseVisualStyleBackColor = true;
+			this.editTextBoxMatShader.Enabled = false;
+			this.editTextBoxMatShader.Location = new System.Drawing.Point(1, 61);
+			this.editTextBoxMatShader.Name = "editTextBoxMatShader";
+			this.editTextBoxMatShader.Size = new System.Drawing.Size(150, 20);
+			this.editTextBoxMatShader.TabIndex = 4;
 			// 
-			// buttonMaterialEditHex
+			// labelMatTex4
 			// 
-			this.buttonMaterialEditHex.Location = new System.Drawing.Point(3, 338);
-			this.buttonMaterialEditHex.Name = "buttonMaterialEditHex";
-			this.buttonMaterialEditHex.Size = new System.Drawing.Size(75, 23);
-			this.buttonMaterialEditHex.TabIndex = 155;
-			this.buttonMaterialEditHex.Text = "Edit Hex";
-			this.buttonMaterialEditHex.UseVisualStyleBackColor = true;
+			this.labelMatTex4.AutoSize = true;
+			this.labelMatTex4.Location = new System.Drawing.Point(5, 177);
+			this.labelMatTex4.Name = "labelMatTex4";
+			this.labelMatTex4.Size = new System.Drawing.Size(13, 13);
+			this.labelMatTex4.TabIndex = 16;
+			this.labelMatTex4.Text = "_";
 			// 
-			// buttonMaterialExternalTexture
+			// labelMatTex3
 			// 
-			this.buttonMaterialExternalTexture.Location = new System.Drawing.Point(178, 310);
-			this.buttonMaterialExternalTexture.Name = "buttonMaterialExternalTexture";
-			this.buttonMaterialExternalTexture.Size = new System.Drawing.Size(75, 22);
-			this.buttonMaterialExternalTexture.TabIndex = 150;
-			this.buttonMaterialExternalTexture.Text = "External";
-			this.buttonMaterialExternalTexture.UseVisualStyleBackColor = true;
+			this.labelMatTex3.AutoSize = true;
+			this.labelMatTex3.Location = new System.Drawing.Point(5, 154);
+			this.labelMatTex3.Name = "labelMatTex3";
+			this.labelMatTex3.Size = new System.Drawing.Size(41, 13);
+			this.labelMatTex3.TabIndex = 14;
+			this.labelMatTex3.Text = "_Ramp";
+			// 
+			// labelMatTex2
+			// 
+			this.labelMatTex2.AutoSize = true;
+			this.labelMatTex2.Location = new System.Drawing.Point(5, 131);
+			this.labelMatTex2.Name = "labelMatTex2";
+			this.labelMatTex2.Size = new System.Drawing.Size(61, 13);
+			this.labelMatTex2.TabIndex = 12;
+			this.labelMatTex2.Text = "_BumpMap";
+			// 
+			// labelMatTex1
+			// 
+			this.labelMatTex1.AutoSize = true;
+			this.labelMatTex1.Location = new System.Drawing.Point(5, 108);
+			this.labelMatTex1.Name = "labelMatTex1";
+			this.labelMatTex1.Size = new System.Drawing.Size(54, 13);
+			this.labelMatTex1.TabIndex = 10;
+			this.labelMatTex1.Text = "_MainTex";
+			// 
+			// labelExtra
+			// 
+			this.labelExtra.AutoSize = true;
+			this.labelExtra.Location = new System.Drawing.Point(197, 389);
+			this.labelExtra.Name = "labelExtra";
+			this.labelExtra.Size = new System.Drawing.Size(13, 13);
+			this.labelExtra.TabIndex = 60;
+			this.labelExtra.Text = "_";
+			// 
+			// labelOutline
+			// 
+			this.labelOutline.AutoSize = true;
+			this.labelOutline.Location = new System.Drawing.Point(132, 390);
+			this.labelOutline.Name = "labelOutline";
+			this.labelOutline.Size = new System.Drawing.Size(40, 13);
+			this.labelOutline.TabIndex = 60;
+			this.labelOutline.Text = "Outline";
+			// 
+			// labelRimPower
+			// 
+			this.labelRimPower.AutoSize = true;
+			this.labelRimPower.Location = new System.Drawing.Point(67, 389);
+			this.labelRimPower.Name = "labelRimPower";
+			this.labelRimPower.Size = new System.Drawing.Size(58, 13);
+			this.labelRimPower.TabIndex = 60;
+			this.labelRimPower.Text = "Rim Power";
+			// 
+			// label30
+			// 
+			this.label30.AutoSize = true;
+			this.label30.Location = new System.Drawing.Point(154, 47);
+			this.label30.Name = "label30";
+			this.label30.Size = new System.Drawing.Size(90, 13);
+			this.label30.TabIndex = 5;
+			this.label30.Text = "Shader Keywords";
+			// 
+			// comboBoxMatShaderKeywords
+			// 
+			this.comboBoxMatShaderKeywords.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.comboBoxMatShaderKeywords.Location = new System.Drawing.Point(157, 61);
+			this.comboBoxMatShaderKeywords.Name = "comboBoxMatShaderKeywords";
+			this.comboBoxMatShaderKeywords.Size = new System.Drawing.Size(92, 21);
+			this.comboBoxMatShaderKeywords.Sorted = true;
+			this.comboBoxMatShaderKeywords.TabIndex = 6;
+			// 
+			// label29
+			// 
+			this.label29.AutoSize = true;
+			this.label29.Location = new System.Drawing.Point(-2, 47);
+			this.label29.Name = "label29";
+			this.label29.Size = new System.Drawing.Size(69, 13);
+			this.label29.TabIndex = 3;
+			this.label29.Text = "Shader Used";
 			// 
 			// comboBoxMatTex4
 			// 
 			this.comboBoxMatTex4.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.comboBoxMatTex4.Location = new System.Drawing.Point(0, 128);
+			this.comboBoxMatTex4.Location = new System.Drawing.Point(93, 172);
 			this.comboBoxMatTex4.Name = "comboBoxMatTex4";
-			this.comboBoxMatTex4.Size = new System.Drawing.Size(250, 21);
+			this.comboBoxMatTex4.Size = new System.Drawing.Size(157, 21);
 			this.comboBoxMatTex4.Sorted = true;
-			this.comboBoxMatTex4.TabIndex = 8;
+			this.comboBoxMatTex4.TabIndex = 16;
 			// 
 			// comboBoxMatTex3
 			// 
 			this.comboBoxMatTex3.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.comboBoxMatTex3.Location = new System.Drawing.Point(0, 105);
+			this.comboBoxMatTex3.Location = new System.Drawing.Point(93, 149);
 			this.comboBoxMatTex3.Name = "comboBoxMatTex3";
-			this.comboBoxMatTex3.Size = new System.Drawing.Size(250, 21);
+			this.comboBoxMatTex3.Size = new System.Drawing.Size(157, 21);
 			this.comboBoxMatTex3.Sorted = true;
-			this.comboBoxMatTex3.TabIndex = 7;
+			this.comboBoxMatTex3.TabIndex = 14;
 			// 
 			// comboBoxMatTex2
 			// 
 			this.comboBoxMatTex2.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.comboBoxMatTex2.Location = new System.Drawing.Point(0, 82);
+			this.comboBoxMatTex2.Location = new System.Drawing.Point(93, 126);
 			this.comboBoxMatTex2.Name = "comboBoxMatTex2";
-			this.comboBoxMatTex2.Size = new System.Drawing.Size(250, 21);
+			this.comboBoxMatTex2.Size = new System.Drawing.Size(157, 21);
 			this.comboBoxMatTex2.Sorted = true;
-			this.comboBoxMatTex2.TabIndex = 6;
+			this.comboBoxMatTex2.TabIndex = 12;
 			// 
 			// comboBoxMatTex1
 			// 
 			this.comboBoxMatTex1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.comboBoxMatTex1.Location = new System.Drawing.Point(0, 59);
+			this.comboBoxMatTex1.Location = new System.Drawing.Point(93, 103);
 			this.comboBoxMatTex1.Name = "comboBoxMatTex1";
-			this.comboBoxMatTex1.Size = new System.Drawing.Size(250, 21);
+			this.comboBoxMatTex1.Size = new System.Drawing.Size(157, 21);
 			this.comboBoxMatTex1.Sorted = true;
-			this.comboBoxMatTex1.TabIndex = 5;
+			this.comboBoxMatTex1.TabIndex = 10;
 			// 
 			// buttonMaterialRemove
 			// 
-			this.buttonMaterialRemove.Location = new System.Drawing.Point(2, 309);
+			this.buttonMaterialRemove.Location = new System.Drawing.Point(2, 432);
 			this.buttonMaterialRemove.Name = "buttonMaterialRemove";
 			this.buttonMaterialRemove.Size = new System.Drawing.Size(75, 23);
-			this.buttonMaterialRemove.TabIndex = 145;
+			this.buttonMaterialRemove.TabIndex = 80;
 			this.buttonMaterialRemove.Text = "Remove";
 			this.buttonMaterialRemove.UseVisualStyleBackColor = true;
+			this.buttonMaterialRemove.Click += new System.EventHandler(this.buttonMaterialRemove_Click);
 			// 
 			// buttonMaterialCopy
 			// 
-			this.buttonMaterialCopy.Location = new System.Drawing.Point(89, 309);
+			this.buttonMaterialCopy.Location = new System.Drawing.Point(89, 432);
 			this.buttonMaterialCopy.Name = "buttonMaterialCopy";
 			this.buttonMaterialCopy.Size = new System.Drawing.Size(75, 23);
-			this.buttonMaterialCopy.TabIndex = 146;
+			this.buttonMaterialCopy.TabIndex = 82;
 			this.buttonMaterialCopy.Text = "Copy->New";
 			this.buttonMaterialCopy.UseVisualStyleBackColor = true;
+			this.buttonMaterialCopy.Click += new System.EventHandler(this.buttonMaterialCopy_Click);
 			// 
 			// label17
 			// 
@@ -2147,230 +2313,362 @@
 			this.label17.Location = new System.Drawing.Point(-2, 4);
 			this.label17.Name = "label17";
 			this.label17.Size = new System.Drawing.Size(35, 13);
-			this.label17.TabIndex = 8;
+			this.label17.TabIndex = 1;
 			this.label17.Text = "Name";
 			// 
 			// label23
 			// 
 			this.label23.AutoSize = true;
-			this.label23.Location = new System.Drawing.Point(-3, 45);
+			this.label23.Location = new System.Drawing.Point(-3, 89);
 			this.label23.Name = "label23";
 			this.label23.Size = new System.Drawing.Size(76, 13);
-			this.label23.TabIndex = 22;
+			this.label23.TabIndex = 9;
 			this.label23.Text = "Textures Used";
 			// 
 			// label11
 			// 
 			this.label11.AutoSize = true;
-			this.label11.Location = new System.Drawing.Point(219, 158);
+			this.label11.Location = new System.Drawing.Point(219, 202);
 			this.label11.Name = "label11";
 			this.label11.Size = new System.Drawing.Size(14, 13);
-			this.label11.TabIndex = 69;
+			this.label11.TabIndex = 20;
 			this.label11.Text = "A";
 			// 
 			// label10
 			// 
 			this.label10.AutoSize = true;
-			this.label10.Location = new System.Drawing.Point(169, 158);
+			this.label10.Location = new System.Drawing.Point(169, 202);
 			this.label10.Name = "label10";
 			this.label10.Size = new System.Drawing.Size(14, 13);
-			this.label10.TabIndex = 68;
+			this.label10.TabIndex = 20;
 			this.label10.Text = "B";
 			// 
 			// label7
 			// 
 			this.label7.AutoSize = true;
-			this.label7.Location = new System.Drawing.Point(119, 158);
+			this.label7.Location = new System.Drawing.Point(119, 202);
 			this.label7.Name = "label7";
 			this.label7.Size = new System.Drawing.Size(15, 13);
-			this.label7.TabIndex = 67;
+			this.label7.TabIndex = 20;
 			this.label7.Text = "G";
 			// 
 			// label2
 			// 
 			this.label2.AutoSize = true;
-			this.label2.Location = new System.Drawing.Point(69, 158);
+			this.label2.Location = new System.Drawing.Point(69, 202);
 			this.label2.Name = "label2";
 			this.label2.Size = new System.Drawing.Size(15, 13);
-			this.label2.TabIndex = 66;
+			this.label2.TabIndex = 20;
 			this.label2.Text = "R";
 			// 
-			// label22
+			// labelShininess
 			// 
-			this.label22.AutoSize = true;
-			this.label22.Location = new System.Drawing.Point(2, 247);
-			this.label22.Name = "label22";
-			this.label22.Size = new System.Drawing.Size(48, 13);
-			this.label22.TabIndex = 17;
-			this.label22.Text = "Emissive";
+			this.labelShininess.AutoSize = true;
+			this.labelShininess.Location = new System.Drawing.Point(2, 389);
+			this.labelShininess.Name = "labelShininess";
+			this.labelShininess.Size = new System.Drawing.Size(52, 13);
+			this.labelShininess.TabIndex = 60;
+			this.labelShininess.Text = "Shininess";
 			// 
-			// label21
+			// labelShadow
 			// 
-			this.label21.AutoSize = true;
-			this.label21.Location = new System.Drawing.Point(-2, 271);
-			this.label21.Name = "label21";
-			this.label21.Size = new System.Drawing.Size(52, 13);
-			this.label21.TabIndex = 16;
-			this.label21.Text = "Shininess";
+			this.labelShadow.AutoSize = true;
+			this.labelShadow.Location = new System.Drawing.Point(0, 362);
+			this.labelShadow.Name = "labelShadow";
+			this.labelShadow.Size = new System.Drawing.Size(46, 13);
+			this.labelShadow.TabIndex = 21;
+			this.labelShadow.Text = "Shadow";
 			// 
-			// label20
+			// labelOutlineColour
 			// 
-			this.label20.AutoSize = true;
-			this.label20.Location = new System.Drawing.Point(0, 224);
-			this.label20.Name = "label20";
-			this.label20.Size = new System.Drawing.Size(49, 13);
-			this.label20.TabIndex = 15;
-			this.label20.Text = "Specular";
+			this.labelOutlineColour.AutoSize = true;
+			this.labelOutlineColour.Location = new System.Drawing.Point(0, 338);
+			this.labelOutlineColour.Name = "labelOutlineColour";
+			this.labelOutlineColour.Size = new System.Drawing.Size(40, 13);
+			this.labelOutlineColour.TabIndex = 21;
+			this.labelOutlineColour.Text = "Outline";
 			// 
-			// label19
+			// labelRim
 			// 
-			this.label19.AutoSize = true;
-			this.label19.Location = new System.Drawing.Point(5, 199);
-			this.label19.Name = "label19";
-			this.label19.Size = new System.Drawing.Size(45, 13);
-			this.label19.TabIndex = 14;
-			this.label19.Text = "Ambient";
+			this.labelRim.AutoSize = true;
+			this.labelRim.Location = new System.Drawing.Point(0, 314);
+			this.labelRim.Name = "labelRim";
+			this.labelRim.Size = new System.Drawing.Size(25, 13);
+			this.labelRim.TabIndex = 21;
+			this.labelRim.Text = "Rim";
 			// 
-			// label18
+			// labelEmissive
 			// 
-			this.label18.AutoSize = true;
-			this.label18.Location = new System.Drawing.Point(10, 175);
-			this.label18.Name = "label18";
-			this.label18.Size = new System.Drawing.Size(40, 13);
-			this.label18.TabIndex = 13;
-			this.label18.Text = "Diffuse";
+			this.labelEmissive.AutoSize = true;
+			this.labelEmissive.Location = new System.Drawing.Point(0, 291);
+			this.labelEmissive.Name = "labelEmissive";
+			this.labelEmissive.Size = new System.Drawing.Size(48, 13);
+			this.labelEmissive.TabIndex = 21;
+			this.labelEmissive.Text = "Emissive";
+			// 
+			// labelSpecular
+			// 
+			this.labelSpecular.AutoSize = true;
+			this.labelSpecular.Location = new System.Drawing.Point(0, 268);
+			this.labelSpecular.Name = "labelSpecular";
+			this.labelSpecular.Size = new System.Drawing.Size(49, 13);
+			this.labelSpecular.TabIndex = 21;
+			this.labelSpecular.Text = "Specular";
+			// 
+			// labelAmbient
+			// 
+			this.labelAmbient.AutoSize = true;
+			this.labelAmbient.Location = new System.Drawing.Point(0, 243);
+			this.labelAmbient.Name = "labelAmbient";
+			this.labelAmbient.Size = new System.Drawing.Size(45, 13);
+			this.labelAmbient.TabIndex = 21;
+			this.labelAmbient.Text = "Ambient";
+			// 
+			// labelDiffuse
+			// 
+			this.labelDiffuse.AutoSize = true;
+			this.labelDiffuse.Location = new System.Drawing.Point(0, 219);
+			this.labelDiffuse.Name = "labelDiffuse";
+			this.labelDiffuse.Size = new System.Drawing.Size(40, 13);
+			this.labelDiffuse.TabIndex = 21;
+			this.labelDiffuse.Text = "Diffuse";
+			// 
+			// textBoxMatExtra
+			// 
+			this.textBoxMatExtra.Location = new System.Drawing.Point(200, 405);
+			this.textBoxMatExtra.Name = "textBoxMatExtra";
+			this.textBoxMatExtra.Size = new System.Drawing.Size(49, 20);
+			this.textBoxMatExtra.TabIndex = 64;
+			// 
+			// textBoxMatShadowA
+			// 
+			this.textBoxMatShadowA.Location = new System.Drawing.Point(201, 359);
+			this.textBoxMatShadowA.Name = "textBoxMatShadowA";
+			this.textBoxMatShadowA.Size = new System.Drawing.Size(49, 20);
+			this.textBoxMatShadowA.TabIndex = 49;
+			// 
+			// textBoxMatShadowB
+			// 
+			this.textBoxMatShadowB.Location = new System.Drawing.Point(151, 359);
+			this.textBoxMatShadowB.Name = "textBoxMatShadowB";
+			this.textBoxMatShadowB.Size = new System.Drawing.Size(49, 20);
+			this.textBoxMatShadowB.TabIndex = 48;
+			// 
+			// textBoxMatShadowG
+			// 
+			this.textBoxMatShadowG.Location = new System.Drawing.Point(101, 359);
+			this.textBoxMatShadowG.Name = "textBoxMatShadowG";
+			this.textBoxMatShadowG.Size = new System.Drawing.Size(49, 20);
+			this.textBoxMatShadowG.TabIndex = 47;
+			// 
+			// textBoxMatShadowR
+			// 
+			this.textBoxMatShadowR.Location = new System.Drawing.Point(51, 359);
+			this.textBoxMatShadowR.Name = "textBoxMatShadowR";
+			this.textBoxMatShadowR.Size = new System.Drawing.Size(49, 20);
+			this.textBoxMatShadowR.TabIndex = 46;
+			// 
+			// textBoxMatOutlineA
+			// 
+			this.textBoxMatOutlineA.Location = new System.Drawing.Point(201, 335);
+			this.textBoxMatOutlineA.Name = "textBoxMatOutlineA";
+			this.textBoxMatOutlineA.Size = new System.Drawing.Size(49, 20);
+			this.textBoxMatOutlineA.TabIndex = 45;
+			// 
+			// textBoxMatOutlineB
+			// 
+			this.textBoxMatOutlineB.Location = new System.Drawing.Point(151, 335);
+			this.textBoxMatOutlineB.Name = "textBoxMatOutlineB";
+			this.textBoxMatOutlineB.Size = new System.Drawing.Size(49, 20);
+			this.textBoxMatOutlineB.TabIndex = 44;
+			// 
+			// textBoxMatOutlineG
+			// 
+			this.textBoxMatOutlineG.Location = new System.Drawing.Point(101, 335);
+			this.textBoxMatOutlineG.Name = "textBoxMatOutlineG";
+			this.textBoxMatOutlineG.Size = new System.Drawing.Size(49, 20);
+			this.textBoxMatOutlineG.TabIndex = 43;
+			// 
+			// textBoxMatOutlineR
+			// 
+			this.textBoxMatOutlineR.Location = new System.Drawing.Point(51, 335);
+			this.textBoxMatOutlineR.Name = "textBoxMatOutlineR";
+			this.textBoxMatOutlineR.Size = new System.Drawing.Size(49, 20);
+			this.textBoxMatOutlineR.TabIndex = 42;
+			// 
+			// textBoxMatRimA
+			// 
+			this.textBoxMatRimA.Location = new System.Drawing.Point(201, 311);
+			this.textBoxMatRimA.Name = "textBoxMatRimA";
+			this.textBoxMatRimA.Size = new System.Drawing.Size(49, 20);
+			this.textBoxMatRimA.TabIndex = 41;
+			// 
+			// textBoxMatRimB
+			// 
+			this.textBoxMatRimB.Location = new System.Drawing.Point(151, 311);
+			this.textBoxMatRimB.Name = "textBoxMatRimB";
+			this.textBoxMatRimB.Size = new System.Drawing.Size(49, 20);
+			this.textBoxMatRimB.TabIndex = 40;
+			// 
+			// textBoxMatRimG
+			// 
+			this.textBoxMatRimG.Location = new System.Drawing.Point(101, 311);
+			this.textBoxMatRimG.Name = "textBoxMatRimG";
+			this.textBoxMatRimG.Size = new System.Drawing.Size(49, 20);
+			this.textBoxMatRimG.TabIndex = 39;
+			// 
+			// textBoxMatRimR
+			// 
+			this.textBoxMatRimR.Location = new System.Drawing.Point(51, 311);
+			this.textBoxMatRimR.Name = "textBoxMatRimR";
+			this.textBoxMatRimR.Size = new System.Drawing.Size(49, 20);
+			this.textBoxMatRimR.TabIndex = 38;
+			// 
+			// textBoxMatOutline
+			// 
+			this.textBoxMatOutline.Location = new System.Drawing.Point(135, 406);
+			this.textBoxMatOutline.Name = "textBoxMatOutline";
+			this.textBoxMatOutline.Size = new System.Drawing.Size(49, 20);
+			this.textBoxMatOutline.TabIndex = 62;
+			// 
+			// textBoxMatRimPower
+			// 
+			this.textBoxMatRimPower.Location = new System.Drawing.Point(70, 405);
+			this.textBoxMatRimPower.Name = "textBoxMatRimPower";
+			this.textBoxMatRimPower.Size = new System.Drawing.Size(49, 20);
+			this.textBoxMatRimPower.TabIndex = 61;
 			// 
 			// textBoxMatSpecularPower
 			// 
-			this.textBoxMatSpecularPower.Location = new System.Drawing.Point(51, 268);
+			this.textBoxMatSpecularPower.Location = new System.Drawing.Point(5, 405);
 			this.textBoxMatSpecularPower.Name = "textBoxMatSpecularPower";
 			this.textBoxMatSpecularPower.Size = new System.Drawing.Size(49, 20);
-			this.textBoxMatSpecularPower.TabIndex = 38;
+			this.textBoxMatSpecularPower.TabIndex = 60;
 			// 
 			// textBoxMatEmissiveA
 			// 
-			this.textBoxMatEmissiveA.Location = new System.Drawing.Point(201, 244);
+			this.textBoxMatEmissiveA.Location = new System.Drawing.Point(201, 288);
 			this.textBoxMatEmissiveA.Name = "textBoxMatEmissiveA";
 			this.textBoxMatEmissiveA.Size = new System.Drawing.Size(49, 20);
 			this.textBoxMatEmissiveA.TabIndex = 37;
 			// 
 			// textBoxMatEmissiveB
 			// 
-			this.textBoxMatEmissiveB.Location = new System.Drawing.Point(151, 244);
+			this.textBoxMatEmissiveB.Location = new System.Drawing.Point(151, 288);
 			this.textBoxMatEmissiveB.Name = "textBoxMatEmissiveB";
 			this.textBoxMatEmissiveB.Size = new System.Drawing.Size(49, 20);
 			this.textBoxMatEmissiveB.TabIndex = 36;
 			// 
 			// textBoxMatEmissiveG
 			// 
-			this.textBoxMatEmissiveG.Location = new System.Drawing.Point(101, 244);
+			this.textBoxMatEmissiveG.Location = new System.Drawing.Point(101, 288);
 			this.textBoxMatEmissiveG.Name = "textBoxMatEmissiveG";
 			this.textBoxMatEmissiveG.Size = new System.Drawing.Size(49, 20);
 			this.textBoxMatEmissiveG.TabIndex = 35;
 			// 
 			// textBoxMatEmissiveR
 			// 
-			this.textBoxMatEmissiveR.Location = new System.Drawing.Point(51, 244);
+			this.textBoxMatEmissiveR.Location = new System.Drawing.Point(51, 288);
 			this.textBoxMatEmissiveR.Name = "textBoxMatEmissiveR";
 			this.textBoxMatEmissiveR.Size = new System.Drawing.Size(49, 20);
 			this.textBoxMatEmissiveR.TabIndex = 34;
 			// 
 			// textBoxMatSpecularA
 			// 
-			this.textBoxMatSpecularA.Location = new System.Drawing.Point(201, 220);
+			this.textBoxMatSpecularA.Location = new System.Drawing.Point(201, 264);
 			this.textBoxMatSpecularA.Name = "textBoxMatSpecularA";
 			this.textBoxMatSpecularA.Size = new System.Drawing.Size(49, 20);
 			this.textBoxMatSpecularA.TabIndex = 33;
 			// 
 			// textBoxMatSpecularB
 			// 
-			this.textBoxMatSpecularB.Location = new System.Drawing.Point(151, 220);
+			this.textBoxMatSpecularB.Location = new System.Drawing.Point(151, 264);
 			this.textBoxMatSpecularB.Name = "textBoxMatSpecularB";
 			this.textBoxMatSpecularB.Size = new System.Drawing.Size(49, 20);
 			this.textBoxMatSpecularB.TabIndex = 32;
 			// 
 			// textBoxMatSpecularG
 			// 
-			this.textBoxMatSpecularG.Location = new System.Drawing.Point(101, 220);
+			this.textBoxMatSpecularG.Location = new System.Drawing.Point(101, 264);
 			this.textBoxMatSpecularG.Name = "textBoxMatSpecularG";
 			this.textBoxMatSpecularG.Size = new System.Drawing.Size(49, 20);
 			this.textBoxMatSpecularG.TabIndex = 31;
 			// 
 			// textBoxMatSpecularR
 			// 
-			this.textBoxMatSpecularR.Location = new System.Drawing.Point(51, 220);
+			this.textBoxMatSpecularR.Location = new System.Drawing.Point(51, 264);
 			this.textBoxMatSpecularR.Name = "textBoxMatSpecularR";
 			this.textBoxMatSpecularR.Size = new System.Drawing.Size(49, 20);
 			this.textBoxMatSpecularR.TabIndex = 30;
 			// 
 			// textBoxMatAmbientA
 			// 
-			this.textBoxMatAmbientA.Location = new System.Drawing.Point(201, 196);
+			this.textBoxMatAmbientA.Location = new System.Drawing.Point(201, 240);
 			this.textBoxMatAmbientA.Name = "textBoxMatAmbientA";
 			this.textBoxMatAmbientA.Size = new System.Drawing.Size(49, 20);
 			this.textBoxMatAmbientA.TabIndex = 29;
 			// 
 			// textBoxMatAmbientB
 			// 
-			this.textBoxMatAmbientB.Location = new System.Drawing.Point(151, 196);
+			this.textBoxMatAmbientB.Location = new System.Drawing.Point(151, 240);
 			this.textBoxMatAmbientB.Name = "textBoxMatAmbientB";
 			this.textBoxMatAmbientB.Size = new System.Drawing.Size(49, 20);
 			this.textBoxMatAmbientB.TabIndex = 28;
 			// 
 			// textBoxMatAmbientG
 			// 
-			this.textBoxMatAmbientG.Location = new System.Drawing.Point(101, 196);
+			this.textBoxMatAmbientG.Location = new System.Drawing.Point(101, 240);
 			this.textBoxMatAmbientG.Name = "textBoxMatAmbientG";
 			this.textBoxMatAmbientG.Size = new System.Drawing.Size(49, 20);
 			this.textBoxMatAmbientG.TabIndex = 27;
 			// 
 			// textBoxMatAmbientR
 			// 
-			this.textBoxMatAmbientR.Location = new System.Drawing.Point(51, 196);
+			this.textBoxMatAmbientR.Location = new System.Drawing.Point(51, 240);
 			this.textBoxMatAmbientR.Name = "textBoxMatAmbientR";
 			this.textBoxMatAmbientR.Size = new System.Drawing.Size(49, 20);
 			this.textBoxMatAmbientR.TabIndex = 26;
 			// 
 			// textBoxMatDiffuseA
 			// 
-			this.textBoxMatDiffuseA.Location = new System.Drawing.Point(201, 172);
+			this.textBoxMatDiffuseA.Location = new System.Drawing.Point(201, 216);
 			this.textBoxMatDiffuseA.Name = "textBoxMatDiffuseA";
 			this.textBoxMatDiffuseA.Size = new System.Drawing.Size(49, 20);
 			this.textBoxMatDiffuseA.TabIndex = 25;
 			// 
 			// textBoxMatDiffuseB
 			// 
-			this.textBoxMatDiffuseB.Location = new System.Drawing.Point(151, 172);
+			this.textBoxMatDiffuseB.Location = new System.Drawing.Point(151, 216);
 			this.textBoxMatDiffuseB.Name = "textBoxMatDiffuseB";
 			this.textBoxMatDiffuseB.Size = new System.Drawing.Size(49, 20);
 			this.textBoxMatDiffuseB.TabIndex = 24;
 			// 
 			// textBoxMatDiffuseG
 			// 
-			this.textBoxMatDiffuseG.Location = new System.Drawing.Point(101, 172);
+			this.textBoxMatDiffuseG.Location = new System.Drawing.Point(101, 216);
 			this.textBoxMatDiffuseG.Name = "textBoxMatDiffuseG";
 			this.textBoxMatDiffuseG.Size = new System.Drawing.Size(49, 20);
 			this.textBoxMatDiffuseG.TabIndex = 23;
 			// 
 			// textBoxMatDiffuseR
 			// 
-			this.textBoxMatDiffuseR.Location = new System.Drawing.Point(51, 172);
+			this.textBoxMatDiffuseR.Location = new System.Drawing.Point(51, 216);
 			this.textBoxMatDiffuseR.Name = "textBoxMatDiffuseR";
 			this.textBoxMatDiffuseR.Size = new System.Drawing.Size(49, 20);
-			this.textBoxMatDiffuseR.TabIndex = 18;
+			this.textBoxMatDiffuseR.TabIndex = 22;
 			// 
 			// textBoxMatName
 			// 
 			this.textBoxMatName.Location = new System.Drawing.Point(0, 19);
 			this.textBoxMatName.Name = "textBoxMatName";
 			this.textBoxMatName.Size = new System.Drawing.Size(250, 20);
-			this.textBoxMatName.TabIndex = 3;
+			this.textBoxMatName.TabIndex = 2;
 			// 
 			// tabPageTextureView
 			// 
-			this.tabPageTextureView.Controls.Add(this.buttonTextureDeleteUnref);
+			this.tabPageTextureView.Controls.Add(this.checkBoxTextureMipMap);
+			this.tabPageTextureView.Controls.Add(this.labelTextureFormat);
 			this.tabPageTextureView.Controls.Add(this.label14);
-			this.tabPageTextureView.Controls.Add(this.buttonTextureEditHex);
 			this.tabPageTextureView.Controls.Add(this.buttonTextureAdd);
 			this.tabPageTextureView.Controls.Add(this.panelTexturePic);
 			this.tabPageTextureView.Controls.Add(this.label3);
@@ -2386,32 +2684,36 @@
 			this.tabPageTextureView.Text = "Texture";
 			this.tabPageTextureView.UseVisualStyleBackColor = true;
 			// 
-			// buttonTextureDeleteUnref
+			// checkBoxTextureMipMap
 			// 
-			this.buttonTextureDeleteUnref.Location = new System.Drawing.Point(176, 83);
-			this.buttonTextureDeleteUnref.Name = "buttonTextureDeleteUnref";
-			this.buttonTextureDeleteUnref.Size = new System.Drawing.Size(75, 23);
-			this.buttonTextureDeleteUnref.TabIndex = 40;
-			this.buttonTextureDeleteUnref.Text = "Delete Unref";
-			this.buttonTextureDeleteUnref.UseVisualStyleBackColor = true;
+			this.checkBoxTextureMipMap.AutoSize = true;
+			this.checkBoxTextureMipMap.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
+			this.checkBoxTextureMipMap.Enabled = false;
+			this.checkBoxTextureMipMap.Location = new System.Drawing.Point(169, 87);
+			this.checkBoxTextureMipMap.Name = "checkBoxTextureMipMap";
+			this.checkBoxTextureMipMap.Size = new System.Drawing.Size(64, 17);
+			this.checkBoxTextureMipMap.TabIndex = 42;
+			this.checkBoxTextureMipMap.TabStop = false;
+			this.checkBoxTextureMipMap.Text = "MipMap";
+			this.checkBoxTextureMipMap.UseVisualStyleBackColor = true;
+			// 
+			// labelTextureFormat
+			// 
+			this.labelTextureFormat.AutoSize = true;
+			this.labelTextureFormat.Location = new System.Drawing.Point(170, 54);
+			this.labelTextureFormat.Name = "labelTextureFormat";
+			this.labelTextureFormat.Size = new System.Drawing.Size(42, 13);
+			this.labelTextureFormat.TabIndex = 40;
+			this.labelTextureFormat.Text = "Format:";
 			// 
 			// label14
 			// 
 			this.label14.AutoSize = true;
-			this.label14.Location = new System.Drawing.Point(173, 4);
+			this.label14.Location = new System.Drawing.Point(167, 4);
 			this.label14.Name = "label14";
 			this.label14.Size = new System.Drawing.Size(57, 13);
 			this.label14.TabIndex = 39;
 			this.label14.Text = "Resolution";
-			// 
-			// buttonTextureEditHex
-			// 
-			this.buttonTextureEditHex.Location = new System.Drawing.Point(176, 49);
-			this.buttonTextureEditHex.Name = "buttonTextureEditHex";
-			this.buttonTextureEditHex.Size = new System.Drawing.Size(75, 23);
-			this.buttonTextureEditHex.TabIndex = 25;
-			this.buttonTextureEditHex.Text = "Edit Hex";
-			this.buttonTextureEditHex.UseVisualStyleBackColor = true;
 			// 
 			// buttonTextureAdd
 			// 
@@ -2421,6 +2723,7 @@
 			this.buttonTextureAdd.TabIndex = 30;
 			this.buttonTextureAdd.Text = "Add Image";
 			this.buttonTextureAdd.UseVisualStyleBackColor = true;
+			this.buttonTextureAdd.Click += new System.EventHandler(this.buttonTextureAdd_Click);
 			// 
 			// panelTexturePic
 			// 
@@ -2463,6 +2766,7 @@
 			this.buttonTextureExport.TabIndex = 16;
 			this.buttonTextureExport.Text = "Export";
 			this.buttonTextureExport.UseVisualStyleBackColor = true;
+			this.buttonTextureExport.Click += new System.EventHandler(this.buttonTextureExport_Click);
 			// 
 			// buttonTextureReplace
 			// 
@@ -2472,6 +2776,7 @@
 			this.buttonTextureReplace.TabIndex = 36;
 			this.buttonTextureReplace.Text = "Replace";
 			this.buttonTextureReplace.UseVisualStyleBackColor = true;
+			this.buttonTextureReplace.Click += new System.EventHandler(this.buttonTextureReplace_Click);
 			// 
 			// buttonTextureRemove
 			// 
@@ -2481,14 +2786,15 @@
 			this.buttonTextureRemove.TabIndex = 20;
 			this.buttonTextureRemove.Text = "Remove";
 			this.buttonTextureRemove.UseVisualStyleBackColor = true;
+			this.buttonTextureRemove.Click += new System.EventHandler(this.buttonTextureRemove_Click);
 			// 
 			// textBoxTexSize
 			// 
 			this.textBoxTexSize.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.textBoxTexSize.Location = new System.Drawing.Point(174, 19);
+			this.textBoxTexSize.Location = new System.Drawing.Point(170, 19);
 			this.textBoxTexSize.Name = "textBoxTexSize";
 			this.textBoxTexSize.ReadOnly = true;
-			this.textBoxTexSize.Size = new System.Drawing.Size(76, 20);
+			this.textBoxTexSize.Size = new System.Drawing.Size(80, 20);
 			this.textBoxTexSize.TabIndex = 37;
 			this.textBoxTexSize.TabStop = false;
 			// 
@@ -2498,7 +2804,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.textBoxTexName.Location = new System.Drawing.Point(0, 19);
 			this.textBoxTexName.Name = "textBoxTexName";
-			this.textBoxTexName.Size = new System.Drawing.Size(172, 20);
+			this.textBoxTexName.Size = new System.Drawing.Size(164, 20);
 			this.textBoxTexName.TabIndex = 5;
 			// 
 			// FormAnimator
@@ -2594,6 +2900,7 @@
 			this.panelMeshExportOptionsFbx.ResumeLayout(false);
 			this.panelMeshExportOptionsFbx.PerformLayout();
 			this.groupBox1.ResumeLayout(false);
+			this.groupBox1.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridViewMesh)).EndInit();
 			this.tabPageMaterialView.ResumeLayout(false);
 			this.tabPageMaterialView.PerformLayout();
@@ -2612,13 +2919,13 @@
 		private System.Windows.Forms.TabPage tabPageObject;
 		public System.Windows.Forms.TreeView treeViewObjectTree;
 		private System.Windows.Forms.Panel panelObjectTreeBottom;
-		private System.Windows.Forms.Button buttonObjectTreeCheckBones;
+		private System.Windows.Forms.Button buttonObjectTreeRefresh;
 		private System.Windows.Forms.Button buttonObjectTreeCollapse;
 		private System.Windows.Forms.Button buttonObjectTreeExpand;
 		private System.Windows.Forms.TabPage tabPageMesh;
 		private System.Windows.Forms.SplitContainer splitContainerMesh;
 		public System.Windows.Forms.ListView listViewMesh;
-		private System.Windows.Forms.ColumnHeader meshlistHeader;
+		private System.Windows.Forms.ColumnHeader meshlistHeaderNames;
 		private System.Windows.Forms.SplitContainer splitContainerMeshCrossRef;
 		private System.Windows.Forms.ListView listViewMeshMaterial;
 		private System.Windows.Forms.ColumnHeader listViewMeshMaterialHeader;
@@ -2651,7 +2958,6 @@
 		public System.Windows.Forms.TabControl tabControlViews;
 		private System.Windows.Forms.TabPage tabPageFrameView;
 		private System.Windows.Forms.Button buttonFrameAddBone;
-		private System.Windows.Forms.Button buttonFrameEditHex;
 		private System.Windows.Forms.GroupBox groupBox3;
 		private System.Windows.Forms.GroupBox groupBox5;
 		private System.Windows.Forms.Button buttonFrameMatrixApply;
@@ -2667,8 +2973,6 @@
 		private System.Windows.Forms.Button buttonFrameMatrixIdentity;
 		private System.Windows.Forms.Button buttonFrameMatrixInverse;
 		private System.Windows.Forms.Button buttonFrameMatrixCombined;
-		private System.Windows.Forms.Label label15;
-		private SB3Utility.EditTextBox textBoxFrameName2;
 		private System.Windows.Forms.TabControl tabControlFrameMatrix;
 		private System.Windows.Forms.TabPage tabPageFrameSRT;
 		private SB3Utility.DataGridViewEditor dataGridViewFrameSRT;
@@ -2707,7 +3011,6 @@
 		private System.Windows.Forms.TabPage tabPageBoneMatrix;
 		private SB3Utility.DataGridViewEditor dataGridViewBoneMatrix;
 		private System.Windows.Forms.Button buttonBoneRemove;
-		private System.Windows.Forms.Button buttonBoneCopy;
 		private System.Windows.Forms.Button buttonBoneGotoFrame;
 		private System.Windows.Forms.Label label25;
 		private SB3Utility.EditTextBox textBoxBoneName;
@@ -2715,7 +3018,7 @@
 		private System.Windows.Forms.Button buttonMeshRestPose;
 		private System.Windows.Forms.CheckBox checkBoxMeshNewSkin;
 		private System.Windows.Forms.Button buttonMeshNormals;
-		private System.Windows.Forms.Button buttonMeshEditHex;
+		private System.Windows.Forms.Button buttonSkinnedMeshRendererAttributes;
 		private System.Windows.Forms.Button buttonMeshMinBones;
 		private System.Windows.Forms.Button buttonMeshGotoFrame;
 		private System.Windows.Forms.GroupBox groupBox2;
@@ -2737,7 +3040,7 @@
 		private System.Windows.Forms.Panel panelMeshExportOptionsFbx;
 		private System.Windows.Forms.CheckBox checkBoxMeshExportFbxLinearInterpolation;
 		private System.Windows.Forms.CheckBox checkBoxMeshExportNoMesh;
-		private System.Windows.Forms.CheckBox checkBoxMeshExportEmbedMedia;
+		private System.Windows.Forms.CheckBox checkBoxMeshExportAllBones;
 		private System.Windows.Forms.CheckBox checkBoxMeshExportFbxSkins;
 		private System.Windows.Forms.Label label13;
 		public SB3Utility.EditTextBox textBoxKeyframeRange;
@@ -2748,18 +3051,13 @@
 		private System.Windows.Forms.Button buttonMeshRemove;
 		private System.Windows.Forms.GroupBox groupBox1;
 		private System.Windows.Forms.Button buttonMeshSnapBorders;
-		private System.Windows.Forms.CheckBox checkBoxSubmeshReorder;
 		public System.Windows.Forms.DataGridView dataGridViewMesh;
 		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnSubmeshVerts;
 		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnSubmeshFaces;
 		private System.Windows.Forms.DataGridViewComboBoxColumn ColumnSubmeshMaterial;
-		private System.Windows.Forms.Button buttonSubmeshEditHex;
-		private System.Windows.Forms.Button buttonSubmeshRemove;
-		public SB3Utility.EditTextBox textBoxMeshName;
+		private System.Windows.Forms.Button buttonMeshAttributes;
+		public SB3Utility.EditTextBox textBoxRendererName;
 		private System.Windows.Forms.TabPage tabPageMaterialView;
-		private System.Windows.Forms.Button buttonMaterialDeleteUnref;
-		private System.Windows.Forms.Button buttonMaterialEditHex;
-		private System.Windows.Forms.Button buttonMaterialExternalTexture;
 		private System.Windows.Forms.ComboBox comboBoxMatTex4;
 		private System.Windows.Forms.ComboBox comboBoxMatTex3;
 		private System.Windows.Forms.ComboBox comboBoxMatTex2;
@@ -2772,11 +3070,11 @@
 		private System.Windows.Forms.Label label10;
 		private System.Windows.Forms.Label label7;
 		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.Label label22;
-		private System.Windows.Forms.Label label21;
-		private System.Windows.Forms.Label label20;
-		private System.Windows.Forms.Label label19;
-		private System.Windows.Forms.Label label18;
+		private System.Windows.Forms.Label labelEmissive;
+		private System.Windows.Forms.Label labelShininess;
+		private System.Windows.Forms.Label labelSpecular;
+		private System.Windows.Forms.Label labelAmbient;
+		private System.Windows.Forms.Label labelDiffuse;
 		private SB3Utility.EditTextBox textBoxMatSpecularPower;
 		private SB3Utility.EditTextBox textBoxMatEmissiveA;
 		private SB3Utility.EditTextBox textBoxMatEmissiveB;
@@ -2796,9 +3094,7 @@
 		private SB3Utility.EditTextBox textBoxMatDiffuseR;
 		private SB3Utility.EditTextBox textBoxMatName;
 		private System.Windows.Forms.TabPage tabPageTextureView;
-		private System.Windows.Forms.Button buttonTextureDeleteUnref;
 		private System.Windows.Forms.Label label14;
-		private System.Windows.Forms.Button buttonTextureEditHex;
 		private System.Windows.Forms.Button buttonTextureAdd;
 		private System.Windows.Forms.Panel panelTexturePic;
 		private System.Windows.Forms.PictureBox pictureBoxTexture;
@@ -2808,5 +3104,43 @@
 		private System.Windows.Forms.Button buttonTextureRemove;
 		private SB3Utility.EditTextBox textBoxTexSize;
 		private SB3Utility.EditTextBox textBoxTexName;
+		private System.Windows.Forms.Label label15;
+		private System.Windows.Forms.Label label26;
+		public SB3Utility.EditTextBox editTextBoxMeshName;
+		private System.Windows.Forms.Label label29;
+		private System.Windows.Forms.Label label30;
+		private System.Windows.Forms.ComboBox comboBoxMatShaderKeywords;
+		private System.Windows.Forms.Label labelOutline;
+		private SB3Utility.EditTextBox textBoxMatOutline;
+		private System.Windows.Forms.Label labelRimPower;
+		private SB3Utility.EditTextBox textBoxMatRimPower;
+		private System.Windows.Forms.Label labelShadow;
+		private System.Windows.Forms.Label labelOutlineColour;
+		private System.Windows.Forms.Label labelRim;
+		private SB3Utility.EditTextBox textBoxMatShadowA;
+		private SB3Utility.EditTextBox textBoxMatShadowB;
+		private SB3Utility.EditTextBox textBoxMatShadowG;
+		private SB3Utility.EditTextBox textBoxMatShadowR;
+		private SB3Utility.EditTextBox textBoxMatOutlineA;
+		private SB3Utility.EditTextBox textBoxMatOutlineB;
+		private SB3Utility.EditTextBox textBoxMatOutlineG;
+		private SB3Utility.EditTextBox textBoxMatOutlineR;
+		private SB3Utility.EditTextBox textBoxMatRimA;
+		private SB3Utility.EditTextBox textBoxMatRimB;
+		private SB3Utility.EditTextBox textBoxMatRimG;
+		private SB3Utility.EditTextBox textBoxMatRimR;
+		private System.Windows.Forms.Label labelExtra;
+		private SB3Utility.EditTextBox textBoxMatExtra;
+		private System.Windows.Forms.Label labelMatTex4;
+		private System.Windows.Forms.Label labelMatTex3;
+		private System.Windows.Forms.Label labelMatTex2;
+		private System.Windows.Forms.Label labelMatTex1;
+		private SB3Utility.EditTextBox editTextBoxMatShader;
+		private System.Windows.Forms.ColumnHeader meshListHeaderType;
+		private System.Windows.Forms.ToolTip toolTip1;
+		private System.Windows.Forms.CheckBox checkBoxRendererEnabled;
+		private System.Windows.Forms.Label label27;
+		private System.Windows.Forms.CheckBox checkBoxTextureMipMap;
+		private System.Windows.Forms.Label labelTextureFormat;
 	}
 }

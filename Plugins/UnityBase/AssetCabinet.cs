@@ -51,6 +51,7 @@ namespace UnityPlugin
 		public UnityParser Parser { get; set; }
 		public bool loadingReferencials { get; set; }
 		public List<NotLoaded> RemovedList { get; set; }
+		HashSet<string> reported;
 
 		public AssetCabinet(Stream stream, UnityParser parser)
 		{
@@ -120,6 +121,7 @@ namespace UnityPlugin
 
 			RemovedList = new List<NotLoaded>();
 			loadingReferencials = false;
+			reported = new HashSet<string>();
 		}
 
 		private void ReadType(BinaryReader reader, TypeDefinitionString tds)
@@ -378,6 +380,20 @@ namespace UnityPlugin
 					avatar.LoadFrom(stream);
 					return avatar;
 				}
+			case UnityClassID.Cubemap:
+				{
+					Cubemap cubemap = new Cubemap(this, comp.pathID, comp.classID1, comp.classID2);
+					ReplaceSubfile(index, cubemap, comp);
+					cubemap.LoadFrom(stream);
+					return cubemap;
+				}
+			case UnityClassID.EllipsoidParticleEmitter:
+				{
+					EllipsoidParticleEmitter ellipsoid = new EllipsoidParticleEmitter(this, comp.pathID, comp.classID1, comp.classID2);
+					ReplaceSubfile(index, ellipsoid, comp);
+					ellipsoid.LoadFrom(stream);
+					return ellipsoid;
+				}
 			case UnityClassID.GameObject:
 				{
 					GameObject gameObj = new GameObject(this, comp.pathID, comp.classID1, comp.classID2);
@@ -403,7 +419,35 @@ namespace UnityPlugin
 					mesh.LoadFrom(stream);
 					return mesh;
 				}
-			case (UnityClassID)(int)-1:
+			case UnityClassID.MeshFilter:
+				{
+					MeshFilter meshFilter = new MeshFilter(this, comp.pathID, comp.classID1, comp.classID2);
+					ReplaceSubfile(index, meshFilter, comp);
+					meshFilter.LoadFrom(stream);
+					return meshFilter;
+				}
+			case UnityClassID.MeshRenderer:
+				{
+					MeshRenderer meshRenderer = new MeshRenderer(this, comp.pathID, comp.classID1, comp.classID2);
+					ReplaceSubfile(index, meshRenderer, comp);
+					meshRenderer.LoadFrom(stream);
+					return meshRenderer;
+				}
+			case UnityClassID.ParticleAnimator:
+				{
+					ParticleAnimator particleAnimator = new ParticleAnimator(this, comp.pathID, comp.classID1, comp.classID2);
+					ReplaceSubfile(index, particleAnimator, comp);
+					particleAnimator.LoadFrom(stream);
+					return particleAnimator;
+				}
+			case UnityClassID.ParticleRenderer:
+				{
+					ParticleRenderer particleRenderer = new ParticleRenderer(this, comp.pathID, comp.classID1, comp.classID2);
+					ReplaceSubfile(index, particleRenderer, comp);
+					particleRenderer.LoadFrom(stream);
+					return particleRenderer;
+				}
+			default:
 				if (comp.classID2 == UnityClassID.MonoBehaviour)
 				{
 					if (loadingReferencials)
@@ -421,8 +465,21 @@ namespace UnityPlugin
 					{
 						ReplaceSubfile(index, comp, comp);
 						comp.replacement = null;
-						Utility.ReportException(e);
+						if (!reported.Contains(e.Message))
+						{
+							Utility.ReportException(e);
+							reported.Add(e.Message);
+						}
 						return null;
+					}
+				}
+				else
+				{
+					string message = "Unhandled class: " + comp.classID1 + "/" + comp.classID2;
+					if (!reported.Contains(message))
+					{
+						Report.ReportLog(message);
+						reported.Add(message);
 					}
 				}
 				break;
@@ -459,7 +516,6 @@ namespace UnityPlugin
 					return trans;
 				}
 			}
-			//Console.WriteLine("LoadAsset : Unhandled class " + comp.classID1 + "/" + comp.classID2 + " PathID=" + comp.pathID);
 			return null;
 		}
 

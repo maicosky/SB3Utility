@@ -96,6 +96,7 @@ namespace UnityPlugin
 							}
 							break;
 						case UnityClassID.AnimationClip:
+						case UnityClassID.Cubemap:
 						case UnityClassID.Material:
 						case UnityClassID.MonoScript:
 						case UnityClassID.Shader:
@@ -103,20 +104,27 @@ namespace UnityPlugin
 							comp.Name = reader.ReadNameA4();
 							break;
 						case UnityClassID.Animator:
+						case UnityClassID.EllipsoidParticleEmitter:
+						case UnityClassID.ParticleAnimator:
+						case UnityClassID.ParticleRenderer:
 							PPtr<GameObject> gameObjPtr = Animator.LoadGameObject(stream);
+							NotLoaded asset = (NotLoaded)Parser.Cabinet.FindComponent(gameObjPtr.m_PathID);
+							if (asset == null)
+							{
+								Report.ReportLog("asset==null for " + comp.classID1 + "/" + comp.classID2);
+								throw new Exception();
+							}
 							if (filter)
 							{
-								NotLoaded asset = (NotLoaded)Parser.Cabinet.FindComponent(gameObjPtr.m_PathID);
 								stream.Position = asset.offset;
-								comp.Name = asset.Name = GameObject.LoadName(stream);
+								asset.Name = GameObject.LoadName(stream);
 							}
-							else
-							{
-								comp.Name = ((NotLoaded)Parser.Cabinet.FindComponent(gameObjPtr.m_PathID)).Name;
-							}
+							comp.Name = asset.Name;
 							break;
-						case UnityClassID.Transform:
+						case UnityClassID.MeshFilter:
+						case UnityClassID.MeshRenderer:
 						case UnityClassID.SkinnedMeshRenderer:
+						case UnityClassID.Transform:
 							if (!filter)
 							{
 								gameObjPtr = Animator.LoadGameObject(stream);
@@ -136,12 +144,8 @@ namespace UnityPlugin
 							}
 							break;
 						}
-						if (comp.Name == null)
-						{
-							comp.Name = comp.pathID.ToString();
-						}
 					}
-					assetNames[i] = comp.Name;
+					assetNames[i] = comp.Name != null ? comp.Name : comp.pathID.ToString();
 				}
 			}
 			return assetNames;

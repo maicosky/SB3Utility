@@ -275,6 +275,14 @@ namespace UnityPlugin
 			writer.Write(image_data);
 		}
 
+		public Texture2D Clone(AssetCabinet file)
+		{
+			Texture2D tex = new Texture2D(file);
+			CopyAttributesTo(tex);
+			CopyImageTo(tex);
+			return tex;
+		}
+
 		public void CopyAttributesTo(Texture2D dst)
 		{
 			dst.m_MipMap = m_MipMap;

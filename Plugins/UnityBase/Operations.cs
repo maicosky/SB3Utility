@@ -28,16 +28,32 @@ namespace UnityPlugin
 			return null;
 		}
 
-		public static List<SkinnedMeshRenderer> FindMeshes(Transform rootFrame, List<string> nameList)
+		public static int FindBoneIndex(List<PPtr<Transform>> boneList, Transform boneFrame)
 		{
-			List<SkinnedMeshRenderer> meshList = new List<SkinnedMeshRenderer>(nameList.Count);
+			for (int i = 0; i < boneList.Count; i++)
+			{
+				if (boneList[i].instance == boneFrame)
+				{
+					return i;
+				}
+			}
+			return -1;
+		}
+
+		public static List<MeshRenderer> FindMeshes(Transform rootFrame, List<string> nameList)
+		{
+			List<MeshRenderer> meshList = new List<MeshRenderer>(nameList.Count);
 			FindMeshFrames(rootFrame, meshList, nameList);
 			return meshList;
 		}
 
-		static void FindMeshFrames(Transform frame, List<SkinnedMeshRenderer> meshList, List<string> nameList)
+		static void FindMeshFrames(Transform frame, List<MeshRenderer> meshList, List<string> nameList)
 		{
-			SkinnedMeshRenderer mesh = frame.m_GameObject.instance.FindLinkedComponent(UnityClassID.SkinnedMeshRenderer);
+			MeshRenderer mesh = frame.m_GameObject.instance.FindLinkedComponent(UnityClassID.SkinnedMeshRenderer);
+			if (mesh == null)
+			{
+				mesh = frame.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshRenderer);
+			}
 			if ((mesh != null) && nameList.Contains(frame.m_GameObject.instance.m_Name))
 			{
 				meshList.Add(mesh);
@@ -121,10 +137,6 @@ namespace UnityPlugin
 				destMesh.m_KeepIndices = srcMesh.m_KeepIndices;
 				destMesh.m_MeshUsageFlags = srcMesh.m_MeshUsageFlags;
 			}
-		}
-
-		public static void CreateUnknowns(SkinnedMeshRenderer sMesh)
-		{
 		}
 
 		public static void CopyUnknowns(SubMesh src, SubMesh dst)

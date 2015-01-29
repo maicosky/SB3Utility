@@ -1235,6 +1235,7 @@ namespace SB3Utility
 			{
 				folderBrowserDialog1.SelectedPath = Path.GetDirectoryName(this.Editor.Parser.FilePath);
 				folderBrowserDialog1.RootFolder = Environment.SpecialFolder.MyComputer;
+				folderBrowserDialog1.Description = "Attention! " + Editor.Parser.Subfiles.Count + " subfiles to be exported.";
 				if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
 				{
 					Gui.Scripting.RunScript("ExportPP(parser=" + ParserVar + ", path=\"" + folderBrowserDialog1.SelectedPath + "\")");
@@ -1252,29 +1253,31 @@ namespace SB3Utility
 			{
 				folderBrowserDialog1.SelectedPath = Path.GetDirectoryName(this.Editor.Parser.FilePath);
 				folderBrowserDialog1.RootFolder = Environment.SpecialFolder.MyComputer;
+
+				ListView subfilesList = null;
+				if (tabControlSubfiles.SelectedTab == tabPageXXSubfiles)
+				{
+					subfilesList = xxSubfilesList;
+				}
+				else if (tabControlSubfiles.SelectedTab == tabPageXASubfiles)
+				{
+					subfilesList = xaSubfilesList;
+				}
+				else if (tabControlSubfiles.SelectedTab == tabPageImageSubfiles)
+				{
+					subfilesList = imageSubfilesList;
+				}
+				else if (tabControlSubfiles.SelectedTab == tabPageSoundSubfiles)
+				{
+					subfilesList = soundSubfilesList;
+				}
+				else if (tabControlSubfiles.SelectedTab == tabPageOtherSubfiles)
+				{
+					subfilesList = otherSubfilesList;
+				}
+				folderBrowserDialog1.Description = (subfilesList != null && subfilesList.SelectedItems.Count > 0 ? subfilesList.SelectedItems.Count + " subfiles" : "Nothing") + " to be exported.";
 				if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
 				{
-					ListView subfilesList = null;
-					if (tabControlSubfiles.SelectedTab == tabPageXXSubfiles)
-					{
-						subfilesList = xxSubfilesList;
-					}
-					else if (tabControlSubfiles.SelectedTab == tabPageXASubfiles)
-					{
-						subfilesList = xaSubfilesList;
-					}
-					else if (tabControlSubfiles.SelectedTab == tabPageImageSubfiles)
-					{
-						subfilesList = imageSubfilesList;
-					}
-					else if (tabControlSubfiles.SelectedTab == tabPageSoundSubfiles)
-					{
-						subfilesList = soundSubfilesList;
-					}
-					else if (tabControlSubfiles.SelectedTab == tabPageOtherSubfiles)
-					{
-						subfilesList = otherSubfilesList;
-					}
 					if (subfilesList != null)
 					{
 						foreach (ListViewItem item in subfilesList.SelectedItems)

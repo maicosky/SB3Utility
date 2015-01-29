@@ -8,6 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 using WeifenLuo.WinFormsUI.Docking;
 using SlimDX;
+using SlimDX.Direct3D9;
 
 using SB3Utility;
 
@@ -20,10 +21,6 @@ namespace UnityPlugin
 		{
 			[Description("Metasequoia")]
 			Mqo,
-			[Description("DirectX (SDK)")]
-			DirectXSDK,
-			[Description("Collada")]
-			Collada,
 			[Description("Collada (FBX 2015.1)")]
 			ColladaFbx,
 			[Description("FBX 2015.1")]
@@ -55,9 +52,24 @@ namespace UnityPlugin
 
 		string exportDir;
 		FormAnimatorDragDrop dragOptions;
+		Label[] matMatrixLabel;
+		EditTextBox[][] matMatrixText = new EditTextBox[8][];
+		Label[] matValues;
+		Label[] matTexNamePurpose;
+		ComboBox[] matTexNameCombo;
+		bool SetComboboxEvent = false;
 
 		public string EditorFormVar { get; protected set; }
 		TreeNode draggedNode = null;
+
+		int loadedFrame = -1;
+		int[] loadedBone = null;
+		int[] highlightedBone = null;
+		int loadedMesh = -1;
+		int loadedMaterial = -1;
+		int loadedTexture = -1;
+
+		private bool listViewItemSyncSelectedSent = false;
 
 		[Plugin]
 		public TreeNode GetDraggedNode()
@@ -100,7 +112,7 @@ namespace UnityPlugin
 				Editor = (AnimatorEditor)Gui.Scripting.RunScript(EditorVar + " = AnimatorEditor(parser=" + ParserVar + ")");
 
 				Init();
-				LoadAnimator();
+				LoadAnimator(false);
 			}
 			catch (Exception ex)
 			{
@@ -219,37 +231,44 @@ namespace UnityPlugin
 				listViewTextureMaterial.Font = new System.Drawing.Font(listViewTextureMaterial.Font.Name, listViewFontSize);
 			}
 
-			//panelTexturePic.Resize += new EventHandler(panelTexturePic_Resize);
+			panelTexturePic.Resize += new EventHandler(panelTexturePic_Resize);
 			splitContainer1.Panel2MinSize = tabControlViews.Width;
 
-			/*matTexNameCombo = new ComboBox[4] { comboBoxMatTex1, comboBoxMatTex2, comboBoxMatTex3, comboBoxMatTex4 };
+			matTexNamePurpose = new Label[4] { labelMatTex1, labelMatTex2, labelMatTex3, labelMatTex4 };
+			matTexNameCombo = new ComboBox[4] { comboBoxMatTex1, comboBoxMatTex2, comboBoxMatTex3, comboBoxMatTex4 };
 
+			matMatrixLabel = new Label[7] { labelDiffuse, labelAmbient, labelSpecular, labelEmissive, labelRim, labelOutlineColour, labelShadow };
 			matMatrixText[0] = new EditTextBox[4] { textBoxMatDiffuseR, textBoxMatDiffuseG, textBoxMatDiffuseB, textBoxMatDiffuseA };
 			matMatrixText[1] = new EditTextBox[4] { textBoxMatAmbientR, textBoxMatAmbientG, textBoxMatAmbientB, textBoxMatAmbientA };
 			matMatrixText[2] = new EditTextBox[4] { textBoxMatSpecularR, textBoxMatSpecularG, textBoxMatSpecularB, textBoxMatSpecularA };
 			matMatrixText[3] = new EditTextBox[4] { textBoxMatEmissiveR, textBoxMatEmissiveG, textBoxMatEmissiveB, textBoxMatEmissiveA };
-			matMatrixText[4] = new EditTextBox[1] { textBoxMatSpecularPower };*/
+			matMatrixText[4] = new EditTextBox[4] { textBoxMatRimR, textBoxMatRimG, textBoxMatRimB, textBoxMatRimA };
+			matMatrixText[5] = new EditTextBox[4] { textBoxMatOutlineR, textBoxMatOutlineG, textBoxMatOutlineB, textBoxMatOutlineA };
+			matMatrixText[6] = new EditTextBox[4] { textBoxMatShadowR, textBoxMatShadowG, textBoxMatShadowB, textBoxMatShadowA };
+			matMatrixText[7] = new EditTextBox[4] { textBoxMatSpecularPower, textBoxMatRimPower, textBoxMatOutline, textBoxMatExtra };
+			matValues = new Label[4] { labelShininess, labelRimPower, labelOutline, labelExtra };
+			LoadMaterial(-1);
 
 			DataGridViewEditor.InitDataGridViewSRT(dataGridViewFrameSRT, dataGridViewFrameMatrix);
 			DataGridViewEditor.InitDataGridViewMatrix(dataGridViewFrameMatrix, dataGridViewFrameSRT);
 			DataGridViewEditor.InitDataGridViewSRT(dataGridViewBoneSRT, dataGridViewBoneMatrix);
 			DataGridViewEditor.InitDataGridViewMatrix(dataGridViewBoneMatrix, dataGridViewBoneSRT);
 
-			/*textBoxFrameName.AfterEditTextChanged += new EventHandler(textBoxFrameName_AfterEditTextChanged);
-			textBoxFrameName2.AfterEditTextChanged += new EventHandler(textBoxFrameName2_AfterEditTextChanged);
-			textBoxBoneName.AfterEditTextChanged += new EventHandler(textBoxBoneName_AfterEditTextChanged);
+			textBoxFrameName.AfterEditTextChanged += new EventHandler(textBoxFrameName_AfterEditTextChanged);
+			editTextBoxMeshName.AfterEditTextChanged += new EventHandler(editTextBoxMeshName_AfterEditTextChanged);
 			textBoxMatName.AfterEditTextChanged += new EventHandler(textBoxMatName_AfterEditTextChanged);
-			textBoxTexName.AfterEditTextChanged += new EventHandler(textBoxTexName_AfterEditTextChanged);*/
+			textBoxTexName.AfterEditTextChanged += new EventHandler(textBoxTexName_AfterEditTextChanged);
 
 			ColumnSubmeshMaterial.DisplayMember = "Item1";
 			ColumnSubmeshMaterial.ValueMember = "Item2";
 			ColumnSubmeshMaterial.DefaultCellStyle.NullValue = "(invalid)";
 
-			/*for (int i = 0; i < matMatrixText.Length; i++)
+			for (int i = 0; i < matMatrixText.Length; i++)
 			{
 				for (int j = 0; j < matMatrixText[i].Length; j++)
 				{
 					matMatrixText[i][j].AfterEditTextChanged += new EventHandler(matMatrixText_AfterEditTextChanged);
+					matMatrixText[i][j].Tag = new Tuple<int, int>(i, j);
 				}
 			}
 
@@ -257,8 +276,7 @@ namespace UnityPlugin
 			{
 				matTexNameCombo[i].Tag = i;
 				matTexNameCombo[i].SelectedIndexChanged += new EventHandler(matTexNameCombo_SelectedIndexChanged);
-				matTexNameCombo[i].TextChanged += new EventHandler(matTexNameCombo_TextChanged);
-			}*/
+			}
 
 			MeshExportFormat[] values = Enum.GetValues(typeof(MeshExportFormat)) as MeshExportFormat[];
 			string[] descriptions = new string[values.Length];
@@ -269,27 +287,40 @@ namespace UnityPlugin
 			comboBoxMeshExportFormat.Items.AddRange(descriptions);
 			comboBoxMeshExportFormat.SelectedItem = Gui.Config["MeshExportFormat"];
 
-			/*checkBoxMeshExportMqoSortMeshes.Checked = (bool)Gui.Config["ExportMqoSortMeshes"];
-			checkBoxMeshExportMqoSortMeshes.CheckedChanged += checkBoxMeshExportMqoSortMeshes_CheckedChanged;*/
+			checkBoxMeshExportMqoSortMeshes.Checked = (bool)Gui.Config["ExportMqoSortMeshes"];
+			checkBoxMeshExportMqoSortMeshes.CheckedChanged += checkBoxMeshExportMqoSortMeshes_CheckedChanged;
 		}
 
-		void LoadAnimator()
+		void LoadAnimator(bool refreshLists)
 		{
-			/*renderObjectMeshes = new List<RenderObjectAnimator>(new RenderObjectAnimator[Editor.Meshes.Count]);
-			renderObjectIds = new List<int>(Editor.Meshes.Count);
-			for (int i = 0; i < Editor.Meshes.Count; i++)
+			if (!refreshLists)
 			{
-				renderObjectIds.Add(-1);
-			}*/
+				/*renderObjectMeshes = new List<RenderObjectAnimator>(new RenderObjectAnimator[Editor.Meshes.Count]);
+				renderObjectIds = new List<int>(Editor.Meshes.Count);
+				for (int i = 0; i < Editor.Meshes.Count; i++)
+				{
+					renderObjectIds.Add(-1);
+				}*/
+			}
 
-			InitFrames();
-			InitMeshes();
-			InitMaterials();
-			InitTextures();
+			try
+			{
+				InitFrames();
+				InitMeshes();
+				InitMaterials();
+				InitTextures();
+			}
+			catch (Exception ex)
+			{
+				Report.ReportLog(ex.ToString());
+			}
 
-			//RecreateCrossRefs();
+			if (!refreshLists)
+			{
+				//RecreateCrossRefs();
 
-			dragOptions = new FormAnimatorDragDrop(Editor);
+				dragOptions = new FormAnimatorDragDrop(Editor);
+			}
 		}
 
 		void InitFrames()
@@ -344,21 +375,21 @@ namespace UnityPlugin
 			TreeNode newNode = new TreeNode(frame.m_GameObject.instance.m_Name);
 			newNode.Tag = new DragSource(EditorVar, typeof(Transform), Editor.Frames.IndexOf(frame));
 
-			SkinnedMeshRenderer frameMesh = frame.m_GameObject.instance.FindLinkedComponent(UnityClassID.SkinnedMeshRenderer);
-			if (frameMesh != null)
+			SkinnedMeshRenderer frameSMR = frame.m_GameObject.instance.FindLinkedComponent(UnityClassID.SkinnedMeshRenderer);
+			if (frameSMR != null)
 			{
-				int meshId = Editor.Meshes.IndexOf(frameMesh);
+				int meshId = Editor.Meshes.IndexOf(frameSMR);
 				TreeNode meshNode = new TreeNode("SkinnedMeshRenderer");
 				meshNode.Tag = new DragSource(EditorVar, typeof(SkinnedMeshRenderer), meshId);
 				newNode.Nodes.Add(meshNode);
 
-				if (frameMesh.m_Bones.Count > 0)
+				if (frameSMR.m_Bones.Count > 0)
 				{
-					TreeNode boneListNode = new TreeNode(frameMesh.m_Bones.Count + " Bones");
+					TreeNode boneListNode = new TreeNode(frameSMR.m_Bones.Count + " Bones");
 					meshNode.Nodes.Add(boneListNode);
-					for (int i = 0; i < frameMesh.m_Bones.Count; i++)
+					for (int i = 0; i < frameSMR.m_Bones.Count; i++)
 					{
-						Transform bone = frameMesh.m_Bones[i].instance;
+						Transform bone = frameSMR.m_Bones[i].instance;
 						TreeNode boneNode;
 						if (bone != null)
 						{
@@ -372,6 +403,17 @@ namespace UnityPlugin
 						boneNode.Tag = new DragSource(EditorVar, typeof(Matrix), new int[] { meshId, i });
 						boneListNode.Nodes.Add(boneNode);
 					}
+				}
+			}
+			else
+			{
+				MeshRenderer frameMR = frame.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshRenderer);
+				if (frameMR != null)
+				{
+					int meshId = Editor.Meshes.IndexOf(frameMR);
+					TreeNode meshNode = new TreeNode("MeshRenderer");
+					meshNode.Tag = new DragSource(EditorVar, typeof(MeshRenderer), meshId);
+					newNode.Nodes.Add(meshNode);
 				}
 			}
 
@@ -456,13 +498,14 @@ namespace UnityPlugin
 			ListViewItem[] meshItems = new ListViewItem[Editor.Meshes.Count];
 			for (int i = 0; i < Editor.Meshes.Count; i++)
 			{
-				SkinnedMeshRenderer sMesh = Editor.Meshes[i];
-				meshItems[i] = new ListViewItem(sMesh.m_GameObject.instance.m_Name);
+				MeshRenderer meshR = Editor.Meshes[i];
+				meshItems[i] = new ListViewItem(new string[] { meshR.m_GameObject.instance.m_Name, meshR.classID1.ToString() });
 				meshItems[i].Tag = i;
 			}
 			listViewMesh.Items.Clear();
 			listViewMesh.Items.AddRange(meshItems);
-			meshlistHeader.AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
+			meshlistHeaderNames.AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
+			meshListHeaderType.AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
 		}
 
 		void InitMaterials()
@@ -472,36 +515,39 @@ namespace UnityPlugin
 			{
 				selectedItems.Add(item.Text);
 			}
-			List<Tuple<string, int>> columnMaterials = new List<Tuple<string, int>>(Editor.Materials.Count);
-			ListViewItem[] materialItems = new ListViewItem[Editor.Materials.Count];
-			for (int i = 0; i < Editor.Materials.Count; i++)
+			if (Editor.Materials.Count > 0)
 			{
-				Material mat = Editor.Materials[i];
-				materialItems[i] = new ListViewItem(mat.m_Name);
-				materialItems[i].Tag = i;
-
-				columnMaterials.Add(new Tuple<string, int>(mat.m_Name, i));
-			}
-			listViewMaterial.Items.Clear();
-			listViewMaterial.Items.AddRange(materialItems);
-			materiallistHeader.AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
-			if (selectedItems.Count > 0)
-			{
-				//listViewMaterial.ItemSelectionChanged -= listViewMaterial_ItemSelectionChanged;
-				listViewMaterial.BeginUpdate();
-				foreach (ListViewItem item in listViewMaterial.Items)
+				List<Tuple<string, int>> columnMaterials = new List<Tuple<string, int>>(Editor.Materials.Count);
+				ListViewItem[] materialItems = new ListViewItem[Editor.Materials.Count];
+				for (int i = 0; i < Editor.Materials.Count; i++)
 				{
-					if (selectedItems.Contains(item.Text))
-					{
-						item.Selected = true;
-					}
-				}
-				listViewMaterial.EndUpdate();
-				//listViewMaterial.ItemSelectionChanged += listViewMaterial_ItemSelectionChanged;
-			}
+					Material mat = Editor.Materials[i];
+					materialItems[i] = new ListViewItem(mat.m_Name);
+					materialItems[i].Tag = i;
 
-			ColumnSubmeshMaterial.DataSource = columnMaterials;
-			//SetComboboxEvent = false;
+					columnMaterials.Add(new Tuple<string, int>(mat.m_Name, i));
+				}
+				listViewMaterial.Items.Clear();
+				listViewMaterial.Items.AddRange(materialItems);
+				materiallistHeader.AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
+				if (selectedItems.Count > 0)
+				{
+					listViewMaterial.ItemSelectionChanged -= listViewMaterial_ItemSelectionChanged;
+					listViewMaterial.BeginUpdate();
+					foreach (ListViewItem item in listViewMaterial.Items)
+					{
+						if (selectedItems.Contains(item.Text))
+						{
+							item.Selected = true;
+						}
+					}
+					listViewMaterial.EndUpdate();
+					listViewMaterial.ItemSelectionChanged += listViewMaterial_ItemSelectionChanged;
+				}
+
+				ColumnSubmeshMaterial.DataSource = columnMaterials;
+			}
+			SetComboboxEvent = false;
 
 			TreeNode materialsNode = new TreeNode("Materials");
 			for (int i = 0; i < Editor.Materials.Count; i++)
@@ -524,34 +570,37 @@ namespace UnityPlugin
 
 		void InitTextures()
 		{
-			/*for (int i = 0; i < matTexNameCombo.Length; i++)
+			for (int i = 0; i < matTexNameCombo.Length; i++)
 			{
 				matTexNameCombo[i].Items.Clear();
 				matTexNameCombo[i].Items.Add("(none)");
-			}*/
+			}
 
 			HashSet<string> selectedItems = new HashSet<string>();
 			foreach (ListViewItem item in listViewTexture.SelectedItems)
 			{
 				selectedItems.Add(item.Text);
 			}
-			ListViewItem[] textureItems = new ListViewItem[Editor.Textures.Count];
-			for (int i = 0; i < Editor.Textures.Count; i++)
+			if (Editor.Textures.Count > 0)
 			{
-				Texture2D tex = Editor.Textures[i];
-				textureItems[i] = new ListViewItem(tex.m_Name);
-				textureItems[i].Tag = i;
-				/*for (int j = 0; j < matTexNameCombo.Length; j++)
+				ListViewItem[] textureItems = new ListViewItem[Editor.Textures.Count];
+				for (int i = 0; i < Editor.Textures.Count; i++)
 				{
-					matTexNameCombo[j].Items.Add(tex.m_Name);
-				}*/
+					Texture2D tex = Editor.Textures[i];
+					textureItems[i] = new ListViewItem(tex.m_Name);
+					textureItems[i].Tag = i;
+					for (int j = 0; j < matTexNameCombo.Length; j++)
+					{
+						matTexNameCombo[j].Items.Add(tex.m_Name);
+					}
+				}
+				listViewTexture.Items.Clear();
+				listViewTexture.Items.AddRange(textureItems);
+				texturelistHeader.AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
 			}
-			listViewTexture.Items.Clear();
-			listViewTexture.Items.AddRange(textureItems);
-			texturelistHeader.AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
 			if (selectedItems.Count > 0)
 			{
-				//listViewTexture.ItemSelectionChanged -= listViewTexture_ItemSelectionChanged;
+				listViewTexture.ItemSelectionChanged -= listViewTexture_ItemSelectionChanged;
 				listViewTexture.BeginUpdate();
 				foreach (ListViewItem item in listViewTexture.Items)
 				{
@@ -561,7 +610,7 @@ namespace UnityPlugin
 					}
 				}
 				listViewTexture.EndUpdate();
-				//listViewTexture.ItemSelectionChanged += listViewTexture_ItemSelectionChanged;
+				listViewTexture.ItemSelectionChanged += listViewTexture_ItemSelectionChanged;
 			}
 
 			TreeNode texturesNode = new TreeNode("Textures");
@@ -571,8 +620,8 @@ namespace UnityPlugin
 				TreeNode texNode = new TreeNode(Editor.Textures[i].m_Name);
 				texNode.Tag = new DragSource(EditorVar, typeof(Texture2D), i);
 				texturesNode.Nodes.Add(texNode);
-				/*if (loadedTexture == i)
-					currentTexture = texNode;*/
+				if (loadedTexture == i)
+					currentTexture = texNode;
 			}
 
 			if (treeViewObjectTree.Nodes.Count > 2)
@@ -586,6 +635,229 @@ namespace UnityPlugin
 			treeViewObjectTree.Nodes.Insert(2, texturesNode);
 			if (currentTexture != null)
 				currentTexture.EnsureVisible();
+		}
+
+		void LoadFrame(int id)
+		{
+			if (id < 0)
+			{
+				textBoxFrameName.Text = String.Empty;
+				DataGridViewEditor.LoadMatrix(Matrix.Identity, dataGridViewFrameSRT, dataGridViewFrameMatrix);
+			}
+			else
+			{
+				Transform frame = Editor.Frames[id];
+				textBoxFrameName.Text = frame.m_GameObject.instance.m_Name;
+				DataGridViewEditor.LoadMatrix(frame.m_LocalScale, frame.m_LocalRotation, frame.m_LocalPosition, dataGridViewFrameSRT, dataGridViewFrameMatrix);
+			}
+			loadedFrame = id;
+		}
+
+		void LoadBone(int[] id)
+		{
+			if (id == null)
+			{
+				textBoxBoneName.Text = String.Empty;
+				DataGridViewEditor.LoadMatrix(Matrix.Identity, dataGridViewBoneSRT, dataGridViewBoneMatrix);
+			}
+			else
+			{
+				SkinnedMeshRenderer smr = (SkinnedMeshRenderer)Editor.Meshes[id[0]];
+				Transform bone = smr.m_Bones[id[1]].instance;
+				textBoxBoneName.Text = bone.m_GameObject.instance.m_Name;
+				Mesh mesh = smr.m_Mesh.instance;
+				if (mesh != null)
+				{
+					DataGridViewEditor.LoadMatrix(mesh.m_BindPose[id[1]], dataGridViewBoneSRT, dataGridViewBoneMatrix);
+				}
+			}
+			loadedBone = id;
+
+			if (highlightedBone != null)
+				HighlightBone(highlightedBone, false);
+			if (loadedBone != null)
+				HighlightBone(loadedBone, true);
+			highlightedBone = loadedBone;
+		}
+
+		void LoadMesh(int id)
+		{
+			dataGridViewMesh.Rows.Clear();
+			if (id < 0)
+			{
+				textBoxRendererName.Text = String.Empty;
+				editTextBoxMeshName.Text = String.Empty;
+				checkBoxRendererEnabled.Checked = false;
+				checkBoxMeshSkinned.Checked = false;
+			}
+			else
+			{
+				MeshRenderer meshR = Editor.Meshes[id];
+				textBoxRendererName.Text= meshR.m_GameObject.instance.m_Name;
+				checkBoxRendererEnabled.Checked = meshR.m_Enabled;
+				Mesh mesh;
+				if (meshR is SkinnedMeshRenderer)
+				{
+					SkinnedMeshRenderer sMesh = (SkinnedMeshRenderer)meshR;
+					mesh = sMesh.m_Mesh.instance;
+				}
+				else
+				{
+					MeshFilter filter = meshR.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshFilter);
+					mesh = filter.m_Mesh.instance;
+				}
+				if (mesh != null)
+				{
+					editTextBoxMeshName.Text = mesh.m_Name;
+					checkBoxMeshSkinned.Checked = mesh.m_Skin.Count > 0;
+
+					for (int i = 0; i < mesh.m_SubMeshes.Count; i++)
+					{
+						SubMesh submesh = mesh.m_SubMeshes[i];
+						dataGridViewMesh.Rows.Add
+						(
+							new object[]
+							{
+								submesh.vertexCount,
+								submesh.indexCount / 3,
+								meshR.m_Materials[i].instance != null ? (object)Editor.Materials.IndexOf(meshR.m_Materials[i].instance) : null
+							}
+						);
+					}
+					dataGridViewMesh.ClearSelection();
+				}
+			}
+			loadedMesh = id;
+		}
+
+		void LoadMaterial(int id)
+		{
+			if (loadedMaterial >= 0)
+			{
+				loadedMaterial = -1;
+			}
+
+			if (id < 0)
+			{
+				textBoxMatName.Text = String.Empty;
+				for (int i = 0; i < matTexNameCombo.Length; i++)
+				{
+					matTexNamePurpose[i].Text = String.Empty;
+					matTexNameCombo[i].SelectedIndex = -1;
+				}
+				editTextBoxMatShader.Text = String.Empty;
+				comboBoxMatShaderKeywords.Items.Clear();
+				for (int i = 0; i < matMatrixText.Length; i++)
+				{
+					if (i < matMatrixLabel.Length)
+					{
+						matMatrixLabel[i].Text = String.Empty;
+					}
+					for (int j = 0; j < matMatrixText[i].Length; j++)
+					{
+						matMatrixText[i][j].Text = String.Empty;
+					}
+				}
+				for (int i = 0; i < matValues.Length; i++)
+				{
+					matValues[i].Text = String.Empty;
+				}
+			}
+			else
+			{
+				Material mat = Editor.Materials[id];
+				textBoxMatName.Text = mat.m_Name;
+
+				if (mat.m_Shader.instance != null)
+				{
+					editTextBoxMatShader.Text = mat.m_Shader.instance.m_Name;
+				}
+				comboBoxMatShaderKeywords.Items.AddRange(mat.m_ShaderKeywords.ToArray());
+
+				for (int i = 0; i < mat.m_SavedProperties.m_TexEnvs.Count; i++)
+				{
+					var matTex = mat.m_SavedProperties.m_TexEnvs[i];
+					if (matTex.Value.m_Texture.instance == null)
+					{
+						matTexNamePurpose[i].Text = String.Empty;
+						matTexNameCombo[i].SelectedIndex = 0;
+					}
+					else
+					{
+						matTexNamePurpose[i].Text = ShortLabel(matTex.Key.name);
+						string matTexName = matTex.Value.m_Texture.instance.m_Name;
+						matTexNameCombo[i].SelectedIndex = matTexNameCombo[i].FindStringExact(matTexName);
+					}
+				}
+
+				for (int i = 0; i < mat.m_SavedProperties.m_Colors.Count && i < matMatrixLabel.Length; i++)
+				{
+					var colPair = mat.m_SavedProperties.m_Colors[i];
+					matMatrixLabel[i].Text = ShortLabel(colPair.Key.name);
+					matMatrixText[i][0].Text = colPair.Value.Red.ToFloatString();
+					matMatrixText[i][1].Text = colPair.Value.Green.ToFloatString();
+					matMatrixText[i][2].Text = colPair.Value.Blue.ToFloatString();
+					matMatrixText[i][3].Text = colPair.Value.Alpha.ToFloatString();
+				}
+
+				for (int i = 0; i < mat.m_SavedProperties.m_Floats.Count && i < matValues.Length; i++)
+				{
+					var floatPair = mat.m_SavedProperties.m_Floats[i];
+					matValues[i].Text = ShortLabel(floatPair.Key.name);
+					matMatrixText[7][i].Text = floatPair.Value.ToFloatString();
+				}
+			}
+			loadedMaterial = id;
+		}
+
+		private string ShortLabel(string text)
+		{
+			int start = text[0] == '_' ? 1 : 0;
+			int len = text.EndsWith("Color") && text.Length - start > 6 ? text.Length - start - 5 : text.Length - start;
+			return text.Substring(start, len);
+		}
+
+		void LoadTexture(int id)
+		{
+			if (id < 0)
+			{
+				textBoxTexName.Text = String.Empty;
+				textBoxTexSize.Text = String.Empty;
+				labelTextureFormat.Text = String.Empty;
+				checkBoxTextureMipMap.Checked = false;
+				pictureBoxTexture.Image = null;
+			}
+			else
+			{
+				Texture2D tex = Editor.Textures[id];
+				textBoxTexName.Text = tex.m_Name;
+				textBoxTexSize.Text = tex.m_Width + "x" + tex.m_Height;
+				labelTextureFormat.Text = "Format: " + tex.m_TextureFormat;
+				checkBoxTextureMipMap.Checked = tex.m_MipMap;
+
+				using (MemoryStream mem = new MemoryStream())
+				{
+					tex.Export(mem);
+					mem.Position = 0;
+					ImportedTexture image = new ImportedTexture(mem, tex.m_Name);
+					Texture renderTexture = Texture.FromMemory(Gui.Renderer.Device, image.Data);
+					Bitmap bitmap = new Bitmap(Texture.ToStream(renderTexture, ImageFileFormat.Bmp));
+					string format = renderTexture.GetLevelDescription(0).Format.GetDescription();
+					int bpp = (format.Contains("A8") ? 8 : 0)
+						+ (format.Contains("R8") ? 8 : 0)
+						+ (format.Contains("G8") ? 8 : 0)
+						+ (format.Contains("B8") ? 8 : 0);
+					if (bpp > 0)
+					{
+						textBoxTexSize.Text += "x" + bpp;
+					}
+					renderTexture.Dispose();
+					pictureBoxTexture.Image = bitmap;
+				}
+
+				ResizeImage();
+			}
+			loadedTexture = id;
 		}
 
 		TreeNode FindFrameNode(string name, TreeNodeCollection nodes)
@@ -623,7 +895,7 @@ namespace UnityPlugin
 					return null;
 				}
 
-				if (source.Value.Type == typeof(xxFrame))
+				if (source.Value.Type == typeof(Transform))
 				{
 					if (Editor.Frames[(int)source.Value.Id].Equals(frame))
 					{
@@ -650,7 +922,8 @@ namespace UnityPlugin
 				if ((source != null) && (source.Value.Type == typeof(Matrix)))
 				{
 					var id = (int[])source.Value.Id;
-					if (Editor.Meshes[id[0]].m_Bones[id[1]].instance.Equals(bone))
+					SkinnedMeshRenderer smr = (SkinnedMeshRenderer)Editor.Meshes[id[0]];
+					if (smr.m_Bones[id[1]].instance.Equals(bone))
 					{
 						return node;
 					}
@@ -708,7 +981,7 @@ namespace UnityPlugin
 			return null;
 		}
 
-		TreeNode FindTextureNode(xxTexture tex)
+		TreeNode FindTextureNode(Texture2D tex)
 		{
 			foreach (TreeNode node in treeViewObjectTree.Nodes[2].Nodes)
 			{
@@ -720,6 +993,94 @@ namespace UnityPlugin
 			}
 
 			return null;
+		}
+
+		private void treeViewObjectTree_AfterSelect(object sender, TreeViewEventArgs e)
+		{
+			try
+			{
+				if (e.Node.Tag is DragSource)
+				{
+					var tag = (DragSource)e.Node.Tag;
+					if (tag.Type == typeof(Transform))
+					{
+						tabControlViews.SelectTabWithoutLoosingFocus(tabPageFrameView);
+						LoadFrame((int)tag.Id);
+						/*if (checkBoxMeshNewSkin.Checked)
+						{
+							buttonFrameAddBone.Text = SkinFrames.Contains(Editor.Frames[loadedFrame].Name) ? "Remove From Skin" : "Add To Skin";
+						}*/
+					}
+					else if (tag.Type == typeof(MeshRenderer) || tag.Type == typeof(SkinnedMeshRenderer))
+					{
+						SetListViewAfterNodeSelect(listViewMesh, tag);
+					}
+					else if (tag.Type == typeof(Matrix))
+					{
+						tabControlViews.SelectTabWithoutLoosingFocus(tabPageBoneView);
+						int[] ids = (int[])tag.Id;
+						LoadBone(ids);
+					}
+					else if (tag.Type == typeof(Material))
+					{
+						SetListViewAfterNodeSelect(listViewMaterial, tag);
+					}
+					else if (tag.Type == typeof(Texture2D))
+					{
+						SetListViewAfterNodeSelect(listViewTexture, tag);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void treeViewObjectTree_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
+		{
+			if (e.Node.Tag is DragSource && ((DragSource)e.Node.Tag).Type == typeof(Matrix) && e.Node.IsSelected)
+			{
+				if (highlightedBone != null)
+				{
+					HighlightBone(highlightedBone, false);
+					highlightedBone = null;
+				}
+				else
+				{
+					highlightedBone = (int[])((DragSource)e.Node.Tag).Id;
+					HighlightBone(highlightedBone, true);
+				}
+			}
+		}
+
+		private void HighlightBone(int[] boneIds, bool show)
+		{
+			/*RenderObjectXX renderObj = renderObjectMeshes[boneIds[0]];
+			if (renderObj != null)
+			{
+				xxMesh mesh = Editor.Meshes[boneIds[0]].Mesh;
+				renderObj.HighlightBone(mesh, boneIds[1], show);
+				Gui.Renderer.Render();
+			}*/
+		}
+
+		private void SetListViewAfterNodeSelect(ListView listView, DragSource tag)
+		{
+			while (listView.SelectedItems.Count > 0)
+			{
+				listView.SelectedItems[0].Selected = false;
+			}
+
+			for (int i = 0; i < listView.Items.Count; i++)
+			{
+				var item = listView.Items[i];
+				if ((int)item.Tag == (int)tag.Id)
+				{
+					item.Selected = true;
+					break;
+				}
+			}
 		}
 
 		private void treeViewObjectTree_ItemDrag(object sender, ItemDragEventArgs e)
@@ -736,11 +1097,11 @@ namespace UnityPlugin
 						if (src.Type == typeof(SkinnedMeshRenderer))
 						{
 							draggedItem = ((TreeNode)e.Item).Parent;
-							draggedMesh = Editor.Meshes[(int)src.Id];
+							draggedMesh = (SkinnedMeshRenderer)Editor.Meshes[(int)src.Id];
 						}
 						else if (src.Type == typeof(Matrix))
 						{
-							SkinnedMeshRenderer mesh = Editor.Meshes[((int[])src.Id)[0]];
+							SkinnedMeshRenderer mesh = (SkinnedMeshRenderer)Editor.Meshes[((int[])src.Id)[0]];
 							Transform bone = mesh.m_Bones[((int[])src.Id)[1]].instance;
 							draggedItem = FindFrameNode(bone.m_GameObject.instance.m_Name, treeViewObjectTree.Nodes);
 						}
@@ -1252,9 +1613,9 @@ namespace UnityPlugin
 		public void RecreateFrames()
 		{
 			/*CrossRefsClear();
-			DisposeRenderObjects();
+			DisposeRenderObjects();*/
 			LoadFrame(-1);
-			LoadMesh(-1);*/
+			LoadMesh(-1);
 			InitFrames();
 			InitMeshes();
 			/*RecreateRenderObjects();
@@ -1264,8 +1625,8 @@ namespace UnityPlugin
 		private void RecreateMeshes()
 		{
 			/*CrossRefsClear();
-			DisposeRenderObjects();
-			LoadMesh(-1);*/
+			DisposeRenderObjects();*/
+			LoadMesh(-1);
 			InitFrames();
 			InitMeshes();
 			/*RecreateRenderObjects();
@@ -1275,23 +1636,24 @@ namespace UnityPlugin
 		private void RecreateMaterials()
 		{
 			/*CrossRefsClear();
-			DisposeRenderObjects();
-			LoadMaterial(-1);*/
+			DisposeRenderObjects();*/
+			LoadMaterial(-1);
 			InitMaterials();
+			InitTextures();
 			/*RecreateRenderObjects();
-			RecreateCrossRefs();
-			LoadMesh(loadedMesh);*/
+			RecreateCrossRefs();*/
+			LoadMesh(loadedMesh);
 		}
 
 		private void RecreateTextures()
 		{
 			/*CrossRefsClear();
-			DisposeRenderObjects();
-			LoadTexture(-1);*/
+			DisposeRenderObjects();*/
+			LoadTexture(-1);
 			InitTextures();
 			/*RecreateRenderObjects();
-			RecreateCrossRefs();
-			LoadMaterial(loadedMaterial);*/
+			RecreateCrossRefs();*/
+			LoadMaterial(loadedMaterial);
 		}
 
 		private int GetDestParentId(string srcFrameName, DragSource? dest)
@@ -1351,11 +1713,27 @@ namespace UnityPlugin
 			{
 				treeViewObjectTree.BeginUpdate();
 				treeViewObjectTree.ExpandAll();
+				CloseBoneNodes(treeViewObjectTree.Nodes);
 				treeViewObjectTree.EndUpdate();
 			}
 			catch (Exception ex)
 			{
 				Utility.ReportException(ex);
+			}
+		}
+
+		private void CloseBoneNodes(TreeNodeCollection childs)
+		{
+			foreach (TreeNode child in childs)
+			{
+				if (child.Text.Contains(" Bones"))
+				{
+					child.Collapse();
+				}
+				else
+				{
+					CloseBoneNodes(child.Nodes);
+				}
 			}
 		}
 
@@ -1370,6 +1748,1061 @@ namespace UnityPlugin
 			catch (Exception ex)
 			{
 				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonObjectTreeRefresh_Click(object sender, EventArgs e)
+		{
+			LoadAnimator(true);
+			SyncWorkspaces();
+		}
+
+		void textBoxFrameName_AfterEditTextChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedFrame < 0)
+				{
+					return;
+				}
+
+				Gui.Scripting.RunScript(EditorVar + ".SetFrameName(id=" + loadedFrame + ", name=\"" + textBoxFrameName.Text + "\")");
+				Changed = Changed;
+
+				//RecreateRenderObjects();
+
+				Transform frame = Editor.Frames[loadedFrame];
+				TreeNode node = FindFrameNode(frame, treeViewObjectTree.Nodes);
+				if (node == null)
+				{
+					Report.ReportLog("node " + frame.m_GameObject.instance.m_Name + " not found");
+				}
+				node.Text = frame.m_GameObject.instance.m_Name;
+				SyncWorkspaces(frame.m_GameObject.instance.m_Name, typeof(Transform), loadedFrame);
+
+				MeshRenderer frameMesh = frame.m_GameObject.instance.FindLinkedComponent(UnityClassID.SkinnedMeshRenderer);
+				if (frameMesh == null)
+				{
+					frameMesh = frame.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshRenderer);
+				}
+				if (frameMesh != null)
+				{
+					RenameListViewItems(Editor.Meshes, listViewMesh, frameMesh, frame.m_GameObject.instance.m_Name);
+					RenameListViewItems(Editor.Meshes, listViewMaterialMesh, frameMesh, frame.m_GameObject.instance.m_Name);
+					RenameListViewItems(Editor.Meshes, listViewTextureMesh, frameMesh, frame.m_GameObject.instance.m_Name);
+					if (loadedMesh >= 0 && Editor.Meshes[loadedMesh] == frameMesh)
+					{
+						textBoxRendererName.Text = Editor.Meshes[loadedMesh].m_GameObject.instance.m_Name;
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonFrameRemove_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedFrame < 0)
+				{
+					return;
+				}
+				if (Editor.Frames[loadedFrame].Parent == null)
+				{
+					Report.ReportLog("Can't remove the root frame");
+					return;
+				}
+
+				Gui.Scripting.RunScript(EditorVar + ".RemoveFrame(id=" + loadedFrame + ")");
+				Changed = Changed;
+
+				RecreateFrames();
+				SyncWorkspaces();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonBoneGotoFrame_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedBone != null)
+				{
+					SkinnedMeshRenderer smr = (SkinnedMeshRenderer)Editor.Meshes[loadedBone[0]];
+					Mesh mesh = smr.m_Mesh.instance;
+					if (mesh != null)
+					{
+						Transform bone = smr.m_Bones[loadedBone[1]].instance;
+						TreeNode node = FindFrameNode(bone, treeViewObjectTree.Nodes);
+						if (node != null)
+						{
+							tabControlLists.SelectedTab = tabPageObject;
+							treeViewObjectTree.SelectedNode = node;
+							node.Expand();
+							node.EnsureVisible();
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonBoneRemove_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedBone == null)
+				{
+					return;
+				}
+
+				Gui.Scripting.RunScript(EditorVar + ".RemoveBone(meshId=" + loadedBone[0] + ", boneId=" + loadedBone[1] + ")");
+				Changed = Changed;
+
+				LoadBone(null);
+				//RecreateRenderObjects();
+				InitFrames();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void listViewMesh_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
+		{
+			try
+			{
+				if (listViewItemSyncSelectedSent == false)
+				{
+					listViewItemSyncSelectedSent = true;
+					listViewMeshMaterial.BeginUpdate();
+					listViewMeshTexture.BeginUpdate();
+
+					int id = (int)e.Item.Tag;
+					if (e.IsSelected)
+					{
+						tabControlViews.SelectTabWithoutLoosingFocus(tabPageMeshView);
+						LoadMesh(id);
+						/*CrossRefAddItem(crossRefMeshMaterials[id], crossRefMeshMaterialsCount, listViewMeshMaterial, listViewMaterial);
+						CrossRefAddItem(crossRefMeshTextures[id], crossRefMeshTexturesCount, listViewMeshTexture, listViewTexture);
+
+						if (renderObjectMeshes[id] == null)
+						{
+							xxFrame frame = Editor.Meshes[id];
+							HashSet<string> meshNames = new HashSet<string>() { frame.Name };
+							renderObjectMeshes[id] = new RenderObjectXX(Editor.Parser, meshNames);
+						}
+						RenderObjectXX renderObj = renderObjectMeshes[id];
+						if (renderObjectIds[id] == -1)
+						{
+							renderObjectIds[id] = Gui.Renderer.AddRenderObject(renderObj);
+						}
+						if (!Gui.Docking.DockRenderer.IsHidden)
+						{
+							Gui.Docking.DockRenderer.Enabled = false;
+							Gui.Docking.DockRenderer.Activate();
+							Gui.Docking.DockRenderer.Enabled = true;
+							if ((bool)Gui.Config["AutoCenterView"])
+							{
+								Gui.Renderer.CenterView();
+							}
+						}*/
+					}
+					else
+					{
+						if (id == loadedMesh)
+						{
+							LoadMesh(-1);
+						}
+						/*CrossRefRemoveItem(crossRefMeshMaterials[id], crossRefMeshMaterialsCount, listViewMeshMaterial);
+						CrossRefRemoveItem(crossRefMeshTextures[id], crossRefMeshTexturesCount, listViewMeshTexture);
+
+						Gui.Renderer.RemoveRenderObject(renderObjectIds[id]);
+						renderObjectIds[id] = -1;*/
+					}
+
+					/*CrossRefSetSelected(e.IsSelected, listViewMesh, id);
+					CrossRefSetSelected(e.IsSelected, listViewMaterialMesh, id);
+					CrossRefSetSelected(e.IsSelected, listViewTextureMesh, id);*/
+
+					listViewMeshMaterial.EndUpdate();
+					listViewMeshTexture.EndUpdate();
+					listViewItemSyncSelectedSent = false;
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void listViewMesh_KeyUp(object sender, KeyEventArgs e)
+		{
+			if (e.KeyData != MASS_DESTRUCTION_KEY_COMBINATION || loadedMesh == -1)
+			{
+				return;
+			}
+			buttonMeshRemove_Click(null, null);
+		}
+
+		private void comboBoxMeshExportFormat_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				switch ((MeshExportFormat)comboBoxMeshExportFormat.SelectedIndex)
+				{
+				case MeshExportFormat.Mqo:
+					panelMeshExportOptionsMqo.BringToFront();
+					break;
+				case MeshExportFormat.Fbx:
+				case MeshExportFormat.Fbx_2006:
+				case MeshExportFormat.ColladaFbx:
+				case MeshExportFormat.Dxf:
+				case MeshExportFormat.Obj:
+					panelMeshExportOptionsFbx.BringToFront();
+					break;
+				default:
+					panelMeshExportOptionsDefault.BringToFront();
+					break;
+				}
+
+				MeshExportFormat[] values = Enum.GetValues(typeof(MeshExportFormat)) as MeshExportFormat[];
+				string description = values[comboBoxMeshExportFormat.SelectedIndex].GetDescription();
+				Gui.Config["MeshExportFormat"] = description;
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonMeshExport_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				DirectoryInfo dir = new DirectoryInfo(exportDir);
+
+				string meshNames = String.Empty;
+				if (!checkBoxMeshExportNoMesh.Checked)
+				{
+					if (listViewMesh.SelectedItems.Count > 0)
+					{
+						for (int i = 0; i < listViewMesh.SelectedItems.Count; i++)
+						{
+							meshNames += "\"" + Editor.Meshes[(int)listViewMesh.SelectedItems[i].Tag].m_GameObject.instance.m_Name + "\", ";
+						}
+					}
+					else
+					{
+						if (listViewMesh.Items.Count <= 0)
+						{
+							Report.ReportLog("There are no meshes for exporting");
+							return;
+						}
+
+						for (int i = 0; i < listViewMesh.Items.Count; i++)
+						{
+							meshNames += "\"" + Editor.Meshes[(int)listViewMesh.Items[i].Tag].m_GameObject.instance.m_Name + "\", ";
+						}
+					}
+					meshNames = "{ " + meshNames.Substring(0, meshNames.Length - 2) + " }";
+				}
+				else
+				{
+					meshNames = "null";
+				}
+
+				Report.ReportLog("Started exporting to " + comboBoxMeshExportFormat.SelectedItem + " format...");
+				Application.DoEvents();
+
+				string xaVars = "null";
+
+				int startKeyframe = -1;
+				int endKeyframe = 0;
+				bool linear = checkBoxMeshExportFbxLinearInterpolation.Checked;
+
+				switch ((MeshExportFormat)comboBoxMeshExportFormat.SelectedIndex)
+				{
+				case MeshExportFormat.Mqo:
+					Gui.Scripting.RunScript("ExportMqo(parser=" + ParserVar + ", meshNames=" + meshNames + ", dirPath=\"" + dir.FullName + "\", singleMqo=" + checkBoxMeshExportMqoSingleFile.Checked + ", worldCoords=" + checkBoxMeshExportMqoWorldCoords.Checked + ", sortMeshes=" + checkBoxMeshExportMqoSortMeshes.Checked + ")");
+					break;
+				case MeshExportFormat.ColladaFbx:
+					Gui.Scripting.RunScript("ExportFbx(animator=" + ParserVar + ", meshNames=" + meshNames + ", animationParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + (bool)Gui.Config["FbxExportAnimationEulerFilter"] + ", filterPrecision=" + ((float)Gui.Config["FbxExportAnimationFilterPrecision"]).ToFloatString() + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".dae") + "\", exportFormat=\".dae\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", allBones=" + checkBoxMeshExportAllBones.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", compatibility=" + false + ")");
+					break;
+				case MeshExportFormat.Fbx:
+					Gui.Scripting.RunScript("ExportFbx(animator=" + ParserVar + ", meshNames=" + meshNames + ", animationParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + (bool)Gui.Config["FbxExportAnimationEulerFilter"] + ", filterPrecision=" + ((float)Gui.Config["FbxExportAnimationFilterPrecision"]).ToFloatString() + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".fbx") + "\", exportFormat=\".fbx\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", allBones=" + checkBoxMeshExportAllBones.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", compatibility=" + false + ")");
+					break;
+				case MeshExportFormat.Fbx_2006:
+					Gui.Scripting.RunScript("ExportFbx(animator=" + ParserVar + ", meshNames=" + meshNames + ", animationParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + (bool)Gui.Config["FbxExportAnimationEulerFilter"] + ", filterPrecision=" + ((float)Gui.Config["FbxExportAnimationFilterPrecision"]).ToFloatString() + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".fbx") + "\", exportFormat=\".fbx\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", allBones=" + checkBoxMeshExportAllBones.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", compatibility=" + true + ")");
+					break;
+				case MeshExportFormat.Dxf:
+					Gui.Scripting.RunScript("ExportFbx(animator=" + ParserVar + ", meshNames=" + meshNames + ", animationParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + (bool)Gui.Config["FbxExportAnimationEulerFilter"] + ", filterPrecision=" + ((float)Gui.Config["FbxExportAnimationFilterPrecision"]).ToFloatString() + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".dxf") + "\", exportFormat=\".dxf\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", allBones=" + checkBoxMeshExportAllBones.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", compatibility=" + false + ")");
+					break;
+				case MeshExportFormat.Obj:
+					Gui.Scripting.RunScript("ExportFbx(animator=" + ParserVar + ", meshNames=" + meshNames + ", animationParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + (bool)Gui.Config["FbxExportAnimationEulerFilter"] + ", filterPrecision=" + ((float)Gui.Config["FbxExportAnimationFilterPrecision"]).ToFloatString() + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".obj") + "\", exportFormat=\".obj\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", allBones=" + checkBoxMeshExportAllBones.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", compatibility=" + false + ")");
+					break;
+				default:
+					throw new Exception("Unexpected ExportFormat");
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void checkBoxMeshExportMqoSortMeshes_CheckedChanged(object sender, EventArgs e)
+		{
+			Gui.Config["ExportMqoSortMeshes"] = checkBoxMeshExportMqoSortMeshes.Checked;
+		}
+
+		private void buttonMeshGotoFrame_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedMesh >= 0)
+				{
+					TreeNode node = FindFrameNode(Editor.Meshes[loadedMesh].m_GameObject.instance.m_Name, treeViewObjectTree.Nodes);
+					if (node != null)
+					{
+						tabControlLists.SelectedTab = tabPageObject;
+						treeViewObjectTree.SelectedNode = node;
+						node.Expand();
+						node.EnsureVisible();
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonMeshRemove_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedMesh < 0)
+				{
+					return;
+				}
+
+				List<int> descendingIds = new List<int>(listViewMesh.SelectedItems.Count);
+				foreach (ListViewItem item in listViewMesh.SelectedItems)
+				{
+					descendingIds.Add((int)item.Tag);
+				}
+				descendingIds.Sort();
+				descendingIds.Reverse();
+				foreach (int id in descendingIds)
+				{
+					Gui.Scripting.RunScript(EditorVar + ".RemoveSkinnedMeshRenderer(id=" + id + ")");
+				}
+				Changed = Changed;
+
+				RecreateMeshes();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void editTextBoxMeshName_AfterEditTextChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedMesh < 0)
+				{
+					return;
+				}
+
+				Gui.Scripting.RunScript(EditorVar + ".SetMeshName(id=" + loadedMesh + ", name=\"" + editTextBoxMeshName.Text + "\")");
+				Changed = Changed;
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void dataGridViewMesh_SelectionChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				/*if (!checkBoxSubmeshReorder.Checked)
+				{
+					HighlightSubmeshes();
+				}
+				else
+				{
+					Gui.Scripting.RunScript(EditorVar + ".MoveSubmesh(meshId=" + loadedMesh + ", submeshId=" + (int)checkBoxSubmeshReorder.Tag + ", newPosition=" + dataGridViewMesh.SelectedRows[0].Index + ")");
+					Changed = Changed;
+
+					RecreateRenderObjects();
+					int pos = dataGridViewMesh.SelectedRows[0].Index;
+					DataGridViewRow src = dataGridViewMesh.Rows[(int)checkBoxSubmeshReorder.Tag];
+					dataGridViewMesh.Rows.Remove(src);
+					dataGridViewMesh.Rows.Insert(pos, src);
+
+					checkBoxSubmeshReorder.Text = "Reorder";
+					checkBoxSubmeshReorder.Checked = false;
+				}*/
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		void HighlightSubmeshes()
+		{
+			if (loadedMesh < 0)
+			{
+				return;
+			}
+
+			/*RenderObjectXX renderObj = renderObjectMeshes[loadedMesh];
+			if (renderObj != null)
+			{
+				renderObj.HighlightSubmesh.Clear();
+				foreach (DataGridViewRow row in dataGridViewMesh.SelectedRows)
+				{
+					renderObj.HighlightSubmesh.Add(row.Index);
+				}
+				Gui.Renderer.Render();
+			}*/
+		}
+
+		private void dataGridViewMesh_KeyDown(object sender, KeyEventArgs e)
+		{
+			try
+			{
+				if (e.KeyData == Keys.Escape)
+				{
+					while (dataGridViewMesh.SelectedRows.Count > 0)
+					{
+						dataGridViewMesh.SelectedRows[0].Selected = false;
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void dataGridViewMesh_CellClick(object sender, DataGridViewCellEventArgs e)
+		{
+			try
+			{
+				if ((dataGridViewMesh.CurrentRow != null) && (dataGridViewMesh.CurrentCell.ColumnIndex == 2))
+				{
+					dataGridViewMesh.BeginEdit(true);
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		// http://connect.microsoft.com/VisualStudio/feedback/details/151567/datagridviewcomboboxcell-needs-selectedindexchanged-event
+		private void dataGridViewMesh_EditingControlShowing(object sender, DataGridViewEditingControlShowingEventArgs e)
+		{
+			try
+			{
+				if (!SetComboboxEvent)
+				{
+					if (e.Control.GetType() == typeof(DataGridViewComboBoxEditingControl))
+					{
+						ComboBox comboBoxCell = (ComboBox)e.Control;
+						if (comboBoxCell != null)
+						{
+							//Remove an existing event-handler, if present, to avoid
+							//adding multiple handlers when the editing control is reused.
+							comboBoxCell.SelectionChangeCommitted -= new EventHandler(comboBoxCell_SelectionChangeCommitted);
+
+							//Add the event handler.
+							comboBoxCell.SelectionChangeCommitted += new EventHandler(comboBoxCell_SelectionChangeCommitted);
+							SetComboboxEvent = true;
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void comboBoxCell_SelectionChangeCommitted(object sender, EventArgs e)
+		{
+			try
+			{
+				ComboBox combo = (ComboBox)sender;
+				if (combo.SelectedValue == null)
+				{
+					return;
+				}
+
+				int comboValue = (int)combo.SelectedValue;
+				int cellValue = dataGridViewMesh.CurrentCell.Value != null ? (int)dataGridViewMesh.CurrentCell.Value : -1;
+				if (comboValue != cellValue)
+				{
+					dataGridViewMesh.CommitEdit(DataGridViewDataErrorContexts.Commit);
+
+					int rowIdx = dataGridViewMesh.CurrentCell.RowIndex;
+					MeshRenderer meshRenderer = Editor.Meshes[loadedMesh];
+					Material subMeshMat = meshRenderer.m_Materials[rowIdx].instance;
+					Mesh mesh;
+					if (meshRenderer is SkinnedMeshRenderer)
+					{
+						SkinnedMeshRenderer sMesh = (SkinnedMeshRenderer)meshRenderer;
+						mesh = sMesh.m_Mesh.instance;
+					}
+					else
+					{
+						MeshFilter filter = meshRenderer.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshFilter);
+						mesh = filter.m_Mesh.instance;
+					}
+					if (mesh != null)
+					{
+						SubMesh submesh = mesh.m_SubMeshes[rowIdx];
+						object val = comboValue;
+						int matIdx = (val == null) ? -1 : (int)val;
+
+						if (Editor.Materials[matIdx] != subMeshMat)
+						{
+							Gui.Scripting.RunScript(EditorVar + ".SetSubMeshMaterial(meshId=" + loadedMesh + ", subMeshId=" + rowIdx + ", material=" + matIdx + ")");
+							Changed = Changed;
+
+							/*RecreateRenderObjects();
+							RecreateCrossRefs();*/
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void listViewMaterial_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
+		{
+			try
+			{
+				if (listViewItemSyncSelectedSent == false)
+				{
+					listViewItemSyncSelectedSent = true;
+					listViewMaterialMesh.BeginUpdate();
+					listViewMaterialTexture.BeginUpdate();
+
+					int id = (int)e.Item.Tag;
+					if (e.IsSelected)
+					{
+						tabControlViews.SelectTabWithoutLoosingFocus(tabPageMaterialView);
+						LoadMaterial(id);
+						/*CrossRefAddItem(crossRefMaterialMeshes[id], crossRefMaterialMeshesCount, listViewMaterialMesh, listViewMesh);
+						CrossRefAddItem(crossRefMaterialTextures[id], crossRefMaterialTexturesCount, listViewMaterialTexture, listViewTexture);*/
+					}
+					else
+					{
+						if (id == loadedMaterial)
+						{
+							LoadMaterial(-1);
+						}
+						/*CrossRefRemoveItem(crossRefMaterialMeshes[id], crossRefMaterialMeshesCount, listViewMaterialMesh);
+						CrossRefRemoveItem(crossRefMaterialTextures[id], crossRefMaterialTexturesCount, listViewMaterialTexture);*/
+					}
+
+					/*CrossRefSetSelected(e.IsSelected, listViewMaterial, id);
+					CrossRefSetSelected(e.IsSelected, listViewMeshMaterial, id);
+					CrossRefSetSelected(e.IsSelected, listViewTextureMaterial, id);*/
+
+					listViewMaterialMesh.EndUpdate();
+					listViewMaterialTexture.EndUpdate();
+					listViewItemSyncSelectedSent = false;
+				}
+			}
+			catch (Exception ex)
+			{
+				Report.ReportLog(ex.ToString());
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void listViewMaterial_KeyUp(object sender, KeyEventArgs e)
+		{
+			if (e.KeyData != MASS_DESTRUCTION_KEY_COMBINATION || loadedMaterial == -1)
+			{
+				return;
+			}
+			buttonMaterialRemove_Click(null, null);
+		}
+
+		void textBoxMatName_AfterEditTextChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedMaterial < 0)
+				{
+					return;
+				}
+
+				Gui.Scripting.RunScript(EditorVar + ".SetMaterialName(id=" + loadedMaterial + ", name=\"" + textBoxMatName.Text + "\")");
+				Changed = Changed;
+
+				Material mat = Editor.Materials[loadedMaterial];
+				RenameListViewItems(Editor.Materials, listViewMaterial, mat, mat.m_Name);
+				RenameListViewItems(Editor.Materials, listViewMeshMaterial, mat, mat.m_Name);
+				RenameListViewItems(Editor.Materials, listViewTextureMaterial, mat, mat.m_Name);
+
+				InitMaterials();
+				SyncWorkspaces(mat.m_Name, typeof(Material), loadedMaterial);
+				LoadMaterial(loadedMaterial);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		void RenameListViewItems<T>(List<T> list, ListView listView, T obj, string name)
+		{
+			foreach (ListViewItem item in listView.Items)
+			{
+				if (list[(int)item.Tag].Equals(obj))
+				{
+					item.Text = name;
+					break;
+				}
+			}
+			listView.Columns[0].AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
+			listView.Sort();
+		}
+
+		void matTexNameCombo_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedMaterial < 0)
+				{
+					return;
+				}
+
+				ComboBox combo = (ComboBox)sender;
+				int matTexIdx = (int)combo.Tag;
+				string name = (combo.SelectedIndex == 0) ? String.Empty : (string)combo.Items[combo.SelectedIndex];
+
+				Gui.Scripting.RunScript(EditorVar + ".SetMaterialTexture(id=" + loadedMaterial + ", index=" + matTexIdx + ", name=\"" + name + "\")");
+				Changed = Changed;
+
+				/*RecreateRenderObjects();
+				RecreateCrossRefs();*/
+				LoadMaterial(loadedMaterial);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		void matMatrixText_AfterEditTextChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedMaterial < 0)
+				{
+					return;
+				}
+
+				Material mat = Editor.Materials[loadedMaterial];
+				Tuple<int, int> rowCol = (Tuple<int, int>)((EditTextBox)sender).Tag;
+				int row = rowCol.Item1;
+				int col = rowCol.Item2;
+				if (row < 7)
+				{
+					Gui.Scripting.RunScript(EditorVar + ".SetMaterialColour(id=" + loadedMaterial + ", index=" + row + ", colour=" + MatMatrixColorScript(matMatrixText[row]) + ")");
+				}
+				else
+				{
+					Gui.Scripting.RunScript(EditorVar + ".SetMaterialValue(id=" + loadedMaterial + ", index=" + col + ", value=" + Single.Parse(((EditTextBox)sender).Text).ToFloatString() + ")");
+				}
+				Changed = Changed;
+
+				/*RecreateRenderObjects();
+				RecreateCrossRefs();*/
+				LoadMaterial(loadedMaterial);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		string MatMatrixColorScript(EditTextBox[] textBoxes)
+		{
+			return "{ " +
+				Single.Parse(textBoxes[0].Text).ToFloatString() + ", " +
+				Single.Parse(textBoxes[1].Text).ToFloatString() + ", " +
+				Single.Parse(textBoxes[2].Text).ToFloatString() + ", " +
+				Single.Parse(textBoxes[3].Text).ToFloatString() + " }";
+		}
+
+		private void buttonMaterialRemove_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedMaterial < 0)
+				{
+					return;
+				}
+
+				List<int> descendingIds = new List<int>(listViewMaterial.SelectedItems.Count);
+				List<Component> assets = new List<Component>(listViewMaterial.SelectedItems.Count);
+				foreach (ListViewItem item in listViewMaterial.SelectedItems)
+				{
+					descendingIds.Add((int)item.Tag);
+					assets.Add(Editor.Materials[(int)item.Tag]);
+				}
+				descendingIds.Sort();
+				descendingIds.Reverse();
+				foreach (int id in descendingIds)
+				{
+					Gui.Scripting.RunScript(EditorVar + ".RemoveMaterial(id=" + id + ")");
+				}
+				Changed = Changed;
+
+				//RecreateRenderObjects();
+				LoadMesh(loadedMesh);
+				InitMaterials();
+				SyncWorkspaces();
+				//RecreateCrossRefs();
+				LoadMaterial(-1);
+
+				List<DockContent> formUnity3dList;
+				if (Gui.Docking.DockContents.TryGetValue(typeof(FormUnity3d), out formUnity3dList))
+				{
+					foreach (FormUnity3d form in formUnity3dList)
+					{
+						if (form.Editor.Parser.Cabinet == Editor.Parser.file)
+						{
+							for (int i = 0; i < form.materialsList.Items.Count; i++)
+							{
+								if (assets.Contains((Component)form.materialsList.Items[i].Tag))
+								{
+									form.materialsList.Items.RemoveAt(i);
+									i--;
+								}
+							}
+							form.materialsList.Columns[0].AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
+							if (form.materialsList.Columns.Count > 1)
+							{
+								form.materialsList.Columns[1].AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
+							}
+							form.materialsList.Sort();
+							((TabPage)form.materialsList.Parent).Text = "Materials [" + form.materialsList.Items.Count + "]";
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonMaterialCopy_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedMaterial < 0)
+				{
+					return;
+				}
+
+				Material newMat = (Material)Gui.Scripting.RunScript(EditorVar + ".CopyMaterial(id=" + loadedMaterial + ")");
+				Changed = Changed;
+
+				int oldMatIndex = -1;
+				while (listViewMaterial.SelectedItems.Count > 0)
+				{
+					oldMatIndex = listViewMaterial.SelectedItems[0].Index;
+					listViewMaterial.SelectedItems[0].Selected = false;
+				}
+				InitMaterials();
+				//RecreateCrossRefs();
+				LoadMesh(loadedMesh);
+				listViewMaterial.Items[oldMatIndex].Selected = true;
+
+				List<DockContent> formUnity3dList;
+				if (Gui.Docking.DockContents.TryGetValue(typeof(FormUnity3d), out formUnity3dList))
+				{
+					foreach (FormUnity3d form in formUnity3dList)
+					{
+						if (form.Editor.Parser.Cabinet == Editor.Parser.file)
+						{
+							ListViewItem item = new ListViewItem(new string[] { newMat.m_Name, newMat.classID2.ToString() });
+							item.Tag = (Component)newMat;
+							item.Font = new System.Drawing.Font(form.materialsList.Font, FontStyle.Bold);
+							form.materialsList.Items.Add(item);
+							form.materialsList.Columns[0].AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
+							if (form.materialsList.Columns.Count > 1)
+							{
+								form.materialsList.Columns[1].AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
+							}
+							form.materialsList.Sort();
+							((TabPage)form.materialsList.Parent).Text = "Materials [" + form.materialsList.Items.Count + "]";
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void listViewTexture_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
+		{
+			try
+			{
+				if (listViewItemSyncSelectedSent == false)
+				{
+					listViewItemSyncSelectedSent = true;
+					listViewTextureMesh.BeginUpdate();
+					listViewTextureMaterial.BeginUpdate();
+
+					int id = (int)e.Item.Tag;
+					if (e.IsSelected)
+					{
+						tabControlViews.SelectTabWithoutLoosingFocus(tabPageTextureView);
+						LoadTexture(id);
+						/*CrossRefAddItem(crossRefTextureMeshes[id], crossRefTextureMeshesCount, listViewTextureMesh, listViewMesh);
+						CrossRefAddItem(crossRefTextureMaterials[id], crossRefTextureMaterialsCount, listViewTextureMaterial, listViewMaterial);*/
+					}
+					else
+					{
+						if (id == loadedTexture)
+						{
+							LoadTexture(-1);
+						}
+						/*CrossRefRemoveItem(crossRefTextureMeshes[id], crossRefTextureMeshesCount, listViewTextureMesh);
+						CrossRefRemoveItem(crossRefTextureMaterials[id], crossRefTextureMaterialsCount, listViewTextureMaterial);*/
+					}
+
+					/*CrossRefSetSelected(e.IsSelected, listViewTexture, id);
+					CrossRefSetSelected(e.IsSelected, listViewMeshTexture, id);
+					CrossRefSetSelected(e.IsSelected, listViewMaterialTexture, id);*/
+
+					listViewTextureMesh.EndUpdate();
+					listViewTextureMaterial.EndUpdate();
+					listViewItemSyncSelectedSent = false;
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void listViewTexture_KeyUp(object sender, KeyEventArgs e)
+		{
+			if (e.KeyData != MASS_DESTRUCTION_KEY_COMBINATION || loadedTexture == -1)
+			{
+				return;
+			}
+			buttonTextureRemove_Click(null, null);
+		}
+
+		void textBoxTexName_AfterEditTextChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedTexture < 0)
+				{
+					return;
+				}
+
+				Gui.Scripting.RunScript(EditorVar + ".SetTextureName(id=" + loadedTexture + ", name=\"" + textBoxTexName.Text + "\")");
+				Changed = Changed;
+
+				Texture2D tex = Editor.Textures[loadedTexture];
+				RenameListViewItems(Editor.Textures, listViewTexture, tex, tex.m_Name);
+				RenameListViewItems(Editor.Textures, listViewMeshTexture, tex, tex.m_Name);
+				RenameListViewItems(Editor.Textures, listViewMaterialTexture, tex, tex.m_Name);
+
+				InitTextures();
+				SyncWorkspaces(tex.m_Name, typeof(Texture2D), loadedTexture);
+				LoadMaterial(loadedMaterial);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonTextureExport_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				foreach (ListViewItem item in listViewTexture.SelectedItems)
+				{
+					int id = (int)item.Tag;
+					DirectoryInfo dirInfo = Directory.GetParent(exportDir);
+					Gui.Scripting.RunScript(EditorVar + ".ExportTexture(id=" + id + ", path=\"" + dirInfo.FullName + "\")");
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonTextureRemove_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedTexture < 0)
+				{
+					return;
+				}
+
+				List<int> descendingIds = new List<int>(listViewTexture.SelectedItems.Count);
+				foreach (ListViewItem item in listViewTexture.SelectedItems)
+				{
+					descendingIds.Add((int)item.Tag);
+				}
+				descendingIds.Sort();
+				descendingIds.Reverse();
+				foreach (int id in descendingIds)
+				{
+					Gui.Scripting.RunScript(EditorVar + ".RemoveTexture(id=" + id + ")");
+				}
+				Changed = Changed;
+
+				//RecreateRenderObjects();
+				InitTextures();
+				SyncWorkspaces();
+				//RecreateCrossRefs();
+				LoadMaterial(loadedMaterial);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonTextureAdd_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (Gui.ImageControl.Image == null)
+				{
+					Report.ReportLog("An image hasn't been loaded");
+					return;
+				}
+
+				List<string> vars = FormImageFiles.GetSelectedImageVariables();
+				if (vars == null)
+				{
+					Report.ReportLog("An image hasn't been selected");
+					return;
+				}
+
+				foreach (string var in vars)
+				{
+					Gui.Scripting.RunScript(EditorVar + ".AddTexture(image=" + var + ")");
+				}
+				Changed = Changed;
+
+				//RecreateRenderObjects();
+				InitTextures();
+				//RecreateCrossRefs();
+				LoadMaterial(loadedMaterial);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonTextureReplace_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedTexture < 0)
+				{
+					return;
+				}
+				if (Gui.ImageControl.Image == null)
+				{
+					Report.ReportLog("An image hasn't been loaded");
+					return;
+				}
+
+				Gui.Scripting.RunScript(EditorVar + ".ReplaceTexture(id=" + loadedTexture + ", image=" + Gui.ImageControl.ImageScriptVariable + ")");
+				Changed = Changed;
+
+				//RecreateRenderObjects();
+				InitTextures();
+				//RecreateCrossRefs();
+				LoadMaterial(loadedMaterial);
+				foreach (ListViewItem item in listViewTexture.Items)
+				{
+					if ((int)item.Tag == loadedTexture)
+					{
+						item.Selected = true;
+						break;
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		void panelTexturePic_Resize(object sender, EventArgs e)
+		{
+			try
+			{
+				ResizeImage();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		void ResizeImage()
+		{
+			if (pictureBoxTexture.Image != null)
+			{
+				Decimal x = (Decimal)panelTexturePic.Width / pictureBoxTexture.Image.Width;
+				Decimal y = (Decimal)panelTexturePic.Height / pictureBoxTexture.Image.Height;
+				if (x > y)
+				{
+					pictureBoxTexture.Width = Decimal.ToInt32(pictureBoxTexture.Image.Width * y);
+					pictureBoxTexture.Height = Decimal.ToInt32(pictureBoxTexture.Image.Height * y);
+				}
+				else
+				{
+					pictureBoxTexture.Width = Decimal.ToInt32(pictureBoxTexture.Image.Width * x);
+					pictureBoxTexture.Height = Decimal.ToInt32(pictureBoxTexture.Image.Height * x);
+				}
 			}
 		}
 	}

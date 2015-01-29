@@ -42,5 +42,15 @@ namespace UnityPlugin.Properties {
                 return ((string)(this["BackupExtensionUnity3d"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(PortableSettingsProvider))]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("FBX 2015.1")]
+        public string MeshExportFormat {
+            get {
+                return ((string)(this["MeshExportFormat"]));
+            }
+        }
     }
 }

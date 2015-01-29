@@ -243,6 +243,8 @@ namespace UnityPlugin
 					{
 					case UnityClassID.Avatar:
 					case UnityClassID.Mesh:
+					case UnityClassID.MeshFilter:
+					case UnityClassID.MeshRenderer:
 					case UnityClassID.SkinnedMeshRenderer:
 					case UnityClassID.Transform:
 					case UnityClassID.GameObject:
@@ -291,13 +293,22 @@ namespace UnityPlugin
 					break;
 				case UnityClassID.Avatar:
 				case UnityClassID.Mesh:
+				case UnityClassID.MeshFilter:
+				case UnityClassID.MeshRenderer:
 				case UnityClassID.SkinnedMeshRenderer:
 				case UnityClassID.Transform:
 				case UnityClassID.GameObject:
 					filtered.Add(item);
 					break;
 				default:
-					if (subfile.classID1 != (UnityClassID)(int)-1 || subfile.classID2 != UnityClassID.MonoBehaviour)
+					if (subfile.classID1 != UnityClassID.AnimationClip &&
+						subfile.classID1 != UnityClassID.AssetBundle &&
+						subfile.classID1 != UnityClassID.Cubemap &&
+						subfile.classID1 != UnityClassID.EllipsoidParticleEmitter &&
+						subfile.classID2 != UnityClassID.MonoBehaviour &&
+						subfile.classID1 != UnityClassID.MonoScript &&
+						subfile.classID1 != UnityClassID.ParticleAnimator &&
+						subfile.classID1 != UnityClassID.ParticleRenderer)
 					{
 						item.BackColor = Color.LightCoral;
 					}
@@ -358,7 +369,6 @@ namespace UnityPlugin
 					}
 					assetListViews[i].Sort();
 				}
-
 			}
 			else
 			{
@@ -716,6 +726,22 @@ namespace UnityPlugin
 		private void backupExtensionToolStripEditTextBox_AfterEditTextChanged(object sender, EventArgs e)
 		{
 			Properties.Settings.Default["BackupExtensionUnity3d"] = backupExtensionToolStripEditTextBox.Text;
+		}
+
+		private void filterIncludedAssetsToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+		{
+			if (filterIncludedAssetsToolStripMenuItem.Checked)
+			{
+				tabControlAssets.TabPages.Remove(tabPageFiltered);
+				assetListViews.Remove(filteredList);
+			}
+			else
+			{
+				tabControlAssets.TabPages.Add(tabPageFiltered);
+				assetListViews.Add(filteredList);
+			}
+
+			InitSubfileLists(false);
 		}
 	}
 }

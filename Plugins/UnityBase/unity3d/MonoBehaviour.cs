@@ -52,6 +52,11 @@ namespace UnityPlugin
 
 		public void LoadFrom(Stream stream)
 		{
+			if (classID1 != (UnityClassID)(int)-1)
+			{
+				throw new Exception("MonoBehaviour classID1=" + classID1 + " not supported");
+			}
+
 			BinaryReader reader = new BinaryReader(stream);
 			unknown1 = reader.ReadInt32Array(5);
 			m_Name = reader.ReadNameA4();
@@ -75,9 +80,16 @@ namespace UnityPlugin
 
 		public static string LoadName(Stream stream)
 		{
-			BinaryReader reader = new BinaryReader(stream);
-			int[] unknown1 = reader.ReadInt32Array(5);
-			return reader.ReadNameA4();
+			try
+			{
+				BinaryReader reader = new BinaryReader(stream);
+				int[] unknown1 = reader.ReadInt32Array(5);
+				return reader.ReadNameA4();
+			}
+			catch
+			{
+				return null;
+			}
 		}
 
 		public void WriteTo(Stream stream)

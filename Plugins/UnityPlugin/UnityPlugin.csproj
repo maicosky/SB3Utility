@@ -70,6 +70,7 @@
     <Compile Include="FormAnimatorDragDrop.Designer.cs">
       <DependentUpon>FormAnimatorDragDrop.cs</DependentUpon>
     </Compile>
+    <Compile Include="Mqo.cs" />
     <Compile Include="PortableSettingsProvider.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>

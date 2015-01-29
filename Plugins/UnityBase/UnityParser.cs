@@ -158,6 +158,7 @@ namespace UnityPlugin
 		SpriteRenderer = 212,
 		Sprite = 213,
 		LightProbeGroup = 220,
+		AnimatorOverrideController = 221,
 		SpringJoint2D = 231,
 		HingeJoint2D = 233,
 		Prefab = 1001,
@@ -435,17 +436,24 @@ namespace UnityPlugin
 							List<UnityClassID> storeRefClasses = new List<UnityClassID>
 							(
 								new UnityClassID[]
-							{
-								UnityClassID.AnimationClip,
-								UnityClassID.Animator,
-								UnityClassID.AssetBundle,
-								UnityClassID.GameObject,
-								UnityClassID.Material,
-								UnityClassID.AnimatorController,
-								UnityClassID.Shader,
-								UnityClassID.SkinnedMeshRenderer,
-								UnityClassID.Transform
-							}
+								{
+									UnityClassID.AnimationClip,
+									UnityClassID.Animator,
+									UnityClassID.AnimatorController,
+									UnityClassID.AssetBundle,
+									UnityClassID.Cubemap,
+									UnityClassID.EllipsoidParticleEmitter,
+									UnityClassID.GameObject,
+									UnityClassID.Material,
+									UnityClassID.MeshFilter,
+									UnityClassID.MeshRenderer,
+									UnityClassID.ParticleAnimator,
+									UnityClassID.ParticleRenderer,
+									UnityClassID.Shader,
+									UnityClassID.SkinnedMeshRenderer,
+									UnityClassID.Sprite,
+									UnityClassID.Transform
+								}
 							);
 							Cabinet.loadingReferencials = true;
 							for (int i = 0; i < Cabinet.Components.Count; i++)

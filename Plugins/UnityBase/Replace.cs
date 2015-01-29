@@ -279,14 +279,26 @@ namespace UnityPlugin
 
 			SkinnedMeshRenderer frameMesh = frame.m_GameObject.instance.FindLinkedComponent(UnityClassID.SkinnedMeshRenderer);
 			vMesh srcMesh = null;
-			if (frameMesh == null)
+			if (frameMesh == null || frameMesh.m_Mesh.instance == null)
 			{
 				sMesh.m_RootBone = new PPtr<Transform>(rootBone);
 				if (rootBone != null)
 				{
 					sMesh.m_Mesh.instance.m_RootBoneNameHash = parser.m_Avatar.instance.BoneHash(rootBone.m_GameObject.instance.m_Name);
 				}
-				CreateUnknowns(sMesh);
+				if (frameMesh != null)
+				{
+					CopyUnknowns(frameMesh, sMesh);
+					if ((bonesMethod == CopyMeshMethod.CopyOrder) || (bonesMethod == CopyMeshMethod.CopyNear))
+					{
+						sMesh.m_Bones.Clear();
+						sMesh.m_Bones.Capacity = frameMesh.m_Bones.Count;
+						for (int i = 0; i < frameMesh.m_Bones.Count; i++)
+						{
+							sMesh.m_Bones.Add(new PPtr<Transform>(frameMesh.m_Bones[i].instance));
+						}
+					}
+				}
 			}
 			else
 			{
@@ -319,7 +331,7 @@ namespace UnityPlugin
 				sMesh.m_AABB.m_Extend = sMesh.m_Mesh.instance.m_LocalAABB.m_Extend;
 			}
 
-			vSubmesh[] replaceSubmeshes = (frameMesh == null) ? null : new vSubmesh[srcMesh.submeshes.Count];
+			vSubmesh[] replaceSubmeshes = (srcMesh == null) ? null : new vSubmesh[srcMesh.submeshes.Count];
 			List<vSubmesh> addSubmeshes = new List<vSubmesh>(destMesh.submeshes.Count);
 			for (int i = 0; i < destMesh.submeshes.Count; i++)
 			{
@@ -335,7 +347,7 @@ namespace UnityPlugin
 
 				vSubmesh baseSubmesh = null;
 				int idx = indices[i];
-				if ((frameMesh != null) && (idx >= 0) && (idx < frameMesh.m_Mesh.instance.m_SubMeshes.Count))
+				if ((srcMesh != null) && (idx >= 0) && (idx < frameMesh.m_Mesh.instance.m_SubMeshes.Count))
 				{
 					baseSubmesh = srcMesh.submeshes[idx];
 					CopyUnknowns(frameMesh.m_Mesh.instance.m_SubMeshes[idx], sMesh.m_Mesh.instance.m_SubMeshes[i]);
@@ -372,7 +384,7 @@ namespace UnityPlugin
 				}
 			}
 
-			if ((frameMesh != null) && merge)
+			if ((srcMesh != null) && merge)
 			{
 				destMesh.submeshes = new List<vSubmesh>(replaceSubmeshes.Length + addSubmeshes.Count);
 				List<vSubmesh> copiedSubmeshes = new List<vSubmesh>(replaceSubmeshes.Length);
@@ -466,9 +478,12 @@ namespace UnityPlugin
 			{
 				frame.m_GameObject.instance.RemoveLinkedComponent(frameMesh);
 				parser.file.RemoveSubfile(frameMesh);
-				parser.file.RemoveSubfile(frameMesh.m_Mesh.instance);
+				if (frameMesh.m_Mesh.instance != null)
+				{
+					parser.file.RemoveSubfile(frameMesh.m_Mesh.instance);
 
-				bundle.DeleteComponent(frameMesh.m_Mesh.asset);
+					bundle.DeleteComponent(frameMesh.m_Mesh.asset);
+				}
 				bundle.DeleteComponent(frameMesh);
 			}
 			frame.m_GameObject.instance.AddLinkedComponent(sMesh);

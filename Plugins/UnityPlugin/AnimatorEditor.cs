@@ -10,7 +10,7 @@ namespace UnityPlugin
 	public class AnimatorEditor : IDisposable, EditedContent
 	{
 		public List<Transform> Frames { get; protected set; }
-		public List<SkinnedMeshRenderer> Meshes { get; set; }
+		public List<MeshRenderer> Meshes { get; set; }
 		public List<Material> Materials { get; set; }
 		public List<Texture2D> Textures { get; set; }
 
@@ -25,10 +25,17 @@ namespace UnityPlugin
 			Bundle = Parser.file.LoadComponent(1);
 
 			Frames = new List<Transform>();
-			Meshes = new List<SkinnedMeshRenderer>();
+			Meshes = new List<MeshRenderer>();
 			Materials = new List<Material>();
 			Textures = new List<Texture2D>();
-			InitLists(parser.RootTransform);
+			try
+			{
+				InitLists(parser.RootTransform);
+			}
+			catch (Exception e)
+			{
+				Utility.ReportException(e);
+			}
 		}
 
 		private void InitLists()
@@ -47,6 +54,10 @@ namespace UnityPlugin
 				{
 					foreach (SkinnedMeshRenderer smr in Meshes)
 					{
+						if (smr == null)
+						{
+							continue;
+						}
 						for (int i = 0; i < smr.m_Bones.Count; i++)
 						{
 							PPtr<Transform> bonePtr = smr.m_Bones[i];
@@ -107,20 +118,24 @@ namespace UnityPlugin
 		private void InitLists(Transform frame)
 		{
 			Frames.Add(frame);
-			SkinnedMeshRenderer mesh = frame.m_GameObject.instance.FindLinkedComponent(UnityClassID.SkinnedMeshRenderer);
+			MeshRenderer mesh = frame.m_GameObject.instance.FindLinkedComponent(UnityClassID.SkinnedMeshRenderer);
+			if (mesh == null)
+			{
+				mesh = frame.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshRenderer);
+			}
 			if (mesh != null)
 			{
 				Meshes.Add(mesh);
 				foreach (PPtr<Material> matPtr in mesh.m_Materials)
 				{
 					Material mat = matPtr.instance;
-					if (!Materials.Contains(mat))
+					if (mat != null && !Materials.Contains(mat))
 					{
 						Materials.Add(mat);
 						foreach (var pair in mat.m_SavedProperties.m_TexEnvs)
 						{
 							Texture2D tex = pair.Value.m_Texture.instance;
-							if (!Textures.Contains(tex))
+							if (tex != null && !Textures.Contains(tex))
 							{
 								Textures.Add(tex);
 							}
@@ -213,7 +228,7 @@ namespace UnityPlugin
 			}
 
 			parent.RemoveChild(frame);
-			Report.ReportLog("Warning! Avatar not updated");
+			Parser.m_Avatar.instance.RemoveBone(frame.m_GameObject.instance.m_Name);
 
 			InitLists();
 			Changed = true;
@@ -380,21 +395,94 @@ namespace UnityPlugin
 		}
 
 		[Plugin]
+		public void RemoveBone(int meshId, int boneId)
+		{
+			SkinnedMeshRenderer smr = (SkinnedMeshRenderer)Meshes[meshId];
+			Mesh mesh = smr.m_Mesh.instance;
+			if (mesh != null)
+			{
+				Operations.vMesh vMesh = new Operations.vMesh(mesh);
+				Transform boneFrame = smr.m_Bones[boneId].instance;
+				int parentBoneIdx = -1;
+				if (boneFrame != null)
+				{
+					Transform parentFrame = boneFrame.Parent;
+					parentBoneIdx = Operations.FindBoneIndex(smr.m_Bones, parentFrame);
+				}
+				smr.m_Bones.RemoveAt(boneId);
+
+				foreach (Operations.vSubmesh submesh in vMesh.submeshes)
+				{
+					foreach (Operations.vVertex vertex in submesh.vertexList)
+					{
+						for (int i = 0; i < vertex.boneIndices.Length; i++)
+						{
+							int boneIdx = vertex.boneIndices[i];
+							if (boneIdx == boneId)
+							{
+								float[] w4 = vertex.weights;
+								for (int j = i + 1; j < vertex.boneIndices.Length; j++)
+								{
+									vertex.boneIndices[j - 1] = vertex.boneIndices[j];
+									vertex.weights[j - 1] = w4[j];
+								}
+								vertex.boneIndices[vertex.boneIndices.Length - 1] = -1;
+
+								w4 = vertex.weights;
+								float normalize = 1f / (w4[0] + w4[1] + w4[2] + w4[3]);
+								if (w4[3] != 1f)
+								{
+									for (int j = 0; vertex.boneIndices[j] != -1; j++)
+									{
+										vertex.weights[j] *= normalize;
+									}
+								}
+								else if (parentBoneIdx >= 0)
+								{
+									vertex.boneIndices[0] = parentBoneIdx;
+									vertex.weights[0] = 1f;
+								}
+
+								i--;
+							}
+							else if (boneIdx != -1 && boneIdx > boneId)
+							{
+								vertex.boneIndices[i]--;
+							}
+						}
+					}
+				}
+				vMesh.Flush();
+			}
+		}
+
+		[Plugin]
 		public void ReplaceSkinnedMeshRenderer(WorkspaceMesh mesh, int frameId, int rootBoneId, bool merge, string normals, string bones)
 		{
-			var normalsMethod = (CopyMeshMethod)Enum.Parse(typeof(CopyMeshMethod), normals);
-			var bonesMethod = (CopyMeshMethod)Enum.Parse(typeof(CopyMeshMethod), bones);
-			Transform rootBone = rootBoneId >= 0 && rootBoneId < Frames.Count ? Frames[rootBoneId] : null;
-			Operations.ReplaceSkinnedMeshRenderer(Frames[frameId], rootBone, Parser, Bundle, Materials, mesh, merge, normalsMethod, bonesMethod);
+			try
+			{
+				var normalsMethod = (CopyMeshMethod)Enum.Parse(typeof(CopyMeshMethod), normals);
+				var bonesMethod = (CopyMeshMethod)Enum.Parse(typeof(CopyMeshMethod), bones);
+				Transform rootBone = rootBoneId >= 0 && rootBoneId < Frames.Count ? Frames[rootBoneId] : null;
+				Operations.ReplaceSkinnedMeshRenderer(Frames[frameId], rootBone, Parser, Bundle, Materials, mesh, merge, normalsMethod, bonesMethod);
 
-			InitLists();
-			Changed = true;
+				InitLists();
+				Changed = true;
+			}
+			catch (Exception e)
+			{
+				Report.ReportLog(e.ToString());
+			}
 		}
 
 		[Plugin]
 		public void RemoveSkinnedMeshRenderer(int id)
 		{
-			SkinnedMeshRenderer sMesh = Meshes[id];
+			SkinnedMeshRenderer sMesh = Meshes[id] as SkinnedMeshRenderer;
+			if (sMesh == null)
+			{
+				return;
+			}
 			if (sMesh.m_Mesh.instance != null)
 			{
 				HashSet<Mesh> meshesForRemoval = new HashSet<Mesh>();
@@ -420,6 +508,37 @@ namespace UnityPlugin
 		}
 
 		[Plugin]
+		public void SetMeshName(int id, string name)
+		{
+			MeshRenderer meshRenderer = Meshes[id];
+			Mesh mesh;
+			if (meshRenderer is SkinnedMeshRenderer)
+			{
+				SkinnedMeshRenderer sMesh = (SkinnedMeshRenderer)meshRenderer;
+				mesh = sMesh.m_Mesh.instance;
+			}
+			else
+			{
+				MeshFilter filter = meshRenderer.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshFilter);
+				mesh = filter.m_Mesh.instance;
+			}
+			if (mesh != null)
+			{
+				mesh.m_Name = name;
+				Changed = true;
+			}
+		}
+
+		[Plugin]
+		public void SetSubMeshMaterial(int meshId, int subMeshId, int material)
+		{
+			MeshRenderer meshRenderer = Meshes[meshId];
+			Material mat = Materials[material];
+			meshRenderer.m_Materials[subMeshId] = new PPtr<Material>(mat);
+			Changed = true;
+		}
+
+		[Plugin]
 		public void SetMaterialName(int id, string name)
 		{
 			Materials[id].m_Name = name;
@@ -427,73 +546,101 @@ namespace UnityPlugin
 		}
 
 		[Plugin]
-		public void SetMaterialPhong(int id, object[] diffuse, object[] ambient, object[] specular, object[] emissive, double shininess)
+		public void SetMaterialColour(int id, string name, object[] colour)
 		{
 			Material mat = Materials[id];
 			for (int i = 0; i < mat.m_SavedProperties.m_Colors.Count; i++)
 			{
 				var col = mat.m_SavedProperties.m_Colors[i];
-				object[] newVal = null;
-				switch (col.Key.name)
+				if (col.Key.name == name)
 				{
-				case "_Color":
-					newVal = diffuse;
-					break;
-				case "_SColor":
-					newVal = ambient;
-					break;
-				case "_ReflectColor":
-					newVal = emissive;
-					break;
-				case "_SpecColor":
-					newVal = specular;
-					break;
-				case "_RimColor":
-				case "_OutlineColor":
-				case "_ShadowColor":
-				default:
-					continue;
+					SetMaterialColour(id, i, colour);
+					return;
 				}
-				mat.m_SavedProperties.m_Colors.RemoveAt(i);
-				col =  new KeyValuePair<FastPropertyName, Color4>(col.Key, new Color4((float)(double)newVal[3], (float)(double)newVal[0], (float)(double)newVal[1], (float)(double)newVal[2]));
-				mat.m_SavedProperties.m_Colors.Insert(i, col);
 			}
+		}
 
+		[Plugin]
+		public void SetMaterialColour(int id, int index, object[] colour)
+		{
+			Material mat = Materials[id];
+			var col = mat.m_SavedProperties.m_Colors[index];
+			mat.m_SavedProperties.m_Colors.RemoveAt(index);
+			col = new KeyValuePair<FastPropertyName, Color4>(col.Key, new Color4((float)(double)colour[3], (float)(double)colour[0], (float)(double)colour[1], (float)(double)colour[2]));
+			mat.m_SavedProperties.m_Colors.Insert(index, col);
+			Changed = true;
+		}
+
+		[Plugin]
+		public void SetMaterialValue(int id, string name, double value)
+		{
+			Material mat = Materials[id];
 			for (int i = 0; i < mat.m_SavedProperties.m_Floats.Count; i++)
 			{
 				var flt = mat.m_SavedProperties.m_Floats[i];
-				float newVal;
-				switch (flt.Key.name)
+				if (flt.Key.name == name)
 				{
-				case "_Shininess":
-					newVal = (float)shininess;
-					break;
-				case "_RimPower":
-				case "_Outline":
-				default:
-					continue;
+					SetMaterialValue(id, i, value);
+					return;
 				}
-				mat.m_SavedProperties.m_Floats.RemoveAt(i);
-				mat.m_SavedProperties.m_Floats.Insert(i, new KeyValuePair<FastPropertyName,float>(flt.Key, newVal));
 			}
+		}
+
+		[Plugin]
+		public void SetMaterialValue(int id, int index, double value)
+		{
+			Material mat = Materials[id];
+			var flt = mat.m_SavedProperties.m_Floats[index];
+			mat.m_SavedProperties.m_Floats.RemoveAt(index);
+			mat.m_SavedProperties.m_Floats.Insert(index, new KeyValuePair<FastPropertyName, float>(flt.Key, (float)value));
+			Changed = true;
+		}
+
+		[Plugin]
+		public void SetMaterialTexture(int id, int index, string name)
+		{
+			Texture2D tex = Parser.file.Parser.GetTexture(name);
+			var texEnv = Materials[id].m_SavedProperties.m_TexEnvs[index].Value;
+			texEnv.m_Texture = new PPtr<Texture2D>(tex);
 			Changed = true;
 		}
 
 		[Plugin]
 		public void RemoveMaterial(int id)
 		{
-			Parser.file.RemoveSubfile(Materials[id]);
+			Material mat = Materials[id];
+			foreach (MeshRenderer meshRenderer in Meshes)
+			{
+				for (int i = 0; i < meshRenderer.m_Materials.Count; i++)
+				{
+					if (meshRenderer.m_Materials[i].instance == mat)
+					{
+						meshRenderer.m_Materials[i] = new PPtr<Material>((Component)null);
+					}
+				}
+			}
+			foreach (Material m in Materials)
+			{
+				Shader shader = m.m_Shader.instance;
+				if (shader != null)
+				{
+					RemoveComponentFromShaders(shader, mat);
+				}
+			}
+
+			Parser.file.RemoveSubfile(mat);
 			Materials.RemoveAt(id);
 			Changed = true;
 		}
 
 		[Plugin]
-		public void CopyMaterial(int id)
+		public Material CopyMaterial(int id)
 		{
 			Material newMat = Materials[id].Clone(Parser.file);
 			newMat.m_Name += "_Copy";
 			Materials.Add(newMat);
 			Changed = true;
+			return newMat;
 		}
 
 		[Plugin]
@@ -507,28 +654,184 @@ namespace UnityPlugin
 		[Plugin]
 		public void MergeMaterial(Material mat)
 		{
+			Shader oldShader = mat.m_Shader.instance != null && mat.file != Parser.file ? FindMaterialShader(mat.m_Shader.instance.m_Name) : null;
+			Material newMat;
 			Material oldMat = Operations.FindMaterial(Materials, mat.m_Name);
 			if (oldMat != null)
 			{
-				mat.CopyTo(oldMat);
+				if (oldMat == mat)
+				{
+					return;
+				}
+				HashSet<Component> addedComponents = new HashSet<Component>();
+				mat.CopyTo(oldMat, addedComponents);
+				newMat = oldMat;
 			}
 			else
 			{
-				Material newMat = mat.Clone(Parser.file);
+				newMat = mat.Clone(Parser.file);
+			}
+			if (oldShader != null)
+			{
+				DeleteNewShader(newMat.m_Shader.instance);
+				newMat.m_Shader = new PPtr<Shader>(oldShader);
+				Report.ReportLog("Warning! Using existing Shader " + newMat.m_Shader.instance.m_Name);
+			}
+			else if (newMat.m_Shader.instance != null && mat.file != newMat.file)
+			{
+				HashSet<Material> delayInsertion = new HashSet<Material>();
+				delayInsertion.Add(newMat);
+				HashSet<string> filterMessages = new HashSet<string>();
+				ReplaceDependentObjects(newMat.m_Shader.instance, delayInsertion, filterMessages);
+				delayInsertion.Remove(newMat);
+				Materials.AddRange(delayInsertion);
+			}
+			if (oldMat == null)
+			{
 				Materials.Add(newMat);
 			}
 			Changed = true;
 		}
 
-		[Plugin]
-		public void SetMaterialTexture(int id, int index, string name)
+		private void ReplaceDependentObjects(Shader shader, HashSet<Material> delayInsertion, HashSet<string> filterMessages)
 		{
-			Texture2D tex = Parser.file.Parser.GetTexture(name);
-			if (tex != null)
+			for (int i = 0; i < shader.m_Dependencies.Count; i++)
 			{
-				var texEnv = Materials[id].m_SavedProperties.m_TexEnvs[index].Value;
-				texEnv.m_Texture = new PPtr<Texture2D>(tex);
-				Changed = true;
+				PPtr<Shader> asset = shader.m_Dependencies[i];
+				if (asset.instance != null)
+				{
+					string msg = "Warning! Using existing dependent Shader " + asset.instance.m_Name;
+					Shader orgShader = FindMaterialShader(asset.instance.m_Name);
+					if (orgShader != null)
+					{
+						shader.m_Dependencies.RemoveAt(i);
+						shader.m_Dependencies.Insert(i, new PPtr<Shader>(orgShader));
+						Parser.file.RemoveSubfile(asset.instance);
+						if (!filterMessages.Contains(msg))
+						{
+							Report.ReportLog(msg);
+							filterMessages.Add(msg);
+						}
+					}
+					else
+					{
+						filterMessages.Add(msg);
+						ReplaceDependentObjects(asset.instance, delayInsertion, filterMessages);
+					}
+				}
+				else if (asset.asset is Material)
+				{
+					Material shaderMat = (Material)asset.asset;
+					int matId = GetMaterialId(shaderMat.m_Name);
+					if (matId >= 0)
+					{
+						shader.m_Dependencies.RemoveAt(i);
+						shader.m_Dependencies.Insert(i, new PPtr<Shader>(Materials[matId]));
+						Parser.file.RemoveSubfile(shaderMat);
+						string msg = "Warning! Using existing Material " + shaderMat.m_Name;
+						if (!filterMessages.Contains(msg))
+						{
+							Report.ReportLog(msg);
+							filterMessages.Add(msg);
+						}
+					}
+					else
+					{
+						if (delayInsertion.Add(shaderMat) && shaderMat.m_Shader.instance != null)
+						{
+							ReplaceDependentObjects(shaderMat.m_Shader.instance, delayInsertion, filterMessages);
+						}
+					}
+				}
+				else if (asset.asset is Texture2D)
+				{
+					Texture2D shaderTex = (Texture2D)asset.asset;
+					string msg = "Warning! Using existing Texture " + shaderTex.m_Name;
+					int texId = GetTextureId(shaderTex.m_Name);
+					if (texId >= 0)
+					{
+						shader.m_Dependencies.RemoveAt(i);
+						shader.m_Dependencies.Insert(i, new PPtr<Shader>(Textures[texId]));
+						Parser.file.RemoveSubfile(shaderTex);
+						Parser.file.Parser.Textures.Remove(shaderTex);
+						if (!filterMessages.Contains(msg))
+						{
+							Report.ReportLog(msg);
+							filterMessages.Add(msg);
+						}
+					}
+					else
+					{
+						filterMessages.Add(msg);
+						Textures.Add(shaderTex);
+					}
+				}
+			}
+		}
+
+		Shader FindMaterialShader(string name)
+		{
+			Shader result = null;
+			Materials.Find
+			(
+				delegate(Material mat)
+				{
+					Shader shader = mat.m_Shader.instance;
+					if (shader != null)
+					{
+						result = FindMaterialShader(shader, name);
+						return result != null;
+					}
+					return false;
+				}
+			);
+			return result;
+		}
+
+		Shader FindMaterialShader(Shader shader, string name)
+		{
+			if (shader.m_Name == name)
+			{
+				return shader;
+			}
+			for (int i = 0; i < shader.m_Dependencies.Count; i++)
+			{
+				PPtr<Shader> asset = shader.m_Dependencies[i];
+				if (asset.instance != null)
+				{
+					Shader depShader = FindMaterialShader(asset.instance, name);
+					if (depShader != null)
+					{
+						return depShader;
+					}
+				}
+			}
+			return null;
+		}
+
+		void DeleteNewShader(Shader shader)
+		{
+			Parser.file.RemoveSubfile(shader);
+			for (int i = 0; i < shader.m_Dependencies.Count; i++)
+			{
+				PPtr<Shader> asset = shader.m_Dependencies[i];
+				if (asset.instance != null)
+				{
+					DeleteNewShader(asset.instance);
+				}
+				else if (asset.asset is Material)
+				{
+					Material mat = (Material)asset.asset;
+					Parser.file.RemoveSubfile(mat);
+					if (mat.m_Shader.instance != null)
+					{
+						DeleteNewShader(mat.m_Shader.instance);
+					}
+				}
+				else if (asset.asset is Texture2D)
+				{
+					Parser.file.RemoveSubfile(asset.asset);
+				}
 			}
 		}
 
@@ -566,6 +869,74 @@ namespace UnityPlugin
 		public void SetTextureName(int id, string name)
 		{
 			Textures[id].m_Name = name;
+			Changed = true;
+		}
+
+		[Plugin]
+		public void ExportTexture(int id, string path)
+		{
+			Textures[id].Export(path);
+		}
+
+		[Plugin]
+		public void RemoveTexture(int id)
+		{
+			Texture2D tex = Textures[id];
+			foreach (Material mat in Materials)
+			{
+				foreach (var texEnv in mat.m_SavedProperties.m_TexEnvs)
+				{
+					if (texEnv.Value.m_Texture.instance == tex)
+					{
+						texEnv.Value.m_Texture = new PPtr<Texture2D>((Component)null);
+					}
+				}
+
+				Shader shader = mat.m_Shader.instance;
+				if (shader != null)
+				{
+					RemoveComponentFromShaders(shader, tex);
+				}
+			}
+
+			Parser.file.RemoveSubfile(tex);
+			Parser.file.Parser.Textures.Remove(tex);
+			Textures.RemoveAt(id);
+			Changed = true;
+		}
+
+		void RemoveComponentFromShaders(Shader shader, Component asset)
+		{
+			for (int i = 0; i < shader.m_Dependencies.Count; i++)
+			{
+				var dep = shader.m_Dependencies[i];
+				if (dep.instance != null)
+				{
+					RemoveComponentFromShaders(dep.instance, asset);
+				}
+				else if (dep.asset == asset)
+				{
+					shader.m_Dependencies.RemoveAt(i);
+					i--;
+				}
+			}
+		}
+
+		[Plugin]
+		public void AddTexture(ImportedTexture image)
+		{
+			Texture2D tex = new Texture2D(Parser.file);
+			Textures.Add(tex);
+			tex.LoadFrom(image);
+			Changed = true;
+		}
+
+		[Plugin]
+		public void ReplaceTexture(int id, ImportedTexture image)
+		{
+			var oldTex = Textures[id];
+			oldTex.LoadFrom(image);
+			Changed = true;
 		}
 	}
 }

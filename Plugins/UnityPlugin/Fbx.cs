@@ -13,7 +13,7 @@ namespace UnityPlugin
 		public static void ExportFbx([DefaultVar]Animator animator, object[] meshNames, object[] animationParsers, int startKeyframe, int endKeyframe, bool linear, bool EulerFilter, double filterPrecision, string path, string exportFormat, bool allFrames, bool allBones, bool skins, bool compatibility)
 		{
 			List<string> meshNamesList = new List<string>(Utility.Convert<string>(meshNames));
-			List<SkinnedMeshRenderer> sMeshes = meshNames != null ? Operations.FindMeshes(animator.RootTransform, new List<string>(Utility.Convert<string>(meshNames))) : null;
+			List<MeshRenderer> sMeshes = meshNames != null ? Operations.FindMeshes(animator.RootTransform, new List<string>(Utility.Convert<string>(meshNames))) : null;
 
 			UnityConverter imp = new UnityConverter(animator, sMeshes, skins);
 
@@ -24,7 +24,7 @@ namespace UnityPlugin
 		public static void ExportFbx([DefaultVar]UnityParser parser, object[] skinnedMeshRendererIDs, object[] animationParsers, int startKeyframe, int endKeyframe, bool linear, bool EulerFilter, double filterPrecision, string path, string exportFormat, bool allFrames, bool allBones, bool skins, bool compatibility)
 		{
 			List<double> sMeshIDList = new List<double>(Utility.Convert<double>(skinnedMeshRendererIDs));
-			List<SkinnedMeshRenderer> sMeshes = new List<SkinnedMeshRenderer>(sMeshIDList.Count);
+			List<MeshRenderer> sMeshes = new List<MeshRenderer>(sMeshIDList.Count);
 			for (int i = 0; i < sMeshIDList.Count; i++)
 			{
 				int sMeshID = (int)sMeshIDList[i];
@@ -67,7 +67,7 @@ namespace UnityPlugin
 
 			Avatar avatar = null;
 
-			public UnityConverter(UnityParser parser, List<SkinnedMeshRenderer> sMeshes, bool skins)
+			public UnityConverter(UnityParser parser, List<MeshRenderer> sMeshes, bool skins)
 			{
 				foreach (SkinnedMeshRenderer sMesh in sMeshes)
 				{
@@ -105,7 +105,7 @@ namespace UnityPlugin
 				AnimationList = new List<ImportedAnimation>();
 			}
 
-			public UnityConverter(Animator animator, List<SkinnedMeshRenderer> sMeshes, bool skins)
+			public UnityConverter(Animator animator, List<MeshRenderer> sMeshes, bool skins)
 			{
 				ConvertFrames(animator.RootTransform, null);
 
@@ -122,7 +122,7 @@ namespace UnityPlugin
 			{
 				ImportedFrame frame = new ImportedFrame();
 				frame.Name = trans.m_GameObject.instance.m_Name;
-				frame.InitChildren(trans./*m_Children.*/Count);
+				frame.InitChildren(trans.Count);
 				frame.Matrix = Matrix.Scaling(trans.m_LocalScale) * Matrix.RotationQuaternion(trans.m_LocalRotation) * Matrix.Translation(trans.m_LocalPosition);
 				if (parent == null)
 				{
@@ -151,7 +151,7 @@ namespace UnityPlugin
 				return world;
 			}
 
-			private void ConvertSkinnedMeshRenderers(List<SkinnedMeshRenderer> sMeshes, bool skins)
+			private void ConvertSkinnedMeshRenderers(List<MeshRenderer> sMeshes, bool skins)
 			{
 				MeshList = new List<ImportedMesh>(sMeshes.Count);
 				MaterialList = new List<ImportedMaterial>(sMeshes.Count);
@@ -282,6 +282,19 @@ namespace UnityPlugin
 					}
 
 					MeshList.Add(iMesh);
+				}
+			}
+
+			public void WorldCoordinates(int meshIdx, Matrix worldTransform)
+			{
+				ImportedMesh mesh = MeshList[meshIdx];
+				foreach (ImportedSubmesh submesh in mesh.SubmeshList)
+				{
+					List<ImportedVertex> vertList = submesh.VertexList;
+					for (int i = 0; i < vertList.Count; i++)
+					{
+						vertList[i].Position = Vector3.TransformCoordinate(vertList[i].Position, worldTransform);
+					}
 				}
 			}
 

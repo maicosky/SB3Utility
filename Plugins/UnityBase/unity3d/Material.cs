@@ -263,17 +263,30 @@ namespace UnityPlugin
 
 		public Material Clone(AssetCabinet file)
 		{
+			HashSet<Component> addedComponents = new HashSet<Component>();
+			return Clone(file, addedComponents);
+		}
+
+		public Material Clone(AssetCabinet file, HashSet<Component> addedComponents)
+		{
+			Component addedAsset = AlreadyAdded(addedComponents, this);
+			if (addedAsset != null)
+			{
+				return (Material)addedAsset;
+			}
+
 			Material mat = new Material(file);
-			CopyTo(mat);
+			addedComponents.Add(mat);
+			CopyTo(mat, addedComponents);
 			return mat;
 		}
 
-		public void CopyTo(Material dest)
+		public void CopyTo(Material dest, HashSet<Component> addedComponents)
 		{
 			try
 			{
 				dest.m_Name = m_Name;
-				dest.m_Shader = dest.file == file ? m_Shader : new PPtr<Shader>((Component)null);
+				dest.m_Shader = dest.file == file || m_Shader.instance == null ? m_Shader : new PPtr<Shader>(m_Shader.instance.Clone(dest.file, addedComponents));
 				dest.m_ShaderKeywords = new List<string>(m_ShaderKeywords);
 				dest.m_CustomRenderQueue = m_CustomRenderQueue;
 				m_SavedProperties.CopyTo(dest);
@@ -282,6 +295,26 @@ namespace UnityPlugin
 			{
 				Report.ReportLog(e.ToString());
 			}
+		}
+
+		Component AlreadyAdded(HashSet<Component> addedComponents, Component newAsset)
+		{
+			foreach (Component asset in addedComponents)
+			{
+				if (asset.classID1 == newAsset.classID1)
+				{
+					switch (asset.classID1)
+					{
+					case UnityClassID.Material:
+						if (((Material)asset).m_Name == ((Material)newAsset).m_Name)
+						{
+							return asset;
+						}
+						break;
+					}
+				}
+			}
+			return null;
 		}
 	}
 }

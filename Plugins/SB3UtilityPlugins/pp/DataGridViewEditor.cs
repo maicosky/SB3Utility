@@ -467,6 +467,21 @@ namespace SB3Utility
 			return srt;
 		}
 
+		public static void GetSQT(DataGridView viewSRT, out Vector3 localScale, out Quaternion localRotation, out Vector3 localTranslation)
+		{
+			DataTable table = (DataTable)viewSRT.DataSource;
+			Vector3[] srt = new Vector3[3];
+			for (int i = 0; i < 3; i++)
+			{
+				srt[0][i] = (float)table.Rows[2][i + 1];
+				srt[1][i] = (float)table.Rows[1][i + 1];
+				srt[2][i] = (float)table.Rows[0][i + 1];
+			}
+			localTranslation = srt[2];
+			localRotation = FbxUtility.EulerToQuaternion(srt[1]);
+			localScale = srt[0];
+		}
+
 		public static void LoadMatrix(Matrix matrix, DataGridView viewSRT, DataGridView viewMatrix)
 		{
 			if (viewSRT != null)
@@ -494,5 +509,32 @@ namespace SB3Utility
 			}
 		}
 
+		public static void LoadMatrix(Vector3 localScale, Quaternion localRotation, Vector3 localTranslation, DataGridView viewSRT, DataGridView viewMatrix)
+		{
+			if (viewSRT != null)
+			{
+				Vector3 rot = FbxUtility.QuaternionToEuler(localRotation);
+				DataTable tableSRT = (DataTable)viewSRT.DataSource;
+				for (int i = 0; i < 3; i++)
+				{
+					tableSRT.Rows[0][i + 1] = localTranslation[i];
+					tableSRT.Rows[1][i + 1] = rot[i];
+					tableSRT.Rows[2][i + 1] = localScale[i];
+				}
+			}
+
+			if (viewMatrix != null)
+			{
+				Matrix matrix = Matrix.Scaling(localScale) * Matrix.RotationQuaternion(localRotation) * Matrix.Translation(localTranslation);
+				DataTable tableMatrix = (DataTable)viewMatrix.DataSource;
+				for (int i = 0; i < 4; i++)
+				{
+					for (int j = 0; j < 4; j++)
+					{
+						tableMatrix.Rows[i][j] = matrix[i, j];
+					}
+				}
+			}
+		}
 	}
 }
