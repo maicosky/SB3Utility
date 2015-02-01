@@ -119,17 +119,24 @@ namespace UnityPlugin
 		[Plugin]
 		public static void ExportTexture([DefaultVar]UnityParser parser, string name)
 		{
-			string folder = Path.GetDirectoryName(parser.FilePath);
+			ExportTexture(parser, name, parser.FilePath);
+		}
+
+		[Plugin]
+		public static void ExportTexture([DefaultVar]UnityParser parser, string name, string path)
+		{
+			string folder = Path.GetDirectoryName(path);
 			if (folder.Length > 0)
 			{
 				folder += "\\";
 			}
+			folder += Path.GetFileNameWithoutExtension(path);
 			if (name != "*")
 			{
 				Texture2D tex = parser.GetTexture(name);
 				if (tex != null)
 				{
-					tex.Export(folder + Path.GetFileNameWithoutExtension(parser.FilePath));
+					tex.Export(folder);
 				}
 			}
 			else
@@ -137,7 +144,7 @@ namespace UnityPlugin
 				for (int i = 0; i < parser.Textures.Count; i++)
 				{
 					Texture2D tex = parser.GetTexture(i);
-					tex.Export(folder + Path.GetFileNameWithoutExtension(parser.FilePath));
+					tex.Export(folder);
 				}
 			}
 		}
@@ -146,6 +153,13 @@ namespace UnityPlugin
 		public static void MergeTexture(UnityParser parser, ImportedTexture texture)
 		{
 			Operations.ReplaceTexture(parser, texture);
+		}
+
+		[Plugin]
+		public static void MergeTexture(UnityParser parser, string path)
+		{
+			ImportedTexture texture = new ImportedTexture(path);
+			MergeTexture(parser, texture);
 		}
 
 		[Plugin]
@@ -158,13 +172,18 @@ namespace UnityPlugin
 			}
 			foreach (FileInfo file in dir.EnumerateFiles())
 			{
-				ImportedTexture tex = new ImportedTexture(file.FullName);
-				MergeTexture(parser, tex);
+				MergeTexture(parser, file.FullName);
 			}
 		}
 
 		[Plugin]
 		public static void ExportMonoBehaviour(UnityParser parser, string name)
+		{
+			ExportMonoBehaviour(parser, name, parser.FilePath);
+		}
+
+		[Plugin]
+		public static void ExportMonoBehaviour(UnityParser parser, string name, string path)
 		{
 			for (int i = 0; i < parser.Cabinet.Components.Count; i++)
 			{
@@ -174,27 +193,27 @@ namespace UnityPlugin
 					MonoBehaviour m = parser.Cabinet.LoadComponent(asset.pathID);
 					if (name == "*" || m.m_Name == name)
 					{
-						ExportMonoBehaviour(parser, asset.pathID);
+						ExportMonoBehaviour(parser, asset.pathID, path);
 					}
 				}
 			}
 		}
 
-		static void ExportMonoBehaviour(UnityParser parser, int pathID)
+		static void ExportMonoBehaviour(UnityParser parser, int pathID, string path)
 		{
-			string folder = Path.GetDirectoryName(parser.FilePath);
+			string folder = Path.GetDirectoryName(path);
 			if (folder.Length > 0)
 			{
 				folder += "\\";
 			}
 			MonoBehaviour m = parser.Cabinet.LoadComponent(pathID);
-			m.Export(folder + Path.GetFileNameWithoutExtension(parser.FilePath));
+			m.Export(folder + Path.GetFileNameWithoutExtension(path));
 		}
 
 		[Plugin]
-		public static void ReplaceMonoBehaviour(UnityParser parser, string filePath)
+		public static void ReplaceMonoBehaviour(UnityParser parser, string path)
 		{
-			MonoBehaviour m = MonoBehaviour.Import(filePath);
+			MonoBehaviour m = MonoBehaviour.Import(path);
 			if (m.m_Lines.Count > 0)
 			{
 				for (int i = 0; i < parser.Cabinet.Components.Count; i++)

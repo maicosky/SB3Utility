@@ -184,11 +184,17 @@ namespace UnityPlugin
 			public float[] weights;
 		}
 
+		public class vFace
+		{
+			public ushort[] index;
+		}
+
 		public class vSubmesh
 		{
 			public List<vVertex> vertexList;
+			public List<vFace> faceList;
 
-			public vSubmesh(Mesh mesh, int submeshIdx)
+			public vSubmesh(Mesh mesh, int submeshIdx, bool faces)
 			{
 				SubMesh s = mesh.m_SubMeshes[submeshIdx];
 				int numVertices = (int)s.vertexCount;
@@ -252,6 +258,27 @@ namespace UnityPlugin
 						}
 					}
 				}
+
+				if (faces)
+				{
+					int numFaces = (int)(s.indexCount / 3);
+					faceList = new List<vFace>(numFaces);
+					int start = 0;
+					for (int i = 0; i < submeshIdx; i++)
+					{
+						start += (int)mesh.m_SubMeshes[i].indexCount;
+					}
+					start *= sizeof(ushort);
+					using (BinaryReader reader = new BinaryReader(new MemoryStream(mesh.m_IndexBuffer, start, (int)s.indexCount * sizeof(ushort))))
+					{
+						for (int i = 0; i < numFaces; i++)
+						{
+							vFace face = new vFace();
+							face.index = reader.ReadUInt16Array(3);
+							faceList.Add(face);
+						}
+					}
+				}
 			}
 		}
 
@@ -260,18 +287,18 @@ namespace UnityPlugin
 			public List<vSubmesh> submeshes;
 			protected Mesh mesh;
 
-			public vMesh(Mesh mesh)
+			public vMesh(Mesh mesh, bool faces)
 			{
 				this.mesh = mesh;
 
 				submeshes = new List<vSubmesh>(mesh.m_SubMeshes.Count);
 				for (int i = 0; i < mesh.m_SubMeshes.Count; i++)
 				{
-					submeshes.Add(new vSubmesh(mesh, i));
+					submeshes.Add(new vSubmesh(mesh, i, faces));
 				}
 			}
 
-			public void Flush()
+			public void Flush(bool faces)
 			{
 				List<vVertex> vertexList = submeshes[0].vertexList;
 				if (vertexList[0].weights != null)
@@ -334,6 +361,11 @@ namespace UnityPlugin
 							}
 						}
 					}
+				}
+
+				if (faces)
+				{
+					throw new NotImplementedException();
 				}
 			}
 		}
@@ -405,6 +437,301 @@ namespace UnityPlugin
 
 				destVert.boneIndices = (int[])nearestVert.boneIndices.Clone();
 				destVert.weights = (float[])nearestVert.weights.Clone();
+			}
+		}
+
+		private class VertexRef
+		{
+			public vVertex vert;
+			public Vector3 norm;
+		}
+
+		private class VertexRefComparerX : IComparer<VertexRef>
+		{
+			public int Compare(VertexRef x, VertexRef y)
+			{
+				return System.Math.Sign(x.vert.position[0] - y.vert.position[0]);
+			}
+		}
+
+		private class VertexRefComparerY : IComparer<VertexRef>
+		{
+			public int Compare(VertexRef x, VertexRef y)
+			{
+				return System.Math.Sign(x.vert.position[1] - y.vert.position[1]);
+			}
+		}
+
+		private class VertexRefComparerZ : IComparer<VertexRef>
+		{
+			public int Compare(VertexRef x, VertexRef y)
+			{
+				return System.Math.Sign(x.vert.position[2] - y.vert.position[2]);
+			}
+		}
+
+		public static void CalculateNormals(List<vSubmesh> submeshes, float threshold)
+		{
+			var pairList = new List<Tuple<List<vFace>, List<vVertex>>>(submeshes.Count);
+			for (int i = 0; i < submeshes.Count; i++)
+			{
+				pairList.Add(new Tuple<List<vFace>, List<vVertex>>(submeshes[i].faceList, submeshes[i].vertexList));
+			}
+			CalculateNormals(pairList, threshold);
+		}
+
+		public static void CalculateNormals(List<Tuple<List<vFace>, List<vVertex>>> pairList, float threshold)
+		{
+			if (threshold < 0)
+			{
+				VertexRef[][] vertRefArray = new VertexRef[pairList.Count][];
+				for (int i = 0; i < pairList.Count; i++)
+				{
+					List<vVertex> vertList = pairList[i].Item2;
+					vertRefArray[i] = new VertexRef[vertList.Count];
+					for (int j = 0; j < vertList.Count; j++)
+					{
+						vVertex vert = vertList[j];
+						VertexRef vertRef = new VertexRef();
+						vertRef.vert = vert;
+						vertRef.norm = new Vector3();
+						vertRefArray[i][j] = vertRef;
+					}
+				}
+
+				for (int i = 0; i < pairList.Count; i++)
+				{
+					List<vFace> faceList = pairList[i].Item1;
+					for (int j = 0; j < faceList.Count; j++)
+					{
+						vFace face = faceList[j];
+						Vector3 v1 = vertRefArray[i][face.index[1]].vert.position - vertRefArray[i][face.index[2]].vert.position;
+						Vector3 v2 = vertRefArray[i][face.index[0]].vert.position - vertRefArray[i][face.index[2]].vert.position;
+						Vector3 norm = Vector3.Cross(v2, v1);
+						norm.Normalize();
+						for (int k = 0; k < face.index.Length; k++)
+						{
+							vertRefArray[i][face.index[k]].norm += norm;
+						}
+					}
+				}
+
+				for (int i = 0; i < vertRefArray.Length; i++)
+				{
+					for (int j = 0; j < vertRefArray[i].Length; j++)
+					{
+						Vector3 norm = vertRefArray[i][j].norm;
+						norm.Normalize();
+						vertRefArray[i][j].vert.normal = norm;
+					}
+				}
+			}
+			else
+			{
+				int vertCount = 0;
+				for (int i = 0; i < pairList.Count; i++)
+				{
+					vertCount += pairList[i].Item2.Count;
+				}
+
+				VertexRefComparerX vertRefComparerX = new VertexRefComparerX();
+				List<VertexRef> vertRefListX = new List<VertexRef>(vertCount);
+				VertexRef[][] vertRefArray = new VertexRef[pairList.Count][];
+				for (int i = 0; i < pairList.Count; i++)
+				{
+					var vertList = pairList[i].Item2;
+					vertRefArray[i] = new VertexRef[vertList.Count];
+					for (int j = 0; j < vertList.Count; j++)
+					{
+						vVertex vert = vertList[j];
+						VertexRef vertRef = new VertexRef();
+						vertRef.vert = vert;
+						vertRef.norm = new Vector3();
+						vertRefArray[i][j] = vertRef;
+						vertRefListX.Add(vertRef);
+					}
+				}
+				vertRefListX.Sort(vertRefComparerX);
+
+				for (int i = 0; i < pairList.Count; i++)
+				{
+					var faceList = pairList[i].Item1;
+					for (int j = 0; j < faceList.Count; j++)
+					{
+						vFace face = faceList[j];
+						Vector3 v1 = vertRefArray[i][face.index[1]].vert.position - vertRefArray[i][face.index[2]].vert.position;
+						Vector3 v2 = vertRefArray[i][face.index[0]].vert.position - vertRefArray[i][face.index[2]].vert.position;
+						Vector3 norm = Vector3.Cross(v2, v1);
+						norm.Normalize();
+						for (int k = 0; k < face.index.Length; k++)
+						{
+							vertRefArray[i][face.index[k]].norm += norm;
+						}
+					}
+				}
+
+				float squaredThreshold = threshold * threshold;
+				while (vertRefListX.Count > 0)
+				{
+					VertexRef vertRef = vertRefListX[vertRefListX.Count - 1];
+					List<VertexRef> dupList = new List<VertexRef>();
+					List<VertexRef> dupListX = GetAxisDups(vertRef, vertRefListX, 0, threshold, null);
+					foreach (VertexRef dupRef in dupListX)
+					{
+						if (((vertRef.vert.position.Y - dupRef.vert.position.Y) <= threshold) &&
+							((vertRef.vert.position.Z - dupRef.vert.position.Z) <= threshold) &&
+							((vertRef.vert.position - dupRef.vert.position).LengthSquared() <= squaredThreshold))
+						{
+							dupList.Add(dupRef);
+						}
+					}
+					vertRefListX.RemoveAt(vertRefListX.Count - 1);
+
+					Vector3 norm = vertRef.norm;
+					foreach (VertexRef dupRef in dupList)
+					{
+						norm += dupRef.norm;
+						vertRefListX.Remove(dupRef);
+					}
+					norm.Normalize();
+
+					vertRef.vert.normal = norm;
+					foreach (VertexRef dupRef in dupList)
+					{
+						dupRef.vert.normal = norm;
+						vertRefListX.Remove(dupRef);
+					}
+				}
+			}
+		}
+
+		private static List<VertexRef> GetAxisDups(VertexRef vertRef, List<VertexRef> compareList, int axis, float threshold, IComparer<VertexRef> binaryComparer)
+		{
+			List<VertexRef> dupList = new List<VertexRef>();
+			int startIdx;
+			if (binaryComparer == null)
+			{
+				startIdx = compareList.IndexOf(vertRef);
+				if (startIdx < 0)
+				{
+					throw new Exception("Vertex wasn't found in the compare list");
+				}
+			}
+			else
+			{
+				startIdx = compareList.BinarySearch(vertRef, binaryComparer);
+				if (startIdx < 0)
+				{
+					startIdx = ~startIdx;
+				}
+				if (startIdx < compareList.Count)
+				{
+					VertexRef compRef = compareList[startIdx];
+					if (System.Math.Abs(vertRef.vert.position[axis] - compRef.vert.position[axis]) <= threshold)
+					{
+						dupList.Add(compRef);
+					}
+				}
+			}
+
+			for (int i = startIdx + 1; i < compareList.Count; i++)
+			{
+				VertexRef compRef = compareList[i];
+				if ((System.Math.Abs(vertRef.vert.position[axis] - compRef.vert.position[axis]) <= threshold))
+				{
+					dupList.Add(compRef);
+				}
+				else
+				{
+					break;
+				}
+			}
+			for (int i = startIdx - 1; i >= 0; i--)
+			{
+				VertexRef compRef = compareList[i];
+				if ((System.Math.Abs(vertRef.vert.position[axis] - compRef.vert.position[axis]) <= threshold))
+				{
+					dupList.Add(compRef);
+				}
+				else
+				{
+					break;
+				}
+			}
+			return dupList;
+		}
+
+		public static void CalculateTangents(List<vSubmesh> submeshes)
+		{
+			foreach (vSubmesh submesh in submeshes)
+			{
+				CalculateTangents(submesh.vertexList, submesh.faceList);
+			}
+		}
+
+		// http://www.terathon.com/code/tangent.html
+		public static void CalculateTangents(List<vVertex> vertList, List<vFace> triangle)
+		{
+			int vertexCount = vertList.Count;
+			Vector3[] tan1 = new Vector3[vertexCount];
+			Vector3[] tan2 = new Vector3[vertexCount];
+
+			int triangleCount = triangle.Count;
+			for (int a = 0; a < triangleCount; a++)
+			{
+				int i1 = triangle[a].index[0];
+				int i2 = triangle[a].index[1];
+				int i3 = triangle[a].index[2];
+
+				vVertex vertex1 = vertList[i1];
+				vVertex vertex2 = vertList[i2];
+				vVertex vertex3 = vertList[i3];
+
+				Vector3 v1 = vertex1.position;
+				Vector3 v2 = vertex2.position;
+				Vector3 v3 = vertex3.position;
+
+				Vector2 w1 = vertex1.uv;
+				Vector2 w2 = vertex2.uv;
+				Vector2 w3 = vertex3.uv;
+
+				float x1 = v2.X - v1.X;
+				float x2 = v3.X - v1.X;
+				float y1 = v2.Y - v1.Y;
+				float y2 = v3.Y - v1.Y;
+				float z1 = v2.Z - v1.Z;
+				float z2 = v3.Z - v1.Z;
+
+				float s1 = w2.X - w1.X;
+				float s2 = w3.X - w1.X;
+				float t1 = w2.Y - w1.Y;
+				float t2 = w3.Y - w1.Y;
+
+				float r = 1.0F / (s1 * t2 - s2 * t1);
+				Vector3 sdir = new Vector3((t2 * x1 - t1 * x2) * r, (t2 * y1 - t1 * y2) * r,
+						(t2 * z1 - t1 * z2) * r);
+				Vector3 tdir = new Vector3((s1 * x2 - s2 * x1) * r, (s1 * y2 - s2 * y1) * r,
+						(s1 * z2 - s2 * z1) * r);
+
+				tan1[i1] += sdir;
+				tan1[i2] += sdir;
+				tan1[i3] += sdir;
+
+				tan2[i1] += tdir;
+				tan2[i2] += tdir;
+				tan2[i3] += tdir;
+			}
+
+			for (int a = 0; a < vertexCount; a++)
+			{
+				Vector3 n = vertList[a].normal;
+				Vector3 t = tan1[a];
+
+				// Gram-Schmidt orthogonalize
+				vertList[a].tangent = new Vector4(Vector3.Normalize(t - n * Vector3.Dot(n, t)),
+
+				// Calculate handedness
+				(Vector3.Dot(Vector3.Cross(n, t), tan2[a]) < 0.0F) ? -1.0F : 1.0F);
 			}
 		}
 	}

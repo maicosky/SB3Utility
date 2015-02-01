@@ -401,7 +401,7 @@ namespace UnityPlugin
 			Mesh mesh = smr.m_Mesh.instance;
 			if (mesh != null)
 			{
-				Operations.vMesh vMesh = new Operations.vMesh(mesh);
+				Operations.vMesh vMesh = new Operations.vMesh(mesh, false);
 				Transform boneFrame = smr.m_Bones[boneId].instance;
 				int parentBoneIdx = -1;
 				if (boneFrame != null)
@@ -452,27 +452,20 @@ namespace UnityPlugin
 						}
 					}
 				}
-				vMesh.Flush();
+				vMesh.Flush(false);
 			}
 		}
 
 		[Plugin]
 		public void ReplaceSkinnedMeshRenderer(WorkspaceMesh mesh, int frameId, int rootBoneId, bool merge, string normals, string bones)
 		{
-			try
-			{
-				var normalsMethod = (CopyMeshMethod)Enum.Parse(typeof(CopyMeshMethod), normals);
-				var bonesMethod = (CopyMeshMethod)Enum.Parse(typeof(CopyMeshMethod), bones);
-				Transform rootBone = rootBoneId >= 0 && rootBoneId < Frames.Count ? Frames[rootBoneId] : null;
-				Operations.ReplaceSkinnedMeshRenderer(Frames[frameId], rootBone, Parser, Bundle, Materials, mesh, merge, normalsMethod, bonesMethod);
+			var normalsMethod = (CopyMeshMethod)Enum.Parse(typeof(CopyMeshMethod), normals);
+			var bonesMethod = (CopyMeshMethod)Enum.Parse(typeof(CopyMeshMethod), bones);
+			Transform rootBone = rootBoneId >= 0 && rootBoneId < Frames.Count ? Frames[rootBoneId] : null;
+			Operations.ReplaceSkinnedMeshRenderer(Frames[frameId], rootBone, Parser, Bundle, Materials, mesh, merge, normalsMethod, bonesMethod);
 
-				InitLists();
-				Changed = true;
-			}
-			catch (Exception e)
-			{
-				Report.ReportLog(e.ToString());
-			}
+			InitLists();
+			Changed = true;
 		}
 
 		[Plugin]
@@ -498,13 +491,131 @@ namespace UnityPlugin
 		}
 
 		[Plugin]
-		public void SetMesh(SkinnedMeshRenderer sMesh, Mesh mesh)
+		public void CalculateNormals(int id, double threshold)
 		{
-			if (sMesh.m_Mesh.instance != mesh)
+			SkinnedMeshRenderer smr = Meshes[id] as SkinnedMeshRenderer;
+			Mesh mesh;
+			if (smr != null)
 			{
-				sMesh.m_Mesh = new PPtr<Mesh>(mesh);
-				Changed = true;
+				mesh = smr.m_Mesh.instance;
 			}
+			else
+			{
+				MeshRenderer meshR = Meshes[id];
+				MeshFilter filter = meshR.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshFilter);
+				mesh = filter.m_Mesh.instance;
+			}
+			Operations.vMesh vMesh = new Operations.vMesh(mesh, true);
+			Operations.CalculateNormals(vMesh.submeshes, (float)threshold);
+			Changed = true;
+		}
+
+		[Plugin]
+		public void CalculateNormals(object[] editors, object[] numMeshes, object[] meshes, double threshold)
+		{
+			if (editors == null || numMeshes == null || meshes == null)
+			{
+				return;
+			}
+
+			List<Operations.vMesh> meshList = new List<Operations.vMesh>(meshes.Length);
+			List<Operations.vSubmesh> submeshList = new List<Operations.vSubmesh>(meshes.Length);
+			ConvertMeshArgs(editors, numMeshes, meshes, meshList, submeshList);
+			Operations.CalculateNormals(submeshList, (float)threshold);
+			foreach (Operations.vMesh mesh in meshList)
+			{
+				mesh.Flush(false);
+			}
+			Changed = true;
+		}
+
+		[Plugin]
+		public void CalculateTangents(int id)
+		{
+			SkinnedMeshRenderer smr = Meshes[id] as SkinnedMeshRenderer;
+			Mesh mesh;
+			if (smr != null)
+			{
+				mesh = smr.m_Mesh.instance;
+			}
+			else
+			{
+				MeshRenderer meshR = Meshes[id];
+				MeshFilter filter = meshR.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshFilter);
+				mesh = filter.m_Mesh.instance;
+			}
+			Operations.vMesh vMesh = new Operations.vMesh(mesh, true);
+			Operations.CalculateTangents(vMesh.submeshes);
+			Changed = true;
+		}
+
+		[Plugin]
+		public void CalculateTangents(object[] editors, object[] numMeshes, object[] meshes)
+		{
+			if (editors == null || numMeshes == null || meshes == null)
+			{
+				return;
+			}
+
+			List<Operations.vMesh> meshList = new List<Operations.vMesh>(meshes.Length);
+			List<Operations.vSubmesh> submeshList = new List<Operations.vSubmesh>(meshes.Length);
+			ConvertMeshArgs(editors, numMeshes, meshes, meshList, submeshList);
+			Operations.CalculateTangents(submeshList);
+			foreach (Operations.vMesh mesh in meshList)
+			{
+				mesh.Flush(false);
+			}
+			Changed = true;
+		}
+
+		private static void ConvertMeshArgs(object[] editors, object[] numMeshes, object[] meshes, List<Operations.vMesh> meshList, List<Operations.vSubmesh> submeshList)
+		{
+			AnimatorEditor editor = null;
+			int editorIdx = -1;
+			int i = 1;
+			foreach (object id in meshes)
+			{
+				if (--i == 0)
+				{
+					editorIdx++;
+					i = (int)(double)numMeshes[editorIdx];
+					editor = (AnimatorEditor)editors[editorIdx];
+				}
+				SkinnedMeshRenderer smr = editor.Meshes[(int)(double)id] as SkinnedMeshRenderer;
+				Mesh mesh;
+				if (smr != null)
+				{
+					mesh = smr.m_Mesh.instance;
+				}
+				else
+				{
+					MeshRenderer meshR = editor.Meshes[(int)(double)id];
+					MeshFilter filter = meshR.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshFilter);
+					mesh = filter.m_Mesh.instance;
+				}
+				Operations.vMesh vMesh = new Operations.vMesh(mesh, true);
+				meshList.Add(vMesh);
+				submeshList.AddRange(vMesh.submeshes);
+			}
+		}
+
+		[Plugin]
+		public void SetMesh(int meshId, int componentIndex)
+		{
+			MeshRenderer meshRenderer = Meshes[meshId];
+			Component asset = componentIndex >= 0 ? Parser.file.Components[componentIndex] : null;
+			Mesh mesh = asset is NotLoaded ? Parser.file.LoadComponent(asset.pathID) : asset;
+			if (meshRenderer is SkinnedMeshRenderer)
+			{
+				SkinnedMeshRenderer sMesh = (SkinnedMeshRenderer)meshRenderer;
+				sMesh.m_Mesh = new PPtr<Mesh>(mesh);
+			}
+			else
+			{
+				MeshFilter filter = meshRenderer.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshFilter);
+				filter.m_Mesh = new PPtr<Mesh>(mesh);
+			}
+			Changed = true;
 		}
 
 		[Plugin]

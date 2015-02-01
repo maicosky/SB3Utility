@@ -97,10 +97,7 @@ namespace UnityPlugin
 						return mat.m_Name == submesh.Material;
 					}
 				);
-				if (matFound != null)
-				{
-					sMesh.m_Materials.Add(new PPtr<Material>(matFound));
-				}
+				sMesh.m_Materials.Add(new PPtr<Material>(matFound));
 			}
 			Mesh uMesh = new Mesh(parser.file);
 			sMesh.m_Mesh = new PPtr<Mesh>(uMesh);
@@ -275,7 +272,7 @@ namespace UnityPlugin
 			bool[] worldCoords;
 			bool[] replaceSubmeshesOption;
 			SkinnedMeshRenderer sMesh = CreateSkinnedMeshRenderer(parser, bundle, materials, mesh, out indices, out worldCoords, out replaceSubmeshesOption);
-			vMesh destMesh = new Operations.vMesh(sMesh.m_Mesh.instance);
+			vMesh destMesh = new Operations.vMesh(sMesh.m_Mesh.instance, false);
 
 			SkinnedMeshRenderer frameMesh = frame.m_GameObject.instance.FindLinkedComponent(UnityClassID.SkinnedMeshRenderer);
 			vMesh srcMesh = null;
@@ -305,7 +302,7 @@ namespace UnityPlugin
 				sMesh.m_RootBone = new PPtr<Transform>(frameMesh.m_RootBone.instance);
 				sMesh.m_Mesh.instance.m_RootBoneNameHash = frameMesh.m_Mesh.instance.m_RootBoneNameHash;
 
-				srcMesh = new Operations.vMesh(frameMesh.m_Mesh.instance);
+				srcMesh = new Operations.vMesh(frameMesh.m_Mesh.instance, false);
 				CopyUnknowns(frameMesh, sMesh);
 
 				if ((bonesMethod == CopyMeshMethod.CopyOrder) || (bonesMethod == CopyMeshMethod.CopyNear))
@@ -472,7 +469,7 @@ namespace UnityPlugin
 					}
 				}
 			}
-			destMesh.Flush();
+			destMesh.Flush(false);
 
 			if (frameMesh != null)
 			{

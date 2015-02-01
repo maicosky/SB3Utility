@@ -41,7 +41,7 @@
 			this.assetsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.exportSubfilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
-			this.addFilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.replaceFilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
 			this.removeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
@@ -78,6 +78,8 @@
 			this.columnHeaderNamePathID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.columnHeaderType = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+			this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
+			this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
 			this.menuStrip1.SuspendLayout();
 			this.panel1.SuspendLayout();
 			this.tabControlAssets.SuspendLayout();
@@ -174,7 +176,7 @@
 			this.assetsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.exportSubfilesToolStripMenuItem,
             this.toolStripSeparator4,
-            this.addFilesToolStripMenuItem,
+            this.replaceFilesToolStripMenuItem,
             this.toolStripSeparator2,
             this.removeToolStripMenuItem,
             this.toolStripSeparator3,
@@ -186,52 +188,52 @@
 			// 
 			// exportSubfilesToolStripMenuItem
 			// 
-			this.exportSubfilesToolStripMenuItem.Enabled = false;
 			this.exportSubfilesToolStripMenuItem.Name = "exportSubfilesToolStripMenuItem";
-			this.exportSubfilesToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
+			this.exportSubfilesToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
 			this.exportSubfilesToolStripMenuItem.Text = "&Export...";
+			this.exportSubfilesToolStripMenuItem.Click += new System.EventHandler(this.exportAssetsToolStripMenuItem_Click);
 			// 
 			// toolStripSeparator4
 			// 
 			this.toolStripSeparator4.Name = "toolStripSeparator4";
-			this.toolStripSeparator4.Size = new System.Drawing.Size(147, 6);
+			this.toolStripSeparator4.Size = new System.Drawing.Size(149, 6);
 			// 
-			// addFilesToolStripMenuItem
+			// replaceFilesToolStripMenuItem
 			// 
-			this.addFilesToolStripMenuItem.Enabled = false;
-			this.addFilesToolStripMenuItem.Name = "addFilesToolStripMenuItem";
-			this.addFilesToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
-			this.addFilesToolStripMenuItem.Text = "&Add Files...";
+			this.replaceFilesToolStripMenuItem.Name = "replaceFilesToolStripMenuItem";
+			this.replaceFilesToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.replaceFilesToolStripMenuItem.Text = "&Replace Files...";
+			this.replaceFilesToolStripMenuItem.Click += new System.EventHandler(this.replaceFilesToolStripMenuItem_Click);
 			// 
 			// toolStripSeparator2
 			// 
 			this.toolStripSeparator2.Name = "toolStripSeparator2";
-			this.toolStripSeparator2.Size = new System.Drawing.Size(147, 6);
+			this.toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
 			// 
 			// removeToolStripMenuItem
 			// 
 			this.removeToolStripMenuItem.Enabled = false;
 			this.removeToolStripMenuItem.Name = "removeToolStripMenuItem";
-			this.removeToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
+			this.removeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
 			this.removeToolStripMenuItem.Text = "Re&move";
 			// 
 			// toolStripSeparator3
 			// 
 			this.toolStripSeparator3.Name = "toolStripSeparator3";
-			this.toolStripSeparator3.Size = new System.Drawing.Size(147, 6);
+			this.toolStripSeparator3.Size = new System.Drawing.Size(149, 6);
 			// 
 			// renameToolStripMenuItem
 			// 
 			this.renameToolStripMenuItem.Enabled = false;
 			this.renameToolStripMenuItem.Name = "renameToolStripMenuItem";
-			this.renameToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
+			this.renameToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
 			this.renameToolStripMenuItem.Text = "Re&name";
 			// 
 			// multiRenameToolStripMenuItem
 			// 
 			this.multiRenameToolStripMenuItem.Enabled = false;
 			this.multiRenameToolStripMenuItem.Name = "multiRenameToolStripMenuItem";
-			this.multiRenameToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
+			this.multiRenameToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
 			this.multiRenameToolStripMenuItem.Text = "&Multi Rename...";
 			// 
 			// optionsToolStripMenuItem
@@ -550,6 +552,11 @@
 			// 
 			this.saveFileDialog1.RestoreDirectory = true;
 			// 
+			// openFileDialog1
+			// 
+			this.openFileDialog1.Multiselect = true;
+			this.openFileDialog1.RestoreDirectory = true;
+			// 
 			// FormUnity3d
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -590,7 +597,7 @@
 		private System.Windows.Forms.ToolStripMenuItem assetsToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem exportSubfilesToolStripMenuItem;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
-		private System.Windows.Forms.ToolStripMenuItem addFilesToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem replaceFilesToolStripMenuItem;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
 		private System.Windows.Forms.ToolStripMenuItem removeToolStripMenuItem;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
@@ -627,5 +634,7 @@
 		private System.Windows.Forms.ColumnHeader soundsListHeaderType;
 		private System.Windows.Forms.ToolStripMenuItem filterIncludedAssetsToolStripMenuItem;
 		private System.Windows.Forms.SaveFileDialog saveFileDialog1;
+		private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
+		private System.Windows.Forms.OpenFileDialog openFileDialog1;
 	}
 }

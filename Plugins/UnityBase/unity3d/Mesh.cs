@@ -688,11 +688,11 @@ namespace UnityPlugin
 			m_KeepIndices = reader.ReadBoolean();
 			reader.ReadBytes(3);
 
-			int numIndexes = reader.ReadInt32();
-			m_IndexBuffer = reader.ReadBytes(numIndexes);
-			if ((numIndexes & 3) > 0)
+			int numIndexBytes = reader.ReadInt32();
+			m_IndexBuffer = reader.ReadBytes(numIndexBytes);
+			if ((numIndexBytes & 3) > 0)
 			{
-				reader.ReadBytes(4 - (numIndexes & 3));
+				reader.ReadBytes(4 - (numIndexBytes & 3));
 			}
 
 			int numInfluences = reader.ReadInt32();

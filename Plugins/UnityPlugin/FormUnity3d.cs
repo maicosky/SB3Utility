@@ -308,7 +308,8 @@ namespace UnityPlugin
 						subfile.classID2 != UnityClassID.MonoBehaviour &&
 						subfile.classID1 != UnityClassID.MonoScript &&
 						subfile.classID1 != UnityClassID.ParticleAnimator &&
-						subfile.classID1 != UnityClassID.ParticleRenderer)
+						subfile.classID1 != UnityClassID.ParticleRenderer &&
+						subfile.classID1 != UnityClassID.Sprite)
 					{
 						item.BackColor = Color.LightCoral;
 					}
@@ -716,6 +717,125 @@ namespace UnityPlugin
 			{
 				Utility.ReportException(ex);
 			}
+		}
+
+		private void exportAssetsToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				folderBrowserDialog1.SelectedPath = Path.GetDirectoryName(this.Editor.Parser.FilePath);
+				folderBrowserDialog1.RootFolder = Environment.SpecialFolder.MyComputer;
+
+				ListView subfilesList = null;
+				string function = null;
+				if (tabControlAssets.SelectedTab == tabPageImages)
+				{
+					subfilesList = imagesList;
+					function = "ExportTexture";
+				}
+				else if (tabControlAssets.SelectedTab == tabPageSounds)
+				{
+					subfilesList = soundsList;
+					function = "ExportSound";
+				}
+				else if (tabControlAssets.SelectedTab == tabPageOthers)
+				{
+					subfilesList = othersList;
+				}
+				folderBrowserDialog1.Description = (subfilesList != null && subfilesList.SelectedItems.Count > 0 ? subfilesList.SelectedItems.Count + " subfiles" : "Nothing") + " to be exported.";
+				if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+				{
+					if (subfilesList != null)
+					{
+						foreach (ListViewItem item in subfilesList.SelectedItems)
+						{
+							Component subfile = (Component)item.Tag;
+							Gui.Scripting.RunScript((function != null ? function : "Export" + subfile.classID2) + "(parser=" + ParserVar + ", name=\"" + item.Text + "\", path=\"" + folderBrowserDialog1.SelectedPath + "\")");
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void replaceFilesToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (openFileDialog1.ShowDialog() == DialogResult.OK)
+				{
+					List<string> editors = new List<string>(openFileDialog1.FileNames.Length);
+					foreach (string path in openFileDialog1.FileNames)
+					{
+						DockContent content;
+						if (ChildForms.TryGetValue(Path.GetFileName(path), out content))
+						{
+							EditedContent editor = content as EditedContent;
+							if (editor != null)
+							{
+								editors.Add(Path.GetFileName(path));
+							}
+						}
+					}
+					if (!CloseEditors(assetsToolStripMenuItem.Text + "/" + replaceFilesToolStripMenuItem.Text, editors))
+					{
+						return;
+					}
+					foreach (string path in openFileDialog1.FileNames)
+					{
+						string extension = Path.GetExtension(path).Substring(1);
+						string function = null;
+						switch (extension.ToLower())
+						{
+						case "bmp":
+						case "dds":
+						case "jpg":
+						case "png":
+						case "tga":
+							function = "MergeTexture";
+							break;
+						default:
+							UnityClassID classID = (UnityClassID)Enum.Parse(typeof(UnityClassID), extension, true);
+							function = "Replace" + classID;
+							break;
+						}
+						Gui.Scripting.RunScript(function + "(parser=" + ParserVar + ", path=\"" + path + "\")");
+						Changed = Changed;
+					}
+
+					InitSubfileLists(false);
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		bool CloseEditors(string title, List<string> editors)
+		{
+			if (editors.Count > 0)
+			{
+				FormPPSubfileChange dialog = new FormPPSubfileChange(title, editors.ToArray(), ChildForms);
+				if (dialog.ShowDialog() == DialogResult.Cancel)
+				{
+					return false;
+				}
+				foreach (string editorName in editors)
+				{
+					DockContent content;
+					if (ChildForms.TryGetValue(editorName, out content))
+					{
+						EditedContent editor = content as EditedContent;
+						editor.Changed = false;
+						content.Close();
+					}
+				}
+			}
+			return true;
 		}
 
 		private void keepBackupToolStripMenuItem_CheckedChanged(object sender, EventArgs e)

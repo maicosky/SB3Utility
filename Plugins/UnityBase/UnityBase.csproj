@@ -67,6 +67,7 @@
     <Compile Include="unity3d\RuntimeAnimatorController.cs" />
     <Compile Include="unity3d\Shader.cs" />
     <Compile Include="unity3d\SkinnedMeshRenderer.cs" />
+    <Compile Include="unity3d\Sprite.cs" />
     <Compile Include="unity3d\Texture2D.cs" />
     <Compile Include="unity3d\Transform.cs" />
     <Compile Include="UnityParser.cs" />

@@ -61,6 +61,7 @@ namespace SB3Utility {
 			FbxImporter* pImporter;
 
 			bool negateQuaternionFlips;
+			bool generatingTangentsReported;
 
 			void ImportNode(ImportedFrame^ parent, FbxNode* pNode);
 			ImportedFrame^ ImportFrame(ImportedFrame^ parent, FbxNode* pNode);

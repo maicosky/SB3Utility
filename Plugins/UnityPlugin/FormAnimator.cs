@@ -69,6 +69,24 @@ namespace UnityPlugin
 		int loadedMaterial = -1;
 		int loadedTexture = -1;
 
+		Matrix[] copyMatrices = new Matrix[10];
+
+		Dictionary<int, List<KeyList<Material>>> crossRefMeshMaterials = new Dictionary<int,List<KeyList<Material>>>();
+		Dictionary<int, List<KeyList<Texture2D>>> crossRefMeshTextures = new Dictionary<int,List<KeyList<Texture2D>>>();
+		Dictionary<int, List<KeyList<MeshRenderer>>> crossRefMaterialMeshes = new Dictionary<int,List<KeyList<MeshRenderer>>>();
+		Dictionary<int, List<KeyList<Texture2D>>> crossRefMaterialTextures = new Dictionary<int,List<KeyList<Texture2D>>>();
+		Dictionary<int, List<KeyList<MeshRenderer>>> crossRefTextureMeshes = new Dictionary<int,List<KeyList<MeshRenderer>>>();
+		Dictionary<int, List<KeyList<Material>>> crossRefTextureMaterials = new Dictionary<int,List<KeyList<Material>>>();
+		Dictionary<int, int> crossRefMeshMaterialsCount = new Dictionary<int, int>();
+		Dictionary<int, int> crossRefMeshTexturesCount = new Dictionary<int, int>();
+		Dictionary<int, int> crossRefMaterialMeshesCount = new Dictionary<int, int>();
+		Dictionary<int, int> crossRefMaterialTexturesCount = new Dictionary<int, int>();
+		Dictionary<int, int> crossRefTextureMeshesCount = new Dictionary<int, int>();
+		Dictionary<int, int> crossRefTextureMaterialsCount = new Dictionary<int, int>();
+
+		public List<RenderObjectXX> renderObjectMeshes { get; protected set; }
+		List<int> renderObjectIds;
+
 		private bool listViewItemSyncSelectedSent = false;
 
 		[Plugin]
@@ -174,14 +192,14 @@ namespace UnityPlugin
 			dragOptions.Dispose();
 			Editor.Dispose();
 			Editor = null;
-			/*DisposeRenderObjects();
+			//DisposeRenderObjects();
 			CrossRefsClear();
-			ClearKeyList<xxMaterial>(crossRefMeshMaterials);
-			ClearKeyList<xxTexture>(crossRefMeshTextures);
-			ClearKeyList<xxFrame>(crossRefMaterialMeshes);
-			ClearKeyList<xxTexture>(crossRefMaterialTextures);
-			ClearKeyList<xxFrame>(crossRefTextureMeshes);
-			ClearKeyList<xxMaterial>(crossRefTextureMaterials);*/
+			ClearKeyList<Material>(crossRefMeshMaterials);
+			ClearKeyList<Texture2D>(crossRefMeshTextures);
+			ClearKeyList<MeshRenderer>(crossRefMaterialMeshes);
+			ClearKeyList<Texture2D>(crossRefMaterialTextures);
+			ClearKeyList<MeshRenderer>(crossRefTextureMeshes);
+			ClearKeyList<Material>(crossRefTextureMaterials);
 		}
 
 		void DisposeRenderObjects()
@@ -263,6 +281,9 @@ namespace UnityPlugin
 			ColumnSubmeshMaterial.ValueMember = "Item2";
 			ColumnSubmeshMaterial.DefaultCellStyle.NullValue = "(invalid)";
 
+			comboBoxMeshRendererMesh.DisplayMember = "Item1";
+			comboBoxMeshRendererMesh.ValueMember = "Item2";
+
 			for (int i = 0; i < matMatrixText.Length; i++)
 			{
 				for (int j = 0; j < matMatrixText[i].Length; j++)
@@ -317,7 +338,7 @@ namespace UnityPlugin
 
 			if (!refreshLists)
 			{
-				//RecreateCrossRefs();
+				RecreateCrossRefs();
 
 				dragOptions = new FormAnimatorDragDrop(Editor);
 			}
@@ -505,7 +526,25 @@ namespace UnityPlugin
 			listViewMesh.Items.Clear();
 			listViewMesh.Items.AddRange(meshItems);
 			meshlistHeaderNames.AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
-			meshListHeaderType.AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
+			meshListHeaderType.Width = 60;
+
+			comboBoxMeshRendererMesh.Items.Clear();
+			comboBoxMeshRendererMesh.Items.Add(new Tuple<string, Component>("(none)", null));
+			for (int i = 0; i < Editor.Parser.file.Components.Count; i++)
+			{
+				Component asset = Editor.Parser.file.Components[i];
+				if (asset.classID1 == UnityClassID.Mesh)
+				{
+					comboBoxMeshRendererMesh.Items.Add
+					(
+						new Tuple<string, Component>
+						(
+							"PathID " + asset.pathID + (!(asset is NotLoaded) ? " " + ((Mesh)asset).m_Name : null),
+							asset
+						)
+					);
+				}
+			}
 		}
 
 		void InitMaterials()
@@ -686,14 +725,17 @@ namespace UnityPlugin
 			if (id < 0)
 			{
 				textBoxRendererName.Text = String.Empty;
-				editTextBoxMeshName.Text = String.Empty;
 				checkBoxRendererEnabled.Checked = false;
+				comboBoxMeshRendererMesh.SelectedIndexChanged -= comboBoxMeshRendererMesh_SelectedIndexChanged;
+				comboBoxMeshRendererMesh.SelectedIndex = 0;
+				comboBoxMeshRendererMesh.SelectedIndexChanged += comboBoxMeshRendererMesh_SelectedIndexChanged;
+				editTextBoxMeshName.Text = String.Empty;
 				checkBoxMeshSkinned.Checked = false;
 			}
 			else
 			{
 				MeshRenderer meshR = Editor.Meshes[id];
-				textBoxRendererName.Text= meshR.m_GameObject.instance.m_Name;
+				textBoxRendererName.Text = meshR.m_GameObject.instance.m_Name;
 				checkBoxRendererEnabled.Checked = meshR.m_Enabled;
 				Mesh mesh;
 				if (meshR is SkinnedMeshRenderer)
@@ -708,6 +750,18 @@ namespace UnityPlugin
 				}
 				if (mesh != null)
 				{
+					comboBoxMeshRendererMesh.SelectedIndexChanged -= comboBoxMeshRendererMesh_SelectedIndexChanged;
+					for (int i = 0; i < comboBoxMeshRendererMesh.Items.Count; i++)
+					{
+						Tuple<string, Component> item = (Tuple<string, Component>)comboBoxMeshRendererMesh.Items[i];
+						if (item.Item2 == mesh)
+						{
+							comboBoxMeshRendererMesh.SelectedIndex = i;
+							break;
+						}
+					}
+					comboBoxMeshRendererMesh.SelectedIndexChanged += comboBoxMeshRendererMesh_SelectedIndexChanged;
+
 					editTextBoxMeshName.Text = mesh.m_Name;
 					checkBoxMeshSkinned.Checked = mesh.m_Skin.Count > 0;
 
@@ -720,7 +774,7 @@ namespace UnityPlugin
 							{
 								submesh.vertexCount,
 								submesh.indexCount / 3,
-								meshR.m_Materials[i].instance != null ? (object)Editor.Materials.IndexOf(meshR.m_Materials[i].instance) : null
+								i < meshR.m_Materials.Count && meshR.m_Materials[i].instance != null ? (object)Editor.Materials.IndexOf(meshR.m_Materials[i].instance) : null
 							}
 						);
 					}
@@ -772,7 +826,11 @@ namespace UnityPlugin
 				{
 					editTextBoxMatShader.Text = mat.m_Shader.instance.m_Name;
 				}
-				comboBoxMatShaderKeywords.Items.AddRange(mat.m_ShaderKeywords.ToArray());
+				if (mat.m_ShaderKeywords.Count > 0)
+				{
+					comboBoxMatShaderKeywords.Items.AddRange(mat.m_ShaderKeywords.ToArray());
+					comboBoxMatShaderKeywords.SelectedIndex = 0;
+				}
 
 				for (int i = 0; i < mat.m_SavedProperties.m_TexEnvs.Count; i++)
 				{
@@ -993,6 +1051,374 @@ namespace UnityPlugin
 			}
 
 			return null;
+		}
+
+		private void RecreateCrossRefs()
+		{
+			CrossRefsClear();
+
+			crossRefMeshMaterials.Clear();
+			crossRefMeshTextures.Clear();
+			crossRefMaterialMeshes.Clear();
+			crossRefMaterialTextures.Clear();
+			crossRefTextureMeshes.Clear();
+			crossRefTextureMaterials.Clear();
+			crossRefMeshMaterialsCount.Clear();
+			crossRefMeshTexturesCount.Clear();
+			crossRefMaterialMeshesCount.Clear();
+			crossRefMaterialTexturesCount.Clear();
+			crossRefTextureMeshesCount.Clear();
+			crossRefTextureMaterialsCount.Clear();
+
+			var meshes = Editor.Meshes;
+			var materials = Editor.Materials;
+			var textures = Editor.Textures;
+
+			for (int i = 0; i < meshes.Count; i++)
+			{
+				crossRefMeshMaterials.Add(i, new List<KeyList<Material>>(materials.Count));
+				crossRefMeshTextures.Add(i, new List<KeyList<Texture2D>>(textures.Count));
+				crossRefMaterialMeshesCount.Add(i, 0);
+				crossRefTextureMeshesCount.Add(i, 0);
+			}
+
+			for (int i = 0; i < materials.Count; i++)
+			{
+				crossRefMaterialMeshes.Add(i, new List<KeyList<MeshRenderer>>(meshes.Count));
+				crossRefMaterialTextures.Add(i, new List<KeyList<Texture2D>>(textures.Count));
+				crossRefMeshMaterialsCount.Add(i, 0);
+				crossRefTextureMaterialsCount.Add(i, 0);
+			}
+
+			for (int i = 0; i < textures.Count; i++)
+			{
+				crossRefTextureMeshes.Add(i, new List<KeyList<MeshRenderer>>(meshes.Count));
+				crossRefTextureMaterials.Add(i, new List<KeyList<Material>>(materials.Count));
+				crossRefMeshTexturesCount.Add(i, 0);
+				crossRefMaterialTexturesCount.Add(i, 0);
+			}
+
+			Dictionary<string, List<string>> missingTextures = new Dictionary<string, List<string>>();
+			for (int i = 0; i < materials.Count; i++)
+			{
+				Material mat = materials[i];
+				for (int j = 0; j < mat.m_SavedProperties.m_TexEnvs.Count; j++)
+				{
+					var matTex = mat.m_SavedProperties.m_TexEnvs[j];
+					if (matTex.Value.m_Texture.instance != null)
+					{
+						string matTexName = matTex.Value.m_Texture.instance.m_Name;
+						bool foundMatTex = false;
+						for (int m = 0; m < textures.Count; m++)
+						{
+							Texture2D tex = textures[m];
+							if (matTexName == tex.m_Name)
+							{
+								crossRefMaterialTextures[i].Add(new KeyList<Texture2D>(textures, m));
+								crossRefTextureMaterials[m].Add(new KeyList<Material>(materials, i));
+								foundMatTex = true;
+								break;
+							}
+						}
+						if (!foundMatTex)
+						{
+							List<string> matNames = null;
+							if (!missingTextures.TryGetValue(matTexName, out matNames))
+							{
+								matNames = new List<string>(1);
+								matNames.Add(mat.m_Name);
+								missingTextures.Add(matTexName, matNames);
+							}
+							else if (!matNames.Contains(mat.m_Name))
+							{
+								matNames.Add(mat.m_Name);
+							}
+						}
+					}
+				}
+			}
+
+			for (int i = 0; i < meshes.Count; i++)
+			{
+				MeshRenderer meshParent = meshes[i];
+				for (int j = 0; j < meshParent.m_Materials.Count; j++)
+				{
+					Material mat = meshParent.m_Materials[j].instance;
+					int matIdx = Editor.Materials.IndexOf(mat);
+					if (matIdx >= 0)
+					{
+						crossRefMeshMaterials[i].Add(new KeyList<Material>(materials, matIdx));
+						crossRefMaterialMeshes[matIdx].Add(new KeyList<MeshRenderer>(meshes, i));
+						for (int k = 0; k < mat.m_SavedProperties.m_TexEnvs.Count; k++)
+						{
+							var matTex = mat.m_SavedProperties.m_TexEnvs[k];
+							if (matTex.Value.m_Texture.instance != null)
+							{
+								string matTexName = matTex.Value.m_Texture.instance.m_Name;
+								bool foundMatTex = false;
+								for (int m = 0; m < textures.Count; m++)
+								{
+									Texture2D tex = textures[m];
+									if (matTexName == tex.m_Name)
+									{
+										crossRefMeshTextures[i].Add(new KeyList<Texture2D>(textures, m));
+										crossRefTextureMeshes[m].Add(new KeyList<MeshRenderer>(meshes, i));
+										foundMatTex = true;
+										break;
+									}
+								}
+								if (!foundMatTex)
+								{
+									List<string> matNames = null;
+									if (!missingTextures.TryGetValue(matTexName, out matNames))
+									{
+										matNames = new List<string>(1);
+										matNames.Add(mat.m_Name);
+										missingTextures.Add(matTexName, matNames);
+									}
+									else if (!matNames.Contains(mat.m_Name))
+									{
+										matNames.Add(mat.m_Name);
+									}
+								}
+							}
+						}
+					}
+					else if (mat != null)
+					{
+						meshParent.m_Materials[j] = new PPtr<Material>((Component)null);
+						Report.ReportLog("Warning: Mesh " + meshParent.m_GameObject.instance.m_Name + " Object " + j + " has an invalid material index");
+					}
+				}
+			}
+			if (missingTextures.Count > 0)
+			{
+				foreach (var missing in missingTextures)
+				{
+					string mats = String.Empty;
+					foreach (string mat in missing.Value)
+					{
+						mats += (mats == String.Empty ? " " : ", ") + mat;
+					}
+					Report.ReportLog("Warning: Couldn't find texture " + missing.Key + " for material(s)" + mats);
+				}
+				Report.ReportLog("Those materials have NOT been set to (none)! Use 'External' when editing such materials.");
+			}
+
+			CrossRefsSet();
+		}
+
+		private void CrossRefsSet()
+		{
+			listViewItemSyncSelectedSent = true;
+
+			listViewMeshMaterial.BeginUpdate();
+			listViewMeshTexture.BeginUpdate();
+			for (int i = 0; i < listViewMesh.SelectedItems.Count; i++)
+			{
+				int meshParent = (int)listViewMesh.SelectedItems[i].Tag;
+				CrossRefAddItem(crossRefMeshMaterials[meshParent], crossRefMeshMaterialsCount, listViewMeshMaterial, listViewMaterial);
+				CrossRefAddItem(crossRefMeshTextures[meshParent], crossRefMeshTexturesCount, listViewMeshTexture, listViewTexture);
+			}
+			listViewMeshMaterial.EndUpdate();
+			listViewMeshTexture.EndUpdate();
+
+			listViewMaterialMesh.BeginUpdate();
+			listViewMaterialTexture.BeginUpdate();
+			for (int i = 0; i < listViewMaterial.SelectedItems.Count; i++)
+			{
+				int mat = (int)listViewMaterial.SelectedItems[i].Tag;
+				CrossRefAddItem(crossRefMaterialMeshes[mat], crossRefMaterialMeshesCount, listViewMaterialMesh, listViewMesh);
+				CrossRefAddItem(crossRefMaterialTextures[mat], crossRefMaterialTexturesCount, listViewMaterialTexture, listViewTexture);
+			}
+			listViewMaterialMesh.EndUpdate();
+			listViewMaterialTexture.EndUpdate();
+
+			listViewTextureMesh.BeginUpdate();
+			listViewTextureMaterial.BeginUpdate();
+			for (int i = 0; i < listViewTexture.SelectedItems.Count; i++)
+			{
+				int tex = (int)listViewTexture.SelectedItems[i].Tag;
+				CrossRefAddItem(crossRefTextureMeshes[tex], crossRefTextureMeshesCount, listViewTextureMesh, listViewMesh);
+				CrossRefAddItem(crossRefTextureMaterials[tex], crossRefTextureMaterialsCount, listViewTextureMaterial, listViewMaterial);
+			}
+			listViewTextureMesh.EndUpdate();
+			listViewTextureMaterial.EndUpdate();
+
+			listViewItemSyncSelectedSent = false;
+		}
+
+		private void CrossRefsClear()
+		{
+			listViewItemSyncSelectedSent = true;
+
+			listViewMeshMaterial.BeginUpdate();
+			listViewMeshTexture.BeginUpdate();
+			foreach (var pair in crossRefMeshMaterials)
+			{
+				int mesh = pair.Key;
+				CrossRefRemoveItem(pair.Value, crossRefMeshMaterialsCount, listViewMeshMaterial);
+				CrossRefRemoveItem(crossRefMeshTextures[mesh], crossRefMeshTexturesCount, listViewMeshTexture);
+			}
+			listViewMeshMaterial.EndUpdate();
+			listViewMeshTexture.EndUpdate();
+
+			listViewMaterialMesh.BeginUpdate();
+			listViewMaterialTexture.BeginUpdate();
+			foreach (var pair in crossRefMaterialMeshes)
+			{
+				int mat = pair.Key;
+				CrossRefRemoveItem(pair.Value, crossRefMaterialMeshesCount, listViewMaterialMesh);
+				CrossRefRemoveItem(crossRefMaterialTextures[mat], crossRefMaterialTexturesCount, listViewMaterialTexture);
+			}
+			listViewMaterialMesh.EndUpdate();
+			listViewMaterialTexture.EndUpdate();
+
+			listViewTextureMesh.BeginUpdate();
+			listViewTextureMaterial.BeginUpdate();
+			foreach (var pair in crossRefTextureMeshes)
+			{
+				int tex = pair.Key;
+				CrossRefRemoveItem(pair.Value, crossRefTextureMeshesCount, listViewTextureMesh);
+				CrossRefRemoveItem(crossRefTextureMaterials[tex], crossRefTextureMaterialsCount, listViewTextureMaterial);
+			}
+			listViewTextureMesh.EndUpdate();
+			listViewTextureMaterial.EndUpdate();
+
+			listViewItemSyncSelectedSent = false;
+		}
+
+		private void CrossRefAddItem<T>(List<KeyList<T>> list, Dictionary<int, int> dic, ListView listView, ListView mainView)
+		{
+			bool added = false;
+			for (int i = 0; i < list.Count; i++)
+			{
+				int count = dic[list[i].Index] + 1;
+				dic[list[i].Index] = count;
+				if (count == 1)
+				{
+					var keylist = list[i];
+					ListViewItem item = new ListViewItem(Unity3dEditor.ToString((Component)keylist.List[keylist.Index]));
+					item.Tag = keylist.Index;
+
+					foreach (ListViewItem mainItem in mainView.Items)
+					{
+						if ((int)mainItem.Tag == keylist.Index)
+						{
+							item.Selected = mainItem.Selected;
+							break;
+						}
+					}
+
+					listView.Items.Add(item);
+					added = true;
+				}
+			}
+
+			if (added)
+			{
+				listView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+			}
+		}
+
+		private void CrossRefRemoveItem<T>(List<KeyList<T>> list, Dictionary<int, int> dic, ListView listView)
+		{
+			bool removed = false;
+			for (int i = 0; i < list.Count; i++)
+			{
+				int count = dic[list[i].Index] - 1;
+				dic[list[i].Index] = count;
+				if (count == 0)
+				{
+					var tuple = list[i];
+					for (int j = 0; j < listView.Items.Count; j++)
+					{
+						if ((int)listView.Items[j].Tag == tuple.Index)
+						{
+							listView.Items.RemoveAt(j);
+							removed = true;
+							break;
+						}
+					}
+				}
+			}
+
+			if (removed)
+			{
+				listView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+			}
+		}
+
+		private void CrossRefSetSelected(bool selected, ListView view, int tag)
+		{
+			foreach (ListViewItem item in view.Items)
+			{
+				if ((int)item.Tag == tag)
+				{
+					item.Selected = selected;
+					break;
+				}
+			}
+		}
+
+		private void listViewMeshMaterial_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
+		{
+			listViewMaterial_ItemSelectionChanged(sender, e);
+		}
+
+		private void listViewMeshMaterial_KeyUp(object sender, KeyEventArgs e)
+		{
+			listViewMaterial_KeyUp(sender, e);
+		}
+
+		private void listViewMeshTexture_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
+		{
+			listViewTexture_ItemSelectionChanged(sender, e);
+		}
+
+		private void listViewMeshTexture_KeyUp(object sender, KeyEventArgs e)
+		{
+			listViewTexture_KeyUp(sender, e);
+		}
+
+		private void listViewMaterialMesh_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
+		{
+			listViewMesh_ItemSelectionChanged(sender, e);
+		}
+
+		private void listViewMaterialMesh_KeyUp(object sender, KeyEventArgs e)
+		{
+			listViewMesh_KeyUp(sender, e);
+		}
+
+		private void listViewMaterialTexture_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
+		{
+			listViewTexture_ItemSelectionChanged(sender, e);
+		}
+
+		private void listViewMaterialTexture_KeyUp(object sender, KeyEventArgs e)
+		{
+			listViewTexture_KeyUp(sender, e);
+		}
+
+		private void listViewTextureMesh_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
+		{
+			listViewMesh_ItemSelectionChanged(sender, e);
+		}
+
+		private void listViewTextureMesh_KeyUp(object sender, KeyEventArgs e)
+		{
+			listViewMesh_KeyUp(sender, e);
+		}
+
+		private void listViewTextureMaterial_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
+		{
+			listViewMaterial_ItemSelectionChanged(sender, e);
+		}
+
+		private void listViewTextureMaterial_KeyUp(object sender, KeyEventArgs e)
+		{
+			listViewMaterial_KeyUp(sender, e);
 		}
 
 		private void treeViewObjectTree_AfterSelect(object sender, TreeViewEventArgs e)
@@ -1612,47 +2038,47 @@ namespace UnityPlugin
 
 		public void RecreateFrames()
 		{
-			/*CrossRefsClear();
-			DisposeRenderObjects();*/
+			CrossRefsClear();
+			//DisposeRenderObjects();
 			LoadFrame(-1);
 			LoadMesh(-1);
 			InitFrames();
 			InitMeshes();
-			/*RecreateRenderObjects();
-			RecreateCrossRefs();*/
+			//RecreateRenderObjects();
+			RecreateCrossRefs();
 		}
 
 		private void RecreateMeshes()
 		{
-			/*CrossRefsClear();
-			DisposeRenderObjects();*/
+			CrossRefsClear();
+			//DisposeRenderObjects();
 			LoadMesh(-1);
 			InitFrames();
 			InitMeshes();
-			/*RecreateRenderObjects();
-			RecreateCrossRefs();*/
+			//RecreateRenderObjects();
+			RecreateCrossRefs();
 		}
 
 		private void RecreateMaterials()
 		{
-			/*CrossRefsClear();
-			DisposeRenderObjects();*/
+			CrossRefsClear();
+			//DisposeRenderObjects();
 			LoadMaterial(-1);
 			InitMaterials();
 			InitTextures();
-			/*RecreateRenderObjects();
-			RecreateCrossRefs();*/
+			//RecreateRenderObjects();
+			RecreateCrossRefs();
 			LoadMesh(loadedMesh);
 		}
 
 		private void RecreateTextures()
 		{
-			/*CrossRefsClear();
-			DisposeRenderObjects();*/
+			CrossRefsClear();
+			//DisposeRenderObjects();
 			LoadTexture(-1);
 			InitTextures();
-			/*RecreateRenderObjects();
-			RecreateCrossRefs();*/
+			//RecreateRenderObjects();
+			RecreateCrossRefs();
 			LoadMaterial(loadedMaterial);
 		}
 
@@ -1893,10 +2319,10 @@ namespace UnityPlugin
 					{
 						tabControlViews.SelectTabWithoutLoosingFocus(tabPageMeshView);
 						LoadMesh(id);
-						/*CrossRefAddItem(crossRefMeshMaterials[id], crossRefMeshMaterialsCount, listViewMeshMaterial, listViewMaterial);
+						CrossRefAddItem(crossRefMeshMaterials[id], crossRefMeshMaterialsCount, listViewMeshMaterial, listViewMaterial);
 						CrossRefAddItem(crossRefMeshTextures[id], crossRefMeshTexturesCount, listViewMeshTexture, listViewTexture);
 
-						if (renderObjectMeshes[id] == null)
+						/*if (renderObjectMeshes[id] == null)
 						{
 							xxFrame frame = Editor.Meshes[id];
 							HashSet<string> meshNames = new HashSet<string>() { frame.Name };
@@ -1924,16 +2350,16 @@ namespace UnityPlugin
 						{
 							LoadMesh(-1);
 						}
-						/*CrossRefRemoveItem(crossRefMeshMaterials[id], crossRefMeshMaterialsCount, listViewMeshMaterial);
+						CrossRefRemoveItem(crossRefMeshMaterials[id], crossRefMeshMaterialsCount, listViewMeshMaterial);
 						CrossRefRemoveItem(crossRefMeshTextures[id], crossRefMeshTexturesCount, listViewMeshTexture);
 
-						Gui.Renderer.RemoveRenderObject(renderObjectIds[id]);
+						/*Gui.Renderer.RemoveRenderObject(renderObjectIds[id]);
 						renderObjectIds[id] = -1;*/
 					}
 
-					/*CrossRefSetSelected(e.IsSelected, listViewMesh, id);
+					CrossRefSetSelected(e.IsSelected, listViewMesh, id);
 					CrossRefSetSelected(e.IsSelected, listViewMaterialMesh, id);
-					CrossRefSetSelected(e.IsSelected, listViewTextureMesh, id);*/
+					CrossRefSetSelected(e.IsSelected, listViewTextureMesh, id);
 
 					listViewMeshMaterial.EndUpdate();
 					listViewMeshTexture.EndUpdate();
@@ -1953,6 +2379,23 @@ namespace UnityPlugin
 				return;
 			}
 			buttonMeshRemove_Click(null, null);
+		}
+
+		private void comboBoxMeshRendererMesh_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				Tuple<string, Component> item =  (Tuple<string,Component>)comboBoxMeshRendererMesh.SelectedItem;
+				int componentIndex = Editor.Parser.file.Components.IndexOf(item.Item2);
+				Gui.Scripting.RunScript(EditorVar + ".SetMesh(meshId=" + loadedMesh + ", componentIndex=" + componentIndex + ")");
+				Changed = Changed;
+
+				LoadMesh(loadedMesh);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
 		}
 
 		private void comboBoxMeshExportFormat_SelectedIndexChanged(object sender, EventArgs e)
@@ -2287,8 +2730,8 @@ namespace UnityPlugin
 							Gui.Scripting.RunScript(EditorVar + ".SetSubMeshMaterial(meshId=" + loadedMesh + ", subMeshId=" + rowIdx + ", material=" + matIdx + ")");
 							Changed = Changed;
 
-							/*RecreateRenderObjects();
-							RecreateCrossRefs();*/
+							//RecreateRenderObjects();
+							RecreateCrossRefs();
 						}
 					}
 				}
@@ -2314,8 +2757,8 @@ namespace UnityPlugin
 					{
 						tabControlViews.SelectTabWithoutLoosingFocus(tabPageMaterialView);
 						LoadMaterial(id);
-						/*CrossRefAddItem(crossRefMaterialMeshes[id], crossRefMaterialMeshesCount, listViewMaterialMesh, listViewMesh);
-						CrossRefAddItem(crossRefMaterialTextures[id], crossRefMaterialTexturesCount, listViewMaterialTexture, listViewTexture);*/
+						CrossRefAddItem(crossRefMaterialMeshes[id], crossRefMaterialMeshesCount, listViewMaterialMesh, listViewMesh);
+						CrossRefAddItem(crossRefMaterialTextures[id], crossRefMaterialTexturesCount, listViewMaterialTexture, listViewTexture);
 					}
 					else
 					{
@@ -2323,13 +2766,13 @@ namespace UnityPlugin
 						{
 							LoadMaterial(-1);
 						}
-						/*CrossRefRemoveItem(crossRefMaterialMeshes[id], crossRefMaterialMeshesCount, listViewMaterialMesh);
-						CrossRefRemoveItem(crossRefMaterialTextures[id], crossRefMaterialTexturesCount, listViewMaterialTexture);*/
+						CrossRefRemoveItem(crossRefMaterialMeshes[id], crossRefMaterialMeshesCount, listViewMaterialMesh);
+						CrossRefRemoveItem(crossRefMaterialTextures[id], crossRefMaterialTexturesCount, listViewMaterialTexture);
 					}
 
-					/*CrossRefSetSelected(e.IsSelected, listViewMaterial, id);
+					CrossRefSetSelected(e.IsSelected, listViewMaterial, id);
 					CrossRefSetSelected(e.IsSelected, listViewMeshMaterial, id);
-					CrossRefSetSelected(e.IsSelected, listViewTextureMaterial, id);*/
+					CrossRefSetSelected(e.IsSelected, listViewTextureMaterial, id);
 
 					listViewMaterialMesh.EndUpdate();
 					listViewMaterialTexture.EndUpdate();
@@ -2409,8 +2852,8 @@ namespace UnityPlugin
 				Gui.Scripting.RunScript(EditorVar + ".SetMaterialTexture(id=" + loadedMaterial + ", index=" + matTexIdx + ", name=\"" + name + "\")");
 				Changed = Changed;
 
-				/*RecreateRenderObjects();
-				RecreateCrossRefs();*/
+				//RecreateRenderObjects();
+				RecreateCrossRefs();
 				LoadMaterial(loadedMaterial);
 			}
 			catch (Exception ex)
@@ -2442,8 +2885,8 @@ namespace UnityPlugin
 				}
 				Changed = Changed;
 
-				/*RecreateRenderObjects();
-				RecreateCrossRefs();*/
+				//RecreateRenderObjects();
+				RecreateCrossRefs();
 				LoadMaterial(loadedMaterial);
 			}
 			catch (Exception ex)
@@ -2489,7 +2932,7 @@ namespace UnityPlugin
 				LoadMesh(loadedMesh);
 				InitMaterials();
 				SyncWorkspaces();
-				//RecreateCrossRefs();
+				RecreateCrossRefs();
 				LoadMaterial(-1);
 
 				List<DockContent> formUnity3dList;
@@ -2543,7 +2986,7 @@ namespace UnityPlugin
 					listViewMaterial.SelectedItems[0].Selected = false;
 				}
 				InitMaterials();
-				//RecreateCrossRefs();
+				RecreateCrossRefs();
 				LoadMesh(loadedMesh);
 				listViewMaterial.Items[oldMatIndex].Selected = true;
 
@@ -2590,8 +3033,8 @@ namespace UnityPlugin
 					{
 						tabControlViews.SelectTabWithoutLoosingFocus(tabPageTextureView);
 						LoadTexture(id);
-						/*CrossRefAddItem(crossRefTextureMeshes[id], crossRefTextureMeshesCount, listViewTextureMesh, listViewMesh);
-						CrossRefAddItem(crossRefTextureMaterials[id], crossRefTextureMaterialsCount, listViewTextureMaterial, listViewMaterial);*/
+						CrossRefAddItem(crossRefTextureMeshes[id], crossRefTextureMeshesCount, listViewTextureMesh, listViewMesh);
+						CrossRefAddItem(crossRefTextureMaterials[id], crossRefTextureMaterialsCount, listViewTextureMaterial, listViewMaterial);
 					}
 					else
 					{
@@ -2599,13 +3042,13 @@ namespace UnityPlugin
 						{
 							LoadTexture(-1);
 						}
-						/*CrossRefRemoveItem(crossRefTextureMeshes[id], crossRefTextureMeshesCount, listViewTextureMesh);
-						CrossRefRemoveItem(crossRefTextureMaterials[id], crossRefTextureMaterialsCount, listViewTextureMaterial);*/
+						CrossRefRemoveItem(crossRefTextureMeshes[id], crossRefTextureMeshesCount, listViewTextureMesh);
+						CrossRefRemoveItem(crossRefTextureMaterials[id], crossRefTextureMaterialsCount, listViewTextureMaterial);
 					}
 
-					/*CrossRefSetSelected(e.IsSelected, listViewTexture, id);
+					CrossRefSetSelected(e.IsSelected, listViewTexture, id);
 					CrossRefSetSelected(e.IsSelected, listViewMeshTexture, id);
-					CrossRefSetSelected(e.IsSelected, listViewMaterialTexture, id);*/
+					CrossRefSetSelected(e.IsSelected, listViewMaterialTexture, id);
 
 					listViewTextureMesh.EndUpdate();
 					listViewTextureMaterial.EndUpdate();
@@ -2696,7 +3139,7 @@ namespace UnityPlugin
 				//RecreateRenderObjects();
 				InitTextures();
 				SyncWorkspaces();
-				//RecreateCrossRefs();
+				RecreateCrossRefs();
 				LoadMaterial(loadedMaterial);
 			}
 			catch (Exception ex)
@@ -2730,7 +3173,7 @@ namespace UnityPlugin
 
 				//RecreateRenderObjects();
 				InitTextures();
-				//RecreateCrossRefs();
+				RecreateCrossRefs();
 				LoadMaterial(loadedMaterial);
 			}
 			catch (Exception ex)
@@ -2758,7 +3201,7 @@ namespace UnityPlugin
 
 				//RecreateRenderObjects();
 				InitTextures();
-				//RecreateCrossRefs();
+				RecreateCrossRefs();
 				LoadMaterial(loadedMaterial);
 				foreach (ListViewItem item in listViewTexture.Items)
 				{
@@ -2803,6 +3246,60 @@ namespace UnityPlugin
 					pictureBoxTexture.Width = Decimal.ToInt32(pictureBoxTexture.Image.Width * x);
 					pictureBoxTexture.Height = Decimal.ToInt32(pictureBoxTexture.Image.Height * x);
 				}
+			}
+		}
+
+		private void buttonMeshNormals_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedMesh < 0)
+				{
+					return;
+				}
+
+				using (var normals = new FormNormalsAndTangents())
+				{
+					if (normals.ShowDialog() == DialogResult.OK)
+					{
+						string editors = "editors={";
+						string numMeshes = "numMeshes={";
+						string meshes = "meshes={";
+						List<DockContent> animatorList = null;
+						Gui.Docking.DockContents.TryGetValue(typeof(FormAnimator), out animatorList);
+						foreach (FormAnimator animator in animatorList)
+						{
+							if (animator.listViewMesh.SelectedItems.Count == 0)
+							{
+								continue;
+							}
+
+							editors += animator.EditorVar + ", ";
+							numMeshes += animator.listViewMesh.SelectedItems.Count + ", ";
+							foreach (ListViewItem item in animator.listViewMesh.SelectedItems)
+							{
+								meshes += (int)item.Tag + ", ";
+							}
+						}
+						string idArgs = editors.Substring(0, editors.Length - 2) + "}, " + numMeshes.Substring(0, numMeshes.Length - 2) + "}, " + meshes.Substring(0, meshes.Length - 2) + "}";
+						if (normals.checkBoxNormalsForSelectedMeshes.Checked)
+						{
+							Gui.Scripting.RunScript(EditorVar + ".CalculateNormals(" + idArgs + ", threshold=" + ((float)normals.numericThreshold.Value).ToFloatString() + ")");
+							Changed = Changed;
+						}
+						if (normals.checkBoxCalculateTangents.Checked)
+						{
+							Gui.Scripting.RunScript(EditorVar + ".CalculateTangents(" + idArgs + ")");
+							Changed = Changed;
+						}
+
+						//RecreateRenderObjects();
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
 			}
 		}
 	}

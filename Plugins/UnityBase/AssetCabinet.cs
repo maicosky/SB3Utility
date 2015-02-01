@@ -497,6 +497,13 @@ namespace UnityPlugin
 					sMesh.LoadFrom(stream);
 					return sMesh;
 				}
+			case UnityClassID.Sprite:
+				{
+					Sprite sprite = new Sprite(this, comp.pathID, comp.classID1, comp.classID2);
+					ReplaceSubfile(index, sprite, comp);
+					sprite.LoadFrom(stream);
+					return sprite;
+				}
 			case UnityClassID.Texture2D:
 				{
 					if (loadingReferencials)

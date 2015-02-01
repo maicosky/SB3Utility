@@ -34,6 +34,10 @@ namespace SB3Utility
 			}
 
 			List<xxFrame> meshFrames = meshNames != null ? xx.FindMeshFrames(xxParser.Frame, new List<string>(Utility.Convert<string>(meshNames))) : null;
+			if (meshFrames != null && meshFrames.Count == 0)
+			{
+				meshFrames = null;
+			}
 			Fbx.Exporter.Export(path, xxParser, meshFrames, xaParserList, startKeyframe, endKeyframe, linear, EulerFilter, (float)filterPrecision, exportFormat, allFrames, skins, embedMedia, compatibility);
 		}
 

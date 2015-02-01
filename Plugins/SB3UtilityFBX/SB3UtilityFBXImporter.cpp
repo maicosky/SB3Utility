@@ -55,6 +55,7 @@ namespace SB3Utility
 			pMaterials = new FbxArray<FbxSurfacePhong*>();
 			pTextures = new FbxArray<FbxTexture*>();
 
+			this->generatingTangentsReported = false;
 			FbxNode* pRootNode = pScene->GetRootNode();
 			if (pRootNode != NULL)
 			{
@@ -207,15 +208,26 @@ namespace SB3Utility
 			}
 
 			bool skinned = false;
+			bool tangents = true;
 			for (int i = 0; i < pMeshArray->GetCount(); i++)
 			{
 				FbxNode* pMeshNode = pMeshArray->GetAt(i);
 				FbxMesh* pMesh = pMeshNode->GetMesh();
+				FbxLayer* pLayerTangent = pMesh->GetLayer(0, FbxLayerElement::eTangent);
+				if (!pLayerTangent)
+				{
+					tangents = false;
+				}
 				if (pMesh->GetDeformerCount(FbxDeformer::eSkin) > 0)
 				{
 					skinned = true;
 					break;
 				}
+			}
+			if (!tangents && !generatingTangentsReported)
+			{
+				Report::ReportLog("Warning! Tangents are generated automatically.");
+				generatingTangentsReported = true;
 			}
 
 			SortedDictionary<String^, int>^ boneDic = gcnew SortedDictionary<String^, int>();
@@ -255,6 +267,10 @@ namespace SB3Utility
 					pLayerElementUV = pLayerUV->GetUVs();
 				}
 
+				if (!tangents)
+				{
+					pMesh->GenerateTangentsDataForAllUVSets(true);
+				}
 				FbxLayer* pLayerTangent = pMesh->GetLayer(0, FbxLayerElement::eTangent);
 				FbxLayerElementTangent* pLayerElementTangent = NULL;
 				if (pLayerTangent != NULL)
