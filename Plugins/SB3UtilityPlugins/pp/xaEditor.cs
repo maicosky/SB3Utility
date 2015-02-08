@@ -432,6 +432,28 @@ namespace SB3Utility
 		}
 
 		[Plugin]
+		public void CopyTrack(string track)
+		{
+			xaAnimationTrack src = xa.FindTrack(track, Parser);
+			xaAnimationTrack cpy = new xaAnimationTrack();
+			cpy.Name = src.Name + "_copy";
+			cpy.Unknown1 = (byte[])src.Unknown1.Clone();
+			cpy.KeyframeList = new List<xaAnimationKeyframe>(src.KeyframeList.Count);
+			foreach (xaAnimationKeyframe srcKeyframe in src.KeyframeList)
+			{
+				xaAnimationKeyframe cpyKeyframe = new xaAnimationKeyframe();
+				cpyKeyframe.Index = srcKeyframe.Index;
+				cpyKeyframe.Rotation = srcKeyframe.Rotation;
+				cpyKeyframe.Unknown1 = (byte[])srcKeyframe.Unknown1.Clone();
+				cpyKeyframe.Translation = srcKeyframe.Translation;
+				cpyKeyframe.Scaling = srcKeyframe.Scaling;
+				cpy.KeyframeList.Add(cpyKeyframe);
+			}
+			Parser.AnimationSection.TrackList.Add(cpy);
+			Changed = true;
+		}
+
+		[Plugin]
 		public void SetAnimationClip(xaAnimationClip clip, string name, int start, int end, int next, double speed)
 		{
 			clip.Name = name;

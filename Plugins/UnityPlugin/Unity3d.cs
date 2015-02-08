@@ -190,8 +190,8 @@ namespace UnityPlugin
 				Component asset = parser.Cabinet.Components[i];
 				if (asset.classID2 == UnityClassID.MonoBehaviour)
 				{
-					MonoBehaviour m = parser.Cabinet.LoadComponent(asset.pathID);
-					if (name == "*" || m.m_Name == name)
+					MonoBehaviour mbic = parser.Cabinet.LoadComponent(asset.pathID);
+					if (name == "*" || mbic.m_Name == name)
 					{
 						ExportMonoBehaviour(parser, asset.pathID, path);
 					}
@@ -221,10 +221,127 @@ namespace UnityPlugin
 					Component asset = parser.Cabinet.Components[i];
 					if (asset.classID2 == UnityClassID.MonoBehaviour)
 					{
-						MonoBehaviour mInCab = parser.Cabinet.LoadComponent(asset.pathID);
-						if (mInCab.m_Name == m.m_Name)
+						MonoBehaviour mbic = parser.Cabinet.LoadComponent(asset.pathID);
+						if (mbic.m_Name == m.m_Name)
 						{
-							mInCab.m_Lines = m.m_Lines;
+							mbic.m_Lines = m.m_Lines;
+							return;
+						}
+					}
+				}
+			}
+		}
+
+		[Plugin]
+		public static void ExportShader(UnityParser parser, string name, string path)
+		{
+			for (int i = 0; i < parser.Cabinet.Components.Count; i++)
+			{
+				Component asset = parser.Cabinet.Components[i];
+				if (asset.classID1 == UnityClassID.Shader)
+				{
+					Shader sic = parser.Cabinet.LoadComponent(asset.pathID);
+					if (name == "*" || sic.m_Name == name)
+					{
+						sic.Export(path);
+					}
+				}
+			}
+		}
+
+		[Plugin]
+		public static void ReplaceShader(UnityParser parser, string path)
+		{
+			Shader s = Shader.Import(path);
+			if (s.m_Script.Length > 0)
+			{
+				for (int i = 0; i < parser.Cabinet.Components.Count; i++)
+				{
+					Component asset = parser.Cabinet.Components[i];
+					if (asset.classID1 == UnityClassID.Shader)
+					{
+						Shader sic = parser.Cabinet.LoadComponent(asset.pathID);
+						if (sic.m_Name == s.m_Name)
+						{
+							sic.m_Script = s.m_Script;
+							return;
+						}
+					}
+				}
+			}
+		}
+
+		[Plugin]
+		public static void ExportTextAsset(UnityParser parser, string name, string path)
+		{
+			for (int i = 0; i < parser.Cabinet.Components.Count; i++)
+			{
+				Component asset = parser.Cabinet.Components[i];
+				if (asset.classID1 == UnityClassID.TextAsset)
+				{
+					TextAsset taic = parser.Cabinet.LoadComponent(asset.pathID);
+					if (name == "*" || taic.m_Name == name)
+					{
+						taic.Export(path);
+					}
+				}
+			}
+		}
+
+		[Plugin]
+		public static void ReplaceTextAsset(UnityParser parser, string path)
+		{
+			TextAsset ta = TextAsset.Import(path);
+			if (ta.m_Script.Length > 0)
+			{
+				for (int i = 0; i < parser.Cabinet.Components.Count; i++)
+				{
+					Component asset = parser.Cabinet.Components[i];
+					if (asset.classID1 == UnityClassID.TextAsset)
+					{
+						TextAsset taic = parser.Cabinet.LoadComponent(asset.pathID);
+						if (taic.m_Name == ta.m_Name)
+						{
+							taic.m_Script = ta.m_Script;
+							return;
+						}
+					}
+				}
+			}
+		}
+
+		[Plugin]
+		public static void ExportAudioClip(UnityParser parser, string name, string path)
+		{
+			for (int i = 0; i < parser.Cabinet.Components.Count; i++)
+			{
+				Component asset = parser.Cabinet.Components[i];
+				if (asset.classID1 == UnityClassID.AudioClip)
+				{
+					AudioClip ac = parser.Cabinet.LoadComponent(asset.pathID);
+					if (name == "*" || ac.m_Name == name)
+					{
+						ac.Export(path);
+					}
+				}
+			}
+		}
+
+		[Plugin]
+		public static void ReplaceAudioClip(UnityParser parser, string path)
+		{
+			AudioClip ac = AudioClip.Import(path);
+			if (ac.m_AudioData.Length > 0)
+			{
+				for (int i = 0; i < parser.Cabinet.Components.Count; i++)
+				{
+					Component asset = parser.Cabinet.Components[i];
+					if (asset.classID1 == UnityClassID.AudioClip)
+					{
+						AudioClip acic = parser.Cabinet.LoadComponent(asset.pathID);
+						if (acic.m_Name == ac.m_Name)
+						{
+							acic.m_AudioData = ac.m_AudioData;
 							return;
 						}
 					}

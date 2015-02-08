@@ -88,6 +88,7 @@ namespace UnityPlugin
 		List<int> renderObjectIds;
 
 		private bool listViewItemSyncSelectedSent = false;
+		private bool textureLoading = false;
 
 		[Plugin]
 		public TreeNode GetDraggedNode()
@@ -721,6 +722,7 @@ namespace UnityPlugin
 
 		void LoadMesh(int id)
 		{
+			dataGridViewMesh.CellValueChanged -= dataGridViewMesh_CellValueChanged;
 			dataGridViewMesh.Rows.Clear();
 			if (id < 0)
 			{
@@ -730,7 +732,9 @@ namespace UnityPlugin
 				comboBoxMeshRendererMesh.SelectedIndex = 0;
 				comboBoxMeshRendererMesh.SelectedIndexChanged += comboBoxMeshRendererMesh_SelectedIndexChanged;
 				editTextBoxMeshName.Text = String.Empty;
-				checkBoxMeshSkinned.Checked = false;
+				editTextBoxRendererRootBone.Text = String.Empty;
+				checkBoxMeshMultiPass.Checked = false;
+				editTextBoxMeshRootBone.Text = String.Empty;
 			}
 			else
 			{
@@ -742,6 +746,7 @@ namespace UnityPlugin
 				{
 					SkinnedMeshRenderer sMesh = (SkinnedMeshRenderer)meshR;
 					mesh = sMesh.m_Mesh.instance;
+					editTextBoxRendererRootBone.Text = sMesh.m_RootBone.instance.m_GameObject.instance.m_Name;
 				}
 				else
 				{
@@ -763,7 +768,8 @@ namespace UnityPlugin
 					comboBoxMeshRendererMesh.SelectedIndexChanged += comboBoxMeshRendererMesh_SelectedIndexChanged;
 
 					editTextBoxMeshName.Text = mesh.m_Name;
-					checkBoxMeshSkinned.Checked = mesh.m_Skin.Count > 0;
+					checkBoxMeshMultiPass.Checked = meshR.m_Materials.Count > mesh.m_SubMeshes.Count;
+					editTextBoxMeshRootBone.Text = Editor.Parser.m_Avatar.instance.FindBoneName(mesh.m_RootBoneNameHash);
 
 					for (int i = 0; i < mesh.m_SubMeshes.Count; i++)
 					{
@@ -774,13 +780,28 @@ namespace UnityPlugin
 							{
 								submesh.vertexCount,
 								submesh.indexCount / 3,
-								i < meshR.m_Materials.Count && meshR.m_Materials[i].instance != null ? (object)Editor.Materials.IndexOf(meshR.m_Materials[i].instance) : null
+								i < meshR.m_Materials.Count && meshR.m_Materials[i].instance != null ? (object)Editor.Materials.IndexOf(meshR.m_Materials[i].instance) : null,
+								submesh.topology.ToString()
+							}
+						);
+					}
+					for (int i = mesh.m_SubMeshes.Count; i < meshR.m_Materials.Count; i++)
+					{
+						dataGridViewMesh.Rows.Add
+						(
+							new object[]
+							{
+								null,
+								null,
+								meshR.m_Materials[i].instance != null ? (object)Editor.Materials.IndexOf(meshR.m_Materials[i].instance) : null,
+								null
 							}
 						);
 					}
 					dataGridViewMesh.ClearSelection();
 				}
 			}
+			dataGridViewMesh.CellValueChanged += dataGridViewMesh_CellValueChanged;
 			loadedMesh = id;
 		}
 
@@ -877,12 +898,21 @@ namespace UnityPlugin
 
 		void LoadTexture(int id)
 		{
+			textureLoading = true;
 			if (id < 0)
 			{
 				textBoxTexName.Text = String.Empty;
 				textBoxTexSize.Text = String.Empty;
 				labelTextureFormat.Text = String.Empty;
+				editTextBoxTexDimension.Text = String.Empty;
 				checkBoxTextureMipMap.Checked = false;
+				editTextBoxTexImageCount.Text = String.Empty;
+				editTextBoxTexColorSpace.Text = String.Empty;
+				editTextBoxTexLightMap.Text = String.Empty;
+				editTextBoxTexFilterMode.Text = String.Empty;
+				editTextBoxTexMipBias.Text = String.Empty;
+				editTextBoxTexAniso.Text = String.Empty;
+				editTextBoxTexWrapMode.Text = String.Empty;
 				pictureBoxTexture.Image = null;
 			}
 			else
@@ -890,8 +920,16 @@ namespace UnityPlugin
 				Texture2D tex = Editor.Textures[id];
 				textBoxTexName.Text = tex.m_Name;
 				textBoxTexSize.Text = tex.m_Width + "x" + tex.m_Height;
-				labelTextureFormat.Text = "Format: " + tex.m_TextureFormat;
+				labelTextureFormat.Text = tex.m_TextureFormat.ToString();
+				editTextBoxTexDimension.Text = tex.m_TextureDimension.ToString();
 				checkBoxTextureMipMap.Checked = tex.m_MipMap;
+				editTextBoxTexImageCount.Text = tex.m_ImageCount.ToString();
+				editTextBoxTexColorSpace.Text = tex.m_ColorSpace.ToString();
+				editTextBoxTexLightMap.Text = tex.m_LightmapFormat.ToString();
+				editTextBoxTexFilterMode.Text = tex.m_TextureSettings.m_FilterMode.ToString();
+				editTextBoxTexMipBias.Text = tex.m_TextureSettings.m_MipBias.ToFloatString();
+				editTextBoxTexAniso.Text = tex.m_TextureSettings.m_Aniso.ToString();
+				editTextBoxTexWrapMode.Text = tex.m_TextureSettings.m_WrapMode.ToString();
 
 				using (MemoryStream mem = new MemoryStream())
 				{
@@ -915,6 +953,7 @@ namespace UnityPlugin
 
 				ResizeImage();
 			}
+			textureLoading = false;
 			loadedTexture = id;
 		}
 
@@ -1298,7 +1337,7 @@ namespace UnityPlugin
 				if (count == 1)
 				{
 					var keylist = list[i];
-					ListViewItem item = new ListViewItem(Unity3dEditor.ToString((Component)keylist.List[keylist.Index]));
+					ListViewItem item = new ListViewItem(AssetCabinet.ToString((Component)keylist.List[keylist.Index]));
 					item.Tag = keylist.Index;
 
 					foreach (ListViewItem mainItem in mainView.Items)
@@ -1877,7 +1916,7 @@ namespace UnityPlugin
 								Gui.Scripting.RunScript(source.Variable + ".setSubmeshEnabled(meshId=" + (int)source.Id + ", id=" + wsMesh.SubmeshList.IndexOf(submesh) + ", enabled=false)");
 							}
 						}
-						Gui.Scripting.RunScript(EditorVar + ".ReplaceSkinnedMeshRenderer(mesh=" + source.Variable + ".Meshes[" + (int)source.Id + "], frameId=" + dragOptions.numericMeshId.Value + ", rootBoneId=-1, merge=" + dragOptions.radioButtonMeshMerge.Checked + ", normals=\"" + dragOptions.NormalsMethod.GetName() + "\", bones=\"" + dragOptions.BonesMethod.GetName() + "\")");
+						Gui.Scripting.RunScript(EditorVar + ".ReplaceSkinnedMeshRenderer(mesh=" + source.Variable + ".Meshes[" + (int)source.Id + "], frameId=" + dragOptions.numericMeshId.Value + ", rootBoneId=-1, merge=" + dragOptions.radioButtonMeshMerge.Checked + ", normals=\"" + dragOptions.NormalsMethod.GetName() + "\", bones=\"" + dragOptions.BonesMethod.GetName() + "\", targetFullMesh=" + dragOptions.radioButtonNearestMesh.Checked + ")");
 						Changed = Changed;
 						RecreateMeshes();
 					}
@@ -2055,8 +2094,10 @@ namespace UnityPlugin
 			LoadMesh(-1);
 			InitFrames();
 			InitMeshes();
+			InitMaterials();
 			//RecreateRenderObjects();
 			RecreateCrossRefs();
+			LoadMaterial(loadedMaterial);
 		}
 
 		private void RecreateMaterials()
@@ -2199,10 +2240,6 @@ namespace UnityPlugin
 
 				Transform frame = Editor.Frames[loadedFrame];
 				TreeNode node = FindFrameNode(frame, treeViewObjectTree.Nodes);
-				if (node == null)
-				{
-					Report.ReportLog("node " + frame.m_GameObject.instance.m_Name + " not found");
-				}
 				node.Text = frame.m_GameObject.instance.m_Name;
 				SyncWorkspaces(frame.m_GameObject.instance.m_Name, typeof(Transform), loadedFrame);
 
@@ -2220,6 +2257,94 @@ namespace UnityPlugin
 					{
 						textBoxRendererName.Text = Editor.Meshes[loadedMesh].m_GameObject.instance.m_Name;
 					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonFrameMoveUp_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedFrame < 0)
+				{
+					return;
+				}
+
+				var frame = Editor.Frames[loadedFrame];
+				var parent = (Transform)frame.Parent;
+				if (parent == null)
+				{
+					return;
+				}
+
+				int idx = parent.IndexOf(frame);
+				if ((idx > 0) && (idx < parent.Count))
+				{
+					TreeNode node = FindFrameNode(frame, treeViewObjectTree.Nodes);
+					TreeNode parentNode = node.Parent;
+					bool selected = node.Equals(node.TreeView.SelectedNode);
+					int nodeIdx = node.Index;
+					node.TreeView.BeginUpdate();
+					parentNode.Nodes.RemoveAt(nodeIdx);
+					parentNode.Nodes.Insert(nodeIdx - 1, node);
+					if (selected)
+					{
+						node.TreeView.SelectedNode = node;
+					}
+					node.TreeView.EndUpdate();
+
+					var source = (DragSource)parentNode.Tag;
+					Gui.Scripting.RunScript(EditorVar + ".MoveFrame(id=" + loadedFrame + ", parent=" + (int)source.Id + ", index=" + (idx - 1) + ")");
+					Changed = Changed;
+					SyncWorkspaces();
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonFrameMoveDown_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedFrame < 0)
+				{
+					return;
+				}
+
+				var frame = Editor.Frames[loadedFrame];
+				var parent = (Transform)frame.Parent;
+				if (parent == null)
+				{
+					return;
+				}
+
+				int idx = parent.IndexOf(frame);
+				if ((idx >= 0) && (idx < (parent.Count - 1)))
+				{
+					TreeNode node = FindFrameNode(frame, treeViewObjectTree.Nodes);
+					TreeNode parentNode = node.Parent;
+					bool selected = node.Equals(node.TreeView.SelectedNode);
+					int nodeIdx = node.Index;
+					node.TreeView.BeginUpdate();
+					parentNode.Nodes.RemoveAt(nodeIdx);
+					parentNode.Nodes.Insert(nodeIdx + 1, node);
+					if (selected)
+					{
+						node.TreeView.SelectedNode = node;
+					}
+					node.TreeView.EndUpdate();
+
+					var source = (DragSource)parentNode.Tag;
+					Gui.Scripting.RunScript(EditorVar + ".MoveFrame(id=" + loadedFrame + ", parent=" + (int)source.Id + ", index=" + (idx + 1) + ")");
+					Changed = Changed;
+					SyncWorkspaces();
 				}
 			}
 			catch (Exception ex)
@@ -2247,6 +2372,174 @@ namespace UnityPlugin
 
 				RecreateFrames();
 				SyncWorkspaces();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void dataGridViewSRT_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+		{
+			DataGridViewEditor.dataGridViewSRT_CellValueChanged(sender, e);
+		}
+
+		private void dataGridViewMatrix_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+		{
+			DataGridViewEditor.dataGridViewMatrix_CellValueChanged(sender, e);
+		}
+
+		private void buttonFrameMatrixIdentity_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				DataGridViewEditor.LoadMatrix(Matrix.Identity, dataGridViewFrameSRT, dataGridViewFrameMatrix);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonFrameMatrixCombined_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedFrame < 0)
+				{
+					return;
+				}
+
+				Transform frame = Editor.Frames[loadedFrame];
+				Matrix m = Transform.WorldTransform(frame);
+				DataGridViewEditor.LoadMatrix(m, dataGridViewFrameSRT, dataGridViewFrameMatrix);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonFrameMatrixInverse_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				Matrix m = DataGridViewEditor.GetMatrix(dataGridViewFrameMatrix);
+				DataGridViewEditor.LoadMatrix(Matrix.Invert(m), dataGridViewFrameSRT, dataGridViewFrameMatrix);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonFrameMatrixGrow_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				float ratio = Decimal.ToSingle(numericFrameMatrixRatio.Value);
+				Vector3[] srt = DataGridViewEditor.GetSRT(dataGridViewFrameSRT);
+				srt[0] = srt[0] * ratio;
+				srt[2] = srt[2] * ratio;
+				DataGridViewEditor.LoadMatrix(FbxUtility.SRTToMatrix(srt[0], srt[1], srt[2]), dataGridViewFrameSRT, dataGridViewFrameMatrix);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonFrameMatrixShrink_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				float ratio = Decimal.ToSingle(numericFrameMatrixRatio.Value);
+				Vector3[] srt = DataGridViewEditor.GetSRT(dataGridViewFrameSRT);
+				srt[0] = srt[0] / ratio;
+				srt[2] = srt[2] / ratio;
+				DataGridViewEditor.LoadMatrix(FbxUtility.SRTToMatrix(srt[0], srt[1], srt[2]), dataGridViewFrameSRT, dataGridViewFrameMatrix);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonFrameMatrixCopy_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				copyMatrices[Decimal.ToInt32(numericFrameMatrixNumber.Value) - 1] = DataGridViewEditor.GetMatrix(dataGridViewFrameMatrix);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonFrameMatrixPaste_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				DataGridViewEditor.LoadMatrix(copyMatrices[Decimal.ToInt32(numericFrameMatrixNumber.Value) - 1], dataGridViewFrameSRT, dataGridViewFrameMatrix);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonFrameMatrixApply_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedFrame < 0)
+				{
+					return;
+				}
+
+				Matrix m = DataGridViewEditor.GetMatrix(dataGridViewFrameMatrix);
+				string command = EditorVar + ".SetFrameMatrix(id=" + loadedFrame;
+				for (int i = 0; i < 4; i++)
+				{
+					for (int j = 0; j < 4; j++)
+					{
+						command += ", m" + (i + 1) + (j + 1) + "=" + m[i, j].ToFloatString();
+					}
+				}
+				command += ")";
+				Gui.Scripting.RunScript(command);
+				Changed = Changed;
+				if (checkBoxFrameMatrixUpdate.Checked)
+				{
+					Transform frame = Editor.Frames[loadedFrame];
+					m = Transform.WorldTransform(frame);
+					m.Invert();
+
+					for (int i = 0; i < Editor.Meshes.Count; i++)
+					{
+						SkinnedMeshRenderer smr = Editor.Meshes[i] as SkinnedMeshRenderer;
+						if (smr != null && smr.m_Mesh.instance != null)
+						{
+							int boneIdx = Operations.FindBoneIndex(smr.m_Bones, frame);
+							if (boneIdx >= 0)
+							{
+								command = EditorVar + ".SetBoneMatrix(meshId=" + i + ", boneId=" + boneIdx;
+								for (int j = 0; j < 4; j++)
+								{
+									for (int k = 0; k < 4; k++)
+									{
+										command += ", m" + (j + 1) + (k + 1) + "=" + m[j, k].ToFloatString();
+									}
+								}
+								command += ")";
+								Gui.Scripting.RunScript(command);
+							}
+						}
+					}
+				}
+
+				//RecreateRenderObjects();
 			}
 			catch (Exception ex)
 			{
@@ -2297,6 +2590,161 @@ namespace UnityPlugin
 				LoadBone(null);
 				//RecreateRenderObjects();
 				InitFrames();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonBoneMatrixIdentity_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				DataGridViewEditor.LoadMatrix(Matrix.Identity, dataGridViewBoneSRT, dataGridViewBoneMatrix);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonBoneMatrixInverse_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				Matrix m = DataGridViewEditor.GetMatrix(dataGridViewBoneMatrix);
+				DataGridViewEditor.LoadMatrix(Matrix.Invert(m), dataGridViewBoneSRT, dataGridViewBoneMatrix);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonBoneMatrixGrow_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				float ratio = Decimal.ToSingle(numericBoneMatrixRatio.Value);
+				Vector3[] srt = DataGridViewEditor.GetSRT(dataGridViewBoneSRT);
+				srt[0] = srt[0] * ratio;
+				srt[2] = srt[2] * ratio;
+				DataGridViewEditor.LoadMatrix(FbxUtility.SRTToMatrix(srt[0], srt[1], srt[2]), dataGridViewBoneSRT, dataGridViewBoneMatrix);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonBoneMatrixShrink_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				float ratio = Decimal.ToSingle(numericBoneMatrixRatio.Value);
+				Vector3[] srt = DataGridViewEditor.GetSRT(dataGridViewBoneSRT);
+				srt[0] = srt[0] / ratio;
+				srt[2] = srt[2] / ratio;
+				DataGridViewEditor.LoadMatrix(FbxUtility.SRTToMatrix(srt[0], srt[1], srt[2]), dataGridViewBoneSRT, dataGridViewBoneMatrix);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonBoneMatrixCopy_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				copyMatrices[Decimal.ToInt32(numericBoneMatrixNumber.Value) - 1] = DataGridViewEditor.GetMatrix(dataGridViewBoneMatrix);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonBoneMatrixPaste_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				DataGridViewEditor.LoadMatrix(copyMatrices[Decimal.ToInt32(numericBoneMatrixNumber.Value) - 1], dataGridViewBoneSRT, dataGridViewBoneMatrix);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonBoneMatrixApply_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedBone == null)
+				{
+					return;
+				}
+
+				Matrix m = DataGridViewEditor.GetMatrix(dataGridViewBoneMatrix);
+				string command = EditorVar + ".SetBoneMatrix(meshId=" + loadedBone[0] + ", boneId=" + loadedBone[1];
+				for (int i = 0; i < 4; i++)
+				{
+					for (int j = 0; j < 4; j++)
+					{
+						command += ", m" + (i + 1) + (j + 1) + "=" + m[i, j].ToFloatString();
+					}
+				}
+				command += ")";
+				Gui.Scripting.RunScript(command);
+				Changed = Changed;
+				if (checkBoxBoneMatrixUpdate.Checked)
+				{
+					Matrix newBoneMatrix = m;
+					SkinnedMeshRenderer meshFromBone = (SkinnedMeshRenderer)Editor.Meshes[loadedBone[0]];
+					Transform frame = meshFromBone.m_Bones[loadedBone[1]].instance;
+					m = Transform.WorldTransform(frame.Parent);
+					Matrix boneFrameMatrix = newBoneMatrix;
+					boneFrameMatrix.Invert();
+					m.Invert();
+					boneFrameMatrix = boneFrameMatrix * m;
+
+					command = EditorVar + ".SetFrameMatrix(id=" + Editor.Frames.IndexOf(frame);
+					for (int i = 0; i < 4; i++)
+					{
+						for (int j = 0; j < 4; j++)
+						{
+							command += ", m" + (i + 1) + (j + 1) + "=" + boneFrameMatrix[i, j].ToFloatString();
+						}
+					}
+					command += ")";
+					Gui.Scripting.RunScript(command);
+
+					for (int i = 0; i < Editor.Meshes.Count; i++)
+					{
+						SkinnedMeshRenderer smr = Editor.Meshes[i] as SkinnedMeshRenderer;
+						if (smr != null && smr != meshFromBone && smr.m_Mesh.instance != null)
+						{
+							int boneIdx = Operations.FindBoneIndex(smr.m_Bones, frame);
+							if (boneIdx >= 0)
+							{
+								command = EditorVar + ".SetBoneMatrix(meshId=" + i + ", boneId=" + boneIdx;
+								for (int j = 0; j < 4; j++)
+								{
+									for (int k = 0; k < 4; k++)
+									{
+										command += ", m" + (j + 1) + (k + 1) + "=" + newBoneMatrix[j, k].ToFloatString();
+									}
+								}
+								command += ")";
+								Gui.Scripting.RunScript(command);
+							}
+						}
+					}
+				}
+
+				//RecreateRenderObjects();
 			}
 			catch (Exception ex)
 			{
@@ -2390,7 +2838,9 @@ namespace UnityPlugin
 				Gui.Scripting.RunScript(EditorVar + ".SetMesh(meshId=" + loadedMesh + ", componentIndex=" + componentIndex + ")");
 				Changed = Changed;
 
-				LoadMesh(loadedMesh);
+				int oldLoadedMesh = loadedMesh;
+				RecreateMeshes();
+				LoadMesh(oldLoadedMesh);
 			}
 			catch (Exception ex)
 			{
@@ -2554,6 +3004,60 @@ namespace UnityPlugin
 				Changed = Changed;
 
 				RecreateMeshes();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonMeshNormals_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedMesh < 0)
+				{
+					return;
+				}
+
+				using (var normals = new FormNormalsAndTangents())
+				{
+					if (normals.ShowDialog() == DialogResult.OK)
+					{
+						string editors = "editors={";
+						string numMeshes = "numMeshes={";
+						string meshes = "meshes={";
+						List<DockContent> animatorList = null;
+						Gui.Docking.DockContents.TryGetValue(typeof(FormAnimator), out animatorList);
+						foreach (FormAnimator animator in animatorList)
+						{
+							if (animator.listViewMesh.SelectedItems.Count == 0)
+							{
+								continue;
+							}
+
+							editors += animator.EditorVar + ", ";
+							numMeshes += animator.listViewMesh.SelectedItems.Count + ", ";
+							foreach (ListViewItem item in animator.listViewMesh.SelectedItems)
+							{
+								meshes += (int)item.Tag + ", ";
+							}
+						}
+						string idArgs = editors.Substring(0, editors.Length - 2) + "}, " + numMeshes.Substring(0, numMeshes.Length - 2) + "}, " + meshes.Substring(0, meshes.Length - 2) + "}";
+						if (normals.checkBoxNormalsForSelectedMeshes.Checked)
+						{
+							Gui.Scripting.RunScript(EditorVar + ".CalculateNormals(" + idArgs + ", threshold=" + ((float)normals.numericThreshold.Value).ToFloatString() + ")");
+							Changed = Changed;
+						}
+						if (normals.checkBoxCalculateTangents.Checked)
+						{
+							Gui.Scripting.RunScript(EditorVar + ".CalculateTangents(" + idArgs + ")");
+							Changed = Changed;
+						}
+
+						//RecreateRenderObjects();
+					}
+				}
 			}
 			catch (Exception ex)
 			{
@@ -2734,6 +3238,69 @@ namespace UnityPlugin
 							RecreateCrossRefs();
 						}
 					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void dataGridViewMesh_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+		{
+			if (e.ColumnIndex == 3)
+			{
+				int topology = int.Parse((string)dataGridViewMesh.Rows[e.RowIndex].Cells[e.ColumnIndex].Value);
+				Gui.Scripting.RunScript(EditorVar + ".SetSubMeshTopology(meshId=" + loadedMesh + ", subMeshId=" + e.RowIndex + ", topology=" + topology + ")");
+			}
+		}
+
+		private void buttonMeshSubmeshRemove_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if ((loadedMesh < 0) || (dataGridViewMesh.SelectedRows.Count <= 0))
+				{
+					return;
+				}
+
+				dataGridViewMesh.SelectionChanged -= new EventHandler(dataGridViewMesh_SelectionChanged);
+
+				int lastSelectedRow = -1;
+				List<int> indices = new List<int>();
+				foreach (DataGridViewRow row in dataGridViewMesh.SelectedRows)
+				{
+					indices.Add(row.Index);
+					lastSelectedRow = row.Index;
+				}
+				indices.Sort();
+
+				bool meshRemoved = (indices.Count == dataGridViewMesh.Rows.Count);
+
+				for (int i = 0; i < indices.Count; i++)
+				{
+					int index = indices[i] - i;
+					Gui.Scripting.RunScript(EditorVar + ".RemoveSubMesh(meshId=" + loadedMesh + ", subMeshId=" + index + ")");
+					Changed = Changed;
+				}
+
+				dataGridViewMesh.SelectionChanged += new EventHandler(dataGridViewMesh_SelectionChanged);
+
+				if (meshRemoved)
+				{
+					RecreateMeshes();
+				}
+				else
+				{
+					LoadMesh(loadedMesh);
+					if (lastSelectedRow == dataGridViewMesh.Rows.Count)
+					{
+						lastSelectedRow--;
+					}
+					dataGridViewMesh.Rows[lastSelectedRow].Selected = true;
+					dataGridViewMesh.FirstDisplayedScrollingRowIndex = lastSelectedRow;
+					//RecreateRenderObjects();
+					RecreateCrossRefs();
 				}
 			}
 			catch (Exception ex)
@@ -3218,6 +3785,53 @@ namespace UnityPlugin
 			}
 		}
 
+		private void editTextBoxTexAttributes_AfterEditTextChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				if (textureLoading)
+				{
+					return;
+				}
+				Gui.Scripting.RunScript(EditorVar + ".SetTextureAttributes(id=" + loadedTexture + GetTextureAttributes() + ")");
+				Changed = Changed;
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void checkBoxTextureMipMap_CheckedChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				if (textureLoading)
+				{
+					return;
+				}
+				Gui.Scripting.RunScript(EditorVar + ".SetTextureAttributes(id=" + loadedTexture + GetTextureAttributes() + ")");
+				Changed = Changed;
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		string GetTextureAttributes()
+		{
+			return ", dimension=" + editTextBoxTexDimension.Text
+				+ ", mipMap=" + checkBoxTextureMipMap.Checked
+				+ ", imageCount=" + editTextBoxTexImageCount.Text
+				+ ", colorSpace=" + editTextBoxTexColorSpace.Text
+				+ ", lightMap=" + editTextBoxTexLightMap.Text
+				+ ", filterMode=" + editTextBoxTexFilterMode.Text
+				+ ", mipBias=" + Single.Parse(editTextBoxTexMipBias.Text).ToFloatString()
+				+ ", aniso=" + editTextBoxTexAniso.Text
+				+ ", wrapMode=" + editTextBoxTexWrapMode.Text;
+		}
+
 		void panelTexturePic_Resize(object sender, EventArgs e)
 		{
 			try
@@ -3246,60 +3860,6 @@ namespace UnityPlugin
 					pictureBoxTexture.Width = Decimal.ToInt32(pictureBoxTexture.Image.Width * x);
 					pictureBoxTexture.Height = Decimal.ToInt32(pictureBoxTexture.Image.Height * x);
 				}
-			}
-		}
-
-		private void buttonMeshNormals_Click(object sender, EventArgs e)
-		{
-			try
-			{
-				if (loadedMesh < 0)
-				{
-					return;
-				}
-
-				using (var normals = new FormNormalsAndTangents())
-				{
-					if (normals.ShowDialog() == DialogResult.OK)
-					{
-						string editors = "editors={";
-						string numMeshes = "numMeshes={";
-						string meshes = "meshes={";
-						List<DockContent> animatorList = null;
-						Gui.Docking.DockContents.TryGetValue(typeof(FormAnimator), out animatorList);
-						foreach (FormAnimator animator in animatorList)
-						{
-							if (animator.listViewMesh.SelectedItems.Count == 0)
-							{
-								continue;
-							}
-
-							editors += animator.EditorVar + ", ";
-							numMeshes += animator.listViewMesh.SelectedItems.Count + ", ";
-							foreach (ListViewItem item in animator.listViewMesh.SelectedItems)
-							{
-								meshes += (int)item.Tag + ", ";
-							}
-						}
-						string idArgs = editors.Substring(0, editors.Length - 2) + "}, " + numMeshes.Substring(0, numMeshes.Length - 2) + "}, " + meshes.Substring(0, meshes.Length - 2) + "}";
-						if (normals.checkBoxNormalsForSelectedMeshes.Checked)
-						{
-							Gui.Scripting.RunScript(EditorVar + ".CalculateNormals(" + idArgs + ", threshold=" + ((float)normals.numericThreshold.Value).ToFloatString() + ")");
-							Changed = Changed;
-						}
-						if (normals.checkBoxCalculateTangents.Checked)
-						{
-							Gui.Scripting.RunScript(EditorVar + ".CalculateTangents(" + idArgs + ")");
-							Changed = Changed;
-						}
-
-						//RecreateRenderObjects();
-					}
-				}
-			}
-			catch (Exception ex)
-			{
-				Utility.ReportException(ex);
 			}
 		}
 	}

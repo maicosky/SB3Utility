@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 
 using SB3Utility;
 
@@ -369,6 +370,17 @@ namespace UnityPlugin
 					assetBundle.LoadFrom(stream);
 					return assetBundle;
 				}
+			case UnityClassID.AudioClip:
+				{
+					if (loadingReferencials)
+					{
+						return comp;
+					}
+					AudioClip ac = new AudioClip(this, comp.pathID, comp.classID1, comp.classID2);
+					ReplaceSubfile(index, ac, comp);
+					ac.LoadFrom(stream);
+					return ac;
+				}
 			case UnityClassID.Avatar:
 				{
 					if (loadingReferencials)
@@ -504,6 +516,17 @@ namespace UnityPlugin
 					sprite.LoadFrom(stream);
 					return sprite;
 				}
+			case UnityClassID.TextAsset:
+				{
+					if (loadingReferencials)
+					{
+						return comp;
+					}
+					TextAsset ta = new TextAsset(this, comp.pathID, comp.classID1, comp.classID2);
+					ReplaceSubfile(index, ta, comp);
+					ta.LoadFrom(stream);
+					return ta;
+				}
 			case UnityClassID.Texture2D:
 				{
 					if (loadingReferencials)
@@ -577,6 +600,38 @@ namespace UnityPlugin
 				}
 			}
 			Components.Insert(index, file);
+		}
+
+		public static string ToString(Component subfile)
+		{
+			Type t = subfile.GetType();
+			PropertyInfo info = t.GetProperty("m_Name");
+			if (info != null)
+			{
+				return info.GetValue(subfile, null).ToString();
+			}
+			else
+			{
+				info = t.GetProperty("m_GameObject");
+				if (info != null)
+				{
+					PPtr<GameObject> gameObjPtr = info.GetValue(subfile, null) as PPtr<GameObject>;
+					if (gameObjPtr != null)
+					{
+						return gameObjPtr.instance.m_Name;
+					}
+					else
+					{
+						GameObject gameObj = info.GetValue(subfile, null) as GameObject;
+						if (gameObj != null)
+						{
+							return gameObj.m_Name;
+						}
+						throw new Exception("What reference is this!? " + subfile.pathID + " " + subfile.classID1);
+					}
+				}
+				throw new Exception("Neither m_Name nor m_GameObject member " + subfile.pathID + " " + subfile.classID1);
+			}
 		}
 	}
 }

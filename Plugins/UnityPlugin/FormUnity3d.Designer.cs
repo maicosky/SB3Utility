@@ -189,51 +189,51 @@
 			// exportSubfilesToolStripMenuItem
 			// 
 			this.exportSubfilesToolStripMenuItem.Name = "exportSubfilesToolStripMenuItem";
-			this.exportSubfilesToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.exportSubfilesToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
 			this.exportSubfilesToolStripMenuItem.Text = "&Export...";
 			this.exportSubfilesToolStripMenuItem.Click += new System.EventHandler(this.exportAssetsToolStripMenuItem_Click);
 			// 
 			// toolStripSeparator4
 			// 
 			this.toolStripSeparator4.Name = "toolStripSeparator4";
-			this.toolStripSeparator4.Size = new System.Drawing.Size(149, 6);
+			this.toolStripSeparator4.Size = new System.Drawing.Size(147, 6);
 			// 
 			// replaceFilesToolStripMenuItem
 			// 
 			this.replaceFilesToolStripMenuItem.Name = "replaceFilesToolStripMenuItem";
-			this.replaceFilesToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.replaceFilesToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
 			this.replaceFilesToolStripMenuItem.Text = "&Replace Files...";
 			this.replaceFilesToolStripMenuItem.Click += new System.EventHandler(this.replaceFilesToolStripMenuItem_Click);
 			// 
 			// toolStripSeparator2
 			// 
 			this.toolStripSeparator2.Name = "toolStripSeparator2";
-			this.toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
+			this.toolStripSeparator2.Size = new System.Drawing.Size(147, 6);
 			// 
 			// removeToolStripMenuItem
 			// 
 			this.removeToolStripMenuItem.Enabled = false;
 			this.removeToolStripMenuItem.Name = "removeToolStripMenuItem";
-			this.removeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.removeToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
 			this.removeToolStripMenuItem.Text = "Re&move";
 			// 
 			// toolStripSeparator3
 			// 
 			this.toolStripSeparator3.Name = "toolStripSeparator3";
-			this.toolStripSeparator3.Size = new System.Drawing.Size(149, 6);
+			this.toolStripSeparator3.Size = new System.Drawing.Size(147, 6);
 			// 
 			// renameToolStripMenuItem
 			// 
 			this.renameToolStripMenuItem.Enabled = false;
 			this.renameToolStripMenuItem.Name = "renameToolStripMenuItem";
-			this.renameToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.renameToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
 			this.renameToolStripMenuItem.Text = "Re&name";
 			// 
 			// multiRenameToolStripMenuItem
 			// 
 			this.multiRenameToolStripMenuItem.Enabled = false;
 			this.multiRenameToolStripMenuItem.Name = "multiRenameToolStripMenuItem";
-			this.multiRenameToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.multiRenameToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
 			this.multiRenameToolStripMenuItem.Text = "&Multi Rename...";
 			// 
 			// optionsToolStripMenuItem
@@ -454,6 +454,8 @@
 			this.soundsList.TabStop = false;
 			this.soundsList.UseCompatibleStateImageBehavior = false;
 			this.soundsList.View = System.Windows.Forms.View.Details;
+			this.soundsList.ItemSelectionChanged += new System.Windows.Forms.ListViewItemSelectionChangedEventHandler(this.soundSubfilesList_ItemSelectionChanged);
+			this.soundsList.KeyUp += new System.Windows.Forms.KeyEventHandler(this.soundSubfilesList_KeyUp);
 			// 
 			// soundsListHeaderName
 			// 

@@ -101,7 +101,7 @@ namespace UnityPlugin
 					}
 				}
 
-				ConvertSkinnedMeshRenderers(sMeshes, skins);
+				ConvertMeshRenderers(sMeshes, skins);
 				AnimationList = new List<ImportedAnimation>();
 			}
 
@@ -114,7 +114,7 @@ namespace UnityPlugin
 					avatar = animator.m_Avatar.instance;
 				}
 
-				ConvertSkinnedMeshRenderers(sMeshes, skins);
+				ConvertMeshRenderers(sMeshes, skins);
 				AnimationList = new List<ImportedAnimation>();
 			}
 
@@ -151,50 +151,62 @@ namespace UnityPlugin
 				return world;
 			}
 
-			private void ConvertSkinnedMeshRenderers(List<MeshRenderer> sMeshes, bool skins)
+			private void ConvertMeshRenderers(List<MeshRenderer> meshList, bool skins)
 			{
-				MeshList = new List<ImportedMesh>(sMeshes.Count);
-				MaterialList = new List<ImportedMaterial>(sMeshes.Count);
-				TextureList = new List<ImportedTexture>(sMeshes.Count);
-				foreach (SkinnedMeshRenderer sMesh in sMeshes)
+				MeshList = new List<ImportedMesh>(meshList.Count);
+				MaterialList = new List<ImportedMaterial>(meshList.Count);
+				TextureList = new List<ImportedTexture>(meshList.Count);
+				foreach (MeshRenderer meshR in meshList)
 				{
-					Mesh mesh = sMesh.m_Mesh.instance;
+					SkinnedMeshRenderer sMesh = meshR as SkinnedMeshRenderer;
+					Mesh mesh;
+					if (sMesh != null)
+					{
+						mesh = sMesh.m_Mesh.instance;
+					}
+					else
+					{
+						MeshFilter filter = meshR.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshFilter);
+						mesh = filter.m_Mesh.instance;
+					}
 					if (mesh == null)
 					{
-						Report.ReportLog("skipping " + sMesh.m_GameObject.instance.m_Name + " - no mesh");
+						Report.ReportLog("skipping " + meshR.m_GameObject.instance.m_Name + " - no mesh");
 						continue;
 					}
 
 					ImportedMesh iMesh = new ImportedMesh();
 					iMesh.Name = mesh.m_Name;
 					iMesh.SubmeshList = new List<ImportedSubmesh>(mesh.m_SubMeshes.Count);
-					for (int i = 0; i < mesh.m_SubMeshes.Count; i++)
+//Report.ReportLog("current=" + mesh.m_VertexData.m_CurrentChannels.ToString("X2"));
+					using (BinaryReader vertReader = new BinaryReader(new MemoryStream(mesh.m_VertexData.m_DataSize)),
+						indexReader = new BinaryReader(new MemoryStream(mesh.m_IndexBuffer)))
 					{
-						SubMesh submesh = mesh.m_SubMeshes[i];
-						ImportedSubmesh iSubmesh = new ImportedSubmesh();
-						iSubmesh.Index = i;
-						iSubmesh.Visible = true;
-
-						Material mat = sMesh.m_Materials[i].instance;
-						ConvertMaterial(mat);
-						iSubmesh.Material = mat.m_Name;
-
-						iSubmesh.VertexList = new List<ImportedVertex>((int)submesh.vertexCount);
-						using (MemoryStream memStream = new MemoryStream(mesh.m_VertexData.m_DataSize, false))
+						for (int i = 0; i < mesh.m_SubMeshes.Count; i++)
 						{
-							BinaryReader reader = new BinaryReader(memStream);
+							SubMesh submesh = mesh.m_SubMeshes[i];
+							ImportedSubmesh iSubmesh = new ImportedSubmesh();
+							iSubmesh.Index = i;
+							iSubmesh.Visible = true;
+
+							Material mat = meshR.m_Materials[i].instance;
+							ConvertMaterial(mat);
+							iSubmesh.Material = mat.m_Name;
+
+							iSubmesh.VertexList = new List<ImportedVertex>((int)submesh.vertexCount);
 							for (int str = 0; str < mesh.m_VertexData.m_Streams.Count; str++)
 							{
 								StreamInfo sInfo = mesh.m_VertexData.m_Streams[str];
+//if (i == 0) Report.ReportLog("sinfo=" + sInfo.channelMask.ToString("X4") + "," + sInfo.offset + "," + sInfo.stride + "," + sInfo.dividerOp + "," + sInfo.frequency);
 								if (sInfo.channelMask == 0)
 								{
 									continue;
 								}
 
-								for (int j = 0; j < mesh.m_VertexData.m_VertexCount; j++)
+								for (int j = 0; j < mesh.m_SubMeshes[i].vertexCount; j++)
 								{
 									ImportedVertex iVertex;
-									if (iSubmesh.VertexList.Count < mesh.m_VertexData.m_VertexCount)
+									if (iSubmesh.VertexList.Count < mesh.m_SubMeshes[i].vertexCount)
 									{
 										iVertex = new ImportedVertex();
 										iSubmesh.VertexList.Add(iVertex);
@@ -207,25 +219,26 @@ namespace UnityPlugin
 									for (int chn = 0; chn < mesh.m_VertexData.m_Channels.Count; chn++)
 									{
 										ChannelInfo cInfo = mesh.m_VertexData.m_Channels[chn];
+//if (i == 0 && j == 0) Report.ReportLog("cinfo=" + cInfo.stream + "," + cInfo.offset + "," + cInfo.format + "," + cInfo.dimension);
 										if ((sInfo.channelMask & (1 << chn)) == 0)
 										{
 											continue;
 										}
 
-										memStream.Position = sInfo.offset + j * sInfo.stride + cInfo.offset;
+										vertReader.BaseStream.Position = sInfo.offset + (submesh.firstVertex + j) * sInfo.stride + cInfo.offset;
 										switch (chn)
 										{
 										case 0:
-											iVertex.Position = new SlimDX.Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+											iVertex.Position = new SlimDX.Vector3(vertReader.ReadSingle(), vertReader.ReadSingle(), vertReader.ReadSingle());
 											break;
 										case 1:
-											iVertex.Normal = new SlimDX.Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+											iVertex.Normal = new SlimDX.Vector3(vertReader.ReadSingle(), vertReader.ReadSingle(), vertReader.ReadSingle());
 											break;
 										case 3:
-											iVertex.UV = new float[2] { reader.ReadSingle(), reader.ReadSingle() };
+											iVertex.UV = new float[2] { vertReader.ReadSingle(), vertReader.ReadSingle() };
 											break;
 										case 5:
-											iVertex.Tangent = new SlimDX.Vector4(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
+											iVertex.Tangent = new SlimDX.Vector4(vertReader.ReadSingle(), vertReader.ReadSingle(), vertReader.ReadSingle(), vertReader.ReadSingle());
 											break;
 										}
 									}
@@ -241,24 +254,22 @@ namespace UnityPlugin
 									}
 								}
 							}
-						}
 
-						int numFaces = (int)(submesh.indexCount / 3);
-						iSubmesh.FaceList = new List<ImportedFace>(numFaces);
-						using (BinaryReader reader = new BinaryReader(new MemoryStream(mesh.m_IndexBuffer)))
-						{
+							int numFaces = (int)(submesh.indexCount / 3);
+							iSubmesh.FaceList = new List<ImportedFace>(numFaces);
+							indexReader.BaseStream.Position = submesh.firstByte;
 							for (int j = 0; j < numFaces; j++)
 							{
 								ImportedFace face = new ImportedFace();
-								face.VertexIndices = new int[3] { reader.ReadUInt16(), reader.ReadUInt16(), reader.ReadUInt16() };
+								face.VertexIndices = new int[3] { indexReader.ReadUInt16() - (int)submesh.firstVertex, indexReader.ReadUInt16() - (int)submesh.firstVertex, indexReader.ReadUInt16() - (int)submesh.firstVertex };
 								iSubmesh.FaceList.Add(face);
 							}
-						}
 
-						iMesh.SubmeshList.Add(iSubmesh);
+							iMesh.SubmeshList.Add(iSubmesh);
+						}
 					}
 
-					if (skins)
+					if (skins && sMesh != null)
 					{
 						if (sMesh.m_Bones.Count >= 256)
 						{

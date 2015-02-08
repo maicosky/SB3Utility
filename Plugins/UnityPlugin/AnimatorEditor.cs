@@ -23,19 +23,20 @@ namespace UnityPlugin
 		{
 			Parser = parser;
 			Bundle = Parser.file.LoadComponent(1);
+			/*for (int i = 0; i < Bundle.m_PreloadTable.Count; i++)
+			{
+				Component comp = Bundle.m_PreloadTable[i].asset;
+				if (comp.classID1 != UnityClassID.GameObject && comp.classID1 != UnityClassID.Transform)
+				{
+					Report.ReportLog(i + " " + comp.pathID + " " + comp.classID1 + " " + (!(comp is NotLoaded) ? AssetCabinet.ToString(comp) : String.Empty));
+				}
+			}*/
 
 			Frames = new List<Transform>();
 			Meshes = new List<MeshRenderer>();
 			Materials = new List<Material>();
 			Textures = new List<Texture2D>();
-			try
-			{
-				InitLists(parser.RootTransform);
-			}
-			catch (Exception e)
-			{
-				Utility.ReportException(e);
-			}
+			InitLists(parser.RootTransform);
 		}
 
 		private void InitLists()
@@ -176,7 +177,7 @@ namespace UnityPlugin
 		}
 
 		[Plugin]
-		public int GetSkinnedMeshRendererId(string name)
+		public int GetMeshRendererId(string name)
 		{
 			for (int i = 0; i < Meshes.Count; i++)
 			{
@@ -218,6 +219,27 @@ namespace UnityPlugin
 		}
 
 		[Plugin]
+		public void SetFrameName(int id, string name)
+		{
+			string oldName = Frames[id].m_GameObject.instance.m_Name;
+			Frames[id].m_GameObject.instance.m_Name = name;
+			Parser.m_Avatar.instance.RenameBone(oldName, name);
+
+			Changed = true;
+		}
+
+		[Plugin]
+		public void MoveFrame(int id, int parent, int index)
+		{
+			var srcFrame = Frames[id];
+			var srcParent = (Transform)srcFrame.Parent;
+			var destParent = Frames[parent];
+			srcParent.RemoveChild(srcFrame);
+			destParent.InsertChild(index, srcFrame);
+			Changed = true;
+		}
+
+		[Plugin]
 		public void RemoveFrame(int id)
 		{
 			var frame = Frames[id];
@@ -235,12 +257,50 @@ namespace UnityPlugin
 		}
 
 		[Plugin]
-		public void SetFrameName(int id, string name)
+		public void SetFrameSRT(int id, double sX, double sY, double sZ, double rX, double rY, double rZ, double tX, double tY, double tZ)
 		{
-			string oldName = Frames[id].m_GameObject.instance.m_Name;
-			Frames[id].m_GameObject.instance.m_Name = name;
-			Parser.m_Avatar.instance.RenameBone(oldName, name);
+			Frames[id].m_LocalRotation = FbxUtility.EulerToQuaternion(new Vector3((float)rX, (float)rY, (float)rZ));
+			Frames[id].m_LocalPosition = new Vector3((float)tX, (float)tY, (float)tZ);
+			Frames[id].m_LocalScale = new Vector3((float)sX, (float)sY, (float)sZ);
+			Changed = true;
+		}
 
+		[Plugin]
+		public void SetFrameMatrix(int id,
+			double m11, double m12, double m13, double m14,
+			double m21, double m22, double m23, double m24,
+			double m31, double m32, double m33, double m34,
+			double m41, double m42, double m43, double m44)
+		{
+			Transform frame = Frames[id];
+			Matrix m = new Matrix();
+
+			m.M11 = (float)m11;
+			m.M12 = (float)m12;
+			m.M13 = (float)m13;
+			m.M14 = (float)m14;
+
+			m.M21 = (float)m21;
+			m.M22 = (float)m22;
+			m.M23 = (float)m23;
+			m.M24 = (float)m24;
+
+			m.M31 = (float)m31;
+			m.M32 = (float)m32;
+			m.M33 = (float)m33;
+			m.M34 = (float)m34;
+
+			m.M41 = (float)m41;
+			m.M42 = (float)m42;
+			m.M43 = (float)m43;
+			m.M44 = (float)m44;
+
+			Vector3 s, t;
+			Quaternion q;
+			m.Decompose(out s, out q, out t);
+			frame.m_LocalPosition = t;
+			frame.m_LocalRotation = q;
+			frame.m_LocalScale = s;
 			Changed = true;
 		}
 
@@ -401,7 +461,7 @@ namespace UnityPlugin
 			Mesh mesh = smr.m_Mesh.instance;
 			if (mesh != null)
 			{
-				Operations.vMesh vMesh = new Operations.vMesh(mesh, false);
+				Operations.vMesh vMesh = new Operations.vMesh(smr, false);
 				Transform boneFrame = smr.m_Bones[boneId].instance;
 				int parentBoneIdx = -1;
 				if (boneFrame != null)
@@ -452,17 +512,60 @@ namespace UnityPlugin
 						}
 					}
 				}
-				vMesh.Flush(false);
+				vMesh.Flush();
 			}
 		}
 
 		[Plugin]
-		public void ReplaceSkinnedMeshRenderer(WorkspaceMesh mesh, int frameId, int rootBoneId, bool merge, string normals, string bones)
+		public void SetBoneSRT(int meshId, int boneId, double sX, double sY, double sZ, double rX, double rY, double rZ, double tX, double tY, double tZ)
+		{
+			SkinnedMeshRenderer smr = (SkinnedMeshRenderer)Meshes[meshId];
+			Matrix boneMatrix = FbxUtility.SRTToMatrix(new Vector3((float)sX, (float)sY, (float)sZ), new Vector3((float)rX, (float)rY, (float)rZ), new Vector3((float)tX, (float)tY, (float)tZ));
+			smr.m_Mesh.instance.m_BindPose[boneId] = boneMatrix;
+			Changed = true;
+		}
+
+		[Plugin]
+		public void SetBoneMatrix(int meshId, int boneId,
+			double m11, double m12, double m13, double m14,
+			double m21, double m22, double m23, double m24,
+			double m31, double m32, double m33, double m34,
+			double m41, double m42, double m43, double m44)
+		{
+			SkinnedMeshRenderer smr = (SkinnedMeshRenderer)Meshes[meshId];
+			Matrix m = new Matrix();
+
+			m.M11 = (float)m11;
+			m.M12 = (float)m12;
+			m.M13 = (float)m13;
+			m.M14 = (float)m14;
+
+			m.M21 = (float)m21;
+			m.M22 = (float)m22;
+			m.M23 = (float)m23;
+			m.M24 = (float)m24;
+
+			m.M31 = (float)m31;
+			m.M32 = (float)m32;
+			m.M33 = (float)m33;
+			m.M34 = (float)m34;
+
+			m.M41 = (float)m41;
+			m.M42 = (float)m42;
+			m.M43 = (float)m43;
+			m.M44 = (float)m44;
+
+			smr.m_Mesh.instance.m_BindPose[boneId] = m;
+			Changed = true;
+		}
+
+		[Plugin]
+		public void ReplaceSkinnedMeshRenderer(WorkspaceMesh mesh, int frameId, int rootBoneId, bool merge, string normals, string bones, bool targetFullMesh)
 		{
 			var normalsMethod = (CopyMeshMethod)Enum.Parse(typeof(CopyMeshMethod), normals);
 			var bonesMethod = (CopyMeshMethod)Enum.Parse(typeof(CopyMeshMethod), bones);
 			Transform rootBone = rootBoneId >= 0 && rootBoneId < Frames.Count ? Frames[rootBoneId] : null;
-			Operations.ReplaceSkinnedMeshRenderer(Frames[frameId], rootBone, Parser, Bundle, Materials, mesh, merge, normalsMethod, bonesMethod);
+			Operations.ReplaceSkinnedMeshRenderer(Frames[frameId], rootBone, Parser, Bundle, Materials, mesh, merge, normalsMethod, bonesMethod, targetFullMesh);
 
 			InitLists();
 			Changed = true;
@@ -493,19 +596,8 @@ namespace UnityPlugin
 		[Plugin]
 		public void CalculateNormals(int id, double threshold)
 		{
-			SkinnedMeshRenderer smr = Meshes[id] as SkinnedMeshRenderer;
-			Mesh mesh;
-			if (smr != null)
-			{
-				mesh = smr.m_Mesh.instance;
-			}
-			else
-			{
-				MeshRenderer meshR = Meshes[id];
-				MeshFilter filter = meshR.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshFilter);
-				mesh = filter.m_Mesh.instance;
-			}
-			Operations.vMesh vMesh = new Operations.vMesh(mesh, true);
+			MeshRenderer meshR = Meshes[id];
+			Operations.vMesh vMesh = new Operations.vMesh(meshR, true);
 			Operations.CalculateNormals(vMesh.submeshes, (float)threshold);
 			Changed = true;
 		}
@@ -524,7 +616,7 @@ namespace UnityPlugin
 			Operations.CalculateNormals(submeshList, (float)threshold);
 			foreach (Operations.vMesh mesh in meshList)
 			{
-				mesh.Flush(false);
+				mesh.Flush();
 			}
 			Changed = true;
 		}
@@ -532,19 +624,8 @@ namespace UnityPlugin
 		[Plugin]
 		public void CalculateTangents(int id)
 		{
-			SkinnedMeshRenderer smr = Meshes[id] as SkinnedMeshRenderer;
-			Mesh mesh;
-			if (smr != null)
-			{
-				mesh = smr.m_Mesh.instance;
-			}
-			else
-			{
-				MeshRenderer meshR = Meshes[id];
-				MeshFilter filter = meshR.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshFilter);
-				mesh = filter.m_Mesh.instance;
-			}
-			Operations.vMesh vMesh = new Operations.vMesh(mesh, true);
+			MeshRenderer meshR = Meshes[id];
+			Operations.vMesh vMesh = new Operations.vMesh(meshR, true);
 			Operations.CalculateTangents(vMesh.submeshes);
 			Changed = true;
 		}
@@ -563,7 +644,7 @@ namespace UnityPlugin
 			Operations.CalculateTangents(submeshList);
 			foreach (Operations.vMesh mesh in meshList)
 			{
-				mesh.Flush(false);
+				mesh.Flush();
 			}
 			Changed = true;
 		}
@@ -581,19 +662,8 @@ namespace UnityPlugin
 					i = (int)(double)numMeshes[editorIdx];
 					editor = (AnimatorEditor)editors[editorIdx];
 				}
-				SkinnedMeshRenderer smr = editor.Meshes[(int)(double)id] as SkinnedMeshRenderer;
-				Mesh mesh;
-				if (smr != null)
-				{
-					mesh = smr.m_Mesh.instance;
-				}
-				else
-				{
-					MeshRenderer meshR = editor.Meshes[(int)(double)id];
-					MeshFilter filter = meshR.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshFilter);
-					mesh = filter.m_Mesh.instance;
-				}
-				Operations.vMesh vMesh = new Operations.vMesh(mesh, true);
+				MeshRenderer meshR = editor.Meshes[(int)(double)id];
+				Operations.vMesh vMesh = new Operations.vMesh(meshR, true);
 				meshList.Add(vMesh);
 				submeshList.AddRange(vMesh.submeshes);
 			}
@@ -647,6 +717,42 @@ namespace UnityPlugin
 			Material mat = Materials[material];
 			meshRenderer.m_Materials[subMeshId] = new PPtr<Material>(mat);
 			Changed = true;
+		}
+
+		[Plugin]
+		public void SetSubMeshTopology(int meshId, int subMeshId, int topology)
+		{
+			MeshRenderer meshR = Meshes[meshId];
+			Mesh mesh;
+			if (meshR is SkinnedMeshRenderer)
+			{
+				SkinnedMeshRenderer smr = (SkinnedMeshRenderer)meshR;
+				mesh = smr.m_Mesh.instance;
+			}
+			else
+			{
+				MeshFilter filter = meshR.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshFilter);
+				mesh = filter.m_Mesh.instance;
+			}
+			mesh.m_SubMeshes[subMeshId].topology = topology;
+			Changed = true;
+		}
+
+		[Plugin]
+		public void RemoveSubMesh(int meshId, int subMeshId)
+		{
+			MeshRenderer meshR = Meshes[meshId];
+			Operations.vMesh vMesh = new Operations.vMesh(meshR, true);
+			if (vMesh.submeshes.Count == 1)
+			{
+				RemoveSkinnedMeshRenderer(meshId);
+			}
+			else
+			{
+				vMesh.submeshes.RemoveAt(subMeshId);
+				vMesh.Flush();
+				Changed = true;
+			}
 		}
 
 		[Plugin]
@@ -739,6 +845,26 @@ namespace UnityPlugin
 				}
 			}
 
+			/*for (int i = 0; i < Bundle.m_PreloadTable.Count; i++)
+			{
+				PPtr<Object> objPtr = Bundle.m_PreloadTable[i];
+				if (objPtr.asset == mat)
+				{
+					Bundle.m_PreloadTable.RemoveAt(i--);
+				}
+			}*/
+			int idx = Bundle.m_Container.FindIndex
+			(
+				delegate(KeyValuePair<string, AssetInfo> match)
+				{
+					return match.Value.asset.asset == mat;
+				}
+			);
+			if (idx >= 0)
+			{
+				Bundle.m_Container.RemoveAt(idx);
+			}
+
 			Parser.file.RemoveSubfile(mat);
 			Materials.RemoveAt(id);
 			Changed = true;
@@ -747,8 +873,35 @@ namespace UnityPlugin
 		[Plugin]
 		public Material CopyMaterial(int id)
 		{
-			Material newMat = Materials[id].Clone(Parser.file);
+			Material oldMat = Materials[id];
+			Material newMat = oldMat.Clone(Parser.file);
 			newMat.m_Name += "_Copy";
+
+			for (int i = 0; i < Bundle.m_PreloadTable.Count; i++)
+			{
+				PPtr<Object> objPtr = Bundle.m_PreloadTable[i];
+				if (objPtr.asset == oldMat)
+				{
+					Bundle.m_PreloadTable.Insert(++i, new PPtr<Object>(newMat));
+				}
+			}
+			int idx = Bundle.m_Container.FindIndex
+			(
+				delegate(KeyValuePair<string, AssetInfo> match)
+				{
+					return match.Value.asset.asset == oldMat;
+				}
+			);
+			if (idx >= 0)
+			{
+				AssetInfo orgInfo = Bundle.m_Container[idx].Value;
+				AssetInfo info = new AssetInfo(Parser.file);
+				info.preloadIndex = orgInfo.preloadIndex;
+				info.preloadSize = orgInfo.preloadSize;
+				info.asset = new PPtr<Object>(newMat);
+				Bundle.m_Container.Insert(idx + 1, new KeyValuePair<string, AssetInfo>(newMat.m_Name, info));
+			}
+
 			Materials.Add(newMat);
 			Changed = true;
 			return newMat;
@@ -980,6 +1133,22 @@ namespace UnityPlugin
 		public void SetTextureName(int id, string name)
 		{
 			Textures[id].m_Name = name;
+			Changed = true;
+		}
+
+		[Plugin]
+		public void SetTextureAttributes(int id, int dimension, bool mipMap, int imageCount, int colorSpace, int lightMap, int filterMode, double mipBias, int aniso, int wrapMode)
+		{
+			Texture2D tex = Textures[id];
+			tex.m_TextureDimension = dimension;
+			tex.m_MipMap = mipMap;
+			tex.m_ImageCount = imageCount;
+			tex.m_ColorSpace = colorSpace;
+			tex.m_LightmapFormat = lightMap;
+			tex.m_TextureSettings.m_FilterMode = filterMode;
+			tex.m_TextureSettings.m_MipBias = (float)mipBias;
+			tex.m_TextureSettings.m_Aniso = aniso;
+			tex.m_TextureSettings.m_WrapMode = wrapMode;
 			Changed = true;
 		}
 

@@ -626,7 +626,6 @@ namespace UnityPlugin
 				{
 					if (pair.Value.Length == beginPos + bonePath.Length || pair.Value[beginPos + bonePath.Length] == '/')
 					{
-						Report.ReportLog(pair.Value + " removed from Avatar");
 						m_TOS.RemoveAt(i);
 					}
 				}

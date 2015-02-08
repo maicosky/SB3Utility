@@ -26,7 +26,7 @@ namespace UnityPlugin
 		Dictionary<string, string> ChildParserVars = new Dictionary<string, string>();
 		Dictionary<string, DockContent> ChildForms = new Dictionary<string, DockContent>();
 
-		//private Utility.SoundLib soundLib;
+		private Utility.SoundLib soundLib;
 
 		private const Keys MASS_DESTRUCTION_KEY_COMBINATION = Keys.Delete | Keys.Shift;
 
@@ -309,7 +309,8 @@ namespace UnityPlugin
 						subfile.classID1 != UnityClassID.MonoScript &&
 						subfile.classID1 != UnityClassID.ParticleAnimator &&
 						subfile.classID1 != UnityClassID.ParticleRenderer &&
-						subfile.classID1 != UnityClassID.Sprite)
+						subfile.classID1 != UnityClassID.Sprite &&
+						subfile.classID1 != UnityClassID.TextAsset)
 					{
 						item.BackColor = Color.LightCoral;
 					}
@@ -338,10 +339,10 @@ namespace UnityPlugin
 			ReselectItems(soundsList, selectedSounds);
 			ReselectItems(othersList, selectedOthers);
 
-			/*if (soundsList.Items.Count > 0 && soundLib == null)
+			if (soundsList.Items.Count > 0 && soundLib == null)
 			{
 				soundLib = new Utility.SoundLib();
-			}*/
+			}
 		}
 
 		private void ReselectItems(ListView subfiles, int[] selectedSubfiles)
@@ -598,6 +599,38 @@ namespace UnityPlugin
 			//removeToolStripMenuItem_Click(sender, e);
 		}
 
+		private void soundSubfilesList_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
+		{
+			try
+			{
+				if (!soundLib.isLoaded())
+					return;
+				if (e.IsSelected)
+				{
+					Component subfile = (Component)e.Item.Tag;
+					AudioClip audioClip = Editor.Parser.LoadAsset(subfile.pathID);
+					soundLib.Play(e.Item.Text, audioClip.m_AudioData);
+				}
+				else
+				{
+					soundLib.Stop(e.Item.Text);
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void soundSubfilesList_KeyUp(object sender, KeyEventArgs e)
+		{
+			if (e.KeyData != MASS_DESTRUCTION_KEY_COMBINATION)
+			{
+				return;
+			}
+			//removeToolStripMenuItem_Click(sender, e);
+		}
+
 		private void saveUnity3dToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			try
@@ -736,7 +769,10 @@ namespace UnityPlugin
 				else if (tabControlAssets.SelectedTab == tabPageSounds)
 				{
 					subfilesList = soundsList;
-					function = "ExportSound";
+				}
+				else if (tabControlAssets.SelectedTab == tabPageMaterials)
+				{
+					subfilesList = materialsList;
 				}
 				else if (tabControlAssets.SelectedTab == tabPageOthers)
 				{
@@ -796,6 +832,9 @@ namespace UnityPlugin
 						case "png":
 						case "tga":
 							function = "MergeTexture";
+							break;
+						case "ogg":
+							function = "ReplaceAudioClip";
 							break;
 						default:
 							UnityClassID classID = (UnityClassID)Enum.Parse(typeof(UnityClassID), extension, true);

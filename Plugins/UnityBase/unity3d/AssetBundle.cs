@@ -115,9 +115,11 @@ namespace UnityPlugin
 					comp = new NotLoaded();
 				}
 				PPtr<Object> assetPtr = new PPtr<Object>(comp);
-				//if (comp.classID1 != UnityClassID.GameObject && comp.classID1 != UnityClassID.Transform)
-				//Console.WriteLine(i + " " + comp.pathID + " " + comp.classID1);
 				m_PreloadTable.Add(assetPtr);
+				/*if (comp.classID1 != UnityClassID.GameObject && comp.classID1 != UnityClassID.Transform)
+				{
+					Report.ReportLog(i + " " + comp.pathID + " " + comp.classID1 + " " + (!(comp is NotLoaded) ? AssetCabinet.ToString(comp) : String.Empty));
+				}*/
 			}
 			/*for (int i = 0; i < file.Components.Count; i++)
 			{
@@ -147,7 +149,8 @@ namespace UnityPlugin
 						reader.ReadNameA4(), new AssetInfo(file, stream)
 					)
 				);
-				//Console.WriteLine(i + " " + m_Container[i].Key + " " + m_Container[i].Value.asset.m_PathID + " i=" + m_Container[i].Value.preloadIndex + " s=" + m_Container[i].Value.preloadSize + " " + ((Component)file.FindComponent(m_Container[i].Value.asset.m_PathID)).classID1);
+				//Component asset = file.FindComponent(m_Container[i].Value.asset.m_PathID);
+				//Report.ReportLog(i + " " + m_Container[i].Key + " " + m_Container[i].Value.asset.m_PathID + " i=" + m_Container[i].Value.preloadIndex + " s=" + m_Container[i].Value.preloadSize + " " + (asset != null? asset.classID1.ToString() : "pathID not found"));
 			}
 			/*Console.WriteLine("Mesh Check");
 			for (int i = 0; i < file.Components.Count; i++)
@@ -229,6 +232,7 @@ namespace UnityPlugin
 
 		public void DeleteComponent(Component asset)
 		{
+			Report.ReportLog("Deleting Component from AssetBundle " + AssetCabinet.ToString(asset));
 			for (int i = 0; i < m_PreloadTable.Count; i++)
 			{
 				if (m_PreloadTable[i] != null && m_PreloadTable[i].asset == asset)
@@ -242,6 +246,25 @@ namespace UnityPlugin
 				if (m_Container[i].Value.asset.asset == asset)
 				{
 					m_Container.RemoveAt(i--);
+				}
+			}
+		}
+
+		public void ReplaceComponent(Component oldAsset, Component newAsset)
+		{
+			for (int i = 0; i < m_PreloadTable.Count; i++)
+			{
+				if (m_PreloadTable[i] != null && m_PreloadTable[i].asset == oldAsset)
+				{
+					m_PreloadTable[i] = new PPtr<Object>(newAsset);
+				}
+			}
+
+			for (int i = 0; i < m_Container.Count; i++)
+			{
+				if (m_Container[i].Value.asset.asset == oldAsset)
+				{
+					m_Container[i].Value.asset = new PPtr<Object>(newAsset);
 				}
 			}
 		}

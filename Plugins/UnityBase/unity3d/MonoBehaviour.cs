@@ -113,7 +113,7 @@ namespace UnityPlugin
 				dirInfo.Create();
 			}
 
-			using (BinaryWriter writer = new BinaryWriter(File.OpenWrite(path + "\\" + m_Name + ".MonoBehaviour"), System.Text.Encoding.UTF8))
+			using (BinaryWriter writer = new BinaryWriter(File.OpenWrite(path + "\\" + m_Name + "." + UnityClassID.MonoBehaviour), System.Text.Encoding.UTF8))
 			{
 				for (int i = 0; i < m_Lines.Count; i++)
 				{
@@ -131,6 +131,7 @@ namespace UnityPlugin
 					}
 					writer.Write(System.Text.Encoding.UTF8.GetBytes("\r\n"));
 				}
+				writer.BaseStream.SetLength(writer.BaseStream.Position);
 			}
 		}
 

@@ -156,5 +156,37 @@ namespace UnityPlugin
 			}
 			return null;
 		}
+
+		public void Export(string path)
+		{
+			DirectoryInfo dirInfo = new DirectoryInfo(path);
+			if (!dirInfo.Exists)
+			{
+				dirInfo.Create();
+			}
+
+			using (BinaryWriter writer = new BinaryWriter(File.OpenWrite(path + "\\" + m_Name + "." + UnityClassID.Shader), System.Text.Encoding.UTF8))
+			{
+				writer.Write(System.Text.Encoding.UTF8.GetBytes(m_Script));
+				writer.Write(System.Text.Encoding.UTF8.GetBytes("\n// Dependencies:\n"));
+				foreach (PPtr<Shader> shaderPtr in m_Dependencies)
+				{
+					writer.Write(System.Text.Encoding.UTF8.GetBytes("//\t" + shaderPtr.asset.classID1 + " " + AssetCabinet.ToString(shaderPtr.asset) + "\n"));
+				}
+				writer.BaseStream.SetLength(writer.BaseStream.Position);
+			}
+		}
+
+		public static Shader Import(string filePath)
+		{
+			Shader s = new Shader(null, 0, UnityClassID.Shader, UnityClassID.Shader);
+			s.m_Name = Path.GetFileNameWithoutExtension(filePath);
+			using (BinaryReader reader = new BinaryReader(File.OpenRead(filePath), System.Text.Encoding.UTF8))
+			{
+				s.m_Script = new string(reader.ReadChars((int)reader.BaseStream.Length));
+			}
+			s.m_PathName = string.Empty;
+			return s;
+		}
 	}
 }

@@ -128,15 +128,18 @@ namespace SB3Utility
 			}
 
 			List<ImportedBone^>^ boneList = meshListSome->BoneList;
-			for (int i = 0; i < boneList->Count; i++)
+			if (boneList != nullptr)
 			{
-				if (!exportFrames->Contains(boneList[i]->Name))
+				for (int i = 0; i < boneList->Count; i++)
 				{
-					ImportedFrame^ boneParent = ImportedHelpers::FindFrame(boneList[i]->Name, imported->FrameList[0]);
-					while (boneParent != nullptr)
+					if (!exportFrames->Contains(boneList[i]->Name))
 					{
-						exportFrames->Add(boneParent->Name);
-						boneParent = (ImportedFrame^)boneParent->Parent;
+						ImportedFrame^ boneParent = ImportedHelpers::FindFrame(boneList[i]->Name, imported->FrameList[0]);
+						while (boneParent != nullptr)
+						{
+							exportFrames->Add(boneParent->Name);
+							boneParent = (ImportedFrame^)boneParent->Parent;
+						}
 					}
 				}
 			}
@@ -159,10 +162,13 @@ namespace SB3Utility
 		{
 			ImportedMesh^ meshList = imported->MeshList[i];
 			List<ImportedBone^>^ boneList = meshList->BoneList;
-			for (int j = 0; j < boneList->Count; j++)
+			if (boneList != nullptr)
 			{
-				ImportedBone^ bone = boneList[j];
-				boneNames->Add(bone->Name);
+				for (int j = 0; j < boneList->Count; j++)
+				{
+					ImportedBone^ bone = boneList[j];
+					boneNames->Add(bone->Name);
+				}
 			}
 		}
 
@@ -213,7 +219,7 @@ namespace SB3Utility
 		String^ frameName = meshList->Name;
 		List<ImportedBone^>^ boneList = meshList->BoneList;
 		bool hasBones;
-		if (exportSkins)
+		if (exportSkins && boneList != nullptr)
 		{
 			hasBones = boneList->Count > 0;
 		}

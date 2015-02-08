@@ -49,6 +49,7 @@
     <Compile Include="unity3d\AssetBundle.cs" />
     <Compile Include="AssetCabinet.cs" />
     <Compile Include="NotLoaded.cs" />
+    <Compile Include="unity3d\AudioClip.cs" />
     <Compile Include="unity3d\Avatar.cs" />
     <Compile Include="unity3d\Cubemap.cs" />
     <Compile Include="unity3d\EllipsoidParticleEmitter.cs" />
@@ -68,6 +69,7 @@
     <Compile Include="unity3d\Shader.cs" />
     <Compile Include="unity3d\SkinnedMeshRenderer.cs" />
     <Compile Include="unity3d\Sprite.cs" />
+    <Compile Include="unity3d\TextAsset.cs" />
     <Compile Include="unity3d\Texture2D.cs" />
     <Compile Include="unity3d\Transform.cs" />
     <Compile Include="UnityParser.cs" />

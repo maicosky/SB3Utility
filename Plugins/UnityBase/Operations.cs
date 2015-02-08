@@ -127,7 +127,7 @@ namespace UnityPlugin
 				Mesh srcMesh = src.m_Mesh.instance;
 
 				destMesh.m_Name = (string)srcMesh.m_Name.Clone();
-				for (int i = 0; i < srcMesh.m_SubMeshes.Count; i++)
+				for (int i = 0; i < srcMesh.m_SubMeshes.Count && i < destMesh.m_SubMeshes.Count; i++)
 				{
 					destMesh.m_SubMeshes[i].topology = srcMesh.m_SubMeshes[i].topology;
 				}
@@ -193,67 +193,64 @@ namespace UnityPlugin
 		{
 			public List<vVertex> vertexList;
 			public List<vFace> faceList;
+			public List<PPtr<Material>> matList;
 
-			public vSubmesh(Mesh mesh, int submeshIdx, bool faces)
+			public vSubmesh(Mesh mesh, int submeshIdx, bool faces, BinaryReader vertReader, BinaryReader indexReader)
 			{
-				SubMesh s = mesh.m_SubMeshes[submeshIdx];
-				int numVertices = (int)s.vertexCount;
+				SubMesh submesh = mesh.m_SubMeshes[submeshIdx];
+				int numVertices = (int)submesh.vertexCount;
 				List<BoneInfluence> weightList = mesh.m_Skin;
 				vertexList = new List<vVertex>(numVertices);
-				using (BinaryReader reader = new BinaryReader(new MemoryStream(mesh.m_VertexData.m_DataSize)))
+				for (int str = 0; str < mesh.m_VertexData.m_Streams.Count; str++)
 				{
-					for (int str = 0; str < mesh.m_VertexData.m_Streams.Count; str++)
+					StreamInfo sInfo = mesh.m_VertexData.m_Streams[str];
+					if (sInfo.channelMask == 0)
 					{
-						StreamInfo sInfo = mesh.m_VertexData.m_Streams[str];
-						if (sInfo.channelMask == 0)
+						continue;
+					}
+
+					for (int j = 0; j < numVertices; j++)
+					{
+						vVertex vVertex;
+						if (vertexList.Count < numVertices)
 						{
-							continue;
+							vVertex = new vVertex();
+							vertexList.Add(vVertex);
+
+							if (weightList.Count > 0)
+							{
+								vVertex.boneIndices = weightList[(int)submesh.firstVertex + j].boneIndex;
+								vVertex.weights = weightList[(int)submesh.firstVertex + j].weight;
+							}
+						}
+						else
+						{
+							vVertex = vertexList[j];
 						}
 
-						for (int j = 0; j < numVertices; j++)
+						for (int chn = 0; chn < mesh.m_VertexData.m_Channels.Count; chn++)
 						{
-							vVertex vVertex;
-							if (vertexList.Count < numVertices)
+							ChannelInfo cInfo = mesh.m_VertexData.m_Channels[chn];
+							if ((sInfo.channelMask & (1 << chn)) == 0)
 							{
-								vVertex = new vVertex();
-								vertexList.Add(vVertex);
-							}
-							else
-							{
-								vVertex = vertexList[j];
+								continue;
 							}
 
-							for (int chn = 0; chn < mesh.m_VertexData.m_Channels.Count; chn++)
+							vertReader.BaseStream.Position = sInfo.offset + (j + submesh.firstVertex) * sInfo.stride + cInfo.offset;
+							switch (chn)
 							{
-								ChannelInfo cInfo = mesh.m_VertexData.m_Channels[chn];
-								if ((sInfo.channelMask & (1 << chn)) == 0)
-								{
-									continue;
-								}
-
-								reader.BaseStream.Position = /*s.firstByte +*/ sInfo.offset + /*(*/j/*+s.firstVertex)*/ * sInfo.stride + cInfo.offset;
-								switch (chn)
-								{
-								case 0:
-									vVertex.position = new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-									break;
-								case 1:
-									vVertex.normal = new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-									break;
-								case 3:
-									vVertex.uv = new Vector2(reader.ReadSingle(), reader.ReadSingle());
-									break;
-								case 5:
-									vVertex.tangent = new Vector4(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
-									break;
-								}
-							}
-
-							if (vVertex.boneIndices == null && weightList.Count > 0)
-							{
-								//s.firstVertex
-								vVertex.boneIndices = weightList[j].boneIndex;
-								vVertex.weights = weightList[j].weight;
+							case 0:
+								vVertex.position = new Vector3(vertReader.ReadSingle(), vertReader.ReadSingle(), vertReader.ReadSingle());
+								break;
+							case 1:
+								vVertex.normal = new Vector3(vertReader.ReadSingle(), vertReader.ReadSingle(), vertReader.ReadSingle());
+								break;
+							case 3:
+								vVertex.uv = new Vector2(vertReader.ReadSingle(), vertReader.ReadSingle());
+								break;
+							case 5:
+								vVertex.tangent = new Vector4(vertReader.ReadSingle(), vertReader.ReadSingle(), vertReader.ReadSingle(), vertReader.ReadSingle());
+								break;
 							}
 						}
 					}
@@ -261,111 +258,209 @@ namespace UnityPlugin
 
 				if (faces)
 				{
-					int numFaces = (int)(s.indexCount / 3);
+					int numFaces = (int)(submesh.indexCount / 3);
 					faceList = new List<vFace>(numFaces);
-					int start = 0;
-					for (int i = 0; i < submeshIdx; i++)
+					indexReader.BaseStream.Position = submesh.firstByte;
+					for (int i = 0; i < numFaces; i++)
 					{
-						start += (int)mesh.m_SubMeshes[i].indexCount;
-					}
-					start *= sizeof(ushort);
-					using (BinaryReader reader = new BinaryReader(new MemoryStream(mesh.m_IndexBuffer, start, (int)s.indexCount * sizeof(ushort))))
-					{
-						for (int i = 0; i < numFaces; i++)
-						{
-							vFace face = new vFace();
-							face.index = reader.ReadUInt16Array(3);
-							faceList.Add(face);
-						}
+						vFace face = new vFace();
+						face.index = new ushort[3] { (ushort)(indexReader.ReadUInt16() - submesh.firstVertex), (ushort)(indexReader.ReadUInt16() - submesh.firstVertex), (ushort)(indexReader.ReadUInt16() - submesh.firstVertex) };
+						faceList.Add(face);
 					}
 				}
+				matList = new List<PPtr<Material>>(1);
 			}
 		}
 
 		public class vMesh
 		{
 			public List<vSubmesh> submeshes;
-			protected Mesh mesh;
+			protected MeshRenderer meshR;
+			protected bool faces;
 
-			public vMesh(Mesh mesh, bool faces)
+			public vMesh(MeshRenderer meshR, bool faces)
 			{
-				this.mesh = mesh;
+				this.meshR = meshR;
+				this.faces = faces;
 
-				submeshes = new List<vSubmesh>(mesh.m_SubMeshes.Count);
-				for (int i = 0; i < mesh.m_SubMeshes.Count; i++)
+				Mesh mesh;
+				if (meshR is SkinnedMeshRenderer)
 				{
-					submeshes.Add(new vSubmesh(mesh, i, faces));
+					SkinnedMeshRenderer smr = (SkinnedMeshRenderer)meshR;
+					mesh = smr.m_Mesh.instance;
+				}
+				else
+				{
+					MeshFilter filter = meshR.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshFilter);
+					mesh = filter.m_Mesh.instance;
+				}
+				submeshes = new List<vSubmesh>(mesh.m_SubMeshes.Count);
+				using (BinaryReader vertReader = new BinaryReader(new MemoryStream(mesh.m_VertexData.m_DataSize)),
+					indexReader = new BinaryReader(new MemoryStream(mesh.m_IndexBuffer)))
+				{
+					for (int i = 0; i < mesh.m_SubMeshes.Count; i++)
+					{
+						vSubmesh submesh = new vSubmesh(mesh, i, faces, vertReader, indexReader);
+						if (i < meshR.m_Materials.Count)
+						{
+							submesh.matList.Add(meshR.m_Materials[i]);
+							if (i == 0 && mesh.m_SubMeshes.Count < meshR.m_Materials.Count)
+							{
+								submesh.matList.AddRange(meshR.m_Materials.GetRange(mesh.m_SubMeshes.Count, meshR.m_Materials.Count - mesh.m_SubMeshes.Count));
+							}
+						}
+						submeshes.Add(submesh);
+					}
 				}
 			}
 
-			public void Flush(bool faces)
+			public void Flush()
 			{
-				List<vVertex> vertexList = submeshes[0].vertexList;
-				if (vertexList[0].weights != null)
+				Mesh mesh;
+				if (meshR is SkinnedMeshRenderer)
 				{
-					mesh.m_Skin.Capacity = vertexList.Count;
+					SkinnedMeshRenderer smr = (SkinnedMeshRenderer)meshR;
+					mesh = smr.m_Mesh.instance;
 				}
-				using (BinaryWriter writer = new BinaryWriter(new MemoryStream(mesh.m_VertexData.m_DataSize)))
+				else
 				{
-					for (int str = 0; str < mesh.m_VertexData.m_Streams.Count; str++)
+					MeshFilter filter = meshR.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshFilter);
+					mesh = filter.m_Mesh.instance;
+				}
+
+				meshR.m_Materials.Clear();
+				int totVerts = 0, totFaces = 0;
+				for (int i = 0; i < submeshes.Count; i++)
+				{
+					vSubmesh submesh = submeshes[i];
+					meshR.m_Materials.Insert(i, submesh.matList[0]);
+					if (i == 0 && submesh.matList.Count > 1)
 					{
-						StreamInfo sInfo = mesh.m_VertexData.m_Streams[str];
-						if (sInfo.channelMask == 0)
+						meshR.m_Materials.AddRange(submesh.matList.GetRange(1, submesh.matList.Count - 1));
+					}
+
+					totVerts += submesh.vertexList.Count;
+					totFaces += submesh.faceList.Count;
+				}
+				if (mesh.m_VertexData.m_VertexCount != totVerts)
+				{
+					mesh.m_VertexData = new VertexData((uint)totVerts);
+					if (mesh.m_Skin.Count > totVerts)
+					{
+						mesh.m_Skin.RemoveRange(0, mesh.m_Skin.Count - totVerts);
+					}
+					else
+					{
+						mesh.m_Skin.Capacity = totVerts;
+					}
+				}
+				if (mesh.m_IndexBuffer.Length != totFaces * 3 * sizeof(ushort))
+				{
+					mesh.m_IndexBuffer = new byte[totFaces * 3 * sizeof(ushort)];
+				}
+				using (BinaryWriter vertWriter = new BinaryWriter(new MemoryStream(mesh.m_VertexData.m_DataSize)),
+					indexWriter = new BinaryWriter(new MemoryStream(mesh.m_IndexBuffer)))
+				{
+					int vertIndex = 0;
+					for (int i = 0; i < submeshes.Count; i++)
+					{
+						SubMesh submesh;
+						if (i < mesh.m_SubMeshes.Count)
 						{
-							continue;
+							submesh = mesh.m_SubMeshes[i];
 						}
-
-						for (int j = 0; j < mesh.m_VertexData.m_VertexCount; j++)
+						else
 						{
-							vVertex vert = vertexList[j];
-							for (int chn = 0; chn < mesh.m_VertexData.m_Channels.Count; chn++)
-							{
-								ChannelInfo cInfo = mesh.m_VertexData.m_Channels[chn];
-								if ((sInfo.channelMask & (1 << chn)) == 0)
-								{
-									continue;
-								}
+							submesh = new SubMesh();
+							mesh.m_SubMeshes.Add(submesh);
+						}
+						submesh.indexCount = (uint)submeshes[i].faceList.Count * 3;
+						submesh.vertexCount = (uint)submeshes[i].vertexList.Count;
+						submesh.firstVertex = (uint)vertIndex;
 
-								writer.BaseStream.Position = sInfo.offset + j * sInfo.stride + cInfo.offset;
-								switch (chn)
-								{
-								case 0:
-									writer.Write(vert.position);
-									break;
-								case 1:
-									writer.Write(vert.normal);
-									break;
-								case 3:
-									writer.Write(vert.uv);
-									break;
-								case 5:
-									writer.Write(vert.tangent);
-									break;
-								}
+						List<vVertex> vertexList = submeshes[i].vertexList;
+						Vector3 min = new Vector3(Single.MaxValue, Single.MaxValue, Single.MaxValue);
+						Vector3 max = new Vector3(Single.MinValue, Single.MinValue, Single.MinValue);
+						for (int str = 0; str < mesh.m_VertexData.m_Streams.Count; str++)
+						{
+							StreamInfo sInfo = mesh.m_VertexData.m_Streams[str];
+							if (sInfo.channelMask == 0)
+							{
+								continue;
 							}
 
-							if (str == 0 && vert.weights != null)
+							for (int j = 0; j < vertexList.Count; j++)
 							{
-								BoneInfluence item;
-								if (mesh.m_Skin.Count <= j)
+								vVertex vert = vertexList[j];
+								for (int chn = 0; chn < mesh.m_VertexData.m_Channels.Count; chn++)
 								{
-									item = new BoneInfluence();
+									ChannelInfo cInfo = mesh.m_VertexData.m_Channels[chn];
+									if ((sInfo.channelMask & (1 << chn)) == 0)
+									{
+										continue;
+									}
+
+									vertWriter.BaseStream.Position = sInfo.offset + (j + submesh.firstVertex) * sInfo.stride + cInfo.offset;
+									switch (chn)
+									{
+									case 0:
+										vertWriter.Write(vert.position);
+										min = Vector3.Minimize(min, vert.position);
+										max = Vector3.Maximize(max, vert.position);
+										break;
+									case 1:
+										vertWriter.Write(vert.normal);
+										break;
+									case 3:
+										vertWriter.Write(vert.uv);
+										break;
+									case 5:
+										vertWriter.Write(vert.tangent);
+										break;
+									}
+								}
+
+								if (mesh.m_Skin.Count <= j + submesh.firstVertex)
+								{
+									BoneInfluence item = new BoneInfluence();
 									mesh.m_Skin.Add(item);
+									if (vert.boneIndices != null)
+									{
+										vert.boneIndices.CopyTo(item.boneIndex, 0);
+										vert.weights.CopyTo(item.weight, 0);
+									}
+									else
+									{
+										item.boneIndex[0] = item.boneIndex[1] = item.boneIndex[2] = item.boneIndex[3] = -1;
+									}
 								}
-								else
-								{
-									item = mesh.m_Skin[j];
-								}
-								vert.boneIndices.CopyTo(item.boneIndex, 0);
-								vert.weights.CopyTo(item.weight, 0);
+							}
+						}
+						vertIndex += (int)submesh.vertexCount;
+
+						submesh.localAABB.m_Extend = (max - min) / 2;
+						submesh.localAABB.m_Center = min + submesh.localAABB.m_Extend;
+						mesh.m_LocalAABB.m_Extend = Vector3.Maximize(mesh.m_LocalAABB.m_Extend, submesh.localAABB.m_Extend);
+						mesh.m_LocalAABB.m_Center += submesh.localAABB.m_Center;
+
+						if (faces)
+						{
+							List<vFace> faceList = submeshes[i].faceList;
+							submesh.firstByte = (uint)indexWriter.BaseStream.Position;
+							for (int j = 0; j < faceList.Count; j++)
+							{
+								ushort[] vertexIndices = faceList[j].index;
+								indexWriter.Write((ushort)(vertexIndices[0] + submesh.firstVertex));
+								indexWriter.Write((ushort)(vertexIndices[1] + submesh.firstVertex));
+								indexWriter.Write((ushort)(vertexIndices[2] + submesh.firstVertex));
 							}
 						}
 					}
-				}
-
-				if (faces)
-				{
-					throw new NotImplementedException();
+					mesh.m_LocalAABB.m_Center /= submeshes.Count;
+					while (mesh.m_SubMeshes.Count > submeshes.Count)
+					{
+						mesh.m_SubMeshes.RemoveAt(mesh.m_SubMeshes.Count - 1);
+					}
 				}
 			}
 		}

@@ -263,7 +263,7 @@ namespace UnityPlugin
 		public uint m_VertexCount { get; set; }
 		public List<ChannelInfo> m_Channels { get; set; }
 		public List<StreamInfo> m_Streams { get; set; }
-		public byte[/*m_VertexCount * 48*/] m_DataSize { get; set; }
+		public byte[] m_DataSize { get; set; }
 
 		public VertexData(Stream stream)
 		{
@@ -290,12 +290,13 @@ namespace UnityPlugin
 			(
 				new StreamInfo[]
 				{
-					new StreamInfo(35, 0, 40, 0, 0),
-					new StreamInfo(8, vertexCount * 40, 8, 0, 0),
+					new StreamInfo(0x23, 0, 40, 0, 0),
+					new StreamInfo(8, vertexCount * 40 + ((vertexCount & 1) != 0 ? (uint)8 : 0), 8, 0, 0),
 					new StreamInfo(0, 0, 0, 0, 0),
 					new StreamInfo(0, 0, 0, 0, 0)
 				}
 			);
+			m_DataSize = new byte[vertexCount * 48 + ((vertexCount & 1) != 0 ? (uint)8 : 0)];
 		}
 
 		public void LoadFrom(Stream stream)
@@ -638,15 +639,10 @@ namespace UnityPlugin
 		{
 			file.ReplaceSubfile(-1, this, null);
 
-			m_SubMeshes = new List<SubMesh>(1);
 			m_Shapes = new BlendShapeData();
-			m_BindPose = new List<Matrix>();
-			m_BoneNameHashes = new List<uint>();
 			m_IsReadable = true;
 			m_KeepVertices = true;
 			m_KeepIndices = true;
-			m_Skin = new List<BoneInfluence>();
-			m_VertexData = new VertexData(0);
 			m_CompressedMesh = new CompressedMesh();
 			m_LocalAABB = new AABB();
 			m_MeshUsageFlags = 1;

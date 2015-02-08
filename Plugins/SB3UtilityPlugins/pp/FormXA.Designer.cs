@@ -179,6 +179,7 @@
 			this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.keepBackupToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+			this.buttonAnimationTrackCopy = new System.Windows.Forms.Button();
 			this.tabControlXA.SuspendLayout();
 			this.tabPageXAObjectView.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer7)).BeginInit();
@@ -1130,14 +1131,15 @@
 			// 
 			// splitContainerAnimation.Panel1
 			// 
-			this.splitContainerAnimation.Panel1.Controls.Add(this.label21);
-			this.splitContainerAnimation.Panel1.Controls.Add(this.comboBoxAnimationEditedTracks);
-			this.splitContainerAnimation.Panel1.Controls.Add(this.groupBox2);
+			this.splitContainerAnimation.Panel1.Controls.Add(this.buttonAnimationTrackCopy);
 			this.splitContainerAnimation.Panel1.Controls.Add(this.buttonAnimationTrackCompare);
 			this.splitContainerAnimation.Panel1.Controls.Add(this.listViewAnimationTrack);
 			this.splitContainerAnimation.Panel1.Controls.Add(this.groupBox1);
 			this.splitContainerAnimation.Panel1.Controls.Add(this.label1);
 			this.splitContainerAnimation.Panel1.Controls.Add(this.buttonAnimationTrackRemove);
+			this.splitContainerAnimation.Panel1.Controls.Add(this.groupBox2);
+			this.splitContainerAnimation.Panel1.Controls.Add(this.comboBoxAnimationEditedTracks);
+			this.splitContainerAnimation.Panel1.Controls.Add(this.label21);
 			// 
 			// splitContainerAnimation.Panel2
 			// 
@@ -1236,11 +1238,11 @@
 			// buttonAnimationTrackCompare
 			// 
 			this.buttonAnimationTrackCompare.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.buttonAnimationTrackCompare.Location = new System.Drawing.Point(385, 52);
+			this.buttonAnimationTrackCompare.Location = new System.Drawing.Point(360, 52);
 			this.buttonAnimationTrackCompare.Name = "buttonAnimationTrackCompare";
-			this.buttonAnimationTrackCompare.Size = new System.Drawing.Size(100, 23);
+			this.buttonAnimationTrackCompare.Size = new System.Drawing.Size(70, 23);
 			this.buttonAnimationTrackCompare.TabIndex = 14;
-			this.buttonAnimationTrackCompare.Text = "Compare Tracks";
+			this.buttonAnimationTrackCompare.Text = "Compare";
 			this.buttonAnimationTrackCompare.UseVisualStyleBackColor = true;
 			this.buttonAnimationTrackCompare.Click += new System.EventHandler(this.buttonAnimationTrackCompare_Click);
 			// 
@@ -1600,11 +1602,11 @@
 			// buttonAnimationTrackRemove
 			// 
 			this.buttonAnimationTrackRemove.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.buttonAnimationTrackRemove.Location = new System.Drawing.Point(385, 21);
+			this.buttonAnimationTrackRemove.Location = new System.Drawing.Point(360, 21);
 			this.buttonAnimationTrackRemove.Name = "buttonAnimationTrackRemove";
-			this.buttonAnimationTrackRemove.Size = new System.Drawing.Size(100, 23);
+			this.buttonAnimationTrackRemove.Size = new System.Drawing.Size(70, 23);
 			this.buttonAnimationTrackRemove.TabIndex = 12;
-			this.buttonAnimationTrackRemove.Text = "Remove Tracks";
+			this.buttonAnimationTrackRemove.Text = "Remove";
 			this.buttonAnimationTrackRemove.UseVisualStyleBackColor = true;
 			this.buttonAnimationTrackRemove.Click += new System.EventHandler(this.buttonAnimationTrackRemove_Click);
 			// 
@@ -1851,6 +1853,17 @@
 			// 
 			this.saveFileDialog1.Filter = ".xa Files (*.xa)|*.xa|All Files (*.*)|*.*";
 			// 
+			// buttonAnimationTrackCopy
+			// 
+			this.buttonAnimationTrackCopy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.buttonAnimationTrackCopy.Location = new System.Drawing.Point(440, 21);
+			this.buttonAnimationTrackCopy.Name = "buttonAnimationTrackCopy";
+			this.buttonAnimationTrackCopy.Size = new System.Drawing.Size(70, 23);
+			this.buttonAnimationTrackCopy.TabIndex = 182;
+			this.buttonAnimationTrackCopy.Text = "Copy";
+			this.buttonAnimationTrackCopy.UseVisualStyleBackColor = true;
+			this.buttonAnimationTrackCopy.Click += new System.EventHandler(this.buttonAnimationTrackCopy_Click);
+			// 
 			// FormXA
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -2064,5 +2077,6 @@
 		private System.Windows.Forms.Label label21;
 		public System.Windows.Forms.ComboBox comboBoxAnimationEditedTracks;
 		private System.Windows.Forms.Button buttonAnimationKeyframeRotQFlip;
+		private System.Windows.Forms.Button buttonAnimationTrackCopy;
 	}
 }

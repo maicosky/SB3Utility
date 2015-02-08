@@ -2313,6 +2313,30 @@ namespace SB3Utility
 			}
 		}
 
+		private void buttonAnimationTrackCopy_Click(object sender, EventArgs e)
+		{
+			if (listViewAnimationTrack.SelectedItems.Count <= 0)
+			{
+				return;
+			}
+
+			try
+			{
+				foreach (ListViewItem item in listViewAnimationTrack.SelectedItems)
+				{
+					Gui.Scripting.RunScript(EditorVar + ".CopyTrack(track=\"" + ((xaAnimationTrack)item.Tag).Name + "\")");
+				}
+				Changed = Changed;
+
+				UnloadXA();
+				LoadXA();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
 		private void buttonAnimationTrackCompare_Click(object sender, EventArgs e)
 		{
 			if (listViewAnimationTrack.SelectedItems.Count < 2)

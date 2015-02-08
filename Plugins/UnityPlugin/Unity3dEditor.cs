@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Reflection;
 
 using SB3Utility;
 
@@ -21,7 +20,12 @@ namespace UnityPlugin
 
 			if (showContents)
 			{
-				GetAssetNames(false);
+				string[] names = GetAssetNames(false);
+				for (int i = 0; i < names.Length; i++)
+				{
+					Component asset = Parser.Cabinet.Components[i];
+					Console.WriteLine("PathID=" + asset.pathID.ToString("D") + " id1=" + (int)asset.classID1 + "/" + asset.classID1 + " id2=" + asset.classID2 + " " + names[i]);
+				}
 			}
 		}
 
@@ -37,7 +41,7 @@ namespace UnityPlugin
 					if (comp == null)
 					{
 						Component subfile = Parser.Cabinet.Components[i];
-						assetNames[i] = ToString(subfile);
+						assetNames[i] = AssetCabinet.ToString(subfile);
 						continue;
 					}
 					if (comp.Name == null)
@@ -53,11 +57,13 @@ namespace UnityPlugin
 								comp.Name = reader.ReadNameA4();
 							}
 							break;
+						case UnityClassID.AudioClip:
 						case UnityClassID.AnimationClip:
 						case UnityClassID.Cubemap:
 						case UnityClassID.Material:
 						case UnityClassID.MonoScript:
 						case UnityClassID.Shader:
+						case UnityClassID.TextAsset:
 						case UnityClassID.Texture2D:
 							comp.Name = reader.ReadNameA4();
 							break;
@@ -106,38 +112,6 @@ namespace UnityPlugin
 
 		public Unity3dEditor(UnityParser parser) : this(parser, false) { }
 		public Unity3dEditor(string path) : this(new UnityParser(path), true) { }
-
-		public static string ToString(Component subfile)
-		{
-			Type t = subfile.GetType();
-			PropertyInfo info = t.GetProperty("m_Name");
-			if (info != null)
-			{
-				return info.GetValue(subfile, null).ToString();
-			}
-			else
-			{
-				info = t.GetProperty("m_GameObject");
-				if (info != null)
-				{
-					PPtr<GameObject> gameObjPtr = info.GetValue(subfile, null) as PPtr<GameObject>;
-					if (gameObjPtr != null)
-					{
-						return gameObjPtr.instance.m_Name;
-					}
-					else
-					{
-						GameObject gameObj = info.GetValue(subfile, null) as GameObject;
-						if (gameObj != null)
-						{
-							return gameObj.m_Name;
-						}
-						throw new Exception("What reference is this!? " + subfile.pathID + " " + subfile.classID1);
-					}
-				}
-				throw new Exception("Neither m_Name nor m_GameObject member " + subfile.pathID + " " + subfile.classID1);
-			}
-		}
 
 		public bool Changed
 		{

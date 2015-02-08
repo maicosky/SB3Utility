@@ -72,13 +72,15 @@ namespace UnityPlugin
 			return uBoneList;
 		}
 
-		public static SkinnedMeshRenderer CreateSkinnedMeshRenderer(Animator parser, AssetBundle bundle, List<Material> materials, WorkspaceMesh mesh, out int[] indices, out bool[] worldCoords, out bool[] replaceSubmeshesOption)
+		public static SkinnedMeshRenderer CreateSkinnedMeshRenderer(Animator parser, List<Material> materials, WorkspaceMesh mesh, out int[] indices, out bool[] worldCoords, out bool[] replaceSubmeshesOption)
 		{
 			int numUncheckedSubmeshes = 0;
 			foreach (ImportedSubmesh submesh in mesh.SubmeshList)
 			{
 				if (!mesh.isSubmeshEnabled(submesh))
+				{
 					numUncheckedSubmeshes++;
+				}
 			}
 			int numSubmeshes = mesh.SubmeshList.Count - numUncheckedSubmeshes;
 			indices = new int[numSubmeshes];
@@ -87,9 +89,15 @@ namespace UnityPlugin
 
 			SkinnedMeshRenderer sMesh = new SkinnedMeshRenderer(parser.file);
 
-			sMesh.m_Materials.Capacity = mesh.SubmeshList.Count;
+			int totVerts = 0, totFaces = 0;
+			sMesh.m_Materials.Capacity = numSubmeshes;
 			foreach (ImportedSubmesh submesh in mesh.SubmeshList)
 			{
+				if (!mesh.isSubmeshEnabled(submesh))
+				{
+					continue;
+				}
+
 				Material matFound = materials.Find
 				(
 					delegate(Material mat)
@@ -98,61 +106,18 @@ namespace UnityPlugin
 					}
 				);
 				sMesh.m_Materials.Add(new PPtr<Material>(matFound));
+
+				totVerts += submesh.VertexList.Count;
+				totFaces += submesh.FaceList.Count;
 			}
 			Mesh uMesh = new Mesh(parser.file);
-			sMesh.m_Mesh = new PPtr<Mesh>(uMesh);
-
-			bool meshesFound = false;
-			for (int i = 0; i < bundle.m_PreloadTable.Count; i++)
-			{
-				PPtr<Object> objPtr = bundle.m_PreloadTable[i];
-				if (objPtr.asset != null)
-				{
-					if (objPtr.asset.classID1 == UnityClassID.Mesh)
-					{
-						meshesFound = true;
-					}
-					else if (meshesFound)
-					{
-						bundle.m_PreloadTable.Insert(i, new PPtr<Object>(uMesh));
-						break;
-					}
-				}
-			}
-			bool animatorFound = false, skinnedFound = false;
-			for (int i = 0; i < bundle.m_PreloadTable.Count; i++)
-			{
-				PPtr<Object> objPtr = bundle.m_PreloadTable[i];
-				if (objPtr.asset != null)
-				{
-					if (bundle.m_PreloadTable[i].asset == parser)
-					{
-						animatorFound = true;
-					}
-					else if (animatorFound && objPtr.asset.classID1 == UnityClassID.SkinnedMeshRenderer)
-					{
-						skinnedFound = true;
-					}
-					else if (skinnedFound && objPtr.asset.classID1 != UnityClassID.SkinnedMeshRenderer)
-					{
-						bundle.m_PreloadTable.Insert(i, new PPtr<Object>(sMesh));
-						break;
-					}
-				}
-			}
-			/*AssetInfo aInfo = new AssetInfo(parser.file);
-			aInfo.preloadIndex = 1;
-			aInfo.preloadSize = 1182;
-			aInfo.asset = new PPtr<Object>(uMesh);
-			bundle.m_Container.Add(new KeyValuePair<string, AssetInfo>(parser.m_GameObject.instance.m_Name, aInfo));*/
-
 			uMesh.m_Name = mesh.Name;
-			uMesh.m_SubMeshes.Capacity = mesh.SubmeshList.Count;
+			sMesh.m_Mesh = new PPtr<Mesh>(uMesh);
 
 			List<Matrix> poseMatrices = new List<Matrix>(mesh.BoneList.Count);
 			sMesh.m_Bones = CreateBoneList(parser.RootTransform, mesh.BoneList, poseMatrices);
-			uMesh.m_BindPose.InsertRange(0, poseMatrices);
-			uMesh.m_BoneNameHashes.Capacity = poseMatrices.Count;
+			uMesh.m_BindPose = poseMatrices;
+			uMesh.m_BoneNameHashes = new List<uint>(poseMatrices.Count);
 			for (int i = 0; i < mesh.BoneList.Count; i++)
 			{
 				string bone = mesh.BoneList[i].Name;
@@ -160,35 +125,34 @@ namespace UnityPlugin
 				uMesh.m_BoneNameHashes.Add(hash);
 			}
 
-			for (int i = 0, submeshIdx = 0; i < numSubmeshes; i++, submeshIdx++)
+			uMesh.m_VertexData = new VertexData((uint)totVerts);
+			uMesh.m_Skin = new List<BoneInfluence>(totVerts);
+			uMesh.m_IndexBuffer = new byte[totFaces * 3 * sizeof(ushort)];
+			using (BinaryWriter vertWriter = new BinaryWriter(new MemoryStream(uMesh.m_VertexData.m_DataSize)),
+					indexWriter = new BinaryWriter(new MemoryStream(uMesh.m_IndexBuffer)))
 			{
-				while (!mesh.isSubmeshEnabled(mesh.SubmeshList[submeshIdx]))
+				uMesh.m_SubMeshes = new List<SubMesh>(numSubmeshes);
+				int vertIndex = 0;
+				for (int i = 0, submeshIdx = 0; i < numSubmeshes; i++, submeshIdx++)
 				{
-					submeshIdx++;
-				}
+					while (!mesh.isSubmeshEnabled(mesh.SubmeshList[submeshIdx]))
+					{
+						submeshIdx++;
+					}
 
-				if (uMesh.m_SubMeshes.Count == 1)
-				{
-					throw new Exception("Only one submesh is supported now.");
-				}
-				SubMesh submesh = new SubMesh();
-				submesh.indexCount = (uint)mesh.SubmeshList[submeshIdx].FaceList.Count * 3;
-				submesh.vertexCount = (uint)mesh.SubmeshList[submeshIdx].VertexList.Count;
-				uMesh.m_SubMeshes.Add(submesh);
-				uMesh.m_Skin.Capacity = (int)submesh.vertexCount;
-				uMesh.m_VertexData.m_VertexCount = submesh.vertexCount;
-				uMesh.m_VertexData.m_Streams[1].offset = submesh.vertexCount * 40;
-				uMesh.m_VertexData.m_DataSize = new byte[submesh.vertexCount * 48];
+					SubMesh submesh = new SubMesh();
+					submesh.indexCount = (uint)mesh.SubmeshList[submeshIdx].FaceList.Count * 3;
+					submesh.vertexCount = (uint)mesh.SubmeshList[submeshIdx].VertexList.Count;
+					submesh.firstVertex = (uint)vertIndex;
+					uMesh.m_SubMeshes.Add(submesh);
 
-				indices[i] = mesh.SubmeshList[submeshIdx].Index;
-				worldCoords[i] = mesh.SubmeshList[submeshIdx].WorldCoords;
-				replaceSubmeshesOption[i] = mesh.isSubmeshReplacingOriginal(mesh.SubmeshList[submeshIdx]);
+					indices[i] = mesh.SubmeshList[submeshIdx].Index;
+					worldCoords[i] = mesh.SubmeshList[submeshIdx].WorldCoords;
+					replaceSubmeshesOption[i] = mesh.isSubmeshReplacingOriginal(mesh.SubmeshList[submeshIdx]);
 
-				List<ImportedVertex> vertexList = mesh.SubmeshList[submeshIdx].VertexList;
-				Vector3 min = new Vector3(Single.MaxValue, Single.MaxValue, Single.MaxValue);
-				Vector3 max = new Vector3(Single.MinValue, Single.MinValue, Single.MinValue);
-				using (BinaryWriter writer = new BinaryWriter(new MemoryStream(uMesh.m_VertexData.m_DataSize)))
-				{
+					List<ImportedVertex> vertexList = mesh.SubmeshList[submeshIdx].VertexList;
+					Vector3 min = new Vector3(Single.MaxValue, Single.MaxValue, Single.MaxValue);
+					Vector3 max = new Vector3(Single.MinValue, Single.MinValue, Single.MinValue);
 					for (int str = 0; str < uMesh.m_VertexData.m_Streams.Count; str++)
 					{
 						StreamInfo sInfo = uMesh.m_VertexData.m_Streams[str];
@@ -197,7 +161,7 @@ namespace UnityPlugin
 							continue;
 						}
 
-						for (int j = 0; j < uMesh.m_VertexData.m_VertexCount; j++)
+						for (int j = 0; j < vertexList.Count; j++)
 						{
 							ImportedVertex vert = vertexList[j];
 							for (int chn = 0; chn < uMesh.m_VertexData.m_Channels.Count; chn++)
@@ -208,27 +172,27 @@ namespace UnityPlugin
 									continue;
 								}
 
-								writer.BaseStream.Position = sInfo.offset + j * sInfo.stride + cInfo.offset;
+								vertWriter.BaseStream.Position = sInfo.offset + (j + submesh.firstVertex) * sInfo.stride + cInfo.offset;
 								switch (chn)
 								{
 								case 0:
-									writer.Write(vert.Position);
+									vertWriter.Write(vert.Position);
 									min = Vector3.Minimize(min, vert.Position);
 									max = Vector3.Maximize(max, vert.Position);
 									break;
 								case 1:
-									writer.Write(vert.Normal);
+									vertWriter.Write(vert.Normal);
 									break;
 								case 3:
-									writer.Write(vert.UV);
+									vertWriter.Write(vert.UV);
 									break;
 								case 5:
-									writer.Write(vert.Tangent);
+									vertWriter.Write(vert.Tangent);
 									break;
 								}
 							}
 
-							if (sMesh.m_Bones.Count > 0 && uMesh.m_Skin.Count < uMesh.m_VertexData.m_VertexCount)
+							if (sMesh.m_Bones.Count > 0 && uMesh.m_Skin.Count < totVerts)
 							{
 								BoneInfluence item = new BoneInfluence();
 								for (int k = 0; k < 4; k++)
@@ -240,30 +204,30 @@ namespace UnityPlugin
 							}
 						}
 					}
-				}
-				uMesh.m_SubMeshes[0].localAABB.m_Extend = (max - min) / 2;
-				uMesh.m_SubMeshes[0].localAABB.m_Center = min + uMesh.m_SubMeshes[0].localAABB.m_Extend;
-				uMesh.m_LocalAABB.m_Extend = uMesh.m_SubMeshes[0].localAABB.m_Extend;
-				uMesh.m_LocalAABB.m_Center = uMesh.m_SubMeshes[0].localAABB.m_Center;
+					vertIndex += (int)submesh.vertexCount;
 
-				List<ImportedFace> faceList = mesh.SubmeshList[submeshIdx].FaceList;
-				uMesh.m_IndexBuffer = new byte[faceList.Count * sizeof(ushort) * 3];
-				using (BinaryWriter writer = new BinaryWriter(new MemoryStream(uMesh.m_IndexBuffer)))
-				{
+					submesh.localAABB.m_Extend = (max - min) / 2;
+					submesh.localAABB.m_Center = min + submesh.localAABB.m_Extend;
+					uMesh.m_LocalAABB.m_Extend = Vector3.Maximize(uMesh.m_LocalAABB.m_Extend, submesh.localAABB.m_Extend);
+					uMesh.m_LocalAABB.m_Center += submesh.localAABB.m_Center;
+
+					List<ImportedFace> faceList = mesh.SubmeshList[submeshIdx].FaceList;
+					submesh.firstByte = (uint)indexWriter.BaseStream.Position;
 					for (int j = 0; j < faceList.Count; j++)
 					{
 						int[] vertexIndices = faceList[j].VertexIndices;
-						writer.Write((ushort)vertexIndices[0]);
-						writer.Write((ushort)vertexIndices[1]);
-						writer.Write((ushort)vertexIndices[2]);
+						indexWriter.Write((ushort)(vertexIndices[0] + submesh.firstVertex));
+						indexWriter.Write((ushort)(vertexIndices[1] + submesh.firstVertex));
+						indexWriter.Write((ushort)(vertexIndices[2] + submesh.firstVertex));
 					}
 				}
+				uMesh.m_LocalAABB.m_Center /= numSubmeshes;
 			}
 
 			return sMesh;
 		}
 
-		public static void ReplaceSkinnedMeshRenderer(Transform frame, Transform rootBone, Animator parser, AssetBundle bundle, List<Material> materials, WorkspaceMesh mesh, bool merge, CopyMeshMethod normalsMethod, CopyMeshMethod bonesMethod)
+		public static void ReplaceSkinnedMeshRenderer(Transform frame, Transform rootBone, Animator parser, AssetBundle bundle, List<Material> materials, WorkspaceMesh mesh, bool merge, CopyMeshMethod normalsMethod, CopyMeshMethod bonesMethod, bool targetFullMesh)
 		{
 			Matrix transform = Transform.WorldTransform(frame);
 			transform.Invert();
@@ -271,11 +235,12 @@ namespace UnityPlugin
 			int[] indices;
 			bool[] worldCoords;
 			bool[] replaceSubmeshesOption;
-			SkinnedMeshRenderer sMesh = CreateSkinnedMeshRenderer(parser, bundle, materials, mesh, out indices, out worldCoords, out replaceSubmeshesOption);
-			vMesh destMesh = new Operations.vMesh(sMesh.m_Mesh.instance, false);
+			SkinnedMeshRenderer sMesh = CreateSkinnedMeshRenderer(parser, materials, mesh, out indices, out worldCoords, out replaceSubmeshesOption);
+			vMesh destMesh = new Operations.vMesh(sMesh, true);
 
 			SkinnedMeshRenderer frameMesh = frame.m_GameObject.instance.FindLinkedComponent(UnityClassID.SkinnedMeshRenderer);
 			vMesh srcMesh = null;
+			List<vVertex> allVertices = null;
 			if (frameMesh == null || frameMesh.m_Mesh.instance == null)
 			{
 				sMesh.m_RootBone = new PPtr<Transform>(rootBone);
@@ -286,15 +251,6 @@ namespace UnityPlugin
 				if (frameMesh != null)
 				{
 					CopyUnknowns(frameMesh, sMesh);
-					if ((bonesMethod == CopyMeshMethod.CopyOrder) || (bonesMethod == CopyMeshMethod.CopyNear))
-					{
-						sMesh.m_Bones.Clear();
-						sMesh.m_Bones.Capacity = frameMesh.m_Bones.Count;
-						for (int i = 0; i < frameMesh.m_Bones.Count; i++)
-						{
-							sMesh.m_Bones.Add(new PPtr<Transform>(frameMesh.m_Bones[i].instance));
-						}
-					}
 				}
 			}
 			else
@@ -302,22 +258,25 @@ namespace UnityPlugin
 				sMesh.m_RootBone = new PPtr<Transform>(frameMesh.m_RootBone.instance);
 				sMesh.m_Mesh.instance.m_RootBoneNameHash = frameMesh.m_Mesh.instance.m_RootBoneNameHash;
 
-				srcMesh = new Operations.vMesh(frameMesh.m_Mesh.instance, false);
+				srcMesh = new Operations.vMesh(frameMesh, true);
 				CopyUnknowns(frameMesh, sMesh);
 
-				if ((bonesMethod == CopyMeshMethod.CopyOrder) || (bonesMethod == CopyMeshMethod.CopyNear))
+				if (targetFullMesh && (normalsMethod == CopyMeshMethod.CopyNear || bonesMethod == CopyMeshMethod.CopyNear))
 				{
-					sMesh.m_Bones.Clear();
-					sMesh.m_Bones.Capacity = frameMesh.m_Bones.Count;
-					for (int i = 0; i < frameMesh.m_Bones.Count; i++)
+					allVertices = new List<vVertex>();
+					HashSet<Vector3> posSet = new HashSet<Vector3>();
+					foreach (vSubmesh submesh in srcMesh.submeshes)
 					{
-						sMesh.m_Bones.Add(new PPtr<Transform>(frameMesh.m_Bones[i].instance));
+						allVertices.Capacity = allVertices.Count + submesh.vertexList.Count;
+						foreach (vVertex vertex in submesh.vertexList)
+						{
+							if (!posSet.Contains(vertex.position))
+							{
+								posSet.Add(vertex.position);
+								allVertices.Add(vertex);
+							}
+						}
 					}
-					sMesh.m_Mesh.instance.m_BoneNameHashes.Clear();
-					sMesh.m_Mesh.instance.m_BoneNameHashes.AddRange(frameMesh.m_Mesh.instance.m_BoneNameHashes);
-
-					sMesh.m_Mesh.instance.m_BindPose.Clear();
-					sMesh.m_Mesh.instance.m_BindPose.AddRange(frameMesh.m_Mesh.instance.m_BindPose);
 				}
 			}
 			if (sMesh.m_RootBone.instance != null)
@@ -358,7 +317,7 @@ namespace UnityPlugin
 					}
 					else if (normalsMethod == CopyMeshMethod.CopyNear)
 					{
-						Operations.CopyNormalsNear(baseSubmesh.vertexList, submesh.vertexList);
+						Operations.CopyNormalsNear(targetFullMesh ? allVertices : baseSubmesh.vertexList, submesh.vertexList);
 					}
 
 					if (bonesMethod == CopyMeshMethod.CopyOrder)
@@ -367,7 +326,7 @@ namespace UnityPlugin
 					}
 					else if (bonesMethod == CopyMeshMethod.CopyNear)
 					{
-						Operations.CopyBonesNear(baseSubmesh.vertexList, submesh.vertexList);
+						Operations.CopyBonesNear(targetFullMesh ? allVertices : baseSubmesh.vertexList, submesh.vertexList);
 					}
 				}
 
@@ -389,10 +348,9 @@ namespace UnityPlugin
 				{
 					if (replaceSubmeshes[i] == null)
 					{
-						throw new Exception("Bad position of submesh - only one submesh suppported");
-						/*vSubmesh vSubmesh = srcMesh.submeshes[i].Clone();
-						copiedSubmeshes.Add(vSubmesh);
-						destMesh.submeshes.Add(vSubmesh);*/
+						vSubmesh srcSubmesh = srcMesh.submeshes[i];
+						copiedSubmeshes.Add(srcSubmesh);
+						destMesh.submeshes.Add(srcSubmesh);
 					}
 					else
 					{
@@ -438,38 +396,56 @@ namespace UnityPlugin
 				{
 					int[] boneIdxMap;
 					sMesh.m_Bones = MergeBoneList(frameMesh.m_Bones, sMesh.m_Bones, out boneIdxMap);
-					for (int i = 0; i < replaceSubmeshes.Length; i++)
+					uint[] boneHashes = new uint[sMesh.m_Bones.Count];
+					Matrix[] poseMatrices = new Matrix[sMesh.m_Bones.Count];
+					for (int i = 0; i < boneIdxMap.Length; i++)
 					{
-						if (replaceSubmeshes[i] != null)
+						boneHashes[boneIdxMap[i]] = sMesh.m_Mesh.instance.m_BoneNameHashes[i];
+						poseMatrices[boneIdxMap[i]] = sMesh.m_Mesh.instance.m_BindPose[i];
+					}
+					sMesh.m_Mesh.instance.m_BoneNameHashes.Clear();
+					sMesh.m_Mesh.instance.m_BoneNameHashes.AddRange(boneHashes);
+					sMesh.m_Mesh.instance.m_BindPose.Clear();
+					sMesh.m_Mesh.instance.m_BindPose.AddRange(poseMatrices);
+
+					if (bonesMethod == CopyMeshMethod.Replace)
+					{
+						for (int i = 0; i < replaceSubmeshes.Length; i++)
 						{
-							List<vVertex> vertexList = replaceSubmeshes[i].vertexList;
-							for (int j = 0; j < vertexList.Count; j++)
+							if (replaceSubmeshes[i] != null)
 							{
-								int[] boneIndices = vertexList[j].boneIndices;
-								vertexList[j].boneIndices = new int[4];
-								for (int k = 0; k < 4; k++)
+								List<vVertex> vertexList = replaceSubmeshes[i].vertexList;
+								for (int j = 0; j < vertexList.Count; j++)
 								{
-									vertexList[j].boneIndices[k] = boneIndices[k] != -1 ? boneIdxMap[boneIndices[k]] : -1;
+									int[] boneIndices = vertexList[j].boneIndices;
+									vertexList[j].boneIndices = new int[4];
+									for (int k = 0; k < 4; k++)
+									{
+										vertexList[j].boneIndices[k] = boneIndices[k] != -1 ? boneIdxMap[boneIndices[k]] : -1;
+									}
 								}
 							}
 						}
-					}
-					for (int i = 0; i < addSubmeshes.Count; i++)
-					{
-						List<vVertex> vertexList = addSubmeshes[i].vertexList;
-						for (int j = 0; j < vertexList.Count; j++)
+						for (int i = 0; i < addSubmeshes.Count; i++)
 						{
-							int[] boneIndices = vertexList[j].boneIndices;
-							vertexList[j].boneIndices = new int[4];
-							for (int k = 0; k < 4; k++)
+							List<vVertex> vertexList = addSubmeshes[i].vertexList;
+							if (vertexList[0].boneIndices != null)
 							{
-								vertexList[j].boneIndices[k] = boneIndices[k] != -1 ? boneIdxMap[boneIndices[k]] : -1;
+								for (int j = 0; j < vertexList.Count; j++)
+								{
+									int[] boneIndices = vertexList[j].boneIndices;
+									vertexList[j].boneIndices = new int[4];
+									for (int k = 0; k < 4; k++)
+									{
+										vertexList[j].boneIndices[k] = boneIndices[k] != -1 ? boneIdxMap[boneIndices[k]] : -1;
+									}
+								}
 							}
 						}
 					}
 				}
 			}
-			destMesh.Flush(false);
+			destMesh.Flush();
 
 			if (frameMesh != null)
 			{
@@ -478,10 +454,54 @@ namespace UnityPlugin
 				if (frameMesh.m_Mesh.instance != null)
 				{
 					parser.file.RemoveSubfile(frameMesh.m_Mesh.instance);
-
-					bundle.DeleteComponent(frameMesh.m_Mesh.asset);
+					bundle.ReplaceComponent(frameMesh.m_Mesh.asset, sMesh.m_Mesh.asset);
 				}
-				bundle.DeleteComponent(frameMesh);
+				bundle.ReplaceComponent(frameMesh, sMesh);
+			}
+			else
+			{
+				/*bool meshesFound = false;
+				for (int i = 0; i < bundle.m_PreloadTable.Count; i++)
+				{
+					PPtr<Object> objPtr = bundle.m_PreloadTable[i];
+					if (objPtr.asset != null)
+					{
+						if (objPtr.asset.classID1 == UnityClassID.Mesh)
+						{
+							meshesFound = true;
+						}
+						else if (meshesFound)
+						{
+							bundle.m_PreloadTable.Insert(i, new PPtr<Object>(uMesh));
+							break;
+						}
+					}
+				}*/
+				for (int i = 0; i < bundle.m_PreloadTable.Count; i++)
+				{
+					PPtr<Object> objPtr = bundle.m_PreloadTable[i];
+					if (objPtr.asset != null)
+					{
+						if (bundle.m_PreloadTable[i].asset == parser)
+						{
+							int parserIdx = i;
+							while (++i < bundle.m_PreloadTable.Count && bundle.m_PreloadTable[i].asset.classID1 == UnityClassID.SkinnedMeshRenderer)
+							{
+							}
+							bundle.m_PreloadTable.Insert(i, new PPtr<Object>(sMesh));
+
+							for (int j = parserIdx - 1; j >= 0; j--)
+							{
+								if (bundle.m_PreloadTable[j].asset.classID1 == UnityClassID.Mesh)
+								{
+									bundle.m_PreloadTable.Insert(j + 1, new PPtr<Object>(sMesh.m_Mesh.asset));
+									break;
+								}
+							}
+							break;
+						}
+					}
+				}
 			}
 			frame.m_GameObject.instance.AddLinkedComponent(sMesh);
 		}
