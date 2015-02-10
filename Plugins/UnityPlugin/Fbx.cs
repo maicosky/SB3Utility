@@ -178,7 +178,6 @@ namespace UnityPlugin
 					ImportedMesh iMesh = new ImportedMesh();
 					iMesh.Name = mesh.m_Name;
 					iMesh.SubmeshList = new List<ImportedSubmesh>(mesh.m_SubMeshes.Count);
-//Report.ReportLog("current=" + mesh.m_VertexData.m_CurrentChannels.ToString("X2"));
 					using (BinaryReader vertReader = new BinaryReader(new MemoryStream(mesh.m_VertexData.m_DataSize)),
 						indexReader = new BinaryReader(new MemoryStream(mesh.m_IndexBuffer)))
 					{
@@ -197,7 +196,6 @@ namespace UnityPlugin
 							for (int str = 0; str < mesh.m_VertexData.m_Streams.Count; str++)
 							{
 								StreamInfo sInfo = mesh.m_VertexData.m_Streams[str];
-//if (i == 0) Report.ReportLog("sinfo=" + sInfo.channelMask.ToString("X4") + "," + sInfo.offset + "," + sInfo.stride + "," + sInfo.dividerOp + "," + sInfo.frequency);
 								if (sInfo.channelMask == 0)
 								{
 									continue;
@@ -219,7 +217,6 @@ namespace UnityPlugin
 									for (int chn = 0; chn < mesh.m_VertexData.m_Channels.Count; chn++)
 									{
 										ChannelInfo cInfo = mesh.m_VertexData.m_Channels[chn];
-//if (i == 0 && j == 0) Report.ReportLog("cinfo=" + cInfo.stream + "," + cInfo.offset + "," + cInfo.format + "," + cInfo.dimension);
 										if ((sInfo.channelMask & (1 << chn)) == 0)
 										{
 											continue;
@@ -245,10 +242,11 @@ namespace UnityPlugin
 
 									if (skins && iVertex.BoneIndices == null && mesh.m_Skin.Count > 0)
 									{
-										iVertex.BoneIndices = new byte[mesh.m_Skin[j].boneIndex.Length];
+										BoneInfluence inf = mesh.m_Skin[(int)submesh.firstVertex + j];
+										iVertex.BoneIndices = new byte[inf.boneIndex.Length];
 										for (int k = 0; k < iVertex.BoneIndices.Length; k++)
 										{
-											iVertex.BoneIndices[k] = mesh.m_Skin[j].boneIndex[k] != 0 || mesh.m_Skin[j].weight[k] != 0 ? (byte)mesh.m_Skin[j].boneIndex[k] : (byte)0xFF;
+											iVertex.BoneIndices[k] = inf.boneIndex[k] != 0 || inf.weight[k] != 0 ? (byte)inf.boneIndex[k] : (byte)0xFF;
 										}
 										iVertex.Weights = mesh.m_Skin[j].weight;
 									}

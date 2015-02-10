@@ -746,7 +746,7 @@ namespace UnityPlugin
 				{
 					SkinnedMeshRenderer sMesh = (SkinnedMeshRenderer)meshR;
 					mesh = sMesh.m_Mesh.instance;
-					editTextBoxRendererRootBone.Text = sMesh.m_RootBone.instance.m_GameObject.instance.m_Name;
+					editTextBoxRendererRootBone.Text = sMesh.m_RootBone.instance != null ? sMesh.m_RootBone.instance.m_GameObject.instance.m_Name : String.Empty;
 				}
 				else
 				{

@@ -352,6 +352,11 @@ namespace UnityPlugin
 					else
 					{
 						mesh.m_Skin.Capacity = totVerts;
+						for (int i = mesh.m_Skin.Count; i < totVerts; i++)
+						{
+							BoneInfluence item = new BoneInfluence();
+							mesh.m_Skin.Add(item);
+						}
 					}
 				}
 				if (mesh.m_IndexBuffer.Length != totFaces * 3 * sizeof(ushort))
@@ -381,6 +386,7 @@ namespace UnityPlugin
 						List<vVertex> vertexList = submeshes[i].vertexList;
 						Vector3 min = new Vector3(Single.MaxValue, Single.MaxValue, Single.MaxValue);
 						Vector3 max = new Vector3(Single.MinValue, Single.MinValue, Single.MinValue);
+						bool skin = false;
 						for (int str = 0; str < mesh.m_VertexData.m_Streams.Count; str++)
 						{
 							StreamInfo sInfo = mesh.m_VertexData.m_Streams[str];
@@ -394,12 +400,12 @@ namespace UnityPlugin
 								vVertex vert = vertexList[j];
 								for (int chn = 0; chn < mesh.m_VertexData.m_Channels.Count; chn++)
 								{
-									ChannelInfo cInfo = mesh.m_VertexData.m_Channels[chn];
 									if ((sInfo.channelMask & (1 << chn)) == 0)
 									{
 										continue;
 									}
 
+									ChannelInfo cInfo = mesh.m_VertexData.m_Channels[chn];
 									vertWriter.BaseStream.Position = sInfo.offset + (j + submesh.firstVertex) * sInfo.stride + cInfo.offset;
 									switch (chn)
 									{
@@ -420,10 +426,9 @@ namespace UnityPlugin
 									}
 								}
 
-								if (mesh.m_Skin.Count <= j + submesh.firstVertex)
+								if (!skin)
 								{
-									BoneInfluence item = new BoneInfluence();
-									mesh.m_Skin.Add(item);
+									BoneInfluence item = mesh.m_Skin[(int)submesh.firstVertex + j];
 									if (vert.boneIndices != null)
 									{
 										vert.boneIndices.CopyTo(item.boneIndex, 0);
@@ -435,6 +440,7 @@ namespace UnityPlugin
 									}
 								}
 							}
+							skin = true;
 						}
 						vertIndex += (int)submesh.vertexCount;
 

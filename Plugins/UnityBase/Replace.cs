@@ -398,6 +398,11 @@ namespace UnityPlugin
 					sMesh.m_Bones = MergeBoneList(frameMesh.m_Bones, sMesh.m_Bones, out boneIdxMap);
 					uint[] boneHashes = new uint[sMesh.m_Bones.Count];
 					Matrix[] poseMatrices = new Matrix[sMesh.m_Bones.Count];
+					for (int i = 0; i < frameMesh.m_Bones.Count; i++)
+					{
+						boneHashes[i] = frameMesh.m_Mesh.instance.m_BoneNameHashes[i];
+						poseMatrices[i] = frameMesh.m_Mesh.instance.m_BindPose[i];
+					}
 					for (int i = 0; i < boneIdxMap.Length; i++)
 					{
 						boneHashes[boneIdxMap[i]] = sMesh.m_Mesh.instance.m_BoneNameHashes[i];
