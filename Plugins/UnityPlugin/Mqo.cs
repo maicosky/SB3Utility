@@ -21,8 +21,7 @@ namespace UnityPlugin
 		[Plugin]
 		public static void ExportMqo([DefaultVar]Animator parser, object[] meshNames, string dirPath, bool singleMqo, bool worldCoords, bool sortMeshes)
 		{
-			List<string> nameList = new List<string>(Utility.Convert<string>(meshNames));
-			List<MeshRenderer> meshes = Operations.FindMeshes(parser.RootTransform, nameList);
+			List<MeshRenderer> meshes = Operations.FindMeshes(parser.RootTransform, new HashSet<string>(Utility.Convert<string>(meshNames)));
 			if (sortMeshes)
 			{
 				meshes.Sort

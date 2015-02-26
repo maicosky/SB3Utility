@@ -198,6 +198,42 @@ namespace UnityPlugin
 				dest.m_SavedProperties.m_Colors.Add(src);
 			}
 		}
+
+		public UnityTexEnv GetTex(string name)
+		{
+			foreach (var ute in m_TexEnvs)
+			{
+				if (ute.Key.name == name)
+				{
+					return ute.Value;
+				}
+			}
+			throw new Exception("TexEnv " + name + " not found");
+		}
+
+		public float GetFloat(string name)
+		{
+			foreach (var flt in m_Floats)
+			{
+				if (flt.Key.name == name)
+				{
+					return flt.Value;
+				}
+			}
+			throw new Exception("Value " + name + " not found");
+		}
+
+		public Color4 GetColour(string name)
+		{
+			foreach (var col in m_Colors)
+			{
+				if (col.Key.name == name)
+				{
+					return col.Value;
+				}
+			}
+			throw new Exception("Colour " + name + " not found");
+		}
 	}
 
 	public class Material : Component, StoresReferences

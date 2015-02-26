@@ -14,13 +14,10 @@ namespace UnityPlugin
 			Transform trans = new Transform(parser.file);
 			GameObject gameObj = new GameObject(parser.file);
 			gameObj.m_Name = (string)frame.Name.Clone();
+			UniqueName(parser, gameObj);
 			gameObj.AddLinkedComponent(trans);
 
-			string framePath = parser.m_Avatar.instance.BonePath(gameObj.m_Name);
-			if (framePath == null)
-			{
-				parser.m_Avatar.instance.AddBone(parent, trans);
-			}
+			parser.m_Avatar.instance.AddBone(parent, trans);
 
 			Vector3 t, s;
 			Quaternion r;
@@ -36,6 +33,69 @@ namespace UnityPlugin
 			}
 
 			return trans;
+		}
+
+		public static Transform CloneTransformTree(Animator parser, Transform frame, Transform parent)
+		{
+			Transform trans = new Transform(parser.file);
+			GameObject gameObj = new GameObject(parser.file);
+			gameObj.m_Name = (string)frame.m_GameObject.instance.m_Name.Clone();
+			UniqueName(parser, gameObj);
+			gameObj.AddLinkedComponent(trans);
+
+			parser.m_Avatar.instance.AddBone(parent, trans);
+
+			trans.m_LocalRotation = frame.m_LocalRotation;
+			trans.m_LocalPosition = frame.m_LocalPosition;
+			trans.m_LocalScale = frame.m_LocalScale;
+			CopyUnknowns(frame, trans);
+
+			trans.InitChildren(frame.Count);
+			for (int i = 0; i < frame.Count; i++)
+			{
+				trans.AddChild(CloneTransformTree(parser, frame[i], trans));
+			}
+
+			return trans;
+		}
+
+		static void UniqueName(Animator parser, GameObject gameObj)
+		{
+			string name = gameObj.m_Name;
+			int attempt = 1;
+			while (FindFrame(gameObj.m_Name, parser.RootTransform) != null)
+			{
+				gameObj.m_Name = name + ++attempt;
+			}
+		}
+
+		public static void UniqueName(Animator parser, Transform frame, List<string> frameNames)
+		{
+			GameObject gameObj = frame.m_GameObject.instance;
+			string frameName = gameObj.m_Name;
+			int attempt = 1;
+			while (FindFrame(gameObj.m_Name, parser.RootTransform) != null)
+			{
+				gameObj.m_Name = frameName + ++attempt;
+			}
+			/*if (rename && attempt > 1)
+			{
+				parser.m_Avatar.instance.RenameBone(frameName, gameObj.m_Name);
+			}
+
+			Transform parent = frame.Parent;
+			string parentPath = Parser.m_Avatar.instance.BonePath(parent.m_GameObject.instance.m_Name);
+			string framePath = Parser.m_Avatar.instance.BonePath(frame.m_GameObject.instance.m_Name);
+			int childIndex = parent.IndexOf(frame);
+			parent.RemoveChild(frame);
+			Operations.UniqueName(Parser, frame.m_GameObject.instance, true);
+			parent.InsertChild(childIndex, frame);
+
+			for (int i = 0; i < frame.Count; i++)
+			{
+				UniqueFrame(frame[i]);
+			}*/
+
 		}
 
 		public static void CopyOrCreateUnknowns(Transform dest, Transform root)
@@ -59,15 +119,20 @@ namespace UnityPlugin
 		public static List<PPtr<Transform>> CreateBoneList(Transform root, List<ImportedBone> boneList, List<Matrix> poseMatrices)
 		{
 			List<PPtr<Transform>> uBoneList = new List<PPtr<Transform>>(boneList.Count);
+			string message = string.Empty;
 			for (int i = 0; i < boneList.Count; i++)
 			{
 				Transform boneFrame = FindFrame(boneList[i].Name, root);
 				if (boneFrame == null)
 				{
-					throw new Exception("BoneFrame " + boneList[i].Name + " not found.");
+					message += " " + boneList[i].Name;
 				}
 				poseMatrices.Add(Matrix.Transpose(boneList[i].Matrix));
 				uBoneList.Add(new PPtr<Transform>(boneFrame));
+			}
+			if (message != string.Empty)
+			{
+				throw new Exception("Boneframe(s) not found:" + message);
 			}
 			return uBoneList;
 		}
@@ -86,6 +151,9 @@ namespace UnityPlugin
 			indices = new int[numSubmeshes];
 			worldCoords = new bool[numSubmeshes];
 			replaceSubmeshesOption = new bool[numSubmeshes];
+
+			List<Matrix> poseMatrices = new List<Matrix>(mesh.BoneList.Count);
+			List<PPtr<Transform>> bones = CreateBoneList(parser.RootTransform, mesh.BoneList, poseMatrices);
 
 			SkinnedMeshRenderer sMesh = new SkinnedMeshRenderer(parser.file);
 
@@ -114,8 +182,7 @@ namespace UnityPlugin
 			uMesh.m_Name = mesh.Name;
 			sMesh.m_Mesh = new PPtr<Mesh>(uMesh);
 
-			List<Matrix> poseMatrices = new List<Matrix>(mesh.BoneList.Count);
-			sMesh.m_Bones = CreateBoneList(parser.RootTransform, mesh.BoneList, poseMatrices);
+			sMesh.m_Bones = bones;
 			uMesh.m_BindPose = poseMatrices;
 			uMesh.m_BoneNameHashes = new List<uint>(poseMatrices.Count);
 			for (int i = 0; i < mesh.BoneList.Count; i++)
@@ -197,7 +264,7 @@ namespace UnityPlugin
 								BoneInfluence item = new BoneInfluence();
 								for (int k = 0; k < 4; k++)
 								{
-									item.boneIndex[k] = vert.BoneIndices[k] != 0xFF ? vert.BoneIndices[k] : -1;
+									item.boneIndex[k] = vert.BoneIndices[k] != 0xFF ? vert.BoneIndices[k] : 0;
 								}
 								vert.Weights.CopyTo(item.weight, 0);
 								uMesh.m_Skin.Add(item);
@@ -279,13 +346,6 @@ namespace UnityPlugin
 					}
 				}
 			}
-			if (sMesh.m_RootBone.instance != null)
-			{
-				Matrix rootBoneMatrix = Transform.WorldTransform(sMesh.m_RootBone.instance);
-				rootBoneMatrix.Invert();
-				sMesh.m_AABB.m_Center = Vector3.TransformCoordinate(sMesh.m_Mesh.instance.m_LocalAABB.m_Center, rootBoneMatrix);
-				sMesh.m_AABB.m_Extend = sMesh.m_Mesh.instance.m_LocalAABB.m_Extend;
-			}
 
 			vSubmesh[] replaceSubmeshes = (srcMesh == null) ? null : new vSubmesh[srcMesh.submeshes.Count];
 			List<vSubmesh> addSubmeshes = new List<vSubmesh>(destMesh.submeshes.Count);
@@ -366,33 +426,12 @@ namespace UnityPlugin
 						List<vVertex> vertexList = copiedSubmeshes[i].vertexList;
 						for (int j = 0; j < vertexList.Count; j++)
 						{
-							vertexList[j].boneIndices = new int[4] { -1, -1, -1, -1 };
+							vertexList[j].boneIndices = new int[4] { 0, 0, 0, 0 };
+							vertexList[j].weights = new float[4] { 0, 0, 0, 0 };
 						}
 					}
 				}
-				else if ((frameMesh.m_Bones.Count > 0) && (sMesh.m_Bones.Count == 0))
-				{
-					for (int i = 0; i < replaceSubmeshes.Length; i++)
-					{
-						if (replaceSubmeshes[i] != null)
-						{
-							List<vVertex> vertexList = replaceSubmeshes[i].vertexList;
-							for (int j = 0; j < vertexList.Count; j++)
-							{
-								vertexList[j].boneIndices = new int[4] { -1, -1, -1, -1 };
-							}
-						}
-					}
-					for (int i = 0; i < addSubmeshes.Count; i++)
-					{
-						List<vVertex> vertexList = addSubmeshes[i].vertexList;
-						for (int j = 0; j < vertexList.Count; j++)
-						{
-							vertexList[j].boneIndices = new int[4] { -1, -1, -1, -1 };
-						}
-					}
-				}
-				else if ((frameMesh.m_Bones.Count > 0) && (sMesh.m_Bones.Count > 0))
+				else if (frameMesh.m_Bones.Count > 0)
 				{
 					int[] boneIdxMap;
 					sMesh.m_Bones = MergeBoneList(frameMesh.m_Bones, sMesh.m_Bones, out boneIdxMap);
@@ -420,13 +459,16 @@ namespace UnityPlugin
 							if (replaceSubmeshes[i] != null)
 							{
 								List<vVertex> vertexList = replaceSubmeshes[i].vertexList;
-								for (int j = 0; j < vertexList.Count; j++)
+								if (vertexList[0].boneIndices != null)
 								{
-									int[] boneIndices = vertexList[j].boneIndices;
-									vertexList[j].boneIndices = new int[4];
-									for (int k = 0; k < 4; k++)
+									for (int j = 0; j < vertexList.Count; j++)
 									{
-										vertexList[j].boneIndices[k] = boneIndices[k] != -1 ? boneIdxMap[boneIndices[k]] : -1;
+										int[] boneIndices = vertexList[j].boneIndices;
+										vertexList[j].boneIndices = new int[4];
+										for (int k = 0; k < 4; k++)
+										{
+											vertexList[j].boneIndices[k] = boneIdxMap[boneIndices[k]];
+										}
 									}
 								}
 							}
@@ -442,7 +484,7 @@ namespace UnityPlugin
 									vertexList[j].boneIndices = new int[4];
 									for (int k = 0; k < 4; k++)
 									{
-										vertexList[j].boneIndices[k] = boneIndices[k] != -1 ? boneIdxMap[boneIndices[k]] : -1;
+										vertexList[j].boneIndices[k] = boneIdxMap[boneIndices[k]];
 									}
 								}
 							}

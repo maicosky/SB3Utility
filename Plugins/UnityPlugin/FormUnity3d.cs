@@ -21,6 +21,8 @@ namespace UnityPlugin
 		public string EditorVar { get; protected set; }
 		public string ParserVar { get; protected set; }
 
+		private bool propertiesChanged = false;
+
 		List<ListView> assetListViews = new List<ListView>();
 
 		Dictionary<string, string> ChildParserVars = new Dictionary<string, string>();
@@ -109,11 +111,18 @@ namespace UnityPlugin
 				keepBackupToolStripMenuItem.CheckedChanged += keepBackupToolStripMenuItem_CheckedChanged;
 				backupExtensionToolStripEditTextBox.Text = (string)Properties.Settings.Default["BackupExtensionUnity3d"];
 				backupExtensionToolStripEditTextBox.AfterEditTextChanged += backupExtensionToolStripEditTextBox_AfterEditTextChanged;
+
+				Properties.Settings.Default.SettingChanging += Default_SettingChanging;
 			}
 			catch (Exception ex)
 			{
 				Utility.ReportException(ex);
 			}
+		}
+
+		void Default_SettingChanging(object sender, System.Configuration.SettingChangingEventArgs e)
+		{
+			propertiesChanged = true;
 		}
 
 		public bool Changed
@@ -196,6 +205,11 @@ namespace UnityPlugin
 				Gui.Scripting.Variables.Remove(FormVariable);
 				Gui.Scripting.Variables.Remove(EditorVar);
 				Gui.Scripting.Variables.Remove(ParserVar);
+
+				if (propertiesChanged)
+				{
+					Properties.Settings.Default.Save();
+				}
 			}
 			catch (Exception ex)
 			{
@@ -901,6 +915,27 @@ namespace UnityPlugin
 			}
 
 			InitSubfileLists(false);
+		}
+
+		private void othersList_DoubleClick(object sender, EventArgs e)
+		{
+			using (Stream stream = File.OpenRead(Editor.Parser.FilePath))
+			{
+				bool format = false;
+				foreach (ListViewItem item in othersList.SelectedItems)
+				{
+					if (item.Tag is NotLoaded)
+					{
+						Editor.Parser.Cabinet.LoadComponent(stream, (NotLoaded)item.Tag);
+						item.Font = new Font(othersList.Font, FontStyle.Bold);
+						format = true;
+					}
+				}
+				if (format)
+				{
+					othersList.Columns[0].AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
+				}
+			}
 		}
 	}
 }

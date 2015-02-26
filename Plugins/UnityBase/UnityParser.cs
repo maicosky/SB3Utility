@@ -277,6 +277,13 @@ namespace UnityPlugin
 		public Quaternion q { get; set; }
 		public Vector4 s { get; set; }
 
+		public xform(Vector4 t, Quaternion q, Vector4 s)
+		{
+			this.t = t;
+			this.q = q;
+			this.s = s;
+		}
+
 		public xform(Stream stream)
 		{
 			BinaryReader reader = new BinaryReader(stream);
@@ -520,6 +527,10 @@ namespace UnityPlugin
 
 		public Texture2D GetTexture(string name)
 		{
+			if (name == null)
+			{
+				return null;
+			}
 			Stream stream = null;
 			try
 			{

@@ -2802,7 +2802,29 @@ namespace SB3Utility
 				int timeIndex = (int)numericAnimationClipKeyframe.Value;
 				xaAnimationKeyframe keyframe = (xaAnimationKeyframe)Gui.Scripting.RunScript(EditorVar + ".NewKeyframe(track=" + EditorVar + ".Parser.AnimationSection.TrackList[" + animation + "], index=" + timeIndex + ")");
 				Changed = Changed;
+
 				int key = track.KeyframeList.IndexOf(keyframe);
+				if (key >= animationSet.GetRotationKeyCount(animationSet.GetAnimationIndex(track.Name)))
+				{
+					if (animationSet != null)
+					{
+						Pause();
+						renderTimer.Tick -= renderTimer_Tick;
+						Gui.Renderer.RemoveAnimationSet(animationId);
+						animationSet.Dispose();
+						animationSet = null;
+					}
+
+					animationSet = CreateAnimationSet();
+					if (animationSet != null)
+					{
+						animationId = Gui.Renderer.AddAnimationSet(animationSet);
+
+						renderTimer.Interval = 10;
+						renderTimer.Tick += new EventHandler(renderTimer_Tick);
+						Play();
+					}
+				}
 
 				float time = timeIndex;
 
@@ -2825,6 +2847,7 @@ namespace SB3Utility
 
 				AddTrackToEditedTracks(track);
 				listViewAnimationTrack.SelectedItems[0].SubItems[1].Text = track.KeyframeList.Count.ToString();
+				listViewAnimationTrack.SelectedItems[0].SubItems[2].Text = (track.KeyframeList[track.KeyframeList.Count - 1].Index - track.KeyframeList[0].Index + 1).ToString();
 				DisplayNewKeyframe(true);
 			}
 			catch (Exception ex)
@@ -2847,7 +2870,7 @@ namespace SB3Utility
 				int timeIndex = (int)numericAnimationClipKeyframe.Value;
 				xaAnimationKeyframe keyframe = FindAnimationKeyframe(track, timeIndex);
 				int key = track.KeyframeList.IndexOf(keyframe);
-				if (keyframe.Index != timeIndex || keyframe == track.KeyframeList[0] || key == track.KeyframeList.Count - 1)
+				if (key < 0 || keyframe.Index != timeIndex || keyframe == track.KeyframeList[0] || key == track.KeyframeList.Count - 1)
 				{
 					return;
 				}

@@ -46,10 +46,30 @@ namespace UnityPlugin.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Configuration.SettingsProviderAttribute(typeof(PortableSettingsProvider))]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("FBX 2015.1")]
-        public string MeshExportFormat {
+        [global::System.Configuration.DefaultSettingValueAttribute("0, 0")]
+        public global::System.Drawing.Size DialogRendererMeshAttributesSize {
             get {
-                return ((string)(this["MeshExportFormat"]));
+                return ((global::System.Drawing.Size)(this["DialogRendererMeshAttributesSize"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(PortableSettingsProvider))]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute(".\\StringToHash\\ArgToHash.exe")]
+        public string ArgToHashExecutable {
+            get {
+                return ((string)(this["ArgToHashExecutable"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(PortableSettingsProvider))]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-nolog -batchmode -nographics -strings")]
+        public string ArgToHashArguments {
+            get {
+                return ((string)(this["ArgToHashArguments"]));
             }
         }
     }

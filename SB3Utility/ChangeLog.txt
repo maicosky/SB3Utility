@@ -1,5 +1,10 @@
 ﻿[1.0.7]
+  - Fix: FBX import drops invisible root node and creates separate animations for childs
+  - Added: FBX import generates Tangents if not already present
+  - Fixed creating new keyframe behind last in XA units
   - Fixed XA parser dropping items in Type4 (SB3Format)
+  - Mouse input scaling
+  - Debut of UnityPlugin
 
 [1.0.6]
   - Fixed saving pp files of AA2 with original version

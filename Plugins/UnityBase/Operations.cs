@@ -40,14 +40,14 @@ namespace UnityPlugin
 			return -1;
 		}
 
-		public static List<MeshRenderer> FindMeshes(Transform rootFrame, List<string> nameList)
+		public static List<MeshRenderer> FindMeshes(Transform rootFrame, HashSet<string> nameList)
 		{
 			List<MeshRenderer> meshList = new List<MeshRenderer>(nameList.Count);
 			FindMeshFrames(rootFrame, meshList, nameList);
 			return meshList;
 		}
 
-		static void FindMeshFrames(Transform frame, List<MeshRenderer> meshList, List<string> nameList)
+		static void FindMeshFrames(Transform frame, List<MeshRenderer> meshList, HashSet<string> nameList)
 		{
 			MeshRenderer mesh = frame.m_GameObject.instance.FindLinkedComponent(UnityClassID.SkinnedMeshRenderer);
 			if (mesh == null)
@@ -62,6 +62,60 @@ namespace UnityPlugin
 			for (int i = 0; i < frame.Count; i++)
 			{
 				FindMeshFrames(frame[i], meshList, nameList);
+			}
+		}
+
+		public static HashSet<string> SearchHierarchy(Transform frame, HashSet<string> meshNames)
+		{
+			HashSet<string> exportFrames = new HashSet<string>();
+			SearchHierarchy(frame, frame, meshNames, exportFrames);
+			return exportFrames;
+		}
+
+		static void SearchHierarchy(Transform root, Transform frame, HashSet<string> meshNames, HashSet<string> exportFrames)
+		{
+			MeshRenderer meshR = frame.m_GameObject.instance.FindLinkedComponent(UnityClassID.SkinnedMeshRenderer);
+			if (meshR == null)
+			{
+				meshR = frame.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshRenderer);
+			}
+			if (meshR != null)
+			{
+				if (meshNames.Contains(frame.m_GameObject.instance.m_Name))
+				{
+					Transform parent = frame;
+					while (parent != null)
+					{
+						exportFrames.Add(parent.m_GameObject.instance.m_Name);
+						parent = (Transform)parent.Parent;
+					}
+
+					if (meshR is SkinnedMeshRenderer)
+					{
+						List<PPtr<Transform>> boneList = ((SkinnedMeshRenderer)meshR).m_Bones;
+						for (int i = 0; i < boneList.Count; i++)
+						{
+							Transform boneFrame = boneList[i].instance;
+							if (boneFrame != null && boneFrame.m_GameObject.instance != null)
+							{
+								string boneName = boneFrame.m_GameObject.instance.m_Name;
+								if (!exportFrames.Contains(boneName))
+								{
+									while (boneFrame != null)
+									{
+										exportFrames.Add(boneFrame.m_GameObject.instance.m_Name);
+										boneFrame = (Transform)boneFrame.Parent;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
+			for (int i = 0; i < frame.Count; i++)
+			{
+				SearchHierarchy(root, frame[i], meshNames, exportFrames);
 			}
 		}
 
@@ -87,6 +141,22 @@ namespace UnityPlugin
 				}
 			}
 			return null;
+		}
+
+		public static Mesh GetMesh(MeshRenderer meshR)
+		{
+			Mesh mesh;
+			if (meshR is SkinnedMeshRenderer)
+			{
+				SkinnedMeshRenderer sMesh = (SkinnedMeshRenderer)meshR;
+				mesh = sMesh.m_Mesh.instance;
+			}
+			else
+			{
+				MeshFilter filter = meshR.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshFilter);
+				mesh = filter.m_Mesh.instance;
+			}
+			return mesh;
 		}
 
 		public static void CopyUnknowns(Transform src, Transform dest)
@@ -283,17 +353,7 @@ namespace UnityPlugin
 				this.meshR = meshR;
 				this.faces = faces;
 
-				Mesh mesh;
-				if (meshR is SkinnedMeshRenderer)
-				{
-					SkinnedMeshRenderer smr = (SkinnedMeshRenderer)meshR;
-					mesh = smr.m_Mesh.instance;
-				}
-				else
-				{
-					MeshFilter filter = meshR.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshFilter);
-					mesh = filter.m_Mesh.instance;
-				}
+				Mesh mesh = GetMesh(meshR);
 				submeshes = new List<vSubmesh>(mesh.m_SubMeshes.Count);
 				using (BinaryReader vertReader = new BinaryReader(new MemoryStream(mesh.m_VertexData.m_DataSize)),
 					indexReader = new BinaryReader(new MemoryStream(mesh.m_IndexBuffer)))
@@ -316,17 +376,7 @@ namespace UnityPlugin
 
 			public void Flush()
 			{
-				Mesh mesh;
-				if (meshR is SkinnedMeshRenderer)
-				{
-					SkinnedMeshRenderer smr = (SkinnedMeshRenderer)meshR;
-					mesh = smr.m_Mesh.instance;
-				}
-				else
-				{
-					MeshFilter filter = meshR.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshFilter);
-					mesh = filter.m_Mesh.instance;
-				}
+				Mesh mesh = GetMesh(meshR);
 
 				meshR.m_Materials.Clear();
 				int totVerts = 0, totFaces = 0;
@@ -340,26 +390,29 @@ namespace UnityPlugin
 					}
 
 					totVerts += submesh.vertexList.Count;
-					totFaces += submesh.faceList.Count;
+					if (faces)
+					{
+						totFaces += submesh.faceList.Count;
+					}
 				}
 				if (mesh.m_VertexData.m_VertexCount != totVerts)
 				{
 					mesh.m_VertexData = new VertexData((uint)totVerts);
-					if (mesh.m_Skin.Count > totVerts)
+				}
+				if (mesh.m_Skin.Count > totVerts)
+				{
+					mesh.m_Skin.RemoveRange(0, mesh.m_Skin.Count - totVerts);
+				}
+				else
+				{
+					mesh.m_Skin.Capacity = totVerts;
+					for (int i = mesh.m_Skin.Count; i < totVerts; i++)
 					{
-						mesh.m_Skin.RemoveRange(0, mesh.m_Skin.Count - totVerts);
-					}
-					else
-					{
-						mesh.m_Skin.Capacity = totVerts;
-						for (int i = mesh.m_Skin.Count; i < totVerts; i++)
-						{
-							BoneInfluence item = new BoneInfluence();
-							mesh.m_Skin.Add(item);
-						}
+						BoneInfluence item = new BoneInfluence();
+						mesh.m_Skin.Add(item);
 					}
 				}
-				if (mesh.m_IndexBuffer.Length != totFaces * 3 * sizeof(ushort))
+				if (faces && mesh.m_IndexBuffer.Length != totFaces * 3 * sizeof(ushort))
 				{
 					mesh.m_IndexBuffer = new byte[totFaces * 3 * sizeof(ushort)];
 				}
@@ -379,14 +432,17 @@ namespace UnityPlugin
 							submesh = new SubMesh();
 							mesh.m_SubMeshes.Add(submesh);
 						}
-						submesh.indexCount = (uint)submeshes[i].faceList.Count * 3;
+						if (faces)
+						{
+							submesh.indexCount = (uint)submeshes[i].faceList.Count * 3;
+						}
 						submesh.vertexCount = (uint)submeshes[i].vertexList.Count;
 						submesh.firstVertex = (uint)vertIndex;
 
 						List<vVertex> vertexList = submeshes[i].vertexList;
 						Vector3 min = new Vector3(Single.MaxValue, Single.MaxValue, Single.MaxValue);
 						Vector3 max = new Vector3(Single.MinValue, Single.MinValue, Single.MinValue);
-						bool skin = false;
+						bool copySkin = mesh.m_Skin.Count == 0;
 						for (int str = 0; str < mesh.m_VertexData.m_Streams.Count; str++)
 						{
 							StreamInfo sInfo = mesh.m_VertexData.m_Streams[str];
@@ -426,7 +482,7 @@ namespace UnityPlugin
 									}
 								}
 
-								if (!skin)
+								if (!copySkin)
 								{
 									BoneInfluence item = mesh.m_Skin[(int)submesh.firstVertex + j];
 									if (vert.boneIndices != null)
@@ -436,11 +492,12 @@ namespace UnityPlugin
 									}
 									else
 									{
-										item.boneIndex[0] = item.boneIndex[1] = item.boneIndex[2] = item.boneIndex[3] = -1;
+										item.boneIndex[0] = item.boneIndex[1] = item.boneIndex[2] = item.boneIndex[3] = 0;
+										item.weight[0] = item.weight[1] = item.weight[2] = item.weight[3] = 0;
 									}
 								}
 							}
-							skin = true;
+							copySkin = true;
 						}
 						vertIndex += (int)submesh.vertexCount;
 
@@ -467,6 +524,21 @@ namespace UnityPlugin
 					{
 						mesh.m_SubMeshes.RemoveAt(mesh.m_SubMeshes.Count - 1);
 					}
+				}
+				if (meshR is SkinnedMeshRenderer)
+				{
+					SkinnedMeshRenderer sMesh = (SkinnedMeshRenderer)meshR;
+					if (sMesh.m_RootBone.instance != null)
+					{
+						Matrix rootBoneMatrix = Transform.WorldTransform(sMesh.m_RootBone.instance);
+						rootBoneMatrix.Invert();
+						sMesh.m_AABB.m_Center = Vector3.TransformCoordinate(sMesh.m_Mesh.instance.m_LocalAABB.m_Center, rootBoneMatrix);
+					}
+					else
+					{
+						sMesh.m_AABB.m_Center = sMesh.m_Mesh.instance.m_LocalAABB.m_Center;
+					}
+					sMesh.m_AABB.m_Extend = sMesh.m_Mesh.instance.m_LocalAABB.m_Extend;
 				}
 			}
 		}

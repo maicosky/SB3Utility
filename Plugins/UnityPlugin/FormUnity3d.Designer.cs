@@ -497,6 +497,7 @@
 			this.othersList.TabStop = false;
 			this.othersList.UseCompatibleStateImageBehavior = false;
 			this.othersList.View = System.Windows.Forms.View.Details;
+			this.othersList.DoubleClick += new System.EventHandler(this.othersList_DoubleClick);
 			// 
 			// othersListHeaderNamePathID
 			// 

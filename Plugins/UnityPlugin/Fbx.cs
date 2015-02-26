@@ -12,8 +12,8 @@ namespace UnityPlugin
 		[Plugin]
 		public static void ExportFbx([DefaultVar]Animator animator, object[] meshNames, object[] animationParsers, int startKeyframe, int endKeyframe, bool linear, bool EulerFilter, double filterPrecision, string path, string exportFormat, bool allFrames, bool allBones, bool skins, bool compatibility)
 		{
-			List<string> meshNamesList = new List<string>(Utility.Convert<string>(meshNames));
-			List<MeshRenderer> sMeshes = meshNames != null ? Operations.FindMeshes(animator.RootTransform, new List<string>(Utility.Convert<string>(meshNames))) : null;
+			string[] meshNameArray = Utility.Convert<string>(meshNames);
+			List<MeshRenderer> sMeshes = meshNames != null ? Operations.FindMeshes(animator.RootTransform, new HashSet<string>(meshNameArray)) : null;
 
 			UnityConverter imp = new UnityConverter(animator, sMeshes, skins);
 
@@ -176,7 +176,7 @@ namespace UnityPlugin
 					}
 
 					ImportedMesh iMesh = new ImportedMesh();
-					iMesh.Name = mesh.m_Name;
+					iMesh.Name = meshR.m_GameObject.instance.m_Name;
 					iMesh.SubmeshList = new List<ImportedSubmesh>(mesh.m_SubMeshes.Count);
 					using (BinaryReader vertReader = new BinaryReader(new MemoryStream(mesh.m_VertexData.m_DataSize)),
 						indexReader = new BinaryReader(new MemoryStream(mesh.m_IndexBuffer)))
@@ -246,7 +246,7 @@ namespace UnityPlugin
 										iVertex.BoneIndices = new byte[inf.boneIndex.Length];
 										for (int k = 0; k < iVertex.BoneIndices.Length; k++)
 										{
-											iVertex.BoneIndices[k] = inf.boneIndex[k] != 0 || inf.weight[k] != 0 ? (byte)inf.boneIndex[k] : (byte)0xFF;
+											iVertex.BoneIndices[k] = (byte)inf.boneIndex[k];
 										}
 										iVertex.Weights = mesh.m_Skin[j].weight;
 									}
@@ -360,8 +360,11 @@ namespace UnityPlugin
 				{
 					var tex = mat.m_SavedProperties.m_TexEnvs[i];
 					Texture2D tex2D = tex.Value.m_Texture.instance;
-					iMat.Textures[i] = tex2D.m_Name + "-" + tex.Key.name + "-" + "offset(X" + tex.Value.m_Offset.X.ToFloatString() + "Y" + tex.Value.m_Offset.Y.ToFloatString() + ")-scale(X" + tex.Value.m_Scale.X.ToFloatString() + "Y" + tex.Value.m_Scale.Y.ToFloatString() + ")" + (tex2D.m_TextureFormat == TextureFormat.DXT1 || tex2D.m_TextureFormat == TextureFormat.DXT5 ? ".dds" : ".tga");
-					ConvertTexture2D(tex2D, iMat.Textures[i]);
+					if (tex2D != null)
+					{
+						iMat.Textures[i] = tex2D.m_Name + "-" + tex.Key.name + "-" + "offset(X" + tex.Value.m_Offset.X.ToFloatString() + "Y" + tex.Value.m_Offset.Y.ToFloatString() + ")-scale(X" + tex.Value.m_Scale.X.ToFloatString() + "Y" + tex.Value.m_Scale.Y.ToFloatString() + ")" + (tex2D.m_TextureFormat == TextureFormat.DXT1 || tex2D.m_TextureFormat == TextureFormat.DXT5 ? ".dds" : ".tga");
+						ConvertTexture2D(tex2D, iMat.Textures[i]);
+					}
 				}
 
 				MaterialList.Add(iMat);

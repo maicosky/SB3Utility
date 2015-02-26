@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using SlimDX;
 
 using SB3Utility;
@@ -23,14 +24,22 @@ namespace UnityPlugin
 		{
 			Parser = parser;
 			Bundle = Parser.file.LoadComponent(1);
-			/*for (int i = 0; i < Bundle.m_PreloadTable.Count; i++)
+			Animator.ArgToHashExecutable = (string)Properties.Settings.Default["ArgToHashExecutable"];
+			if (Animator.ArgToHashExecutable.StartsWith("."))
+			{
+				Animator.ArgToHashExecutable = System.Environment.CurrentDirectory + Animator.ArgToHashExecutable.Substring(1);
+			}
+			Animator.ArgToHashArgs = (string)Properties.Settings.Default["ArgToHashArguments"];
+			/*string msg = string.Empty;
+			for (int i = 0; i < Bundle.m_PreloadTable.Count; i++)
 			{
 				Component comp = Bundle.m_PreloadTable[i].asset;
 				if (comp.classID1 != UnityClassID.GameObject && comp.classID1 != UnityClassID.Transform)
 				{
-					Report.ReportLog(i + " " + comp.pathID + " " + comp.classID1 + " " + (!(comp is NotLoaded) ? AssetCabinet.ToString(comp) : String.Empty));
+					msg += i + " " + comp.pathID + " " + comp.classID1 + " " + (!(comp is NotLoaded) ? AssetCabinet.ToString(comp) : String.Empty) + "\r\n";
 				}
-			}*/
+			}
+			Report.ReportLog(msg);*/
 
 			Frames = new List<Transform>();
 			Meshes = new List<MeshRenderer>();
@@ -86,15 +95,22 @@ namespace UnityPlugin
 						}
 					}
 
-					SkinnedMeshRenderer sMesh = trans.m_GameObject.instance.FindLinkedComponent(UnityClassID.SkinnedMeshRenderer);
+					GameObject gameObj = trans.m_GameObject.instance;
+					SkinnedMeshRenderer sMesh = gameObj.FindLinkedComponent(UnityClassID.SkinnedMeshRenderer);
 					if (sMesh != null)
 					{
+						Bundle.DeleteComponent(sMesh);
 						sMesh.m_GameObject.instance.RemoveLinkedComponent(sMesh);
 						meshesForRemoval.Add(sMesh.m_Mesh.instance);
 						Parser.file.RemoveSubfile(sMesh);
 					}
-					trans.m_GameObject.instance.RemoveLinkedComponent(trans);
+					Bundle.DeleteComponent(trans);
+					gameObj.RemoveLinkedComponent(trans);
 					Parser.file.RemoveSubfile(trans);
+					if (gameObj.m_Component.Count == 0)
+					{
+						Bundle.DeleteComponent(gameObj);
+					}
 				}
 			}
 			RemoveUnlinkedMeshes(meshesForRemoval);
@@ -102,11 +118,12 @@ namespace UnityPlugin
 
 		private void RemoveUnlinkedMeshes(HashSet<Mesh> meshesForRemoval)
 		{
-			foreach (SkinnedMeshRenderer smr in Meshes)
+			foreach (MeshRenderer meshR in Meshes)
 			{
-				if (meshesForRemoval.Contains(smr.m_Mesh.instance))
+				Mesh mesh = Operations.GetMesh(meshR);
+				if (meshesForRemoval.Contains(mesh))
 				{
-					meshesForRemoval.Remove(smr.m_Mesh.instance);
+					meshesForRemoval.Remove(mesh);
 				}
 			}
 			foreach (Mesh mesh in meshesForRemoval)
@@ -314,7 +331,6 @@ namespace UnityPlugin
 			AddFrame(newFrame, destParentId);
 		}
 
-		[Plugin]
 		public void AddFrame(Transform newFrame, int destParentId)
 		{
 			if (destParentId < 0)
@@ -333,7 +349,9 @@ namespace UnityPlugin
 		[Plugin]
 		public void AddFrame(Transform srcFrame, List<Material> srcMaterials, List<Texture2D> srcTextures, bool appendIfMissing, int destParentId)
 		{
-			AddFrame(srcFrame, destParentId);
+			Transform destParent = destParentId >= 0 ? Frames[destParentId] : Parser.RootTransform;
+			Transform newFrame = Operations.CloneTransformTree(Parser, srcFrame, destParent);
+			AddFrame(newFrame, destParentId);
 		}
 
 		[Plugin]
@@ -455,6 +473,103 @@ namespace UnityPlugin
 		}
 
 		[Plugin]
+		public void UniqueFrame(int id)
+		{
+			UniqueFrame(Frames[id]);
+		}
+
+		private void UniqueFrame(Transform frame)
+		{
+			for (int i = 0; i < frame.Count; i++)
+			{
+				UniqueFrame(frame[i]);
+			}
+
+			int attempt = 1;
+			for (int i = 0; i < Frames.Count; i++)
+			{
+				Transform t = Frames[i];
+				if (t != frame && t.m_GameObject.instance.m_Name == frame.m_GameObject.instance.m_Name)
+				{
+					++attempt;
+				}
+			}
+			if (attempt > 1)
+			{
+				string framePath = GetTransformPath(frame);
+
+				frame.m_GameObject.instance.m_Name += attempt;
+
+				int index = Parser.m_Avatar.instance.m_TOS.FindLastIndex
+				(
+					delegate(KeyValuePair<uint, string> data)
+					{
+						return data.Value == framePath;
+					}
+				);
+				if (index >= 0)
+				{
+					string newName = framePath + attempt;
+					var pair = Parser.m_Avatar.instance.m_TOS[index];
+					Parser.m_Avatar.instance.m_TOS.RemoveAt(index);
+					Report.ReportLog("renaming " + framePath + " to " + newName);
+					if (frame.Count > 0)
+					{
+						for (int i = 0; i < Parser.m_Avatar.instance.m_TOS.Count; i++)
+						{
+							KeyValuePair<uint, string> data = Parser.m_Avatar.instance.m_TOS[i];
+							if (data.Value.StartsWith(framePath + "/"))
+							{
+								Parser.m_Avatar.instance.m_TOS.RemoveAt(i);
+								Parser.m_Avatar.instance.m_TOS.Insert(i, new KeyValuePair<uint, string>(data.Key, newName + data.Value.Substring(framePath.Length)));
+								Report.ReportLog("   child " + data.Value + " to " + Parser.m_Avatar.instance.m_TOS[i].Value);
+							}
+						}
+					}
+					Parser.m_Avatar.instance.m_TOS.Insert(index, new KeyValuePair<uint, string>(pair.Key, newName));
+				}
+				else
+				{
+					Report.ReportLog("adding " + framePath);
+					Parser.m_Avatar.instance.AddBone(frame.Parent, frame);
+				}
+			}
+		}
+
+		string GetTransformPath(Transform trans)
+		{
+			return (trans.Parent != null ? GetTransformPath(trans.Parent) + "/" : String.Empty) + trans.m_GameObject.instance.m_Name;
+		}
+
+		[Plugin]
+		public void AddBone(int id, object[] meshes)
+		{
+			Matrix boneMatrix = Transform.WorldTransform(Frames[id]);
+			boneMatrix[3, 0] = boneMatrix[3, 1] = boneMatrix[3, 2] = 0;
+			uint boneHash = Parser.m_Avatar.instance.BoneHash(Frames[id].m_GameObject.instance.m_Name);
+			string[] meshFrameNames = Utility.Convert<string>(meshes);
+			List<MeshRenderer> meshList = Operations.FindMeshes(Parser.RootTransform, new HashSet<string>(meshFrameNames));
+			foreach (MeshRenderer meshR in meshList)
+			{
+				if (meshR is SkinnedMeshRenderer)
+				{
+					SkinnedMeshRenderer sMesh = (SkinnedMeshRenderer)meshR;
+					if (Operations.FindBoneIndex(sMesh.m_Bones, Frames[id]) < 0)
+					{
+						sMesh.m_Bones.Add(new PPtr<Transform>(Frames[id]));
+						Mesh mesh = sMesh.m_Mesh.instance;
+						if (mesh != null)
+						{
+							mesh.m_BoneNameHashes.Add(boneHash);
+							mesh.m_BindPose.Add(boneMatrix);
+						}
+					}
+				}
+			}
+			Changed = true;
+		}
+
+		[Plugin]
 		public void RemoveBone(int meshId, int boneId)
 		{
 			SkinnedMeshRenderer smr = (SkinnedMeshRenderer)Meshes[meshId];
@@ -470,6 +585,8 @@ namespace UnityPlugin
 					parentBoneIdx = Operations.FindBoneIndex(smr.m_Bones, parentFrame);
 				}
 				smr.m_Bones.RemoveAt(boneId);
+				mesh.m_BindPose.RemoveAt(boneId);
+				mesh.m_BoneNameHashes.RemoveAt(boneId);
 
 				foreach (Operations.vSubmesh submesh in vMesh.submeshes)
 				{
@@ -572,6 +689,20 @@ namespace UnityPlugin
 		}
 
 		[Plugin]
+		public void AddRendererMaterial(int meshId, int materialId)
+		{
+			MeshRenderer meshR = Meshes[meshId];
+			meshR.m_Materials.Add(new PPtr<Material>(materialId >= 0 ? Materials[materialId] : (Component)null));
+		}
+
+		[Plugin]
+		public void RemoveRendererMaterial(int meshId)
+		{
+			MeshRenderer meshR = Meshes[meshId];
+			meshR.m_Materials.RemoveAt(meshR.m_Materials.Count - 1);
+		}
+
+		[Plugin]
 		public void RemoveSkinnedMeshRenderer(int id)
 		{
 			SkinnedMeshRenderer sMesh = Meshes[id] as SkinnedMeshRenderer;
@@ -586,6 +717,7 @@ namespace UnityPlugin
 				sMesh.m_Mesh = new PPtr<Mesh>((Component)null);
 				RemoveUnlinkedMeshes(meshesForRemoval);
 			}
+			Bundle.DeleteComponent(sMesh);
 			sMesh.m_GameObject.instance.RemoveLinkedComponent(sMesh);
 			Parser.file.RemoveSubfile(sMesh);
 
@@ -670,7 +802,7 @@ namespace UnityPlugin
 		}
 
 		[Plugin]
-		public void SetMesh(int meshId, int componentIndex)
+		public void LoadAndSetMesh(int meshId, int componentIndex)
 		{
 			MeshRenderer meshRenderer = Meshes[meshId];
 			Component asset = componentIndex >= 0 ? Parser.file.Components[componentIndex] : null;
@@ -679,11 +811,70 @@ namespace UnityPlugin
 			{
 				SkinnedMeshRenderer sMesh = (SkinnedMeshRenderer)meshRenderer;
 				sMesh.m_Mesh = new PPtr<Mesh>(mesh);
+				Transform frame = mesh != null ? FindTransform(mesh.m_RootBoneNameHash) : null;
+				sMesh.m_RootBone = new PPtr<Transform>(frame);
+				if (frame == null && mesh != null && mesh.m_RootBoneNameHash != 0)
+				{
+					Report.ReportLog("Warning: RootTransform not found. hash=" + mesh.m_RootBoneNameHash);
+				}
+				sMesh.m_Bones.Clear();
+				if (mesh != null)
+				{
+					for (int i = 0; i < mesh.m_BoneNameHashes.Count; i++)
+					{
+						frame = FindTransform(mesh.m_BoneNameHashes[i]);
+						sMesh.m_Bones.Add(new PPtr<Transform>(frame));
+						if (frame == null)
+						{
+							Report.ReportLog("Warning: Transform for bone[" + i + "] not found. hash=" + mesh.m_BoneNameHashes[i]);
+						}
+					}
+					if (sMesh.m_RootBone.instance != null)
+					{
+						Matrix rootBoneMatrix = Transform.WorldTransform(sMesh.m_RootBone.instance);
+						rootBoneMatrix.Invert();
+						sMesh.m_AABB.m_Center = Vector3.TransformCoordinate(mesh.m_LocalAABB.m_Center, rootBoneMatrix);
+					}
+					else
+					{
+						sMesh.m_AABB.m_Center = mesh.m_LocalAABB.m_Center;
+					}
+					sMesh.m_AABB.m_Extend = mesh.m_LocalAABB.m_Extend;
+				}
 			}
 			else
 			{
 				MeshFilter filter = meshRenderer.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshFilter);
 				filter.m_Mesh = new PPtr<Mesh>(mesh);
+			}
+			int numSubmeshes = mesh != null ? mesh.m_SubMeshes.Count : 0;
+			while (meshRenderer.m_Materials.Count < numSubmeshes)
+			{
+				AddRendererMaterial(meshId, -1);
+			}
+			while (meshRenderer.m_Materials.Count > numSubmeshes)
+			{
+				RemoveRendererMaterial(meshId);
+			}
+			Changed = true;
+		}
+
+		private Transform FindTransform(uint boneHash)
+		{
+			string frameName = Parser.m_Avatar.instance.FindBoneName(boneHash);
+			int frameId = GetTransformId(frameName);
+			Transform frame = frameId >= 0 ? Frames[frameId] : null;
+			return frame;
+		}
+
+		[Plugin]
+		public void SetSkinnedMeshRendererRootBone(int meshId, int frameId)
+		{
+			SkinnedMeshRenderer sMesh = (SkinnedMeshRenderer)Meshes[meshId];
+			sMesh.m_RootBone = new PPtr<Transform>(frameId >= 0 ? Frames[frameId] : null);
+			if (sMesh.m_Mesh != null)
+			{
+				sMesh.m_Mesh.instance.m_RootBoneNameHash = frameId >= 0 ? Parser.m_Avatar.instance.BoneHash(Frames[frameId].m_GameObject.instance.m_Name) : 0;
 			}
 			Changed = true;
 		}
@@ -692,17 +883,7 @@ namespace UnityPlugin
 		public void SetMeshName(int id, string name)
 		{
 			MeshRenderer meshRenderer = Meshes[id];
-			Mesh mesh;
-			if (meshRenderer is SkinnedMeshRenderer)
-			{
-				SkinnedMeshRenderer sMesh = (SkinnedMeshRenderer)meshRenderer;
-				mesh = sMesh.m_Mesh.instance;
-			}
-			else
-			{
-				MeshFilter filter = meshRenderer.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshFilter);
-				mesh = filter.m_Mesh.instance;
-			}
+			Mesh mesh = Operations.GetMesh(meshRenderer);
 			if (mesh != null)
 			{
 				mesh.m_Name = name;
@@ -720,20 +901,24 @@ namespace UnityPlugin
 		}
 
 		[Plugin]
+		public void LoadAndSetSubMeshMaterial(int meshId, int subMeshId, int componentIndex)
+		{
+			MeshRenderer meshRenderer = Meshes[meshId];
+			Component asset = componentIndex >= 0 ? Parser.file.Components[componentIndex] : null;
+			Material mat = asset is NotLoaded ? Parser.file.LoadComponent(asset.pathID) : asset;
+			if (!Materials.Contains(mat))
+			{
+				Materials.Add(mat);
+			}
+			meshRenderer.m_Materials[subMeshId] = new PPtr<Material>(mat);
+			Changed = true;
+		}
+
+		[Plugin]
 		public void SetSubMeshTopology(int meshId, int subMeshId, int topology)
 		{
 			MeshRenderer meshR = Meshes[meshId];
-			Mesh mesh;
-			if (meshR is SkinnedMeshRenderer)
-			{
-				SkinnedMeshRenderer smr = (SkinnedMeshRenderer)meshR;
-				mesh = smr.m_Mesh.instance;
-			}
-			else
-			{
-				MeshFilter filter = meshR.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshFilter);
-				mesh = filter.m_Mesh.instance;
-			}
+			Mesh mesh = Operations.GetMesh(meshR);
 			mesh.m_SubMeshes[subMeshId].topology = topology;
 			Changed = true;
 		}
@@ -819,6 +1004,10 @@ namespace UnityPlugin
 			Texture2D tex = Parser.file.Parser.GetTexture(name);
 			var texEnv = Materials[id].m_SavedProperties.m_TexEnvs[index].Value;
 			texEnv.m_Texture = new PPtr<Texture2D>(tex);
+			if (!Textures.Contains(tex))
+			{
+				Textures.Add(tex);
+			}
 			Changed = true;
 		}
 
@@ -845,26 +1034,7 @@ namespace UnityPlugin
 				}
 			}
 
-			/*for (int i = 0; i < Bundle.m_PreloadTable.Count; i++)
-			{
-				PPtr<Object> objPtr = Bundle.m_PreloadTable[i];
-				if (objPtr.asset == mat)
-				{
-					Bundle.m_PreloadTable.RemoveAt(i--);
-				}
-			}*/
-			int idx = Bundle.m_Container.FindIndex
-			(
-				delegate(KeyValuePair<string, AssetInfo> match)
-				{
-					return match.Value.asset.asset == mat;
-				}
-			);
-			if (idx >= 0)
-			{
-				Bundle.m_Container.RemoveAt(idx);
-			}
-
+			Bundle.DeleteComponent(mat);
 			Parser.file.RemoveSubfile(mat);
 			Materials.RemoveAt(id);
 			Changed = true;
@@ -1179,6 +1349,7 @@ namespace UnityPlugin
 				}
 			}
 
+			Bundle.DeleteComponent(tex);
 			Parser.file.RemoveSubfile(tex);
 			Parser.file.Parser.Textures.Remove(tex);
 			Textures.RemoveAt(id);

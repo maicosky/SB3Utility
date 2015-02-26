@@ -232,12 +232,13 @@ namespace UnityPlugin
 
 		public void DeleteComponent(Component asset)
 		{
-			Report.ReportLog("Deleting Component from AssetBundle " + AssetCabinet.ToString(asset));
+			bool removed = false;
 			for (int i = 0; i < m_PreloadTable.Count; i++)
 			{
 				if (m_PreloadTable[i] != null && m_PreloadTable[i].asset == asset)
 				{
-					m_PreloadTable.RemoveAt(i--);
+					m_PreloadTable[i] = new PPtr<Object>((Component)null);
+					removed = true;
 				}
 			}
 
@@ -246,7 +247,12 @@ namespace UnityPlugin
 				if (m_Container[i].Value.asset.asset == asset)
 				{
 					m_Container.RemoveAt(i--);
+					removed = true;
 				}
+			}
+			if (removed)
+			{
+				Report.ReportLog(asset.classID2 + " " + AssetCabinet.ToString(asset) + " deleted from AssetBundle");
 			}
 		}
 

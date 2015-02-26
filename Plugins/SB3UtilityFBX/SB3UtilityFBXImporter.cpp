@@ -695,26 +695,31 @@ namespace SB3Utility
 			}
 			if (numLayers > 0)
 			{
-				Type^ animType = GetAnimationType(pAnimStack->GetMember<FbxAnimLayer>(0), pScene->GetRootNode());
-				ConstructorInfo^ ctor = animType->GetConstructor(Type::EmptyTypes);
-				if (animType == ImportedKeyframedAnimation::typeid)
+				FbxNode* rootNode = pScene->GetRootNode();
+				for (int j = 0; j < rootNode->GetChildCount(); j++)
 				{
-					ImportedKeyframedAnimation^ wsAnimation = (ImportedKeyframedAnimation^)ctor->Invoke(Type::EmptyTypes);
-					wsAnimation->TrackList = gcnew List<ImportedAnimationKeyframedTrack^>(pScene->GetNodeCount());
-					ImportAnimation(pAnimStack->GetMember<FbxAnimLayer>(0), pScene->GetRootNode(), wsAnimation);
-					if (wsAnimation->TrackList->Count > 0)
+					FbxNode* rootChild = rootNode->GetChild(j);
+					Type^ animType = GetAnimationType(pAnimStack->GetMember<FbxAnimLayer>(0), pScene->GetRootNode());
+					ConstructorInfo^ ctor = animType->GetConstructor(Type::EmptyTypes);
+					if (animType == ImportedKeyframedAnimation::typeid)
 					{
-						AnimationList->Add(wsAnimation);
+						ImportedKeyframedAnimation^ wsAnimation = (ImportedKeyframedAnimation^)ctor->Invoke(Type::EmptyTypes);
+						wsAnimation->TrackList = gcnew List<ImportedAnimationKeyframedTrack^>(pScene->GetNodeCount());
+						ImportAnimation(pAnimStack->GetMember<FbxAnimLayer>(0), rootChild, wsAnimation);
+						if (wsAnimation->TrackList->Count > 0)
+						{
+							AnimationList->Add(wsAnimation);
+						}
 					}
-				}
-				else
-				{
-					ImportedSampledAnimation^ wsAnimation = (ImportedSampledAnimation^)ctor->Invoke(Type::EmptyTypes);
-					wsAnimation->TrackList = gcnew List<ImportedAnimationSampledTrack^>(pScene->GetNodeCount());
-					ImportAnimation(pAnimStack->GetMember<FbxAnimLayer>(0), pScene->GetRootNode(), wsAnimation);
-					if (wsAnimation->TrackList->Count > 0)
+					else
 					{
-						AnimationList->Add(wsAnimation);
+						ImportedSampledAnimation^ wsAnimation = (ImportedSampledAnimation^)ctor->Invoke(Type::EmptyTypes);
+						wsAnimation->TrackList = gcnew List<ImportedAnimationSampledTrack^>(pScene->GetNodeCount());
+						ImportAnimation(pAnimStack->GetMember<FbxAnimLayer>(0), rootChild, wsAnimation);
+						if (wsAnimation->TrackList->Count > 0)
+						{
+							AnimationList->Add(wsAnimation);
+						}
 					}
 				}
 			}

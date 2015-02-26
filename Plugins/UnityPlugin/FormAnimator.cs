@@ -84,7 +84,7 @@ namespace UnityPlugin
 		Dictionary<int, int> crossRefTextureMeshesCount = new Dictionary<int, int>();
 		Dictionary<int, int> crossRefTextureMaterialsCount = new Dictionary<int, int>();
 
-		public List<RenderObjectXX> renderObjectMeshes { get; protected set; }
+		public List<RenderObjectUnity> renderObjectMeshes { get; protected set; }
 		List<int> renderObjectIds;
 
 		private bool listViewItemSyncSelectedSent = false;
@@ -193,7 +193,7 @@ namespace UnityPlugin
 			dragOptions.Dispose();
 			Editor.Dispose();
 			Editor = null;
-			//DisposeRenderObjects();
+			DisposeRenderObjects();
 			CrossRefsClear();
 			ClearKeyList<Material>(crossRefMeshMaterials);
 			ClearKeyList<Texture2D>(crossRefMeshTextures);
@@ -203,9 +203,45 @@ namespace UnityPlugin
 			ClearKeyList<Material>(crossRefTextureMaterials);
 		}
 
+		public void RecreateRenderObjects()
+		{
+			DisposeRenderObjects();
+
+			renderObjectMeshes = new List<RenderObjectUnity>(new RenderObjectUnity[Editor.Meshes.Count]);
+			renderObjectIds = new List<int>(Editor.Meshes.Count);
+			for (int i = 0; i < Editor.Meshes.Count; i++)
+			{
+				renderObjectIds.Add(-1);
+			}
+
+			foreach (ListViewItem item in listViewMesh.SelectedItems)
+			{
+				int id = (int)item.Tag;
+				MeshRenderer meshR = Editor.Meshes[id];
+				HashSet<string> meshNames = new HashSet<string>() { meshR.m_GameObject.instance.m_Name };
+				renderObjectMeshes[id] = new RenderObjectUnity(Editor, meshNames);
+
+				RenderObjectUnity renderObj = renderObjectMeshes[id];
+				renderObjectIds[id] = Gui.Renderer.AddRenderObject(renderObj);
+			}
+
+			HighlightSubmeshes();
+			if (highlightedBone != null)
+			{
+				if (highlightedBone[0] >= Editor.Meshes.Count || highlightedBone[1] >= ((SkinnedMeshRenderer)Editor.Meshes[highlightedBone[0]]).m_Bones.Count)
+				{
+					highlightedBone = null;
+				}
+				else
+				{
+					HighlightBone(highlightedBone, true);
+				}
+			}
+		}
+
 		void DisposeRenderObjects()
 		{
-			/*foreach (ListViewItem item in listViewMesh.SelectedItems)
+			foreach (ListViewItem item in listViewMesh.SelectedItems)
 			{
 				Gui.Renderer.RemoveRenderObject(renderObjectIds[(int)item.Tag]);
 				renderObjectIds[(int)item.Tag] = -1;
@@ -218,7 +254,7 @@ namespace UnityPlugin
 					renderObjectMeshes[i].Dispose();
 					renderObjectMeshes[i] = null;
 				}
-			}*/
+			}
 		}
 
 		void ClearKeyList<T>(Dictionary<int, List<KeyList<T>>> dic)
@@ -255,6 +291,11 @@ namespace UnityPlugin
 
 			matTexNamePurpose = new Label[4] { labelMatTex1, labelMatTex2, labelMatTex3, labelMatTex4 };
 			matTexNameCombo = new ComboBox[4] { comboBoxMatTex1, comboBoxMatTex2, comboBoxMatTex3, comboBoxMatTex4 };
+			foreach (ComboBox matTexCombo in matTexNameCombo)
+			{
+				matTexCombo.DisplayMember = "Item1";
+				matTexCombo.ValueMember = "Item2";
+			}
 
 			matMatrixLabel = new Label[7] { labelDiffuse, labelAmbient, labelSpecular, labelEmissive, labelRim, labelOutlineColour, labelShadow };
 			matMatrixText[0] = new EditTextBox[4] { textBoxMatDiffuseR, textBoxMatDiffuseG, textBoxMatDiffuseB, textBoxMatDiffuseA };
@@ -284,6 +325,9 @@ namespace UnityPlugin
 
 			comboBoxMeshRendererMesh.DisplayMember = "Item1";
 			comboBoxMeshRendererMesh.ValueMember = "Item2";
+
+			comboBoxRendererRootBone.DisplayMember = "Item1";
+			comboBoxRendererRootBone.ValueMember = "Item2";
 
 			for (int i = 0; i < matMatrixText.Length; i++)
 			{
@@ -317,12 +361,12 @@ namespace UnityPlugin
 		{
 			if (!refreshLists)
 			{
-				/*renderObjectMeshes = new List<RenderObjectAnimator>(new RenderObjectAnimator[Editor.Meshes.Count]);
+				renderObjectMeshes = new List<RenderObjectUnity>(new RenderObjectUnity[Editor.Meshes.Count]);
 				renderObjectIds = new List<int>(Editor.Meshes.Count);
 				for (int i = 0; i < Editor.Meshes.Count; i++)
 				{
 					renderObjectIds.Add(-1);
-				}*/
+				}
 			}
 
 			try
@@ -413,7 +457,7 @@ namespace UnityPlugin
 					{
 						Transform bone = frameSMR.m_Bones[i].instance;
 						TreeNode boneNode;
-						if (bone != null)
+						if (bone != null && bone.m_GameObject.instance != null)
 						{
 							boneNode = new TreeNode(bone.m_GameObject.instance.m_Name);
 						}
@@ -540,11 +584,26 @@ namespace UnityPlugin
 					(
 						new Tuple<string, Component>
 						(
-							"PathID " + asset.pathID + (!(asset is NotLoaded) ? " " + ((Mesh)asset).m_Name : null),
+							asset.pathID + " " + (asset is NotLoaded ? ((NotLoaded)asset).Name : ((Mesh)asset).m_Name),
 							asset
 						)
 					);
 				}
+			}
+
+			comboBoxRendererRootBone.Items.Clear();
+			comboBoxRendererRootBone.Items.Add(new Tuple<string, int>("(none)", -1));
+			for (int i = 0; i < Editor.Frames.Count; i++)
+			{
+				Transform frame = Editor.Frames[i];
+				comboBoxRendererRootBone.Items.Add
+				(
+					new Tuple<string, int>
+					(
+						frame.m_GameObject.instance.m_Name,
+						i
+					)
+				);
 			}
 		}
 
@@ -555,38 +614,49 @@ namespace UnityPlugin
 			{
 				selectedItems.Add(item.Text);
 			}
-			if (Editor.Materials.Count > 0)
+			ListViewItem[] materialItems = new ListViewItem[Editor.Materials.Count];
+			for (int i = 0; i < Editor.Materials.Count; i++)
 			{
-				List<Tuple<string, int>> columnMaterials = new List<Tuple<string, int>>(Editor.Materials.Count);
-				ListViewItem[] materialItems = new ListViewItem[Editor.Materials.Count];
-				for (int i = 0; i < Editor.Materials.Count; i++)
-				{
-					Material mat = Editor.Materials[i];
-					materialItems[i] = new ListViewItem(mat.m_Name);
-					materialItems[i].Tag = i;
-
-					columnMaterials.Add(new Tuple<string, int>(mat.m_Name, i));
-				}
-				listViewMaterial.Items.Clear();
-				listViewMaterial.Items.AddRange(materialItems);
-				materiallistHeader.AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
-				if (selectedItems.Count > 0)
-				{
-					listViewMaterial.ItemSelectionChanged -= listViewMaterial_ItemSelectionChanged;
-					listViewMaterial.BeginUpdate();
-					foreach (ListViewItem item in listViewMaterial.Items)
-					{
-						if (selectedItems.Contains(item.Text))
-						{
-							item.Selected = true;
-						}
-					}
-					listViewMaterial.EndUpdate();
-					listViewMaterial.ItemSelectionChanged += listViewMaterial_ItemSelectionChanged;
-				}
-
-				ColumnSubmeshMaterial.DataSource = columnMaterials;
+				Material mat = Editor.Materials[i];
+				materialItems[i] = new ListViewItem(mat.m_Name);
+				materialItems[i].Tag = i;
 			}
+			listViewMaterial.Items.Clear();
+			listViewMaterial.Items.AddRange(materialItems);
+			materiallistHeader.AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
+			if (selectedItems.Count > 0)
+			{
+				listViewMaterial.ItemSelectionChanged -= listViewMaterial_ItemSelectionChanged;
+				listViewMaterial.BeginUpdate();
+				foreach (ListViewItem item in listViewMaterial.Items)
+				{
+					if (selectedItems.Contains(item.Text))
+					{
+						item.Selected = true;
+					}
+				}
+				listViewMaterial.EndUpdate();
+				listViewMaterial.ItemSelectionChanged += listViewMaterial_ItemSelectionChanged;
+			}
+
+			List<Tuple<string, int, Component>> columnMaterials = new List<Tuple<string, int, Component>>(Editor.Materials.Count * 2);
+			for (int i = 0; i < Editor.Parser.file.Components.Count; i++)
+			{
+				Component asset = Editor.Parser.file.Components[i];
+				if (asset.classID1 == UnityClassID.Material)
+				{
+					columnMaterials.Add
+					(
+						new Tuple<string, int, Component>
+						(
+							asset.pathID + " " + (asset is NotLoaded ? ((NotLoaded)asset).Name : ((Material)asset).m_Name),
+							Editor.Materials.IndexOf(asset as Material),
+							asset
+						)
+					);
+				}
+			}
+			ColumnSubmeshMaterial.DataSource = columnMaterials;
 			SetComboboxEvent = false;
 
 			TreeNode materialsNode = new TreeNode("Materials");
@@ -610,34 +680,21 @@ namespace UnityPlugin
 
 		void InitTextures()
 		{
-			for (int i = 0; i < matTexNameCombo.Length; i++)
-			{
-				matTexNameCombo[i].Items.Clear();
-				matTexNameCombo[i].Items.Add("(none)");
-			}
-
 			HashSet<string> selectedItems = new HashSet<string>();
 			foreach (ListViewItem item in listViewTexture.SelectedItems)
 			{
 				selectedItems.Add(item.Text);
 			}
-			if (Editor.Textures.Count > 0)
+			ListViewItem[] textureItems = new ListViewItem[Editor.Textures.Count];
+			for (int i = 0; i < Editor.Textures.Count; i++)
 			{
-				ListViewItem[] textureItems = new ListViewItem[Editor.Textures.Count];
-				for (int i = 0; i < Editor.Textures.Count; i++)
-				{
-					Texture2D tex = Editor.Textures[i];
-					textureItems[i] = new ListViewItem(tex.m_Name);
-					textureItems[i].Tag = i;
-					for (int j = 0; j < matTexNameCombo.Length; j++)
-					{
-						matTexNameCombo[j].Items.Add(tex.m_Name);
-					}
-				}
-				listViewTexture.Items.Clear();
-				listViewTexture.Items.AddRange(textureItems);
-				texturelistHeader.AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
+				Texture2D tex = Editor.Textures[i];
+				textureItems[i] = new ListViewItem(tex.m_Name);
+				textureItems[i].Tag = i;
 			}
+			listViewTexture.Items.Clear();
+			listViewTexture.Items.AddRange(textureItems);
+			texturelistHeader.AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
 			if (selectedItems.Count > 0)
 			{
 				listViewTexture.ItemSelectionChanged -= listViewTexture_ItemSelectionChanged;
@@ -651,6 +708,30 @@ namespace UnityPlugin
 				}
 				listViewTexture.EndUpdate();
 				listViewTexture.ItemSelectionChanged += listViewTexture_ItemSelectionChanged;
+			}
+
+			for (int i = 0; i < matTexNameCombo.Length; i++)
+			{
+				matTexNameCombo[i].Items.Clear();
+				matTexNameCombo[i].Items.Add(new Tuple<string, Component>("(none)", null));
+			}
+			for (int i = 0; i < Editor.Parser.file.Components.Count; i++)
+			{
+				Component asset = Editor.Parser.file.Components[i];
+				if (asset.classID1 == UnityClassID.Texture2D)
+				{
+					for (int j = 0; j < matTexNameCombo.Length; j++)
+					{
+						matTexNameCombo[j].Items.Add
+						(
+							new Tuple<string, Component>
+							(
+								asset.pathID + " " + (asset is NotLoaded ? ((NotLoaded)asset).Name : ((Texture2D)asset).m_Name),
+								asset
+							)
+						);
+					}
+				}
 			}
 
 			TreeNode texturesNode = new TreeNode("Textures");
@@ -704,11 +785,12 @@ namespace UnityPlugin
 			{
 				SkinnedMeshRenderer smr = (SkinnedMeshRenderer)Editor.Meshes[id[0]];
 				Transform bone = smr.m_Bones[id[1]].instance;
-				textBoxBoneName.Text = bone.m_GameObject.instance.m_Name;
+				textBoxBoneName.Text = bone != null && bone.m_GameObject.instance != null ? bone.m_GameObject.instance.m_Name : "invalid";
 				Mesh mesh = smr.m_Mesh.instance;
 				if (mesh != null)
 				{
-					DataGridViewEditor.LoadMatrix(mesh.m_BindPose[id[1]], dataGridViewBoneSRT, dataGridViewBoneMatrix);
+					Matrix matrix = mesh.m_BindPose[id[1]];
+					DataGridViewEditor.LoadMatrix(matrix, dataGridViewBoneSRT, dataGridViewBoneMatrix);
 				}
 			}
 			loadedBone = id;
@@ -724,15 +806,16 @@ namespace UnityPlugin
 		{
 			dataGridViewMesh.CellValueChanged -= dataGridViewMesh_CellValueChanged;
 			dataGridViewMesh.Rows.Clear();
+			comboBoxMeshRendererMesh.SelectedIndexChanged -= comboBoxMeshRendererMesh_SelectedIndexChanged;
+			comboBoxRendererRootBone.SelectedIndexChanged -= comboBoxRendererRootBone_SelectedIndexChanged;
+
 			if (id < 0)
 			{
 				textBoxRendererName.Text = String.Empty;
 				checkBoxRendererEnabled.Checked = false;
-				comboBoxMeshRendererMesh.SelectedIndexChanged -= comboBoxMeshRendererMesh_SelectedIndexChanged;
-				comboBoxMeshRendererMesh.SelectedIndex = 0;
-				comboBoxMeshRendererMesh.SelectedIndexChanged += comboBoxMeshRendererMesh_SelectedIndexChanged;
+				comboBoxMeshRendererMesh.SelectedIndex = -1;
 				editTextBoxMeshName.Text = String.Empty;
-				editTextBoxRendererRootBone.Text = String.Empty;
+				comboBoxRendererRootBone.SelectedIndex = -1;
 				checkBoxMeshMultiPass.Checked = false;
 				editTextBoxMeshRootBone.Text = String.Empty;
 			}
@@ -741,21 +824,14 @@ namespace UnityPlugin
 				MeshRenderer meshR = Editor.Meshes[id];
 				textBoxRendererName.Text = meshR.m_GameObject.instance.m_Name;
 				checkBoxRendererEnabled.Checked = meshR.m_Enabled;
-				Mesh mesh;
+				Mesh mesh = Operations.GetMesh(meshR);
 				if (meshR is SkinnedMeshRenderer)
 				{
 					SkinnedMeshRenderer sMesh = (SkinnedMeshRenderer)meshR;
-					mesh = sMesh.m_Mesh.instance;
-					editTextBoxRendererRootBone.Text = sMesh.m_RootBone.instance != null ? sMesh.m_RootBone.instance.m_GameObject.instance.m_Name : String.Empty;
-				}
-				else
-				{
-					MeshFilter filter = meshR.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshFilter);
-					mesh = filter.m_Mesh.instance;
+					comboBoxRendererRootBone.SelectedIndex = sMesh.m_RootBone.instance != null ? comboBoxRendererRootBone.FindStringExact(sMesh.m_RootBone.instance.m_GameObject.instance.m_Name) : 0;
 				}
 				if (mesh != null)
 				{
-					comboBoxMeshRendererMesh.SelectedIndexChanged -= comboBoxMeshRendererMesh_SelectedIndexChanged;
 					for (int i = 0; i < comboBoxMeshRendererMesh.Items.Count; i++)
 					{
 						Tuple<string, Component> item = (Tuple<string, Component>)comboBoxMeshRendererMesh.Items[i];
@@ -765,7 +841,6 @@ namespace UnityPlugin
 							break;
 						}
 					}
-					comboBoxMeshRendererMesh.SelectedIndexChanged += comboBoxMeshRendererMesh_SelectedIndexChanged;
 
 					editTextBoxMeshName.Text = mesh.m_Name;
 					checkBoxMeshMultiPass.Checked = meshR.m_Materials.Count > mesh.m_SubMeshes.Count;
@@ -800,7 +875,14 @@ namespace UnityPlugin
 					}
 					dataGridViewMesh.ClearSelection();
 				}
+				else
+				{
+					comboBoxMeshRendererMesh.SelectedIndex = 0;
+				}
 			}
+
+			comboBoxRendererRootBone.SelectedIndexChanged += comboBoxRendererRootBone_SelectedIndexChanged;
+			comboBoxMeshRendererMesh.SelectedIndexChanged += comboBoxMeshRendererMesh_SelectedIndexChanged;
 			dataGridViewMesh.CellValueChanged += dataGridViewMesh_CellValueChanged;
 			loadedMesh = id;
 		}
@@ -865,7 +947,15 @@ namespace UnityPlugin
 					{
 						matTexNamePurpose[i].Text = ShortLabel(matTex.Key.name);
 						string matTexName = matTex.Value.m_Texture.instance.m_Name;
-						matTexNameCombo[i].SelectedIndex = matTexNameCombo[i].FindStringExact(matTexName);
+						for (int j = 0; j < matTexNameCombo[i].Items.Count; j++)
+						{
+							Tuple<string, Component> item = (Tuple<string, Component>)matTexNameCombo[i].Items[j];
+							if (item.Item2 == matTex.Value.m_Texture.instance)
+							{
+								matTexNameCombo[i].SelectedIndex = j;
+								break;
+							}
+						}
 					}
 				}
 
@@ -1241,7 +1331,6 @@ namespace UnityPlugin
 					}
 					Report.ReportLog("Warning: Couldn't find texture " + missing.Key + " for material(s)" + mats);
 				}
-				Report.ReportLog("Those materials have NOT been set to (none)! Use 'External' when editing such materials.");
 			}
 
 			CrossRefsSet();
@@ -1521,13 +1610,12 @@ namespace UnityPlugin
 
 		private void HighlightBone(int[] boneIds, bool show)
 		{
-			/*RenderObjectXX renderObj = renderObjectMeshes[boneIds[0]];
+			RenderObjectUnity renderObj = renderObjectMeshes[boneIds[0]];
 			if (renderObj != null)
 			{
-				xxMesh mesh = Editor.Meshes[boneIds[0]].Mesh;
-				renderObj.HighlightBone(mesh, boneIds[1], show);
+				renderObj.HighlightBone(Editor.Meshes[boneIds[0]], boneIds[1], show);
 				Gui.Renderer.Render();
-			}*/
+			}
 		}
 
 		private void SetListViewAfterNodeSelect(ListView listView, DragSource tag)
@@ -2078,36 +2166,41 @@ namespace UnityPlugin
 		public void RecreateFrames()
 		{
 			CrossRefsClear();
-			//DisposeRenderObjects();
+			DisposeRenderObjects();
 			LoadFrame(-1);
 			LoadMesh(-1);
 			InitFrames();
 			InitMeshes();
-			//RecreateRenderObjects();
+			RecreateRenderObjects();
 			RecreateCrossRefs();
 		}
 
 		private void RecreateMeshes()
 		{
+			int oldLoadedMesh = loadedMesh;
 			CrossRefsClear();
-			//DisposeRenderObjects();
+			DisposeRenderObjects();
 			LoadMesh(-1);
 			InitFrames();
 			InitMeshes();
 			InitMaterials();
-			//RecreateRenderObjects();
+			RecreateRenderObjects();
 			RecreateCrossRefs();
 			LoadMaterial(loadedMaterial);
+			if (oldLoadedMesh != -1)
+			{
+				LoadMesh(oldLoadedMesh);
+			}
 		}
 
 		private void RecreateMaterials()
 		{
 			CrossRefsClear();
-			//DisposeRenderObjects();
+			DisposeRenderObjects();
 			LoadMaterial(-1);
 			InitMaterials();
 			InitTextures();
-			//RecreateRenderObjects();
+			RecreateRenderObjects();
 			RecreateCrossRefs();
 			LoadMesh(loadedMesh);
 		}
@@ -2115,10 +2208,10 @@ namespace UnityPlugin
 		private void RecreateTextures()
 		{
 			CrossRefsClear();
-			//DisposeRenderObjects();
+			DisposeRenderObjects();
 			LoadTexture(-1);
 			InitTextures();
-			//RecreateRenderObjects();
+			RecreateRenderObjects();
 			RecreateCrossRefs();
 			LoadMaterial(loadedMaterial);
 		}
@@ -2236,7 +2329,7 @@ namespace UnityPlugin
 				Gui.Scripting.RunScript(EditorVar + ".SetFrameName(id=" + loadedFrame + ", name=\"" + textBoxFrameName.Text + "\")");
 				Changed = Changed;
 
-				//RecreateRenderObjects();
+				RecreateRenderObjects();
 
 				Transform frame = Editor.Frames[loadedFrame];
 				TreeNode node = FindFrameNode(frame, treeViewObjectTree.Nodes);
@@ -2353,6 +2446,35 @@ namespace UnityPlugin
 			}
 		}
 
+		private void buttonFrameUnique_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedFrame < 0)
+				{
+					return;
+				}
+
+				Gui.Scripting.RunScript(EditorVar + ".UniqueFrame(id=" + loadedFrame + ")");
+				Changed = Changed;
+
+				if (treeViewObjectTree.SelectedNode.Tag is DragSource)
+				{
+					DragSource src = (DragSource)treeViewObjectTree.SelectedNode.Tag;
+					if (src.Type == typeof(Transform) && loadedFrame == (int)src.Id)
+					{
+						treeViewObjectTree.SelectedNode.Text = Editor.Frames[loadedFrame].m_GameObject.instance.m_Name;
+					}
+				}
+				RecreateFrames();
+				SyncWorkspaces();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
 		private void buttonFrameRemove_Click(object sender, EventArgs e)
 		{
 			try
@@ -2372,6 +2494,41 @@ namespace UnityPlugin
 
 				RecreateFrames();
 				SyncWorkspaces();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonFrameAddBone_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedFrame < 0)
+				{
+					return;
+				}
+
+				if (listViewMesh.SelectedItems.Count == 0)
+				{
+					return;
+				}
+				string meshNames = String.Empty;
+				List<int> reselect = new List<int>(listViewMesh.SelectedIndices.Count);
+				for (int i = 0; i < listViewMesh.SelectedItems.Count; i++)
+				{
+					int meshId = (int)listViewMesh.SelectedItems[i].Tag;
+					meshNames += "\"" + Editor.Meshes[meshId].m_GameObject.instance.m_Name + "\", ";
+					reselect.Add(meshId);
+				}
+				meshNames = meshNames.Substring(0, meshNames.Length - 2);
+
+				Gui.Scripting.RunScript(EditorVar + ".AddBone(id=" + loadedFrame + ", meshes={ " + meshNames + " })");
+				Changed = Changed;
+
+				InitFrames();
+				RecreateRenderObjects();
 			}
 			catch (Exception ex)
 			{
@@ -2539,7 +2696,7 @@ namespace UnityPlugin
 					}
 				}
 
-				//RecreateRenderObjects();
+				RecreateRenderObjects();
 			}
 			catch (Exception ex)
 			{
@@ -2588,7 +2745,7 @@ namespace UnityPlugin
 				Changed = Changed;
 
 				LoadBone(null);
-				//RecreateRenderObjects();
+				RecreateRenderObjects();
 				InitFrames();
 			}
 			catch (Exception ex)
@@ -2744,7 +2901,7 @@ namespace UnityPlugin
 					}
 				}
 
-				//RecreateRenderObjects();
+				RecreateRenderObjects();
 			}
 			catch (Exception ex)
 			{
@@ -2770,13 +2927,13 @@ namespace UnityPlugin
 						CrossRefAddItem(crossRefMeshMaterials[id], crossRefMeshMaterialsCount, listViewMeshMaterial, listViewMaterial);
 						CrossRefAddItem(crossRefMeshTextures[id], crossRefMeshTexturesCount, listViewMeshTexture, listViewTexture);
 
-						/*if (renderObjectMeshes[id] == null)
+						if (renderObjectMeshes[id] == null)
 						{
-							xxFrame frame = Editor.Meshes[id];
-							HashSet<string> meshNames = new HashSet<string>() { frame.Name };
-							renderObjectMeshes[id] = new RenderObjectXX(Editor.Parser, meshNames);
+							MeshRenderer meshR = Editor.Meshes[id];
+							HashSet<string> meshNames = new HashSet<string>() { meshR.m_GameObject.instance.m_Name };
+							renderObjectMeshes[id] = new RenderObjectUnity(Editor, meshNames);
 						}
-						RenderObjectXX renderObj = renderObjectMeshes[id];
+						RenderObjectUnity renderObj = renderObjectMeshes[id];
 						if (renderObjectIds[id] == -1)
 						{
 							renderObjectIds[id] = Gui.Renderer.AddRenderObject(renderObj);
@@ -2790,7 +2947,7 @@ namespace UnityPlugin
 							{
 								Gui.Renderer.CenterView();
 							}
-						}*/
+						}
 					}
 					else
 					{
@@ -2801,8 +2958,8 @@ namespace UnityPlugin
 						CrossRefRemoveItem(crossRefMeshMaterials[id], crossRefMeshMaterialsCount, listViewMeshMaterial);
 						CrossRefRemoveItem(crossRefMeshTextures[id], crossRefMeshTexturesCount, listViewMeshTexture);
 
-						/*Gui.Renderer.RemoveRenderObject(renderObjectIds[id]);
-						renderObjectIds[id] = -1;*/
+						Gui.Renderer.RemoveRenderObject(renderObjectIds[id]);
+						renderObjectIds[id] = -1;
 					}
 
 					CrossRefSetSelected(e.IsSelected, listViewMesh, id);
@@ -2833,14 +2990,28 @@ namespace UnityPlugin
 		{
 			try
 			{
-				Tuple<string, Component> item =  (Tuple<string,Component>)comboBoxMeshRendererMesh.SelectedItem;
+				Tuple<string, Component> item = (Tuple<string, Component>)comboBoxMeshRendererMesh.SelectedItem;
 				int componentIndex = Editor.Parser.file.Components.IndexOf(item.Item2);
-				Gui.Scripting.RunScript(EditorVar + ".SetMesh(meshId=" + loadedMesh + ", componentIndex=" + componentIndex + ")");
+				Gui.Scripting.RunScript(EditorVar + ".LoadAndSetMesh(meshId=" + loadedMesh + ", componentIndex=" + componentIndex + ")");
 				Changed = Changed;
 
-				int oldLoadedMesh = loadedMesh;
 				RecreateMeshes();
-				LoadMesh(oldLoadedMesh);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void comboBoxRendererRootBone_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				Tuple<string, int> item = (Tuple<string, int>)comboBoxRendererRootBone.SelectedItem;
+				Gui.Scripting.RunScript(EditorVar + ".SetSkinnedMeshRendererRootBone(meshId=" + loadedMesh + ", frameId=" + item.Item2 + ")");
+				Changed = Changed;
+
+				RecreateMeshes();
 			}
 			catch (Exception ex)
 			{
@@ -3003,6 +3174,7 @@ namespace UnityPlugin
 				}
 				Changed = Changed;
 
+				loadedMesh = -1;
 				RecreateMeshes();
 			}
 			catch (Exception ex)
@@ -3055,7 +3227,29 @@ namespace UnityPlugin
 							Changed = Changed;
 						}
 
-						//RecreateRenderObjects();
+						RecreateRenderObjects();
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonSkinnedMeshRendererAttributes_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedMesh < 0)
+				{
+					return;
+				}
+
+				using (var attributesDialog = new FormRendererMeshAttributes(Editor.Meshes[loadedMesh]))
+				{
+					if (attributesDialog.ShowDialog() == DialogResult.OK)
+					{
 					}
 				}
 			}
@@ -3088,9 +3282,9 @@ namespace UnityPlugin
 			try
 			{
 				/*if (!checkBoxSubmeshReorder.Checked)
-				{
+				{*/
 					HighlightSubmeshes();
-				}
+				/*}
 				else
 				{
 					Gui.Scripting.RunScript(EditorVar + ".MoveSubmesh(meshId=" + loadedMesh + ", submeshId=" + (int)checkBoxSubmeshReorder.Tag + ", newPosition=" + dataGridViewMesh.SelectedRows[0].Index + ")");
@@ -3119,7 +3313,7 @@ namespace UnityPlugin
 				return;
 			}
 
-			/*RenderObjectXX renderObj = renderObjectMeshes[loadedMesh];
+			RenderObjectUnity renderObj = renderObjectMeshes[loadedMesh];
 			if (renderObj != null)
 			{
 				renderObj.HighlightSubmesh.Clear();
@@ -3128,7 +3322,7 @@ namespace UnityPlugin
 					renderObj.HighlightSubmesh.Add(row.Index);
 				}
 				Gui.Renderer.Render();
-			}*/
+			}
 		}
 
 		private void dataGridViewMesh_KeyDown(object sender, KeyEventArgs e)
@@ -3203,38 +3397,40 @@ namespace UnityPlugin
 					return;
 				}
 
-				int comboValue = (int)combo.SelectedValue;
-				int cellValue = dataGridViewMesh.CurrentCell.Value != null ? (int)dataGridViewMesh.CurrentCell.Value : -1;
-				if (comboValue != cellValue)
+				List<Tuple<string, int, Component>> columnMaterials = (List<Tuple<string, int, Component>>)ColumnSubmeshMaterial.DataSource;
+				int matIdx = combo.SelectedIndex != -1 ? columnMaterials[combo.SelectedIndex].Item2 : -1;
+				int rowIdx = dataGridViewMesh.CurrentCell.RowIndex;
+				MeshRenderer meshRenderer = Editor.Meshes[loadedMesh];
+				Material subMeshMat = meshRenderer.m_Materials[rowIdx].instance;
+				if (Editor.Materials.IndexOf(subMeshMat) != matIdx)
 				{
 					dataGridViewMesh.CommitEdit(DataGridViewDataErrorContexts.Commit);
 
-					int rowIdx = dataGridViewMesh.CurrentCell.RowIndex;
-					MeshRenderer meshRenderer = Editor.Meshes[loadedMesh];
-					Material subMeshMat = meshRenderer.m_Materials[rowIdx].instance;
-					Mesh mesh;
-					if (meshRenderer is SkinnedMeshRenderer)
-					{
-						SkinnedMeshRenderer sMesh = (SkinnedMeshRenderer)meshRenderer;
-						mesh = sMesh.m_Mesh.instance;
-					}
-					else
-					{
-						MeshFilter filter = meshRenderer.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshFilter);
-						mesh = filter.m_Mesh.instance;
-					}
+					Mesh mesh = Operations.GetMesh(meshRenderer);
 					if (mesh != null)
 					{
-						SubMesh submesh = mesh.m_SubMeshes[rowIdx];
-						object val = comboValue;
-						int matIdx = (val == null) ? -1 : (int)val;
-
-						if (Editor.Materials[matIdx] != subMeshMat)
+						if (matIdx == -1)
+						{
+							List<Tuple<string, int, Component>> source = (List<Tuple<string, int, Component>>)ColumnSubmeshMaterial.DataSource;
+							Gui.Scripting.RunScript(EditorVar + ".LoadAndSetSubMeshMaterial(meshId=" + loadedMesh + ", subMeshId=" + rowIdx + ", componentIndex=" + Editor.Parser.file.Components.IndexOf(source[combo.SelectedIndex].Item3) + ")");
+							Changed = Changed;
+						}
+						else if (Editor.Materials[matIdx] != subMeshMat)
 						{
 							Gui.Scripting.RunScript(EditorVar + ".SetSubMeshMaterial(meshId=" + loadedMesh + ", subMeshId=" + rowIdx + ", material=" + matIdx + ")");
 							Changed = Changed;
+						}
+						else
+						{
+							return;
+						}
 
-							//RecreateRenderObjects();
+						subMeshMat = meshRenderer.m_Materials[rowIdx].instance;
+						dataGridViewMesh.CurrentCell.Value = Editor.Materials.IndexOf(subMeshMat);
+						if (matIdx == -1)
+						{
+							InitMaterials();
+							RecreateRenderObjects();
 							RecreateCrossRefs();
 						}
 					}
@@ -3299,7 +3495,7 @@ namespace UnityPlugin
 					}
 					dataGridViewMesh.Rows[lastSelectedRow].Selected = true;
 					dataGridViewMesh.FirstDisplayedScrollingRowIndex = lastSelectedRow;
-					//RecreateRenderObjects();
+					RecreateRenderObjects();
 					RecreateCrossRefs();
 				}
 			}
@@ -3414,12 +3610,13 @@ namespace UnityPlugin
 
 				ComboBox combo = (ComboBox)sender;
 				int matTexIdx = (int)combo.Tag;
-				string name = (combo.SelectedIndex == 0) ? String.Empty : (string)combo.Items[combo.SelectedIndex];
-
+				Component asset = ((Tuple<string, Component>)combo.Items[combo.SelectedIndex]).Item2;
+				string name = (combo.SelectedIndex < 1) ? String.Empty : (asset is NotLoaded ? ((NotLoaded)asset).Name : ((Texture2D)asset).m_Name);
 				Gui.Scripting.RunScript(EditorVar + ".SetMaterialTexture(id=" + loadedMaterial + ", index=" + matTexIdx + ", name=\"" + name + "\")");
 				Changed = Changed;
 
-				//RecreateRenderObjects();
+				InitTextures();
+				RecreateRenderObjects();
 				RecreateCrossRefs();
 				LoadMaterial(loadedMaterial);
 			}
@@ -3452,7 +3649,7 @@ namespace UnityPlugin
 				}
 				Changed = Changed;
 
-				//RecreateRenderObjects();
+				RecreateRenderObjects();
 				RecreateCrossRefs();
 				LoadMaterial(loadedMaterial);
 			}
@@ -3495,7 +3692,7 @@ namespace UnityPlugin
 				}
 				Changed = Changed;
 
-				//RecreateRenderObjects();
+				RecreateRenderObjects();
 				LoadMesh(loadedMesh);
 				InitMaterials();
 				SyncWorkspaces();
@@ -3703,7 +3900,7 @@ namespace UnityPlugin
 				}
 				Changed = Changed;
 
-				//RecreateRenderObjects();
+				RecreateRenderObjects();
 				InitTextures();
 				SyncWorkspaces();
 				RecreateCrossRefs();
@@ -3738,7 +3935,7 @@ namespace UnityPlugin
 				}
 				Changed = Changed;
 
-				//RecreateRenderObjects();
+				RecreateRenderObjects();
 				InitTextures();
 				RecreateCrossRefs();
 				LoadMaterial(loadedMaterial);
@@ -3766,7 +3963,7 @@ namespace UnityPlugin
 				Gui.Scripting.RunScript(EditorVar + ".ReplaceTexture(id=" + loadedTexture + ", image=" + Gui.ImageControl.ImageScriptVariable + ")");
 				Changed = Changed;
 
-				//RecreateRenderObjects();
+				RecreateRenderObjects();
 				InitTextures();
 				RecreateCrossRefs();
 				LoadMaterial(loadedMaterial);

@@ -776,7 +776,7 @@ namespace SB3Utility
 
 		public void Zoom(float dist)
 		{
-			radius -= dist * Sensitivity;
+			radius -= dist * Sensitivity * radius / 3;
 			if (radius < nearClip)
 			{
 				radius = nearClip;
@@ -787,16 +787,16 @@ namespace SB3Utility
 
 		public void Rotate(float h, float v)
 		{
-			hRotation += h * Sensitivity;
-			vRotation += v * Sensitivity;
+			hRotation += h * Sensitivity + Math.Sign(h) * radius / 1000;
+			vRotation += v * Sensitivity + Math.Sign(v) * radius / 1000;
 
 			UpdatePosition();
 		}
 
 		public void Translate(float h, float v)
 		{
-			h *= Sensitivity * 3;
-			v *= Sensitivity * 3;
+			h *= Sensitivity * radius / 3;
+			v *= Sensitivity * radius / 3;
 
 			Vector3 diff = Vector3.Subtract(position, target);
 			Vector3 hVector = Vector3.Cross(diff, upVector);

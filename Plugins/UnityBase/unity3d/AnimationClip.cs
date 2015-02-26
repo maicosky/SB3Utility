@@ -1000,7 +1000,6 @@ namespace UnityPlugin
 
 		public void WriteTo(Stream stream)
 		{
-			long beginPos = stream.Position;
 			BinaryWriter writer = new BinaryWriter(stream);
 			writer.WriteNameA4(m_Name);
 			writer.Write(m_AnimationType);

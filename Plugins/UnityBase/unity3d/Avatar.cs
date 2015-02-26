@@ -13,6 +13,12 @@ namespace UnityPlugin
 		public int m_ParentId { get; set; }
 		public int m_AxesId { get; set; }
 
+		public Node(int parentId, int axesId)
+		{
+			m_ParentId = parentId;
+			m_AxesId = axesId;
+		}
+
 		public Node(Stream stream)
 		{
 			BinaryReader reader = new BinaryReader(stream);
@@ -574,25 +580,67 @@ namespace UnityPlugin
 		public void AddBone(Transform parent, Transform bone)
 		{
 			string parentPath = BonePath(parent.m_GameObject.instance.m_Name);
-			StringBuilder sb = new StringBuilder(parentPath);
-			sb.Append("/");
-			sb.Append(bone.m_GameObject.instance.m_Name);
-			string bonePath = sb.ToString();
-			for (uint boneHash = (uint)bonePath.GetHashCode(); ; boneHash += 7327)
+			string bonePath = parentPath + "/" + bone.m_GameObject.instance.m_Name;
+			uint[] hashes = Animator.StringsToHashes(bonePath, bone.m_GameObject.instance.m_Name);
+			uint bonePathHash = hashes[0];// Animator.StringToHash(bonePath);
+			uint boneHash = hashes[1];// Animator.StringToHash(bone.m_GameObject.instance.m_Name);
+
+			int idx;
+			for (idx = 0; idx < m_TOS.Count; idx++)
 			{
-				uint freeHash = m_TOS.Find
-				(
-					delegate(KeyValuePair<uint, string> data)
-					{
-						return data.Key == boneHash;
-					}
-				).Key;
-				if (freeHash == 0)
+				var data = m_TOS[idx];
+				if (data.Key > bonePathHash)
 				{
-					m_TOS.Add(new KeyValuePair<uint, string>(boneHash, bonePath));
 					break;
 				}
 			}
+			m_TOS.Insert(idx, new KeyValuePair<uint, string>(bonePathHash, bonePath));
+
+			uint parentHash = BoneHash(parent.m_GameObject.instance.m_Name);
+			for (int i = 0; i < m_Avatar.m_AvatarSkeleton.m_ID.Count; i++)
+			{
+				if (m_Avatar.m_AvatarSkeleton.m_ID[i] == parentHash)
+				{
+					int cIdx = i + BoneIndex(parent, bone);
+					m_Avatar.m_AvatarSkeleton.m_Node.Insert(cIdx, new Node(i, -1));
+					m_Avatar.m_AvatarSkeleton.m_ID.Insert(cIdx, bonePathHash);
+					m_Avatar.m_SkeletonNameIDArray.Insert(cIdx, boneHash);
+					Matrix m = Matrix.Transpose(Matrix.Invert(Transform.WorldTransform(bone)));
+					Vector3 t, s;
+					Quaternion q;
+					m.Decompose(out s, out q, out t);
+					xform boneXform = new xform(new Vector4(t, 0), q, new Vector4(s, 1));
+					m_Avatar.m_AvatarSkeletonPose.m_X.Insert(cIdx, boneXform);
+					m_Avatar.m_DefaultPose.m_X.Insert(cIdx, boneXform);
+
+					for (int j = cIdx + 1; j < m_Avatar.m_AvatarSkeleton.m_ID.Count; j++)
+					{
+						if (m_Avatar.m_AvatarSkeleton.m_Node[j].m_ParentId >= cIdx)
+						{
+							m_Avatar.m_AvatarSkeleton.m_Node[j].m_ParentId++;
+						}
+					}
+					break;
+				}
+			}
+			if (m_TOS.Count != m_Avatar.m_AvatarSkeleton.m_Node.Count)
+			{
+				Report.ReportLog("Warning! Parent Transform " + parent.m_GameObject.instance.m_Name + " not found in Avatar member m_ID");
+			}
+		}
+
+		int BoneIndex(Transform parent, Transform bone)
+		{
+			int index = 1;
+			for (int i = 0; i < parent.Count; i++)
+			{
+				if (parent[i] == bone)
+				{
+					return index;
+				}
+				index += BoneIndex(parent[i], null);
+			}
+			return index;
 		}
 
 		public void RenameBone(string oldName, string newName)
@@ -627,6 +675,26 @@ namespace UnityPlugin
 					if (pair.Value.Length == beginPos + bonePath.Length || pair.Value[beginPos + bonePath.Length] == '/')
 					{
 						m_TOS.RemoveAt(i);
+						for (int j = 0; j < m_Avatar.m_AvatarSkeleton.m_ID.Count; j++)
+						{
+							if (m_Avatar.m_AvatarSkeleton.m_ID[j] == pair.Key)
+							{
+								m_Avatar.m_AvatarSkeleton.m_ID.RemoveAt(j);
+								m_Avatar.m_AvatarSkeleton.m_Node.RemoveAt(j);
+								m_Avatar.m_SkeletonNameIDArray.RemoveAt(j);
+								m_Avatar.m_AvatarSkeletonPose.m_X.RemoveAt(j);
+								m_Avatar.m_DefaultPose.m_X.RemoveAt(j);
+
+								for (int k = j; k < m_Avatar.m_AvatarSkeleton.m_ID.Count; k++)
+								{
+									if (m_Avatar.m_AvatarSkeleton.m_Node[k].m_ParentId >= j)
+									{
+										m_Avatar.m_AvatarSkeleton.m_Node[k].m_ParentId--;
+									}
+								}
+								break;
+							}
+						}
 					}
 				}
 			}

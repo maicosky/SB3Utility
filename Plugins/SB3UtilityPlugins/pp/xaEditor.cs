@@ -522,29 +522,43 @@ namespace SB3Utility
 				}
 				if (track.KeyframeList[i].Index > index)
 				{
-					xaAnimationKeyframe keyframe = new xaAnimationKeyframe();
-					keyframe.Index = index;
-					xa.CreateUnknowns(keyframe);
-					if (i > 0)
-					{
-						int predIdx = track.KeyframeList[i - 1].Index;
-						float indexPosition = (float)(index - predIdx) / (track.KeyframeList[i].Index - predIdx);
-						keyframe.Scaling = track.KeyframeList[i - 1].Scaling + (track.KeyframeList[i].Scaling - track.KeyframeList[i - 1].Scaling) * indexPosition;
-						keyframe.Rotation = track.KeyframeList[i - 1].Rotation + (track.KeyframeList[i].Rotation - track.KeyframeList[i - 1].Rotation) * indexPosition;
-						keyframe.Translation = track.KeyframeList[i - 1].Translation + (track.KeyframeList[i].Translation - track.KeyframeList[i - 1].Translation) * indexPosition;
-					}
-					else
-					{
-						keyframe.Scaling = track.KeyframeList[i].Scaling;
-						keyframe.Rotation = track.KeyframeList[i].Rotation;
-						keyframe.Translation = track.KeyframeList[i].Translation;
-					}
-					track.KeyframeList.Insert(i, keyframe);
-					Changed = true;
-					return keyframe;
+					return AddKeyframe(track, index, i);
 				}
 			}
-			return null;
+			return AddKeyframe(track, index, track.KeyframeList.Count);
+		}
+
+		private xaAnimationKeyframe AddKeyframe(xaAnimationTrack track, int index, int i)
+		{
+			xaAnimationKeyframe keyframe = new xaAnimationKeyframe();
+			keyframe.Index = index;
+			xa.CreateUnknowns(keyframe);
+			if (i < track.KeyframeList.Count)
+			{
+				if (i > 0)
+				{
+					int predIdx = track.KeyframeList[i - 1].Index;
+					float indexPosition = (float)(index - predIdx) / (track.KeyframeList[i].Index - predIdx);
+					keyframe.Scaling = track.KeyframeList[i - 1].Scaling + (track.KeyframeList[i].Scaling - track.KeyframeList[i - 1].Scaling) * indexPosition;
+					keyframe.Rotation = track.KeyframeList[i - 1].Rotation + (track.KeyframeList[i].Rotation - track.KeyframeList[i - 1].Rotation) * indexPosition;
+					keyframe.Translation = track.KeyframeList[i - 1].Translation + (track.KeyframeList[i].Translation - track.KeyframeList[i - 1].Translation) * indexPosition;
+				}
+				else
+				{
+					keyframe.Scaling = track.KeyframeList[i].Scaling;
+					keyframe.Rotation = track.KeyframeList[i].Rotation;
+					keyframe.Translation = track.KeyframeList[i].Translation;
+				}
+			}
+			else
+			{
+				keyframe.Scaling = track.KeyframeList[track.KeyframeList.Count - 1].Scaling;
+				keyframe.Rotation = track.KeyframeList[track.KeyframeList.Count - 1].Rotation;
+				keyframe.Translation = track.KeyframeList[track.KeyframeList.Count - 1].Translation;
+			}
+			track.KeyframeList.Insert(i, keyframe);
+			Changed = true;
+			return keyframe;
 		}
 
 		[Plugin]
