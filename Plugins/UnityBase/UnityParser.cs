@@ -340,7 +340,7 @@ namespace UnityPlugin
 		public int Entry1Length { get; protected set; }
 		public int Entry1LengthCopy { get; protected set; }
 		public int FileLengthCopy { get; protected set; }
-		public int ReducedLength { get; protected set; }
+		public int CabinetOffset { get; protected set; }
 		public byte LastByte { get; protected set; }
 		public AssetCabinet Cabinet { get; protected set; }
 
@@ -364,7 +364,7 @@ namespace UnityPlugin
 				Entry1Length = reader.ReadInt32BE();
 				Entry1LengthCopy = reader.ReadInt32BE();
 				FileLengthCopy = reader.ReadInt32BE();
-				ReducedLength = reader.ReadInt32BE();
+				CabinetOffset = reader.ReadInt32BE();
 				LastByte = reader.ReadByte();
 
 				if (reader.BaseStream.Length != FileLength || reader.BaseStream.Length != FileLengthCopy)
@@ -494,7 +494,7 @@ namespace UnityPlugin
 					writer.WriteInt32BE(Entry1Length);
 					writer.WriteInt32BE(Entry1LengthCopy);
 					writer.WriteInt32BE(FileLengthCopy);
-					writer.WriteInt32BE(ReducedLength);
+					writer.WriteInt32BE(CabinetOffset);
 					writer.Write(LastByte);
 				}
 

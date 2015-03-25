@@ -100,6 +100,7 @@ namespace SB3Utility {
 			static void ExportMorph(String^ path, xxParser^ xxParser, xxFrame^ meshFrame, xaMorphClip^ morphClip, xaParser^ xaparser, String^ exportFormat, bool oneBlendShape, bool embedMedia, bool compatibility);
 
 			static void Export(String^ path, IImported^ imported, int startKeyframe, int endKeyframe, bool linear, bool EulerFilter, float filterPrecision, String^ exportFormat, bool allFrames, bool allBones, bool skins, bool compatibility);
+			static void ExportMorph(String^ path, IImported^ imported, String^ exportFormat, bool oneBlendShape, bool compatibility);
 
 		private:
 			HashSet<String^>^ frameNames;
@@ -145,6 +146,7 @@ namespace SB3Utility {
 					FbxPropertyT<FbxDouble3>& scale, FbxPropertyT<FbxDouble4>& rotate, FbxPropertyT<FbxDouble3>& translate, List<String^>^ pNotFound);
 			void ExportSampledAnimation(ImportedSampledAnimation^ parser, FbxString& kTakeName, int startKeyframe, int endKeyframe, bool linear, FbxAnimCurveFilterUnroll* EulerFilter, float filterPrecision,
 					FbxPropertyT<FbxDouble3>& scale, FbxPropertyT<FbxDouble4>& rotate, FbxPropertyT<FbxDouble3>& translate, List<String^>^ pNotFound);
+			void ExportMorphs(IImported^ imported, bool oneBlendShape);
 		};
 
 	private:

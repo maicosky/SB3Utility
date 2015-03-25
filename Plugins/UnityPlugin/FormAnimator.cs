@@ -33,6 +33,16 @@ namespace UnityPlugin
 			Fbx_2006
 		}
 
+		private enum MorphExportFormat
+		{
+			[Description("Metasequoia")]
+			Mqo,
+			[Description("FBX 2015.1")]
+			Fbx,
+			[Description("FBX 2006")]
+			Fbx_2006
+		}
+
 		private class KeyList<T>
 		{
 			public List<T> List { get; protected set; }
@@ -355,6 +365,15 @@ namespace UnityPlugin
 
 			checkBoxMeshExportMqoSortMeshes.Checked = (bool)Gui.Config["ExportMqoSortMeshes"];
 			checkBoxMeshExportMqoSortMeshes.CheckedChanged += checkBoxMeshExportMqoSortMeshes_CheckedChanged;
+
+			MorphExportFormat[] morphValues = Enum.GetValues(typeof(MorphExportFormat)) as MorphExportFormat[];
+			descriptions = new string[morphValues.Length];
+			for (int i = 0; i < descriptions.Length; i++)
+			{
+				descriptions[i] = morphValues[i].GetDescription();
+			}
+			comboBoxMorphExportFormat.Items.AddRange(descriptions);
+			comboBoxMorphExportFormat.SelectedIndex = 1;
 		}
 
 		void LoadAnimator(bool refreshLists)
@@ -371,8 +390,28 @@ namespace UnityPlugin
 
 			try
 			{
+				if (tabControlLists.TabPages.Contains(tabPageMorph))
+				{
+					bool keepEmIn = false;
+					foreach (MeshRenderer meshR in Editor.Meshes)
+					{
+						Mesh mesh = Operations.GetMesh(meshR);
+						if (mesh != null && mesh.m_Shapes.shapes.Count > 0)
+						{
+							keepEmIn = true;
+							break;
+						}
+					}
+					if (!keepEmIn)
+					{
+						tabControlLists.TabPages.Remove(tabPageMorph);
+						tabControlViews.TabPages.Remove(tabPageMorphView);
+					}
+				}
+
 				InitFrames();
 				InitMeshes();
+				InitMorphs();
 				InitMaterials();
 				InitTextures();
 			}
@@ -607,6 +646,44 @@ namespace UnityPlugin
 			}
 		}
 
+		void InitMorphs()
+		{
+			string keyframeName = editTextBoxMorphKeyframe.Text;
+			List<TreeNode> morphMeshes = new List<TreeNode>();
+			TreeNode selectedNode = null;
+			for (int i = 0; i < Editor.Meshes.Count; i++)
+			{
+				MeshRenderer meshR = Editor.Meshes[i];
+				Mesh mesh = Operations.GetMesh(meshR);
+				if (mesh != null && mesh.m_Shapes.shapes.Count > 0)
+				{
+					TreeNode meshNode = new TreeNode(Operations.BlendShapeName(mesh) + " [" + mesh.m_Name + "]");
+					meshNode.Tag = meshR;
+					for (int j = 0; j < mesh.m_Shapes.shapes.Count; j++)
+					{
+						MeshBlendShapeChannel channel = mesh.m_Shapes.channels[j];
+						MeshBlendShape shape = mesh.m_Shapes.shapes[j];
+						TreeNode morphClipNode = new TreeNode(channel.frameIndex.ToString("D2") + ": " + Operations.BlendShapeKeyframeName(mesh, j) + " vertices=" + shape.vertexCount);
+						morphClipNode.Tag = j;
+						if (channel.name == keyframeName)
+						{
+							meshNode.Expand();
+							selectedNode = morphClipNode;
+						}
+						meshNode.Nodes.Add(morphClipNode);
+					}
+					morphMeshes.Add(meshNode);
+				}
+			}
+			treeViewMorphKeyframes.Nodes.Clear();
+			treeViewMorphKeyframes.Nodes.AddRange(morphMeshes.ToArray());
+			if (selectedNode != null)
+			{
+				treeViewMorphKeyframes.SelectedNode = selectedNode;
+				selectedNode.EnsureVisible();
+			}
+		}
+
 		void InitMaterials()
 		{
 			HashSet<string> selectedItems = new HashSet<string>();
@@ -789,7 +866,7 @@ namespace UnityPlugin
 				Mesh mesh = smr.m_Mesh.instance;
 				if (mesh != null)
 				{
-					Matrix matrix = mesh.m_BindPose[id[1]];
+					Matrix matrix = Matrix.Transpose(mesh.m_BindPose[id[1]]);
 					DataGridViewEditor.LoadMatrix(matrix, dataGridViewBoneSRT, dataGridViewBoneMatrix);
 				}
 			}
@@ -824,12 +901,12 @@ namespace UnityPlugin
 				MeshRenderer meshR = Editor.Meshes[id];
 				textBoxRendererName.Text = meshR.m_GameObject.instance.m_Name;
 				checkBoxRendererEnabled.Checked = meshR.m_Enabled;
-				Mesh mesh = Operations.GetMesh(meshR);
 				if (meshR is SkinnedMeshRenderer)
 				{
 					SkinnedMeshRenderer sMesh = (SkinnedMeshRenderer)meshR;
 					comboBoxRendererRootBone.SelectedIndex = sMesh.m_RootBone.instance != null ? comboBoxRendererRootBone.FindStringExact(sMesh.m_RootBone.instance.m_GameObject.instance.m_Name) : 0;
 				}
+				Mesh mesh = Operations.GetMesh(meshR);
 				if (mesh != null)
 				{
 					for (int i = 0; i < comboBoxMeshRendererMesh.Items.Count; i++)
@@ -1859,7 +1936,7 @@ namespace UnityPlugin
 				DragSource source = (DragSource)node.Tag;
 				if (source.Type == typeof(Transform))
 				{
-					dragOptions.ShowPanel(true);
+					dragOptions.ShowPanel(FormAnimatorDragDrop.ShowPanelOption.Frame);
 					if (!dragOptions.checkBoxFrameDestinationLock.Checked)
 					{
 						var srcEditor = (AnimatorEditor)Gui.Scripting.Variables[source.Variable];
@@ -1890,7 +1967,7 @@ namespace UnityPlugin
 				}
 				else if (source.Type == typeof(ImportedFrame))
 				{
-					dragOptions.ShowPanel(true);
+					dragOptions.ShowPanel(FormAnimatorDragDrop.ShowPanelOption.Frame);
 					if (!dragOptions.checkBoxFrameDestinationLock.Checked)
 					{
 						var srcEditor = (ImportedEditor)Gui.Scripting.Variables[source.Variable];
@@ -1914,7 +1991,7 @@ namespace UnityPlugin
 				}
 				else if (source.Type == typeof(WorkspaceMesh))
 				{
-					dragOptions.ShowPanel(false);
+					dragOptions.ShowPanel(FormAnimatorDragDrop.ShowPanelOption.Mesh);
 					var srcEditor = (ImportedEditor)Gui.Scripting.Variables[source.Variable];
 
 					if (!dragOptions.checkBoxMeshDestinationLock.Checked)
@@ -1961,6 +2038,9 @@ namespace UnityPlugin
 									bonesCopyNear = false;
 								}
 							}
+							if (!bonesCopyNear)
+							{
+								dragOptions.radioButtonMeshReplace.Checked = true;}
 						}
 						if (!dragOptions.checkBoxMeshNormalsLock.Checked)
 						{
@@ -2171,6 +2251,7 @@ namespace UnityPlugin
 			LoadMesh(-1);
 			InitFrames();
 			InitMeshes();
+			InitMorphs();
 			RecreateRenderObjects();
 			RecreateCrossRefs();
 		}
@@ -2183,11 +2264,12 @@ namespace UnityPlugin
 			LoadMesh(-1);
 			InitFrames();
 			InitMeshes();
+			InitMorphs();
 			InitMaterials();
 			RecreateRenderObjects();
 			RecreateCrossRefs();
 			LoadMaterial(loadedMaterial);
-			if (oldLoadedMesh != -1)
+			if (oldLoadedMesh != -1 && oldLoadedMesh < Editor.Meshes.Count)
 			{
 				LoadMesh(oldLoadedMesh);
 			}
@@ -3402,7 +3484,7 @@ namespace UnityPlugin
 				int rowIdx = dataGridViewMesh.CurrentCell.RowIndex;
 				MeshRenderer meshRenderer = Editor.Meshes[loadedMesh];
 				Material subMeshMat = meshRenderer.m_Materials[rowIdx].instance;
-				if (Editor.Materials.IndexOf(subMeshMat) != matIdx)
+				if (subMeshMat == null || Editor.Materials.IndexOf(subMeshMat) != matIdx)
 				{
 					dataGridViewMesh.CommitEdit(DataGridViewDataErrorContexts.Commit);
 
@@ -3411,8 +3493,7 @@ namespace UnityPlugin
 					{
 						if (matIdx == -1)
 						{
-							List<Tuple<string, int, Component>> source = (List<Tuple<string, int, Component>>)ColumnSubmeshMaterial.DataSource;
-							Gui.Scripting.RunScript(EditorVar + ".LoadAndSetSubMeshMaterial(meshId=" + loadedMesh + ", subMeshId=" + rowIdx + ", componentIndex=" + Editor.Parser.file.Components.IndexOf(source[combo.SelectedIndex].Item3) + ")");
+							Gui.Scripting.RunScript(EditorVar + ".LoadAndSetSubMeshMaterial(meshId=" + loadedMesh + ", subMeshId=" + rowIdx + ", componentIndex=" + Editor.Parser.file.Components.IndexOf(columnMaterials[combo.SelectedIndex].Item3) + ")");
 							Changed = Changed;
 						}
 						else if (Editor.Materials[matIdx] != subMeshMat)
@@ -3425,14 +3506,15 @@ namespace UnityPlugin
 							return;
 						}
 
-						subMeshMat = meshRenderer.m_Materials[rowIdx].instance;
-						dataGridViewMesh.CurrentCell.Value = Editor.Materials.IndexOf(subMeshMat);
 						if (matIdx == -1)
 						{
 							InitMaterials();
-							RecreateRenderObjects();
-							RecreateCrossRefs();
 						}
+						RecreateRenderObjects();
+						RecreateCrossRefs();
+						subMeshMat = meshRenderer.m_Materials[rowIdx].instance;
+						dataGridViewMesh.CurrentCell.Value = Editor.Materials.IndexOf(subMeshMat);
+						combo.SelectedValue = dataGridViewMesh.CurrentCell.Value;
 					}
 				}
 			}
@@ -3502,6 +3584,347 @@ namespace UnityPlugin
 			catch (Exception ex)
 			{
 				Utility.ReportException(ex);
+			}
+		}
+
+		private void treeViewMorphKeyframe_AfterSelect(object sender, TreeViewEventArgs e)
+		{
+			try
+			{
+				tabControlViews.SelectTabWithoutLoosingFocus(tabPageMorphView);
+				checkBoxMorphNormals.CheckedChanged -= checkBoxMorphNormals_CheckedChanged;
+				checkBoxMorphTangents.CheckedChanged -= checkBoxMorphTangents_CheckedChanged;
+				if (e.Node.Tag is int)
+				{
+					SkinnedMeshRenderer sMesh = (SkinnedMeshRenderer)e.Node.Parent.Tag;
+					Mesh mesh = Operations.GetMesh(sMesh);
+					if (mesh != null)
+					{
+						int shapeIndex = (int)e.Node.Tag;
+						editTextBoxMorphKeyframe.Text = mesh.m_Shapes.channels[shapeIndex].name;
+						editTextBoxMorphKeyframeHash.Text = mesh.m_Shapes.channels[shapeIndex].nameHash.ToString("X");
+						textBoxMorphFrameIndex.Text = mesh.m_Shapes.channels[shapeIndex].frameIndex.ToString();
+						editTextBoxMorphFrameCount.Text = mesh.m_Shapes.channels[shapeIndex].frameCount.ToString();
+						checkBoxMorphNormals.Checked = mesh.m_Shapes.shapes[shapeIndex].hasNormals;
+						checkBoxMorphTangents.Checked = mesh.m_Shapes.shapes[shapeIndex].hasTangents;
+						editTextBoxMorphWeightRange.Text = sMesh.m_BlendShapeWeights[shapeIndex].ToFloatString() + "-" + mesh.m_Shapes.fullWeights[shapeIndex].ToFloatString();
+					}
+				}
+				else
+				{
+					editTextBoxMorphKeyframe.Text = String.Empty;
+					editTextBoxMorphKeyframeHash.Text = String.Empty;
+					textBoxMorphFrameIndex.Text = String.Empty;
+					editTextBoxMorphFrameCount.Text = String.Empty;
+					checkBoxMorphNormals.Checked = false;
+					checkBoxMorphTangents.Checked = false;
+					editTextBoxMorphWeightRange.Text = String.Empty;
+				}
+				checkBoxMorphTangents.CheckedChanged += checkBoxMorphTangents_CheckedChanged;
+				checkBoxMorphNormals.CheckedChanged += checkBoxMorphNormals_CheckedChanged;
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		void checkBoxMorphTangents_CheckedChanged(object sender, EventArgs e)
+		{
+		}
+
+		void checkBoxMorphNormals_CheckedChanged(object sender, EventArgs e)
+		{
+		}
+
+		void editTextBoxMorphWeightRange_AfterEditTextChanged(object sender, EventArgs e)
+		{
+		}
+
+		void editTextBoxMorphKeyframe_AfterEditTextChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				if (treeViewMorphKeyframes.SelectedNode.Tag is int)
+				{
+					int index = (int)treeViewMorphKeyframes.SelectedNode.Tag;
+					SkinnedMeshRenderer sMesh = (SkinnedMeshRenderer)treeViewMorphKeyframes.SelectedNode.Parent.Tag;
+					Gui.Scripting.RunScript(EditorVar + ".RenameMorphKeyframe(meshId=" + Editor.Meshes.IndexOf(sMesh) + ", morphIndex=" + index + ", name=\"" + editTextBoxMorphKeyframe.Text + "\")");
+					InitMorphs();
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		void editTextBoxMorphFrameIndexCount_AfterEditTextChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				if (treeViewMorphKeyframes.SelectedNode.Tag is int)
+				{
+					int index = (int)treeViewMorphKeyframes.SelectedNode.Tag;
+					SkinnedMeshRenderer sMesh = (SkinnedMeshRenderer)treeViewMorphKeyframes.SelectedNode.Parent.Tag;
+					Gui.Scripting.RunScript(EditorVar + ".SetMorphKeyframeIndexCount(meshId=" + Editor.Meshes.IndexOf(sMesh) + ", morphIndex=" + index + ", index=" + textBoxMorphFrameIndex.Text + ", count=" + editTextBoxMorphFrameCount.Text + ")");
+					InitMorphs();
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void checkBoxStartEndKeyframe_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				CheckBox origin = (CheckBox)sender;
+				if (!origin.Checked)
+				{
+					Tuple<RenderObjectUnity, SkinnedMeshRenderer> tuple = (Tuple<RenderObjectUnity, SkinnedMeshRenderer>)origin.Tag;
+					if (tuple != null)
+					{
+						float unsetMorphFactor = tuple.Item1.UnsetMorphKeyframe(tuple.Item2, sender == checkBoxMorphStartKeyframe);
+						Gui.Renderer.Render();
+						trackBarMorphFactor.ValueChanged -= trackBarMorphFactor_ValueChanged;
+						trackBarMorphFactor.Value = (int)(trackBarMorphFactor.Maximum * unsetMorphFactor);
+						trackBarMorphFactor.ValueChanged += trackBarMorphFactor_ValueChanged;
+					}
+					origin.Text = sender == checkBoxMorphStartKeyframe ? "Start" : "End";
+					return;
+				}
+
+				if (treeViewMorphKeyframes.SelectedNode == null || !(treeViewMorphKeyframes.SelectedNode.Tag is int))
+				{
+					return;
+				}
+
+				SkinnedMeshRenderer sMesh = (SkinnedMeshRenderer)treeViewMorphKeyframes.SelectedNode.Parent.Tag;
+				int blendShapeIndex = (int)treeViewMorphKeyframes.SelectedNode.Tag;
+				RenderObjectUnity renderObj = renderObjectMeshes[Editor.Meshes.IndexOf(sMesh)];
+				if (renderObj == null)
+				{
+					Report.ReportLog("Mesh " + sMesh.m_GameObject.instance.m_Name + " not displayed.");
+					return;
+				}
+				float setMorphFactor = renderObj.SetMorphKeyframe(sMesh, blendShapeIndex, sender == checkBoxMorphStartKeyframe);
+				origin.Tag = new Tuple<RenderObjectUnity, SkinnedMeshRenderer>(renderObj, sMesh);
+				Gui.Renderer.Render();
+				trackBarMorphFactor.ValueChanged -= trackBarMorphFactor_ValueChanged;
+				trackBarMorphFactor.Value = (int)(trackBarMorphFactor.Maximum * setMorphFactor);
+				trackBarMorphFactor.ValueChanged += trackBarMorphFactor_ValueChanged;
+				origin.Text = Operations.BlendShapeKeyframeName(Operations.GetMesh(sMesh), blendShapeIndex);
+				toolTip1.SetToolTip(origin, Graphics.FromHwnd(Handle).MeasureString(origin.Text, origin.Font).Width >= origin.Width - 6 ? origin.Text : null);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void trackBarMorphFactor_ValueChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				Tuple<RenderObjectUnity, SkinnedMeshRenderer> tuple = (Tuple<RenderObjectUnity, SkinnedMeshRenderer>)checkBoxMorphStartKeyframe.Tag;
+				if (tuple != null)
+				{
+					tuple.Item1.SetTweenFactor(tuple.Item2, trackBarMorphFactor.Value / (float)trackBarMorphFactor.Maximum);
+					Gui.Renderer.Render();
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonMorphClipExport_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (treeViewMorphKeyframes.SelectedNode == null)
+				{
+					Report.ReportLog("No morph clip was selected");
+					return;
+				}
+
+				TreeNode meshNode = treeViewMorphKeyframes.SelectedNode;
+				if (meshNode.Parent != null)
+				{
+					meshNode = meshNode.Parent;
+				}
+				SkinnedMeshRenderer sMesh = (SkinnedMeshRenderer)meshNode.Tag;
+				HashSet<string> meshNames = new HashSet<string>();
+				meshNames.Add(sMesh.m_GameObject.instance.m_Name);
+				if (listViewMesh.SelectedItems.Count > 0)
+				{
+					foreach (ListViewItem meshItem in listViewMesh.SelectedItems)
+					{
+						meshNames.Add(meshItem.Text);
+					}
+				}
+				string meshNamesArg = String.Empty;
+				foreach (string meshName in meshNames)
+				{
+					meshNamesArg += (meshNamesArg.Length > 0 ? ", \"" : "\"") + meshName + "\"";
+				}
+
+				string path = Editor.Parser.file.Parser.FilePath;
+				if (path.ToLower().EndsWith(".unity3d"))
+				{
+					path = path.Substring(0, path.Length - 8);
+				}
+				path += @"\" + Editor.Parser.m_GameObject.instance.m_Name;
+				switch ((MorphExportFormat)comboBoxMorphExportFormat.SelectedIndex)
+				{
+				case MorphExportFormat.Mqo:
+					Gui.Scripting.RunScript("ExportMorphMqo(dirPath=\"" + path + "\", parser=" + ParserVar + ", meshName=\"" + sMesh.m_GameObject.instance.m_Name + "\")");
+					break;
+				case MorphExportFormat.Fbx:
+				case MorphExportFormat.Fbx_2006:
+					Mesh mesh = Operations.GetMesh(sMesh);
+					DirectoryInfo dir = new DirectoryInfo(path);
+					path = Utility.GetDestFile(dir, sMesh.m_GameObject.instance.m_Name + "-" + (mesh != null ? Operations.BlendShapeName(mesh) : "") + "-", ".fbx");
+					Gui.Scripting.RunScript("ExportMorphFbx(animator=" + ParserVar + ", path=\"" + path + "\", meshNames={" + meshNamesArg + "}, exportFormat=\"" + ".fbx" + "\", oneBlendShape=" + checkBoxMorphFbxOptionOneBlendshape.Checked + ", compatibility=" + ((MorphExportFormat)comboBoxMorphExportFormat.SelectedIndex == MorphExportFormat.Fbx_2006) + ")");
+					break;
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void treeViewMorphKeyframes_ItemDrag(object sender, ItemDragEventArgs e)
+		{
+			try
+			{
+				if (e.Item is TreeNode)
+				{
+					treeViewMorphKeyframes.DoDragDrop(e.Item, DragDropEffects.Copy);
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void treeViewMorphKeyframes_DragEnter(object sender, DragEventArgs e)
+		{
+			try
+			{
+				UpdateDragDropMorphs(sender, e);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void treeViewMorphKeyframes_DragOver(object sender, DragEventArgs e)
+		{
+			try
+			{
+				UpdateDragDropMorphs(sender, e);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void treeViewMorphKeyframes_DragDrop(object sender, DragEventArgs e)
+		{
+			try
+			{
+				TreeNode node = (TreeNode)e.Data.GetData(typeof(TreeNode));
+				if (node == null)
+				{
+					Gui.Docking.DockDragDrop(sender, e);
+				}
+				else
+				{
+					ProcessDragDropMorphs(node);
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void ProcessDragDropMorphs(TreeNode node)
+		{
+			if (node.Tag is DragSource)
+			{
+				if ((node.Parent != null) && !node.Checked && node.StateImageIndex != (int)CheckState.Indeterminate)
+				{
+					return;
+				}
+
+				DragSource? dest = null;
+				if (treeViewMorphKeyframes.SelectedNode != null)
+				{
+					dest = treeViewMorphKeyframes.SelectedNode.Tag as DragSource?;
+				}
+
+				DragSource source = (DragSource)node.Tag;
+				if (source.Type == typeof(WorkspaceMorph))
+				{
+					dragOptions.ShowPanel(FormAnimatorDragDrop.ShowPanelOption.Morph);
+					var srcEditor = (ImportedEditor)Gui.Scripting.Variables[source.Variable];
+					dragOptions.textBoxName.Text = srcEditor.Morphs[(int)source.Id].Name;
+					if (dragOptions.ShowDialog() == DialogResult.OK)
+					{
+						// repeating only final choices for repeatability of the script
+						WorkspaceMorph wsMorph = srcEditor.Morphs[(int)source.Id];
+						foreach (ImportedMorphKeyframe keyframe in wsMorph.KeyframeList)
+						{
+							if (!wsMorph.isMorphKeyframeEnabled(keyframe))
+							{
+								Gui.Scripting.RunScript(source.Variable + ".setMorphKeyframeEnabled(morphId=" + (int)source.Id + ", id=" + wsMorph.KeyframeList.IndexOf(keyframe) + ", enabled=false)");
+							}
+						}
+						Gui.Scripting.RunScript(EditorVar + ".ReplaceMorph(morph=" + source.Variable + ".Morphs[" + (int)source.Id + "], destMorphName=\"" + dragOptions.textBoxName.Text + "\", replaceNormals=" + dragOptions.radioButtonReplaceNormalsYes.Checked + ", minSquaredDistance=" + ((float)dragOptions.numericUpDownMinimumDistanceSquared.Value).ToFloatString() + ")");
+						Changed = Changed;
+
+						InitMorphs();
+						tabControlLists.SelectedTab = tabPageMorph;
+					}
+				}
+			}
+			else
+			{
+				foreach (TreeNode child in node.Nodes)
+				{
+					ProcessDragDropMorphs(child);
+				}
+			}
+		}
+
+		private void UpdateDragDropMorphs(object sender, DragEventArgs e)
+		{
+			Point p = treeViewMorphKeyframes.PointToClient(new Point(e.X, e.Y));
+			TreeNode target = treeViewMorphKeyframes.GetNodeAt(p);
+			if ((target != null) && ((p.X < target.Bounds.Left) || (p.X > target.Bounds.Right) || (p.Y < target.Bounds.Top) || (p.Y > target.Bounds.Bottom)))
+			{
+				target = null;
+			}
+			treeViewMorphKeyframes.SelectedNode = target;
+
+			TreeNode node = (TreeNode)e.Data.GetData(typeof(TreeNode));
+			if (node == null)
+			{
+				Gui.Docking.DockDragEnter(sender, e);
+			}
+			else
+			{
+				e.Effect = e.AllowedEffect & DragDropEffects.Copy;
 			}
 		}
 

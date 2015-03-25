@@ -40,6 +40,64 @@ namespace UnityPlugin
 			return -1;
 		}
 
+		public static int FindBlendShapeIndex(Mesh mesh, string name)
+		{
+			for (int i = 0; i < mesh.m_Shapes.channels.Count; i++)
+			{
+				if (mesh.m_Shapes.channels[i].name == name)
+				{
+					return i;
+				}
+			}
+			return -1;
+		}
+
+		public static SkinnedMeshRenderer FindMeshByMorph(Transform frame, string name)
+		{
+			SkinnedMeshRenderer sMesh = frame.m_GameObject.instance.FindLinkedComponent(UnityClassID.SkinnedMeshRenderer);
+			if (sMesh != null)
+			{
+				Mesh mesh = GetMesh(sMesh);
+				if (mesh != null && BlendShapeName(mesh) == name)
+				{
+					return sMesh;
+				}
+			}
+
+			for (int i = 0; i < frame.Count; i++)
+			{
+				sMesh = FindMeshByMorph(frame[i], name);
+				if (sMesh != null)
+				{
+					return sMesh;
+				}
+			}
+			return null;
+		}
+
+		public static MeshRenderer FindMesh(Transform frame, string name)
+		{
+			if (name == frame.m_GameObject.instance.m_Name)
+			{
+				MeshRenderer mesh = frame.m_GameObject.instance.FindLinkedComponent(UnityClassID.SkinnedMeshRenderer);
+				if (mesh == null)
+				{
+					mesh = frame.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshRenderer);
+				}
+				return mesh;
+			}
+
+			for (int i = 0; i < frame.Count; i++)
+			{
+				MeshRenderer mesh = FindMesh(frame[i], name);
+				if (mesh != null)
+				{
+					return mesh;
+				}
+			}
+			return null;
+		}
+
 		public static List<MeshRenderer> FindMeshes(Transform rootFrame, HashSet<string> nameList)
 		{
 			List<MeshRenderer> meshList = new List<MeshRenderer>(nameList.Count);
@@ -157,6 +215,28 @@ namespace UnityPlugin
 				mesh = filter.m_Mesh.instance;
 			}
 			return mesh;
+		}
+
+		public static string BlendShapeName(Mesh mesh)
+		{
+			string name = mesh.m_Shapes.channels[0].name;
+			int dotPos = name.IndexOf('.');
+			if (dotPos >= 0)
+			{
+				return name.Substring(0, dotPos);
+			}
+			return name;
+		}
+
+		public static string BlendShapeKeyframeName(Mesh mesh, int index)
+		{
+			string name = mesh.m_Shapes.channels[index].name;
+			int dotPos = name.IndexOf('.');
+			if (dotPos >= 0)
+			{
+				return name.Substring(dotPos + 1);
+			}
+			return name;
 		}
 
 		public static void CopyUnknowns(Transform src, Transform dest)
@@ -906,6 +986,135 @@ namespace UnityPlugin
 				// Calculate handedness
 				(Vector3.Dot(Vector3.Cross(n, t), tan2[a]) < 0.0F) ? -1.0F : 1.0F);
 			}
+		}
+
+		public static void ReplaceMorph(string destMorphName, Animator parser, WorkspaceMorph wsMorphList, bool replaceNormals, float minSquaredDistance)
+		{
+			SkinnedMeshRenderer sMesh = FindMeshByMorph(parser.RootTransform, destMorphName);
+			if (sMesh == null)
+			{
+				Report.ReportLog("Couldn't find SkinnedMeshRenderer of morph clip " + destMorphName + ". Skipping these morphs");
+				return;
+			}
+			Mesh mesh = GetMesh(sMesh);
+			if (mesh == null)
+			{
+				Report.ReportLog("The SkinnedMeshRenderer " + sMesh.m_GameObject.instance.m_Name + " found for morph clip " + destMorphName + ", but doesn't have a Mesh. Skipping these morphs");
+				return;
+			}
+
+			try
+			{
+				vMesh morphMesh = new vMesh(sMesh, false);
+				List<vVertex> morphVerts = morphMesh.submeshes[0].vertexList;
+				foreach (ImportedMorphKeyframe wsMorph in wsMorphList.KeyframeList)
+				{
+					if (!wsMorphList.isMorphKeyframeEnabled(wsMorph))
+					{
+						continue;
+					}
+					if (mesh.m_VertexData.m_VertexCount != wsMorph.VertexList.Count)
+					{
+						Report.ReportLog("The SkinnedMeshRenderer " + sMesh.m_GameObject.instance.m_Name + "'s Mesh has a different number of vertices than specified in morph keyframe " + wsMorph.Name + ". Skipping this morph");
+						continue;
+					}
+
+					MeshBlendShape shape;
+					int index = FindBlendShapeIndex(mesh, destMorphName + "." + wsMorph.Name);
+					if (index >= 0)
+					{
+						Report.ReportLog("Replacing morph keyframe " + wsMorph.Name);
+						shape = mesh.m_Shapes.shapes[index];
+						shape.hasNormals |= replaceNormals;
+						shape.hasTangents |= replaceNormals;
+					}
+					else
+					{
+						Report.ReportLog("Adding morph keyframe " + wsMorph.Name);
+						shape = new MeshBlendShape();
+						shape.firstVertex = (uint)mesh.m_Shapes.vertices.Count;
+						shape.hasNormals = replaceNormals;
+						shape.hasTangents = replaceNormals;
+						mesh.m_Shapes.shapes.Add(shape);
+						MeshBlendShapeChannel channel = new MeshBlendShapeChannel();
+						channel.name = wsMorph.Name;
+						channel.nameHash = Animator.StringToHash(channel.name);
+						channel.frameIndex = mesh.m_Shapes.channels.Count;
+						channel.frameCount = 1;
+						mesh.m_Shapes.channels.Add(channel);
+						mesh.m_Shapes.fullWeights.Add(100f);
+						sMesh.m_BlendShapeWeights.Add(0f);
+					}
+					List<ImportedVertex> vertList = wsMorph.VertexList;
+					List<BlendShapeVertex> destVerts = new List<BlendShapeVertex>(vertList.Count);
+					for (int i = 0; i < vertList.Count; i++)
+					{
+						vVertex morphVert = morphVerts[i];
+						ImportedVertex srcVert = vertList[i];
+						Vector3 diffVector = srcVert.Position - morphVert.position;
+						float lenSquared = diffVector.LengthSquared();
+						if (lenSquared >= minSquaredDistance)
+						{
+							BlendShapeVertex destVert = new BlendShapeVertex();
+							destVert.vertex = diffVector;
+							destVert.index = (uint)i;
+							if (replaceNormals)
+							{
+								destVert.normal = srcVert.Normal;
+								destVert.tangent = new Vector3(srcVert.Tangent.X, srcVert.Tangent.Y, srcVert.Tangent.Z);
+							}
+							else if (shape.hasNormals)
+							{
+								BlendShapeVertex vert = FindBlendShapeVertex(shape, mesh.m_Shapes.vertices, (uint)i);
+								if (vert != null)
+								{
+									destVert.normal = vert.normal;
+									destVert.tangent = vert.tangent;
+								}
+							}
+							destVerts.Add(destVert);
+						}
+					}
+					destVerts.TrimExcess();
+
+					mesh.m_Shapes.vertices.RemoveRange((int)shape.firstVertex, (int)shape.vertexCount);
+					mesh.m_Shapes.vertices.InsertRange((int)shape.firstVertex, destVerts);
+					uint diff = (uint)destVerts.Count - shape.vertexCount;
+					shape.vertexCount = (uint)destVerts.Count;
+					for (int i = 0; i < mesh.m_Shapes.shapes.Count; i++)
+					{
+						if (mesh.m_Shapes.shapes[i].firstVertex > shape.firstVertex)
+						{
+							mesh.m_Shapes.shapes[i].firstVertex += diff;
+						}
+					}
+
+					string morphNewName = wsMorphList.getMorphKeyframeNewName(wsMorph);
+					if (morphNewName != String.Empty)
+					{
+						MeshBlendShapeChannel channel = mesh.m_Shapes.channels[index];
+						channel.name = morphNewName;
+						channel.nameHash = Animator.StringToHash(channel.name);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Report.ReportLog("Error replacing morphs: " + ex.Message);
+			}
+		}
+
+		private static BlendShapeVertex FindBlendShapeVertex(MeshBlendShape shape, List<BlendShapeVertex> vertList, uint vertIdx)
+		{
+			int lastVertIndex = (int)(shape.firstVertex + shape.vertexCount);
+			for (int i = (int)shape.firstVertex; i < lastVertIndex; i++)
+			{
+				if (vertList[i].index == vertIdx)
+				{
+					return vertList[i];
+				}
+			}
+			return null;
 		}
 	}
 }

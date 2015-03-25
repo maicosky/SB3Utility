@@ -23,6 +23,26 @@ namespace SB3Utility
 		Directory::SetCurrentDirectory(currentDir);
 	}
 
+	void Fbx::Exporter::ExportMorph(String^ path, IImported^ imported, String^ exportFormat, bool oneBlendShape, bool compatibility)
+	{
+		FileInfo^ file = gcnew FileInfo(path);
+		DirectoryInfo^ dir = file->Directory;
+		if (!dir->Exists)
+		{
+			dir->Create();
+		}
+		String^ currentDir = Directory::GetCurrentDirectory();
+		Directory::SetCurrentDirectory(dir->FullName);
+		path = Path::GetFileName(path);
+
+		Exporter^ exporter = gcnew Exporter(path, imported, exportFormat, false, false, false, compatibility);
+		exporter->ExportMorphs(imported, oneBlendShape);
+		exporter->pExporter->Export(exporter->pScene);
+		delete exporter;
+
+		Directory::SetCurrentDirectory(currentDir);
+	}
+
 	Fbx::Exporter::Exporter(String^ path, IImported^ imported, String^ exportFormat, bool allFrames, bool allBones, bool skins, bool compatibility)
 	{
 		this->imported = imported;
@@ -966,6 +986,124 @@ namespace SB3Utility
 					EulerFilter->SetQualityTolerance(filterPrecision);
 					EulerFilter->Apply((FbxAnimCurve**)lCurve, 3);
 				}
+			}
+		}
+	}
+
+	void Fbx::Exporter::ExportMorphs(IImported^ imported, bool oneBlendShape)
+	{
+		for (int meshIdx = 0; meshIdx < imported->MeshList->Count; meshIdx++)
+		{
+			FbxNode* pBaseNode = pMeshNodes->GetAt(meshIdx);
+
+			ImportedMesh^ meshList = imported->MeshList[meshIdx];
+			int meshObjIdx = 0;
+			List<ImportedVertex^>^ vertList = meshList->SubmeshList[meshObjIdx]->VertexList;
+
+			int morphIdx;
+			for (morphIdx = 0; morphIdx < imported->MorphList->Count; morphIdx++)
+			{
+				if (imported->MorphList[morphIdx]->Name == meshList->Name)
+				{
+					break;
+				}
+			}
+			if (morphIdx == imported->MorphList->Count)
+			{
+				continue;
+			}
+			ImportedMorph^ morph = imported->MorphList[morphIdx];
+
+			FbxNode* pBaseMeshNode = pBaseNode->GetChild(meshObjIdx);
+			FbxMesh* pBaseMesh = pBaseMeshNode->GetMesh();
+			char* pMorphClipName = NULL;
+			try
+			{
+				String^ morphClipName = gcnew String(pBaseMeshNode->GetName()) + "_morph_" + morph->ClipName;
+				pMorphClipName = StringToCharArray(morphClipName);
+				pBaseMeshNode->SetName(pMorphClipName);
+			}
+			finally
+			{
+				Marshal::FreeHGlobal((IntPtr)pMorphClipName);
+			}
+
+			FbxBlendShape* lBlendShape;
+			if (oneBlendShape)
+			{
+				WITH_MARSHALLED_STRING
+				(
+					pShapeName, morph->Name + "_BlendShape",
+					lBlendShape = FbxBlendShape::Create(pScene, pShapeName);
+				);
+				pBaseMesh->AddDeformer(lBlendShape);
+			}
+			List<ImportedMorphKeyframe^>^ keyframes = morph->KeyframeList;
+			for (int i = 0; i < keyframes->Count; i++)
+			{
+				ImportedMorphKeyframe^ keyframe = keyframes[i];
+
+				if (!oneBlendShape)
+				{
+					WITH_MARSHALLED_STRING
+					(
+						pShapeName, morph->Name + "_BlendShape",
+						lBlendShape = FbxBlendShape::Create(pScene, pShapeName);
+					);
+					pBaseMesh->AddDeformer(lBlendShape);
+				}
+				FbxBlendShapeChannel* lBlendShapeChannel = FbxBlendShapeChannel::Create(pScene, "");
+				FbxShape* pShape;
+				WITH_MARSHALLED_STRING
+				(
+					pMorphShapeName, keyframe->Name, \
+					pShape = FbxShape::Create(pScene, pMorphShapeName);
+				);
+				lBlendShapeChannel->AddTargetShape(pShape);
+				lBlendShape->AddBlendShapeChannel(lBlendShapeChannel);
+
+				pShape->InitControlPoints(vertList->Count);
+				FbxVector4* pControlPoints = pShape->GetControlPoints();
+
+				FbxLayer* pLayer = pShape->GetLayer(0);
+				if (pLayer == NULL)
+				{
+					pShape->CreateLayer();
+					pLayer = pShape->GetLayer(0);
+				}
+
+				for (int j = 0; j < vertList->Count; j++)
+				{
+					ImportedVertex^ vertex = vertList[j];
+					Vector3 coords = vertex->Position;
+					pControlPoints[j] = FbxVector4(coords.X, coords.Y, coords.Z);
+				}
+				List<unsigned short>^ meshIndices = keyframe->MorphedVertexIndices;
+				for (int j = 0; j < meshIndices->Count; j++)
+				{
+					Vector3 coords = keyframe->VertexList[j]->Position;
+					pControlPoints[meshIndices[j]] = FbxVector4(coords.X, coords.Y, coords.Z);
+				}
+
+				FbxLayerElementVertexColor* pVertexColorLayer;
+				WITH_MARSHALLED_STRING
+				(
+					pColourLayerName, morph->KeyframeList[i]->Name,
+					pVertexColorLayer = FbxLayerElementVertexColor::Create(pBaseMesh, pColourLayerName);
+				);
+				pVertexColorLayer->SetMappingMode(FbxLayerElement::eByControlPoint);
+				pVertexColorLayer->SetReferenceMode(FbxLayerElement::eDirect);
+				for (int j = 0; j < vertList->Count; j++)
+				{
+					pVertexColorLayer->GetDirectArray().Add(FbxColor(1, 1, 1));
+				}
+				for (int j = 0; j < meshIndices->Count; j++)
+				{
+					pVertexColorLayer->GetDirectArray().SetAt(meshIndices[j], FbxColor(0, 0, 1));
+				}
+				pBaseMesh->CreateLayer();
+				pLayer = pBaseMesh->GetLayer(pBaseMesh->GetLayerCount() - 1);
+				pLayer->SetVertexColors(pVertexColorLayer);
 			}
 		}
 	}

@@ -12,6 +12,13 @@ namespace UnityPlugin
 {
 	public partial class FormAnimatorDragDrop : Form
 	{
+		public enum ShowPanelOption
+		{
+			Frame,
+			Mesh,
+			Morph
+		};
+
 		public CopyFrameMethod FrameMethod { get; protected set; }
 		public CopyMeshMethod NormalsMethod { get; protected set; }
 		public CopyMeshMethod BonesMethod { get; protected set; }
@@ -31,15 +38,19 @@ namespace UnityPlugin
 			numericMeshId.Maximum = editor.Frames.Count - 1;
 		}
 
-		public void ShowPanel(bool frame)
+		public void ShowPanel(ShowPanelOption panelOption)
 		{
-			if (frame)
+			switch (panelOption)
 			{
+			case ShowPanelOption.Frame:
 				panelFrame.BringToFront();
-			}
-			else
-			{
+				break;
+			case ShowPanelOption.Mesh:
 				panelMesh.BringToFront();
+				break;
+			case ShowPanelOption.Morph:
+				panelMorph.BringToFront();
+				break;
 			}
 		}
 

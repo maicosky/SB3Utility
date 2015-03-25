@@ -51,6 +51,7 @@
     <Compile Include="NotLoaded.cs" />
     <Compile Include="unity3d\AudioClip.cs" />
     <Compile Include="unity3d\Avatar.cs" />
+    <Compile Include="unity3d\AnimatorController.cs" />
     <Compile Include="unity3d\Cubemap.cs" />
     <Compile Include="unity3d\EllipsoidParticleEmitter.cs" />
     <Compile Include="unity3d\GameObject.cs" />

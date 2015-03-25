@@ -85,6 +85,11 @@ namespace SB3Utility
 			Fbx.Exporter.Export(path, imp, startKeyframe, endKeyframe, linear, EulerFilter, filterPrecision, exportFormat, allFrames, allBones, skins, compatibility);
 		}
 
+		public static void ExportMorph(String path, IImported imp, String exportFormat, bool oneBlendShape, bool compatibility)
+		{
+			Fbx.Exporter.ExportMorph(path, imp, exportFormat, oneBlendShape, compatibility);
+		}
+
 		public static List<KeyValuePair<string, ImportedAnimationKeyframe[]>> CopyKeyframedAnimation(WorkspaceAnimation wsAnimation, int resampleCount, bool linear)
 		{
 			List<ImportedAnimationKeyframedTrack> trackList = ((ImportedKeyframedAnimation)wsAnimation.importedAnimation).TrackList;

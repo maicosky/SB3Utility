@@ -1,4 +1,10 @@
-﻿[1.0.7]
+﻿[1.0.8]
+  - Fix in UnityPlugin: crash when a mesh with an invalid material was selected
+  - Fix in UnityPlugin: crash upon selecting an unloaded material
+  - Fix in UnityPlugin: clearing mesh assignment
+  - Change in UnityPlugin: replacing meshes defaults to "Merge", except when the imported mesh has bones
+
+[1.0.7]
   - Fix: FBX import drops invisible root node and creates separate animations for childs
   - Added: FBX import generates Tangents if not already present
   - Fixed creating new keyframe behind last in XA units

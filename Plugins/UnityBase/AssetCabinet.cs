@@ -11,9 +11,8 @@ namespace UnityPlugin
 	{
 		public string Name { get; protected set; }
 		public int Unknown1 { get; protected set; }
-		public int HeaderLength { get; protected set; }
+		public int Offset { get; protected set; }
 		public int ContentLength { get; protected set; }
-		public byte[] Alignment1 { get; protected set; }
 		public int UsedLength { get; protected set; }
 		public int ContentLengthCopy { get; protected set; }
 		public int Format { get; protected set; }
@@ -60,17 +59,15 @@ namespace UnityPlugin
 			BinaryReader reader = new BinaryReader(stream);
 			Unknown1 = reader.ReadInt32BE();
 			Name = reader.ReadName0();
-			HeaderLength = reader.ReadInt32BE();
+			Offset = reader.ReadInt32BE();
 			ContentLength = reader.ReadInt32BE();
-			Alignment1 = reader.ReadBytes(3);
 
-			// Address 0x70 seems to be the beginning of a structure
+			stream.Position = parser.HeaderLength + Offset;
 			UsedLength = reader.ReadInt32BE();
 			ContentLengthCopy = reader.ReadInt32BE();
 			Format = reader.ReadInt32BE();
 			DataPosition = reader.ReadInt32BE();
 			Unknown6 = reader.ReadInt32BE();
-//			Console.WriteLine(" 1=" + Unknown1 + " 2=x" + Unknown2[0].ToString("X2") + Unknown2[1].ToString("X2") + Unknown2[2].ToString("X2") + " UL=x"+ UsedLength.ToString("X6") + " F=" + Format +" DP=x"+DataPosition.ToString("X6") + " 6=" + Unknown6);
 			Version = reader.ReadName0();
 
 			Unknown7 = reader.ReadInt32();
@@ -93,7 +90,7 @@ namespace UnityPlugin
 			{
 				NotLoaded comp = new NotLoaded();
 				comp.pathID = reader.ReadInt32();
-				comp.offset = (uint)0x70 + (uint)DataPosition + reader.ReadUInt32();
+				comp.offset = (uint)(parser.HeaderLength + Offset) + (uint)DataPosition + reader.ReadUInt32();
 				comp.size = reader.ReadUInt32();
 				comp.classID1 = (UnityClassID)reader.ReadInt32();
 				comp.classID2 = (UnityClassID)reader.ReadInt32();
@@ -110,12 +107,12 @@ namespace UnityPlugin
 				References[i].filePath = reader.ReadName0();
 				References[i].assetPath = reader.ReadName0();
 			}
-			if (stream.Position != UsedLength + 0x83)
+			if (stream.Position != UsedLength + (parser.HeaderLength + Offset) + 0x13)
 			{
-				Report.ReportLog("Unexpected Length");
+				Report.ReportLog("Unexpected Length Pos=" + stream.Position.ToString("X") + " UsedLength=" + UsedLength.ToString("X"));
 			}
 			long padding = (stream.Position + 16) & ~(long)15;
-			if (padding != 0x70 + DataPosition)
+			if (padding != parser.HeaderLength + Offset + DataPosition)
 			{
 				Report.ReportLog("Unexpected DataPosition");
 			}
@@ -147,8 +144,8 @@ namespace UnityPlugin
 		{
 			BinaryWriter writer = new BinaryWriter(stream);
 			long beginPos = stream.Position;
-			stream.Position += 4 + Name.Length + 1 + 4 + 4 + Alignment1.Length + 4 + 4 + 4 + 4;
 
+			stream.Position += Offset + 4 + 4 + 4 + 4;
 			writer.WriteInt32BE(Unknown6);
 			writer.WriteName0(Version);
 
@@ -175,9 +172,9 @@ namespace UnityPlugin
 				writer.WriteName0(References[i].filePath);
 				writer.WriteName0(References[i].assetPath);
 			}
-			UsedLength = (int)stream.Position - 0x83;
+			UsedLength = (int)stream.Position - (Parser.HeaderLength + Offset + 0x13);
 			stream.Position = (stream.Position + 16) & ~(long)15;
-			DataPosition = (int)stream.Position - 0x70;
+			DataPosition = (int)stream.Position - (Parser.HeaderLength + Offset);
 
 			uint[] offsets = new uint[Components.Count];
 			uint[] sizes = new uint[Components.Count];
@@ -199,15 +196,18 @@ namespace UnityPlugin
 				}
 				Parser.worker.ReportProgress(50 + i * 49 / Components.Count);
 			}
-			ContentLength = ContentLengthCopy = (int)stream.Position - 0x70;
+			ContentLength = ContentLengthCopy = (int)stream.Position - (Parser.HeaderLength + Offset);
 
 			stream.Position = beginPos;
 			writer.WriteInt32BE(Unknown1);
 			writer.WriteName0(Name);
-			writer.WriteInt32BE(HeaderLength);
+			writer.WriteInt32BE(Offset);
 			writer.WriteInt32BE(ContentLength);
-			writer.Write(Alignment1);
 
+			if ((stream.Position & 3) > 0)
+			{
+				stream.Position += 4 - (stream.Position & 3);
+			}
 			writer.WriteInt32BE(UsedLength);
 			writer.WriteInt32BE(ContentLengthCopy);
 			writer.WriteInt32BE(Format);
@@ -218,7 +218,7 @@ namespace UnityPlugin
 			{
 				Component comp = Components[i];
 				writer.Write(comp.pathID);
-				writer.Write(offsets[i] - (uint)DataPosition - (uint)0x70);
+				writer.Write(offsets[i] - (uint)DataPosition - (uint)(Parser.HeaderLength + Offset));
 				writer.Write(sizes[i]);
 				writer.Write((int)comp.classID1);
 				writer.Write((int)comp.classID2);
@@ -264,7 +264,7 @@ namespace UnityPlugin
 				index = -1;
 				return null;
 			}
-			index = pathID - 1 < Components.Count ? pathID - 1 : Components.Count - 1;
+			index = pathID >= 0 && pathID - 1 < Components.Count ? pathID - 1 : Components.Count - 1;
 			Component asset = Components[index];
 			if (asset.pathID == pathID)
 			{
@@ -362,7 +362,12 @@ namespace UnityPlugin
 					return animator;
 				}
 			case UnityClassID.AnimatorController:
-				throw new Exception("Unhandled " + comp.classID1 + " (would corrupt output file)");
+				{
+					AnimatorController animatorController = new AnimatorController(this, comp.pathID, comp.classID1, comp.classID2);
+					ReplaceSubfile(index, animatorController, comp);
+					animatorController.LoadFrom(stream);
+					return animatorController;
+				}
 			case UnityClassID.AssetBundle:
 				{
 					AssetBundle assetBundle = new AssetBundle(this, comp.pathID, comp.classID1, comp.classID2);

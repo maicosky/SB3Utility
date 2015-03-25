@@ -138,6 +138,8 @@ namespace UnityPlugin
 		public Vector3 tangent { get; set; }
 		public uint index { get; set; }
 
+		public BlendShapeVertex() { }
+
 		public BlendShapeVertex(Stream stream)
 		{
 			LoadFrom(stream);
@@ -168,6 +170,8 @@ namespace UnityPlugin
 		public uint vertexCount { get; set; }
 		public bool hasNormals { get; set; }
 		public bool hasTangents { get; set; }
+
+		public MeshBlendShape() { }
 
 		public MeshBlendShape(Stream stream)
 		{
@@ -201,6 +205,8 @@ namespace UnityPlugin
 		public uint nameHash { get; set; }
 		public int frameIndex { get; set; }
 		public int frameCount { get; set; }
+
+		public MeshBlendShapeChannel() { }
 
 		public MeshBlendShapeChannel(Stream stream)
 		{

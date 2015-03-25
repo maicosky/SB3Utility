@@ -149,15 +149,7 @@ namespace UnityPlugin
 					Material mat = matPtr.instance;
 					if (mat != null && !Materials.Contains(mat))
 					{
-						Materials.Add(mat);
-						foreach (var pair in mat.m_SavedProperties.m_TexEnvs)
-						{
-							Texture2D tex = pair.Value.m_Texture.instance;
-							if (tex != null && !Textures.Contains(tex))
-							{
-								Textures.Add(tex);
-							}
-						}
+						AddMaterialToEditor(mat);
 					}
 				}
 			}
@@ -165,6 +157,19 @@ namespace UnityPlugin
 			foreach (Transform child in frame)
 			{
 				InitLists(child);
+			}
+		}
+
+		private void AddMaterialToEditor(Material mat)
+		{
+			Materials.Add(mat);
+			foreach (var pair in mat.m_SavedProperties.m_TexEnvs)
+			{
+				Texture2D tex = pair.Value.m_Texture.instance;
+				if (tex != null && !Textures.Contains(tex))
+				{
+					Textures.Add(tex);
+				}
 			}
 		}
 
@@ -544,8 +549,7 @@ namespace UnityPlugin
 		[Plugin]
 		public void AddBone(int id, object[] meshes)
 		{
-			Matrix boneMatrix = Transform.WorldTransform(Frames[id]);
-			boneMatrix[3, 0] = boneMatrix[3, 1] = boneMatrix[3, 2] = 0;
+			Matrix boneMatrix = Matrix.Transpose(Matrix.Invert(Transform.WorldTransform(Frames[id])));
 			uint boneHash = Parser.m_Avatar.instance.BoneHash(Frames[id].m_GameObject.instance.m_Name);
 			string[] meshFrameNames = Utility.Convert<string>(meshes);
 			List<MeshRenderer> meshList = Operations.FindMeshes(Parser.RootTransform, new HashSet<string>(meshFrameNames));
@@ -638,7 +642,7 @@ namespace UnityPlugin
 		{
 			SkinnedMeshRenderer smr = (SkinnedMeshRenderer)Meshes[meshId];
 			Matrix boneMatrix = FbxUtility.SRTToMatrix(new Vector3((float)sX, (float)sY, (float)sZ), new Vector3((float)rX, (float)rY, (float)rZ), new Vector3((float)tX, (float)tY, (float)tZ));
-			smr.m_Mesh.instance.m_BindPose[boneId] = boneMatrix;
+			smr.m_Mesh.instance.m_BindPose[boneId] = Matrix.Transpose(boneMatrix);
 			Changed = true;
 		}
 
@@ -672,7 +676,7 @@ namespace UnityPlugin
 			m.M43 = (float)m43;
 			m.M44 = (float)m44;
 
-			smr.m_Mesh.instance.m_BindPose[boneId] = m;
+			smr.m_Mesh.instance.m_BindPose[boneId] = Matrix.Transpose(m);
 			Changed = true;
 		}
 
@@ -840,6 +844,19 @@ namespace UnityPlugin
 						sMesh.m_AABB.m_Center = mesh.m_LocalAABB.m_Center;
 					}
 					sMesh.m_AABB.m_Extend = mesh.m_LocalAABB.m_Extend;
+
+					if (sMesh.m_BlendShapeWeights.Count != mesh.m_Shapes.shapes.Count)
+					{
+						int diff = sMesh.m_BlendShapeWeights.Count - mesh.m_Shapes.shapes.Count;
+						if (diff < 0)
+						{
+							sMesh.m_BlendShapeWeights.RemoveRange(sMesh.m_BlendShapeWeights.Count + diff, -diff);
+						}
+						else
+						{
+							sMesh.m_BlendShapeWeights.AddRange(new float[diff]);
+						}
+					}
 				}
 			}
 			else
@@ -908,7 +925,7 @@ namespace UnityPlugin
 			Material mat = asset is NotLoaded ? Parser.file.LoadComponent(asset.pathID) : asset;
 			if (!Materials.Contains(mat))
 			{
-				Materials.Add(mat);
+				AddMaterialToEditor(mat);
 			}
 			meshRenderer.m_Materials[subMeshId] = new PPtr<Material>(mat);
 			Changed = true;
@@ -937,6 +954,39 @@ namespace UnityPlugin
 				vMesh.submeshes.RemoveAt(subMeshId);
 				vMesh.Flush();
 				Changed = true;
+			}
+		}
+
+		[Plugin]
+		public void ReplaceMorph(WorkspaceMorph morph, string destMorphName, bool replaceNormals, double minSquaredDistance)
+		{
+			Operations.ReplaceMorph(destMorphName, Parser, morph, replaceNormals, (float)minSquaredDistance);
+			Changed = true;
+		}
+
+		[Plugin]
+		public void RenameMorphKeyframe(int meshId, int morphIndex, string name)
+		{
+			SkinnedMeshRenderer sMesh = (SkinnedMeshRenderer)Meshes[meshId];
+			Mesh mesh = Operations.GetMesh(sMesh);
+			if (mesh != null)
+			{
+				MeshBlendShapeChannel channel = mesh.m_Shapes.channels[morphIndex];
+				channel.name = name;
+				channel.nameHash = Animator.StringToHash(channel.name);
+			}
+		}
+
+		[Plugin]
+		public void SetMorphKeyframeIndexCount(int meshId, int morphIndex, int index, int count)
+		{
+			SkinnedMeshRenderer sMesh = (SkinnedMeshRenderer)Meshes[meshId];
+			Mesh mesh = Operations.GetMesh(sMesh);
+			if (mesh != null)
+			{
+				MeshBlendShapeChannel channel = mesh.m_Shapes.channels[morphIndex];
+				channel.frameIndex = index;
+				channel.frameCount = count;
 			}
 		}
 

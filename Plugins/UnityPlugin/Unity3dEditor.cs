@@ -59,6 +59,7 @@ namespace UnityPlugin
 							break;
 						case UnityClassID.AudioClip:
 						case UnityClassID.AnimationClip:
+						case UnityClassID.AnimatorController:
 						case UnityClassID.Cubemap:
 						case UnityClassID.Material:
 						case UnityClassID.MonoScript:
@@ -72,7 +73,7 @@ namespace UnityPlugin
 						case UnityClassID.ParticleAnimator:
 						case UnityClassID.ParticleRenderer:
 							PPtr<GameObject> gameObjPtr = Animator.LoadGameObject(stream);
-							NotLoaded asset = (NotLoaded)Parser.Cabinet.FindComponent(gameObjPtr.m_PathID);
+							NotLoaded asset = Parser.Cabinet.FindComponent(gameObjPtr.m_PathID);
 							if (filter)
 							{
 								stream.Position = asset.offset;
@@ -87,7 +88,13 @@ namespace UnityPlugin
 							if (!filter)
 							{
 								gameObjPtr = Animator.LoadGameObject(stream);
-								comp.Name = ((NotLoaded)Parser.Cabinet.FindComponent(gameObjPtr.m_PathID)).Name;
+								asset = Parser.Cabinet.FindComponent(gameObjPtr.m_PathID);
+								if (asset.Name == null)
+								{
+									stream.Position = asset.offset;
+									asset.Name = GameObject.LoadName(stream);
+								}
+								comp.Name = asset.Name;
 							}
 							break;
 						case UnityClassID.GameObject:

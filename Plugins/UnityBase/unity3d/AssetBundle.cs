@@ -116,9 +116,9 @@ namespace UnityPlugin
 				}
 				PPtr<Object> assetPtr = new PPtr<Object>(comp);
 				m_PreloadTable.Add(assetPtr);
-				/*if (comp.classID1 != UnityClassID.GameObject && comp.classID1 != UnityClassID.Transform)
+				/*if (comp.pathID != 0 && comp.classID1 != UnityClassID.GameObject && comp.classID1 != UnityClassID.Transform)
 				{
-					Report.ReportLog(i + " " + comp.pathID + " " + comp.classID1 + " " + (!(comp is NotLoaded) ? AssetCabinet.ToString(comp) : String.Empty));
+					Report.ReportLog(i + " " + comp.pathID + " " + comp.classID1 + " " + (!(comp is NotLoaded) ? AssetCabinet.ToString(comp) : ((NotLoaded)comp).Name));
 				}*/
 			}
 			/*for (int i = 0; i < file.Components.Count; i++)
@@ -150,7 +150,7 @@ namespace UnityPlugin
 					)
 				);
 				//Component asset = file.FindComponent(m_Container[i].Value.asset.m_PathID);
-				//Report.ReportLog(i + " " + m_Container[i].Key + " " + m_Container[i].Value.asset.m_PathID + " i=" + m_Container[i].Value.preloadIndex + " s=" + m_Container[i].Value.preloadSize + " " + (asset != null? asset.classID1.ToString() : "pathID not found"));
+				//Report.ReportLog(i + " " + m_Container[i].Key + " " + m_Container[i].Value.asset.m_PathID + " i=" + m_Container[i].Value.preloadIndex + " s=" + m_Container[i].Value.preloadSize + " " + (asset != null ? asset.classID1.ToString() : "pathID not found"));
 			}
 			/*Console.WriteLine("Mesh Check");
 			for (int i = 0; i < file.Components.Count; i++)

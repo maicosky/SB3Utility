@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -24,6 +25,7 @@ namespace UnityPlugin
 		private bool propertiesChanged = false;
 
 		List<ListView> assetListViews = new List<ListView>();
+		ListViewItemComparer listViewItemComparer = new ListViewItemComparer();
 
 		Dictionary<string, string> ChildParserVars = new Dictionary<string, string>();
 		Dictionary<string, DockContent> ChildForms = new Dictionary<string, DockContent>();
@@ -271,6 +273,11 @@ namespace UnityPlugin
 				{
 					item.Font = new Font(animatorsList.Font, /*subfile is ppSwapfile || subfile is RawFile ? FontStyle.Italic :*/ FontStyle.Bold);
 				}
+				else
+				{
+					NotLoaded asset = (NotLoaded)subfile;
+					item.SubItems.Add(asset.size.ToString());
+				}
 				int itemWidth = (int)Math.Ceiling(Graphics.FromHwnd(Handle).MeasureString(item.Text, bold).Width) + 16;
 
 				switch (subfile.classID1)
@@ -316,6 +323,7 @@ namespace UnityPlugin
 					break;
 				default:
 					if (subfile.classID1 != UnityClassID.AnimationClip &&
+						subfile.classID1 != UnityClassID.AnimatorController &&
 						subfile.classID1 != UnityClassID.AssetBundle &&
 						subfile.classID1 != UnityClassID.Cubemap &&
 						subfile.classID1 != UnityClassID.EllipsoidParticleEmitter &&
@@ -345,6 +353,7 @@ namespace UnityPlugin
 			{
 				filteredList.Items.AddRange(filtered.ToArray());
 			}
+			filteredList.ListViewItemSorter = listViewItemComparer;
 			adjustSubfileListsEnabled(true);
 			adjustSubfileLists(opening);
 			ReselectItems(animatorsList, selectedAnimators);
@@ -891,6 +900,42 @@ namespace UnityPlugin
 			return true;
 		}
 
+		private void removeToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				ListView subfilesList = null;
+				if (tabControlAssets.SelectedTab == tabPageImages)
+				{
+					subfilesList = imagesList;
+				}
+				else if (tabControlAssets.SelectedTab == tabPageSounds)
+				{
+					subfilesList = soundsList;
+				}
+				else if (tabControlAssets.SelectedTab == tabPageMaterials)
+				{
+					subfilesList = materialsList;
+				}
+				else if (tabControlAssets.SelectedTab == tabPageOthers)
+				{
+					subfilesList = othersList;
+				}
+				foreach (ListViewItem item in subfilesList.SelectedItems)
+				{
+					Component asset = (Component)item.Tag;
+					Gui.Scripting.RunScript("RemoveAsset(parser=" + ParserVar + ", pathID=" + asset.pathID + ")");
+				}
+				Changed = Changed;
+
+				InitSubfileLists(false);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
 		private void keepBackupToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
 		{
 			Properties.Settings.Default["KeepBackupOfUnity3d"] = keepBackupToolStripMenuItem.Checked;
@@ -935,6 +980,49 @@ namespace UnityPlugin
 				{
 					othersList.Columns[0].AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
 				}
+			}
+		}
+
+		private void filteredList_ColumnClick(object sender, ColumnClickEventArgs e)
+		{
+			filteredList.BeginUpdate();
+			bool newColumn = listViewItemComparer.col != e.Column;
+			listViewItemComparer.col = e.Column;
+			if (filteredList.Sorting != SortOrder.Ascending || newColumn)
+			{
+				filteredList.ListViewItemSorter = listViewItemComparer;
+				listViewItemComparer.asc = true;
+				filteredList.Sorting = SortOrder.Ascending;
+			}
+			else
+			{
+				filteredList.ListViewItemSorter = listViewItemComparer;
+				listViewItemComparer.asc = false;
+				filteredList.Sorting = SortOrder.Descending;
+			}
+			filteredList.Sort();
+			filteredList.EndUpdate();
+		}
+
+		class ListViewItemComparer : IComparer
+		{
+			public int col;
+			public bool asc;
+
+			public ListViewItemComparer()
+			{
+				col = 0;
+				asc = true;
+			}
+			public ListViewItemComparer(int column)
+			{
+				col = column;
+				asc = true;
+			}
+			public int Compare(object x, object y)
+			{
+				int cmp = String.Compare(((ListViewItem)x).SubItems[col].Text, ((ListViewItem)y).SubItems[col].Text);
+				return asc ? cmp : -cmp;
 			}
 		}
 	}

@@ -15,7 +15,7 @@ namespace UnityPlugin
 			string[] meshNameArray = Utility.Convert<string>(meshNames);
 			List<MeshRenderer> sMeshes = meshNames != null ? Operations.FindMeshes(animator.RootTransform, new HashSet<string>(meshNameArray)) : null;
 
-			UnityConverter imp = new UnityConverter(animator, sMeshes, skins);
+			UnityConverter imp = new UnityConverter(animator, sMeshes, skins, false);
 
 			FbxUtility.Export(path, imp, startKeyframe, endKeyframe, linear, EulerFilter, (float)filterPrecision, exportFormat, allFrames, allBones, skins, compatibility);
 		}
@@ -54,6 +54,16 @@ namespace UnityPlugin
 			UnityConverter imp = new UnityConverter(parser, sMeshes, skins);
 
 			FbxUtility.Export(path, imp, startKeyframe, endKeyframe, linear, EulerFilter, (float)filterPrecision, exportFormat, allFrames, allBones, skins, compatibility);
+		}
+
+		[Plugin]
+		public static void ExportMorphFbx([DefaultVar]Animator animator, object[] meshNames, string path, string exportFormat, bool oneBlendShape, bool compatibility)
+		{
+			HashSet<string> meshNamesSet = new HashSet<string>(Utility.Convert<string>(meshNames));
+			List<MeshRenderer> sMeshList = Operations.FindMeshes(animator.RootTransform, meshNamesSet);
+			UnityConverter imp = new UnityConverter(animator, sMeshList, false, true);
+
+			FbxUtility.ExportMorph(path, imp, exportFormat, oneBlendShape, compatibility);
 		}
 
 		public class UnityConverter : IImported
@@ -101,11 +111,11 @@ namespace UnityPlugin
 					}
 				}
 
-				ConvertMeshRenderers(sMeshes, skins);
+				ConvertMeshRenderers(sMeshes, skins, false);
 				AnimationList = new List<ImportedAnimation>();
 			}
 
-			public UnityConverter(Animator animator, List<MeshRenderer> sMeshes, bool skins)
+			public UnityConverter(Animator animator, List<MeshRenderer> sMeshes, bool skins, bool morphs)
 			{
 				ConvertFrames(animator.RootTransform, null);
 
@@ -114,7 +124,7 @@ namespace UnityPlugin
 					avatar = animator.m_Avatar.instance;
 				}
 
-				ConvertMeshRenderers(sMeshes, skins);
+				ConvertMeshRenderers(sMeshes, skins, morphs);
 				AnimationList = new List<ImportedAnimation>();
 			}
 
@@ -151,24 +161,16 @@ namespace UnityPlugin
 				return world;
 			}
 
-			private void ConvertMeshRenderers(List<MeshRenderer> meshList, bool skins)
+			private void ConvertMeshRenderers(List<MeshRenderer> meshList, bool skins, bool morphs)
 			{
 				MeshList = new List<ImportedMesh>(meshList.Count);
 				MaterialList = new List<ImportedMaterial>(meshList.Count);
 				TextureList = new List<ImportedTexture>(meshList.Count);
+				MorphList = new List<ImportedMorph>(meshList.Count);
 				foreach (MeshRenderer meshR in meshList)
 				{
 					SkinnedMeshRenderer sMesh = meshR as SkinnedMeshRenderer;
-					Mesh mesh;
-					if (sMesh != null)
-					{
-						mesh = sMesh.m_Mesh.instance;
-					}
-					else
-					{
-						MeshFilter filter = meshR.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshFilter);
-						mesh = filter.m_Mesh.instance;
-					}
+					Mesh mesh = Operations.GetMesh(sMesh);
 					if (mesh == null)
 					{
 						Report.ReportLog("skipping " + meshR.m_GameObject.instance.m_Name + " - no mesh");
@@ -288,6 +290,36 @@ namespace UnityPlugin
 							bone.Matrix = Matrix.Invert(WorldTransform(boneMatrix, parser));*/
 							iMesh.BoneList.Add(bone);
 						}
+					}
+
+					if (morphs && mesh.m_Shapes.shapes.Count > 0)
+					{
+						ImportedMorph morph = new ImportedMorph();
+						morph.Name = sMesh.m_GameObject.instance.m_Name;
+						morph.ClipName = Operations.BlendShapeName(mesh);
+						morph.KeyframeList = new List<ImportedMorphKeyframe>(mesh.m_Shapes.shapes.Count);
+						List<ImportedVertex> vertList = iMesh.SubmeshList[0].VertexList;
+						for (int i = 0; i < mesh.m_Shapes.shapes.Count; i++)
+						{
+							ImportedMorphKeyframe keyframe = new ImportedMorphKeyframe();
+							keyframe.Name = Operations.BlendShapeKeyframeName(mesh, i);
+							keyframe.VertexList = new List<ImportedVertex>((int)mesh.m_Shapes.shapes[i].vertexCount);
+							keyframe.MorphedVertexIndices = new List<ushort>((int)mesh.m_Shapes.shapes[i].vertexCount);
+							int lastVertIndex = (int)(mesh.m_Shapes.shapes[i].firstVertex + mesh.m_Shapes.shapes[i].vertexCount);
+							for (int j = (int)mesh.m_Shapes.shapes[i].firstVertex; j < lastVertIndex; j++)
+							{
+								BlendShapeVertex morphVert = mesh.m_Shapes.vertices[j];
+								ImportedVertex vert = vertList[(int)morphVert.index];
+								ImportedVertex destVert = new ImportedVertex();
+								destVert.Position = vert.Position + morphVert.vertex;
+								destVert.Normal = vert.Normal;
+								destVert.Tangent = vert.Tangent;
+								keyframe.VertexList.Add(destVert);
+								keyframe.MorphedVertexIndices.Add((ushort)morphVert.index);
+							}
+							morph.KeyframeList.Add(keyframe);
+						}
+						MorphList.Add(morph);
 					}
 
 					MeshList.Add(iMesh);

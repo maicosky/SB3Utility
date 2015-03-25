@@ -69,6 +69,18 @@
 			this.label7 = new System.Windows.Forms.Label();
 			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
 			this.checkBoxOkContinue = new System.Windows.Forms.CheckBox();
+			this.panelMorph = new System.Windows.Forms.Panel();
+			this.groupBox3 = new System.Windows.Forms.GroupBox();
+			this.textBoxName = new System.Windows.Forms.TextBox();
+			this.textBoxNewName = new System.Windows.Forms.TextBox();
+			this.label9 = new System.Windows.Forms.Label();
+			this.label11 = new System.Windows.Forms.Label();
+			this.label12 = new System.Windows.Forms.Label();
+			this.numericUpDownMinimumDistanceSquared = new System.Windows.Forms.NumericUpDown();
+			this.label10 = new System.Windows.Forms.Label();
+			this.panel7 = new System.Windows.Forms.Panel();
+			this.radioButtonReplaceNormalsNo = new System.Windows.Forms.RadioButton();
+			this.radioButtonReplaceNormalsYes = new System.Windows.Forms.RadioButton();
 			this.panelFrame.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericFrameId)).BeginInit();
 			this.panel2.SuspendLayout();
@@ -78,6 +90,10 @@
 			this.panel4.SuspendLayout();
 			this.panel3.SuspendLayout();
 			this.panel1.SuspendLayout();
+			this.panelMorph.SuspendLayout();
+			this.groupBox3.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.numericUpDownMinimumDistanceSquared)).BeginInit();
+			this.panel7.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// buttonOK
@@ -445,22 +461,22 @@
 			// radioButtonMeshReplace
 			// 
 			this.radioButtonMeshReplace.AutoSize = true;
-			this.radioButtonMeshReplace.Checked = true;
 			this.radioButtonMeshReplace.Location = new System.Drawing.Point(6, 2);
 			this.radioButtonMeshReplace.Name = "radioButtonMeshReplace";
 			this.radioButtonMeshReplace.Size = new System.Drawing.Size(65, 17);
 			this.radioButtonMeshReplace.TabIndex = 30;
-			this.radioButtonMeshReplace.TabStop = true;
 			this.radioButtonMeshReplace.Text = "Replace";
 			this.radioButtonMeshReplace.UseVisualStyleBackColor = true;
 			// 
 			// radioButtonMeshMerge
 			// 
 			this.radioButtonMeshMerge.AutoSize = true;
+			this.radioButtonMeshMerge.Checked = true;
 			this.radioButtonMeshMerge.Location = new System.Drawing.Point(80, 2);
 			this.radioButtonMeshMerge.Name = "radioButtonMeshMerge";
 			this.radioButtonMeshMerge.Size = new System.Drawing.Size(55, 17);
 			this.radioButtonMeshMerge.TabIndex = 32;
+			this.radioButtonMeshMerge.TabStop = true;
 			this.radioButtonMeshMerge.Text = "Merge";
 			this.radioButtonMeshMerge.UseVisualStyleBackColor = true;
 			// 
@@ -513,6 +529,137 @@
 			this.checkBoxOkContinue.UseVisualStyleBackColor = true;
 			this.checkBoxOkContinue.Click += new System.EventHandler(this.checkBoxOkContinue_Click);
 			// 
+			// panelMorph
+			// 
+			this.panelMorph.Controls.Add(this.groupBox3);
+			this.panelMorph.Location = new System.Drawing.Point(12, 12);
+			this.panelMorph.Name = "panelMorph";
+			this.panelMorph.Size = new System.Drawing.Size(423, 139);
+			this.panelMorph.TabIndex = 59;
+			// 
+			// groupBox3
+			// 
+			this.groupBox3.Controls.Add(this.textBoxName);
+			this.groupBox3.Controls.Add(this.textBoxNewName);
+			this.groupBox3.Controls.Add(this.label9);
+			this.groupBox3.Controls.Add(this.label11);
+			this.groupBox3.Controls.Add(this.label12);
+			this.groupBox3.Controls.Add(this.numericUpDownMinimumDistanceSquared);
+			this.groupBox3.Controls.Add(this.label10);
+			this.groupBox3.Controls.Add(this.panel7);
+			this.groupBox3.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.groupBox3.Location = new System.Drawing.Point(0, 0);
+			this.groupBox3.Name = "groupBox3";
+			this.groupBox3.Size = new System.Drawing.Size(423, 139);
+			this.groupBox3.TabIndex = 152;
+			this.groupBox3.TabStop = false;
+			this.groupBox3.Text = "Morph Options";
+			// 
+			// textBoxName
+			// 
+			this.textBoxName.Location = new System.Drawing.Point(140, 15);
+			this.textBoxName.Name = "textBoxName";
+			this.textBoxName.Size = new System.Drawing.Size(113, 20);
+			this.textBoxName.TabIndex = 110;
+			// 
+			// textBoxNewName
+			// 
+			this.textBoxNewName.Enabled = false;
+			this.textBoxNewName.Location = new System.Drawing.Point(140, 44);
+			this.textBoxNewName.Name = "textBoxNewName";
+			this.textBoxNewName.Size = new System.Drawing.Size(113, 20);
+			this.textBoxNewName.TabIndex = 112;
+			// 
+			// label9
+			// 
+			this.label9.AutoSize = true;
+			this.label9.Location = new System.Drawing.Point(9, 80);
+			this.label9.Name = "label9";
+			this.label9.Size = new System.Drawing.Size(94, 13);
+			this.label9.TabIndex = 15;
+			this.label9.Text = "Replace Normals?";
+			// 
+			// label11
+			// 
+			this.label11.AutoSize = true;
+			this.label11.Location = new System.Drawing.Point(9, 22);
+			this.label11.Name = "label11";
+			this.label11.Size = new System.Drawing.Size(91, 13);
+			this.label11.TabIndex = 13;
+			this.label11.Text = "Target Morph Clip";
+			// 
+			// label12
+			// 
+			this.label12.AutoSize = true;
+			this.label12.Location = new System.Drawing.Point(9, 47);
+			this.label12.Name = "label12";
+			this.label12.Size = new System.Drawing.Size(59, 13);
+			this.label12.TabIndex = 19;
+			this.label12.Text = "Rename to";
+			// 
+			// numericUpDownMinimumDistanceSquared
+			// 
+			this.numericUpDownMinimumDistanceSquared.DecimalPlaces = 12;
+			this.numericUpDownMinimumDistanceSquared.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            655360});
+			this.numericUpDownMinimumDistanceSquared.Location = new System.Drawing.Point(140, 109);
+			this.numericUpDownMinimumDistanceSquared.Maximum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+			this.numericUpDownMinimumDistanceSquared.Name = "numericUpDownMinimumDistanceSquared";
+			this.numericUpDownMinimumDistanceSquared.Size = new System.Drawing.Size(113, 20);
+			this.numericUpDownMinimumDistanceSquared.TabIndex = 170;
+			this.numericUpDownMinimumDistanceSquared.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            655360});
+			// 
+			// label10
+			// 
+			this.label10.AutoSize = true;
+			this.label10.Location = new System.Drawing.Point(9, 111);
+			this.label10.Name = "label10";
+			this.label10.Size = new System.Drawing.Size(96, 13);
+			this.label10.TabIndex = 17;
+			this.label10.Text = "Minimum Distance²";
+			// 
+			// panel7
+			// 
+			this.panel7.Controls.Add(this.radioButtonReplaceNormalsNo);
+			this.panel7.Controls.Add(this.radioButtonReplaceNormalsYes);
+			this.panel7.Location = new System.Drawing.Point(140, 75);
+			this.panel7.Name = "panel7";
+			this.panel7.Size = new System.Drawing.Size(113, 23);
+			this.panel7.TabIndex = 16;
+			// 
+			// radioButtonReplaceNormalsNo
+			// 
+			this.radioButtonReplaceNormalsNo.AutoSize = true;
+			this.radioButtonReplaceNormalsNo.Checked = true;
+			this.radioButtonReplaceNormalsNo.Location = new System.Drawing.Point(66, 3);
+			this.radioButtonReplaceNormalsNo.Name = "radioButtonReplaceNormalsNo";
+			this.radioButtonReplaceNormalsNo.Size = new System.Drawing.Size(39, 17);
+			this.radioButtonReplaceNormalsNo.TabIndex = 162;
+			this.radioButtonReplaceNormalsNo.TabStop = true;
+			this.radioButtonReplaceNormalsNo.Text = "No";
+			this.radioButtonReplaceNormalsNo.UseVisualStyleBackColor = true;
+			// 
+			// radioButtonReplaceNormalsYes
+			// 
+			this.radioButtonReplaceNormalsYes.AutoSize = true;
+			this.radioButtonReplaceNormalsYes.Location = new System.Drawing.Point(6, 3);
+			this.radioButtonReplaceNormalsYes.Name = "radioButtonReplaceNormalsYes";
+			this.radioButtonReplaceNormalsYes.Size = new System.Drawing.Size(43, 17);
+			this.radioButtonReplaceNormalsYes.TabIndex = 160;
+			this.radioButtonReplaceNormalsYes.Text = "Yes";
+			this.radioButtonReplaceNormalsYes.UseVisualStyleBackColor = true;
+			// 
 			// FormAnimatorDragDrop
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -523,8 +670,9 @@
 			this.Controls.Add(this.checkBoxOkContinue);
 			this.Controls.Add(this.buttonCancel);
 			this.Controls.Add(this.buttonOK);
-			this.Controls.Add(this.panelFrame);
+			this.Controls.Add(this.panelMorph);
 			this.Controls.Add(this.panelMesh);
+			this.Controls.Add(this.panelFrame);
 			this.Name = "FormAnimatorDragDrop";
 			this.ShowInTaskbar = false;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -548,6 +696,12 @@
 			this.panel3.PerformLayout();
 			this.panel1.ResumeLayout(false);
 			this.panel1.PerformLayout();
+			this.panelMorph.ResumeLayout(false);
+			this.groupBox3.ResumeLayout(false);
+			this.groupBox3.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.numericUpDownMinimumDistanceSquared)).EndInit();
+			this.panel7.ResumeLayout(false);
+			this.panel7.PerformLayout();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -595,5 +749,17 @@
 		public System.Windows.Forms.CheckBox checkBoxMeshDestinationLock;
 		public System.Windows.Forms.CheckBox checkBoxOkContinue;
 		public System.Windows.Forms.CheckBox checkBoxFrameAppend;
+		private System.Windows.Forms.Panel panelMorph;
+		private System.Windows.Forms.GroupBox groupBox3;
+		public System.Windows.Forms.TextBox textBoxName;
+		public System.Windows.Forms.TextBox textBoxNewName;
+		private System.Windows.Forms.Label label9;
+		private System.Windows.Forms.Label label11;
+		private System.Windows.Forms.Label label12;
+		public System.Windows.Forms.NumericUpDown numericUpDownMinimumDistanceSquared;
+		private System.Windows.Forms.Label label10;
+		private System.Windows.Forms.Panel panel7;
+		public System.Windows.Forms.RadioButton radioButtonReplaceNormalsNo;
+		public System.Windows.Forms.RadioButton radioButtonReplaceNormalsYes;
 	}
 }

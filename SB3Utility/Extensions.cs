@@ -470,6 +470,16 @@ namespace SB3Utility
 			WriteArray<Vector3>(new Action<Vector3>(writer.Write), array);
 		}
 
+		public static Vector4[] ReadVector4Array(this BinaryReader reader, int length)
+		{
+			return ReadArray<Vector4>(reader, new Func<Vector4>(reader.ReadVector4), length);
+		}
+
+		public static void Write(this BinaryWriter writer, Vector4[] array)
+		{
+			WriteArray<Vector4>(new Action<Vector4>(writer.Write), array);
+		}
+
 		public static byte[] ReadBytes(this BinaryReader reader, uint count)
 		{
 			return reader.ReadBytes((int)count);

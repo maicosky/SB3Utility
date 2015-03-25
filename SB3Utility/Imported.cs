@@ -197,6 +197,7 @@ namespace SB3Utility
 		/// Target mesh name
 		/// </summary>
 		public string Name { get; set; }
+		public string ClipName { get; set; }
 		public List<ImportedMorphKeyframe> KeyframeList { get; set; }
 		public List<ushort> MorphedVertexIndices { get; set; }
 	}
@@ -208,6 +209,7 @@ namespace SB3Utility
 		/// </summary>
 		public string Name { get; set; }
 		public List<ImportedVertex> VertexList { get; set; }
+		public List<ushort> MorphedVertexIndices { get; set; }
 	}
 
 	public static class ImportedHelpers
