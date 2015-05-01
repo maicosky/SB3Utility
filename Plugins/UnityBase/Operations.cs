@@ -212,7 +212,7 @@ namespace UnityPlugin
 			else
 			{
 				MeshFilter filter = meshR.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshFilter);
-				mesh = filter.m_Mesh.instance;
+				mesh = filter != null ? filter.m_Mesh.instance : null;
 			}
 			return mesh;
 		}
@@ -251,7 +251,7 @@ namespace UnityPlugin
 			frame.m_GameObject.instance.m_isActive = true;
 		}
 
-		public static void CopyUnknowns(SkinnedMeshRenderer src, SkinnedMeshRenderer dest)
+		public static void CopyUnknowns(MeshRenderer src, MeshRenderer dest)
 		{
 			dest.m_Enabled = src.m_Enabled;
 			dest.m_CastShadows = src.m_CastShadows;
@@ -264,18 +264,22 @@ namespace UnityPlugin
 			dest.m_LightProbeAnchor = src.m_LightProbeAnchor;
 			dest.m_SortingLayerID = src.m_SortingLayerID;
 			dest.m_SortingOrder = src.m_SortingOrder;
-			dest.m_Quality = src.m_Quality;
-			dest.m_UpdateWhenOffScreen = src.m_UpdateWhenOffScreen;
-			//m_BlendShapeWeights
-			dest.m_RootBone = src.m_RootBone;
-			dest.m_AABB = src.m_AABB;
-			dest.m_DirtyAABB = src.m_DirtyAABB;
-
-			if (dest.m_Mesh.instance != null && src.m_Mesh.instance != null)
+			if (src is SkinnedMeshRenderer && dest is SkinnedMeshRenderer)
 			{
-				Mesh destMesh = dest.m_Mesh.instance;
-				Mesh srcMesh = src.m_Mesh.instance;
+				SkinnedMeshRenderer srcSkinned = (SkinnedMeshRenderer)src;
+				SkinnedMeshRenderer destSkinned = (SkinnedMeshRenderer)dest;
+				destSkinned.m_Quality = srcSkinned.m_Quality;
+				destSkinned.m_UpdateWhenOffScreen = srcSkinned.m_UpdateWhenOffScreen;
+				//m_BlendShapeWeights
+				destSkinned.m_RootBone = srcSkinned.m_RootBone;
+				destSkinned.m_AABB = srcSkinned.m_AABB;
+				destSkinned.m_DirtyAABB = srcSkinned.m_DirtyAABB;
+			}
 
+			Mesh destMesh = GetMesh(dest);
+			Mesh srcMesh = GetMesh(src);
+			if (destMesh != null && srcMesh != null)
+			{
 				destMesh.m_Name = (string)srcMesh.m_Name.Clone();
 				for (int i = 0; i < srcMesh.m_SubMeshes.Count && i < destMesh.m_SubMeshes.Count; i++)
 				{
@@ -369,8 +373,8 @@ namespace UnityPlugin
 
 							if (weightList.Count > 0)
 							{
-								vVertex.boneIndices = weightList[(int)submesh.firstVertex + j].boneIndex;
-								vVertex.weights = weightList[(int)submesh.firstVertex + j].weight;
+								vVertex.boneIndices = (int[])weightList[(int)submesh.firstVertex + j].boneIndex.Clone();
+								vVertex.weights = (float[])weightList[(int)submesh.firstVertex + j].weight.Clone();
 							}
 						}
 						else
@@ -499,6 +503,8 @@ namespace UnityPlugin
 				using (BinaryWriter vertWriter = new BinaryWriter(new MemoryStream(mesh.m_VertexData.m_DataSize)),
 					indexWriter = new BinaryWriter(new MemoryStream(mesh.m_IndexBuffer)))
 				{
+					mesh.m_LocalAABB.m_Center = new Vector3(Single.MaxValue, Single.MaxValue, Single.MaxValue);
+					mesh.m_LocalAABB.m_Extend = new Vector3(Single.MinValue, Single.MinValue, Single.MinValue);
 					int vertIndex = 0;
 					for (int i = 0; i < submeshes.Count; i++)
 					{
@@ -581,10 +587,10 @@ namespace UnityPlugin
 						}
 						vertIndex += (int)submesh.vertexCount;
 
-						submesh.localAABB.m_Extend = (max - min) / 2;
-						submesh.localAABB.m_Center = min + submesh.localAABB.m_Extend;
-						mesh.m_LocalAABB.m_Extend = Vector3.Maximize(mesh.m_LocalAABB.m_Extend, submesh.localAABB.m_Extend);
-						mesh.m_LocalAABB.m_Center += submesh.localAABB.m_Center;
+						submesh.localAABB.m_Extend = max - min;
+						submesh.localAABB.m_Center = min + submesh.localAABB.m_Extend / 2;
+						mesh.m_LocalAABB.m_Extend = Vector3.Maximize(mesh.m_LocalAABB.m_Extend, max);
+						mesh.m_LocalAABB.m_Center = Vector3.Minimize(submesh.localAABB.m_Center, min);
 
 						if (faces)
 						{
@@ -599,7 +605,8 @@ namespace UnityPlugin
 							}
 						}
 					}
-					mesh.m_LocalAABB.m_Center /= submeshes.Count;
+					mesh.m_LocalAABB.m_Extend -= mesh.m_LocalAABB.m_Center;
+					mesh.m_LocalAABB.m_Center += mesh.m_LocalAABB.m_Extend / 2;
 					while (mesh.m_SubMeshes.Count > submeshes.Count)
 					{
 						mesh.m_SubMeshes.RemoveAt(mesh.m_SubMeshes.Count - 1);

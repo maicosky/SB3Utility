@@ -91,6 +91,14 @@ namespace UnityPlugin
 			writer.Write(m_Aniso);
 			writer.Write(m_WrapMode);
 		}
+
+		public void CopyTo(GLTextureSettings dest)
+		{
+			dest.m_FilterMode = m_FilterMode;
+			dest.m_MipBias = m_MipBias;
+			dest.m_Aniso = m_Aniso;
+			dest.m_WrapMode = m_WrapMode;
+		}
 	}
 
 	public class Texture2D : Component
@@ -150,6 +158,7 @@ namespace UnityPlugin
 			m_ColorSpace = reader.ReadInt32();
 			int size = reader.ReadInt32();
 			image_data = reader.ReadBytes(size);
+			reader.ReadBytes(4 - size & 3);
 		}
 
 		public static string LoadName(Stream stream)
@@ -273,14 +282,34 @@ namespace UnityPlugin
 			writer.Write(m_ColorSpace);
 			writer.Write(image_data.Length);
 			writer.Write(image_data);
+			writer.Write(new byte[4 - image_data.Length & 3]);
 		}
 
 		public Texture2D Clone(AssetCabinet file)
 		{
-			Texture2D tex = new Texture2D(file);
-			CopyAttributesTo(tex);
-			CopyImageTo(tex);
-			return tex;
+			Component tex = file.Bundle.FindComponent(m_Name, UnityClassID.Texture2D);
+			if (tex == null)
+			{
+				file.MergeTypeDefinition(this.file, UnityClassID.Texture2D);
+
+				tex = new Texture2D(file);
+				file.Bundle.AddComponent(m_Name, tex);
+				CopyAttributesTo((Texture2D)tex);
+				CopyImageTo((Texture2D)tex);
+			}
+			else if (tex is NotLoaded)
+			{
+				NotLoaded notLoaded = (NotLoaded)tex;
+				if (notLoaded.replacement != null)
+				{
+					tex = notLoaded.replacement;
+				}
+				else
+				{
+					tex = file.LoadComponent(file.SourceStream, notLoaded);
+				}
+			}
+			return (Texture2D)tex;
 		}
 
 		public void CopyAttributesTo(Texture2D dst)
@@ -288,10 +317,7 @@ namespace UnityPlugin
 			dst.m_MipMap = m_MipMap;
 			dst.m_isReadable = m_isReadable;
 			dst.m_ReadAllowed = m_ReadAllowed;
-			dst.m_TextureSettings.m_FilterMode = m_TextureSettings.m_FilterMode;
-			dst.m_TextureSettings.m_MipBias = m_TextureSettings.m_MipBias;
-			dst.m_TextureSettings.m_Aniso = m_TextureSettings.m_Aniso;
-			dst.m_TextureSettings.m_WrapMode = m_TextureSettings.m_WrapMode;
+			m_TextureSettings.CopyTo(dst.m_TextureSettings);
 			dst.m_LightmapFormat = m_LightmapFormat;
 			dst.m_ColorSpace = m_ColorSpace;
 		}

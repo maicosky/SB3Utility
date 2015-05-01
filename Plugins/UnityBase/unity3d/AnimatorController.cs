@@ -743,6 +743,12 @@ namespace UnityPlugin
 			this.classID2 = classID2;
 		}
 
+		public AnimatorController(AssetCabinet file) :
+			this(file, 0, UnityClassID.AnimatorController, UnityClassID.AnimatorController)
+		{
+			file.ReplaceSubfile(-1, this, null);
+		}
+
 		public void LoadFrom(Stream stream)
 		{
 			BinaryReader reader = new BinaryReader(stream);
@@ -785,5 +791,12 @@ namespace UnityPlugin
 				file.WritePPtr(m_AnimationClips[i].asset, false, stream);
 			}
 		}
+
+		/*public AnimatorController Clone(AssetCabinet file)
+		{
+			AnimatorController animCtrl = new AnimatorController(file);
+
+			return animCtrl;
+		}*/
 	}
 }

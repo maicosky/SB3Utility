@@ -198,6 +198,8 @@ namespace UnityPlugin
 			using (BinaryWriter vertWriter = new BinaryWriter(new MemoryStream(uMesh.m_VertexData.m_DataSize)),
 					indexWriter = new BinaryWriter(new MemoryStream(uMesh.m_IndexBuffer)))
 			{
+				uMesh.m_LocalAABB.m_Center = new Vector3(Single.MaxValue, Single.MaxValue, Single.MaxValue);
+				uMesh.m_LocalAABB.m_Extend = new Vector3(Single.MinValue, Single.MinValue, Single.MinValue);
 				uMesh.m_SubMeshes = new List<SubMesh>(numSubmeshes);
 				int vertIndex = 0;
 				for (int i = 0, submeshIdx = 0; i < numSubmeshes; i++, submeshIdx++)
@@ -259,7 +261,7 @@ namespace UnityPlugin
 								}
 							}
 
-							if (sMesh.m_Bones.Count > 0 && uMesh.m_Skin.Count < totVerts)
+							if (sMesh.m_Bones.Count > 0 && sInfo.offset == 0 && uMesh.m_Skin.Count < totVerts)
 							{
 								BoneInfluence item = new BoneInfluence();
 								for (int k = 0; k < 4; k++)
@@ -273,10 +275,10 @@ namespace UnityPlugin
 					}
 					vertIndex += (int)submesh.vertexCount;
 
-					submesh.localAABB.m_Extend = (max - min) / 2;
-					submesh.localAABB.m_Center = min + submesh.localAABB.m_Extend;
-					uMesh.m_LocalAABB.m_Extend = Vector3.Maximize(uMesh.m_LocalAABB.m_Extend, submesh.localAABB.m_Extend);
-					uMesh.m_LocalAABB.m_Center += submesh.localAABB.m_Center;
+					submesh.localAABB.m_Extend = max - min;
+					submesh.localAABB.m_Center = min + submesh.localAABB.m_Extend / 2;
+					uMesh.m_LocalAABB.m_Extend = Vector3.Maximize(uMesh.m_LocalAABB.m_Extend, max);
+					uMesh.m_LocalAABB.m_Center = Vector3.Minimize(uMesh.m_LocalAABB.m_Center, min);
 
 					List<ImportedFace> faceList = mesh.SubmeshList[submeshIdx].FaceList;
 					submesh.firstByte = (uint)indexWriter.BaseStream.Position;
@@ -288,13 +290,14 @@ namespace UnityPlugin
 						indexWriter.Write((ushort)(vertexIndices[2] + submesh.firstVertex));
 					}
 				}
-				uMesh.m_LocalAABB.m_Center /= numSubmeshes;
+				uMesh.m_LocalAABB.m_Extend -= uMesh.m_LocalAABB.m_Center;
+				uMesh.m_LocalAABB.m_Center += uMesh.m_LocalAABB.m_Extend / 2;
 			}
 
 			return sMesh;
 		}
 
-		public static void ReplaceSkinnedMeshRenderer(Transform frame, Transform rootBone, Animator parser, AssetBundle bundle, List<Material> materials, WorkspaceMesh mesh, bool merge, CopyMeshMethod normalsMethod, CopyMeshMethod bonesMethod, bool targetFullMesh)
+		public static void ReplaceMeshRenderer(Transform frame, Transform rootBone, Animator parser, List<Material> materials, WorkspaceMesh mesh, bool merge, CopyMeshMethod normalsMethod, CopyMeshMethod bonesMethod, bool targetFullMesh)
 		{
 			Matrix transform = Transform.WorldTransform(frame);
 			transform.Invert();
@@ -305,28 +308,41 @@ namespace UnityPlugin
 			SkinnedMeshRenderer sMesh = CreateSkinnedMeshRenderer(parser, materials, mesh, out indices, out worldCoords, out replaceSubmeshesOption);
 			vMesh destMesh = new Operations.vMesh(sMesh, true);
 
-			SkinnedMeshRenderer frameMesh = frame.m_GameObject.instance.FindLinkedComponent(UnityClassID.SkinnedMeshRenderer);
+			SkinnedMeshRenderer sFrameMesh = frame.m_GameObject.instance.FindLinkedComponent(UnityClassID.SkinnedMeshRenderer);
+			MeshRenderer frameMeshR = sFrameMesh;
+			if (sFrameMesh == null)
+			{
+				frameMeshR = frame.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshRenderer);
+			}
+			Mesh frameMesh = frameMeshR != null ? Operations.GetMesh(frameMeshR) : null;
 			vMesh srcMesh = null;
 			List<vVertex> allVertices = null;
-			if (frameMesh == null || frameMesh.m_Mesh.instance == null)
+			if (frameMeshR == null || frameMesh == null)
 			{
 				sMesh.m_RootBone = new PPtr<Transform>(rootBone);
 				if (rootBone != null)
 				{
 					sMesh.m_Mesh.instance.m_RootBoneNameHash = parser.m_Avatar.instance.BoneHash(rootBone.m_GameObject.instance.m_Name);
 				}
-				if (frameMesh != null)
+				if (frameMeshR != null)
 				{
-					CopyUnknowns(frameMesh, sMesh);
+					CopyUnknowns(frameMeshR, sMesh);
 				}
 			}
 			else
 			{
-				sMesh.m_RootBone = new PPtr<Transform>(frameMesh.m_RootBone.instance);
-				sMesh.m_Mesh.instance.m_RootBoneNameHash = frameMesh.m_Mesh.instance.m_RootBoneNameHash;
+				if (sFrameMesh != null)
+				{
+					sMesh.m_RootBone = new PPtr<Transform>(sFrameMesh.m_RootBone.instance);
+					sMesh.m_Mesh.instance.m_RootBoneNameHash = frameMesh.m_RootBoneNameHash;
+				}
+				else
+				{
+					sMesh.m_RootBone = new PPtr<Transform>((Component)null);
+				}
 
-				srcMesh = new Operations.vMesh(frameMesh, true);
-				CopyUnknowns(frameMesh, sMesh);
+				srcMesh = new Operations.vMesh(frameMeshR, true);
+				CopyUnknowns(frameMeshR, sMesh);
 
 				if (targetFullMesh && (normalsMethod == CopyMeshMethod.CopyNear || bonesMethod == CopyMeshMethod.CopyNear))
 				{
@@ -363,10 +379,10 @@ namespace UnityPlugin
 
 				vSubmesh baseSubmesh = null;
 				int idx = indices[i];
-				if ((srcMesh != null) && (idx >= 0) && (idx < frameMesh.m_Mesh.instance.m_SubMeshes.Count))
+				if ((srcMesh != null) && (idx >= 0) && (idx < frameMesh.m_SubMeshes.Count))
 				{
 					baseSubmesh = srcMesh.submeshes[idx];
-					CopyUnknowns(frameMesh.m_Mesh.instance.m_SubMeshes[idx], sMesh.m_Mesh.instance.m_SubMeshes[i]);
+					CopyUnknowns(frameMesh.m_SubMeshes[idx], sMesh.m_Mesh.instance.m_SubMeshes[i]);
 				}
 
 				if (baseSubmesh != null)
@@ -380,13 +396,16 @@ namespace UnityPlugin
 						Operations.CopyNormalsNear(targetFullMesh ? allVertices : baseSubmesh.vertexList, submesh.vertexList);
 					}
 
-					if (bonesMethod == CopyMeshMethod.CopyOrder)
+					if (baseSubmesh.vertexList[0].weights != null)
 					{
-						Operations.CopyBonesOrder(baseSubmesh.vertexList, submesh.vertexList);
-					}
-					else if (bonesMethod == CopyMeshMethod.CopyNear)
-					{
-						Operations.CopyBonesNear(targetFullMesh ? allVertices : baseSubmesh.vertexList, submesh.vertexList);
+						if (bonesMethod == CopyMeshMethod.CopyOrder)
+						{
+							Operations.CopyBonesOrder(baseSubmesh.vertexList, submesh.vertexList);
+						}
+						else if (bonesMethod == CopyMeshMethod.CopyNear)
+						{
+							Operations.CopyBonesNear(targetFullMesh ? allVertices : baseSubmesh.vertexList, submesh.vertexList);
+						}
 					}
 				}
 
@@ -419,7 +438,7 @@ namespace UnityPlugin
 				}
 				destMesh.submeshes.AddRange(addSubmeshes);
 
-				if ((frameMesh.m_Bones.Count == 0) && (sMesh.m_Bones.Count > 0))
+				if ((sFrameMesh == null || sFrameMesh.m_Bones.Count == 0) && (sMesh.m_Bones.Count > 0))
 				{
 					for (int i = 0; i < copiedSubmeshes.Count; i++)
 					{
@@ -431,16 +450,16 @@ namespace UnityPlugin
 						}
 					}
 				}
-				else if (frameMesh.m_Bones.Count > 0)
+				else if (sFrameMesh != null && sFrameMesh.m_Bones.Count > 0)
 				{
 					int[] boneIdxMap;
-					sMesh.m_Bones = MergeBoneList(frameMesh.m_Bones, sMesh.m_Bones, out boneIdxMap);
+					sMesh.m_Bones = MergeBoneList(sFrameMesh.m_Bones, sMesh.m_Bones, out boneIdxMap);
 					uint[] boneHashes = new uint[sMesh.m_Bones.Count];
 					Matrix[] poseMatrices = new Matrix[sMesh.m_Bones.Count];
-					for (int i = 0; i < frameMesh.m_Bones.Count; i++)
+					for (int i = 0; i < sFrameMesh.m_Bones.Count; i++)
 					{
-						boneHashes[i] = frameMesh.m_Mesh.instance.m_BoneNameHashes[i];
-						poseMatrices[i] = frameMesh.m_Mesh.instance.m_BindPose[i];
+						boneHashes[i] = sFrameMesh.m_Mesh.instance.m_BoneNameHashes[i];
+						poseMatrices[i] = sFrameMesh.m_Mesh.instance.m_BindPose[i];
 					}
 					for (int i = 0; i < boneIdxMap.Length; i++)
 					{
@@ -494,61 +513,23 @@ namespace UnityPlugin
 			}
 			destMesh.Flush();
 
-			if (frameMesh != null)
+			AssetBundle bundle = parser.file.Bundle;
+			if (frameMeshR != null)
 			{
-				frame.m_GameObject.instance.RemoveLinkedComponent(frameMesh);
-				parser.file.RemoveSubfile(frameMesh);
-				if (frameMesh.m_Mesh.instance != null)
+				frame.m_GameObject.instance.RemoveLinkedComponent(frameMeshR);
+				//parser.file.RemoveSubfile(frameMeshR);
+				if (frameMesh != null)
 				{
-					parser.file.RemoveSubfile(frameMesh.m_Mesh.instance);
-					bundle.ReplaceComponent(frameMesh.m_Mesh.asset, sMesh.m_Mesh.asset);
+					//parser.file.RemoveSubfile(frameMesh);
+					parser.file.ReplaceSubfile(frameMesh, sMesh.m_Mesh.asset);
+					bundle.ReplaceComponent(frameMesh, sMesh.m_Mesh.asset);
 				}
-				bundle.ReplaceComponent(frameMesh, sMesh);
+				parser.file.ReplaceSubfile(frameMeshR, sMesh);
+				bundle.ReplaceComponent(frameMeshR, sMesh);
 			}
 			else
 			{
-				/*bool meshesFound = false;
-				for (int i = 0; i < bundle.m_PreloadTable.Count; i++)
-				{
-					PPtr<Object> objPtr = bundle.m_PreloadTable[i];
-					if (objPtr.asset != null)
-					{
-						if (objPtr.asset.classID1 == UnityClassID.Mesh)
-						{
-							meshesFound = true;
-						}
-						else if (meshesFound)
-						{
-							bundle.m_PreloadTable.Insert(i, new PPtr<Object>(uMesh));
-							break;
-						}
-					}
-				}*/
-				for (int i = 0; i < bundle.m_PreloadTable.Count; i++)
-				{
-					PPtr<Object> objPtr = bundle.m_PreloadTable[i];
-					if (objPtr.asset != null)
-					{
-						if (bundle.m_PreloadTable[i].asset == parser)
-						{
-							int parserIdx = i;
-							while (++i < bundle.m_PreloadTable.Count && bundle.m_PreloadTable[i].asset.classID1 == UnityClassID.SkinnedMeshRenderer)
-							{
-							}
-							bundle.m_PreloadTable.Insert(i, new PPtr<Object>(sMesh));
-
-							for (int j = parserIdx - 1; j >= 0; j--)
-							{
-								if (bundle.m_PreloadTable[j].asset.classID1 == UnityClassID.Mesh)
-								{
-									bundle.m_PreloadTable.Insert(j + 1, new PPtr<Object>(sMesh.m_Mesh.asset));
-									break;
-								}
-							}
-							break;
-						}
-					}
-				}
+				bundle.RegisterForUpdate(parser.m_GameObject.asset);
 			}
 			frame.m_GameObject.instance.AddLinkedComponent(sMesh);
 		}
@@ -574,7 +555,7 @@ namespace UnityPlugin
 
 		public static void ReplaceTexture(UnityParser parser, ImportedTexture texture)
 		{
-			Texture2D tex = parser.GetTexture(texture.Name);
+			Texture2D tex = parser.GetTexture(Path.GetFileNameWithoutExtension(texture.Name));
 			if (tex == null)
 			{
 				parser.AddTexture(texture);

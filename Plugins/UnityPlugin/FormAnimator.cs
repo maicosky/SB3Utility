@@ -299,8 +299,8 @@ namespace UnityPlugin
 			panelTexturePic.Resize += new EventHandler(panelTexturePic_Resize);
 			splitContainer1.Panel2MinSize = tabControlViews.Width;
 
-			matTexNamePurpose = new Label[4] { labelMatTex1, labelMatTex2, labelMatTex3, labelMatTex4 };
-			matTexNameCombo = new ComboBox[4] { comboBoxMatTex1, comboBoxMatTex2, comboBoxMatTex3, comboBoxMatTex4 };
+			matTexNamePurpose = new Label[5] { labelMatTex1, labelMatTex2, labelMatTex3, labelMatTex4, labelMatTex5 };
+			matTexNameCombo = new ComboBox[5] { comboBoxMatTex1, comboBoxMatTex2, comboBoxMatTex3, comboBoxMatTex4, comboBoxMatTex5 };
 			foreach (ComboBox matTexCombo in matTexNameCombo)
 			{
 				matTexCombo.DisplayMember = "Item1";
@@ -315,8 +315,8 @@ namespace UnityPlugin
 			matMatrixText[4] = new EditTextBox[4] { textBoxMatRimR, textBoxMatRimG, textBoxMatRimB, textBoxMatRimA };
 			matMatrixText[5] = new EditTextBox[4] { textBoxMatOutlineR, textBoxMatOutlineG, textBoxMatOutlineB, textBoxMatOutlineA };
 			matMatrixText[6] = new EditTextBox[4] { textBoxMatShadowR, textBoxMatShadowG, textBoxMatShadowB, textBoxMatShadowA };
-			matMatrixText[7] = new EditTextBox[4] { textBoxMatSpecularPower, textBoxMatRimPower, textBoxMatOutline, textBoxMatExtra };
-			matValues = new Label[4] { labelShininess, labelRimPower, labelOutline, labelExtra };
+			matMatrixText[7] = new EditTextBox[6] { textBoxMatSpecularPower, textBoxMatRimPower, textBoxMatOutline, textBoxMatExtra, textBoxMatExtra2, textBoxMatExtra3 };
+			matValues = new Label[6] { labelShininess, labelRimPower, labelOutline, labelExtra, labelExtra2, labelExtra3 };
 			LoadMaterial(-1);
 
 			DataGridViewEditor.InitDataGridViewSRT(dataGridViewFrameSRT, dataGridViewFrameMatrix);
@@ -480,45 +480,68 @@ namespace UnityPlugin
 			TreeNode newNode = new TreeNode(frame.m_GameObject.instance.m_Name);
 			newNode.Tag = new DragSource(EditorVar, typeof(Transform), Editor.Frames.IndexOf(frame));
 
-			SkinnedMeshRenderer frameSMR = frame.m_GameObject.instance.FindLinkedComponent(UnityClassID.SkinnedMeshRenderer);
-			if (frameSMR != null)
+			foreach (var pair in frame.m_GameObject.instance.m_Component)
 			{
-				int meshId = Editor.Meshes.IndexOf(frameSMR);
-				TreeNode meshNode = new TreeNode("SkinnedMeshRenderer");
-				meshNode.Tag = new DragSource(EditorVar, typeof(SkinnedMeshRenderer), meshId);
-				newNode.Nodes.Add(meshNode);
-
-				if (frameSMR.m_Bones.Count > 0)
+				Component asset = pair.Value.asset;
+				if (asset == null)
 				{
-					TreeNode boneListNode = new TreeNode(frameSMR.m_Bones.Count + " Bones");
-					meshNode.Nodes.Add(boneListNode);
-					for (int i = 0; i < frameSMR.m_Bones.Count; i++)
-					{
-						Transform bone = frameSMR.m_Bones[i].instance;
-						TreeNode boneNode;
-						if (bone != null && bone.m_GameObject.instance != null)
-						{
-							boneNode = new TreeNode(bone.m_GameObject.instance.m_Name);
-						}
-						else
-						{
-							boneNode = new TreeNode("invalid bone");
-							boneNode.ForeColor = Color.OrangeRed;
-						}
-						boneNode.Tag = new DragSource(EditorVar, typeof(Matrix), new int[] { meshId, i });
-						boneListNode.Nodes.Add(boneNode);
-					}
+					continue;
 				}
-			}
-			else
-			{
-				MeshRenderer frameMR = frame.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshRenderer);
-				if (frameMR != null)
+
+				switch (asset.classID2)
 				{
-					int meshId = Editor.Meshes.IndexOf(frameMR);
-					TreeNode meshNode = new TreeNode("MeshRenderer");
-					meshNode.Tag = new DragSource(EditorVar, typeof(MeshRenderer), meshId);
-					newNode.Nodes.Add(meshNode);
+				case UnityClassID.SkinnedMeshRenderer:
+					SkinnedMeshRenderer frameSMR = (SkinnedMeshRenderer)asset;
+					int sMeshId = Editor.Meshes.IndexOf(frameSMR);
+					TreeNode sMeshNode = new TreeNode("SkinnedMeshRenderer");
+					sMeshNode.Tag = new DragSource(EditorVar, typeof(SkinnedMeshRenderer), sMeshId);
+					newNode.Nodes.Add(sMeshNode);
+
+					if (frameSMR.m_Bones.Count > 0)
+					{
+						TreeNode boneListNode = new TreeNode(frameSMR.m_Bones.Count + " Bones");
+						sMeshNode.Nodes.Add(boneListNode);
+						for (int i = 0; i < frameSMR.m_Bones.Count; i++)
+						{
+							Transform bone = frameSMR.m_Bones[i].instance;
+							TreeNode boneNode;
+							if (bone != null && bone.m_GameObject.instance != null)
+							{
+								boneNode = new TreeNode(bone.m_GameObject.instance.m_Name);
+							}
+							else
+							{
+								boneNode = new TreeNode("invalid bone");
+								boneNode.ForeColor = Color.OrangeRed;
+							}
+							boneNode.Tag = new DragSource(EditorVar, typeof(Matrix), new int[] { sMeshId, i });
+							boneListNode.Nodes.Add(boneNode);
+						}
+					}
+					break;
+				case UnityClassID.MeshRenderer:
+					MeshRenderer frameMR = (MeshRenderer)asset;
+					int meshMRId = Editor.Meshes.IndexOf(frameMR);
+					TreeNode meshRNode = new TreeNode("MeshRenderer");
+					meshRNode.Tag = new DragSource(EditorVar, typeof(MeshRenderer), meshMRId);
+					newNode.Nodes.Add(meshRNode);
+					break;
+				case UnityClassID.ParticleRenderer:
+					ParticleRenderer framePR = (ParticleRenderer)asset;
+					int meshPRId = Editor.Meshes.IndexOf(framePR);
+					TreeNode meshPRNode = new TreeNode("ParticleRenderer");
+					meshPRNode.Tag = new DragSource(EditorVar, typeof(ParticleRenderer), meshPRId);
+					newNode.Nodes.Add(meshPRNode);
+					break;
+				case UnityClassID.MeshFilter:
+				case UnityClassID.Transform:
+					break;
+				default:
+					string text = asset.classID2.ToString() + (asset.classID1 != asset.classID2 ? " " + (int)asset.classID1 : String.Empty);
+					TreeNode otherNode = new TreeNode(text);
+					otherNode.ForeColor = Color.Red;
+					newNode.Nodes.Add(otherNode);
+					break;
 				}
 			}
 
@@ -795,7 +818,7 @@ namespace UnityPlugin
 			for (int i = 0; i < Editor.Parser.file.Components.Count; i++)
 			{
 				Component asset = Editor.Parser.file.Components[i];
-				if (asset.classID1 == UnityClassID.Texture2D)
+				if (asset.classID1 == UnityClassID.Texture2D || asset.classID1 == UnityClassID.Cubemap)
 				{
 					for (int j = 0; j < matTexNameCombo.Length; j++)
 					{
@@ -804,7 +827,7 @@ namespace UnityPlugin
 							new Tuple<string, Component>
 							(
 								asset.pathID + " " + (asset is NotLoaded ? ((NotLoaded)asset).Name : ((Texture2D)asset).m_Name),
-								asset
+								Editor.Parser.file.Components[i]
 							)
 						);
 					}
@@ -845,6 +868,7 @@ namespace UnityPlugin
 			else
 			{
 				Transform frame = Editor.Frames[id];
+				labelTransformName.Text = id > 0 ? "Transform Name" : "Animator Name";
 				textBoxFrameName.Text = frame.m_GameObject.instance.m_Name;
 				DataGridViewEditor.LoadMatrix(frame.m_LocalScale, frame.m_LocalRotation, frame.m_LocalPosition, dataGridViewFrameSRT, dataGridViewFrameMatrix);
 			}
@@ -856,6 +880,7 @@ namespace UnityPlugin
 			if (id == null)
 			{
 				textBoxBoneName.Text = String.Empty;
+				editTextBoxBoneHash.Text = String.Empty;
 				DataGridViewEditor.LoadMatrix(Matrix.Identity, dataGridViewBoneSRT, dataGridViewBoneMatrix);
 			}
 			else
@@ -866,6 +891,7 @@ namespace UnityPlugin
 				Mesh mesh = smr.m_Mesh.instance;
 				if (mesh != null)
 				{
+					editTextBoxBoneHash.Text = mesh.m_BoneNameHashes[id[1]].ToString();
 					Matrix matrix = Matrix.Transpose(mesh.m_BindPose[id[1]]);
 					DataGridViewEditor.LoadMatrix(matrix, dataGridViewBoneSRT, dataGridViewBoneMatrix);
 				}
@@ -921,7 +947,10 @@ namespace UnityPlugin
 
 					editTextBoxMeshName.Text = mesh.m_Name;
 					checkBoxMeshMultiPass.Checked = meshR.m_Materials.Count > mesh.m_SubMeshes.Count;
-					editTextBoxMeshRootBone.Text = Editor.Parser.m_Avatar.instance.FindBoneName(mesh.m_RootBoneNameHash);
+					if (Editor.Parser.m_Avatar.instance != null)
+					{
+						editTextBoxMeshRootBone.Text = Editor.Parser.m_Avatar.instance.FindBoneName(mesh.m_RootBoneNameHash);
+					}
 
 					for (int i = 0; i < mesh.m_SubMeshes.Count; i++)
 					{
@@ -1002,9 +1031,9 @@ namespace UnityPlugin
 				Material mat = Editor.Materials[id];
 				textBoxMatName.Text = mat.m_Name;
 
-				if (mat.m_Shader.instance != null)
+				if (mat.m_Shader.asset != null)
 				{
-					editTextBoxMatShader.Text = mat.m_Shader.instance.m_Name;
+					editTextBoxMatShader.Text = AssetCabinet.ToString(mat.m_Shader.asset);
 				}
 				if (mat.m_ShaderKeywords.Count > 0)
 				{
@@ -1012,7 +1041,7 @@ namespace UnityPlugin
 					comboBoxMatShaderKeywords.SelectedIndex = 0;
 				}
 
-				for (int i = 0; i < mat.m_SavedProperties.m_TexEnvs.Count; i++)
+				for (int i = 0; i < mat.m_SavedProperties.m_TexEnvs.Count && i < matTexNamePurpose.Length; i++)
 				{
 					var matTex = mat.m_SavedProperties.m_TexEnvs[i];
 					if (matTex.Value.m_Texture.instance == null)
@@ -1035,6 +1064,10 @@ namespace UnityPlugin
 						}
 					}
 				}
+				if (mat.m_SavedProperties.m_TexEnvs.Count > matTexNamePurpose.Length)
+				{
+					Report.ReportLog("Warning! Material " + mat.m_Name + " features " + mat.m_SavedProperties.m_TexEnvs.Count + " textures!");
+				}
 
 				for (int i = 0; i < mat.m_SavedProperties.m_Colors.Count && i < matMatrixLabel.Length; i++)
 				{
@@ -1045,12 +1078,20 @@ namespace UnityPlugin
 					matMatrixText[i][2].Text = colPair.Value.Blue.ToFloatString();
 					matMatrixText[i][3].Text = colPair.Value.Alpha.ToFloatString();
 				}
+				if (mat.m_SavedProperties.m_Colors.Count > matMatrixLabel.Length)
+				{
+					Report.ReportLog("Warning! Material " + mat.m_Name + " features " + mat.m_SavedProperties.m_Colors.Count + " colours!");
+				}
 
 				for (int i = 0; i < mat.m_SavedProperties.m_Floats.Count && i < matValues.Length; i++)
 				{
 					var floatPair = mat.m_SavedProperties.m_Floats[i];
 					matValues[i].Text = ShortLabel(floatPair.Key.name);
 					matMatrixText[7][i].Text = floatPair.Value.ToFloatString();
+				}
+				if (mat.m_SavedProperties.m_Floats.Count > matValues.Length)
+				{
+					Report.ReportLog("Warning! Material " + mat.m_Name + " features " + mat.m_SavedProperties.m_Floats.Count + " values!");
 				}
 			}
 			loadedMaterial = id;
@@ -1085,6 +1126,7 @@ namespace UnityPlugin
 			else
 			{
 				Texture2D tex = Editor.Textures[id];
+				labelTextureClass.Text = tex.classID1.ToString();
 				textBoxTexName.Text = tex.m_Name;
 				textBoxTexSize.Text = tex.m_Width + "x" + tex.m_Height;
 				labelTextureFormat.Text = tex.m_TextureFormat.ToString();
@@ -1177,7 +1219,7 @@ namespace UnityPlugin
 			return null;
 		}
 
-		TreeNode FindBoneNode(Transform bone, TreeNodeCollection nodes)
+		void FindBoneNodes(Transform bone, TreeNodeCollection nodes, List<TreeNode> boneNodes)
 		{
 			foreach (TreeNode node in nodes)
 			{
@@ -1187,20 +1229,17 @@ namespace UnityPlugin
 				{
 					var id = (int[])source.Value.Id;
 					SkinnedMeshRenderer smr = (SkinnedMeshRenderer)Editor.Meshes[id[0]];
-					if (smr.m_Bones[id[1]].instance.Equals(bone))
+					Mesh mesh = Operations.GetMesh(smr);
+					if (smr.m_Bones[id[1]].instance != null && smr.m_Bones[id[1]].instance.Equals(bone)
+						|| mesh != null && Editor.Parser.m_Avatar.instance.FindBoneName(mesh.m_BoneNameHashes[id[1]]) == bone.m_GameObject.instance.m_Name)
 					{
-						return node;
+						boneNodes.Add(node);
+						break;
 					}
 				}
 
-				TreeNode found = FindBoneNode(bone, node.Nodes);
-				if (found != null)
-				{
-					return found;
-				}
+				FindBoneNodes(bone, node.Nodes, boneNodes);
 			}
-
-			return null;
 		}
 
 		TreeNode FindMaterialNode(string name)
@@ -1958,12 +1997,14 @@ namespace UnityPlugin
 					Gui.Scripting.RunScript(EditorVar + ".MergeMaterial(mat=" + source.Variable + ".Materials[" + (int)source.Id + "])");
 					Changed = Changed;
 					RecreateMaterials();
+					RefreshFormUnity();
 				}
 				else if (source.Type == typeof(Texture2D))
 				{
 					Gui.Scripting.RunScript(EditorVar + ".MergeTexture(tex=" + source.Variable + ".Textures[" + (int)source.Id + "])");
 					Changed = Changed;
 					RecreateTextures();
+					RefreshFormUnity();
 				}
 				else if (source.Type == typeof(ImportedFrame))
 				{
@@ -2040,7 +2081,8 @@ namespace UnityPlugin
 							}
 							if (!bonesCopyNear)
 							{
-								dragOptions.radioButtonMeshReplace.Checked = true;}
+								dragOptions.radioButtonMeshReplace.Checked = true;
+							}
 						}
 						if (!dragOptions.checkBoxMeshNormalsLock.Checked)
 						{
@@ -2084,7 +2126,7 @@ namespace UnityPlugin
 								Gui.Scripting.RunScript(source.Variable + ".setSubmeshEnabled(meshId=" + (int)source.Id + ", id=" + wsMesh.SubmeshList.IndexOf(submesh) + ", enabled=false)");
 							}
 						}
-						Gui.Scripting.RunScript(EditorVar + ".ReplaceSkinnedMeshRenderer(mesh=" + source.Variable + ".Meshes[" + (int)source.Id + "], frameId=" + dragOptions.numericMeshId.Value + ", rootBoneId=-1, merge=" + dragOptions.radioButtonMeshMerge.Checked + ", normals=\"" + dragOptions.NormalsMethod.GetName() + "\", bones=\"" + dragOptions.BonesMethod.GetName() + "\", targetFullMesh=" + dragOptions.radioButtonNearestMesh.Checked + ")");
+						Gui.Scripting.RunScript(EditorVar + ".ReplaceMeshRenderer(mesh=" + source.Variable + ".Meshes[" + (int)source.Id + "], frameId=" + dragOptions.numericMeshId.Value + ", rootBoneId=-1, merge=" + dragOptions.radioButtonMeshMerge.Checked + ", normals=\"" + dragOptions.NormalsMethod.GetName() + "\", bones=\"" + dragOptions.BonesMethod.GetName() + "\", targetFullMesh=" + dragOptions.radioButtonNearestMesh.Checked + ")");
 						Changed = Changed;
 						RecreateMeshes();
 					}
@@ -2107,6 +2149,22 @@ namespace UnityPlugin
 				foreach (TreeNode child in node.Nodes)
 				{
 					ProcessDragDropSources(child);
+				}
+			}
+		}
+
+		private void RefreshFormUnity()
+		{
+			List<DockContent> formUnity3dList;
+			if (Gui.Docking.DockContents.TryGetValue(typeof(FormUnity3d), out formUnity3dList))
+			{
+				foreach (FormUnity3d form in formUnity3dList)
+				{
+					if (form.Editor.Parser.Cabinet == Editor.Parser.file)
+					{
+						form.InitSubfileLists(false);
+						break;
+					}
 				}
 			}
 		}
@@ -2252,6 +2310,8 @@ namespace UnityPlugin
 			InitFrames();
 			InitMeshes();
 			InitMorphs();
+			InitMaterials();
+			InitTextures();
 			RecreateRenderObjects();
 			RecreateCrossRefs();
 		}
@@ -2266,6 +2326,7 @@ namespace UnityPlugin
 			InitMeshes();
 			InitMorphs();
 			InitMaterials();
+			InitTextures();
 			RecreateRenderObjects();
 			RecreateCrossRefs();
 			LoadMaterial(loadedMaterial);
@@ -2414,14 +2475,28 @@ namespace UnityPlugin
 				RecreateRenderObjects();
 
 				Transform frame = Editor.Frames[loadedFrame];
-				TreeNode node = FindFrameNode(frame, treeViewObjectTree.Nodes);
-				node.Text = frame.m_GameObject.instance.m_Name;
+				TreeNode frameNode = FindFrameNode(frame, treeViewObjectTree.Nodes);
+				frameNode.Text = frame.m_GameObject.instance.m_Name;
+				List<TreeNode> boneNodes = new List<TreeNode>();
+				FindBoneNodes(frame, treeViewObjectTree.Nodes[0].Nodes, boneNodes);
+				foreach (TreeNode node in boneNodes)
+				{
+					node.Text = frame.m_GameObject.instance.m_Name;
+					if (node.ForeColor == Color.OrangeRed)
+					{
+						node.ForeColor = treeViewObjectTree.ForeColor;
+					}
+				}
 				SyncWorkspaces(frame.m_GameObject.instance.m_Name, typeof(Transform), loadedFrame);
 
 				MeshRenderer frameMesh = frame.m_GameObject.instance.FindLinkedComponent(UnityClassID.SkinnedMeshRenderer);
 				if (frameMesh == null)
 				{
 					frameMesh = frame.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshRenderer);
+				}
+				if (frameMesh == null)
+				{
+					frameMesh = frame.m_GameObject.instance.FindLinkedComponent(UnityClassID.ParticleRenderer);
 				}
 				if (frameMesh != null)
 				{
@@ -2829,6 +2904,61 @@ namespace UnityPlugin
 				LoadBone(null);
 				RecreateRenderObjects();
 				InitFrames();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void buttonBoneGetHash_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedBone == null || loadedFrame < 0)
+				{
+					return;
+				}
+
+				string bonePath = Editor.GetTransformPath(Editor.Frames[loadedFrame]);
+				uint pathHash = Animator.StringToHash(bonePath);
+				editTextBoxBoneHash.Text = pathHash.ToString();
+				editTextBoxBoneHash.Focus();
+				editTextBoxBoneHash.Select(editTextBoxBoneHash.Text.Length, 0);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void editTextBoxBoneHash_AfterEditTextChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedBone == null)
+				{
+					return;
+				}
+
+				uint boneHash = uint.Parse(editTextBoxBoneHash.Text);
+				Gui.Scripting.RunScript(EditorVar + ".SetMeshBoneHash(id=" + loadedBone[0] + ", boneId=" + loadedBone[1] + ", hash=" + boneHash + ")");
+				Changed = Changed;
+
+				SkinnedMeshRenderer sMesh = Editor.Meshes[loadedBone[0]] as SkinnedMeshRenderer;
+				if (sMesh != null && sMesh.m_Bones[loadedBone[1]].instance != null)
+				{
+					TreeNode meshFrameNode = FindFrameNode(sMesh.m_GameObject.instance.m_Name, treeViewObjectTree.Nodes[0].Nodes);
+					TreeNode meshNode = meshFrameNode.Nodes[0];
+					TreeNode bonesNode = meshNode.Nodes[0];
+					TreeNode boneNode = bonesNode.Nodes[loadedBone[1]];
+					boneNode.Text = sMesh.m_Bones[loadedBone[1]].instance.m_GameObject.instance.m_Name;
+					if (boneNode.ForeColor == Color.OrangeRed)
+					{
+						boneNode.ForeColor = treeViewObjectTree.ForeColor;
+					}
+					textBoxBoneName.Text = boneNode.Text;
+				}
 			}
 			catch (Exception ex)
 			{
@@ -3252,7 +3382,7 @@ namespace UnityPlugin
 				descendingIds.Reverse();
 				foreach (int id in descendingIds)
 				{
-					Gui.Scripting.RunScript(EditorVar + ".RemoveSkinnedMeshRenderer(id=" + id + ")");
+					Gui.Scripting.RunScript(EditorVar + ".RemoveMeshRenderer(id=" + id + ")");
 				}
 				Changed = Changed;
 
@@ -3332,6 +3462,16 @@ namespace UnityPlugin
 				{
 					if (attributesDialog.ShowDialog() == DialogResult.OK)
 					{
+						if (Operations.GetMesh(Editor.Meshes[loadedMesh]) != null)
+						{
+							Gui.Scripting.RunScript(EditorVar + ".SetMeshAttributes(id=" + loadedMesh + ", readable=" + attributesDialog.checkBoxMeshReadable.Checked + ", keepVertices=" + attributesDialog.checkBoxMeshKeepVertices.Checked + ", keepIndices=" + attributesDialog.checkBoxMeshKeepIndices.Checked + ", usageFlags=" + attributesDialog.editTextBoxMeshUsageFlags.Text + ")");
+						}
+						if (Editor.Meshes[loadedMesh] is SkinnedMeshRenderer)
+						{
+							Gui.Scripting.RunScript(EditorVar + ".SetSkinnedMeshRendererAttributes(id=" + loadedMesh + ", quality=" + attributesDialog.editTextBoxSkinnedMeshRendererQuality.Text + ", updateWhenOffScreen=" + attributesDialog.checkBoxSkinnedMeshRendererUpdateWhenOffScreen.Checked + ", dirtyAABB=" + attributesDialog.checkBoxSkinnedMeshRendererDirtyAABB.Checked + ")");
+						}
+						Gui.Scripting.RunScript(EditorVar + ".SetRendererAttributes(id=" + loadedMesh + ", castShadows=" + attributesDialog.checkBoxRendererCastShadows.Checked + ", receiveShadows=" + attributesDialog.checkBoxRendererReceiveShadows.Checked + ", lightmap=" + attributesDialog.editTextBoxRendererLightMap.Text + ", lightProbes=" + attributesDialog.checkBoxRendererUseLightProbes.Checked + ", sortingLayer= " + attributesDialog.editTextBoxRendererSortingLayerID.Text + ", sortingOrder=" + attributesDialog.editTextBoxRendererSortingOrder.Text + ")");
+						Changed = Changed;
 					}
 				}
 			}
@@ -3352,6 +3492,7 @@ namespace UnityPlugin
 
 				Gui.Scripting.RunScript(EditorVar + ".SetMeshName(id=" + loadedMesh + ", name=\"" + editTextBoxMeshName.Text + "\")");
 				Changed = Changed;
+				RecreateMeshes();
 			}
 			catch (Exception ex)
 			{
@@ -3509,6 +3650,7 @@ namespace UnityPlugin
 						if (matIdx == -1)
 						{
 							InitMaterials();
+							InitTextures();
 						}
 						RecreateRenderObjects();
 						RecreateCrossRefs();
@@ -3522,6 +3664,11 @@ namespace UnityPlugin
 			{
 				Utility.ReportException(ex);
 			}
+		}
+
+		private void dataGridViewMesh_DataError(object sender, DataGridViewDataErrorEventArgs e)
+		{
+			e.ThrowException = false;
 		}
 
 		private void dataGridViewMesh_CellValueChanged(object sender, DataGridViewCellEventArgs e)
@@ -4034,8 +4181,8 @@ namespace UnityPlugin
 				ComboBox combo = (ComboBox)sender;
 				int matTexIdx = (int)combo.Tag;
 				Component asset = ((Tuple<string, Component>)combo.Items[combo.SelectedIndex]).Item2;
-				string name = (combo.SelectedIndex < 1) ? String.Empty : (asset is NotLoaded ? ((NotLoaded)asset).Name : ((Texture2D)asset).m_Name);
-				Gui.Scripting.RunScript(EditorVar + ".SetMaterialTexture(id=" + loadedMaterial + ", index=" + matTexIdx + ", name=\"" + name + "\")");
+				int compIdx = Editor.Parser.file.Components.IndexOf(asset);
+				Gui.Scripting.RunScript(EditorVar + ".SetMaterialTexture(id=" + loadedMaterial + ", index=" + matTexIdx + ", componentIndex=" + compIdx + ")");
 				Changed = Changed;
 
 				InitTextures();

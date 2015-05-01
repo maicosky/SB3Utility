@@ -79,6 +79,23 @@ namespace UnityPlugin
 			file.WritePPtr(/*m_Father.asset*/Parent, false, stream);
 		}
 
+		public Transform Clone(AssetCabinet file)
+		{
+			Transform trans = new Transform(file);
+			trans.m_LocalRotation = m_LocalRotation;
+			trans.m_LocalPosition = m_LocalPosition;
+			trans.m_LocalScale = m_LocalScale;
+
+			trans.InitChildren(Count);
+			for (int i = 0; i < Count; i++)
+			{
+				GameObject gameObj = this[i].m_GameObject.instance.Clone(file);
+				trans.AddChild(gameObj.FindLinkedComponent(UnityClassID.Transform));
+			}
+
+			return trans;
+		}
+
 		public static Matrix WorldTransform(Transform frame)
 		{
 			Matrix world = Matrix.Identity;

@@ -89,5 +89,50 @@ namespace UnityPlugin
 			// Unity's writer aligns here
 			// writer.Write(new byte[3]);
 		}
+
+		public new SkinnedMeshRenderer Clone(AssetCabinet file)
+		{
+			file.MergeTypeDefinition(this.file, UnityClassID.SkinnedMeshRenderer);
+
+			SkinnedMeshRenderer sMesh = new SkinnedMeshRenderer(file);
+			AssetCabinet.IncompleteClones.Add(new Tuple<Component, Component>(this, sMesh));
+			return sMesh;
+		}
+
+		public void CopyTo(SkinnedMeshRenderer dest)
+		{
+			base.CopyTo(dest);
+			dest.m_Quality = m_Quality;
+			dest.m_UpdateWhenOffScreen = m_UpdateWhenOffScreen;
+			dest.m_Mesh = new PPtr<Mesh>(m_Mesh.instance != null ? m_Mesh.instance.Clone(dest.file) : null);
+
+			dest.m_Bones = new List<PPtr<Transform>>(m_Bones.Count);
+			Transform animatorFrame = dest.m_GameObject.instance.FindLinkedComponent(UnityClassID.Transform);
+			while (animatorFrame.Parent != null)
+			{
+				animatorFrame = animatorFrame.Parent;
+			}
+			for (int i = 0; i < m_Bones.Count; i++)
+			{
+				Transform boneFrame = m_Bones[i].instance;
+				if (boneFrame != null)
+				{
+					boneFrame = Operations.FindFrame(boneFrame.m_GameObject.instance.m_Name, animatorFrame);
+				}
+				dest.m_Bones.Add(new PPtr<Transform>(boneFrame));
+			}
+
+			dest.m_BlendShapeWeights = new List<float>(m_BlendShapeWeights);
+
+			Transform rootBone = null;
+			if (m_RootBone.instance != null)
+			{
+				rootBone = Operations.FindFrame(m_RootBone.instance.m_GameObject.instance.m_Name, animatorFrame);
+			}
+			dest.m_RootBone = new PPtr<Transform>(rootBone);
+
+			dest.m_AABB = m_AABB.Clone();
+			dest.m_DirtyAABB = m_DirtyAABB;
+		}
 	}
 }

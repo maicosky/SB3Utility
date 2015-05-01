@@ -114,5 +114,55 @@ namespace UnityPlugin
 			writer.Write(m_SortingOrder);
 			writer.Write(new byte[2]);
 		}
+
+		public MeshRenderer Clone(AssetCabinet file)
+		{
+			file.MergeTypeDefinition(this.file, UnityClassID.MeshRenderer);
+
+			MeshRenderer meshR = new MeshRenderer(file);
+			AssetCabinet.IncompleteClones.Add(new Tuple<Component, Component>(this, meshR));
+			return meshR;
+		}
+
+		public void CopyTo(MeshRenderer dest)
+		{
+			dest.m_Enabled = m_Enabled;
+			dest.m_CastShadows = m_CastShadows;
+			dest.m_ReceiveShadows = m_ReceiveShadows;
+			dest.m_LightmapIndex = m_LightmapIndex;
+			dest.m_LightmapTilingOffset = m_LightmapTilingOffset;
+
+			dest.m_Materials = new List<PPtr<Material>>(m_Materials.Count);
+			for (int i = 0; i < m_Materials.Count; i++)
+			{
+				Component mat = null;
+				if (m_Materials[i].instance != null)
+				{
+					mat = dest.file.Bundle.FindComponent(m_Materials[i].instance.m_Name, UnityClassID.Material);
+					if (mat == null)
+					{
+						mat = m_Materials[i].instance.Clone(dest.file);
+					}
+					else if (mat is NotLoaded)
+					{
+						NotLoaded notLoaded = (NotLoaded)mat;
+						if (notLoaded.replacement != null)
+						{
+							mat = notLoaded.replacement;
+						}
+						else
+						{
+							mat = dest.file.LoadComponent(dest.file.SourceStream, notLoaded);
+						}
+					}
+				}
+				dest.m_Materials.Add(new PPtr<Material>(mat));
+			}
+
+			dest.m_SubsetIndices = (uint[])m_SubsetIndices.Clone();
+			dest.m_UseLightProbes = m_UseLightProbes;
+			dest.m_SortingLayerID = m_SortingLayerID;
+			dest.m_SortingOrder = m_SortingOrder;
+		}
 	}
 }

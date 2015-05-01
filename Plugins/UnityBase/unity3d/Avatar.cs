@@ -513,6 +513,12 @@ namespace UnityPlugin
 			this.classID2 = classID2;
 		}
 
+		public Avatar(AssetCabinet file) :
+			this(file, 0, UnityClassID.Avatar, UnityClassID.Avatar)
+		{
+			file.ReplaceSubfile(-1, this, null);
+		}
+
 		public void LoadFrom(Stream stream)
 		{
 			BinaryReader reader = new BinaryReader(stream);
@@ -541,6 +547,37 @@ namespace UnityPlugin
 				writer.Write(m_TOS[i].Key);
 				writer.WriteNameA4(m_TOS[i].Value);
 			}
+		}
+
+		public Avatar Clone(AssetCabinet file)
+		{
+			Component avatar = file.Components.Find
+			(
+				delegate (Component asset)
+				{
+					return asset.classID1 == UnityClassID.Avatar &&
+						(asset is NotLoaded ? ((NotLoaded)asset).Name : ((Avatar)asset).m_Name) == m_Name;
+				}
+			);
+			if (avatar == null)
+			{
+				file.MergeTypeDefinition(this.file, UnityClassID.Avatar);
+
+				Avatar dest = new Avatar(file);
+				using (MemoryStream mem = new MemoryStream())
+				{
+					this.WriteTo(mem);
+					mem.Position = 0;
+					dest.LoadFrom(mem);
+				}
+				return dest;
+			}
+			else if (avatar is NotLoaded)
+			{
+				NotLoaded notLoaded = (NotLoaded)avatar;
+				avatar = file.LoadComponent(file.SourceStream, notLoaded);
+			}
+			return (Avatar)avatar;
 		}
 
 		public string FindBoneName(uint hash)
@@ -581,9 +618,8 @@ namespace UnityPlugin
 		{
 			string parentPath = BonePath(parent.m_GameObject.instance.m_Name);
 			string bonePath = parentPath + "/" + bone.m_GameObject.instance.m_Name;
-			uint[] hashes = Animator.StringsToHashes(bonePath, bone.m_GameObject.instance.m_Name);
-			uint bonePathHash = hashes[0];// Animator.StringToHash(bonePath);
-			uint boneHash = hashes[1];// Animator.StringToHash(bone.m_GameObject.instance.m_Name);
+			uint bonePathHash = Animator.StringToHash(bonePath);
+			uint boneHash = Animator.StringToHash(bone.m_GameObject.instance.m_Name);
 
 			int idx;
 			for (idx = 0; idx < m_TOS.Count; idx++)
@@ -643,8 +679,9 @@ namespace UnityPlugin
 			return index;
 		}
 
-		public void RenameBone(string oldName, string newName)
+		public SortedDictionary<uint, uint> RenameBone(string oldName, string newName)
 		{
+			SortedDictionary<uint, uint> boneHashTranslation = new SortedDictionary<uint, uint>();
 			for (int i = 0; i < m_TOS.Count; i++)
 			{
 				var pair = m_TOS[i];
@@ -653,14 +690,24 @@ namespace UnityPlugin
 				{
 					string begin = pair.Value.Substring(0, beginPos);
 					string end = pair.Value.Substring(beginPos + oldName.Length);
-					if ((beginPos == 0 || beginPos > 0 && begin[0] == '/') && (end.Length == 0 || end[0] == '/'))
+					if ((beginPos == 0 || beginPos > 0 && begin[begin.Length - 1] == '/') && (end.Length == 0 || end[0] == '/'))
 					{
-						var newPair = new KeyValuePair<uint, string>(pair.Key, begin + newName + end);
-						m_TOS.RemoveAt(i);
-						m_TOS.Insert(i, newPair);
+						string path = begin + newName + end;
+						uint hash = Animator.StringToHash(path);
+						boneHashTranslation.Add(m_TOS[i].Key, hash);
+						var newPair = new KeyValuePair<uint, string>(hash, path);
+						m_TOS[i] = newPair;
 					}
 				}
 			}
+			m_TOS.Sort
+			(
+				delegate(KeyValuePair<uint, string> x, KeyValuePair<uint, string> y)
+				{
+					return x.Key > y.Key ? 1 : x.Key < y.Key ? -1 : 0;
+				}
+			);
+			return boneHashTranslation;
 		}
 
 		public void RemoveBone(string name)

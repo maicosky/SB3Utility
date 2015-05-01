@@ -89,6 +89,7 @@
 			// 
 			this.editTextBoxMeshCenter.Location = new System.Drawing.Point(171, 79);
 			this.editTextBoxMeshCenter.Name = "editTextBoxMeshCenter";
+			this.editTextBoxMeshCenter.ReadOnly = true;
 			this.editTextBoxMeshCenter.Size = new System.Drawing.Size(155, 20);
 			this.editTextBoxMeshCenter.TabIndex = 214;
 			// 
@@ -162,6 +163,7 @@
 			// 
 			this.editTextBoxRendererLightProbeAnchor.Location = new System.Drawing.Point(437, 81);
 			this.editTextBoxRendererLightProbeAnchor.Name = "editTextBoxRendererLightProbeAnchor";
+			this.editTextBoxRendererLightProbeAnchor.ReadOnly = true;
 			this.editTextBoxRendererLightProbeAnchor.Size = new System.Drawing.Size(106, 20);
 			this.editTextBoxRendererLightProbeAnchor.TabIndex = 42;
 			// 
@@ -199,6 +201,7 @@
 			// 
 			this.editTextBoxRendererStaticBatchRoot.Location = new System.Drawing.Point(208, 53);
 			this.editTextBoxRendererStaticBatchRoot.Name = "editTextBoxRendererStaticBatchRoot";
+			this.editTextBoxRendererStaticBatchRoot.ReadOnly = true;
 			this.editTextBoxRendererStaticBatchRoot.Size = new System.Drawing.Size(106, 20);
 			this.editTextBoxRendererStaticBatchRoot.TabIndex = 22;
 			// 
@@ -215,6 +218,7 @@
 			// 
 			this.editTextBoxRendererTilingOffset.Location = new System.Drawing.Point(389, 25);
 			this.editTextBoxRendererTilingOffset.Name = "editTextBoxRendererTilingOffset";
+			this.editTextBoxRendererTilingOffset.ReadOnly = true;
 			this.editTextBoxRendererTilingOffset.Size = new System.Drawing.Size(154, 20);
 			this.editTextBoxRendererTilingOffset.TabIndex = 16;
 			// 
@@ -277,14 +281,13 @@
 			// buttonOK
 			// 
 			this.buttonOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.buttonOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.buttonOK.Enabled = false;
 			this.buttonOK.Location = new System.Drawing.Point(12, 343);
 			this.buttonOK.Name = "buttonOK";
 			this.buttonOK.Size = new System.Drawing.Size(75, 23);
 			this.buttonOK.TabIndex = 470;
 			this.buttonOK.Text = "OK";
 			this.buttonOK.UseVisualStyleBackColor = true;
+			this.buttonOK.Click += new System.EventHandler(this.buttonOK_Click);
 			// 
 			// groupBoxMesh
 			// 
@@ -382,6 +385,7 @@
 			// checkBoxMeshStreamCompression
 			// 
 			this.checkBoxMeshStreamCompression.AutoSize = true;
+			this.checkBoxMeshStreamCompression.Enabled = false;
 			this.checkBoxMeshStreamCompression.Location = new System.Drawing.Point(130, 54);
 			this.checkBoxMeshStreamCompression.Name = "checkBoxMeshStreamCompression";
 			this.checkBoxMeshStreamCompression.Size = new System.Drawing.Size(122, 17);
@@ -392,6 +396,7 @@
 			// checkBoxMeshCompression
 			// 
 			this.checkBoxMeshCompression.AutoSize = true;
+			this.checkBoxMeshCompression.Enabled = false;
 			this.checkBoxMeshCompression.Location = new System.Drawing.Point(9, 54);
 			this.checkBoxMeshCompression.Name = "checkBoxMeshCompression";
 			this.checkBoxMeshCompression.Size = new System.Drawing.Size(115, 17);
@@ -454,6 +459,7 @@
 			// 
 			this.editTextBoxMeshExtend.Location = new System.Drawing.Point(377, 79);
 			this.editTextBoxMeshExtend.Name = "editTextBoxMeshExtend";
+			this.editTextBoxMeshExtend.ReadOnly = true;
 			this.editTextBoxMeshExtend.Size = new System.Drawing.Size(155, 20);
 			this.editTextBoxMeshExtend.TabIndex = 216;
 			// 
@@ -501,6 +507,7 @@
 			// 
 			this.editTextBoxSkinnedMeshRendererAABBExtend.Location = new System.Drawing.Point(258, 55);
 			this.editTextBoxSkinnedMeshRendererAABBExtend.Name = "editTextBoxSkinnedMeshRendererAABBExtend";
+			this.editTextBoxSkinnedMeshRendererAABBExtend.ReadOnly = true;
 			this.editTextBoxSkinnedMeshRendererAABBExtend.Size = new System.Drawing.Size(155, 20);
 			this.editTextBoxSkinnedMeshRendererAABBExtend.TabIndex = 112;
 			// 
@@ -525,6 +532,7 @@
 			// 
 			this.editTextBoxSkinnedMeshRendererAABBCenter.Location = new System.Drawing.Point(50, 55);
 			this.editTextBoxSkinnedMeshRendererAABBCenter.Name = "editTextBoxSkinnedMeshRendererAABBCenter";
+			this.editTextBoxSkinnedMeshRendererAABBCenter.ReadOnly = true;
 			this.editTextBoxSkinnedMeshRendererAABBCenter.Size = new System.Drawing.Size(155, 20);
 			this.editTextBoxSkinnedMeshRendererAABBCenter.TabIndex = 110;
 			// 
@@ -617,42 +625,25 @@
 
 		#endregion
 
-		private SB3Utility.EditTextBox editTextBoxMeshCenter;
 		private System.Windows.Forms.Label label8;
 		private System.Windows.Forms.GroupBox groupBoxRenderer;
 		private System.Windows.Forms.Button buttonCancel;
 		private System.Windows.Forms.Button buttonOK;
-		private System.Windows.Forms.CheckBox checkBoxRendererCastShadows;
-		private SB3Utility.EditTextBox editTextBoxRendererLightMap;
 		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.CheckBox checkBoxRendererReceiveShadows;
 		private System.Windows.Forms.Label label1;
-		private SB3Utility.EditTextBox editTextBoxRendererTilingOffset;
-		private System.Windows.Forms.CheckBox checkBoxRendererSubsetIndices;
-		private SB3Utility.EditTextBox editTextBoxRendererStaticBatchRoot;
 		private System.Windows.Forms.Label label3;
-		private System.Windows.Forms.CheckBox checkBoxRendererUseLightProbes;
-		private SB3Utility.EditTextBox editTextBoxRendererLightProbeAnchor;
 		private System.Windows.Forms.Label label4;
-		private SB3Utility.EditTextBox editTextBoxRendererSortingLayerID;
 		private System.Windows.Forms.Label label6;
 		private System.Windows.Forms.GroupBox groupBoxMesh;
-		private SB3Utility.EditTextBox editTextBoxMeshExtend;
 		private System.Windows.Forms.Label label5;
-		private SB3Utility.EditTextBox editTextBoxRendererSortingOrder;
 		private System.Windows.Forms.Label label7;
 		private System.Windows.Forms.GroupBox groupBoxSkinnedMeshRenderer;
-		private SB3Utility.EditTextBox editTextBoxSkinnedMeshRendererQuality;
 		private System.Windows.Forms.Label label9;
-		private System.Windows.Forms.CheckBox checkBoxSkinnedMeshRendererUpdateWhenOffScreen;
 		private SB3Utility.EditTextBox editTextBoxSkinnedMeshRendererBones;
 		private System.Windows.Forms.Label label10;
 		private SB3Utility.EditTextBox editTextBoxSkinnedMeshRendererBlendShapeWeights;
 		private System.Windows.Forms.Label label11;
-		private System.Windows.Forms.CheckBox checkBoxSkinnedMeshRendererDirtyAABB;
-		private SB3Utility.EditTextBox editTextBoxSkinnedMeshRendererAABBExtend;
 		private System.Windows.Forms.Label label12;
-		private SB3Utility.EditTextBox editTextBoxSkinnedMeshRendererAABBCenter;
 		private System.Windows.Forms.Label label13;
 		private SB3Utility.EditTextBox editTextBoxMeshBlendShape;
 		private System.Windows.Forms.Label label14;
@@ -660,14 +651,31 @@
 		private System.Windows.Forms.Label label15;
 		private SB3Utility.EditTextBox editTextBoxMeshBoneHashes;
 		private System.Windows.Forms.Label label16;
-		private System.Windows.Forms.CheckBox checkBoxMeshCompression;
-		private System.Windows.Forms.CheckBox checkBoxMeshStreamCompression;
-		private System.Windows.Forms.CheckBox checkBoxMeshReadable;
-		private System.Windows.Forms.CheckBox checkBoxMeshKeepVertices;
-		private System.Windows.Forms.CheckBox checkBoxMeshKeepIndices;
 		private SB3Utility.EditTextBox editTextBoxMeshInfluences;
 		private System.Windows.Forms.Label label17;
-		private SB3Utility.EditTextBox editTextBoxMeshUsageFlags;
 		private System.Windows.Forms.Label label18;
+		public SB3Utility.EditTextBox editTextBoxMeshCenter;
+		public System.Windows.Forms.CheckBox checkBoxRendererCastShadows;
+		public SB3Utility.EditTextBox editTextBoxRendererLightMap;
+		public System.Windows.Forms.CheckBox checkBoxRendererReceiveShadows;
+		public SB3Utility.EditTextBox editTextBoxRendererTilingOffset;
+		public System.Windows.Forms.CheckBox checkBoxRendererSubsetIndices;
+		public SB3Utility.EditTextBox editTextBoxRendererStaticBatchRoot;
+		public System.Windows.Forms.CheckBox checkBoxRendererUseLightProbes;
+		public SB3Utility.EditTextBox editTextBoxRendererLightProbeAnchor;
+		public SB3Utility.EditTextBox editTextBoxRendererSortingLayerID;
+		public SB3Utility.EditTextBox editTextBoxMeshExtend;
+		public SB3Utility.EditTextBox editTextBoxRendererSortingOrder;
+		public SB3Utility.EditTextBox editTextBoxSkinnedMeshRendererQuality;
+		public System.Windows.Forms.CheckBox checkBoxSkinnedMeshRendererUpdateWhenOffScreen;
+		public System.Windows.Forms.CheckBox checkBoxSkinnedMeshRendererDirtyAABB;
+		public SB3Utility.EditTextBox editTextBoxSkinnedMeshRendererAABBExtend;
+		public SB3Utility.EditTextBox editTextBoxSkinnedMeshRendererAABBCenter;
+		public System.Windows.Forms.CheckBox checkBoxMeshCompression;
+		public System.Windows.Forms.CheckBox checkBoxMeshStreamCompression;
+		public System.Windows.Forms.CheckBox checkBoxMeshReadable;
+		public System.Windows.Forms.CheckBox checkBoxMeshKeepVertices;
+		public System.Windows.Forms.CheckBox checkBoxMeshKeepIndices;
+		public SB3Utility.EditTextBox editTextBoxMeshUsageFlags;
 	}
 }

@@ -11,7 +11,7 @@ namespace SB3Utility
 {
 	public static class Gui
 	{
-		public static string Version = "1.0.8";
+		public static string Version = "1.0.9";
 
 		public static IScripting Scripting { get; set; }
 		public static IDocking Docking { get; set; }

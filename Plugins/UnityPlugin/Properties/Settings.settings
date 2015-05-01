@@ -15,7 +15,7 @@
       <Value Profile="(Default)">.\StringToHash\ArgToHash.exe</Value>
     </Setting>
     <Setting Name="ArgToHashArguments" Provider="PortableSettingsProvider" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">-nolog -batchmode -nographics -strings</Value>
+      <Value Profile="(Default)">-nolog -batchmode -nographics -server</Value>
     </Setting>
   </Settings>
 </SettingsFile>

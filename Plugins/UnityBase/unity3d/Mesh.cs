@@ -761,5 +761,19 @@ namespace UnityPlugin
 			m_LocalAABB.WriteTo(stream);
 			writer.Write(m_MeshUsageFlags);
 		}
+
+		public Mesh Clone(AssetCabinet file)
+		{
+			file.MergeTypeDefinition(this.file, UnityClassID.Mesh);
+
+			Mesh mesh = new Mesh(file);
+			using (MemoryStream mem = new MemoryStream())
+			{
+				WriteTo(mem);
+				mem.Position = 0;
+				mesh.LoadFrom(mem);
+			}
+			return mesh;
+		}
 	}
 }

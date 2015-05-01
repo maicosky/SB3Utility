@@ -13,6 +13,7 @@ namespace UnityPlugin
 	public partial class FormRendererMeshAttributes : Form
 	{
 		private SizeF startSize;
+		private bool contentChanged = false;
 
 		public FormRendererMeshAttributes(MeshRenderer meshR)
 		{
@@ -69,6 +70,30 @@ namespace UnityPlugin
 			{
 				groupBoxMesh.Enabled = false;
 			}
+
+			checkBoxRendererCastShadows.CheckedChanged += AttributeChanged;
+			checkBoxRendererReceiveShadows.CheckedChanged += AttributeChanged;
+			editTextBoxRendererLightMap.AfterEditTextChanged += AttributeChanged;
+			editTextBoxRendererTilingOffset.AfterEditTextChanged += AttributeChanged;
+			checkBoxRendererSubsetIndices.CheckedChanged += AttributeChanged;
+			editTextBoxRendererStaticBatchRoot.AfterEditTextChanged += AttributeChanged;
+			checkBoxRendererUseLightProbes.CheckedChanged += AttributeChanged;
+			editTextBoxRendererSortingLayerID.AfterEditTextChanged += AttributeChanged;
+			editTextBoxRendererSortingOrder.AfterEditTextChanged += AttributeChanged;
+			editTextBoxRendererLightProbeAnchor.AfterEditTextChanged += AttributeChanged;
+			editTextBoxSkinnedMeshRendererQuality.AfterEditTextChanged += AttributeChanged;
+			checkBoxSkinnedMeshRendererUpdateWhenOffScreen.CheckedChanged += AttributeChanged;
+			editTextBoxSkinnedMeshRendererAABBCenter.AfterEditTextChanged += AttributeChanged;
+			editTextBoxSkinnedMeshRendererAABBExtend.AfterEditTextChanged += AttributeChanged;
+			checkBoxSkinnedMeshRendererDirtyAABB.CheckedChanged += AttributeChanged;
+			checkBoxMeshCompression.CheckedChanged += AttributeChanged;
+			checkBoxMeshStreamCompression.CheckedChanged += AttributeChanged;
+			checkBoxMeshReadable.CheckedChanged += AttributeChanged;
+			checkBoxMeshKeepVertices.CheckedChanged += AttributeChanged;
+			checkBoxMeshKeepIndices.CheckedChanged += AttributeChanged;
+			editTextBoxMeshUsageFlags.AfterEditTextChanged += AttributeChanged;
+			editTextBoxMeshCenter.AfterEditTextChanged += AttributeChanged;
+			editTextBoxMeshExtend.AfterEditTextChanged += AttributeChanged;
 		}
 
 		private void FormRendererMeshAttributes_Shown(object sender, EventArgs e)
@@ -106,6 +131,16 @@ namespace UnityPlugin
 					Properties.Settings.Default["DialogRendererMeshAttributesSize"] = this.Size;
 				}
 			}
+		}
+
+		private void AttributeChanged(object sender, EventArgs e)
+		{
+			contentChanged = true;
+		}
+
+		private void buttonOK_Click(object sender, EventArgs e)
+		{
+			this.DialogResult = contentChanged ? DialogResult.OK : DialogResult.Cancel;
 		}
 	}
 }

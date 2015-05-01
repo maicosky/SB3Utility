@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Reflection;
 
 using SB3Utility;
 
@@ -11,12 +12,51 @@ namespace UnityPlugin
 	public class Unity3dEditor : EditedContent
 	{
 		public UnityParser Parser { get; protected set; }
+		public HashSet<Animator> VirtualAnimators { get; protected set; }
 
 		protected bool contentChanged = false;
+
+		public HashSet<Component> Marked = new HashSet<Component>();
+		private HashSet<string> msgFilter = new HashSet<string>();
 
 		public Unity3dEditor(UnityParser parser, bool showContents)
 		{
 			Parser = parser;
+
+			VirtualAnimators = new HashSet<Animator>();
+			for (int i = 0; i < Parser.Cabinet.Bundle.m_Container.Count; i++)
+			{
+				AssetInfo info = Parser.Cabinet.Bundle.m_Container[i].Value;
+				if (info.asset.m_PathID == 0)
+				{
+					string msg = "Invalid container entry for " + Parser.Cabinet.Bundle.m_Container[i].Key;
+					if (msgFilter.Add(msg))
+					{
+						Report.ReportLog(msg);
+					}
+					continue;
+				}
+				if (info.asset.asset.classID1 == UnityClassID.GameObject)
+				{
+					bool animatorFound = false;
+					int nextPreloadIdx = info.preloadIndex + info.preloadSize;
+					for (int j = info.preloadIndex; j < nextPreloadIdx; j++)
+					{
+						if (Parser.Cabinet.Bundle.m_PreloadTable[j].asset.classID1 == UnityClassID.Animator)
+						{
+							animatorFound = true;
+							break;
+						}
+					}
+					if (!animatorFound)
+					{
+						Animator animator = new Animator(Parser.Cabinet, 0, 0, 0);
+						animator.m_Avatar = new PPtr<Avatar>((Component)null);
+						animator.m_GameObject = new PPtr<GameObject>(info.asset.asset);
+						VirtualAnimators.Add(animator);
+					}
+				}
+			}
 
 			if (showContents)
 			{
@@ -29,6 +69,7 @@ namespace UnityPlugin
 			}
 		}
 
+		[Plugin]
 		public string[] GetAssetNames(bool filter)
 		{
 			string[] assetNames = new string[Parser.Cabinet.Components.Count];
@@ -64,22 +105,29 @@ namespace UnityPlugin
 						case UnityClassID.Material:
 						case UnityClassID.MonoScript:
 						case UnityClassID.Shader:
+						case UnityClassID.Sprite:
 						case UnityClassID.TextAsset:
 						case UnityClassID.Texture2D:
 							comp.Name = reader.ReadNameA4();
 							break;
 						case UnityClassID.Animator:
 						case UnityClassID.EllipsoidParticleEmitter:
+						case UnityClassID.Light:
 						case UnityClassID.ParticleAnimator:
 						case UnityClassID.ParticleRenderer:
-							PPtr<GameObject> gameObjPtr = Animator.LoadGameObject(stream);
-							NotLoaded asset = Parser.Cabinet.FindComponent(gameObjPtr.m_PathID);
-							if (filter)
+						case UnityClassID.ParticleSystem:
+						case UnityClassID.ParticleSystemRenderer:
+							comp.Name = GetNameFromGameObject(filter, stream);
+							break;
+						default:
+							if ((int)comp.classID1 <= -1 && comp.classID2 == UnityClassID.MonoBehaviour)
 							{
-								stream.Position = asset.offset;
-								asset.Name = GameObject.LoadName(stream);
+								comp.Name = GetNameFromGameObject(filter, stream);
+								if (comp.Name == null)
+								{
+									comp.Name = MonoBehaviour.LoadName(stream);
+								}
 							}
-							comp.Name = asset.Name;
 							break;
 						case UnityClassID.MeshFilter:
 						case UnityClassID.MeshRenderer:
@@ -87,26 +135,13 @@ namespace UnityPlugin
 						case UnityClassID.Transform:
 							if (!filter)
 							{
-								gameObjPtr = Animator.LoadGameObject(stream);
-								asset = Parser.Cabinet.FindComponent(gameObjPtr.m_PathID);
-								if (asset.Name == null)
-								{
-									stream.Position = asset.offset;
-									asset.Name = GameObject.LoadName(stream);
-								}
-								comp.Name = asset.Name;
+								comp.Name = GetNameFromGameObject(true, stream);
 							}
 							break;
 						case UnityClassID.GameObject:
-							if (!filter)
+							if (!filter || IsVirtualAnimator(comp))
 							{
 								comp.Name = GameObject.LoadName(stream);
-							}
-							break;
-						default:
-							if (comp.classID1 == (UnityClassID)(int)-1 && comp.classID2 == UnityClassID.MonoBehaviour)
-							{
-								comp.Name = MonoBehaviour.LoadName(stream);
 							}
 							break;
 						}
@@ -115,6 +150,36 @@ namespace UnityPlugin
 				}
 			}
 			return assetNames;
+		}
+
+		private string GetNameFromGameObject(bool filter, Stream stream)
+		{
+			long pos = stream.Position;
+			PPtr<GameObject> gameObjPtr = Animator.LoadGameObject(stream);
+			if (gameObjPtr.m_PathID == 0)
+			{
+				stream.Position = pos;
+				return null;
+			}
+			NotLoaded asset = Parser.Cabinet.FindComponent(gameObjPtr.m_PathID);
+			if (filter && asset.Name == null)
+			{
+				stream.Position = asset.offset;
+				asset.Name = GameObject.LoadName(stream);
+			}
+			return asset.Name;
+		}
+
+		bool IsVirtualAnimator(NotLoaded gameObject)
+		{
+			foreach (Animator animator in VirtualAnimators)
+			{
+				if (animator.m_GameObject.asset == gameObject)
+				{
+					return true;
+				}
+			}
+			return false;
 		}
 
 		public Unity3dEditor(UnityParser parser) : this(parser, false) { }
@@ -161,6 +226,421 @@ namespace UnityPlugin
 		{
 			Operations.ReplaceMaterial(Parser, material);
 			Changed = true;
+		}
+
+		[Plugin]
+		public Animator OpenAnimator(string name)
+		{
+			for (int i = 0; i < Parser.Cabinet.Components.Count; i++)
+			{
+				Component subfile = Parser.Cabinet.Components[i];
+				if (subfile.classID1 == UnityClassID.Animator)
+				{
+					if (subfile is Animator)
+					{
+						Animator a = (Animator)subfile;
+						if (a.m_GameObject.instance.m_Name == name)
+						{
+							return a;
+						}
+						continue;
+					}
+					NotLoaded animatorComp = (NotLoaded)subfile;
+					if (animatorComp.Name == name)
+					{
+						bool marked = Marked.Remove(animatorComp);
+						try
+						{
+							using (Stream stream = File.OpenRead(Parser.FilePath))
+							{
+								return Parser.Cabinet.LoadComponent(stream, i, animatorComp);
+							}
+						}
+						finally
+						{
+							if (marked)
+							{
+								Marked.Add(animatorComp.replacement);
+							}
+						}
+					}
+				}
+			}
+			return null;
+		}
+
+		[Plugin]
+		public Animator OpenVirtualAnimator(string name)
+		{
+			foreach (Animator anim in VirtualAnimators)
+			{
+				string animName = anim.m_GameObject.asset is NotLoaded ? ((NotLoaded)anim.m_GameObject.asset).Name : anim.m_GameObject.instance.m_Name;
+				if (animName == name)
+				{
+					if (anim.m_GameObject.instance == null)
+					{
+						bool marked = Marked.Remove(anim.m_GameObject.asset);
+						anim.m_GameObject = new PPtr<GameObject>
+						(
+							Parser.Cabinet.LoadComponent(anim.m_GameObject.asset.pathID)
+						);
+						//anim.RootTransform = anim.m_GameObject.instance.FindLinkedComponent(UnityClassID.Transform);
+						if (marked)
+						{
+							Marked.Add(anim.m_GameObject.instance);
+						}
+					}
+					return anim;
+				}
+			}
+			return null;
+		}
+
+		[Plugin]
+		public void ExportMonoBehaviour(Component asset, string path)
+		{
+			MonoBehaviour mono = LoadWhenNeeded(asset);
+			mono.Export(path);
+		}
+
+		private dynamic LoadWhenNeeded(Component asset)
+		{
+			if (asset is NotLoaded)
+			{
+				Component comp = Parser.Cabinet.FindComponent(asset.pathID);
+				if (comp is NotLoaded)
+				{
+					asset = Parser.Cabinet.LoadComponent(asset.pathID);
+				}
+			}
+			return asset;
+		}
+
+		[Plugin]
+		public void ReplaceMonoBehaviour(string path)
+		{
+			MonoBehaviour m = MonoBehaviour.Import(path);
+			if (m.m_Lines.Count > 0)
+			{
+				for (int i = 0; i < Parser.Cabinet.Components.Count; i++)
+				{
+					Component asset = Parser.Cabinet.Components[i];
+					if (asset.classID2 == UnityClassID.MonoBehaviour)
+					{
+						MonoBehaviour mono = null;
+						string name;
+						if (asset is NotLoaded)
+						{
+							name = ((NotLoaded)asset).Name;
+							if (name != m.m_Name)
+							{
+								continue;
+							}
+							mono = Parser.Cabinet.LoadComponent(asset.pathID);
+						}
+						else
+						{
+							mono = (MonoBehaviour)asset;
+							name = mono.m_GameObject.instance != null ? mono.m_GameObject.instance.m_Name : mono.m_Name;
+						}
+						if (name == m.m_Name)
+						{
+							mono.m_Lines = m.m_Lines;
+							Changed = true;
+							return;
+						}
+					}
+				}
+			}
+		}
+
+		[Plugin]
+		public void ExportTexture2D(Component asset, string path)
+		{
+			Texture2D tex = LoadWhenNeeded(asset);
+			tex.Export(path);
+		}
+
+		[Plugin]
+		public void ExportCubemap(Component asset, string path)
+		{
+			Cubemap tex = LoadWhenNeeded(asset);
+			Report.ReportLog("Warning! Cubemap exported as normal texture!");
+			tex.Export(path);
+		}
+
+		[Plugin]
+		public void MergeTexture(string path)
+		{
+			ImportedTexture texture = new ImportedTexture(path);
+			Operations.ReplaceTexture(Parser, texture);
+			Changed = true;
+		}
+
+		[Plugin]
+		public void ExportShader(Component asset, string path)
+		{
+			Shader shader = LoadWhenNeeded(asset);
+			shader.Export(path);
+		}
+
+		[Plugin]
+		public void ReplaceShader(string path)
+		{
+			Shader sh = Shader.Import(path);
+			if (sh.m_Script.Length > 0)
+			{
+				for (int i = 0; i < Parser.Cabinet.Components.Count; i++)
+				{
+					Component asset = Parser.Cabinet.Components[i];
+					if (asset.classID1 == UnityClassID.Shader)
+					{
+						Shader shader = null;
+						string name;
+						if (asset is NotLoaded)
+						{
+							name = ((NotLoaded)asset).Name;
+							if (name != sh.m_Name)
+							{
+								continue;
+							}
+							shader = Parser.Cabinet.LoadComponent(asset.pathID);
+						}
+						else
+						{
+							shader = (Shader)asset;
+							name = shader.m_Name;
+						}
+						if (name == sh.m_Name)
+						{
+							shader.m_Script = sh.m_Script;
+							Changed = true;
+							return;
+						}
+					}
+				}
+			}
+		}
+
+		[Plugin]
+		public void ExportTextAsset(Component asset, string path)
+		{
+			TextAsset text = LoadWhenNeeded(asset);
+			text.Export(path);
+		}
+
+		[Plugin]
+		public void ReplaceTextAsset(string path)
+		{
+			TextAsset ta = TextAsset.Import(path);
+			if (ta.m_Script.Length > 0)
+			{
+				for (int i = 0; i < Parser.Cabinet.Components.Count; i++)
+				{
+					Component asset = Parser.Cabinet.Components[i];
+					if (asset.classID1 == UnityClassID.TextAsset)
+					{
+						TextAsset text = null;
+						string name;
+						if (asset is NotLoaded)
+						{
+							name = ((NotLoaded)asset).Name;
+							if (name != ta.m_Name)
+							{
+								continue;
+							}
+							text = Parser.Cabinet.LoadComponent(asset.pathID);
+						}
+						else
+						{
+							text = (TextAsset)asset;
+							name = text.m_Name;
+						}
+						if (name == ta.m_Name)
+						{
+							text.m_Script = ta.m_Script;
+							Changed = true;
+							return;
+						}
+					}
+				}
+			}
+		}
+
+		[Plugin]
+		public void ExportAudioClip(Component asset, string path)
+		{
+			AudioClip audio = LoadWhenNeeded(asset);
+			audio.Export(path);
+		}
+
+		[Plugin]
+		public void ReplaceAudioClip(string path)
+		{
+			AudioClip ac = AudioClip.Import(path);
+			if (ac.m_AudioData.Length > 0)
+			{
+				for (int i = 0; i < Parser.Cabinet.Components.Count; i++)
+				{
+					Component asset = Parser.Cabinet.Components[i];
+					if (asset.classID1 == UnityClassID.AudioClip)
+					{
+						AudioClip audio = null;
+						string name;
+						if (asset is NotLoaded)
+						{
+							name = ((NotLoaded)asset).Name;
+							if (name != ac.m_Name)
+							{
+								continue;
+							}
+							audio = Parser.Cabinet.LoadComponent(asset.pathID);
+						}
+						else
+						{
+							audio = (AudioClip)asset;
+							name = audio.m_Name;
+						}
+						if (name == ac.m_Name)
+						{
+							audio.m_AudioData = ac.m_AudioData;
+							Changed = true;
+							return;
+						}
+					}
+				}
+			}
+		}
+
+		[Plugin]
+		public void MarkAsset(int componentIdx)
+		{
+			Marked.Add(Parser.Cabinet.Components[componentIdx]);
+		}
+
+		[Plugin]
+		public void UnmarkAsset(int componentIdx)
+		{
+			Marked.Remove(Parser.Cabinet.Components[componentIdx]);
+		}
+
+		[Plugin]
+		public void PasteAllMarked()
+		{
+			try
+			{
+				Parser.Cabinet.BeginLoadingSkippedComponents();
+				foreach (object obj in Gui.Scripting.Variables.Values)
+				{
+					if (obj is Unity3dEditor && (Unity3dEditor)obj != this)
+					{
+						Unity3dEditor editor = (Unity3dEditor)obj;
+						HashSet<Component> remove = new HashSet<Component>();
+						HashSet<Component> replace = new HashSet<Component>();
+						foreach (Component asset in editor.Marked)
+						{
+							Component loaded;
+							if (asset is NotLoaded)
+							{
+								loaded = editor.Parser.Cabinet.LoadComponent(asset.pathID);
+								remove.Add(asset);
+								replace.Add(loaded);
+							}
+							else
+							{
+								loaded = asset;
+							}
+							Component clone;
+							switch (asset.classID1)
+							{
+							case UnityClassID.Texture2D:
+								Texture2D tex = (Texture2D)loaded;
+								clone = tex.Clone(Parser.Cabinet);
+								break;
+							case UnityClassID.Cubemap:
+								Cubemap cubemap = (Cubemap)loaded;
+								clone = cubemap.Clone(Parser.Cabinet);
+								break;
+							case UnityClassID.Material:
+								Material mat = (Material)loaded;
+								clone = mat.Clone(Parser.Cabinet);
+								break;
+							case UnityClassID.Shader:
+								Shader shader = (Shader)loaded;
+								clone = shader.Clone(Parser.Cabinet);
+								break;
+							case UnityClassID.Sprite:
+								Sprite sprite = (Sprite)loaded;
+								clone = sprite.Clone(Parser.Cabinet);
+								break;
+							case UnityClassID.Animator:
+								Parser.Cabinet.MergeTypeDefinition(loaded.file, UnityClassID.GameObject);
+								Parser.Cabinet.MergeTypeDefinition(loaded.file, UnityClassID.Transform);
+								Animator anim = (Animator)loaded;
+								clone = anim.m_GameObject.instance.Clone(Parser.Cabinet);
+								break;
+							case UnityClassID.GameObject:
+								Parser.Cabinet.MergeTypeDefinition(loaded.file, UnityClassID.GameObject);
+								Parser.Cabinet.MergeTypeDefinition(loaded.file, UnityClassID.Transform);
+								GameObject gameObj = (GameObject)loaded;
+								clone = gameObj.Clone(Parser.Cabinet);
+
+								Animator vAnim = new Animator(Parser.Cabinet, 0, 0, 0);
+								vAnim.m_Avatar = new PPtr<Avatar>((Component)null);
+								vAnim.m_GameObject = new PPtr<GameObject>(clone);
+								if (loaded.file.Bundle.numContainerEntries(gameObj.m_Name, UnityClassID.GameObject) > 1)
+								{
+									Report.ReportLog("Warning! Animator " + gameObj.m_Name + " has multiple entries in the AssetBundle's Container.");
+								}
+								vAnim.file.Bundle.AddComponent(vAnim.m_GameObject.instance.m_Name, clone);
+								VirtualAnimators.Add(vAnim);
+								if (loaded != asset)
+								{
+									foreach (Animator a in editor.VirtualAnimators)
+									{
+										if (a.m_GameObject.asset == asset)
+										{
+											a.m_GameObject = new PPtr<GameObject>(loaded);
+											break;
+										}
+									}
+								}
+								break;
+							default:
+								continue;
+							}
+
+							if (clone.pathID == 0)
+							{
+								Changed = true;
+							}
+						}
+
+						foreach (var pair in AssetCabinet.IncompleteClones)
+						{
+							Component src = pair.Item1;
+							Component dest = pair.Item2;
+							Type t = src.GetType();
+							MethodInfo info = t.GetMethod("CopyTo", new Type[] { t });
+							info.Invoke(src, new object[] { dest });
+						}
+						AssetCabinet.IncompleteClones.Clear();
+
+						foreach (Component asset in remove)
+						{
+							editor.Marked.Remove(asset);
+						}
+						foreach (Component asset in replace)
+						{
+							editor.Marked.Add(asset);
+						}
+					}
+				}
+			}
+			finally
+			{
+				Parser.Cabinet.EndLoadingSkippedComponents();
+			}
 		}
 	}
 }

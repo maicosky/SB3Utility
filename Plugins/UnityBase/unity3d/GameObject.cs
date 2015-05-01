@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 
 using SB3Utility;
 
@@ -101,7 +102,7 @@ namespace UnityPlugin
 		{
 			for (int i = 0; i < m_Component.Count; i++)
 			{
-				if (m_Component[i].Value.asset != null && m_Component[i].Value.asset.classID1 == classID)
+				if (m_Component[i].Value.asset != null && m_Component[i].Value.asset.classID2 == classID)
 				{
 					return m_Component[i].Value.asset;
 				}
@@ -153,6 +154,41 @@ namespace UnityPlugin
 					return;
 				}
 			}
+		}
+
+		private static HashSet<string> msgFilter = new HashSet<string>();
+
+		public GameObject Clone(AssetCabinet file)
+		{
+			GameObject gameObj = new GameObject(file);
+
+			for (int i = 0; i < m_Component.Count; i++)
+			{
+				Component asset = m_Component[i].Value.asset;
+
+				Type t = asset.GetType();
+				MethodInfo info = t.GetMethod("Clone", new Type[] { typeof(AssetCabinet) });
+				if (info != null)
+				{
+					LinkedByGameObject clone = (LinkedByGameObject)info.Invoke(asset, new object[] { file });
+					gameObj.AddLinkedComponent(clone);
+				}
+				else
+				{
+					string msg = "No Clone method for " + asset.classID2;
+					if (!msgFilter.Contains(msg))
+					{
+						msgFilter.Add(msg);
+						Report.ReportLog(msg);
+					}
+				}
+			}
+
+			gameObj.m_Layer = m_Layer;
+			gameObj.m_Name = m_Name;
+			gameObj.m_Tag = m_Tag;
+			gameObj.m_isActive = m_isActive;
+			return gameObj;
 		}
 	}
 }

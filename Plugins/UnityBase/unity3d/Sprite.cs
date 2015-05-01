@@ -20,6 +20,8 @@ namespace UnityPlugin
 			LoadFrom(stream);
 		}
 
+		public Rectf() { }
+
 		public void LoadFrom(Stream stream)
 		{
 			BinaryReader reader = new BinaryReader(stream);
@@ -37,6 +39,16 @@ namespace UnityPlugin
 			writer.Write(width);
 			writer.Write(height);
 		}
+
+		public Rectf Clone()
+		{
+			Rectf clone = new Rectf();
+			clone.x = x;
+			clone.y = y;
+			clone.width = width;
+			clone.height = height;
+			return clone;
+		}
 	}
 
 	public class SpriteVertex : IObjInfo
@@ -48,6 +60,8 @@ namespace UnityPlugin
 			LoadFrom(stream);
 		}
 
+		public SpriteVertex() { }
+
 		public void LoadFrom(Stream stream)
 		{
 			BinaryReader reader = new BinaryReader(stream);
@@ -58,6 +72,13 @@ namespace UnityPlugin
 		{
 			BinaryWriter writer = new BinaryWriter(stream);
 			writer.Write(pos);
+		}
+
+		public SpriteVertex Clone()
+		{
+			SpriteVertex clone = new SpriteVertex();
+			clone.pos = pos;
+			return clone;
 		}
 	}
 
@@ -77,6 +98,11 @@ namespace UnityPlugin
 		{
 			this.file = file;
 			LoadFrom(stream);
+		}
+
+		public SpriteRenderData(AssetCabinet file)
+		{
+			this.file = file;
 		}
 
 		public void LoadFrom(Stream stream)
@@ -126,6 +152,25 @@ namespace UnityPlugin
 			writer.Write(textureRectOffset);
 			writer.Write(settingsRaw);
 			writer.Write(uvTransform);
+		}
+
+		public SpriteRenderData Clone(AssetCabinet file)
+		{
+			SpriteRenderData clone = new SpriteRenderData(file);
+			clone.texture = new PPtr<Texture2D>(texture.instance != null ? texture.instance.Clone(file) : null);
+
+			clone.vertices = new SpriteVertex[vertices.Length];
+			for (int i = 0; i < vertices.Length; i++)
+			{
+				clone.vertices[i] = vertices[i].Clone();
+			}
+
+			clone.indices = (ushort[])indices.Clone();
+			clone.textureRect = textureRect.Clone();
+			clone.textureRectOffset = textureRectOffset;
+			clone.settingsRaw = settingsRaw;
+			clone.uvTransform = uvTransform;
+			return clone;
 		}
 	}
 
@@ -180,6 +225,46 @@ namespace UnityPlugin
 			writer.Write(m_PixelsToUnits);
 			writer.Write(m_Extrude);
 			m_RD.WriteTo(stream);
+		}
+
+		public Sprite Clone(AssetCabinet file)
+		{
+			Component sprite = file.Bundle.FindComponent(m_Name, UnityClassID.Sprite);
+			if (sprite == null)
+			{
+				if (m_RD.texture.instance == null)
+				{
+					throw new Exception("Cant clone textureless Sprite");
+				}
+
+				file.MergeTypeDefinition(this.file, UnityClassID.Sprite);
+
+				Sprite dest = new Sprite(file);
+				dest.m_Name = m_Name;
+				dest.m_Rect = m_Rect.Clone();
+				dest.m_Offset = m_Offset;
+				dest.m_Border = m_Border;
+				dest.m_PixelsToUnits = m_PixelsToUnits;
+				dest.m_Extrude = m_Extrude;
+				dest.m_RD = m_RD.Clone(file);
+				file.Bundle.UnregisterFromUpdate(dest.m_RD.texture.instance);
+				file.Bundle.AppendComponent(m_RD.texture.instance.m_Name, UnityClassID.Texture2D, dest);
+				file.Bundle.RegisterForUpdate(dest);
+				return dest;
+			}
+			else if (sprite is NotLoaded)
+			{
+				NotLoaded notLoaded = (NotLoaded)sprite;
+				if (notLoaded.replacement != null)
+				{
+					sprite = notLoaded.replacement;
+				}
+				else
+				{
+					sprite = file.LoadComponent(file.SourceStream, notLoaded);
+				}
+			}
+			return (Sprite)sprite;
 		}
 	}
 }

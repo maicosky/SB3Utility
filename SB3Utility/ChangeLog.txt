@@ -1,4 +1,23 @@
-﻿[1.0.8]
+﻿[1.0.9]
+  - UnityPlugin Update Only
+  - Asset Type Definitions
+  - AssetBundle handling
+  - Copy/Paste of Animator, Material, Shader, Sprite, Texture
+  - Support for new types: Light, MonoBehaviour (partially), MonoScript, ParticleSystem, ParticleSystemRenderer
+  - New Assets are appended at the end to compensate for unsupported MonoBehaviours
+  - MeshRenderers can be replaced with SkinnedMeshRenderers
+  - Fixed computation of extents of MeshRenderers/SkinnedMeshRenderes
+  - Fixed boneweights in additional submeshes beyond the first
+  - Fixed Cubemap handling
+  - Fixed referencial integrity check for appended assets
+  - Relaxed texture names check, e.g. *_Ramp-offset(X0Y0)-scale(X1Y1)
+  - Animator.StringToHash() exposed
+  - TextAssets export/import with Windows-style line breaks
+  - Renaming Animators
+  - All Assets linked in GameObject are visible in ObjectTree
+  - Virtual Animators
+
+[1.0.8]
   - Fix in UnityPlugin: crash when a mesh with an invalid material was selected
   - Fix in UnityPlugin: crash upon selecting an unloaded material
   - Fix in UnityPlugin: clearing mesh assignment

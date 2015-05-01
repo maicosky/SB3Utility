@@ -33,7 +33,7 @@ namespace UnityPlugin
 			public int typeId;
 			public TypeDefinitionString definitions;
 		}
-		public TypeDefinition[] Types { get; protected set; }
+		public List<TypeDefinition> Types { get; protected set; }
 		public int Unknown8 { get; protected set; }
 
 		public List<Component> Components { get; protected set; }
@@ -52,6 +52,8 @@ namespace UnityPlugin
 		public bool loadingReferencials { get; set; }
 		public List<NotLoaded> RemovedList { get; set; }
 		HashSet<string> reported;
+		public AssetBundle Bundle { get; set; }
+		public static HashSet<Tuple<Component, Component>> IncompleteClones = new HashSet<Tuple<Component, Component>>();
 
 		public AssetCabinet(Stream stream, UnityParser parser)
 		{
@@ -73,13 +75,14 @@ namespace UnityPlugin
 			Unknown7 = reader.ReadInt32();
 
 			int numTypes = reader.ReadInt32();
-			Types = new TypeDefinition[numTypes];
+			Types = new List<TypeDefinition>(numTypes);
 			for (int i = 0; i < numTypes; i++)
 			{
-				Types[i] = new TypeDefinition();
-				Types[i].typeId = reader.ReadInt32();
-				Types[i].definitions = new TypeDefinitionString();
-				ReadType(reader, Types[i].definitions);
+				TypeDefinition t = new TypeDefinition();
+				t.typeId = reader.ReadInt32();
+				t.definitions = new TypeDefinitionString();
+				ReadType(reader, t.definitions);
+				Types.Add(t);
 			}
 
 			Unknown8 = reader.ReadInt32();
@@ -120,6 +123,16 @@ namespace UnityPlugin
 			RemovedList = new List<NotLoaded>();
 			loadingReferencials = false;
 			reported = new HashSet<string>();
+
+			for (int i = 0; i < Components.Count; i++)
+			{
+				Component asset = Components[i];
+				if (asset.classID1 == UnityClassID.AssetBundle)
+				{
+					Bundle = LoadComponent(stream, i, (NotLoaded)asset);
+					break;
+				}
+			}
 		}
 
 		private void ReadType(BinaryReader reader, TypeDefinitionString tds)
@@ -151,8 +164,8 @@ namespace UnityPlugin
 
 			writer.Write(Unknown7);
 
-			writer.Write(Types.Length);
-			for (int i = 0; i < Types.Length; i++)
+			writer.Write(Types.Count);
+			for (int i = 0; i < Types.Count; i++)
 			{
 				writer.Write(Types[i].typeId);
 				WriteType(writer, Types[i].definitions);
@@ -244,6 +257,62 @@ namespace UnityPlugin
 			}
 		}
 
+		public void MergeTypeDefinition(AssetCabinet file, UnityClassID cls)
+		{
+			AssetCabinet.TypeDefinition clsDef = Types.Find
+			(
+				delegate(AssetCabinet.TypeDefinition def)
+				{
+					return def.typeId == (int)cls;
+				}
+			);
+			if (clsDef == null)
+			{
+				clsDef = file.Types.Find
+				(
+					delegate(AssetCabinet.TypeDefinition def)
+					{
+						return def.typeId == (int)cls;
+					}
+				);
+				if (clsDef == null)
+				{
+					Report.ReportLog("Error! Class Definition for " + cls + " not found!");
+					return;
+				}
+				Types.Add(clsDef);
+			}
+		}
+
+		public void DumpType(UnityClassID cls)
+		{
+			for (int i = 0; i < Types.Count; i++)
+			{
+				if (Types[i].typeId == (int)cls)
+				{
+					DumpType(Types[i]);
+					return;
+				}
+			}
+		}
+
+		public void DumpType(TypeDefinition td)
+		{
+			System.Text.StringBuilder sb = new System.Text.StringBuilder(10000);
+			sb.AppendFormat("typeId={0}\r\n", td.typeId);
+			DumpTypeString(td.definitions, 0, sb);
+			Report.ReportLog(sb.ToString());
+		}
+
+		void DumpTypeString(TypeDefinitionString tds, int level, System.Text.StringBuilder sb)
+		{
+			sb.AppendFormat("{0," + (level * 3 + tds.type.Length) + "} {1} flags=({2}, {3}, {4}, {5}, x{6:X})\r\n", tds.type, tds.identifier, tds.flags[0], tds.flags[1], tds.flags[2], tds.flags[3], tds.flags[4]);
+			for (int i = 0; i < tds.children.Length; i++)
+			{
+				DumpTypeString(tds.children[i], level + 1, sb);
+			}
+		}
+
 		public dynamic FindComponentIndex(int pathID)
 		{
 			for (int i = 0; i < Components.Count; i++)
@@ -272,28 +341,28 @@ namespace UnityPlugin
 			}
 			try
 			{
-				int i;
-				for (i = index + 1; asset.pathID < pathID; i++)
+				int i = index;
+				while (asset.pathID < pathID && index < Components.Count - 1)
 				{
-					asset = Components[i];
+					asset = Components[++index];
 				}
 				if (asset.pathID == pathID)
 				{
-					index = i - 1;
 					return asset;
 				}
-				for (i = index - 1; asset.pathID == 0 || asset.pathID > pathID; i--)
+				asset = Components[index = i - 1];
+				while (asset.pathID == 0 || asset.pathID > pathID)
 				{
-					asset = Components[i];
+					asset = Components[--index];
 				}
 				if (asset.pathID == pathID)
 				{
-					index = i + 1;
 					return asset;
 				}
 			}
 			catch { }
 
+			Report.ReportLog("FindComponent : pathID=" + pathID + " not found");
 			index = -1;
 			return null;
 		}
@@ -302,6 +371,18 @@ namespace UnityPlugin
 		{
 			int index_not_required;
 			return FindComponent(pathID, out index_not_required);
+		}
+
+		public void BeginLoadingSkippedComponents()
+		{
+			SourceStream = File.OpenRead(Parser.FilePath);
+		}
+
+		public void EndLoadingSkippedComponents()
+		{
+			SourceStream.Close();
+			SourceStream.Dispose();
+			SourceStream = null;
 		}
 
 		public dynamic LoadComponent(int pathID)
@@ -402,6 +483,7 @@ namespace UnityPlugin
 					Cubemap cubemap = new Cubemap(this, comp.pathID, comp.classID1, comp.classID2);
 					ReplaceSubfile(index, cubemap, comp);
 					cubemap.LoadFrom(stream);
+					Parser.Textures.Add(cubemap);
 					return cubemap;
 				}
 			case UnityClassID.EllipsoidParticleEmitter:
@@ -410,6 +492,13 @@ namespace UnityPlugin
 					ReplaceSubfile(index, ellipsoid, comp);
 					ellipsoid.LoadFrom(stream);
 					return ellipsoid;
+				}
+			case UnityClassID.Light:
+				{
+					Light light = new Light(this, comp.pathID, comp.classID1, comp.classID2);
+					ReplaceSubfile(index, light, comp);
+					light.LoadFrom(stream);
+					return light;
 				}
 			case UnityClassID.GameObject:
 				{
@@ -450,6 +539,35 @@ namespace UnityPlugin
 					meshRenderer.LoadFrom(stream);
 					return meshRenderer;
 				}
+			default:
+				if (comp.classID2 == UnityClassID.MonoBehaviour)
+				{
+					MonoBehaviour monoBehaviour = new MonoBehaviour(this, comp.pathID, comp.classID1, comp.classID2);
+					ReplaceSubfile(index, monoBehaviour, comp);
+					monoBehaviour.LoadFrom(stream, comp.size);
+					return monoBehaviour;
+				}
+				else
+				{
+					string message = "Unhandled class: " + comp.classID1 + "/" + comp.classID2;
+					if (!reported.Contains(message))
+					{
+						Report.ReportLog(message);
+						reported.Add(message);
+					}
+				}
+				break;
+			case UnityClassID.MonoScript:
+				{
+					if (loadingReferencials)
+					{
+						return comp;
+					}
+					MonoScript monoScript = new MonoScript(this, comp.pathID, comp.classID1, comp.classID2);
+					ReplaceSubfile(index, monoScript, comp);
+					monoScript.LoadFrom(stream);
+					return monoScript;
+				}
 			case UnityClassID.ParticleAnimator:
 				{
 					ParticleAnimator particleAnimator = new ParticleAnimator(this, comp.pathID, comp.classID1, comp.classID2);
@@ -464,42 +582,20 @@ namespace UnityPlugin
 					particleRenderer.LoadFrom(stream);
 					return particleRenderer;
 				}
-			default:
-				if (comp.classID2 == UnityClassID.MonoBehaviour)
+			case UnityClassID.ParticleSystem:
 				{
-					if (loadingReferencials)
-					{
-						return comp;
-					}
-					try
-					{
-						MonoBehaviour monoBehaviour = new MonoBehaviour(this, comp.pathID, comp.classID1, comp.classID2);
-						ReplaceSubfile(index, monoBehaviour, comp);
-						monoBehaviour.LoadFrom(stream);
-						return monoBehaviour;
-					}
-					catch (Exception e)
-					{
-						ReplaceSubfile(index, comp, comp);
-						comp.replacement = null;
-						if (!reported.Contains(e.Message))
-						{
-							Utility.ReportException(e);
-							reported.Add(e.Message);
-						}
-						return null;
-					}
+					ParticleSystem particleSystem = new ParticleSystem(this, comp.pathID, comp.classID1, comp.classID2);
+					ReplaceSubfile(index, particleSystem, comp);
+					particleSystem.LoadFrom(stream);
+					return particleSystem;
 				}
-				else
+			case UnityClassID.ParticleSystemRenderer:
 				{
-					string message = "Unhandled class: " + comp.classID1 + "/" + comp.classID2;
-					if (!reported.Contains(message))
-					{
-						Report.ReportLog(message);
-						reported.Add(message);
-					}
+					ParticleSystemRenderer particleSystemRenderer = new ParticleSystemRenderer(this, comp.pathID, comp.classID1, comp.classID2);
+					ReplaceSubfile(index, particleSystemRenderer, comp);
+					particleSystemRenderer.LoadFrom(stream);
+					return particleSystemRenderer;
 				}
-				break;
 			case UnityClassID.Shader:
 				{
 					Shader shader = new Shader(this, comp.pathID, comp.classID1, comp.classID2);
@@ -541,6 +637,7 @@ namespace UnityPlugin
 					Texture2D tex = new Texture2D(this, comp.pathID, comp.classID1, comp.classID2);
 					ReplaceSubfile(index, tex, comp);
 					tex.LoadFrom(stream);
+					Parser.Textures.Add(tex);
 					return tex;
 				}
 			case UnityClassID.Transform:
@@ -591,7 +688,7 @@ namespace UnityPlugin
 			}
 			else
 			{
-				for (int i = Components.Count - 1; i >= 0; i--)
+				/*for (int i = Components.Count - 1; i >= 0; i--)
 				{
 					if (Components[i].classID1 == file.classID1)
 					{
@@ -599,7 +696,7 @@ namespace UnityPlugin
 						break;
 					}
 				}
-				if (index < 0)
+				if (index < 0)*/
 				{
 					index = Components.Count;
 				}
@@ -607,36 +704,54 @@ namespace UnityPlugin
 			Components.Insert(index, file);
 		}
 
+		public void ReplaceSubfile(Component replaced, Component file)
+		{
+			Components.Remove(file);
+			int index = Components.IndexOf(replaced);
+			Components.RemoveAt(index);
+			for (int i = 0; i < RemovedList.Count; i++)
+			{
+				NotLoaded asset = RemovedList[i];
+				if (asset.replacement == replaced)
+				{
+					asset.replacement = file;
+					break;
+				}
+			}
+			Components.Insert(index, file);
+			file.pathID = replaced.pathID;
+		}
+
 		public static string ToString(Component subfile)
 		{
 			Type t = subfile.GetType();
-			PropertyInfo info = t.GetProperty("m_Name");
+			PropertyInfo info = t.GetProperty("m_GameObject");
+			if (info != null)
+			{
+				PPtr<GameObject> gameObjPtr = info.GetValue(subfile, null) as PPtr<GameObject>;
+				if (gameObjPtr != null)
+				{
+					if (gameObjPtr.instance != null)
+					{
+						return gameObjPtr.instance.m_Name;
+					}
+				}
+				else
+				{
+					GameObject gameObj = info.GetValue(subfile, null) as GameObject;
+					if (gameObj != null)
+					{
+						return gameObj.m_Name;
+					}
+					throw new Exception("What reference is this!? " + subfile.pathID + " " + subfile.classID1);
+				}
+			}
+			info = t.GetProperty("m_Name");
 			if (info != null)
 			{
 				return info.GetValue(subfile, null).ToString();
 			}
-			else
-			{
-				info = t.GetProperty("m_GameObject");
-				if (info != null)
-				{
-					PPtr<GameObject> gameObjPtr = info.GetValue(subfile, null) as PPtr<GameObject>;
-					if (gameObjPtr != null)
-					{
-						return gameObjPtr.instance.m_Name;
-					}
-					else
-					{
-						GameObject gameObj = info.GetValue(subfile, null) as GameObject;
-						if (gameObj != null)
-						{
-							return gameObj.m_Name;
-						}
-						throw new Exception("What reference is this!? " + subfile.pathID + " " + subfile.classID1);
-					}
-				}
-				throw new Exception("Neither m_Name nor m_GameObject member " + subfile.pathID + " " + subfile.classID1);
-			}
+			throw new Exception("Neither m_Name nor m_GameObject member " + subfile.pathID + " " + subfile.classID1);
 		}
 	}
 }

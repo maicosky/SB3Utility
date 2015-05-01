@@ -64,11 +64,13 @@ namespace UnityPlugin
 			writer.Write(m_Offset);
 		}
 
-		public void CopyTo(UnityTexEnv dest)
+		public void CopyTo(UnityTexEnv dest, bool cloneTextures)
 		{
-			if (file != dest.file)
+			if (file != dest.file && m_Texture.instance != null)
 			{
-				Texture2D destTex = dest.file.Parser.GetTexture(m_Texture.instance.m_Name);
+				Texture2D destTex = cloneTextures
+					? m_Texture.instance is Cubemap ? ((Cubemap)m_Texture.instance).Clone(dest.file) : m_Texture.instance.Clone(dest.file)
+					: dest.file.Parser.GetTexture(m_Texture.instance.m_Name);
 				dest.m_Texture = new PPtr<Texture2D>(destTex);
 			}
 			else
@@ -176,13 +178,13 @@ namespace UnityPlugin
 			}
 		}
 
-		public void CopyTo(Material dest)
+		public void CopyTo(Material dest, bool cloneTextures)
 		{
 			dest.m_SavedProperties.m_TexEnvs = new List<KeyValuePair<FastPropertyName, UnityTexEnv>>(m_TexEnvs.Count);
 			foreach (var src in m_TexEnvs)
 			{
 				UnityTexEnv texEnv = new UnityTexEnv(dest.file);
-				src.Value.CopyTo(texEnv);
+				src.Value.CopyTo(texEnv, cloneTextures);
 				dest.m_SavedProperties.m_TexEnvs.Add(new KeyValuePair<FastPropertyName, UnityTexEnv>(src.Key, texEnv));
 			}
 
@@ -299,58 +301,50 @@ namespace UnityPlugin
 
 		public Material Clone(AssetCabinet file)
 		{
-			HashSet<Component> addedComponents = new HashSet<Component>();
-			return Clone(file, addedComponents);
+			return Clone(file, true);
 		}
 
-		public Material Clone(AssetCabinet file, HashSet<Component> addedComponents)
+		public Material Clone(AssetCabinet file, bool cloneTextures)
 		{
-			Component addedAsset = AlreadyAdded(addedComponents, this);
-			if (addedAsset != null)
+			Component mat = file.Bundle.FindComponent(m_Name, UnityClassID.Material);
+			if (mat == null)
 			{
-				return (Material)addedAsset;
-			}
+				file.MergeTypeDefinition(this.file, UnityClassID.Material);
 
-			Material mat = new Material(file);
-			addedComponents.Add(mat);
-			CopyTo(mat, addedComponents);
-			return mat;
-		}
-
-		public void CopyTo(Material dest, HashSet<Component> addedComponents)
-		{
-			try
-			{
-				dest.m_Name = m_Name;
-				dest.m_Shader = dest.file == file || m_Shader.instance == null ? m_Shader : new PPtr<Shader>(m_Shader.instance.Clone(dest.file, addedComponents));
-				dest.m_ShaderKeywords = new List<string>(m_ShaderKeywords);
-				dest.m_CustomRenderQueue = m_CustomRenderQueue;
-				m_SavedProperties.CopyTo(dest);
+				mat = new Material(file);
+				file.Bundle.AddComponent(m_Name, mat);
+				CopyTo((Material)mat, cloneTextures);
 			}
-			catch (Exception e)
+			else if (mat is NotLoaded)
 			{
-				Report.ReportLog(e.ToString());
-			}
-		}
-
-		Component AlreadyAdded(HashSet<Component> addedComponents, Component newAsset)
-		{
-			foreach (Component asset in addedComponents)
-			{
-				if (asset.classID1 == newAsset.classID1)
+				NotLoaded notLoaded = (NotLoaded)mat;
+				if (notLoaded.replacement != null)
 				{
-					switch (asset.classID1)
-					{
-					case UnityClassID.Material:
-						if (((Material)asset).m_Name == ((Material)newAsset).m_Name)
-						{
-							return asset;
-						}
-						break;
-					}
+					mat = notLoaded.replacement;
+				}
+				else
+				{
+					mat = file.LoadComponent(file.SourceStream, notLoaded);
 				}
 			}
-			return null;
+			return (Material)mat;
+		}
+
+		public void CopyTo(Material dest, bool cloneTextures)
+		{
+			dest.m_Name = m_Name;
+			if (dest.file == file || m_Shader.instance == null)
+			{
+				dest.m_Shader = m_Shader;
+			}
+			else
+			{
+				Shader shader = m_Shader.instance.Clone(dest.file);
+				dest.m_Shader = new PPtr<Shader>(shader);
+			}
+			dest.m_ShaderKeywords = new List<string>(m_ShaderKeywords);
+			dest.m_CustomRenderQueue = m_CustomRenderQueue;
+			m_SavedProperties.CopyTo(dest, cloneTextures);
 		}
 	}
 }

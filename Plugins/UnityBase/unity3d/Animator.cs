@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
+using System.Text;
 
 using SB3Utility;
 
@@ -24,10 +25,19 @@ namespace UnityPlugin
 		public bool m_HasTransformHierarchy { get; set; }
 		public bool m_AllowConstantClipSamplingOptimization { get; set; }
 
-		public Transform RootTransform { get; set; }
+		public Transform RootTransform
+		{
+			get
+			{
+				return m_GameObject.instance != null
+					? m_GameObject.instance.FindLinkedComponent(UnityClassID.Transform)
+					: null;
+			}
+		}
 
 		public static string ArgToHashExecutable { get; set; }
 		public static string ArgToHashArgs { get; set; }
+		private static Process ArgToHashProcess;
 
 		public Animator(AssetCabinet file, int pathID, UnityClassID classID1, UnityClassID classID2)
 		{
@@ -35,6 +45,12 @@ namespace UnityPlugin
 			this.pathID = pathID;
 			this.classID1 = classID1;
 			this.classID2 = classID2;
+		}
+
+		public Animator(AssetCabinet file) :
+			this(file, 0, UnityClassID.Animator, UnityClassID.Animator)
+		{
+			file.ReplaceSubfile(-1, this, null);
 		}
 
 		public void LoadFrom(Stream stream)
@@ -50,11 +66,6 @@ namespace UnityPlugin
 			m_ApplyRootMotion = reader.ReadInt32();
 			m_HasTransformHierarchy = reader.ReadBoolean();
 			m_AllowConstantClipSamplingOptimization = reader.ReadBoolean();
-
-			if (m_GameObject.instance != null)
-			{
-				RootTransform = m_GameObject.instance.FindLinkedComponent(UnityClassID.Transform);
-			}
 		}
 
 		public static PPtr<GameObject> LoadGameObject(Stream stream)
@@ -78,67 +89,115 @@ namespace UnityPlugin
 			writer.Write(m_AllowConstantClipSamplingOptimization);
 		}
 
-		public static uint StringToHash(string str)
+		public Animator Clone(AssetCabinet file)
 		{
-			Process p = Process.Start(ArgToHashExecutable, ArgToHashArgs + " \"" + str + "\"");
-			if (p != null && p.WaitForExit(15000))
+			Component gameObj = file.Bundle.FindComponent(m_GameObject.instance.m_Name, UnityClassID.GameObject);
+			if (gameObj == null)
 			{
-				try
+				file.MergeTypeDefinition(this.file, UnityClassID.Animator);
+
+				Animator dest = new Animator(file);
+				AssetCabinet.IncompleteClones.Add(new Tuple<Component, Component>(this, dest));
+				return dest;
+			}
+			else if (gameObj is NotLoaded)
+			{
+				NotLoaded notLoaded = (NotLoaded)gameObj;
+				if (notLoaded.replacement != null)
 				{
-					using (StreamReader reader = new StreamReader(Path.GetFileNameWithoutExtension(ArgToHashExecutable) + ".out", System.Text.ASCIIEncoding.ASCII))
-					{
-						string line = reader.ReadLine();
-						string[] pair = line.Split(',');
-						return uint.Parse(pair[0]);
-					}
+					gameObj = notLoaded.replacement;
 				}
-				finally
+				else
 				{
-					File.Delete(Path.GetFileNameWithoutExtension(ArgToHashExecutable) + ".out");
+					gameObj = file.LoadComponent(file.SourceStream, notLoaded);
 				}
 			}
-			else
+			return ((GameObject)gameObj).FindLinkedComponent(UnityClassID.Animator);
+		}
+
+		public void CopyTo(Animator dest)
+		{
+			if (file.Bundle.numContainerEntries(m_GameObject.instance.m_Name, UnityClassID.GameObject) > 1)
 			{
-				if (p != null)
+				Report.ReportLog("Warning! Animator " + m_GameObject.instance.m_Name + " has multiple entries in the AssetBundle's Container.");
+			}
+			dest.file.Bundle.AddComponent(m_GameObject.instance.m_Name, dest.m_GameObject.instance);
+			dest.m_Enabled = m_Enabled;
+			dest.m_Avatar = new PPtr<Avatar>(m_Avatar.instance.Clone(dest.file));
+
+			dest.m_Controller = new PPtr<RuntimeAnimatorController>((Component)null);
+			if (m_Controller.asset != null)
+			{
+				Report.ReportLog("Warning! " + m_Controller.asset.classID1 + " " + AssetCabinet.ToString(m_Controller.asset) + " not duplicated!");
+			}
+
+			dest.m_CullingMode = m_CullingMode;
+			dest.m_UpdateMode = m_UpdateMode;
+			dest.m_ApplyRootMotion = m_ApplyRootMotion;
+			dest.m_HasTransformHierarchy = m_HasTransformHierarchy;
+			dest.m_AllowConstantClipSamplingOptimization = m_AllowConstantClipSamplingOptimization;
+		}
+
+		public static uint StringToHash(string str)
+		{
+			if (ArgToHashProcess == null)
+			{
+				LaunchArgToHash();
+			}
+
+			ArgToHashProcess.StandardInput.Write(str + "\n");
+			string output = ReadLineBlocking(ArgToHashProcess.StandardOutput);
+			string[] pair = output.Split(',');
+			return (uint)int.Parse(pair[0]);
+		}
+
+		private static void LaunchArgToHash()
+		{
+			ArgToHashProcess = new Process();
+			ArgToHashProcess.StartInfo = new ProcessStartInfo(ArgToHashExecutable, ArgToHashArgs);
+			ArgToHashProcess.StartInfo.UseShellExecute = false;
+			ArgToHashProcess.StartInfo.RedirectStandardInput = true;
+			ArgToHashProcess.StartInfo.RedirectStandardOutput = true;
+			ArgToHashProcess.Start();
+			while (!ArgToHashProcess.StandardOutput.EndOfStream)
+			{
+				string msg = ReadLineBlocking(ArgToHashProcess.StandardOutput);
+				if (msg.Contains("ArgToHash started"))
 				{
-					p.Kill();
+					break;
 				}
-				throw new Exception("Unable to start process - no hash for " + str);
 			}
 		}
 
-		public static uint[] StringsToHashes(string s1, string s2)
+		public static void TerminateArgToHash()
 		{
-			string args = ArgToHashArgs + " \"" + s1 + "\" \"" + s2 + "\"";
-			Process p = Process.Start(ArgToHashExecutable, args);
-			if (p != null && p.WaitForExit(15000))
+			if (ArgToHashProcess != null)
 			{
-				try
-				{
-					using (StreamReader reader = new StreamReader(Path.GetFileNameWithoutExtension(ArgToHashExecutable) + ".out", System.Text.ASCIIEncoding.ASCII))
-					{
-						string line = reader.ReadLine();
-						string[] pair = line.Split(',');
-						uint h1 = uint.Parse(pair[0]);
-						line = reader.ReadLine();
-						pair = line.Split(',');
-						uint h2 = uint.Parse(pair[0]);
-						return new uint[2] { h1, h2 };
-					}
-				}
-				finally
-				{
-					File.Delete(Path.GetFileNameWithoutExtension(ArgToHashExecutable) + ".out");
-				}
+				ArgToHashProcess.StandardInput.Write("~QUIT~\n");
+				ReadLineBlocking(ArgToHashProcess.StandardOutput);
+				ArgToHashProcess.Close();
+				ArgToHashProcess = null;
 			}
-			else
+		}
+
+		private static string ReadLineBlocking(StreamReader reader)
+		{
+			StringBuilder sb = new StringBuilder(1000);
+			char[] buffer = new char[1];
+			int charsRead;
+			do
 			{
-				if (p != null)
+				charsRead = reader.ReadBlock(buffer, 0, 1);
+				if (charsRead < 1)
 				{
-					p.Kill();
+					break;
 				}
-				throw new Exception("Unable to start process - no hash for " + s1 + "," + s2);
-			}
+				if (buffer[0] >= ' ')
+				{
+					sb.Append(buffer);
+				}
+			} while (buffer[0] != '\x0A');
+			return sb.ToString();
 		}
 	}
 }

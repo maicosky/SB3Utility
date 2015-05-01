@@ -670,9 +670,9 @@
 			this.Controls.Add(this.checkBoxOkContinue);
 			this.Controls.Add(this.buttonCancel);
 			this.Controls.Add(this.buttonOK);
+			this.Controls.Add(this.panelFrame);
 			this.Controls.Add(this.panelMorph);
 			this.Controls.Add(this.panelMesh);
-			this.Controls.Add(this.panelFrame);
 			this.Name = "FormAnimatorDragDrop";
 			this.ShowInTaskbar = false;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;

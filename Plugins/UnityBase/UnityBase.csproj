@@ -54,8 +54,10 @@
     <Compile Include="unity3d\AnimatorController.cs" />
     <Compile Include="unity3d\Cubemap.cs" />
     <Compile Include="unity3d\EllipsoidParticleEmitter.cs" />
+    <Compile Include="unity3d\Flare.cs" />
     <Compile Include="unity3d\GameObject.cs" />
     <Compile Include="unity3d\Component.cs" />
+    <Compile Include="unity3d\Light.cs" />
     <Compile Include="unity3d\Material.cs" />
     <Compile Include="unity3d\Mesh.cs" />
     <Compile Include="unity3d\MeshFilter.cs" />
@@ -66,6 +68,8 @@
     <Compile Include="Replace.cs" />
     <Compile Include="unity3d\ParticleAnimator.cs" />
     <Compile Include="unity3d\ParticleRenderer.cs" />
+    <Compile Include="unity3d\ParticleSystem.cs" />
+    <Compile Include="unity3d\ParticleSystemRenderer.cs" />
     <Compile Include="unity3d\RuntimeAnimatorController.cs" />
     <Compile Include="unity3d\Shader.cs" />
     <Compile Include="unity3d\SkinnedMeshRenderer.cs" />

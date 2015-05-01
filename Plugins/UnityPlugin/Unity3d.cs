@@ -191,23 +191,23 @@ namespace UnityPlugin
 				if (asset.classID2 == UnityClassID.MonoBehaviour)
 				{
 					MonoBehaviour mbic = parser.Cabinet.LoadComponent(asset.pathID);
-					if (name == "*" || mbic.m_Name == name)
+					string monoBName = mbic.m_GameObject.instance != null ? mbic.m_GameObject.instance.m_Name : mbic.m_Name;
+					if (name == "*" || monoBName == name)
 					{
-						ExportMonoBehaviour(parser, asset.pathID, path);
+						ExportMonoBehaviour(mbic, path);
 					}
 				}
 			}
 		}
 
-		static void ExportMonoBehaviour(UnityParser parser, int pathID, string path)
+		static void ExportMonoBehaviour(MonoBehaviour monob, string path)
 		{
 			string folder = Path.GetDirectoryName(path);
 			if (folder.Length > 0)
 			{
 				folder += "\\";
 			}
-			MonoBehaviour m = parser.Cabinet.LoadComponent(pathID);
-			m.Export(folder + Path.GetFileNameWithoutExtension(path));
+			monob.Export(folder + Path.GetFileNameWithoutExtension(path));
 		}
 
 		[Plugin]

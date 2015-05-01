@@ -169,8 +169,7 @@ namespace UnityPlugin
 				MorphList = new List<ImportedMorph>(meshList.Count);
 				foreach (MeshRenderer meshR in meshList)
 				{
-					SkinnedMeshRenderer sMesh = meshR as SkinnedMeshRenderer;
-					Mesh mesh = Operations.GetMesh(sMesh);
+					Mesh mesh = Operations.GetMesh(meshR);
 					if (mesh == null)
 					{
 						Report.ReportLog("skipping " + meshR.m_GameObject.instance.m_Name + " - no mesh");
@@ -250,7 +249,7 @@ namespace UnityPlugin
 										{
 											iVertex.BoneIndices[k] = (byte)inf.boneIndex[k];
 										}
-										iVertex.Weights = mesh.m_Skin[j].weight;
+										iVertex.Weights = (float[])inf.weight.Clone();
 									}
 								}
 							}
@@ -269,8 +268,9 @@ namespace UnityPlugin
 						}
 					}
 
-					if (skins && sMesh != null)
+					if (skins && meshR is SkinnedMeshRenderer)
 					{
+						SkinnedMeshRenderer sMesh = (SkinnedMeshRenderer)meshR;
 						if (sMesh.m_Bones.Count >= 256)
 						{
 							throw new Exception("Too many bones (" + mesh.m_BindPose.Count + ")");
@@ -295,7 +295,7 @@ namespace UnityPlugin
 					if (morphs && mesh.m_Shapes.shapes.Count > 0)
 					{
 						ImportedMorph morph = new ImportedMorph();
-						morph.Name = sMesh.m_GameObject.instance.m_Name;
+						morph.Name = meshR.m_GameObject.instance.m_Name;
 						morph.ClipName = Operations.BlendShapeName(mesh);
 						morph.KeyframeList = new List<ImportedMorphKeyframe>(mesh.m_Shapes.shapes.Count);
 						List<ImportedVertex> vertList = iMesh.SubmeshList[0].VertexList;

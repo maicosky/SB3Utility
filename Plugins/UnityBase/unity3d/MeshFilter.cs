@@ -40,5 +40,14 @@ namespace UnityPlugin
 			file.WritePPtr(m_GameObject.asset, false, stream);
 			file.WritePPtr(m_Mesh.asset, false, stream);
 		}
+
+		public MeshFilter Clone(AssetCabinet file)
+		{
+			file.MergeTypeDefinition(this.file, UnityClassID.MeshFilter);
+
+			MeshFilter filter = new MeshFilter(file);
+			filter.m_Mesh = new PPtr<Mesh>(m_Mesh.instance != null ? m_Mesh.instance.Clone(file) : null);
+			return filter;
+		}
 	}
 }

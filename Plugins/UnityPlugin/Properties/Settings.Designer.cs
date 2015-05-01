@@ -66,7 +66,7 @@ namespace UnityPlugin.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Configuration.SettingsProviderAttribute(typeof(PortableSettingsProvider))]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("-nolog -batchmode -nographics -strings")]
+        [global::System.Configuration.DefaultSettingValueAttribute("-nolog -batchmode -nographics -server")]
         public string ArgToHashArguments {
             get {
                 return ((string)(this["ArgToHashArguments"]));

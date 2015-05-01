@@ -115,6 +115,16 @@ namespace UnityPlugin
 				backupExtensionToolStripEditTextBox.AfterEditTextChanged += backupExtensionToolStripEditTextBox_AfterEditTextChanged;
 
 				Properties.Settings.Default.SettingChanging += Default_SettingChanging;
+
+				if (Animator.ArgToHashExecutable == null)
+				{
+					Animator.ArgToHashExecutable = (string)Properties.Settings.Default["ArgToHashExecutable"];
+					if (Animator.ArgToHashExecutable.StartsWith("."))
+					{
+						Animator.ArgToHashExecutable = System.Environment.CurrentDirectory + Animator.ArgToHashExecutable.Substring(1);
+					}
+					Animator.ArgToHashArgs = (string)Properties.Settings.Default["ArgToHashArguments"];
+				}
 			}
 			catch (Exception ex)
 			{
@@ -212,6 +222,12 @@ namespace UnityPlugin
 				{
 					Properties.Settings.Default.Save();
 				}
+
+				List<DockContent> formUnity3dList;
+				if (Gui.Docking.DockContents.TryGetValue(typeof(FormUnity3d), out formUnity3dList) && formUnity3dList.Count == 1)
+				{
+					Animator.TerminateArgToHash();
+				}
 			}
 			catch (Exception ex)
 			{
@@ -219,7 +235,7 @@ namespace UnityPlugin
 			}
 		}
 
-		private void InitSubfileLists(bool opening)
+		public void InitSubfileLists(bool opening)
 		{
 			adjustSubfileListsEnabled(false);
 			int[] selectedAnimators = new int[animatorsList.SelectedIndices.Count];
@@ -249,7 +265,7 @@ namespace UnityPlugin
 			List<ListViewItem> others = new List<ListViewItem>(Editor.Parser.Cabinet.Components.Count);
 			List<ListViewItem> filtered = new List<ListViewItem>(Editor.Parser.Cabinet.Components.Count);
 			Font bold = new Font(animatorsList.Font, FontStyle.Bold);
-			string[] assetNames = Editor.GetAssetNames(filterIncludedAssetsToolStripMenuItem.Checked);
+			string[] assetNames = (string[])Gui.Scripting.RunScript(EditorVar + ".GetAssetNames(filter=" + filterIncludedAssetsToolStripMenuItem.Checked + ")");
 			for (int i = 0; i < Editor.Parser.Cabinet.Components.Count; i++)
 			{
 				Component subfile = Editor.Parser.Cabinet.Components[i];
@@ -267,16 +283,21 @@ namespace UnityPlugin
 						continue;
 					}
 				}
-				ListViewItem item = new ListViewItem(new string[] { assetNames[i], subfile.classID2.ToString() });
+				string text = subfile.classID2.ToString() + (subfile.classID1 != subfile.classID2 ? " " + (int)subfile.classID1 : String.Empty);
+				ListViewItem item = new ListViewItem(new string[] { assetNames[i], text });
 				item.Tag = subfile;
 				if (!(subfile is NotLoaded))
 				{
-					item.Font = new Font(animatorsList.Font, /*subfile is ppSwapfile || subfile is RawFile ? FontStyle.Italic :*/ FontStyle.Bold);
+					item.Font = new Font(animatorsList.Font, FontStyle.Bold | (Editor.Marked.Contains(subfile) ? FontStyle.Underline : 0));
 				}
 				else
 				{
 					NotLoaded asset = (NotLoaded)subfile;
 					item.SubItems.Add(asset.size.ToString());
+					if (Editor.Marked.Contains(subfile))
+					{
+						item.Font = new Font(animatorsList.Font, FontStyle.Underline);
+					}
 				}
 				int itemWidth = (int)Math.Ceiling(Graphics.FromHwnd(Handle).MeasureString(item.Text, bold).Width) + 16;
 
@@ -298,6 +319,7 @@ namespace UnityPlugin
 					}
 					break;
 				case UnityClassID.Texture2D:
+				case UnityClassID.Cubemap:
 					images.Add(item);
 					if (itemWidth > imagesListHeaderName.Width)
 					{
@@ -327,10 +349,13 @@ namespace UnityPlugin
 						subfile.classID1 != UnityClassID.AssetBundle &&
 						subfile.classID1 != UnityClassID.Cubemap &&
 						subfile.classID1 != UnityClassID.EllipsoidParticleEmitter &&
+						subfile.classID1 != UnityClassID.Light &&
 						subfile.classID2 != UnityClassID.MonoBehaviour &&
 						subfile.classID1 != UnityClassID.MonoScript &&
 						subfile.classID1 != UnityClassID.ParticleAnimator &&
 						subfile.classID1 != UnityClassID.ParticleRenderer &&
+						subfile.classID1 != UnityClassID.ParticleSystem &&
+						subfile.classID1 != UnityClassID.ParticleSystemRenderer &&
 						subfile.classID1 != UnityClassID.Sprite &&
 						subfile.classID1 != UnityClassID.TextAsset)
 					{
@@ -344,6 +369,35 @@ namespace UnityPlugin
 					break;
 				}
 			}
+			foreach (Animator anim in Editor.VirtualAnimators)
+			{
+				string name = anim.m_GameObject.asset is NotLoaded ? ((NotLoaded)anim.m_GameObject.asset).Name : anim.m_GameObject.instance.m_Name;
+				FontStyle marked = Editor.Marked.Contains(anim.m_GameObject.asset) ? FontStyle.Underline : 0;
+				ListViewItem item = new ListViewItem(new string[] { name, anim.classID2.ToString() });
+				item.Tag = anim;
+				if (!(anim.m_GameObject.asset is NotLoaded))
+				{
+					item.Font = new Font(animatorsList.Font, FontStyle.Bold | marked);
+				}
+				else
+				{
+					NotLoaded asset = (NotLoaded)anim.m_GameObject.asset;
+					item.SubItems.Add(asset.size.ToString());
+					if (marked != 0)
+					{
+						item.Font = new Font(animatorsList.Font, marked);
+					}
+				}
+				item.ForeColor = Color.Purple;
+				int itemWidth = (int)Math.Ceiling(Graphics.FromHwnd(Handle).MeasureString(item.Text, bold).Width) + 16;
+
+				animators.Add(item);
+				if (itemWidth > animatorsListHeader.Width)
+				{
+					animatorsListHeader.Width = itemWidth;
+				}
+			}
+
 			animatorsList.Items.AddRange(animators.ToArray());
 			materialsList.Items.AddRange(materials.ToArray());
 			imagesList.Items.AddRange(images.ToArray());
@@ -387,10 +441,15 @@ namespace UnityPlugin
 				for (int i = 0; i < assetListViews.Count; i++)
 				{
 					assetListViews[i].EndUpdate();
-					assetListViews[i].Columns[0].AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
-					if (assetListViews[i].Columns.Count > 1)
+					for (int j = assetListViews[i].Columns.Count - 1; j >= 0; j--)
 					{
-						assetListViews[i].Columns[1].AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
+						int prevWidth = assetListViews[i].Columns[j].Width;
+						assetListViews[i].Columns[j].Width = -2;
+						assetListViews[i].Columns[j].AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
+						if (assetListViews[i].Columns[j].Width < prevWidth)
+						{
+							assetListViews[i].Columns[j].Width = prevWidth;
+						}
 					}
 					assetListViews[i].Sort();
 				}
@@ -469,15 +528,18 @@ namespace UnityPlugin
 			List<FormAnimator> list = new List<FormAnimator>(animatorsList.SelectedItems.Count);
 			foreach (ListViewItem item in animatorsList.SelectedItems)
 			{
-				FormAnimator formAnimator = (FormAnimator)Gui.Scripting.RunScript(FormVariable + ".OpenAnimator(name=\"" + item.Text + "\")", false);
+				Animator anim = item.Tag as Animator;
+				bool vAnimator = Editor.VirtualAnimators.Contains(anim);
+				FormAnimator formAnimator = (FormAnimator)Gui.Scripting.RunScript(FormVariable + ".OpenAnimator(name=\"" + item.Text + "\", virtualAnimator=" + vAnimator + ")", false);
 				formAnimator.Activate();
 				list.Add(formAnimator);
 			}
+			InitSubfileLists(false);
 			return list;
 		}
 
 		[Plugin]
-		public FormAnimator OpenAnimator(string name)
+		public FormAnimator OpenAnimator(string name, bool virtualAnimator)
 		{
 			DockContent child;
 			if (!ChildForms.TryGetValue(name, out child))
@@ -486,21 +548,19 @@ namespace UnityPlugin
 				bool changed = true;
 				if (!ChildParserVars.TryGetValue(name, out childParserVar))
 				{
-					childParserVar = Gui.Scripting.GetNextVariable("animator");
-					Gui.Scripting.RunScript(childParserVar + " = OpenAnimator(parser=" + ParserVar + ", name=\"" + name + "\")");
+					if (!virtualAnimator)
+					{
+						childParserVar = Gui.Scripting.GetNextVariable("animator");
+						Gui.Scripting.RunScript(childParserVar + " = " + EditorVar + ".OpenAnimator(name=\"" + name + "\")");
+					}
+					else
+					{
+						childParserVar = Gui.Scripting.GetNextVariable("virtualAnimator");
+						Gui.Scripting.RunScript(childParserVar + " = " + EditorVar + ".OpenVirtualAnimator(name=\"" + name + "\")");
+					}
 					ChildParserVars.Add(name, childParserVar);
 
-					foreach (ListViewItem item in animatorsList.Items)
-					{
-						if (item.Text.Equals(name, StringComparison.InvariantCultureIgnoreCase))
-						{
-							item.Font = new Font(item.Font, FontStyle.Bold);
-							changed = false;// item.Tag is ppSwapfile;
-							item.Tag = Gui.Scripting.Variables[childParserVar];
-							break;
-						}
-					}
-					animatorsList.Columns[0].AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
+					changed = false;
 				}
 
 				child = new FormAnimator(Editor.Parser, childParserVar);
@@ -567,6 +627,10 @@ namespace UnityPlugin
 							}
 						}*/
 					}
+					else
+					{
+						Changed = true;
+					}
 				}
 
 				if (!dontSwap)
@@ -597,7 +661,25 @@ namespace UnityPlugin
 			{
 				if (e.IsSelected)
 				{
-					Texture2D tex = Editor.Parser.GetTexture(e.Item.Text);
+					Component asset = (Component)e.Item.Tag;
+					Texture2D tex;
+					if (asset is NotLoaded)
+					{
+						if (((NotLoaded)asset).replacement != null)
+						{
+							tex = (Texture2D)((NotLoaded)asset).replacement;
+						}
+						else
+						{
+							int texIdx = Editor.Parser.Textures.IndexOf(asset);
+							tex = Editor.Parser.GetTexture(texIdx);
+						}
+						e.Item.Tag = tex;
+					}
+					else
+					{
+						tex = (Texture2D)asset;
+					}
 					using (MemoryStream mem = new MemoryStream())
 					{
 						tex.Export(mem);
@@ -609,7 +691,7 @@ namespace UnityPlugin
 			}
 			catch (Exception ex)
 			{
-				Report.ReportLog(ex.ToString());
+				Utility.ReportException(ex);
 			}
 		}
 
@@ -701,52 +783,16 @@ namespace UnityPlugin
 
 		void ClearChanges()
 		{
-			/*using (FileStream stream = File.OpenRead(Editor.Parser.FilePath))
+			foreach (DockContent child in ChildForms.Values)
 			{
-				List<IWriteFile> headerFromFile = Editor.Parser.Format.ppHeader.ReadHeader(stream, Editor.Parser.Format);
-				List<IWriteFile> swapped = new List<IWriteFile>(Editor.Parser.Subfiles.Count);
-				foreach (IWriteFile unit in Editor.Parser.Subfiles)
+				var editorForm = child as EditedContent;
+				if (editorForm != null)
 				{
-					if (unit is ppSwapfile || unit is RawFile)
-					{
-						swapped.Add(unit);
-					}
-					else if (ChildForms.ContainsKey(unit.Name))
-					{
-						var editorForm = ChildForms[unit.Name] as EditedContent;
-						if (editorForm != null)
-						{
-							editorForm.Changed = false;
-						}
-					}
-					else if (!(unit is ppSubfile))
-					{
-						swapped.Add(unit);
-						string parserVar = null;
-						if (ChildParserVars.TryGetValue(unit.Name, out parserVar))
-						{
-							ChildParserVars.Remove(unit.Name);
-							Gui.Scripting.RunScript(parserVar + "=null");
-						}
-					}
+					editorForm.Changed = false;
 				}
-				if (swapped.Count > 0)
-				{
-					foreach (IWriteFile swapfile in swapped)
-					{
-						foreach (ppSubfile subfile in headerFromFile)
-						{
-							if (subfile.Name == swapfile.Name)
-							{
-								headerFromFile.Remove(subfile);
-								Editor.ReplaceSubfile(subfile);
-								break;
-							}
-						}
-					}
-					InitSubfileLists(false);
-				}
-			}*/
+			}
+			InitSubfileLists(false);
+
 			Changed = false;
 		}
 
@@ -783,11 +829,9 @@ namespace UnityPlugin
 				folderBrowserDialog1.RootFolder = Environment.SpecialFolder.MyComputer;
 
 				ListView subfilesList = null;
-				string function = null;
 				if (tabControlAssets.SelectedTab == tabPageImages)
 				{
 					subfilesList = imagesList;
-					function = "ExportTexture";
 				}
 				else if (tabControlAssets.SelectedTab == tabPageSounds)
 				{
@@ -801,15 +845,33 @@ namespace UnityPlugin
 				{
 					subfilesList = othersList;
 				}
-				folderBrowserDialog1.Description = (subfilesList != null && subfilesList.SelectedItems.Count > 0 ? subfilesList.SelectedItems.Count + " subfiles" : "Nothing") + " to be exported.";
+				if (subfilesList == null || subfilesList.SelectedItems.Count == 0)
+				{
+					Report.ReportLog("Nothing is selected for export.");
+					return;
+				}
+				folderBrowserDialog1.Description = subfilesList.SelectedItems.Count + " subfiles will be exported.";
 				if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
 				{
-					if (subfilesList != null)
+					foreach (ListViewItem item in subfilesList.SelectedItems)
 					{
-						foreach (ListViewItem item in subfilesList.SelectedItems)
+						Component subfile = (Component)item.Tag;
+						if (subfile is NotLoaded && ((NotLoaded)subfile).replacement != null)
+						{
+							subfile = ((NotLoaded)subfile).replacement;
+						}
+						Gui.Scripting.RunScript(EditorVar + ".Export" + subfile.classID2 + "(asset=" + ParserVar + ".Cabinet.Components[" + Editor.Parser.Cabinet.Components.IndexOf(subfile) + "], path=\"" + folderBrowserDialog1.SelectedPath + "\")");
+					}
+					for (int i = 0; i < assetListViews.Count; i++)
+					{
+						foreach (ListViewItem item in subfilesList.Items)
 						{
 							Component subfile = (Component)item.Tag;
-							Gui.Scripting.RunScript((function != null ? function : "Export" + subfile.classID2) + "(parser=" + ParserVar + ", name=\"" + item.Text + "\", path=\"" + folderBrowserDialog1.SelectedPath + "\")");
+							if (subfile is NotLoaded && ((NotLoaded)subfile).replacement != null)
+							{
+								item.Tag = ((NotLoaded)subfile).replacement;
+								item.Font = new Font(subfilesList.Font, FontStyle.Bold);
+							}
 						}
 					}
 				}
@@ -864,7 +926,7 @@ namespace UnityPlugin
 							function = "Replace" + classID;
 							break;
 						}
-						Gui.Scripting.RunScript(function + "(parser=" + ParserVar + ", path=\"" + path + "\")");
+						Gui.Scripting.RunScript(EditorVar + "." + function + "(path=\"" + path + "\")");
 						Changed = Changed;
 					}
 
@@ -898,6 +960,94 @@ namespace UnityPlugin
 				}
 			}
 			return true;
+		}
+
+		private void markForCopyingtoolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				ListView subfilesList = null;
+				if (tabControlAssets.SelectedTab == tabPageAnimators)
+				{
+					subfilesList = animatorsList;
+				}
+				else if (tabControlAssets.SelectedTab == tabPageImages)
+				{
+					subfilesList = imagesList;
+				}
+				else if (tabControlAssets.SelectedTab == tabPageSounds)
+				{
+					subfilesList = soundsList;
+				}
+				else if (tabControlAssets.SelectedTab == tabPageMaterials)
+				{
+					subfilesList = materialsList;
+				}
+				else if (tabControlAssets.SelectedTab == tabPageOthers)
+				{
+					subfilesList = othersList;
+				}
+				else if (tabControlAssets.SelectedTab == tabPageFiltered)
+				{
+					subfilesList = filteredList;
+				}
+				foreach (ListViewItem item in subfilesList.Items)
+				{
+					Component asset = (Component)item.Tag;
+					Component markedAsset = asset;
+					int compIdx = Editor.Parser.Cabinet.Components.IndexOf(asset);
+					if (compIdx < 0)
+					{
+						Animator vAnim = (Animator)asset;
+						markedAsset = vAnim.m_GameObject.asset;
+						compIdx = Editor.Parser.Cabinet.Components.IndexOf(markedAsset);
+					}
+					if (item.Selected)
+					{
+						if (!Editor.Marked.Contains(markedAsset))
+						{
+							Gui.Scripting.RunScript(EditorVar + ".MarkAsset(componentIdx=" + compIdx + ")");
+						}
+					}
+					else
+					{
+						if (Editor.Marked.Contains(markedAsset))
+						{
+							Gui.Scripting.RunScript(EditorVar + ".UnmarkAsset(componentIdx=" + compIdx + ")");
+						}
+					}
+				}
+
+				InitSubfileLists(false);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void pasteAllMarkedtoolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				Gui.Scripting.RunScript(EditorVar + ".PasteAllMarked()");
+				Changed = Changed;
+
+				InitSubfileLists(false);
+				List<DockContent> formUnity3dList;
+				Gui.Docking.DockContents.TryGetValue(typeof(FormUnity3d), out formUnity3dList);
+				foreach (FormUnity3d form in formUnity3dList)
+				{
+					if (form != this && form.Editor.Marked.Count > 0)
+					{
+						form.InitSubfileLists(false);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
 		}
 
 		private void removeToolStripMenuItem_Click(object sender, EventArgs e)
@@ -962,6 +1112,46 @@ namespace UnityPlugin
 			InitSubfileLists(false);
 		}
 
+		private void dumpAssetBundleToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			Editor.Parser.Cabinet.Bundle.Dump();
+		}
+
+		private void dumpTypeToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			ListView subfilesList = null;
+			if (tabControlAssets.SelectedTab == tabPageImages)
+			{
+				subfilesList = imagesList;
+			}
+			else if (tabControlAssets.SelectedTab == tabPageSounds)
+			{
+				subfilesList = soundsList;
+			}
+			else if (tabControlAssets.SelectedTab == tabPageMaterials)
+			{
+				subfilesList = materialsList;
+			}
+			else if (tabControlAssets.SelectedTab == tabPageOthers)
+			{
+				subfilesList = othersList;
+			}
+			else if (tabControlAssets.SelectedTab == tabPageFiltered)
+			{
+				subfilesList = filteredList;
+			}
+			HashSet<UnityClassID> selectedClasses = new HashSet<UnityClassID>();
+			foreach (ListViewItem item in subfilesList.SelectedItems)
+			{
+				Component asset = (Component)item.Tag;
+				selectedClasses.Add(asset.classID1);
+			}
+			foreach (UnityClassID cls in selectedClasses)
+			{
+				Editor.Parser.Cabinet.DumpType(cls);
+			}
+		}
+
 		private void othersList_DoubleClick(object sender, EventArgs e)
 		{
 			using (Stream stream = File.OpenRead(Editor.Parser.FilePath))
@@ -971,7 +1161,7 @@ namespace UnityPlugin
 				{
 					if (item.Tag is NotLoaded)
 					{
-						Editor.Parser.Cabinet.LoadComponent(stream, (NotLoaded)item.Tag);
+						item.Tag = Editor.Parser.Cabinet.LoadComponent(stream, (NotLoaded)item.Tag);
 						item.Font = new Font(othersList.Font, FontStyle.Bold);
 						format = true;
 					}

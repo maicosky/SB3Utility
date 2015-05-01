@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Text.RegularExpressions;
+
 using SlimDX;
 
 using SB3Utility;
@@ -258,6 +260,22 @@ namespace UnityPlugin
 			writer.Write(m_FileID);
 			writer.Write(m_PathID);
 		}
+
+		public void UpdateOrLoad()
+		{
+			if (asset is NotLoaded)
+			{
+				NotLoaded notLoaded = (NotLoaded)asset;
+				if (notLoaded.replacement != null)
+				{
+					asset = instance = (T)notLoaded.replacement;
+				}
+				else
+				{
+					asset = instance = asset.file.LoadComponent(asset.file.SourceStream, notLoaded);
+				}
+			}
+		}
 	}
 
 	public abstract class Object : Component
@@ -326,6 +344,36 @@ namespace UnityPlugin
 			writer.Write(m_Center);
 			writer.Write(m_Extend);
 		}
+
+		public AABB Clone()
+		{
+			AABB aabb = new AABB();
+			aabb.m_Center = m_Center;
+			aabb.m_Extend = m_Extend;
+			return aabb;
+		}
+	}
+
+	public class BitField : IObjInfo
+	{
+		uint m_Bits { get; set; }
+
+		public BitField(Stream stream)
+		{
+			LoadFrom(stream);
+		}
+
+		public void LoadFrom(Stream stream)
+		{
+			BinaryReader reader = new BinaryReader(stream);
+			m_Bits = reader.ReadUInt32();
+		}
+
+		public void WriteTo(Stream stream)
+		{
+			BinaryWriter writer = new BinaryWriter(stream);
+			writer.Write(m_Bits);
+		}
 	}
 
 	public class UnityParser
@@ -378,7 +426,7 @@ namespace UnityPlugin
 			Textures = new List<Component>();
 			foreach (Component asset in Cabinet.Components)
 			{
-				if (asset.classID1 == UnityClassID.Texture2D)
+				if (asset.classID1 == UnityClassID.Texture2D || asset.classID1 == UnityClassID.Cubemap)
 				{
 					Textures.Add(asset);
 				}
@@ -433,6 +481,15 @@ namespace UnityPlugin
 							continue;
 						}
 						needsLoadingRefs = true;
+						while (i < Cabinet.Components.Count && Cabinet.Components[i].pathID == 0)
+						{
+							Cabinet.Components[i].pathID = i + 1;
+							i++;
+						}
+						if (i == Cabinet.Components.Count)
+						{
+							needsLoadingRefs = false;
+						}
 						break;
 					}
 					worker.ReportProgress(1);
@@ -451,11 +508,15 @@ namespace UnityPlugin
 									UnityClassID.Cubemap,
 									UnityClassID.EllipsoidParticleEmitter,
 									UnityClassID.GameObject,
+									UnityClassID.Light,
 									UnityClassID.Material,
 									UnityClassID.MeshFilter,
 									UnityClassID.MeshRenderer,
+									UnityClassID.MonoBehaviour,
 									UnityClassID.ParticleAnimator,
 									UnityClassID.ParticleRenderer,
+									UnityClassID.ParticleSystem,
+									UnityClassID.ParticleSystemRenderer,
 									UnityClassID.Shader,
 									UnityClassID.SkinnedMeshRenderer,
 									UnityClassID.Sprite,
@@ -466,7 +527,7 @@ namespace UnityPlugin
 							for (int i = 0; i < Cabinet.Components.Count; i++)
 							{
 								NotLoaded asset = Cabinet.Components[i] as NotLoaded;
-								if (asset != null && storeRefClasses.Contains(asset.classID1))
+								if (asset != null && storeRefClasses.Contains(asset.classID2))
 								{
 									Cabinet.LoadComponent(stream, i, asset);
 									worker.ReportProgress(1 + i * 49 / Cabinet.Components.Count);
@@ -539,7 +600,7 @@ namespace UnityPlugin
 					if (asset is Texture2D)
 					{
 						Texture2D tex = (Texture2D)asset;
-						if (name.Contains(tex.m_Name))
+						if (name == tex.m_Name || Regex.IsMatch(name, tex.m_Name + "-[^-]+-[^-]+-[^-]+"))
 						{
 							return tex;
 						}
@@ -556,7 +617,7 @@ namespace UnityPlugin
 							stream.Position = comp.offset;
 							comp.Name = Texture2D.LoadName(stream);
 						}
-						if (name.Contains(comp.Name))
+						if (name == comp.Name || Regex.IsMatch(name, comp.Name + "-[^-]+-[^-]+-[^-]+"))
 						{
 							if (stream == null)
 							{
@@ -577,6 +638,18 @@ namespace UnityPlugin
 					stream = null;
 				}
 			}
+		}
+
+		public Component FindTexture(string name)
+		{
+			Component texFound = Textures.Find
+			(
+				delegate(Component tex)
+				{
+					return (tex is NotLoaded ? ((NotLoaded)tex).Name : AssetCabinet.ToString(tex)) == name;
+				}
+			);
+			return texFound;
 		}
 
 		public Texture2D GetTexture(int index)
@@ -612,6 +685,7 @@ namespace UnityPlugin
 			Texture2D tex = new Texture2D(Cabinet, 0, UnityClassID.Texture2D, UnityClassID.Texture2D);
 			tex.LoadFrom(texture);
 			Cabinet.ReplaceSubfile(-1, tex, null);
+			Cabinet.Bundle.AddComponent(tex);
 			Textures.Add(tex);
 			return tex;
 		}
