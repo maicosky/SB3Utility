@@ -27,11 +27,34 @@ namespace UnityPlugin
 			public string identifier;
 			public int[] flags;
 			public TypeDefinitionString[] children;
+
+			public TypeDefinitionString Clone()
+			{
+				TypeDefinitionString clone = new TypeDefinitionString();
+				clone.type = type;
+				clone.identifier = identifier;
+				clone.flags = (int[])flags.Clone();
+
+				clone.children = new TypeDefinitionString[children.Length];
+				for (int i = 0; i < children.Length; i++)
+				{
+					clone.children[i] = children[i].Clone();
+				}
+				return clone;
+			}
 		}
 		public class TypeDefinition
 		{
 			public int typeId;
 			public TypeDefinitionString definitions;
+
+			public TypeDefinition Clone()
+			{
+				TypeDefinition clone = new TypeDefinition();
+				clone.typeId = typeId;
+				clone.definitions = definitions.Clone();
+				return clone;
+			}
 		}
 		public List<TypeDefinition> Types { get; protected set; }
 		public int Unknown8 { get; protected set; }
@@ -282,6 +305,28 @@ namespace UnityPlugin
 				}
 				Types.Add(clsDef);
 			}
+		}
+
+		public static bool CompareTypes(AssetCabinet.TypeDefinition td1, AssetCabinet.TypeDefinition td2)
+		{
+			return CompareTypes(td1.definitions, td2.definitions);
+		}
+
+		public static bool CompareTypes(AssetCabinet.TypeDefinitionString tds1, AssetCabinet.TypeDefinitionString tds2)
+		{
+			if (tds1.type != tds2.type || tds1.identifier != tds2.identifier || tds1.children.Length != tds2.children.Length)
+			{
+				return false;
+			}
+
+			for (int i = 0; i < tds1.children.Length; i++)
+			{
+				if (!CompareTypes(tds1.children[i], tds2.children[i]))
+				{
+					return false;
+				}
+			}
+			return true;
 		}
 
 		public void DumpType(UnityClassID cls)
@@ -544,7 +589,7 @@ namespace UnityPlugin
 				{
 					MonoBehaviour monoBehaviour = new MonoBehaviour(this, comp.pathID, comp.classID1, comp.classID2);
 					ReplaceSubfile(index, monoBehaviour, comp);
-					monoBehaviour.LoadFrom(stream, comp.size);
+					monoBehaviour.LoadFrom(stream);
 					return monoBehaviour;
 				}
 				else

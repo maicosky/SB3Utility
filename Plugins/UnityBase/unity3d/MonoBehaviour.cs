@@ -51,16 +51,54 @@ namespace UnityPlugin
 		public UnityClassID classID1 { get; set; }
 		public UnityClassID classID2 { get; set; }
 
-		public PPtr<GameObject> m_GameObject { get; set; }
-		public uint Unknown1 { get; set; }
-		public PPtr<MonoScript> m_MonoScript { get; set; }
+		public PPtr<GameObject> m_GameObject
+		{
+			get
+			{
+				return new PPtr<GameObject>
+					(
+						((UPPtr)Parser.type.Members[0]).Value != null ?
+							((UPPtr)Parser.type.Members[0]).Value.asset : null
+					);
+			}
+			set { ((UPPtr)Parser.type.Members[0]).Value = new PPtr<Object>(value.asset); }
+		}
 
-		public string m_Name { get; set; }
-		public List<Line> m_Lines { get; set; }
+		public PPtr<MonoScript> m_MonoScript
+		{
+			get { return new PPtr<MonoScript>(((UPPtr)Parser.type.Members[2]).Value.asset); }
+			set { throw new NotImplementedException(); }
+		}
 
-		public uint Unknown2 { get; set; }
-		public List<PPtr<Object>> m_RawRefs { get; set; }
-		public byte[] RawData { get; set; }
+		public string m_Name
+		{
+			get
+			{
+				if (Parser.type.Members.Count > 3 && Parser.type.Members[3] is UClass &&
+					((UClass)Parser.type.Members[3]).ClassName == "string" &&
+					((UClass)Parser.type.Members[3]).Name == "m_Name")
+				{
+					return ((UClass)Parser.type.Members[3]).GetString();
+				}
+
+				throw new Exception(classID1 + " " + classID2 + " has no m_Name member");
+			}
+
+			set
+			{
+				if (Parser.type.Members.Count > 3 && Parser.type.Members[3] is UClass &&
+					((UClass)Parser.type.Members[3]).ClassName == "string" &&
+					((UClass)Parser.type.Members[3]).Name == "m_Name")
+				{
+					((UClass)Parser.type.Members[3]).SetString(value);
+					return;
+				}
+
+				throw new Exception(classID1 + " " + classID2 + " has no m_Name member");
+			}
+		}
+
+		public TypeParser Parser { get; set; }
 
 		public MonoBehaviour(AssetCabinet file, int pathID, UnityClassID classID1, UnityClassID classID2)
 		{
@@ -78,106 +116,17 @@ namespace UnityPlugin
 
 		public void LoadFrom(Stream stream)
 		{
-			throw new NotImplementedException();
-		}
-
-		public void LoadFrom(Stream stream, uint size)
-		{
-			try
+			for (int i = 0; i < file.Types.Count; i++)
 			{
-				long start = stream.Position;
-				BinaryReader reader = new BinaryReader(stream);
-				m_GameObject = new PPtr<GameObject>(stream, file);
-				Unknown1 = reader.ReadUInt32();
-				m_MonoScript = new PPtr<MonoScript>(stream, file);
-
-				int nameLength = reader.ReadInt32();
-				stream.Position -= 4;
-				m_Name = nameLength > 0 && 8 + 4 + 8 + 4 + nameLength + 4 < size ? reader.ReadNameA4() : String.Empty;
-				int rest = (int)(size - (stream.Position - start));
-				if (m_Name.Length > 0 && rest > 4 && rest < 80 * 1024)
+				if ((int)classID1 == file.Types[i].typeId)
 				{
-					int numLines = reader.ReadInt32();
-					m_Lines = new List<Line>(numLines);
-					for (int i = 0; i < numLines; i++)
-					{
-						m_Lines.Add(new Line(stream));
-					}
-				}
-				else
-				{
-					if (rest >= 12)
-					{
-						Unknown2 = reader.ReadUInt32();
-						m_RawRefs = new List<PPtr<Object>>();
-						PPtr<Object> testRef = new PPtr<Object>(stream);
-						if ((testRef.m_FileID == 0 || testRef.m_FileID == 1) && testRef.m_PathID != 0)
-						{
-							if (testRef.m_FileID == 0 && rest - 12 - testRef.m_PathID * 8 >= 0)
-							{
-								m_RawRefs.Capacity = testRef.m_PathID;
-								int numRefs = testRef.m_PathID;
-								for (int i = 0; i < numRefs; i++)
-								{
-									testRef = new PPtr<Object>(stream);
-									Component asset = file.FindComponent(testRef.m_PathID);
-									if (asset != null)
-									{
-										if (asset is NotLoaded)
-										{
-											long pos = stream.Position;
-											Component comp = file.LoadComponent(stream, (NotLoaded)asset);
-											if (comp != null)
-											{
-												asset = comp;
-											}
-											stream.Position = pos;
-										}
-										PPtr<Object> newRef = new PPtr<Object>(asset);
-										newRef.m_FileID = testRef.m_FileID;
-										m_RawRefs.Add(newRef);
-									}
-								}
-								rest -= 12 + numRefs * 8;
-							}
-							else
-							{
-								Component asset = file.FindComponent(testRef.m_PathID);
-								if (asset != null)
-								{
-									if (asset is NotLoaded)
-									{
-										long pos = stream.Position;
-										Component comp = file.LoadComponent(stream, (NotLoaded)asset);
-										if (comp != null)
-										{
-											asset = comp;
-										}
-										stream.Position = pos;
-									}
-									rest -= 12;
-									PPtr<Object> newRef = new PPtr<Object>(asset);
-									newRef.m_FileID = testRef.m_FileID;
-									m_RawRefs.Add(newRef);
-								}
-								else
-								{
-									stream.Position -= 12;
-								}
-							}
-						}
-						else
-						{
-							stream.Position -= 12;
-						}
-					}
-					RawData = reader.ReadBytes(rest);
+					Parser = new TypeParser(file, file.Types[i]);
+					Parser.type.LoadFrom(stream);
+					return;
 				}
 			}
-			catch (Exception ex)
-			{
-				Utility.ReportException(ex);
-			}
+
+			throw new Exception(classID2 + " " + classID1 + " not found in Types");
 		}
 
 		public static string LoadName(Stream stream)
@@ -196,40 +145,7 @@ namespace UnityPlugin
 
 		public void WriteTo(Stream stream)
 		{
-			BinaryWriter writer = new BinaryWriter(stream);
-			file.WritePPtr(m_GameObject.asset, m_GameObject.m_FileID != 0, stream);
-			writer.Write(Unknown1);
-			file.WritePPtr(m_MonoScript.asset, m_MonoScript.m_FileID != 0, stream);
-
-			if (m_Name.Length > 0)
-			{
-				writer.WriteNameA4(m_Name);
-			}
-			if (m_Lines != null)
-			{
-				writer.Write(m_Lines.Count);
-				for (int i = 0; i < m_Lines.Count; i++)
-				{
-					m_Lines[i].WriteTo(stream);
-				}
-			}
-			else
-			{
-				if (m_RawRefs.Count > 0)
-				{
-					writer.Write(Unknown2);
-					if (m_RawRefs.Count > 1)
-					{
-						writer.Write((int)0);
-						writer.Write(m_RawRefs.Count);
-					}
-					for (int i = 0; i < m_RawRefs.Count; i++)
-					{
-						file.WritePPtr(m_RawRefs[i].asset, m_RawRefs[i].m_FileID != 0, stream);
-					}
-				}
-				writer.Write(RawData);
-			}
+			Parser.type.WriteTo(stream);
 		}
 
 		public MonoBehaviour Clone(AssetCabinet file)
@@ -241,90 +157,51 @@ namespace UnityPlugin
 					return def.typeId == (int)this.classID1;
 				}
 			);
-			// deep compare all MonoBehaviour types
-			// duplicate with unique classID1 in file
-			// dynamically create that class to get all references
+			int destId = 0, minId = 0;
+			AssetCabinet.TypeDefinition destDef = null;
+			for (int i = 0; i < file.Types.Count; i++)
+			{
+				if (AssetCabinet.CompareTypes(srcDef, file.Types[i]))
+				{
+					destDef = file.Types[i];
+					destId = destDef.typeId;
+					break;
+				}
+				if (file.Types[i].typeId < minId)
+				{
+					minId = file.Types[i].typeId;
+				}
+			}
+			if (destId == 0)
+			{
+				destDef = srcDef.Clone();
+				destId = destDef.typeId = minId - 1;
+				file.Types.Add(destDef);
+			}
 
-			MonoBehaviour dest = new MonoBehaviour(file, classID1);
-			dest.Unknown1 = Unknown1;
-			Component script = null;
-			if (m_MonoScript.instance != null)
-			{
-				script = file.Bundle.FindComponent(m_MonoScript.instance.m_Name, UnityClassID.MonoScript);
-				if (script == null)
-				{
-					script = m_MonoScript.instance.Clone(file);
-					file.Bundle.AddComponent(script);
-				}
-			}
-			dest.m_MonoScript = new PPtr<MonoScript>(script);
-			dest.m_Name = m_Name;
-
-			if (m_Lines != null)
-			{
-				dest.m_Lines = new List<Line>(m_Lines.Count);
-				for (int i = 0; i < m_Lines.Count; i++)
-				{
-					Line l = m_Lines[i];
-					dest.m_Lines.Add(l.Clone());
-				}
-			}
-			else
-			{
-				if (m_RawRefs.Count > 0)
-				{
-					AssetCabinet.IncompleteClones.Add(new Tuple<Component, Component>(this, dest));
-				}
-				dest.RawData = (byte[])RawData.Clone();
-			}
+			MonoBehaviour dest = new MonoBehaviour(file, (UnityClassID)destId);
+			dest.Parser = new TypeParser(file, destDef);
+			AssetCabinet.IncompleteClones.Add(new Tuple<Component, Component>(this, dest));
 			return dest;
 		}
 
-		private static HashSet<string> msgFilter = new HashSet<string>();
-
 		public void CopyTo(MonoBehaviour dest)
 		{
-			dest.Unknown2 = Unknown2;
-			dest.m_RawRefs = new List<PPtr<Object>>(m_RawRefs.Count);
-			for (int i = 0; i < m_RawRefs.Count; i++)
+			GameObject destGameObj = dest.m_GameObject.instance;
+			if (destGameObj != null)
 			{
-				Component asset = dest.FindOrClone(m_RawRefs[i].asset, dest.file);
-				if (asset == null)
-				{
-					string msg = "No counterpart found for " + m_RawRefs[i].asset.classID2 + " " + AssetCabinet.ToString(m_RawRefs[i].asset);
-					if (!msgFilter.Contains(msg))
-					{
-						msgFilter.Add(msg);
-						Report.ReportLog(msg);
-					}
-				}
-				dest.m_RawRefs.Add(new PPtr<Object>(asset));
-			}
-		}
-
-		Component FindOrClone(Component asset, AssetCabinet destFile)
-		{
-			switch (asset.classID2)
-			{
-			case UnityClassID.Transform:
-				Transform animFrame = m_GameObject.instance.FindLinkedComponent(UnityClassID.Transform);
+				Transform animFrame = destGameObj.FindLinkedComponent(UnityClassID.Transform);
 				while (animFrame.Parent != null)
 				{
 					animFrame = animFrame.Parent;
 				}
-				return Operations.FindFrame(((Transform)asset).m_GameObject.instance.m_Name, animFrame);
-			case UnityClassID.Texture2D:
-				string name = AssetCabinet.ToString(asset);
-				Component texFound = destFile.Bundle.FindComponent(name, UnityClassID.Texture2D);
-				if (texFound != null)
-				{
-					return texFound;
-				}
-				Texture2D clone = ((Texture2D)asset).Clone(destFile);
-				file.Bundle.AddComponent(clone);
-				return clone;
+				UPPtr.AnimatorRoot = animFrame;
 			}
-			return null;
+			else
+			{
+				UPPtr.AnimatorRoot = null;
+			}
+			Parser.type.CopyTo(dest.Parser.type);
 		}
 
 		public void Export(string path)
@@ -335,24 +212,22 @@ namespace UnityPlugin
 				dirInfo.Create();
 			}
 
-			if (RawData != null)
+			if (Parser.type.Members.Count > 4 && Parser.type.Members[4] is UClass &&
+				((UClass)Parser.type.Members[4]).ClassName == "Param" &&
+				((UClass)Parser.type.Members[4]).Name == "list")
 			{
-				string name = m_GameObject.instance != null ? m_GameObject.instance.m_Name : m_Name;
-				using (BinaryWriter writer = new BinaryWriter(File.OpenWrite(path + "\\" + name + "." + UnityClassID.MonoBehaviour)))
-				{
-					writer.Write(RawData);
-					writer.BaseStream.SetLength(writer.BaseStream.Position);
-				}
-			}
-			else
-			{
+				Uarray arr = (Uarray)((UClass)Parser.type.Members[4]).Members[0];
+				UType[] GenericMono = arr.Value;
 				using (BinaryWriter writer = new BinaryWriter(File.OpenWrite(path + "\\" + m_Name + "." + UnityClassID.MonoBehaviour), System.Text.Encoding.UTF8))
 				{
-					for (int i = 0; i < m_Lines.Count; i++)
+					for (int i = 0; i < GenericMono.Length; i++)
 					{
-						for (int j = 0; j < m_Lines[i].m_Words.Count; j++)
+						UClass vectorList = (UClass)GenericMono[i].Members[0];
+						arr = (Uarray)vectorList.Members[0];
+						UType[] Strings = arr.Value;
+						for (int j = 0; j < Strings.Length; j++)
 						{
-							string word = m_Lines[i].m_Words[j];
+							string word = ((UClass)Strings[j]).GetString();
 							for (int k = 0; k < word.Length; k++)
 							{
 								if (word[k] == '<' || word[k] == '>' || word[k] == '\\')
@@ -367,16 +242,61 @@ namespace UnityPlugin
 					writer.BaseStream.SetLength(writer.BaseStream.Position);
 				}
 			}
+			else
+			{
+				string name = m_GameObject.instance != null ? m_GameObject.instance.m_Name : m_Name;
+				using (FileStream stream = File.OpenWrite(path + "\\" + name + "." + UnityClassID.MonoBehaviour))
+				{
+					Parser.type.WriteTo(stream);
+					stream.SetLength(stream.Position);
+				}
+			}
 		}
 
-		public static MonoBehaviour Import(string filePath)
+		public static MonoBehaviour Import(string filePath, AssetCabinet file)
 		{
-			MonoBehaviour m = new MonoBehaviour(null, 0, (UnityClassID)(int)-1, UnityClassID.MonoBehaviour);
-			m.m_GameObject = new PPtr<GameObject>((Component)null);
-			m.Unknown1 = 1;
-			m.m_MonoScript = new PPtr<MonoScript>((Component)null);
-			m.m_Name = Path.GetFileNameWithoutExtension(filePath);
-			m.m_Lines = new List<Line>();
+			foreach (var typeDef in file.Types)
+			{
+				if (typeDef.definitions.type == UnityClassID.MonoBehaviour.ToString() &&
+					typeDef.definitions.children.Length > 4)
+				{
+					var member = typeDef.definitions.children[4];
+					if (member.type == "Param" && member.identifier == "list")
+					{
+						MonoBehaviour m = new MonoBehaviour(null, 0, (UnityClassID)typeDef.typeId, UnityClassID.MonoBehaviour);
+						m.Parser = new TypeParser(file, typeDef);
+						m.m_Name = Path.GetFileNameWithoutExtension(filePath);
+						Uarray ParamListArr = (Uarray)m.Parser.type.Members[4].Members[0];
+						List<Line> lines = LoadLines(filePath);
+						ParamListArr.Value = new UType[lines.Count];
+						Type genericMonoType = ParamListArr.Members[1].GetType();
+						ConstructorInfo genericMonoCtrInfo = genericMonoType.GetConstructor(new Type[] { genericMonoType });
+						for (int i = 0; i < lines.Count; i++)
+						{
+							ParamListArr.Value[i] = (UType)genericMonoCtrInfo.Invoke(new object[] { ParamListArr.Members[1] });
+							UClass GenericMonoData = (UClass)ParamListArr.Value[i];
+							Uarray vectorListArr = (Uarray)GenericMonoData.Members[0].Members[0];
+							UClass[] Strings = new UClass[lines[i].m_Words.Count];
+							vectorListArr.Value = Strings;
+							Type stringType = vectorListArr.Members[1].GetType();
+							ConstructorInfo stringCtrInfo = genericMonoType.GetConstructor(new Type[] { stringType });
+							for (int j = 0; j < lines[i].m_Words.Count; j++)
+							{
+								Strings[j] = (UClass)stringCtrInfo.Invoke(new object[] { vectorListArr.Members[1] });
+								Strings[j].SetString(lines[i].m_Words[j]);
+							}
+						}
+						return m;
+					}
+				}
+			}
+			Report.ReportLog("Warning! No definition of required type found!");
+			return null;
+		}
+
+		private static List<Line> LoadLines(string filePath)
+		{
+			List<Line> lines = new List<Line>();
 			using (BinaryReader reader = new BinaryReader(File.OpenRead(filePath), System.Text.Encoding.UTF8))
 			{
 				for (int lineIdx = 0; reader.BaseStream.Position < reader.BaseStream.Length; lineIdx++)
@@ -427,10 +347,10 @@ namespace UnityPlugin
 					{
 						break;
 					}
-					m.m_Lines.Add(l);
+					lines.Add(l);
 				}
 			}
-			return m;
+			return lines;
 		}
 	}
 }

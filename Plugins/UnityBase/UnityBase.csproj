@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="TypeParser.cs" />
     <Compile Include="unity3d\AnimationClip.cs" />
     <Compile Include="unity3d\Animator.cs" />
     <Compile Include="unity3d\AssetBundle.cs" />

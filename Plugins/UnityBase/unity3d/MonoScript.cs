@@ -61,16 +61,33 @@ namespace UnityPlugin
 
 		public MonoScript Clone(AssetCabinet file)
 		{
-			file.MergeTypeDefinition(this.file, UnityClassID.MonoScript);
-
-			MonoScript monos = new MonoScript(file);
-			using (MemoryStream mem = new MemoryStream())
+			Component monoS = file.Bundle.FindComponent(m_Name, UnityClassID.MonoScript);
+			if (monoS == null)
 			{
-				WriteTo(mem);
-				mem.Position = 0;
-				monos.LoadFrom(mem);
+				file.MergeTypeDefinition(this.file, UnityClassID.MonoScript);
+
+				monoS = new MonoScript(file);
+				file.Bundle.AddComponent(m_Name, monoS);
+				using (MemoryStream mem = new MemoryStream())
+				{
+					WriteTo(mem);
+					mem.Position = 0;
+					monoS.LoadFrom(mem);
+				}
 			}
-			return monos;
+			else if (monoS is NotLoaded)
+			{
+				NotLoaded notLoaded = (NotLoaded)monoS;
+				if (notLoaded.replacement != null)
+				{
+					monoS = notLoaded.replacement;
+				}
+				else
+				{
+					monoS = file.LoadComponent(file.SourceStream, notLoaded);
+				}
+			}
+			return (MonoScript)monoS;
 		}
 	}
 }

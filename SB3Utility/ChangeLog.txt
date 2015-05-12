@@ -1,4 +1,17 @@
-﻿[1.0.9]
+﻿[1.0.10]
+  - UnityPlugin Update Only
+  - All MonoBehaviours are handled according to their type definition
+  - Removed static script functions: ExportMonoBehaviour, ReplaceMonoBehaviour, added both to Unity3dEditor class
+  - Missing Materials are added with a warning when (LoadAnd)SetSubmeshMaterial
+  - Avatar is optional in Animator
+  - Fix for unnecessary additional entries in AssetBundle (Light's Texture, AnimatorEditor: Shader and Texture)
+  - Fix for duplicates of Materials in the Object Tree and Unity3d editor's Materials list after "Copy -> New"
+  - Added Copy/Paste for MonoBehaviour
+  - Fix for multiple copies of the same MonoScripts
+  - Fix for MergeMaterial not copying attributes from Materials of other Animators
+  - Fix for "Goto Frame" in Bone Editor and Mesh Editor
+
+[1.0.9]
   - UnityPlugin Update Only
   - Asset Type Definitions
   - AssetBundle handling

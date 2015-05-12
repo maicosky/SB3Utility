@@ -1171,9 +1171,9 @@ namespace UnityPlugin
 			foreach (TreeNode node in nodes)
 			{
 				var source = node.Tag as DragSource?;
-				if (source == null || source.Value.Type != typeof(Transform) && source.Value.Type != typeof(SkinnedMeshRenderer))
+				if (source == null || source.Value.Type != typeof(Transform))
 				{
-					return null;
+					continue;
 				}
 
 				if (Editor.Frames[(int)source.Value.Id].m_GameObject.instance.m_Name == name)
@@ -1196,23 +1196,20 @@ namespace UnityPlugin
 			foreach (TreeNode node in nodes)
 			{
 				var source = node.Tag as DragSource?;
-				if (source == null)
+				if (source == null || source.Value.Type != typeof(Transform))
 				{
-					return null;
+					continue;
 				}
 
-				if (source.Value.Type == typeof(Transform))
+				if (Editor.Frames[(int)source.Value.Id].Equals(frame))
 				{
-					if (Editor.Frames[(int)source.Value.Id].Equals(frame))
-					{
-						return node;
-					}
+					return node;
+				}
 
-					TreeNode found = FindFrameNode(frame, node.Nodes);
-					if (found != null)
-					{
-						return found;
-					}
+				TreeNode found = FindFrameNode(frame, node.Nodes);
+				if (found != null)
+				{
+					return found;
 				}
 			}
 
@@ -4331,17 +4328,8 @@ namespace UnityPlugin
 					{
 						if (form.Editor.Parser.Cabinet == Editor.Parser.file)
 						{
-							ListViewItem item = new ListViewItem(new string[] { newMat.m_Name, newMat.classID2.ToString() });
-							item.Tag = (Component)newMat;
-							item.Font = new System.Drawing.Font(form.materialsList.Font, FontStyle.Bold);
-							form.materialsList.Items.Add(item);
-							form.materialsList.Columns[0].AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
-							if (form.materialsList.Columns.Count > 1)
-							{
-								form.materialsList.Columns[1].AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
-							}
-							form.materialsList.Sort();
-							((TabPage)form.materialsList.Parent).Text = "Materials [" + form.materialsList.Items.Count + "]";
+							form.InitSubfileLists(false);
+							break;
 						}
 					}
 				}

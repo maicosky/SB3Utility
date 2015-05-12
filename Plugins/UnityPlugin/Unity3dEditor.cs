@@ -319,37 +319,47 @@ namespace UnityPlugin
 		[Plugin]
 		public void ReplaceMonoBehaviour(string path)
 		{
-			MonoBehaviour m = MonoBehaviour.Import(path);
-			if (m.m_Lines.Count > 0)
+			MonoBehaviour m = MonoBehaviour.Import(path, Parser.Cabinet);
+			if (m == null)
 			{
-				for (int i = 0; i < Parser.Cabinet.Components.Count; i++)
+				return;
+			}
+
+			for (int i = 0; i < Parser.Cabinet.Components.Count; i++)
+			{
+				Component asset = Parser.Cabinet.Components[i];
+				if (asset.classID1 == m.classID1)
 				{
-					Component asset = Parser.Cabinet.Components[i];
-					if (asset.classID2 == UnityClassID.MonoBehaviour)
+					MonoBehaviour mono = null;
+					string name;
+					if (asset is NotLoaded)
 					{
-						MonoBehaviour mono = null;
-						string name;
-						if (asset is NotLoaded)
+						name = ((NotLoaded)asset).Name;
+						if (name != m.m_Name)
 						{
-							name = ((NotLoaded)asset).Name;
-							if (name != m.m_Name)
-							{
-								continue;
-							}
-							mono = Parser.Cabinet.LoadComponent(asset.pathID);
+							continue;
 						}
-						else
+						mono = Parser.Cabinet.LoadComponent(asset.pathID);
+					}
+					else
+					{
+						mono = (MonoBehaviour)asset;
+						name = mono.m_GameObject.instance != null ? mono.m_GameObject.instance.m_Name : mono.m_Name;
+						if (name != m.m_Name)
 						{
-							mono = (MonoBehaviour)asset;
-							name = mono.m_GameObject.instance != null ? mono.m_GameObject.instance.m_Name : mono.m_Name;
-						}
-						if (name == m.m_Name)
-						{
-							mono.m_Lines = m.m_Lines;
-							Changed = true;
-							return;
+							continue;
 						}
 					}
+					if (mono.Parser.type.Members.Count > 4 && mono.Parser.type.Members[4] is UClass &&
+						((UClass)mono.Parser.type.Members[4]).ClassName == "Param" &&
+						((UClass)mono.Parser.type.Members[4]).Name == "list")
+					{
+						Uarray monoArr = (Uarray)((UClass)mono.Parser.type.Members[4]).Members[0];
+						Uarray mArr = (Uarray)((UClass)m.Parser.type.Members[4]).Members[0];
+						monoArr.Value = mArr.Value;
+						Changed = true;
+					}
+					return;
 				}
 			}
 		}
@@ -527,6 +537,7 @@ namespace UnityPlugin
 		[Plugin]
 		public void PasteAllMarked()
 		{
+			int components = Parser.Cabinet.Components.Count;
 			try
 			{
 				Parser.Cabinet.BeginLoadingSkippedComponents();
@@ -550,40 +561,39 @@ namespace UnityPlugin
 							{
 								loaded = asset;
 							}
-							Component clone;
-							switch (asset.classID1)
+							switch (asset.classID2)
 							{
 							case UnityClassID.Texture2D:
 								Texture2D tex = (Texture2D)loaded;
-								clone = tex.Clone(Parser.Cabinet);
+								tex.Clone(Parser.Cabinet);
 								break;
 							case UnityClassID.Cubemap:
 								Cubemap cubemap = (Cubemap)loaded;
-								clone = cubemap.Clone(Parser.Cabinet);
+								cubemap.Clone(Parser.Cabinet);
 								break;
 							case UnityClassID.Material:
 								Material mat = (Material)loaded;
-								clone = mat.Clone(Parser.Cabinet);
+								mat.Clone(Parser.Cabinet);
 								break;
 							case UnityClassID.Shader:
 								Shader shader = (Shader)loaded;
-								clone = shader.Clone(Parser.Cabinet);
+								shader.Clone(Parser.Cabinet);
 								break;
 							case UnityClassID.Sprite:
 								Sprite sprite = (Sprite)loaded;
-								clone = sprite.Clone(Parser.Cabinet);
+								sprite.Clone(Parser.Cabinet);
 								break;
 							case UnityClassID.Animator:
 								Parser.Cabinet.MergeTypeDefinition(loaded.file, UnityClassID.GameObject);
 								Parser.Cabinet.MergeTypeDefinition(loaded.file, UnityClassID.Transform);
 								Animator anim = (Animator)loaded;
-								clone = anim.m_GameObject.instance.Clone(Parser.Cabinet);
+								anim.m_GameObject.instance.Clone(Parser.Cabinet);
 								break;
 							case UnityClassID.GameObject:
 								Parser.Cabinet.MergeTypeDefinition(loaded.file, UnityClassID.GameObject);
 								Parser.Cabinet.MergeTypeDefinition(loaded.file, UnityClassID.Transform);
 								GameObject gameObj = (GameObject)loaded;
-								clone = gameObj.Clone(Parser.Cabinet);
+								Component clone = gameObj.Clone(Parser.Cabinet);
 
 								Animator vAnim = new Animator(Parser.Cabinet, 0, 0, 0);
 								vAnim.m_Avatar = new PPtr<Avatar>((Component)null);
@@ -606,25 +616,27 @@ namespace UnityPlugin
 									}
 								}
 								break;
-							default:
-								continue;
-							}
-
-							if (clone.pathID == 0)
-							{
-								Changed = true;
+							case UnityClassID.MonoBehaviour:
+								MonoBehaviour monoB = (MonoBehaviour)loaded;
+								monoB.Clone(Parser.Cabinet);
+								break;
 							}
 						}
 
-						foreach (var pair in AssetCabinet.IncompleteClones)
+						do
 						{
-							Component src = pair.Item1;
-							Component dest = pair.Item2;
-							Type t = src.GetType();
-							MethodInfo info = t.GetMethod("CopyTo", new Type[] { t });
-							info.Invoke(src, new object[] { dest });
+							HashSet<Tuple<Component, Component>> loopSet = new HashSet<Tuple<Component, Component>>(AssetCabinet.IncompleteClones);
+							AssetCabinet.IncompleteClones.Clear();
+							foreach (var pair in loopSet)
+							{
+								Component src = pair.Item1;
+								Component dest = pair.Item2;
+								Type t = src.GetType();
+								MethodInfo info = t.GetMethod("CopyTo", new Type[] { t });
+								info.Invoke(src, new object[] { dest });
+							}
 						}
-						AssetCabinet.IncompleteClones.Clear();
+						while (AssetCabinet.IncompleteClones.Count > 0);
 
 						foreach (Component asset in remove)
 						{
@@ -640,6 +652,10 @@ namespace UnityPlugin
 			finally
 			{
 				Parser.Cabinet.EndLoadingSkippedComponents();
+				if (components != Parser.Cabinet.Components.Count)
+				{
+					Changed = true;
+				}
 			}
 		}
 	}

@@ -220,7 +220,6 @@ namespace UnityPlugin
 				if (shader == null)
 				{
 					shader = Parser.file.LoadComponent(Parser.file.SourceStream, (NotLoaded)mat.m_Shader.asset);
-					Parser.file.Bundle.AddComponent(shader);
 				}
 				mat.m_Shader = new PPtr<Shader>(shader);
 			}
@@ -232,7 +231,6 @@ namespace UnityPlugin
 					if (loadedTex == null)
 					{
 						loadedTex = Parser.file.LoadComponent(Parser.file.SourceStream, (NotLoaded)pair.Value.m_Texture.asset);
-						Parser.file.Bundle.AddComponent(loadedTex);
 					}
 					pair.Value.m_Texture = new PPtr<Texture2D>(loadedTex);
 				}
@@ -1096,7 +1094,18 @@ namespace UnityPlugin
 		{
 			MeshRenderer meshRenderer = Meshes[meshId];
 			Material mat = Materials[material];
-			meshRenderer.m_Materials[subMeshId] = new PPtr<Material>(mat);
+			if (subMeshId < meshRenderer.m_Materials.Count)
+			{
+				meshRenderer.m_Materials[subMeshId] = new PPtr<Material>(mat);
+			}
+			else
+			{
+				while (subMeshId >= meshRenderer.m_Materials.Count)
+				{
+					meshRenderer.m_Materials.Add(new PPtr<Material>(mat));
+				}
+				Report.ReportLog("Warning! Missing Material added");
+			}
 
 			Parser.file.Bundle.RegisterForUpdate(Parser.m_GameObject.asset);
 			Changed = true;
@@ -1112,10 +1121,8 @@ namespace UnityPlugin
 			{
 				AddMaterialToEditor(mat);
 			}
-			meshRenderer.m_Materials[subMeshId] = new PPtr<Material>(mat);
 
-			Parser.file.Bundle.RegisterForUpdate(Parser.m_GameObject.asset);
-			Changed = true;
+			SetSubMeshMaterial(meshId, subMeshId, Materials.IndexOf(mat));
 		}
 
 		[Plugin]
@@ -1310,7 +1317,7 @@ namespace UnityPlugin
 			Material newMat = oldMat.Clone(Parser.file);
 			oldMat.m_Name = oldName;
 
-			if (newMat.pathID == 0)
+			if (!Materials.Contains(newMat))
 			{
 				Materials.Add(newMat);
 			}
@@ -1343,11 +1350,30 @@ namespace UnityPlugin
 			}
 			else
 			{
-				Material newMat = mat.Clone(Parser.file, false);
-				if (newMat.pathID != 0)
+				Material newMat;
+				Component m = Parser.file.Bundle.FindComponent(mat.m_Name, UnityClassID.Material);
+				if (m == null)
 				{
-					mat.CopyTo(newMat, false);
-					Parser.file.Bundle.RegisterForUpdate(newMat);
+					newMat = mat.Clone(Parser.file, false);
+				}
+				else
+				{
+					if (m is NotLoaded)
+					{
+						NotLoaded notLoaded = (NotLoaded)m;
+						if (notLoaded.replacement != null)
+						{
+							m = (Material)notLoaded.replacement;
+						}
+						else
+						{
+							m = Parser.file.LoadComponent(notLoaded.pathID);
+						}
+					}
+					oldMat = (Material)m;
+					mat.CopyTo(oldMat, false);
+					Parser.file.Bundle.RegisterForUpdate(oldMat);
+					newMat = oldMat;
 				}
 				if (!Materials.Contains(newMat))
 				{

@@ -453,6 +453,11 @@ namespace UnityPlugin
 								submesh.matList.AddRange(meshR.m_Materials.GetRange(mesh.m_SubMeshes.Count, meshR.m_Materials.Count - mesh.m_SubMeshes.Count));
 							}
 						}
+						else
+						{
+							submesh.matList.Add(new PPtr<Material>((Component)null));
+							Report.ReportLog("Warning! Missing Material in " + meshR.m_GameObject.instance.m_Name + " has been added");
+						}
 						submeshes.Add(submesh);
 					}
 				}

@@ -123,7 +123,7 @@ namespace UnityPlugin
 			}
 			dest.file.Bundle.AddComponent(m_GameObject.instance.m_Name, dest.m_GameObject.instance);
 			dest.m_Enabled = m_Enabled;
-			dest.m_Avatar = new PPtr<Avatar>(m_Avatar.instance.Clone(dest.file));
+			dest.m_Avatar = new PPtr<Avatar>(m_Avatar.instance != null ? m_Avatar.instance.Clone(dest.file) : null);
 
 			dest.m_Controller = new PPtr<RuntimeAnimatorController>((Component)null);
 			if (m_Controller.asset != null)

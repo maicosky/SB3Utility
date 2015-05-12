@@ -177,62 +177,6 @@ namespace UnityPlugin
 		}
 
 		[Plugin]
-		public static void ExportMonoBehaviour(UnityParser parser, string name)
-		{
-			ExportMonoBehaviour(parser, name, parser.FilePath);
-		}
-
-		[Plugin]
-		public static void ExportMonoBehaviour(UnityParser parser, string name, string path)
-		{
-			for (int i = 0; i < parser.Cabinet.Components.Count; i++)
-			{
-				Component asset = parser.Cabinet.Components[i];
-				if (asset.classID2 == UnityClassID.MonoBehaviour)
-				{
-					MonoBehaviour mbic = parser.Cabinet.LoadComponent(asset.pathID);
-					string monoBName = mbic.m_GameObject.instance != null ? mbic.m_GameObject.instance.m_Name : mbic.m_Name;
-					if (name == "*" || monoBName == name)
-					{
-						ExportMonoBehaviour(mbic, path);
-					}
-				}
-			}
-		}
-
-		static void ExportMonoBehaviour(MonoBehaviour monob, string path)
-		{
-			string folder = Path.GetDirectoryName(path);
-			if (folder.Length > 0)
-			{
-				folder += "\\";
-			}
-			monob.Export(folder + Path.GetFileNameWithoutExtension(path));
-		}
-
-		[Plugin]
-		public static void ReplaceMonoBehaviour(UnityParser parser, string path)
-		{
-			MonoBehaviour m = MonoBehaviour.Import(path);
-			if (m.m_Lines.Count > 0)
-			{
-				for (int i = 0; i < parser.Cabinet.Components.Count; i++)
-				{
-					Component asset = parser.Cabinet.Components[i];
-					if (asset.classID2 == UnityClassID.MonoBehaviour)
-					{
-						MonoBehaviour mbic = parser.Cabinet.LoadComponent(asset.pathID);
-						if (mbic.m_Name == m.m_Name)
-						{
-							mbic.m_Lines = m.m_Lines;
-							return;
-						}
-					}
-				}
-			}
-		}
-
-		[Plugin]
 		public static void ExportShader(UnityParser parser, string name, string path)
 		{
 			for (int i = 0; i < parser.Cabinet.Components.Count; i++)

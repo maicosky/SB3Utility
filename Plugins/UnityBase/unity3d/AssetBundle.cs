@@ -662,8 +662,8 @@ namespace UnityPlugin
 				default:
 					if (asset.classID2 == UnityClassID.MonoBehaviour)
 					{
-						MonoBehaviour monB = (MonoBehaviour)asset;
-						assets.Add(monB.m_MonoScript.asset);
+						MonoBehaviour monoB = (MonoBehaviour)asset;
+						assets.Add(monoB.m_MonoScript.asset);
 					}
 					break;
 				case UnityClassID.MonoScript:

@@ -155,7 +155,6 @@ namespace UnityPlugin
 				if (tex == null)
 				{
 					tex = m_Cookie.instance.Clone(dest.file);
-					dest.file.Bundle.AddComponent(tex);
 				}
 			}
 			dest.m_Cookie = new PPtr<Texture2D>(tex);
