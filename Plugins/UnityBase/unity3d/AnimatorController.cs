@@ -788,7 +788,7 @@ namespace UnityPlugin
 			writer.Write(m_AnimationClips.Count);
 			for (int i = 0; i < m_AnimationClips.Count; i++)
 			{
-				file.WritePPtr(m_AnimationClips[i].asset, false, stream);
+				m_AnimationClips[i].WriteTo(stream);
 			}
 		}
 

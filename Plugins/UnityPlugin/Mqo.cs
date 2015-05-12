@@ -19,12 +19,13 @@ namespace UnityPlugin
 		/// <param name="singleMqo"><b>True</b> will export all meshes in a single file. <b>False</b> will export a file per mesh.</param>
 		/// <param name="worldCoords"><b>True</b> will transform vertices into world coordinates by multiplying them by their parent frames. <b>False</b> will keep their local coordinates.</param>
 		[Plugin]
-		public static void ExportMqo([DefaultVar]Animator parser, object[] meshNames, string dirPath, bool singleMqo, bool worldCoords, bool sortMeshes)
+		public static void ExportMqo([DefaultVar]Animator parser, object[] meshes, string dirPath, bool singleMqo, bool worldCoords, bool sortMeshes)
 		{
-			List<MeshRenderer> meshes = Operations.FindMeshes(parser.RootTransform, new HashSet<string>(Utility.Convert<string>(meshNames)));
+			MeshRenderer[] meshArray = Utility.Convert<MeshRenderer>(meshes);
+			List<MeshRenderer> meshList = new List<MeshRenderer>(meshArray);
 			if (sortMeshes)
 			{
-				meshes.Sort
+				meshList.Sort
 				(
 					delegate(MeshRenderer m1, MeshRenderer m2)
 					{
@@ -49,7 +50,7 @@ namespace UnityPlugin
 					}
 				);
 			}
-			Mqo.Exporter.Export(dirPath, parser, meshes, singleMqo, worldCoords);
+			Mqo.Exporter.Export(dirPath, parser, meshList, singleMqo, worldCoords);
 		}
 
 		[Plugin]

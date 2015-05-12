@@ -398,6 +398,17 @@ namespace UnityPlugin
 					buffer[k] = b;
 				}
 				break;
+			case TextureFormat.Alpha8:
+				tga_header = new byte[0x12]
+				{
+					0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+					(byte)m_Width, (byte)(m_Width >> 8), (byte)m_Height, (byte)(m_Height >> 8), 8, 0
+				};
+				writer.Write(tga_header);
+				buffer = (byte[])image_data.Clone();
+				break;
+			default:
+				throw new Exception("Unhandled Texture2D format: " + m_TextureFormat);
 			}
 			writer.Write(buffer);
 		}

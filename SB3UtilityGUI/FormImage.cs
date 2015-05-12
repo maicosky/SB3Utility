@@ -83,27 +83,35 @@ namespace SB3Utility
 				}
 				else
 				{
-					ImageInformation imageInfo;
-					Texture renderTexture = Texture.FromMemory(Gui.Renderer.Device, tex.Data, 0, 0, -1, Usage.None, Format.Unknown, Pool.Managed, Filter.Default, Filter.Default, 0, out imageInfo);
-					DataStream stream = Texture.ToStream(renderTexture, ImageFileFormat.Bmp);
-					Bitmap bitmap = new Bitmap(stream);
-					stream.Dispose();
-					string format = renderTexture.GetLevelDescription(0).Format.GetDescription();
-					int bpp = (format.Contains("A8") ? 8 : 0)
-						+ (format.Contains("R8") ? 8 : 0) + (format.Contains("G8") ? 8 : 0) + (format.Contains("B8") ? 8 : 0);
-					renderTexture.Dispose();
-					pictureBox1.Image = bitmap;
-
-					ResizeImage();
-					if (!this.IsHidden)
-					{
-						Enabled = false;
-						Activate();
-						Enabled = true;
-					}
-
 					textBoxName.Text = tex.Name;
-					textBoxSize.Text = imageInfo.Width + "x" + imageInfo.Height + (bpp > 0 ? "x" + bpp : String.Empty);
+
+					if (tex.Data.Length > 0x12)
+					{
+						ImageInformation imageInfo;
+						Texture renderTexture = Texture.FromMemory(Gui.Renderer.Device, tex.Data, 0, 0, -1, Usage.None, Format.Unknown, Pool.Managed, Filter.Default, Filter.Default, 0, out imageInfo);
+						DataStream stream = Texture.ToStream(renderTexture, ImageFileFormat.Bmp);
+						Bitmap bitmap = new Bitmap(stream);
+						stream.Dispose();
+						string format = renderTexture.GetLevelDescription(0).Format.GetDescription();
+						int bpp = (format.Contains("A8") ? 8 : 0)
+							+ (format.Contains("R8") ? 8 : 0) + (format.Contains("G8") ? 8 : 0) + (format.Contains("B8") ? 8 : 0);
+						renderTexture.Dispose();
+						pictureBox1.Image = bitmap;
+
+						ResizeImage();
+						if (!this.IsHidden)
+						{
+							Enabled = false;
+							Activate();
+							Enabled = true;
+						}
+						textBoxSize.Text = imageInfo.Width + "x" + imageInfo.Height + (bpp > 0 ? "x" + bpp : String.Empty);
+					}
+					else
+					{
+						pictureBox1.Image = null;
+						textBoxSize.Text = "0x0";
+					}
 				}
 
 				image = tex;

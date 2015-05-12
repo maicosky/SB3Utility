@@ -59,7 +59,7 @@ namespace UnityPlugin
 		public void WriteTo(Stream stream)
 		{
 			BinaryWriter writer = new BinaryWriter(stream);
-			file.WritePPtr(m_Texture.asset, false, stream);
+			m_Texture.WriteTo(stream);
 			writer.Write(m_Scale);
 			writer.Write(m_Offset);
 		}
@@ -287,7 +287,7 @@ namespace UnityPlugin
 		{
 			BinaryWriter writer = new BinaryWriter(stream);
 			writer.WriteNameA4(m_Name);
-			file.WritePPtr(m_Shader.asset, !(m_Shader.asset is Shader), stream);
+			m_Shader.WriteTo(stream);
 
 			writer.Write(m_ShaderKeywords.Count);
 			for (int i = 0; i < m_ShaderKeywords.Count; i++)

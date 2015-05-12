@@ -26,7 +26,7 @@ namespace UnityPlugin
 			preloadIndex = reader.ReadInt32();
 			preloadSize = reader.ReadInt32();
 			PPtr<Object> objPtr = new PPtr<Object>(stream);
-			if (objPtr.m_PathID != 0)
+			if (objPtr.m_FileID == 0 && objPtr.m_PathID != 0)
 			{
 				Component comp = file.FindComponent(objPtr.m_PathID);
 				if (comp == null)
@@ -46,7 +46,7 @@ namespace UnityPlugin
 			BinaryWriter writer = new BinaryWriter(stream);
 			writer.Write(preloadIndex);
 			writer.Write(preloadSize);
-			file.WritePPtr(asset.asset, false, stream);
+			asset.WriteTo(stream);
 		}
 	}
 
@@ -114,14 +114,17 @@ namespace UnityPlugin
 			for (int i = 0; i < numObjects; i++)
 			{
 				PPtr<Object> objPtr = new PPtr<Object>(stream);
-				Component comp = file.FindComponent(objPtr.m_PathID);
-				if (comp == null)
+				if (objPtr.m_FileID == 0)
 				{
-					comp = new NotLoaded();
-					comp.pathID = objPtr.m_PathID;
+					Component comp = file.FindComponent(objPtr.m_PathID);
+					if (comp == null)
+					{
+						comp = new NotLoaded();
+						comp.pathID = objPtr.m_PathID;
+					}
+					objPtr = new PPtr<Object>(comp);
 				}
-				PPtr<Object> assetPtr = new PPtr<Object>(comp);
-				m_PreloadTable.Add(assetPtr);
+				m_PreloadTable.Add(objPtr);
 			}
 
 			int numContainerEntries = reader.ReadInt32();
@@ -169,7 +172,7 @@ namespace UnityPlugin
 			writer.Write(m_PreloadTable.Count);
 			for (int i = 0; i < m_PreloadTable.Count; i++)
 			{
-				file.WritePPtr(m_PreloadTable[i].asset, false, stream);
+				m_PreloadTable[i].WriteTo(stream);
 			}
 
 			writer.Write(m_Container.Count);
@@ -466,6 +469,23 @@ namespace UnityPlugin
 			List<Component> transforms = new List<Component>();
 			List<Component> containerRelated = new List<Component>();
 			GetDependantAssets(asset, assets, transforms, containerRelated);
+			if (asset.classID1 == UnityClassID.GameObject)
+			{
+				GameObject gameObj = (GameObject)asset;
+				Animator animator = gameObj.FindLinkedComponent(UnityClassID.Animator);
+				if (animator == null)
+				{
+					foreach (Component trans in transforms)
+					{
+						GetDependantAssets(trans, assets, null, null);
+					}
+					animator = new Animator(null, 0, UnityClassID.Animator, UnityClassID.Animator);
+					animator.m_Avatar = new PPtr<Avatar>((Component)null);
+					animator.m_Controller = new PPtr<RuntimeAnimatorController>((Component)null);
+					GetDependantAssets(animator, assets, transforms, containerRelated);
+					assets.Remove(animator);
+				}
+			}
 			foreach (var group in containerGroups)
 			{
 				var preloadPart = group.Item1;
@@ -478,7 +498,18 @@ namespace UnityPlugin
 						preloadPart.Clear();
 						for (int j = 0; j < assets.Count; j++)
 						{
-							preloadPart.Add(new PPtr<Object>(assets[j]));
+							if (assets[j] is ExternalAsset)
+							{
+								ExternalAsset extAsset = (ExternalAsset)assets[j];
+								PPtr<Object> preloadEntry = new PPtr<Object>((Component)null);
+								preloadEntry.m_FileID = extAsset.FileID;
+								preloadEntry.m_PathID = extAsset.PathID;
+								preloadPart.Add(preloadEntry);
+							}
+							else
+							{
+								preloadPart.Add(new PPtr<Object>(assets[j]));
+							}
 						}
 
 						string groupName = containerEntries[0].Key;
@@ -554,55 +585,76 @@ namespace UnityPlugin
 				switch (asset.classID1)
 				{
 				case UnityClassID.Animator:
-					assets.Remove(asset);
 					Animator animator = (Animator)asset;
 					GetDependantAssets(animator.m_Avatar.asset, assets, transforms, containerRelated);
 					GetDependantAssets(animator.m_Controller.asset, assets, transforms, containerRelated);
-					List<Component> meshes = new List<Component>();
-					List<Component> materials = new List<Component>();
 					foreach (Component ren in containerRelated)
 					{
 						GetDependantAssets(ren, assets, null, null);
 						if (ren is MeshRenderer)
 						{
 							MeshRenderer meshR = (MeshRenderer)ren;
-							Mesh mesh = Operations.GetMesh(meshR);
-							if (mesh != null)
+							PPtr<Mesh> meshPtr = Operations.GetMeshPtr(meshR);
+							if (meshPtr != null)
 							{
-								meshes.Add(mesh);
+								if (meshPtr.m_FileID != 0)
+								{
+									Component found = assets.Find
+									(
+										delegate(Component c)
+										{
+											if (c is ExternalAsset)
+											{
+												ExternalAsset e = (ExternalAsset)c;
+												return e.FileID == meshPtr.m_FileID && e.PathID == meshPtr.m_PathID;
+											}
+											return false;
+										}
+									);
+									if (found == null)
+									{
+										ExternalAsset extMesh = new ExternalAsset();
+										extMesh.FileID = meshPtr.m_FileID;
+										extMesh.PathID = meshPtr.m_PathID;
+										assets.Add(extMesh);
+									}
+								}
+								else if (meshPtr.instance != null && !assets.Contains(meshPtr.instance))
+								{
+									assets.Add(meshPtr.instance);
+								}
 							}
 							foreach (PPtr<Material> matPtr in meshR.m_Materials)
 							{
-								GetDependantAssets(matPtr.asset, materials, null, null);
+								if (!assets.Contains(matPtr.asset))
+								{
+									GetDependantAssets(matPtr.asset, assets, null, null);
+								}
 							}
 						}
 					}
-					for (int i = materials.Count - 1; i >= 0; i--)
-					{
-						if (materials[i].classID1 == UnityClassID.Shader)
+					assets.Sort
+					(
+						delegate(Component c1, Component c2)
 						{
-							assets.Insert(0, materials[i]);
+							if (c1 is ExternalAsset)
+							{
+								ExternalAsset e1 = (ExternalAsset)c1;
+								if (c2 is ExternalAsset)
+								{
+									ExternalAsset e2 = (ExternalAsset)c2;
+									return e1.FileID != e2.FileID ? e1.FileID.CompareTo(e2.FileID)
+										: e1.PathID.CompareTo(e2.PathID);
+								}
+								return -1;
+							}
+							else if (c2 is ExternalAsset)
+							{
+								return 1;
+							}
+							return c1.pathID.CompareTo(c2.pathID);
 						}
-					}
-					for (int i = meshes.Count - 1; i >= 0; i--)
-					{
-						assets.Insert(0, meshes[i]);
-					}
-					for (int i = materials.Count - 1; i >= 0; i--)
-					{
-						if (materials[i].classID1 == UnityClassID.Texture2D)
-						{
-							assets.Insert(0, materials[i]);
-						}
-					}
-					for (int i = materials.Count - 1; i >= 0; i--)
-					{
-						if (materials[i].classID1 == UnityClassID.Material)
-						{
-							assets.Insert(0, materials[i]);
-						}
-					}
-					assets.Add(asset);
+					);
 					break;
 				case UnityClassID.Avatar:
 					break;
@@ -619,7 +671,6 @@ namespace UnityPlugin
 				case UnityClassID.GameObject:
 					GameObject gameObj = (GameObject)asset;
 					animator = null;
-					Light light = null;
 					foreach (var compPair in gameObj.m_Component)
 					{
 						switch (compPair.Key)
@@ -635,9 +686,6 @@ namespace UnityPlugin
 						case UnityClassID.Animator:
 							animator = (Animator)compPair.Value.asset;
 							break;
-						case UnityClassID.Light:
-							light = (Light)compPair.Value.asset;
-							break;
 						case UnityClassID.MeshRenderer:
 						case UnityClassID.MeshFilter:
 						case UnityClassID.SkinnedMeshRenderer:
@@ -646,15 +694,21 @@ namespace UnityPlugin
 						case UnityClassID.MonoBehaviour:
 							GetDependantAssets(compPair.Value.asset, assets, transforms, containerRelated);
 							break;
+						default:
+							if (!assets.Contains(compPair.Value.asset))
+							{
+								assets.Add(compPair.Value.asset);
+							}
+							break;
 						}
 					}
-					if (animator != null /*|| light != null*/)
+					if (animator != null)
 					{
 						foreach (Component trans in transforms)
 						{
 							GetDependantAssets(trans, assets, null, null);
 						}
-						GetDependantAssets(animator /*!= null ? (Component)animator : (Component)light*/, assets, transforms, containerRelated);
+						GetDependantAssets(animator, assets, transforms, containerRelated);
 					}
 					break;
 				case UnityClassID.Light:
@@ -663,7 +717,10 @@ namespace UnityPlugin
 					if (asset.classID2 == UnityClassID.MonoBehaviour)
 					{
 						MonoBehaviour monoB = (MonoBehaviour)asset;
-						assets.Add(monoB.m_MonoScript.asset);
+						if (!assets.Contains(monoB.m_MonoScript.asset))
+						{
+							assets.Add(monoB.m_MonoScript.asset);
+						}
 					}
 					break;
 				case UnityClassID.MonoScript:
@@ -680,24 +737,27 @@ namespace UnityPlugin
 					{
 						GetDependantAssets(texVal.Value.m_Texture.asset, assets, transforms, containerRelated);
 					}
-					if (mat.m_Shader.instance != null)
+					if (mat.m_Shader.m_FileID != 0)
 					{
-						assets.Add(mat.m_Shader.instance);
-						foreach (PPtr<Shader> dep in mat.m_Shader.instance.m_Dependencies)
-						{
-							assets.Add(dep.asset);
-						}
+						AddExternalAsset(assets, mat.m_Shader);
 					}
-					else if (mat.m_Shader.asset != null)
+					else if (mat.m_Shader.instance != null)
 					{
-						assets.Add(mat.m_Shader.asset);
+						GetDependantAssets(mat.m_Shader.asset, assets, transforms, containerRelated);
 					}
 					break;
 				case UnityClassID.Shader:
 					Shader shader = (Shader)asset;
 					foreach (PPtr<Shader> dep in shader.m_Dependencies)
 					{
-						GetDependantAssets(dep.asset, assets, transforms, containerRelated);
+						if (dep.m_FileID != 0)
+						{
+							AddExternalAsset(assets, dep);
+						}
+						else
+						{
+							GetDependantAssets(dep.asset, assets, transforms, containerRelated);
+						}
 					}
 					break;
 				case UnityClassID.Sprite:
@@ -712,20 +772,50 @@ namespace UnityPlugin
 			}
 		}
 
+		private static void AddExternalAsset(List<Component> assets, PPtr<Shader> dep)
+		{
+			Component found = assets.Find
+			(
+				delegate(Component c)
+				{
+					if (c is ExternalAsset)
+					{
+						ExternalAsset e = (ExternalAsset)c;
+						return e.FileID == dep.m_FileID && e.PathID == dep.m_PathID;
+					}
+					return false;
+				}
+			);
+			if (found == null)
+			{
+				ExternalAsset extShader = new ExternalAsset();
+				extShader.FileID = dep.m_FileID;
+				extShader.PathID = dep.m_PathID;
+				assets.Add(extShader);
+			}
+		}
+
 		public void Dump()
 		{
 			string msg = String.Empty;
 			for (int i = 0; i < m_PreloadTable.Count; i++)
 			{
 				PPtr<Object> objPtr = m_PreloadTable[i];
-				Component comp = file.FindComponent(objPtr.asset.pathID);
-				if (comp == null)
+				if (objPtr.m_FileID == 0)
 				{
-					comp = new NotLoaded();
+					Component comp = file.FindComponent(objPtr.asset.pathID);
+					if (comp == null)
+					{
+						comp = new NotLoaded();
+					}
+					//if (comp.classID1 == UnityClassID.Material // comp.pathID != 0 && comp.classID1 != UnityClassID.GameObject && comp.classID1 != UnityClassID.Transform)
+					{
+						msg += i + " PathID=" + objPtr.asset.pathID + " " + comp.classID1 + " " + (!(comp is NotLoaded) ? AssetCabinet.ToString(comp) : ((NotLoaded)comp).Name) + "\r\n";
+					}
 				}
-				//if (comp.classID1 == UnityClassID.Material // comp.pathID != 0 && comp.classID1 != UnityClassID.GameObject && comp.classID1 != UnityClassID.Transform)
+				else
 				{
-					msg += i + " " + objPtr.asset.pathID + " " + comp.classID1 + " " + (!(comp is NotLoaded) ? AssetCabinet.ToString(comp) : ((NotLoaded)comp).Name) + "\r\n";
+					msg += i + " external FileID=" + objPtr.m_FileID + " PathID=" + objPtr.m_PathID + "\r\n";
 				}
 			}
 			Report.ReportLog(msg);
@@ -736,11 +826,11 @@ namespace UnityPlugin
 				if (m_Container[i].Value.asset.asset.pathID != 0)
 				{
 					Component asset = file.FindComponent(m_Container[i].Value.asset.asset.pathID);
-					msg += i + " " + m_Container[i].Key + " " + m_Container[i].Value.asset.asset.pathID + " i=" + m_Container[i].Value.preloadIndex + " s=" + m_Container[i].Value.preloadSize + " " + asset.classID1.ToString() + " " + (asset is NotLoaded ? ((NotLoaded)asset).Name : AssetCabinet.ToString(asset)) + "\r\n";
+					msg += i + " " + m_Container[i].Key + " PathID=" + m_Container[i].Value.asset.asset.pathID + " i=" + m_Container[i].Value.preloadIndex + " s=" + m_Container[i].Value.preloadSize + " " + asset.classID1.ToString() + " " + (asset is NotLoaded ? ((NotLoaded)asset).Name : AssetCabinet.ToString(asset)) + "\r\n";
 				}
 				else
 				{
-					msg += "NULL! " + i + " " + m_Container[i].Key + " " + m_Container[i].Value.asset.asset.pathID + " i=" + m_Container[i].Value.preloadIndex + " s=" + m_Container[i].Value.preloadSize + " NULL!\r\n";
+					msg += "NULL! " + i + " " + m_Container[i].Key + " PathID=" + m_Container[i].Value.asset.asset.pathID + " i=" + m_Container[i].Value.preloadIndex + " s=" + m_Container[i].Value.preloadSize + " NULL!\r\n";
 				}
 			}
 			Report.ReportLog(msg);

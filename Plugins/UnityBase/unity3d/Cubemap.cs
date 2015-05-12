@@ -41,7 +41,7 @@ namespace UnityPlugin
 			writer.Write(m_SourceTextures.Count);
 			for (int i = 0; i < m_SourceTextures.Count; i++)
 			{
-				file.WritePPtr(m_SourceTextures[i].asset, false, stream);
+				m_SourceTextures[i].WriteTo(stream);
 			}
 		}
 

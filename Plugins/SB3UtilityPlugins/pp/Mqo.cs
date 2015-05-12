@@ -549,10 +549,20 @@ namespace SB3Utility
 					string firstVisibleMorph = null;
 					foreach (ImportedMesh meshList in importer.MeshList)
 					{
+						int dotPos = meshList.Name.IndexOf('.');
+						if (dotPos >= 0 && morphList.Name == null)
+						{
+							morphList.Name = meshList.Name.Substring(0, dotPos);
+						}
 						foreach (ImportedSubmesh submesh in meshList.SubmeshList)
 						{
 							ImportedMorphKeyframe morph = new ImportedMorphKeyframe();
 							morph.Name = meshList.Name;
+							dotPos = morph.Name.IndexOf('.');
+							if (dotPos >= 0)
+							{
+								morph.Name = morph.Name.Substring(dotPos + 1);
+							}
 							morph.VertexList = submesh.VertexList;
 							morphList.KeyframeList.Add(morph);
 
@@ -586,27 +596,30 @@ namespace SB3Utility
 						}
 					}
 
-					int startIdx = path.IndexOf('-') + 1;
-					int endIdx = path.LastIndexOf('-');
-					if (startIdx > endIdx)
+					if (morphList.Name == null)
 					{
-						int extIdx = path.ToLower().LastIndexOf(".morph.mqo");
-						for (int i = extIdx - 1; i >= 0; i--)
+						int startIdx = path.IndexOf('-', path.LastIndexOf('\\')) + 1;
+						int endIdx = path.LastIndexOf('-');
+						if (startIdx > endIdx)
 						{
-							if (!Char.IsDigit(path[i]))
+							int extIdx = path.ToLower().LastIndexOf(".morph.mqo");
+							for (int i = extIdx - 1; i >= 0; i--)
 							{
-								endIdx = i + 1;
-								break;
+								if (!Char.IsDigit(path[i]))
+								{
+									endIdx = i + 1;
+									break;
+								}
 							}
 						}
-					}
-					if ((startIdx > 0) && (endIdx > 0) && (startIdx < endIdx))
-					{
-						morphList.Name = path.Substring(startIdx, endIdx - startIdx);
-					}
-					if (morphList.Name == String.Empty)
-					{
-						morphList.Name = "(no name)";
+						if ((startIdx > 0) && (endIdx > 0) && (startIdx < endIdx))
+						{
+							morphList.Name = path.Substring(startIdx, endIdx - startIdx);
+						}
+						if (morphList.Name == String.Empty)
+						{
+							morphList.Name = "(no name)";
+						}
 					}
 				}
 				catch (Exception ex)

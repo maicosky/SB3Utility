@@ -115,7 +115,7 @@ namespace SB3Utility
 		pMaterials->Reserve(imported->MaterialList->Count);
 		pTextures->Reserve(imported->TextureList->Count);
 
-		pMeshNodes = new FbxArray<FbxNode*>();
+		pMeshNodes = new FbxArray<FbxNode*>(imported->MeshList->Count);
 		ExportFrame(pScene->GetRootNode(), imported->FrameList[0]);
 
 		SetJointsFromImportedMeshes(allBones);
@@ -123,7 +123,13 @@ namespace SB3Utility
 		for (int i = 0; i < pMeshNodes->GetCount(); i++)
 		{
 			FbxNode* meshNode = pMeshNodes->GetAt(i);
-			ImportedMesh^ mesh = ImportedHelpers::FindMesh(gcnew String(meshNode->GetName()), imported->MeshList);
+			String^ meshPath = gcnew String(meshNode->GetName());
+			FbxNode* rootNode = meshNode;
+			while ((rootNode = rootNode->GetParent()) != pScene->GetRootNode())
+			{
+				meshPath = gcnew String(rootNode->GetName()) + "/" + meshPath;
+			}
+			ImportedMesh^ mesh = ImportedHelpers::FindMesh(meshPath, imported->MeshList);
 			ExportMesh(meshNode, mesh);
 		}
 	}
@@ -137,7 +143,7 @@ namespace SB3Utility
 
 	void Fbx::Exporter::SearchHierarchy(ImportedFrame^ frame, HashSet<String^>^ exportFrames)
 	{
-		ImportedMesh^ meshListSome = ImportedHelpers::FindMesh(frame->Name, imported->MeshList);
+		ImportedMesh^ meshListSome = ImportedHelpers::FindMesh(frame, imported->MeshList);
 		if (meshListSome != nullptr)
 		{
 			ImportedFrame^ parent = frame;
@@ -222,7 +228,7 @@ namespace SB3Utility
 			pFrameNode->LclTranslation.Set(FbxVector4(translate.X, translate.Y, translate.Z));
 			pParentNode->AddChild(pFrameNode);
 
-			if (ImportedHelpers::FindMesh(frameName, imported->MeshList) != nullptr)
+			if (ImportedHelpers::FindMesh(frame, imported->MeshList) != nullptr)
 			{
 				pMeshNodes->Add(pFrameNode);
 			}
@@ -236,7 +242,8 @@ namespace SB3Utility
 
 	void Fbx::Exporter::ExportMesh(FbxNode* pFrameNode, ImportedMesh^ meshList)
 	{
-		String^ frameName = meshList->Name;
+		int lastSlash = meshList->Name->LastIndexOf('/');
+		String^ frameName = lastSlash < 0 ? meshList->Name : meshList->Name->Substring(lastSlash + 1);
 		List<ImportedBone^>^ boneList = meshList->BoneList;
 		bool hasBones;
 		if (exportSkins && boneList != nullptr)
@@ -994,26 +1001,44 @@ namespace SB3Utility
 	{
 		for (int meshIdx = 0; meshIdx < imported->MeshList->Count; meshIdx++)
 		{
-			FbxNode* pBaseNode = pMeshNodes->GetAt(meshIdx);
-
 			ImportedMesh^ meshList = imported->MeshList[meshIdx];
 			int meshObjIdx = 0;
 			List<ImportedVertex^>^ vertList = meshList->SubmeshList[meshObjIdx]->VertexList;
 
-			int morphIdx;
-			for (morphIdx = 0; morphIdx < imported->MorphList->Count; morphIdx++)
+			ImportedMorph^ morph = nullptr;
+			for each (ImportedMorph^ m in imported->MorphList)
 			{
-				if (imported->MorphList[morphIdx]->Name == meshList->Name)
+				if (m->Name == meshList->Name)
 				{
+					morph = m;
 					break;
 				}
 			}
-			if (morphIdx == imported->MorphList->Count)
+			if (morph == nullptr)
 			{
 				continue;
 			}
-			ImportedMorph^ morph = imported->MorphList[morphIdx];
 
+			FbxNode* pBaseNode = NULL;
+			for (int nodeIdx = 0; nodeIdx < pMeshNodes->GetCount(); nodeIdx++)
+			{
+				FbxNode* pMeshNode = pMeshNodes->GetAt(nodeIdx);
+				String^ framePath = gcnew String(pMeshNode->GetName());
+				FbxNode* rootNode = pMeshNode;
+				while ((rootNode = rootNode->GetParent()) != pScene->GetRootNode())
+				{
+					framePath = gcnew String(rootNode->GetName()) + "/" + framePath;
+				}
+				if (framePath == meshList->Name)
+				{
+					pBaseNode = pMeshNode;
+					break;
+				}
+			}
+			if (pBaseNode == NULL)
+			{
+				continue;
+			}
 			FbxNode* pBaseMeshNode = pBaseNode->GetChild(meshObjIdx);
 			FbxMesh* pBaseMesh = pBaseMeshNode->GetMesh();
 			char* pMorphClipName = NULL;

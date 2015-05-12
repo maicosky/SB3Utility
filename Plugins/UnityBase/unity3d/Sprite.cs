@@ -133,7 +133,7 @@ namespace UnityPlugin
 		public void WriteTo(Stream stream)
 		{
 			BinaryWriter writer = new BinaryWriter(stream);
-			file.WritePPtr(texture.asset, false, stream);
+			texture.WriteTo(stream);
 			
 			writer.Write(vertices.Length);
 			for (int i = 0; i < vertices.Length; i++)

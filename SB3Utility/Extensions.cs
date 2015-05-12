@@ -240,21 +240,23 @@ namespace SB3Utility
 
 		public static string ReadNameA4(this BinaryReader reader)
 		{
-			int len = reader.ReadInt32();
+			/*int len = reader.ReadInt32();
 			int align4 = (len & 3) > 0 ? 4 - (len & 3) : 0;
 			byte[] buffer = reader.ReadBytes(len + align4);
-			return System.Text.ASCIIEncoding.ASCII.GetString(buffer, 0, len);
+			return System.Text.ASCIIEncoding.ASCII.GetString(buffer, 0, len);*/
+			return ReadNameA4U8(reader);
 		}
 
 		public static void WriteNameA4(this BinaryWriter writer, string name)
 		{
-			byte[] bytes = System.Text.ASCIIEncoding.ASCII.GetBytes(name);
+			/*byte[] bytes = System.Text.ASCIIEncoding.ASCII.GetBytes(name);
 			writer.Write(bytes.Length);
 			writer.Write(bytes);
 			if ((name.Length & 3) != 0)
 			{
 				writer.Write(new byte[4 - (name.Length & 3)]);
-			}
+			}*/
+			WriteNameA4U8(writer, name);
 		}
 
 		public static string ReadNameA4U8(this BinaryReader reader)
@@ -272,7 +274,7 @@ namespace SB3Utility
 			writer.Write(bytes);
 			if ((bytes.Length & 3) != 0)
 			{
-				writer.Write(new byte[4 - (bytes.Length & 3)]);
+				writer.BaseStream.Position += 4 - (bytes.Length & 3);
 			}
 		}
 

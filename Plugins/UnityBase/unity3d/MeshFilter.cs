@@ -37,8 +37,8 @@ namespace UnityPlugin
 
 		public void WriteTo(Stream stream)
 		{
-			file.WritePPtr(m_GameObject.asset, false, stream);
-			file.WritePPtr(m_Mesh.asset, false, stream);
+			m_GameObject.WriteTo(stream);
+			m_Mesh.WriteTo(stream);
 		}
 
 		public MeshFilter Clone(AssetCabinet file)

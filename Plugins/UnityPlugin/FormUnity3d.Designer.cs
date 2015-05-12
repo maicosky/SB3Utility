@@ -52,9 +52,13 @@
 			this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.keepBackupToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.backupExtensionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.backupExtensionToolStripEditTextBox = new SB3Utility.ToolStripEditTextBox();
+			this.backupExtension1ToolStripEditTextBox = new SB3Utility.ToolStripEditTextBox();
+			this.backupExtension2ToolStripEditTextBox = new SB3Utility.ToolStripEditTextBox();
+			this.backupExtension3ToolStripEditTextBox = new SB3Utility.ToolStripEditTextBox();
+			this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
 			this.filterIncludedAssetsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.dumpAssetBundleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.dumpTypeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.panel1 = new System.Windows.Forms.Panel();
 			this.tabControlAssets = new System.Windows.Forms.TabControl();
 			this.tabPageAnimators = new System.Windows.Forms.TabPage();
@@ -85,8 +89,6 @@
 			this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
 			this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
 			this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-			this.dumpTypeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
 			this.menuStrip1.SuspendLayout();
 			this.panel1.SuspendLayout();
 			this.tabControlAssets.SuspendLayout();
@@ -248,10 +250,10 @@
 			// 
 			// renameToolStripMenuItem
 			// 
-			this.renameToolStripMenuItem.Enabled = false;
 			this.renameToolStripMenuItem.Name = "renameToolStripMenuItem";
 			this.renameToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
 			this.renameToolStripMenuItem.Text = "Re&name";
+			this.renameToolStripMenuItem.Click += new System.EventHandler(this.renameToolStripMenuItem_Click);
 			// 
 			// multiRenameToolStripMenuItem
 			// 
@@ -283,15 +285,32 @@
 			// backupExtensionToolStripMenuItem
 			// 
 			this.backupExtensionToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.backupExtensionToolStripEditTextBox});
+            this.backupExtension1ToolStripEditTextBox,
+            this.backupExtension2ToolStripEditTextBox,
+            this.backupExtension3ToolStripEditTextBox});
 			this.backupExtensionToolStripMenuItem.Name = "backupExtensionToolStripMenuItem";
 			this.backupExtensionToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
 			this.backupExtensionToolStripMenuItem.Text = "Backup &Extension";
 			// 
-			// backupExtensionToolStripEditTextBox
+			// backupExtension1ToolStripEditTextBox
 			// 
-			this.backupExtensionToolStripEditTextBox.Name = "backupExtensionToolStripEditTextBox";
-			this.backupExtensionToolStripEditTextBox.Size = new System.Drawing.Size(50, 21);
+			this.backupExtension1ToolStripEditTextBox.Name = "backupExtension1ToolStripEditTextBox";
+			this.backupExtension1ToolStripEditTextBox.Size = new System.Drawing.Size(50, 21);
+			// 
+			// backupExtension2ToolStripEditTextBox
+			// 
+			this.backupExtension2ToolStripEditTextBox.Name = "backupExtension2ToolStripEditTextBox";
+			this.backupExtension2ToolStripEditTextBox.Size = new System.Drawing.Size(50, 21);
+			// 
+			// backupExtension3ToolStripEditTextBox
+			// 
+			this.backupExtension3ToolStripEditTextBox.Name = "backupExtension3ToolStripEditTextBox";
+			this.backupExtension3ToolStripEditTextBox.Size = new System.Drawing.Size(50, 21);
+			// 
+			// toolStripSeparator7
+			// 
+			this.toolStripSeparator7.Name = "toolStripSeparator7";
+			this.toolStripSeparator7.Size = new System.Drawing.Size(174, 6);
 			// 
 			// filterIncludedAssetsToolStripMenuItem
 			// 
@@ -309,6 +328,13 @@
 			this.dumpAssetBundleToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
 			this.dumpAssetBundleToolStripMenuItem.Text = "&Dump AssetBundle";
 			this.dumpAssetBundleToolStripMenuItem.Click += new System.EventHandler(this.dumpAssetBundleToolStripMenuItem_Click);
+			// 
+			// dumpTypeToolStripMenuItem
+			// 
+			this.dumpTypeToolStripMenuItem.Name = "dumpTypeToolStripMenuItem";
+			this.dumpTypeToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
+			this.dumpTypeToolStripMenuItem.Text = "Dump Type";
+			this.dumpTypeToolStripMenuItem.Click += new System.EventHandler(this.dumpTypeToolStripMenuItem_Click);
 			// 
 			// panel1
 			// 
@@ -606,18 +632,6 @@
 			this.openFileDialog1.Multiselect = true;
 			this.openFileDialog1.RestoreDirectory = true;
 			// 
-			// dumpTypeToolStripMenuItem
-			// 
-			this.dumpTypeToolStripMenuItem.Name = "dumpTypeToolStripMenuItem";
-			this.dumpTypeToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
-			this.dumpTypeToolStripMenuItem.Text = "Dump Type";
-			this.dumpTypeToolStripMenuItem.Click += new System.EventHandler(this.dumpTypeToolStripMenuItem_Click);
-			// 
-			// toolStripSeparator7
-			// 
-			this.toolStripSeparator7.Name = "toolStripSeparator7";
-			this.toolStripSeparator7.Size = new System.Drawing.Size(174, 6);
-			// 
 			// FormUnity3d
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -667,7 +681,7 @@
 		private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem keepBackupToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem backupExtensionToolStripMenuItem;
-		private SB3Utility.ToolStripEditTextBox backupExtensionToolStripEditTextBox;
+		private SB3Utility.ToolStripEditTextBox backupExtension1ToolStripEditTextBox;
 		private System.Windows.Forms.Panel panel1;
 		private System.Windows.Forms.TabControl tabControlAssets;
 		private System.Windows.Forms.TabPage tabPageAnimators;
@@ -704,5 +718,7 @@
 		private System.Windows.Forms.ToolStripMenuItem dumpAssetBundleToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem dumpTypeToolStripMenuItem;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;
+		private SB3Utility.ToolStripEditTextBox backupExtension2ToolStripEditTextBox;
+		private SB3Utility.ToolStripEditTextBox backupExtension3ToolStripEditTextBox;
 	}
 }

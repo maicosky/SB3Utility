@@ -246,6 +246,27 @@ namespace SB3Utility
 			return null;
 		}
 
+		public static ImportedMesh FindMesh(ImportedFrame frame, List<ImportedMesh> importedMeshList)
+		{
+			string framePath = frame.Name;
+			ImportedFrame root = frame;
+			while (root.Parent != null)
+			{
+				root = root.Parent;
+				framePath = root.Name + "/" + framePath;
+			}
+
+			foreach (ImportedMesh mesh in importedMeshList)
+			{
+				if (mesh.Name == framePath)
+				{
+					return mesh;
+				}
+			}
+
+			return null;
+		}
+
 		public static ImportedMaterial FindMaterial(String name, List<ImportedMaterial> importedMats)
 		{
 			foreach (ImportedMaterial mat in importedMats)

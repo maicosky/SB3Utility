@@ -156,7 +156,7 @@ namespace UnityPlugin
 			writer.WriteNameA4(attribute);
 			writer.WriteNameA4(path);
 			writer.Write(classID);
-			file.WritePPtr(script.asset, false, stream);
+			script.WriteTo(stream);
 		}
 	}
 
@@ -184,7 +184,7 @@ namespace UnityPlugin
 		{
 			BinaryWriter writer = new BinaryWriter(stream);
 			writer.Write(time);
-			file.WritePPtr(value.asset, false, stream);
+			value.WriteTo(stream);
 		}
 	}
 
@@ -233,7 +233,7 @@ namespace UnityPlugin
 			writer.WriteNameA4(attribute);
 			writer.WriteNameA4(path);
 			writer.Write(classID);
-			file.WritePPtr(script.asset, false, stream);
+			script.WriteTo(stream);
 		}
 	}
 
@@ -799,7 +799,7 @@ namespace UnityPlugin
 			BinaryWriter writer = new BinaryWriter(stream);
 			writer.Write(path);
 			writer.Write(attribute);
-			file.WritePPtr(script.asset, false, stream);
+			script.WriteTo(stream);
 			writer.Write(classID);
 			writer.Write(customType);
 			writer.Write(isPPtrCurve);
@@ -851,7 +851,7 @@ namespace UnityPlugin
 			writer.Write(pptrCurveMapping.Count);
 			for (int i = 0; i < pptrCurveMapping.Count; i++)
 			{
-				file.WritePPtr(pptrCurveMapping[i].asset, false, stream);
+				pptrCurveMapping[i].WriteTo(stream);
 			}
 		}
 	}
@@ -892,7 +892,7 @@ namespace UnityPlugin
 			writer.Write(time);
 			writer.WriteNameA4(functionName);
 			writer.WriteNameA4(data);
-			file.WritePPtr(objectReferenceParameter.asset, false, stream);
+			objectReferenceParameter.WriteTo(stream);
 			writer.Write(floatParameter);
 			writer.Write(intParameter);
 			writer.Write(messageOptions);

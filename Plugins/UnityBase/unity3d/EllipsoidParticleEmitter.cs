@@ -84,7 +84,7 @@ namespace UnityPlugin
 		{
 			long start = stream.Position;
 			BinaryWriter writer = new BinaryWriter(stream);
-			file.WritePPtr(m_GameObject.asset, false, stream);
+			m_GameObject.WriteTo(stream);
 			writer.Write(m_Enabled);
 			writer.Write(m_Emit);
 			writer.Write(new byte[2]);

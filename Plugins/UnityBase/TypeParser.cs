@@ -249,7 +249,7 @@ namespace UnityPlugin
 
 		public override void WriteTo(Stream stream)
 		{
-			file.WritePPtr(Value.asset, Value.m_FileID != 0, stream);
+			Value.WriteTo(stream);
 		}
 	}
 

@@ -15,6 +15,8 @@ namespace UnityPlugin
 {
 	[Plugin]
 	[PluginOpensFile(".unity3d")]
+	[PluginOpensFile(".assets")]
+	[PluginOpensFile(".")]
 	public partial class FormUnity3d : DockContent, EditedContent
 	{
 		public string FormVariable { get; protected set; }
@@ -111,8 +113,12 @@ namespace UnityPlugin
 
 				keepBackupToolStripMenuItem.Checked = (bool)Properties.Settings.Default["KeepBackupOfUnity3d"];
 				keepBackupToolStripMenuItem.CheckedChanged += keepBackupToolStripMenuItem_CheckedChanged;
-				backupExtensionToolStripEditTextBox.Text = (string)Properties.Settings.Default["BackupExtensionUnity3d"];
-				backupExtensionToolStripEditTextBox.AfterEditTextChanged += backupExtensionToolStripEditTextBox_AfterEditTextChanged;
+				backupExtension1ToolStripEditTextBox.Text = (string)Properties.Settings.Default["BackupExtensionUnity3d"];
+				backupExtension1ToolStripEditTextBox.AfterEditTextChanged += backupExtensionToolStripEditTextBox_AfterEditTextChanged;
+				backupExtension2ToolStripEditTextBox.Text = (string)Properties.Settings.Default["BackupExtensionAssets"];
+				backupExtension2ToolStripEditTextBox.AfterEditTextChanged += backupExtensionToolStripEditTextBox_AfterEditTextChanged;
+				backupExtension3ToolStripEditTextBox.Text = (string)Properties.Settings.Default["BackupExtensionNone"];
+				backupExtension3ToolStripEditTextBox.AfterEditTextChanged += backupExtensionToolStripEditTextBox_AfterEditTextChanged;
 
 				Properties.Settings.Default.SettingChanging += Default_SettingChanging;
 
@@ -530,7 +536,8 @@ namespace UnityPlugin
 			{
 				Animator anim = item.Tag as Animator;
 				bool vAnimator = Editor.VirtualAnimators.Contains(anim);
-				FormAnimator formAnimator = (FormAnimator)Gui.Scripting.RunScript(FormVariable + ".OpenAnimator(name=\"" + item.Text + "\", virtualAnimator=" + vAnimator + ")", false);
+				int componentIdx = Editor.Parser.Cabinet.Components.IndexOf(vAnimator ? anim.m_GameObject.asset : (Component)item.Tag);
+				FormAnimator formAnimator = (FormAnimator)Gui.Scripting.RunScript(FormVariable + ".OpenAnimator(componentIndex=" + componentIdx + ", virtualAnimator=" + vAnimator + ")", false);
 				formAnimator.Activate();
 				list.Add(formAnimator);
 			}
@@ -539,8 +546,14 @@ namespace UnityPlugin
 		}
 
 		[Plugin]
-		public FormAnimator OpenAnimator(string name, bool virtualAnimator)
+		public FormAnimator OpenAnimator(int componentIndex, bool virtualAnimator)
 		{
+			Component asset = Editor.Parser.Cabinet.Components[componentIndex];
+			string name = asset is NotLoaded ? ((NotLoaded)asset).Name : AssetCabinet.ToString(asset);
+			if (!virtualAnimator)
+			{
+				name += asset.pathID;
+			}
 			DockContent child;
 			if (!ChildForms.TryGetValue(name, out child))
 			{
@@ -551,12 +564,12 @@ namespace UnityPlugin
 					if (!virtualAnimator)
 					{
 						childParserVar = Gui.Scripting.GetNextVariable("animator");
-						Gui.Scripting.RunScript(childParserVar + " = " + EditorVar + ".OpenAnimator(name=\"" + name + "\")");
+						Gui.Scripting.RunScript(childParserVar + " = " + EditorVar + ".OpenAnimator(componentIndex=" + componentIndex + ")");
 					}
 					else
 					{
 						childParserVar = Gui.Scripting.GetNextVariable("virtualAnimator");
-						Gui.Scripting.RunScript(childParserVar + " = " + EditorVar + ".OpenVirtualAnimator(name=\"" + name + "\")");
+						Gui.Scripting.RunScript(childParserVar + " = " + EditorVar + ".OpenVirtualAnimator(componentIndex=" + componentIndex + ")");
 					}
 					ChildParserVars.Add(name, childParserVar);
 
@@ -740,7 +753,10 @@ namespace UnityPlugin
 		{
 			try
 			{
-				BackgroundWorker worker = (BackgroundWorker)Gui.Scripting.RunScript(EditorVar + ".SaveUnity3d(keepBackup=" + keepBackupToolStripMenuItem.Checked + ", backupExtension=\"" + (string)Properties.Settings.Default["BackupExtensionUnity3d"] + "\", background=True)");
+				string backupExt = Path.GetExtension(Editor.Parser.FilePath);
+				backupExt = backupExt == String.Empty ? backupExt = "None" : backupExt.Substring(1);
+				backupExt = (string)Properties.Settings.Default["BackupExtension" + backupExt];
+				BackgroundWorker worker = (BackgroundWorker)Gui.Scripting.RunScript(EditorVar + ".SaveUnity3d(keepBackup=" + keepBackupToolStripMenuItem.Checked + ", backupExtension=\"" + backupExt + "\", background=True)");
 				ShowBlockingDialog(Editor.Parser.FilePath, worker);
 				ClearChanges();
 			}
@@ -756,7 +772,10 @@ namespace UnityPlugin
 			{
 				if (saveFileDialog1.ShowDialog() == DialogResult.OK)
 				{
-					BackgroundWorker worker = (BackgroundWorker)Gui.Scripting.RunScript(EditorVar + ".SaveUnity3d(path=\"" + saveFileDialog1.FileName + "\", keepBackup=" + keepBackupToolStripMenuItem.Checked + ", backupExtension=\"" + (string)Properties.Settings.Default["BackupExtensionUnity3d"] + "\", background=True)");
+					string backupExt = Path.GetExtension(Editor.Parser.FilePath);
+					backupExt = backupExt == String.Empty ? backupExt = "None" : backupExt.Substring(1);
+					backupExt = (string)Properties.Settings.Default["BackupExtension" + backupExt];
+					BackgroundWorker worker = (BackgroundWorker)Gui.Scripting.RunScript(EditorVar + ".SaveUnity3d(path=\"" + saveFileDialog1.FileName + "\", keepBackup=" + keepBackupToolStripMenuItem.Checked + ", backupExtension=\"" + backupExt + "\", background=True)");
 					ShowBlockingDialog(saveFileDialog1.FileName, worker);
 					Text = Path.GetFileName(saveFileDialog1.FileName);
 					ToolTipText = Editor.Parser.FilePath;
@@ -1086,6 +1105,92 @@ namespace UnityPlugin
 			}
 		}
 
+		private void renameToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				ListView subfilesList = null;
+				if (tabControlAssets.SelectedTab == tabPageAnimators)
+				{
+					subfilesList = animatorsList;
+				}
+				else if (tabControlAssets.SelectedTab == tabPageImages)
+				{
+					subfilesList = imagesList;
+				}
+				else if (tabControlAssets.SelectedTab == tabPageSounds)
+				{
+					subfilesList = soundsList;
+				}
+				else if (tabControlAssets.SelectedTab == tabPageMaterials)
+				{
+					subfilesList = materialsList;
+				}
+				else if (tabControlAssets.SelectedTab == tabPageOthers)
+				{
+					subfilesList = othersList;
+				}
+				if (subfilesList.SelectedItems.Count != 1)
+				{
+					return;
+				}
+				ListViewItem item = subfilesList.SelectedItems[0];
+				using (FormPPRename renameForm = new FormPPRename(item))
+				{
+					if (renameForm.ShowDialog() == DialogResult.OK)
+					{
+						Animator anim = item.Tag as Animator;
+						bool vAnimator = Editor.VirtualAnimators.Contains(anim);
+						int componentIdx = Editor.Parser.Cabinet.Components.IndexOf(vAnimator ? anim.m_GameObject.asset : (Component)item.Tag);
+
+						string oldName = item.Text;
+						if (!vAnimator)
+						{
+							oldName += Editor.Parser.Cabinet.Components[componentIdx].pathID;
+						}
+						if ((bool)Gui.Scripting.RunScript(EditorVar + ".SetAssetName(componentIndex=" + componentIdx + ", name=\"" + renameForm.NewName + "\")"))
+						{
+							if (tabControlAssets.SelectedTab == tabPageAnimators)
+							{
+								string newName = renameForm.NewName;
+								if (!vAnimator)
+								{
+									newName += Editor.Parser.Cabinet.Components[componentIdx].pathID;
+								}
+								if (ChildParserVars.ContainsKey(oldName))
+								{
+									string value = ChildParserVars[oldName];
+									ChildParserVars.Remove(oldName);
+									ChildParserVars.Add(newName, value);
+								}
+
+								if (ChildForms.ContainsKey(oldName))
+								{
+									DockContent value = ChildForms[oldName];
+									ChildForms.Remove(oldName);
+									ChildForms.Add(newName, value);
+									value.Tag = newName;
+									value.Text = renameForm.NewName;
+									value.ToolTipText = Editor.Parser.FilePath + @"\" + renameForm.NewName;
+								}
+							}
+							Changed = Changed;
+
+							InitSubfileLists(false);
+						}
+						else
+						{
+							Report.ReportLog(((Component)item.Tag).classID1 + " asset could not be renamed.");
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
 		private void keepBackupToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
 		{
 			Properties.Settings.Default["KeepBackupOfUnity3d"] = keepBackupToolStripMenuItem.Checked;
@@ -1093,62 +1198,97 @@ namespace UnityPlugin
 
 		private void backupExtensionToolStripEditTextBox_AfterEditTextChanged(object sender, EventArgs e)
 		{
-			Properties.Settings.Default["BackupExtensionUnity3d"] = backupExtensionToolStripEditTextBox.Text;
+			ToolStripEditTextBox backupExtTextBox = (ToolStripEditTextBox)sender;
+			string backupExt;
+			if (backupExtTextBox == backupExtension1ToolStripEditTextBox)
+			{
+				backupExt = "Unity3d";
+			}
+			else if (backupExtTextBox == backupExtension2ToolStripEditTextBox)
+			{
+				backupExt = "Assets";
+			}
+			else
+			{
+				backupExt = "None";
+			}
+			Properties.Settings.Default["BackupExtension" + backupExt] = backupExtTextBox.Text;
 		}
 
 		private void filterIncludedAssetsToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
 		{
-			if (filterIncludedAssetsToolStripMenuItem.Checked)
+			try
 			{
-				tabControlAssets.TabPages.Remove(tabPageFiltered);
-				assetListViews.Remove(filteredList);
-			}
-			else
-			{
-				tabControlAssets.TabPages.Add(tabPageFiltered);
-				assetListViews.Add(filteredList);
-			}
+				if (filterIncludedAssetsToolStripMenuItem.Checked)
+				{
+					tabControlAssets.TabPages.Remove(tabPageFiltered);
+					assetListViews.Remove(filteredList);
+				}
+				else
+				{
+					tabControlAssets.TabPages.Add(tabPageFiltered);
+					assetListViews.Add(filteredList);
+				}
 
-			InitSubfileLists(false);
+				InitSubfileLists(false);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
 		}
 
 		private void dumpAssetBundleToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			Editor.Parser.Cabinet.Bundle.Dump();
+			try
+			{
+				Editor.Parser.Cabinet.Bundle.Dump();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
 		}
 
 		private void dumpTypeToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			ListView subfilesList = null;
-			if (tabControlAssets.SelectedTab == tabPageImages)
+			try
 			{
-				subfilesList = imagesList;
+				ListView subfilesList = null;
+				if (tabControlAssets.SelectedTab == tabPageImages)
+				{
+					subfilesList = imagesList;
+				}
+				else if (tabControlAssets.SelectedTab == tabPageSounds)
+				{
+					subfilesList = soundsList;
+				}
+				else if (tabControlAssets.SelectedTab == tabPageMaterials)
+				{
+					subfilesList = materialsList;
+				}
+				else if (tabControlAssets.SelectedTab == tabPageOthers)
+				{
+					subfilesList = othersList;
+				}
+				else if (tabControlAssets.SelectedTab == tabPageFiltered)
+				{
+					subfilesList = filteredList;
+				}
+				HashSet<UnityClassID> selectedClasses = new HashSet<UnityClassID>();
+				foreach (ListViewItem item in subfilesList.SelectedItems)
+				{
+					Component asset = (Component)item.Tag;
+					selectedClasses.Add(asset.classID1);
+				}
+				foreach (UnityClassID cls in selectedClasses)
+				{
+					Editor.Parser.Cabinet.DumpType(cls);
+				}
 			}
-			else if (tabControlAssets.SelectedTab == tabPageSounds)
+			catch (Exception ex)
 			{
-				subfilesList = soundsList;
-			}
-			else if (tabControlAssets.SelectedTab == tabPageMaterials)
-			{
-				subfilesList = materialsList;
-			}
-			else if (tabControlAssets.SelectedTab == tabPageOthers)
-			{
-				subfilesList = othersList;
-			}
-			else if (tabControlAssets.SelectedTab == tabPageFiltered)
-			{
-				subfilesList = filteredList;
-			}
-			HashSet<UnityClassID> selectedClasses = new HashSet<UnityClassID>();
-			foreach (ListViewItem item in subfilesList.SelectedItems)
-			{
-				Component asset = (Component)item.Tag;
-				selectedClasses.Add(asset.classID1);
-			}
-			foreach (UnityClassID cls in selectedClasses)
-			{
-				Editor.Parser.Cabinet.DumpType(cls);
+				Utility.ReportException(ex);
 			}
 		}
 

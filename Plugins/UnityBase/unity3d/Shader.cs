@@ -64,7 +64,7 @@ namespace UnityPlugin
 			writer.Write(m_Dependencies.Count);
 			for (int i = 0; i < m_Dependencies.Count; i++)
 			{
-				file.WritePPtr(m_Dependencies[i].asset, !(m_Dependencies[i].asset is Shader), stream);
+				m_Dependencies[i].WriteTo(stream);
 			}
 
 			writer.Write(m_ShaderIsBaked);

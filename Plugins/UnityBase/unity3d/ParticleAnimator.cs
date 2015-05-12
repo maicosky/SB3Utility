@@ -61,7 +61,7 @@ namespace UnityPlugin
 		public void WriteTo(Stream stream)
 		{
 			BinaryWriter writer = new BinaryWriter(stream);
-			file.WritePPtr(m_GameObject.asset, false, stream);
+			m_GameObject.WriteTo(stream);
 			writer.Write(Does_Animate_Color);
 			writer.Write(new byte[3]);
 			writer.Write(colorAnimation);

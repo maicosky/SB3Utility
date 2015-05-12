@@ -29,9 +29,16 @@ namespace UnityPlugin
 		{
 			get
 			{
-				return m_GameObject.instance != null
-					? m_GameObject.instance.FindLinkedComponent(UnityClassID.Transform)
-					: null;
+				if (m_GameObject.instance == null)
+				{
+					return null;
+				}
+				Transform rootTransform = m_GameObject.instance.FindLinkedComponent(UnityClassID.Transform);
+				while (rootTransform.Parent != null)
+				{
+					rootTransform = rootTransform.Parent;
+				}
+				return rootTransform;
 			}
 		}
 
@@ -77,11 +84,11 @@ namespace UnityPlugin
 		public void WriteTo(Stream stream)
 		{
 			BinaryWriter writer = new BinaryWriter(stream);
-			file.WritePPtr(m_GameObject.asset, false, stream);
+			m_GameObject.WriteTo(stream);
 			writer.Write(m_Enabled);
 			writer.Write(new byte[3]);
-			file.WritePPtr(m_Avatar.asset, false, stream);
-			file.WritePPtr(m_Controller.asset, false, stream);
+			m_Avatar.WriteTo(stream);
+			m_Controller.WriteTo(stream);
 			writer.Write(m_CullingMode);
 			writer.Write(m_UpdateMode);
 			writer.Write(m_ApplyRootMotion);

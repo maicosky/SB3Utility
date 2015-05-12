@@ -1,4 +1,20 @@
-﻿[1.0.10]
+﻿[1.0.11]
+  - UnityPlugin Update Only
+  - Fix for virtual Animators being unopenable
+  - Files without extension are treated like *.assets, all three backup extensions are editable
+  - Meshes (and their morphs) are exported by reference to allow duplicate names
+  - Fix for morphs from MQOs always adding morph keyframes
+  - Avatars for (virtual) Animators
+  - Fix for meshes with non-unique Transforms in the skeleton
+  - Fix for TextAssets: replace retains original line end, export with CR-LF always
+  - Fix for external assets: Meshes, Shaders
+  - Partial fix in AssetBundle for virtual Animators: dependencies of MonoBehaviours aren't put into PreloadTable
+  - Fix for all names: encoding set to UTF-8
+  - Fix for unknown childs of Transforms
+  - Fix for setting a Material's texture slot to "none"
+  - Added "Rename" for (loadable) Assets
+
+[1.0.10]
   - UnityPlugin Update Only
   - All MonoBehaviours are handled according to their type definition
   - Removed static script functions: ExportMonoBehaviour, ReplaceMonoBehaviour, added both to Unity3dEditor class

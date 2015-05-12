@@ -322,9 +322,19 @@ namespace SB3Utility
 
 		static void OpenFile(string path, List<object> results)
 		{
-			for (int extIdx = 0; (extIdx = path.IndexOf('.', extIdx)) > 0; extIdx++)
+			string pathToParse = path;
+			int lastSlashPos = path.LastIndexOf('\\');
+			if (lastSlashPos == -1)
 			{
-				string ext = path.Substring(extIdx).ToLowerInvariant();
+				lastSlashPos = 0;
+			}
+			if (path.IndexOf('.', lastSlashPos) == -1)
+			{
+				pathToParse += '.';
+			}
+			for (int extIdx = 0; (extIdx = pathToParse.IndexOf('.', extIdx)) > 0; extIdx++)
+			{
+				string ext = pathToParse.Substring(extIdx).ToLowerInvariant();
 				List<string> functions;
 				if (PluginManager.OpensFile.TryGetValue(ext, out functions))
 				{

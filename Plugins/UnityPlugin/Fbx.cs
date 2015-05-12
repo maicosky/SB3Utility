@@ -10,12 +10,12 @@ namespace UnityPlugin
 	public static partial class Plugins
 	{
 		[Plugin]
-		public static void ExportFbx([DefaultVar]Animator animator, object[] meshNames, object[] animationParsers, int startKeyframe, int endKeyframe, bool linear, bool EulerFilter, double filterPrecision, string path, string exportFormat, bool allFrames, bool allBones, bool skins, bool compatibility)
+		public static void ExportFbx([DefaultVar]Animator animator, object[] meshes, object[] animationParsers, int startKeyframe, int endKeyframe, bool linear, bool EulerFilter, double filterPrecision, string path, string exportFormat, bool allFrames, bool allBones, bool skins, bool compatibility)
 		{
-			string[] meshNameArray = Utility.Convert<string>(meshNames);
-			List<MeshRenderer> sMeshes = meshNames != null ? Operations.FindMeshes(animator.RootTransform, new HashSet<string>(meshNameArray)) : null;
+			MeshRenderer[] meshArray = Utility.Convert<MeshRenderer>(meshes);
+			List<MeshRenderer> meshList = new List<MeshRenderer>(meshArray);
 
-			UnityConverter imp = new UnityConverter(animator, sMeshes, skins, false);
+			UnityConverter imp = new UnityConverter(animator, meshList, skins, false);
 
 			FbxUtility.Export(path, imp, startKeyframe, endKeyframe, linear, EulerFilter, (float)filterPrecision, exportFormat, allFrames, allBones, skins, compatibility);
 		}
@@ -57,11 +57,11 @@ namespace UnityPlugin
 		}
 
 		[Plugin]
-		public static void ExportMorphFbx([DefaultVar]Animator animator, object[] meshNames, string path, string exportFormat, bool oneBlendShape, bool compatibility)
+		public static void ExportMorphFbx([DefaultVar]Animator animator, object[] meshes, string path, string exportFormat, bool oneBlendShape, bool compatibility)
 		{
-			HashSet<string> meshNamesSet = new HashSet<string>(Utility.Convert<string>(meshNames));
-			List<MeshRenderer> sMeshList = Operations.FindMeshes(animator.RootTransform, meshNamesSet);
-			UnityConverter imp = new UnityConverter(animator, sMeshList, false, true);
+			MeshRenderer[] meshArray = Utility.Convert<MeshRenderer>(meshes);
+			List<MeshRenderer> meshList = new List<MeshRenderer>(meshArray);
+			UnityConverter imp = new UnityConverter(animator, meshList, false, true);
 
 			FbxUtility.ExportMorph(path, imp, exportFormat, oneBlendShape, compatibility);
 		}
@@ -115,7 +115,7 @@ namespace UnityPlugin
 				AnimationList = new List<ImportedAnimation>();
 			}
 
-			public UnityConverter(Animator animator, List<MeshRenderer> sMeshes, bool skins, bool morphs)
+			public UnityConverter(Animator animator, List<MeshRenderer> meshList, bool skins, bool morphs)
 			{
 				ConvertFrames(animator.RootTransform, null);
 
@@ -124,7 +124,7 @@ namespace UnityPlugin
 					avatar = animator.m_Avatar.instance;
 				}
 
-				ConvertMeshRenderers(sMeshes, skins, morphs);
+				ConvertMeshRenderers(meshList, skins, morphs);
 				AnimationList = new List<ImportedAnimation>();
 			}
 
@@ -177,7 +177,8 @@ namespace UnityPlugin
 					}
 
 					ImportedMesh iMesh = new ImportedMesh();
-					iMesh.Name = meshR.m_GameObject.instance.m_Name;
+					Transform meshTransform = meshR.m_GameObject.instance.FindLinkedComponent(UnityClassID.Transform);
+					iMesh.Name = meshTransform.GetTransformPath();
 					iMesh.SubmeshList = new List<ImportedSubmesh>(mesh.m_SubMeshes.Count);
 					using (BinaryReader vertReader = new BinaryReader(new MemoryStream(mesh.m_VertexData.m_DataSize)),
 						indexReader = new BinaryReader(new MemoryStream(mesh.m_IndexBuffer)))
@@ -295,7 +296,7 @@ namespace UnityPlugin
 					if (morphs && mesh.m_Shapes.shapes.Count > 0)
 					{
 						ImportedMorph morph = new ImportedMorph();
-						morph.Name = meshR.m_GameObject.instance.m_Name;
+						morph.Name = iMesh.Name;
 						morph.ClipName = Operations.BlendShapeName(mesh);
 						morph.KeyframeList = new List<ImportedMorphKeyframe>(mesh.m_Shapes.shapes.Count);
 						List<ImportedVertex> vertList = iMesh.SubmeshList[0].VertexList;

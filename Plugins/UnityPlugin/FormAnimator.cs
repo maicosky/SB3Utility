@@ -217,6 +217,11 @@ namespace UnityPlugin
 		{
 			DisposeRenderObjects();
 
+			if (Gui.Docking.DockRenderer.IsHidden)
+			{
+				return;
+			}
+
 			renderObjectMeshes = new List<RenderObjectUnity>(new RenderObjectUnity[Editor.Meshes.Count]);
 			renderObjectIds = new List<int>(Editor.Meshes.Count);
 			for (int i = 0; i < Editor.Meshes.Count; i++)
@@ -228,7 +233,8 @@ namespace UnityPlugin
 			{
 				int id = (int)item.Tag;
 				MeshRenderer meshR = Editor.Meshes[id];
-				HashSet<string> meshNames = new HashSet<string>() { meshR.m_GameObject.instance.m_Name };
+				Transform meshTransform = meshR.m_GameObject.instance.FindLinkedComponent(UnityClassID.Transform);
+				HashSet<string> meshNames = new HashSet<string>() { meshTransform.GetTransformPath() };
 				renderObjectMeshes[id] = new RenderObjectUnity(Editor, meshNames);
 
 				RenderObjectUnity renderObj = renderObjectMeshes[id];
@@ -251,18 +257,27 @@ namespace UnityPlugin
 
 		void DisposeRenderObjects()
 		{
-			foreach (ListViewItem item in listViewMesh.SelectedItems)
+			if (renderObjectIds != null)
 			{
-				Gui.Renderer.RemoveRenderObject(renderObjectIds[(int)item.Tag]);
-				renderObjectIds[(int)item.Tag] = -1;
+				foreach (ListViewItem item in listViewMesh.SelectedItems)
+				{
+					if (renderObjectIds.Count > (int)item.Tag && renderObjectIds[(int)item.Tag] >= 0)
+					{
+						Gui.Renderer.RemoveRenderObject(renderObjectIds[(int)item.Tag]);
+						renderObjectIds[(int)item.Tag] = -1;
+					}
+				}
 			}
 
-			for (int i = 0; i < renderObjectMeshes.Count; i++)
+			if (renderObjectMeshes != null)
 			{
-				if (renderObjectMeshes[i] != null)
+				for (int i = 0; i < renderObjectMeshes.Count; i++)
 				{
-					renderObjectMeshes[i].Dispose();
-					renderObjectMeshes[i] = null;
+					if (renderObjectMeshes[i] != null)
+					{
+						renderObjectMeshes[i].Dispose();
+						renderObjectMeshes[i] = null;
+					}
 				}
 			}
 		}
@@ -333,6 +348,9 @@ namespace UnityPlugin
 			ColumnSubmeshMaterial.ValueMember = "Item2";
 			ColumnSubmeshMaterial.DefaultCellStyle.NullValue = "(invalid)";
 
+			comboBoxAvatar.DisplayMember = "Item1";
+			comboBoxAvatar.ValueMember = "Item2";
+
 			comboBoxMeshRendererMesh.DisplayMember = "Item1";
 			comboBoxMeshRendererMesh.ValueMember = "Item2";
 
@@ -380,11 +398,14 @@ namespace UnityPlugin
 		{
 			if (!refreshLists)
 			{
-				renderObjectMeshes = new List<RenderObjectUnity>(new RenderObjectUnity[Editor.Meshes.Count]);
-				renderObjectIds = new List<int>(Editor.Meshes.Count);
-				for (int i = 0; i < Editor.Meshes.Count; i++)
+				if (!Gui.Docking.DockRenderer.IsHidden)
 				{
-					renderObjectIds.Add(-1);
+					renderObjectMeshes = new List<RenderObjectUnity>(new RenderObjectUnity[Editor.Meshes.Count]);
+					renderObjectIds = new List<int>(Editor.Meshes.Count);
+					for (int i = 0; i < Editor.Meshes.Count; i++)
+					{
+						renderObjectIds.Add(-1);
+					}
 				}
 			}
 
@@ -472,6 +493,50 @@ namespace UnityPlugin
 						treeViewObjectTree.SelectedNode = newNode;
 					}
 				}
+			}
+
+			comboBoxAvatar.Items.Clear();
+			comboBoxAvatar.Items.Add(new Tuple<string, Component>("(none)", null));
+			try
+			{
+				Editor.Parser.file.BeginLoadingSkippedComponents();
+				for (int i = 0; i < Editor.Parser.file.Components.Count; i++)
+				{
+					Component asset = Editor.Parser.file.Components[i];
+					if (asset.classID1 == UnityClassID.Avatar)
+					{
+						string assetName;
+						if (asset is NotLoaded)
+						{
+							if (((NotLoaded)asset).Name != null)
+							{
+								assetName = ((NotLoaded)asset).Name;
+							}
+							else
+							{
+								Editor.Parser.file.SourceStream.Position = ((NotLoaded)asset).offset;
+								assetName = Avatar.LoadName(Editor.Parser.file.SourceStream);
+								((NotLoaded)asset).Name = assetName;
+							}
+						}
+						else
+						{
+							assetName = ((Avatar)asset).m_Name;
+						}
+						comboBoxAvatar.Items.Add
+						(
+							new Tuple<string, Component>
+							(
+								asset.pathID + " " + assetName,
+								asset
+							)
+						);
+					}
+				}
+			}
+			finally
+			{
+				Editor.Parser.file.EndLoadingSkippedComponents();
 			}
 		}
 
@@ -868,7 +933,29 @@ namespace UnityPlugin
 			else
 			{
 				Transform frame = Editor.Frames[id];
-				labelTransformName.Text = id > 0 ? "Transform Name" : "Animator Name";
+				comboBoxAvatar.SelectedIndexChanged -= comboBoxAvatar_SelectedIndexChanged;
+				if (id != 0 && frame.m_GameObject.instance.FindLinkedComponent(UnityClassID.Animator) == null)
+				{
+					labelTransformName.Text = "Transform Name";
+					comboBoxAvatar.SelectedIndex = -1;
+					comboBoxAvatar.Enabled = false;
+				}
+				else
+				{
+					labelTransformName.Text = "Animator Name";
+					comboBoxAvatar.SelectedIndex = -1;
+					for (int i = 0; i < comboBoxAvatar.Items.Count; i++)
+					{
+						Tuple<string, Component> item = (Tuple<string, Component>)comboBoxAvatar.Items[i];
+						if (item.Item2 == Editor.Parser.m_Avatar.instance)
+						{
+							comboBoxAvatar.SelectedIndex = i;
+							break;
+						}
+					}
+					comboBoxAvatar.Enabled = true;
+				}
+				comboBoxAvatar.SelectedIndexChanged += comboBoxAvatar_SelectedIndexChanged;
 				textBoxFrameName.Text = frame.m_GameObject.instance.m_Name;
 				DataGridViewEditor.LoadMatrix(frame.m_LocalScale, frame.m_LocalRotation, frame.m_LocalPosition, dataGridViewFrameSRT, dataGridViewFrameMatrix);
 			}
@@ -983,6 +1070,27 @@ namespace UnityPlugin
 				}
 				else
 				{
+					PPtr<Mesh> meshPtr = null;
+					if (meshR is SkinnedMeshRenderer)
+					{
+						SkinnedMeshRenderer sMesh = (SkinnedMeshRenderer)meshR;
+						if (sMesh.m_Mesh.m_FileID != 0)
+						{
+							meshPtr = sMesh.m_Mesh;
+						}
+					}
+					else
+					{
+						MeshFilter filter = meshR.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshFilter);
+						if (filter.m_Mesh.m_FileID != 0)
+						{
+							meshPtr = filter.m_Mesh;
+						}
+					}
+					if (meshPtr != null)
+					{
+						editTextBoxMeshName.Text = "External Mesh FileID=" + meshPtr.m_FileID + " PathID=" + meshPtr.m_PathID;
+					}
 					comboBoxMeshRendererMesh.SelectedIndex = 0;
 				}
 			}
@@ -1034,6 +1142,10 @@ namespace UnityPlugin
 				if (mat.m_Shader.asset != null)
 				{
 					editTextBoxMatShader.Text = AssetCabinet.ToString(mat.m_Shader.asset);
+				}
+				else if (mat.m_Shader.m_FileID != 0)
+				{
+					editTextBoxMatShader.Text = "External Shader FileID=" + mat.m_Shader.m_FileID + " PathID=" + mat.m_Shader.m_PathID;
 				}
 				if (mat.m_ShaderKeywords.Count > 0)
 				{
@@ -1723,11 +1835,14 @@ namespace UnityPlugin
 
 		private void HighlightBone(int[] boneIds, bool show)
 		{
-			RenderObjectUnity renderObj = renderObjectMeshes[boneIds[0]];
-			if (renderObj != null)
+			if (renderObjectMeshes != null && renderObjectMeshes.Count > boneIds[0])
 			{
-				renderObj.HighlightBone(Editor.Meshes[boneIds[0]], boneIds[1], show);
-				Gui.Renderer.Render();
+				RenderObjectUnity renderObj = renderObjectMeshes[boneIds[0]];
+				if (renderObj != null)
+				{
+					renderObj.HighlightBone(Editor.Meshes[boneIds[0]], boneIds[1], show);
+					Gui.Renderer.Render();
+				}
 			}
 		}
 
@@ -2512,6 +2627,29 @@ namespace UnityPlugin
 			}
 		}
 
+		private void comboBoxAvatar_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			try
+			{
+				Tuple<string, Component> item = (Tuple<string, Component>)comboBoxAvatar.SelectedItem;
+				int componentIndex = Editor.Parser.file.Components.IndexOf(item.Item2);
+				Gui.Scripting.RunScript(EditorVar + ".LoadAndSetAvatar(componentIndex=" + componentIndex + ")");
+
+				if (item.Item2 is NotLoaded)
+				{
+					Avatar avatar = (Avatar)((NotLoaded)item.Item2).replacement;
+					comboBoxAvatar.SelectedIndexChanged -= comboBoxAvatar_SelectedIndexChanged;
+					comboBoxAvatar.Items[comboBoxAvatar.SelectedIndex] = new Tuple<string, Component>(item.Item1, avatar);
+					comboBoxAvatar.SelectedIndexChanged += comboBoxAvatar_SelectedIndexChanged;
+				}
+				Changed = Changed;
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
 		private void buttonFrameMoveUp_Click(object sender, EventArgs e)
 		{
 			try
@@ -3136,19 +3274,21 @@ namespace UnityPlugin
 						CrossRefAddItem(crossRefMeshMaterials[id], crossRefMeshMaterialsCount, listViewMeshMaterial, listViewMaterial);
 						CrossRefAddItem(crossRefMeshTextures[id], crossRefMeshTexturesCount, listViewMeshTexture, listViewTexture);
 
-						if (renderObjectMeshes[id] == null)
-						{
-							MeshRenderer meshR = Editor.Meshes[id];
-							HashSet<string> meshNames = new HashSet<string>() { meshR.m_GameObject.instance.m_Name };
-							renderObjectMeshes[id] = new RenderObjectUnity(Editor, meshNames);
-						}
-						RenderObjectUnity renderObj = renderObjectMeshes[id];
-						if (renderObjectIds[id] == -1)
-						{
-							renderObjectIds[id] = Gui.Renderer.AddRenderObject(renderObj);
-						}
 						if (!Gui.Docking.DockRenderer.IsHidden)
 						{
+							if (renderObjectMeshes[id] == null)
+							{
+								MeshRenderer meshR = Editor.Meshes[id];
+								Transform meshTransform = meshR.m_GameObject.instance.FindLinkedComponent(UnityClassID.Transform);
+								HashSet<string> meshNames = new HashSet<string>() { meshTransform.GetTransformPath() };
+								renderObjectMeshes[id] = new RenderObjectUnity(Editor, meshNames);
+							}
+							RenderObjectUnity renderObj = renderObjectMeshes[id];
+							if (renderObjectIds[id] == -1)
+							{
+								renderObjectIds[id] = Gui.Renderer.AddRenderObject(renderObj);
+							}
+
 							Gui.Docking.DockRenderer.Enabled = false;
 							Gui.Docking.DockRenderer.Activate();
 							Gui.Docking.DockRenderer.Enabled = true;
@@ -3167,8 +3307,11 @@ namespace UnityPlugin
 						CrossRefRemoveItem(crossRefMeshMaterials[id], crossRefMeshMaterialsCount, listViewMeshMaterial);
 						CrossRefRemoveItem(crossRefMeshTextures[id], crossRefMeshTexturesCount, listViewMeshTexture);
 
-						Gui.Renderer.RemoveRenderObject(renderObjectIds[id]);
-						renderObjectIds[id] = -1;
+						if (renderObjectIds != null && renderObjectIds.Count > id && renderObjectIds[id] >= 0)
+						{
+							Gui.Renderer.RemoveRenderObject(renderObjectIds[id]);
+							renderObjectIds[id] = -1;
+						}
 					}
 
 					CrossRefSetSelected(e.IsSelected, listViewMesh, id);
@@ -3265,14 +3408,14 @@ namespace UnityPlugin
 			{
 				DirectoryInfo dir = new DirectoryInfo(exportDir);
 
-				string meshNames = String.Empty;
+				StringBuilder meshes = new StringBuilder(1000);
 				if (!checkBoxMeshExportNoMesh.Checked)
 				{
 					if (listViewMesh.SelectedItems.Count > 0)
 					{
 						for (int i = 0; i < listViewMesh.SelectedItems.Count; i++)
 						{
-							meshNames += "\"" + Editor.Meshes[(int)listViewMesh.SelectedItems[i].Tag].m_GameObject.instance.m_Name + "\", ";
+							meshes.Append(EditorVar).Append(".Meshes[").Append((int)listViewMesh.SelectedItems[i].Tag).Append("], ");
 						}
 					}
 					else
@@ -3285,14 +3428,16 @@ namespace UnityPlugin
 
 						for (int i = 0; i < listViewMesh.Items.Count; i++)
 						{
-							meshNames += "\"" + Editor.Meshes[(int)listViewMesh.Items[i].Tag].m_GameObject.instance.m_Name + "\", ";
+							meshes.Append(EditorVar).Append(".Meshes[").Append((int)listViewMesh.Items[i].Tag).Append("], ");
 						}
 					}
-					meshNames = "{ " + meshNames.Substring(0, meshNames.Length - 2) + " }";
+					meshes.Insert(0, "{ ");
+					meshes.Length -= 2;
+					meshes.Append(" }");
 				}
 				else
 				{
-					meshNames = "null";
+					meshes.Append("null");
 				}
 
 				Report.ReportLog("Started exporting to " + comboBoxMeshExportFormat.SelectedItem + " format...");
@@ -3307,22 +3452,22 @@ namespace UnityPlugin
 				switch ((MeshExportFormat)comboBoxMeshExportFormat.SelectedIndex)
 				{
 				case MeshExportFormat.Mqo:
-					Gui.Scripting.RunScript("ExportMqo(parser=" + ParserVar + ", meshNames=" + meshNames + ", dirPath=\"" + dir.FullName + "\", singleMqo=" + checkBoxMeshExportMqoSingleFile.Checked + ", worldCoords=" + checkBoxMeshExportMqoWorldCoords.Checked + ", sortMeshes=" + checkBoxMeshExportMqoSortMeshes.Checked + ")");
+					Gui.Scripting.RunScript("ExportMqo(parser=" + ParserVar + ", meshes=" + meshes + ", dirPath=\"" + dir.FullName + "\", singleMqo=" + checkBoxMeshExportMqoSingleFile.Checked + ", worldCoords=" + checkBoxMeshExportMqoWorldCoords.Checked + ", sortMeshes=" + checkBoxMeshExportMqoSortMeshes.Checked + ")");
 					break;
 				case MeshExportFormat.ColladaFbx:
-					Gui.Scripting.RunScript("ExportFbx(animator=" + ParserVar + ", meshNames=" + meshNames + ", animationParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + (bool)Gui.Config["FbxExportAnimationEulerFilter"] + ", filterPrecision=" + ((float)Gui.Config["FbxExportAnimationFilterPrecision"]).ToFloatString() + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".dae") + "\", exportFormat=\".dae\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", allBones=" + checkBoxMeshExportAllBones.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", compatibility=" + false + ")");
+					Gui.Scripting.RunScript("ExportFbx(animator=" + ParserVar + ", meshes=" + meshes + ", animationParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + (bool)Gui.Config["FbxExportAnimationEulerFilter"] + ", filterPrecision=" + ((float)Gui.Config["FbxExportAnimationFilterPrecision"]).ToFloatString() + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".dae") + "\", exportFormat=\".dae\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", allBones=" + checkBoxMeshExportAllBones.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", compatibility=" + false + ")");
 					break;
 				case MeshExportFormat.Fbx:
-					Gui.Scripting.RunScript("ExportFbx(animator=" + ParserVar + ", meshNames=" + meshNames + ", animationParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + (bool)Gui.Config["FbxExportAnimationEulerFilter"] + ", filterPrecision=" + ((float)Gui.Config["FbxExportAnimationFilterPrecision"]).ToFloatString() + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".fbx") + "\", exportFormat=\".fbx\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", allBones=" + checkBoxMeshExportAllBones.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", compatibility=" + false + ")");
+					Gui.Scripting.RunScript("ExportFbx(animator=" + ParserVar + ", meshes=" + meshes + ", animationParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + (bool)Gui.Config["FbxExportAnimationEulerFilter"] + ", filterPrecision=" + ((float)Gui.Config["FbxExportAnimationFilterPrecision"]).ToFloatString() + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".fbx") + "\", exportFormat=\".fbx\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", allBones=" + checkBoxMeshExportAllBones.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", compatibility=" + false + ")");
 					break;
 				case MeshExportFormat.Fbx_2006:
-					Gui.Scripting.RunScript("ExportFbx(animator=" + ParserVar + ", meshNames=" + meshNames + ", animationParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + (bool)Gui.Config["FbxExportAnimationEulerFilter"] + ", filterPrecision=" + ((float)Gui.Config["FbxExportAnimationFilterPrecision"]).ToFloatString() + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".fbx") + "\", exportFormat=\".fbx\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", allBones=" + checkBoxMeshExportAllBones.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", compatibility=" + true + ")");
+					Gui.Scripting.RunScript("ExportFbx(animator=" + ParserVar + ", meshes=" + meshes + ", animationParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + (bool)Gui.Config["FbxExportAnimationEulerFilter"] + ", filterPrecision=" + ((float)Gui.Config["FbxExportAnimationFilterPrecision"]).ToFloatString() + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".fbx") + "\", exportFormat=\".fbx\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", allBones=" + checkBoxMeshExportAllBones.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", compatibility=" + true + ")");
 					break;
 				case MeshExportFormat.Dxf:
-					Gui.Scripting.RunScript("ExportFbx(animator=" + ParserVar + ", meshNames=" + meshNames + ", animationParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + (bool)Gui.Config["FbxExportAnimationEulerFilter"] + ", filterPrecision=" + ((float)Gui.Config["FbxExportAnimationFilterPrecision"]).ToFloatString() + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".dxf") + "\", exportFormat=\".dxf\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", allBones=" + checkBoxMeshExportAllBones.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", compatibility=" + false + ")");
+					Gui.Scripting.RunScript("ExportFbx(animator=" + ParserVar + ", meshes=" + meshes + ", animationParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + (bool)Gui.Config["FbxExportAnimationEulerFilter"] + ", filterPrecision=" + ((float)Gui.Config["FbxExportAnimationFilterPrecision"]).ToFloatString() + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".dxf") + "\", exportFormat=\".dxf\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", allBones=" + checkBoxMeshExportAllBones.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", compatibility=" + false + ")");
 					break;
 				case MeshExportFormat.Obj:
-					Gui.Scripting.RunScript("ExportFbx(animator=" + ParserVar + ", meshNames=" + meshNames + ", animationParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + (bool)Gui.Config["FbxExportAnimationEulerFilter"] + ", filterPrecision=" + ((float)Gui.Config["FbxExportAnimationFilterPrecision"]).ToFloatString() + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".obj") + "\", exportFormat=\".obj\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", allBones=" + checkBoxMeshExportAllBones.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", compatibility=" + false + ")");
+					Gui.Scripting.RunScript("ExportFbx(animator=" + ParserVar + ", meshes=" + meshes + ", animationParsers=" + xaVars + ", startKeyframe=" + startKeyframe + ", endKeyframe=" + endKeyframe + ", linear=" + linear + ", EulerFilter=" + (bool)Gui.Config["FbxExportAnimationEulerFilter"] + ", filterPrecision=" + ((float)Gui.Config["FbxExportAnimationFilterPrecision"]).ToFloatString() + ", path=\"" + Utility.GetDestFile(dir, "meshes", ".obj") + "\", exportFormat=\".obj\", allFrames=" + checkBoxMeshExportFbxAllFrames.Checked + ", allBones=" + checkBoxMeshExportAllBones.Checked + ", skins=" + checkBoxMeshExportFbxSkins.Checked + ", compatibility=" + false + ")");
 					break;
 				default:
 					throw new Exception("Unexpected ExportFormat");
@@ -3345,7 +3490,7 @@ namespace UnityPlugin
 			{
 				if (loadedMesh >= 0)
 				{
-					TreeNode node = FindFrameNode(Editor.Meshes[loadedMesh].m_GameObject.instance.m_Name, treeViewObjectTree.Nodes);
+					TreeNode node = FindFrameNode(Editor.Meshes[loadedMesh].m_GameObject.instance.FindLinkedComponent(UnityClassID.Transform), treeViewObjectTree.Nodes);
 					if (node != null)
 					{
 						tabControlLists.SelectedTab = tabPageObject;
@@ -3455,7 +3600,7 @@ namespace UnityPlugin
 					return;
 				}
 
-				using (var attributesDialog = new FormRendererMeshAttributes(Editor.Meshes[loadedMesh]))
+				using (var attributesDialog = new FormRendererMeshAttributes(Editor.Meshes[loadedMesh], dataGridViewMesh.SelectedRows.Count > 0 ? dataGridViewMesh.SelectedRows[0].Index : -1))
 				{
 					if (attributesDialog.ShowDialog() == DialogResult.OK)
 					{
@@ -3902,20 +4047,17 @@ namespace UnityPlugin
 					meshNode = meshNode.Parent;
 				}
 				SkinnedMeshRenderer sMesh = (SkinnedMeshRenderer)meshNode.Tag;
-				HashSet<string> meshNames = new HashSet<string>();
-				meshNames.Add(sMesh.m_GameObject.instance.m_Name);
+				StringBuilder meshes = new StringBuilder(1000);
 				if (listViewMesh.SelectedItems.Count > 0)
 				{
-					foreach (ListViewItem meshItem in listViewMesh.SelectedItems)
+					for (int i = 0; i < listViewMesh.SelectedItems.Count; i++)
 					{
-						meshNames.Add(meshItem.Text);
+						meshes.Append(EditorVar).Append(".Meshes[").Append((int)listViewMesh.SelectedItems[i].Tag).Append("], ");
 					}
 				}
-				string meshNamesArg = String.Empty;
-				foreach (string meshName in meshNames)
-				{
-					meshNamesArg += (meshNamesArg.Length > 0 ? ", \"" : "\"") + meshName + "\"";
-				}
+				meshes.Insert(0, "{ ");
+				meshes.Length -= 2;
+				meshes.Append(" }");
 
 				string path = Editor.Parser.file.Parser.FilePath;
 				if (path.ToLower().EndsWith(".unity3d"))
@@ -3933,7 +4075,7 @@ namespace UnityPlugin
 					Mesh mesh = Operations.GetMesh(sMesh);
 					DirectoryInfo dir = new DirectoryInfo(path);
 					path = Utility.GetDestFile(dir, sMesh.m_GameObject.instance.m_Name + "-" + (mesh != null ? Operations.BlendShapeName(mesh) : "") + "-", ".fbx");
-					Gui.Scripting.RunScript("ExportMorphFbx(animator=" + ParserVar + ", path=\"" + path + "\", meshNames={" + meshNamesArg + "}, exportFormat=\"" + ".fbx" + "\", oneBlendShape=" + checkBoxMorphFbxOptionOneBlendshape.Checked + ", compatibility=" + ((MorphExportFormat)comboBoxMorphExportFormat.SelectedIndex == MorphExportFormat.Fbx_2006) + ")");
+					Gui.Scripting.RunScript("ExportMorphFbx(animator=" + ParserVar + ", path=\"" + path + "\", meshes=" + meshes + ", exportFormat=\"" + ".fbx" + "\", oneBlendShape=" + checkBoxMorphFbxOptionOneBlendshape.Checked + ", compatibility=" + ((MorphExportFormat)comboBoxMorphExportFormat.SelectedIndex == MorphExportFormat.Fbx_2006) + ")");
 					break;
 				}
 			}

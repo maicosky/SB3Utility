@@ -52,7 +52,8 @@ namespace UnityPlugin
 
 			using (BinaryWriter writer = new BinaryWriter(File.OpenWrite(path + "\\" + m_Name + "." + UnityClassID.TextAsset), System.Text.Encoding.UTF8))
 			{
-				writer.Write(System.Text.Encoding.UTF8.GetBytes(m_Script.Replace("\n", "\r\n")));
+				string script = m_Script.IndexOf('\r') == -1 ? m_Script.Replace("\n", "\r\n") : m_Script;
+				writer.Write(System.Text.Encoding.UTF8.GetBytes(script));
 				writer.BaseStream.SetLength(writer.BaseStream.Position);
 			}
 		}
@@ -63,7 +64,7 @@ namespace UnityPlugin
 			ta.m_Name = Path.GetFileNameWithoutExtension(filePath);
 			using (BinaryReader reader = new BinaryReader(File.OpenRead(filePath), System.Text.Encoding.UTF8))
 			{
-				ta.m_Script = new string(reader.ReadChars((int)reader.BaseStream.Length)).Replace("\r\n", "\n");
+				ta.m_Script = new string(reader.ReadChars((int)reader.BaseStream.Length));
 			}
 			ta.m_PathName = string.Empty;
 			return ta;

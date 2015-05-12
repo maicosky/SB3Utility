@@ -89,7 +89,7 @@ namespace UnityPlugin
 			for (int i = 0; i < m_Component.Count; i++)
 			{
 				writer.Write((int)m_Component[i].Key);
-				file.WritePPtr(m_Component[i].Value.asset, false, stream);
+				m_Component[i].Value.WriteTo(stream);
 			}
 
 			writer.Write(m_Layer);

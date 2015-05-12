@@ -80,6 +80,11 @@
 			this.checkBoxSkinnedMeshRendererUpdateWhenOffScreen = new System.Windows.Forms.CheckBox();
 			this.editTextBoxSkinnedMeshRendererQuality = new SB3Utility.EditTextBox();
 			this.label9 = new System.Windows.Forms.Label();
+			this.editTextBoxSubmeshExtend = new SB3Utility.EditTextBox();
+			this.label19 = new System.Windows.Forms.Label();
+			this.editTextBoxSubmeshCenter = new SB3Utility.EditTextBox();
+			this.label20 = new System.Windows.Forms.Label();
+			this.label21 = new System.Windows.Forms.Label();
 			this.groupBoxRenderer.SuspendLayout();
 			this.groupBoxMesh.SuspendLayout();
 			this.groupBoxSkinnedMeshRenderer.SuspendLayout();
@@ -271,7 +276,7 @@
 			// 
 			this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.buttonCancel.Location = new System.Drawing.Point(493, 343);
+			this.buttonCancel.Location = new System.Drawing.Point(493, 368);
 			this.buttonCancel.Name = "buttonCancel";
 			this.buttonCancel.Size = new System.Drawing.Size(75, 23);
 			this.buttonCancel.TabIndex = 471;
@@ -281,7 +286,7 @@
 			// buttonOK
 			// 
 			this.buttonOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.buttonOK.Location = new System.Drawing.Point(12, 343);
+			this.buttonOK.Location = new System.Drawing.Point(12, 368);
 			this.buttonOK.Name = "buttonOK";
 			this.buttonOK.Size = new System.Drawing.Size(75, 23);
 			this.buttonOK.TabIndex = 470;
@@ -293,6 +298,11 @@
 			// 
 			this.groupBoxMesh.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
+			this.groupBoxMesh.Controls.Add(this.label21);
+			this.groupBoxMesh.Controls.Add(this.editTextBoxSubmeshExtend);
+			this.groupBoxMesh.Controls.Add(this.label19);
+			this.groupBoxMesh.Controls.Add(this.editTextBoxSubmeshCenter);
+			this.groupBoxMesh.Controls.Add(this.label20);
 			this.groupBoxMesh.Controls.Add(this.editTextBoxMeshUsageFlags);
 			this.groupBoxMesh.Controls.Add(this.label18);
 			this.groupBoxMesh.Controls.Add(this.editTextBoxMeshInfluences);
@@ -314,7 +324,7 @@
 			this.groupBoxMesh.Controls.Add(this.label8);
 			this.groupBoxMesh.Location = new System.Drawing.Point(13, 225);
 			this.groupBoxMesh.Name = "groupBoxMesh";
-			this.groupBoxMesh.Size = new System.Drawing.Size(555, 112);
+			this.groupBoxMesh.Size = new System.Drawing.Size(555, 137);
 			this.groupBoxMesh.TabIndex = 272;
 			this.groupBoxMesh.TabStop = false;
 			this.groupBoxMesh.Text = "Mesh";
@@ -597,11 +607,54 @@
 			this.label9.TabIndex = 285;
 			this.label9.Text = "Quality";
 			// 
+			// editTextBoxSubmeshExtend
+			// 
+			this.editTextBoxSubmeshExtend.Location = new System.Drawing.Point(377, 105);
+			this.editTextBoxSubmeshExtend.Name = "editTextBoxSubmeshExtend";
+			this.editTextBoxSubmeshExtend.ReadOnly = true;
+			this.editTextBoxSubmeshExtend.Size = new System.Drawing.Size(155, 20);
+			this.editTextBoxSubmeshExtend.TabIndex = 304;
+			// 
+			// label19
+			// 
+			this.label19.AutoSize = true;
+			this.label19.Location = new System.Drawing.Point(333, 108);
+			this.label19.Name = "label19";
+			this.label19.Size = new System.Drawing.Size(40, 13);
+			this.label19.TabIndex = 306;
+			this.label19.Text = "Extend";
+			// 
+			// editTextBoxSubmeshCenter
+			// 
+			this.editTextBoxSubmeshCenter.Location = new System.Drawing.Point(171, 105);
+			this.editTextBoxSubmeshCenter.Name = "editTextBoxSubmeshCenter";
+			this.editTextBoxSubmeshCenter.ReadOnly = true;
+			this.editTextBoxSubmeshCenter.Size = new System.Drawing.Size(155, 20);
+			this.editTextBoxSubmeshCenter.TabIndex = 303;
+			// 
+			// label20
+			// 
+			this.label20.AutoSize = true;
+			this.label20.Location = new System.Drawing.Point(127, 108);
+			this.label20.Name = "label20";
+			this.label20.Size = new System.Drawing.Size(38, 13);
+			this.label20.TabIndex = 305;
+			this.label20.Text = "Center";
+			// 
+			// label21
+			// 
+			this.label21.AutoSize = true;
+			this.label21.Location = new System.Drawing.Point(25, 108);
+			this.label21.Name = "label21";
+			this.label21.Size = new System.Drawing.Size(96, 13);
+			this.label21.TabIndex = 307;
+			this.label21.Text = "Selected Submesh";
+			// 
 			// FormRendererMeshAttributes
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(580, 378);
+			this.ClientSize = new System.Drawing.Size(580, 403);
 			this.Controls.Add(this.groupBoxSkinnedMeshRenderer);
 			this.Controls.Add(this.groupBoxMesh);
 			this.Controls.Add(this.buttonCancel);
@@ -677,5 +730,10 @@
 		public System.Windows.Forms.CheckBox checkBoxMeshKeepVertices;
 		public System.Windows.Forms.CheckBox checkBoxMeshKeepIndices;
 		public SB3Utility.EditTextBox editTextBoxMeshUsageFlags;
+		private System.Windows.Forms.Label label21;
+		public SB3Utility.EditTextBox editTextBoxSubmeshExtend;
+		private System.Windows.Forms.Label label19;
+		public SB3Utility.EditTextBox editTextBoxSubmeshCenter;
+		private System.Windows.Forms.Label label20;
 	}
 }

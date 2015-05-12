@@ -139,12 +139,12 @@ namespace UnityPlugin
 			}
 			if (meshR != null)
 			{
-				if (meshNames.Contains(frame.m_GameObject.instance.m_Name))
+				if (meshNames.Contains(frame.GetTransformPath()))
 				{
 					Transform parent = frame;
 					while (parent != null)
 					{
-						exportFrames.Add(parent.m_GameObject.instance.m_Name);
+						exportFrames.Add(parent.GetTransformPath());
 						parent = (Transform)parent.Parent;
 					}
 
@@ -156,12 +156,12 @@ namespace UnityPlugin
 							Transform boneFrame = boneList[i].instance;
 							if (boneFrame != null && boneFrame.m_GameObject.instance != null)
 							{
-								string boneName = boneFrame.m_GameObject.instance.m_Name;
+								string boneName = boneFrame.GetTransformPath();
 								if (!exportFrames.Contains(boneName))
 								{
 									while (boneFrame != null)
 									{
-										exportFrames.Add(boneFrame.m_GameObject.instance.m_Name);
+										exportFrames.Add(boneFrame.GetTransformPath());
 										boneFrame = (Transform)boneFrame.Parent;
 									}
 								}
@@ -215,6 +215,20 @@ namespace UnityPlugin
 				mesh = filter != null ? filter.m_Mesh.instance : null;
 			}
 			return mesh;
+		}
+
+		public static PPtr<Mesh> GetMeshPtr(MeshRenderer meshR)
+		{
+			if (meshR is SkinnedMeshRenderer)
+			{
+				SkinnedMeshRenderer sMesh = (SkinnedMeshRenderer)meshR;
+				return sMesh.m_Mesh;
+			}
+			else
+			{
+				MeshFilter filter = meshR.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshFilter);
+				return filter != null ? filter.m_Mesh : null;
+			}
 		}
 
 		public static string BlendShapeName(Mesh mesh)

@@ -534,6 +534,19 @@ namespace UnityPlugin
 			}
 		}
 
+		public static string LoadName(Stream stream)
+		{
+			try
+			{
+				BinaryReader reader = new BinaryReader(stream);
+				return reader.ReadNameA4();
+			}
+			catch
+			{
+				return null;
+			}
+		}
+
 		public void WriteTo(Stream stream)
 		{
 			BinaryWriter writer = new BinaryWriter(stream);

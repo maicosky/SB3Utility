@@ -211,25 +211,28 @@ namespace UnityPlugin
 		public PPtr(Stream stream, AssetCabinet file)
 		{
 			LoadFrom(stream);
-			int index;
-			Component comp = file.FindComponent(m_PathID, out index);
-			if (comp is NotLoaded)
+			if (m_FileID == 0)
 			{
-				long pos = stream.Position;
-				asset = file.LoadComponent(stream, index, (NotLoaded)comp);
-				if (asset == null)
+				int index;
+				Component comp = file.FindComponent(m_PathID, out index);
+				if (comp is NotLoaded)
+				{
+					long pos = stream.Position;
+					asset = file.LoadComponent(stream, index, (NotLoaded)comp);
+					if (asset == null)
+					{
+						asset = comp;
+					}
+					stream.Position = pos;
+				}
+				else
 				{
 					asset = comp;
 				}
-				stream.Position = pos;
-			}
-			else
-			{
-				asset = comp;
-			}
-			if (asset is T)
-			{
-				instance = (T)asset;
+				if (asset is T)
+				{
+					instance = (T)asset;
+				}
 			}
 		}
 
@@ -258,7 +261,7 @@ namespace UnityPlugin
 		{
 			BinaryWriter writer = new BinaryWriter(stream);
 			writer.Write(m_FileID);
-			writer.Write(m_PathID);
+			writer.Write(asset != null ? asset.pathID : m_PathID);
 		}
 
 		public void UpdateOrLoad()
@@ -390,6 +393,10 @@ namespace UnityPlugin
 		public int FileLengthCopy { get; protected set; }
 		public int CabinetOffset { get; protected set; }
 		public byte LastByte { get; protected set; }
+		public string Name { get; protected set; }
+		public int Unknown3 { get; protected set; }
+		public int Offset { get; protected set; }
+		public int ContentLength { get; set; }
 		public AssetCabinet Cabinet { get; protected set; }
 
 		public List<Component> Textures { get; set; }
@@ -404,22 +411,30 @@ namespace UnityPlugin
 			FilePath = path;
 			using (BinaryReader reader = new BinaryReader(File.OpenRead(path)))
 			{
-				ExtendedSignature = reader.ReadBytes(27);
-				FileLength = reader.ReadInt32BE();
-				HeaderLength = reader.ReadInt32BE();
-				Unknown1 = reader.ReadInt32BE();
-				Unknown2 = reader.ReadInt32BE(); // number of entries
-				Entry1Length = reader.ReadInt32BE();
-				Entry1LengthCopy = reader.ReadInt32BE();
-				FileLengthCopy = reader.ReadInt32BE();
-				CabinetOffset = reader.ReadInt32BE();
-				LastByte = reader.ReadByte();
-
-				if (reader.BaseStream.Length != FileLength || reader.BaseStream.Length != FileLengthCopy)
+				if (Path.GetExtension(path).ToLower() == ".unity3d")
 				{
-					throw new Exception("Unsupported Unity3d file");
-				}
+					ExtendedSignature = reader.ReadBytes(27);
+					FileLength = reader.ReadInt32BE();
+					HeaderLength = reader.ReadInt32BE();
+					Unknown1 = reader.ReadInt32BE();
+					Unknown2 = reader.ReadInt32BE(); // number of entries
+					Entry1Length = reader.ReadInt32BE();
+					Entry1LengthCopy = reader.ReadInt32BE();
+					FileLengthCopy = reader.ReadInt32BE();
+					CabinetOffset = reader.ReadInt32BE();
+					LastByte = reader.ReadByte();
 
+					if (reader.BaseStream.Length != FileLength || reader.BaseStream.Length != FileLengthCopy)
+					{
+						throw new Exception("Unsupported Unity3d file");
+					}
+
+					Unknown3 = reader.ReadInt32BE();
+					Name = reader.ReadName0();
+					Offset = reader.ReadInt32BE();
+					ContentLength = reader.ReadInt32BE();
+					reader.BaseStream.Position = HeaderLength + Offset;
+				}
 				Cabinet = new AssetCabinet(reader.BaseStream, this);
 			}
 
@@ -471,7 +486,14 @@ namespace UnityPlugin
 			{
 				using (BinaryWriter writer = new BinaryWriter(File.Create(newName)))
 				{
-					writer.BaseStream.Position = 27 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 1;
+					if (Path.GetExtension(FilePath).ToLower() == ".unity3d")
+					{
+						writer.BaseStream.Position = 27 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 1 + 4 + (Name.Length + 1) + 4 + 4;
+						if ((writer.BaseStream.Position & 3) > 0)
+						{
+							writer.BaseStream.Position += 4 - (writer.BaseStream.Position & 3);
+						}
+					}
 
 					bool needsLoadingRefs = false;
 					for (int i = 0; i < Cabinet.Components.Count; i++)
@@ -546,17 +568,24 @@ namespace UnityPlugin
 					FileLength = FileLengthCopy = (int)writer.BaseStream.Length;
 					Entry1Length = Entry1LengthCopy = FileLength - HeaderLength;
 
-					writer.BaseStream.Position = 0;
-					writer.Write(ExtendedSignature);
-					writer.WriteInt32BE(FileLength);
-					writer.WriteInt32BE(HeaderLength);
-					writer.WriteInt32BE(Unknown1);
-					writer.WriteInt32BE(Unknown2);
-					writer.WriteInt32BE(Entry1Length);
-					writer.WriteInt32BE(Entry1LengthCopy);
-					writer.WriteInt32BE(FileLengthCopy);
-					writer.WriteInt32BE(CabinetOffset);
-					writer.Write(LastByte);
+					if (Path.GetExtension(FilePath).ToLower() == ".unity3d")
+					{
+						writer.BaseStream.Position = 0;
+						writer.Write(ExtendedSignature);
+						writer.WriteInt32BE(FileLength);
+						writer.WriteInt32BE(HeaderLength);
+						writer.WriteInt32BE(Unknown1);
+						writer.WriteInt32BE(Unknown2);
+						writer.WriteInt32BE(Entry1Length);
+						writer.WriteInt32BE(Entry1LengthCopy);
+						writer.WriteInt32BE(FileLengthCopy);
+						writer.WriteInt32BE(CabinetOffset);
+						writer.Write(LastByte);
+						writer.WriteInt32BE(Unknown1);
+						writer.WriteName0(Name);
+						writer.WriteInt32BE(Offset);
+						writer.WriteInt32BE(ContentLength);
+					}
 				}
 
 				if (FilePath == destPath)

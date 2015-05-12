@@ -30,10 +30,52 @@ namespace UnityPlugin
 			try
 			{
 				parser.file.BeginLoadingSkippedComponents();
+				if (Parser.m_Avatar.asset == null)
+				{
+					string animatorName = Parser.m_GameObject.instance.m_Name;
+					if (animatorName.Length > 2 && animatorName[1] == '_')
+					{
+						animatorName = animatorName.Substring(2);
+					}
+					foreach (Component asset in Parser.file.Components)
+					{
+						if (asset.classID1 == UnityClassID.Avatar)
+						{
+							string assetName;
+							if (asset is NotLoaded)
+							{
+								if (((NotLoaded)asset).Name != null)
+								{
+									assetName = ((NotLoaded)asset).Name;
+								}
+								else
+								{
+									Parser.file.SourceStream.Position = ((NotLoaded)asset).offset;
+									assetName = Avatar.LoadName(Parser.file.SourceStream);
+									((NotLoaded)asset).Name = assetName;
+								}
+							}
+							else
+							{
+								assetName = ((Avatar)asset).m_Name;
+							}
+							if (assetName.Contains(animatorName))
+							{
+								Parser.m_Avatar = new PPtr<Avatar>(asset);
+								Report.ReportLog("Warning! Using Avatar " + assetName + " for Animator " + Parser.m_GameObject.instance.m_Name);
+								break;
+							}
+						}
+					}
+				}
 				if (Parser.m_Avatar.asset is NotLoaded)
 				{
 					Avatar loadedAvatar = Parser.file.LoadComponent(Parser.file.SourceStream, (NotLoaded)Parser.m_Avatar.asset);
 					Parser.m_Avatar = new PPtr<Avatar>(loadedAvatar);
+				}
+				if (Parser.m_Avatar.instance == null)
+				{
+					Report.ReportLog("Warning! Animator " + Parser.m_GameObject.instance.m_Name + " has no Avatar!");
 				}
 				InitLists(parser.RootTransform);
 			}
@@ -362,6 +404,22 @@ namespace UnityPlugin
 			}
 
 			Changed = true;
+		}
+
+		[Plugin]
+		public void LoadAndSetAvatar(int componentIndex)
+		{
+			Component asset = componentIndex >= 0 ? Parser.file.Components[componentIndex] : null;
+			if (asset is NotLoaded)
+			{
+				asset = Parser.file.LoadComponent(asset.pathID);
+			}
+			Parser.m_Avatar = new PPtr<Avatar>(asset);
+
+			if (Parser.m_Controller != null)
+			{
+				Changed = true;
+			}
 		}
 
 		[Plugin]
@@ -1265,12 +1323,20 @@ namespace UnityPlugin
 		[Plugin]
 		public void SetMaterialTexture(int id, int index, int componentIndex)
 		{
-			Component asset = Parser.file.Components[componentIndex];
-			int parserTexIdx = Parser.file.Parser.Textures.IndexOf(asset);
-			Texture2D tex = Parser.file.Parser.GetTexture(parserTexIdx);
+			Texture2D tex;
+			if (componentIndex >= 0)
+			{
+				Component asset = Parser.file.Components[componentIndex];
+				int parserTexIdx = Parser.file.Parser.Textures.IndexOf(asset);
+				tex = Parser.file.Parser.GetTexture(parserTexIdx);
+			}
+			else
+			{
+				tex = null;
+			}
 			var texEnv = Materials[id].m_SavedProperties.m_TexEnvs[index].Value;
 			texEnv.m_Texture = new PPtr<Texture2D>(tex);
-			if (!Textures.Contains(tex))
+			if (tex != null && !Textures.Contains(tex))
 			{
 				Textures.Add(tex);
 			}

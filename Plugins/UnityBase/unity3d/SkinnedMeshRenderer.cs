@@ -68,13 +68,13 @@ namespace UnityPlugin
 			BinaryWriter writer = new BinaryWriter(stream);
 			writer.Write(m_Quality);
 			writer.Write(m_UpdateWhenOffScreen);
-			writer.Write(new byte[3]);
-			file.WritePPtr(m_Mesh.asset, false, stream);
+			writer.BaseStream.Position += 3;
+			m_Mesh.WriteTo(stream);
 
 			writer.Write(m_Bones.Count);
 			for (int i = 0; i < m_Bones.Count; i++)
 			{
-				file.WritePPtr(m_Bones[i].asset, false, stream);
+				m_Bones[i].WriteTo(stream);
 			}
 
 			writer.Write(m_BlendShapeWeights.Count);
@@ -83,11 +83,11 @@ namespace UnityPlugin
 				writer.Write(m_BlendShapeWeights[i]);
 			}
 
-			file.WritePPtr(m_RootBone.asset, false, stream);
+			m_RootBone.WriteTo(stream);
 			m_AABB.WriteTo(stream);
 			writer.Write(m_DirtyAABB);
 			// Unity's writer aligns here
-			// writer.Write(new byte[3]);
+			writer.BaseStream.Position += 3;
 		}
 
 		public new SkinnedMeshRenderer Clone(AssetCabinet file)

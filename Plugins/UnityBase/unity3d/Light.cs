@@ -108,7 +108,7 @@ namespace UnityPlugin
 		public void WriteTo(Stream stream)
 		{
 			BinaryWriter writer = new BinaryWriter(stream);
-			file.WritePPtr(m_GameObject.asset, false, stream);
+			m_GameObject.WriteTo(stream);
 			writer.Write(m_Enabled);
 			writer.Write(new byte[3]);
 			writer.Write(m_Type);
@@ -118,11 +118,11 @@ namespace UnityPlugin
 			writer.Write(m_SpotAngle);
 			writer.Write(m_CookieSize);
 			m_Shadows.WriteTo(stream);
-			file.WritePPtr(m_Cookie.asset, false, stream);
+			m_Cookie.WriteTo(stream);
 			writer.Write(m_DrawHalo);
 			writer.Write(m_ActuallyLightmapped);
 			writer.Write(new byte[2]);
-			file.WritePPtr(m_Flare.asset, false, stream);
+			m_Flare.WriteTo(stream);
 			writer.Write(m_RenderMode);
 			m_CullingMask.WriteTo(stream);
 			writer.Write(m_Lightmapping);

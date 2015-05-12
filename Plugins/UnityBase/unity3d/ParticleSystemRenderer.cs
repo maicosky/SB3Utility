@@ -56,10 +56,10 @@ namespace UnityPlugin
 			writer.Write(m_SortingFudge);
 			writer.Write(m_NormalDirection);
 			writer.Write(m_SortMode);
-			file.WritePPtr(m_Mesh.asset, false, stream);
-			file.WritePPtr(m_Mesh1.asset, false, stream);
-			file.WritePPtr(m_Mesh2.asset, false, stream);
-			file.WritePPtr(m_Mesh3.asset, false, stream);
+			m_Mesh.WriteTo(stream);
+			m_Mesh1.WriteTo(stream);
+			m_Mesh2.WriteTo(stream);
+			m_Mesh3.WriteTo(stream);
 		}
 	}
 }

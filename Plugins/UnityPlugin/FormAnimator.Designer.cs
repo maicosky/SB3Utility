@@ -90,6 +90,8 @@
 			this.label74 = new System.Windows.Forms.Label();
 			this.tabControlViews = new System.Windows.Forms.TabControl();
 			this.tabPageFrameView = new System.Windows.Forms.TabPage();
+			this.comboBoxAvatar = new System.Windows.Forms.ComboBox();
+			this.label4 = new System.Windows.Forms.Label();
 			this.buttonFrameUnique = new System.Windows.Forms.Button();
 			this.buttonFrameAddBone = new System.Windows.Forms.Button();
 			this.groupBox3 = new System.Windows.Forms.GroupBox();
@@ -319,6 +321,7 @@
 			this.editTextBoxTexImageCount = new SB3Utility.EditTextBox();
 			this.textBoxTexSize = new SB3Utility.EditTextBox();
 			this.textBoxTexName = new SB3Utility.EditTextBox();
+			this.label38 = new System.Windows.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
 			this.splitContainer1.Panel1.SuspendLayout();
 			this.splitContainer1.Panel2.SuspendLayout();
@@ -438,7 +441,7 @@
 			this.comboBoxMeshRendererMesh.Name = "comboBoxMeshRendererMesh";
 			this.comboBoxMeshRendererMesh.Size = new System.Drawing.Size(139, 21);
 			this.comboBoxMeshRendererMesh.TabIndex = 10;
-			this.toolTip1.SetToolTip(this.comboBoxMeshRendererMesh, "Bones will taken from Mesh");
+			this.toolTip1.SetToolTip(this.comboBoxMeshRendererMesh, "Bones will be taken from Mesh");
 			this.comboBoxMeshRendererMesh.SelectedIndexChanged += new System.EventHandler(this.comboBoxMeshRendererMesh_SelectedIndexChanged);
 			// 
 			// buttonMeshNormals
@@ -504,7 +507,7 @@
 			// 
 			this.textBoxFrameName.Location = new System.Drawing.Point(0, 19);
 			this.textBoxFrameName.Name = "textBoxFrameName";
-			this.textBoxFrameName.Size = new System.Drawing.Size(249, 20);
+			this.textBoxFrameName.Size = new System.Drawing.Size(122, 20);
 			this.textBoxFrameName.TabIndex = 1;
 			this.toolTip1.SetToolTip(this.textBoxFrameName, "Warning for Transforms which are used as Bones!\r\nBones of Meshes are linked by th" +
         "e hash value of this name!");
@@ -1070,6 +1073,8 @@
 			// 
 			// tabPageFrameView
 			// 
+			this.tabPageFrameView.Controls.Add(this.comboBoxAvatar);
+			this.tabPageFrameView.Controls.Add(this.label4);
 			this.tabPageFrameView.Controls.Add(this.buttonFrameUnique);
 			this.tabPageFrameView.Controls.Add(this.buttonFrameAddBone);
 			this.tabPageFrameView.Controls.Add(this.groupBox3);
@@ -1085,6 +1090,25 @@
 			this.tabPageFrameView.TabIndex = 2;
 			this.tabPageFrameView.Text = "Frame";
 			this.tabPageFrameView.UseVisualStyleBackColor = true;
+			// 
+			// comboBoxAvatar
+			// 
+			this.comboBoxAvatar.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.comboBoxAvatar.FormattingEnabled = true;
+			this.comboBoxAvatar.Location = new System.Drawing.Point(128, 18);
+			this.comboBoxAvatar.Name = "comboBoxAvatar";
+			this.comboBoxAvatar.Size = new System.Drawing.Size(122, 21);
+			this.comboBoxAvatar.TabIndex = 88;
+			this.comboBoxAvatar.SelectedIndexChanged += new System.EventHandler(this.comboBoxAvatar_SelectedIndexChanged);
+			// 
+			// label4
+			// 
+			this.label4.AutoSize = true;
+			this.label4.Location = new System.Drawing.Point(126, 4);
+			this.label4.Name = "label4";
+			this.label4.Size = new System.Drawing.Size(38, 13);
+			this.label4.TabIndex = 87;
+			this.label4.Text = "Avatar";
 			// 
 			// buttonFrameUnique
 			// 
@@ -2602,6 +2626,7 @@
 			// 
 			// tabPageMaterialView
 			// 
+			this.tabPageMaterialView.Controls.Add(this.label38);
 			this.tabPageMaterialView.Controls.Add(this.labelExtra3);
 			this.tabPageMaterialView.Controls.Add(this.textBoxMatExtra3);
 			this.tabPageMaterialView.Controls.Add(this.labelExtra2);
@@ -3552,6 +3577,15 @@
 			this.textBoxTexName.Size = new System.Drawing.Size(164, 20);
 			this.textBoxTexName.TabIndex = 5;
 			// 
+			// label38
+			// 
+			this.label38.AutoSize = true;
+			this.label38.Location = new System.Drawing.Point(90, 79);
+			this.label38.Name = "label38";
+			this.label38.Size = new System.Drawing.Size(79, 13);
+			this.label38.TabIndex = 89;
+			this.label38.Text = "PathID Texture";
+			// 
 			// FormAnimator
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -3956,5 +3990,8 @@
 		private System.Windows.Forms.Button buttonBoneGetHash;
 		private System.Windows.Forms.Label labelExtra3;
 		private SB3Utility.EditTextBox textBoxMatExtra3;
+		private System.Windows.Forms.ComboBox comboBoxAvatar;
+		private System.Windows.Forms.Label label4;
+		private System.Windows.Forms.Label label38;
 	}
 }

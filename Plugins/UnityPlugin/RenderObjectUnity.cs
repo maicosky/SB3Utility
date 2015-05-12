@@ -350,7 +350,7 @@ namespace UnityPlugin
 			Matrix combinedTransform = Matrix.Scaling(frame.m_LocalScale) * Matrix.RotationQuaternion(frame.m_LocalRotation) * Matrix.Translation(frame.m_LocalPosition) * combinedParent;
 			try
 			{
-				extractMatrices.Add(frame.m_GameObject.instance.m_Name, new Tuple<Matrix, Matrix>(combinedTransform, Matrix.Invert(combinedTransform)));
+				extractMatrices.Add(frame.GetTransformPath(), new Tuple<Matrix, Matrix>(combinedTransform, Matrix.Invert(combinedTransform)));
 			}
 			catch (ArgumentException)
 			{
@@ -365,7 +365,7 @@ namespace UnityPlugin
 			for (int i = 0; i < frame.Count; i++)
 			{
 				Transform child = frame[i];
-				if (extractFrames.Contains(child.m_GameObject.instance.m_Name))
+				if (extractFrames.Contains(child.GetTransformPath()))
 				{
 					CreateCombinedMatrices(child, extractFrames, combinedTransform, extractMatrices);
 				}
@@ -375,12 +375,12 @@ namespace UnityPlugin
 		private AnimationFrame CreateFrame(Transform frame, AnimatorEditor editor, HashSet<string> extractFrames, HashSet<string> meshNames, Device device, Matrix combinedParent, List<AnimationFrame> meshFrames, Dictionary<string, Tuple<Matrix, Matrix>> extractMatrices)
 		{
 			AnimationFrame animationFrame = new AnimationFrame();
-			animationFrame.Name = frame.m_GameObject.instance.m_Name;
+			animationFrame.Name = frame.GetTransformPath();
 			animationFrame.TransformationMatrix = Matrix.Scaling(frame.m_LocalScale) * Matrix.RotationQuaternion(frame.m_LocalRotation) * Matrix.Translation(frame.m_LocalPosition);
 			animationFrame.OriginalTransform = animationFrame.TransformationMatrix;
-			animationFrame.CombinedTransform = extractMatrices[frame.m_GameObject.instance.m_Name].Item1;
+			animationFrame.CombinedTransform = extractMatrices[animationFrame.Name].Item1;
 
-			if (meshNames.Contains(frame.m_GameObject.instance.m_Name))
+			if (meshNames.Contains(animationFrame.Name))
 			{
 				MeshRenderer meshR = frame.m_GameObject.instance.FindLinkedComponent(UnityClassID.SkinnedMeshRenderer);
 				if (meshR == null)
@@ -412,13 +412,13 @@ namespace UnityPlugin
 								for (int i = 0; i < boneList.Count; i++)
 								{
 									Transform bone = boneList[i].instance;
-									if (bone == null || bone.m_GameObject.instance == null || !extractCopy.Remove(bone.m_GameObject.instance.m_Name))
+									if (bone == null || bone.m_GameObject.instance == null || !extractCopy.Remove(bone.GetTransformPath()))
 									{
 										invalidBones++;
 									}
 									else if (i < numBones)
 									{
-										boneNames[i] = bone.m_GameObject.instance.m_Name;
+										boneNames[i] = bone.GetTransformPath();
 										boneOffsets[i] = Matrix.Transpose(mesh.m_BindPose[i]);
 									}
 								}
@@ -565,7 +565,7 @@ namespace UnityPlugin
 			for (int i = 0; i < frame.Count; i++)
 			{
 				Transform child = frame[i];
-				if (extractFrames.Contains(child.m_GameObject.instance.m_Name))
+				if (extractFrames.Contains(child.GetTransformPath()))
 				{
 					AnimationFrame childAnimationFrame = CreateFrame(child, editor, extractFrames, meshNames, device, animationFrame.CombinedTransform, meshFrames, extractMatrices);
 					childAnimationFrame.Parent = animationFrame;
@@ -927,7 +927,8 @@ namespace UnityPlugin
 		{
 			foreach (AnimationFrame frame in meshFrames)
 			{
-				if (frame.Name == sMesh.m_GameObject.instance.m_Name)
+				Transform meshTransform = sMesh.m_GameObject.instance.FindLinkedComponent(UnityClassID.Transform);
+				if (frame.Name == meshTransform.GetTransformPath())
 				{
 					Mesh mesh = Operations.GetMesh(sMesh);
 					int meshObjIdx = 0;
@@ -1048,7 +1049,8 @@ namespace UnityPlugin
 		{
 			foreach (AnimationFrame frame in meshFrames)
 			{
-				if (frame.Name == sMesh.m_GameObject.instance.m_Name)
+				Transform meshTransform = sMesh.m_GameObject.instance.FindLinkedComponent(UnityClassID.Transform);
+				if (frame.Name == meshTransform.GetTransformPath())
 				{
 					int meshObjIdx = 0;
 					MeshContainer animMesh = frame.MeshContainer;
@@ -1102,7 +1104,8 @@ namespace UnityPlugin
 		{
 			foreach (AnimationFrame frame in meshFrames)
 			{
-				if (frame.Name == sMesh.m_GameObject.instance.m_Name)
+				Transform meshTransform = sMesh.m_GameObject.instance.FindLinkedComponent(UnityClassID.Transform);
+				if (frame.Name == meshTransform.GetTransformPath())
 				{
 					Mesh mesh = Operations.GetMesh(sMesh);
 					int meshObjIdx = 0;

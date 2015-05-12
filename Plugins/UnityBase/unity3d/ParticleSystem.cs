@@ -276,7 +276,7 @@ namespace UnityPlugin
 			writer.Write(boxY);
 			writer.Write(boxZ);
 			writer.Write(placementMode);
-			file.WritePPtr(m_Mesh.asset, false, stream);
+			m_Mesh.WriteTo(stream);
 			writer.Write(randomDirection);
 			writer.Write(new byte[3]);
 		}
@@ -825,12 +825,12 @@ namespace UnityPlugin
 			BinaryWriter writer = new BinaryWriter(stream);
 			writer.Write(enabled);
 			writer.Write(new byte[3]);
-			file.WritePPtr(subEmitterBirth.asset, false, stream);
-			file.WritePPtr(subEmitterBirth1.asset, false, stream);
-			file.WritePPtr(subEmitterCollision.asset, false, stream);
-			file.WritePPtr(subEmitterCollision1.asset, false, stream);
-			file.WritePPtr(subEmitterDeath.asset, false, stream);
-			file.WritePPtr(subEmitterDeath1.asset, false, stream);
+			subEmitterBirth.WriteTo(stream);
+			subEmitterBirth1.WriteTo(stream);
+			subEmitterCollision.WriteTo(stream);
+			subEmitterCollision1.WriteTo(stream);
+			subEmitterDeath.WriteTo(stream);
+			subEmitterDeath1.WriteTo(stream);
 		}
 	}
 
@@ -908,7 +908,7 @@ namespace UnityPlugin
 		public void WriteTo(Stream stream)
 		{
 			BinaryWriter writer = new BinaryWriter(stream);
-			file.WritePPtr(m_GameObject.asset, false, stream);
+			m_GameObject.WriteTo(stream);
 			writer.Write(lengthInSec);
 			writer.Write(startDelay);
 			writer.Write(speed);

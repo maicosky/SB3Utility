@@ -23,6 +23,8 @@ namespace UnityPlugin
 		//public List<PPtr<Transform>> m_Children { get; protected set; }
 		//public PPtr<Transform> m_Father { get; protected set; }
 
+		public List<PPtr<Transform>> UnknownChilds;
+
 		public Transform(AssetCabinet file, int pathID, UnityClassID classID1, UnityClassID classID2)
 		{
 			this.file = file;
@@ -56,6 +58,15 @@ namespace UnityPlugin
 				{
 					AddChild(transPtr.instance);
 				}
+				else
+				{
+					if (UnknownChilds == null)
+					{
+						UnknownChilds = new List<PPtr<Transform>>();
+					}
+					UnknownChilds.Add(transPtr);
+					Report.ReportLog("Warning! Transform \"" + (m_GameObject.instance != null ? m_GameObject.instance.m_Name : "with unresolved name") + "\" has unhandled child " + i + (transPtr.asset != null ? " class=" + transPtr.asset.classID1 + "/" + transPtr.asset.classID2 : "") + " FileID=" + transPtr.m_FileID + " PathID=" + transPtr.m_PathID);
+				}
 			}
 
 			//m_Father = 
@@ -65,18 +76,22 @@ namespace UnityPlugin
 		public void WriteTo(Stream stream)
 		{
 			BinaryWriter writer = new BinaryWriter(stream);
-			file.WritePPtr(m_GameObject.asset, false, stream);
+			m_GameObject.WriteTo(stream);
 			writer.Write(m_LocalRotation);
 			writer.Write(m_LocalPosition);
 			writer.Write(m_LocalScale);
 
-			writer.Write(/*m_Children.*/Count);
+			writer.Write(/*m_Children.*/Count + (UnknownChilds != null ? UnknownChilds.Count : 0));
+			for (int i = 0; i < (UnknownChilds != null ? UnknownChilds.Count : 0); i++)
+			{
+				UnknownChilds[i].WriteTo(stream);
+			}
 			for (int i = 0; i < /*m_Children.*/Count; i++)
 			{
-				file.WritePPtr(/*m_Children*/this[i]/*.asset*/, false, stream);
+				new PPtr<Transform>(/*m_Children*/this[i]/*.asset*/).WriteTo(stream);
 			}
 
-			file.WritePPtr(/*m_Father.asset*/Parent, false, stream);
+			new PPtr<Transform>((Component)/*m_Father.asset*/Parent).WriteTo(stream);
 		}
 
 		public Transform Clone(AssetCabinet file)
@@ -105,6 +120,11 @@ namespace UnityPlugin
 				frame = frame.Parent;
 			}
 			return world;
+		}
+
+		public string GetTransformPath()
+		{
+			return (Parent != null ? ((Transform)Parent).GetTransformPath() + "/" : String.Empty) + m_GameObject.instance.m_Name;
 		}
 	}
 }

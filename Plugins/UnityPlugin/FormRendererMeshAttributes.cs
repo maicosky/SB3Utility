@@ -15,7 +15,7 @@ namespace UnityPlugin
 		private SizeF startSize;
 		private bool contentChanged = false;
 
-		public FormRendererMeshAttributes(MeshRenderer meshR)
+		public FormRendererMeshAttributes(MeshRenderer meshR, int selectedSubmesh)
 		{
 			InitializeComponent();
 			startSize = new SizeF(Width, Height);
@@ -65,6 +65,12 @@ namespace UnityPlugin
 				editTextBoxMeshUsageFlags.Text = mesh.m_MeshUsageFlags.ToString();
 				editTextBoxMeshCenter.Text = "X:" + mesh.m_LocalAABB.m_Center.X.ToFloatString() + ", Y:" + mesh.m_LocalAABB.m_Center.Y.ToFloatString() + ", Z:" + mesh.m_LocalAABB.m_Center.Z.ToFloatString();
 				editTextBoxMeshExtend.Text = "X:" + mesh.m_LocalAABB.m_Extend.X.ToFloatString() + ", Y:" + mesh.m_LocalAABB.m_Extend.Y.ToFloatString() + ", Z:" + mesh.m_LocalAABB.m_Extend.Z.ToFloatString();
+
+				if (selectedSubmesh >= 0)
+				{
+					editTextBoxSubmeshCenter.Text = "X:" + mesh.m_SubMeshes[selectedSubmesh].localAABB.m_Center.X.ToFloatString() + ", Y:" + mesh.m_SubMeshes[selectedSubmesh].localAABB.m_Center.Y.ToFloatString() + ", Z:" + mesh.m_SubMeshes[selectedSubmesh].localAABB.m_Center.Z.ToFloatString();
+					editTextBoxSubmeshExtend.Text = "X:" + mesh.m_SubMeshes[selectedSubmesh].localAABB.m_Extend.X.ToFloatString() + ", Y:" + mesh.m_SubMeshes[selectedSubmesh].localAABB.m_Extend.Y.ToFloatString() + ", Z:" + mesh.m_SubMeshes[selectedSubmesh].localAABB.m_Extend.Z.ToFloatString();
+				}
 			}
 			else
 			{

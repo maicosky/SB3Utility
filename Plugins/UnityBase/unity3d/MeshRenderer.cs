@@ -90,7 +90,7 @@ namespace UnityPlugin
 		public void WriteTo(Stream stream)
 		{
 			BinaryWriter writer = new BinaryWriter(stream);
-			file.WritePPtr(m_GameObject.asset, false, stream);
+			m_GameObject.WriteTo(stream);
 			writer.Write(m_Enabled);
 			writer.Write(m_CastShadows);
 			writer.Write(m_ReceiveShadows);
@@ -100,16 +100,16 @@ namespace UnityPlugin
 			writer.Write(m_Materials.Count);
 			for (int i = 0; i < m_Materials.Count; i++)
 			{
-				file.WritePPtr(m_Materials[i].asset, false, stream);
+				m_Materials[i].WriteTo(stream);
 			}
 
 			writer.Write(m_SubsetIndices.Length);
 			writer.Write(m_SubsetIndices);
 
-			file.WritePPtr(m_StaticBatchRoot.asset, false, stream);
+			m_StaticBatchRoot.WriteTo(stream);
 			writer.Write(m_UseLightProbes);
 			writer.Write(new byte[3]);
-			file.WritePPtr(m_LightProbeAnchor.asset, false, stream);
+			m_LightProbeAnchor.WriteTo(stream);
 			writer.Write(m_SortingLayerID);
 			writer.Write(m_SortingOrder);
 			writer.Write(new byte[2]);

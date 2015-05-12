@@ -513,7 +513,6 @@ namespace UnityPlugin
 			}
 			destMesh.Flush();
 
-			AssetBundle bundle = parser.file.Bundle;
 			if (frameMeshR != null)
 			{
 				frame.m_GameObject.instance.RemoveLinkedComponent(frameMeshR);
@@ -522,16 +521,27 @@ namespace UnityPlugin
 				{
 					//parser.file.RemoveSubfile(frameMesh);
 					parser.file.ReplaceSubfile(frameMesh, sMesh.m_Mesh.asset);
-					bundle.ReplaceComponent(frameMesh, sMesh.m_Mesh.asset);
 				}
 				parser.file.ReplaceSubfile(frameMeshR, sMesh);
-				bundle.ReplaceComponent(frameMeshR, sMesh);
-			}
-			else
-			{
-				bundle.RegisterForUpdate(parser.m_GameObject.asset);
 			}
 			frame.m_GameObject.instance.AddLinkedComponent(sMesh);
+
+			AssetBundle bundle = parser.file.Bundle;
+			if (bundle != null)
+			{
+				if (frameMeshR != null)
+				{
+					if (frameMesh != null)
+					{
+						bundle.ReplaceComponent(frameMesh, sMesh.m_Mesh.asset);
+					}
+					bundle.ReplaceComponent(frameMeshR, sMesh);
+				}
+				else
+				{
+					bundle.RegisterForUpdate(parser.m_GameObject.asset);
+				}
+			}
 		}
 
 		public static void ReplaceMaterial(UnityParser parser, ImportedMaterial material)
