@@ -107,12 +107,14 @@ namespace UnityPlugin
 						case UnityClassID.AnimatorController:
 						case UnityClassID.Cubemap:
 						case UnityClassID.Material:
-						case UnityClassID.MonoScript:
 						case UnityClassID.Shader:
 						case UnityClassID.Sprite:
 						case UnityClassID.TextAsset:
 						case UnityClassID.Texture2D:
 							comp.Name = reader.ReadNameA4();
+							break;
+						case UnityClassID.MonoScript:
+							comp.Name = comp.pathID + " / " + reader.ReadNameA4();
 							break;
 						case UnityClassID.Animator:
 						case UnityClassID.EllipsoidParticleEmitter:
@@ -609,6 +611,10 @@ namespace UnityPlugin
 								Material mat = (Material)loaded;
 								mat.Clone(Parser.Cabinet);
 								break;
+							case UnityClassID.Mesh:
+								Mesh mesh = (Mesh)loaded;
+								mesh.Clone(Parser.Cabinet);
+								break;
 							case UnityClassID.Shader:
 								Shader shader = (Shader)loaded;
 								shader.Clone(Parser.Cabinet);
@@ -650,9 +656,17 @@ namespace UnityPlugin
 									}
 								}
 								break;
+							case UnityClassID.Avatar:
+								Avatar avatar = (Avatar)loaded;
+								avatar.Clone(Parser.Cabinet);
+								break;
 							case UnityClassID.MonoBehaviour:
 								MonoBehaviour monoB = (MonoBehaviour)loaded;
 								monoB.Clone(Parser.Cabinet);
+								break;
+							case UnityClassID.TextAsset:
+								TextAsset text = (TextAsset)loaded;
+								text.Clone(Parser.Cabinet);
 								break;
 							}
 						}

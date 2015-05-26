@@ -190,7 +190,12 @@ namespace UnityPlugin
 				device.SetTransform(TransformState.World, frame.CombinedTransform);
 
 				submeshNum = 0;
-				DrawMorphMeshContainer(morphMeshContainer);
+				while (morphMeshContainer != null)
+				{
+					DrawMorphMeshContainer(morphMeshContainer);
+					morphMeshContainer = morphMeshContainer.NextMeshContainer as MorphMeshContainer;
+					submeshNum++;
+				}
 			}
 		}
 
@@ -931,90 +936,95 @@ namespace UnityPlugin
 				if (frame.Name == meshTransform.GetTransformPath())
 				{
 					Mesh mesh = Operations.GetMesh(sMesh);
-					int meshObjIdx = 0;
-					MorphMeshContainer morphMesh = null;
 					AnimationMeshContainer animMesh = frame.MeshContainer as AnimationMeshContainer;
 					if (animMesh != null)
 					{
-						for (int i = 1; i < meshObjIdx; i++)
+						MorphMeshContainer[] morphMeshes = new MorphMeshContainer[mesh.m_SubMeshes.Count];
+						int startVertexIdx = 0;
+						for (int meshObjIdx = 0; meshObjIdx < mesh.m_SubMeshes.Count; meshObjIdx++)
 						{
+							MorphMeshContainer morphMesh = new MorphMeshContainer();
+							morphMeshes[meshObjIdx] = morphMesh;
+							morphMesh.FaceCount = (int)mesh.m_SubMeshes[meshObjIdx].indexCount / 3;
+							morphMesh.IndexBuffer = animMesh.MeshData.Mesh.IndexBuffer;
+
+							morphMesh.VertexCount = (int)mesh.m_SubMeshes[meshObjIdx].vertexCount;
+							Operations.vMesh vMesh = new Operations.vMesh(sMesh, false);
+							List<Operations.vVertex> vertexList = vMesh.submeshes[meshObjIdx].vertexList;
+							VertexBuffer vertBuffer = CreateMorphVertexBuffer(mesh.m_Shapes, keyframeIdx, vertexList, startVertexIdx);
+							morphMesh.StartBuffer = morphMesh.EndBuffer = vertBuffer;
+
+							int vertBufferSize = morphMesh.VertexCount * Marshal.SizeOf(typeof(TweeningWithoutNormalsVertexBufferFormat.Stream2));
+							vertBuffer = new VertexBuffer(device, vertBufferSize, Usage.WriteOnly, VertexFormat.Texture1, Pool.Managed);
+							using (DataStream vertexStream = vertBuffer.Lock(0, vertBufferSize, LockFlags.None))
+							{
+								for (int i = 0; i < vertexList.Count; i++)
+								{
+									Operations.vVertex vertex = vertexList[i];
+									vertexStream.Write(vertex.uv[0]);
+									vertexStream.Write(vertex.uv[1]);
+								}
+								vertBuffer.Unlock();
+							}
+							morphMesh.CommonBuffer = vertBuffer;
+
+							morphMesh.MaterialIndex = animMesh.MaterialIndex;
+							morphMesh.TextureIndex = animMesh.TextureIndex;
+
+							morphMesh.TweenFactor = 0.0f;
+
+							startVertexIdx += morphMesh.VertexCount;
 							animMesh = (AnimationMeshContainer)animMesh.NextMeshContainer;
-							if (animMesh == null)
-							{
-								break;
-							}
 						}
-						if (animMesh == null)
+
+						for (int meshObjIdx = 0; meshObjIdx < mesh.m_SubMeshes.Count; meshObjIdx++)
 						{
-							Report.ReportLog("Bad submesh specified.");
-							return -1f;
+							morphMeshes[meshObjIdx].NextMeshContainer = meshObjIdx < mesh.m_SubMeshes.Count - 1
+								? (MeshContainer)morphMeshes[meshObjIdx + 1] : frame.MeshContainer;
 						}
-
-						morphMesh = new MorphMeshContainer();
-						morphMesh.FaceCount = (int)mesh.m_SubMeshes[meshObjIdx].indexCount / 3;
-						morphMesh.IndexBuffer = animMesh.MeshData.Mesh.IndexBuffer;
-
-						morphMesh.VertexCount = (int)mesh.m_SubMeshes[meshObjIdx].vertexCount;
-						Operations.vMesh vMesh = new Operations.vMesh(sMesh, false);
-						List<Operations.vVertex> vertexList = vMesh.submeshes[meshObjIdx].vertexList;
-						VertexBuffer vertBuffer = CreateMorphVertexBuffer(mesh.m_Shapes, keyframeIdx, vertexList);
-						morphMesh.StartBuffer = morphMesh.EndBuffer = vertBuffer;
-
-						int vertBufferSize = morphMesh.VertexCount * Marshal.SizeOf(typeof(TweeningWithoutNormalsVertexBufferFormat.Stream2));
-						vertBuffer = new VertexBuffer(device, vertBufferSize, Usage.WriteOnly, VertexFormat.Texture1, Pool.Managed);
-						using (DataStream vertexStream = vertBuffer.Lock(0, vertBufferSize, LockFlags.None))
-						{
-							for (int i = 0; i < vertexList.Count; i++)
-							{
-								Operations.vVertex vertex = vertexList[i];
-								vertexStream.Write(vertex.uv[0]);
-								vertexStream.Write(vertex.uv[1]);
-							}
-							vertBuffer.Unlock();
-						}
-						morphMesh.CommonBuffer = vertBuffer;
-
-						morphMesh.MaterialIndex = animMesh.MaterialIndex;
-						morphMesh.TextureIndex = animMesh.TextureIndex;
-
-						morphMesh.NextMeshContainer = animMesh;
-						frame.MeshContainer = morphMesh;
-
-						morphMesh.TweenFactor = 0.0f;
+						frame.MeshContainer = morphMeshes[0];
+						return 0;
 					}
 					else
 					{
-						morphMesh = frame.MeshContainer as MorphMeshContainer;
+						MorphMeshContainer morphMesh = frame.MeshContainer as MorphMeshContainer;
 						Operations.vMesh vMesh = new Operations.vMesh(sMesh, false);
-						List<Operations.vVertex> vertexList = vMesh.submeshes[meshObjIdx].vertexList;
-						VertexBuffer vertBuffer = CreateMorphVertexBuffer(mesh.m_Shapes, keyframeIdx, vertexList);
-						if (asStart)
+						int startVertexIdx = 0;
+						for (int meshObjIdx = 0; meshObjIdx < mesh.m_SubMeshes.Count; meshObjIdx++)
 						{
-							if (morphMesh.StartBuffer != morphMesh.EndBuffer)
+							List<Operations.vVertex> vertexList = vMesh.submeshes[meshObjIdx].vertexList;
+							VertexBuffer vertBuffer = CreateMorphVertexBuffer(mesh.m_Shapes, keyframeIdx, vertexList, startVertexIdx);
+							if (asStart)
 							{
-								morphMesh.StartBuffer.Dispose();
+								if (morphMesh.StartBuffer != morphMesh.EndBuffer)
+								{
+									morphMesh.StartBuffer.Dispose();
+								}
+								morphMesh.StartBuffer = vertBuffer;
+								morphMesh.TweenFactor = 0.0f;
 							}
-							morphMesh.StartBuffer = vertBuffer;
-							morphMesh.TweenFactor = 0.0f;
-						}
-						else
-						{
-							if (morphMesh.StartBuffer != morphMesh.EndBuffer)
+							else
 							{
-								morphMesh.EndBuffer.Dispose();
+								if (morphMesh.StartBuffer != morphMesh.EndBuffer)
+								{
+									morphMesh.EndBuffer.Dispose();
+								}
+								morphMesh.EndBuffer = vertBuffer;
+								morphMesh.TweenFactor = 1.0f;
 							}
-							morphMesh.EndBuffer = vertBuffer;
-							morphMesh.TweenFactor = 1.0f;
+
+							startVertexIdx += morphMesh.VertexCount;
+							morphMesh = morphMesh.NextMeshContainer as MorphMeshContainer;
 						}
+						return asStart ? 0 : 1;
 					}
-					return morphMesh.TweenFactor;
 				}
 			}
 			Report.ReportLog("Mesh frame " + sMesh.m_GameObject.instance.m_Name + " not displayed.");
 			return -1f;
 		}
 
-		private VertexBuffer CreateMorphVertexBuffer(BlendShapeData shapes, int keyframeIdx, List<Operations.vVertex> vertexList)
+		private VertexBuffer CreateMorphVertexBuffer(BlendShapeData shapes, int keyframeIdx, List<Operations.vVertex> vertexList, int firstVertexIndex)
 		{
 			int vertBufferSize = vertexList.Count * Marshal.SizeOf(typeof(TweeningWithoutNormalsVertexBufferFormat.Stream0));
 			VertexBuffer vertBuffer = new VertexBuffer(device, vertBufferSize, Usage.WriteOnly, VertexFormat.Position, Pool.Managed);
@@ -1027,7 +1037,11 @@ namespace UnityPlugin
 			int nextShapeVertIdx = (int)(shapes.shapes[keyframeIdx].firstVertex + shapes.shapes[keyframeIdx].vertexCount);
 			for (int i = (int)shapes.shapes[keyframeIdx].firstVertex; i < nextShapeVertIdx; i++)
 			{
-				positions[blendVerts[i].index] += blendVerts[i].vertex;
+				int morphVertIdx = (int)blendVerts[i].index - firstVertexIndex;
+				if (morphVertIdx >= 0 && morphVertIdx < vertexList.Count)
+				{
+					positions[morphVertIdx] += blendVerts[i].vertex;
+				}
 			}
 
 			using (DataStream vertexStream = vertBuffer.Lock(0, vertBufferSize, LockFlags.None))
@@ -1052,51 +1066,43 @@ namespace UnityPlugin
 				Transform meshTransform = sMesh.m_GameObject.instance.FindLinkedComponent(UnityClassID.Transform);
 				if (frame.Name == meshTransform.GetTransformPath())
 				{
-					int meshObjIdx = 0;
-					MeshContainer animMesh = frame.MeshContainer;
-					for (int i = 1; i < meshObjIdx; i++)
+					MorphMeshContainer morphMesh = frame.MeshContainer as MorphMeshContainer;
+					float tweenFactor = 0;
+					for (int meshObjIdx = 0; morphMesh != null; meshObjIdx++)
 					{
-						animMesh = animMesh.NextMeshContainer;
-						if (animMesh == null)
-							break;
-					}
-					if (animMesh == null)
-					{
-						Report.ReportLog("Bad submesh specified.");
-						return -1f;
-					}
-					MorphMeshContainer morphMesh = (MorphMeshContainer)animMesh;
-
-					if (asStart)
-					{
-						if (morphMesh.StartBuffer != morphMesh.EndBuffer)
+						if (asStart)
 						{
-							morphMesh.StartBuffer.Dispose();
-							morphMesh.StartBuffer = morphMesh.EndBuffer;
+							if (morphMesh.StartBuffer != morphMesh.EndBuffer)
+							{
+								morphMesh.StartBuffer.Dispose();
+								morphMesh.StartBuffer = morphMesh.EndBuffer;
+							}
+							else
+							{
+								frame.MeshContainer = morphMesh.NextMeshContainer;
+							}
+							morphMesh.TweenFactor = 1.0f;
 						}
 						else
 						{
-							frame.MeshContainer = morphMesh.NextMeshContainer;
+							if (morphMesh.StartBuffer != morphMesh.EndBuffer)
+							{
+								morphMesh.EndBuffer.Dispose();
+								morphMesh.EndBuffer = morphMesh.StartBuffer;
+							}
+							else
+							{
+								frame.MeshContainer = morphMesh.NextMeshContainer;
+							}
+							morphMesh.TweenFactor = 0.0f;
 						}
-						morphMesh.TweenFactor = 1.0f;
+						tweenFactor = morphMesh.TweenFactor;
+						morphMesh = morphMesh.NextMeshContainer as MorphMeshContainer;
 					}
-					else
-					{
-						if (morphMesh.StartBuffer != morphMesh.EndBuffer)
-						{
-							morphMesh.EndBuffer.Dispose();
-							morphMesh.EndBuffer = morphMesh.StartBuffer;
-						}
-						else
-						{
-							frame.MeshContainer = morphMesh.NextMeshContainer;
-						}
-						morphMesh.TweenFactor = 0.0f;
-					}
-					return morphMesh.TweenFactor;
+					return tweenFactor;
 				}
 			}
-			Report.ReportLog("Mesh frame " + sMesh + " not displayed.");
+			Report.ReportLog("Mesh frame " + sMesh.m_GameObject.instance.m_Name + " not displayed.");
 			return -1f;
 		}
 
@@ -1107,23 +1113,12 @@ namespace UnityPlugin
 				Transform meshTransform = sMesh.m_GameObject.instance.FindLinkedComponent(UnityClassID.Transform);
 				if (frame.Name == meshTransform.GetTransformPath())
 				{
-					Mesh mesh = Operations.GetMesh(sMesh);
-					int meshObjIdx = 0;
-					MeshContainer animMesh = frame.MeshContainer;
-					for (int i = 1; i < meshObjIdx; i++)
+					MorphMeshContainer morphMesh = frame.MeshContainer as MorphMeshContainer;
+					for (int meshObjIdx = 0; morphMesh != null; meshObjIdx++)
 					{
-						animMesh = animMesh.NextMeshContainer;
-						if (animMesh == null)
-							break;
+						morphMesh.TweenFactor = tweenFactor;
+						morphMesh = morphMesh.NextMeshContainer as MorphMeshContainer;
 					}
-					if (animMesh == null)
-					{
-						Report.ReportLog("Bad submesh specified.");
-						return;
-					}
-					MorphMeshContainer morphMesh = (MorphMeshContainer)animMesh;
-
-					morphMesh.TweenFactor = tweenFactor;
 					return;
 				}
 			}

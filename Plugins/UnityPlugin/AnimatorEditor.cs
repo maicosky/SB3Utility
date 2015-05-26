@@ -155,14 +155,20 @@ namespace UnityPlugin
 					{
 						Mesh mesh = Operations.GetMesh(frameMeshR);
 						meshesForRemoval.Add(mesh);
-						Parser.file.Bundle.DeleteComponent(frameMeshR);
+						if (Parser.file.Bundle != null)
+						{
+							Parser.file.Bundle.DeleteComponent(frameMeshR);
+						}
 						Parser.file.RemoveSubfile(frameMeshR);
 						frameMeshR.m_GameObject.instance.RemoveLinkedComponent(frameMeshR);
 					}
-					Parser.file.Bundle.DeleteComponent(trans);
+					if (Parser.file.Bundle != null)
+					{
+						Parser.file.Bundle.DeleteComponent(trans);
+					}
 					Parser.file.RemoveSubfile(trans);
 					gameObj.RemoveLinkedComponent(trans);
-					if (gameObj.m_Component.Count == 0)
+					if (gameObj.m_Component.Count == 0 && Parser.file.Bundle != null)
 					{
 						Parser.file.Bundle.DeleteComponent(gameObj);
 					}
@@ -184,7 +190,10 @@ namespace UnityPlugin
 			foreach (Mesh mesh in meshesForRemoval)
 			{
 				Parser.file.RemoveSubfile(mesh);
-				Parser.file.Bundle.DeleteComponent(mesh);
+				if (Parser.file.Bundle != null)
+				{
+					Parser.file.Bundle.DeleteComponent(mesh);
+				}
 			}
 		}
 
@@ -359,7 +368,10 @@ namespace UnityPlugin
 
 			if (id == 0)
 			{
-				Parser.file.Bundle.RegisterForUpdate(Parser.m_GameObject.asset);
+				if (Parser.file.Bundle != null)
+				{
+					Parser.file.Bundle.RegisterForUpdate(Parser.m_GameObject.asset);
+				}
 			}
 			else
 			{
@@ -450,7 +462,10 @@ namespace UnityPlugin
 				Parser.m_Avatar.instance.RemoveBone(frame.m_GameObject.instance.m_Name);
 			}
 
-			Parser.file.Bundle.RegisterForUpdate(Parser.m_GameObject.asset);
+			if (Parser.file.Bundle != null)
+			{
+				Parser.file.Bundle.RegisterForUpdate(Parser.m_GameObject.asset);
+			}
 			InitLists();
 			Changed = true;
 		}
@@ -524,7 +539,10 @@ namespace UnityPlugin
 				Frames[destParentId].AddChild(newFrame);
 			}
 
-			Parser.file.Bundle.RegisterForUpdate(Parser.m_GameObject.asset);
+			if (Parser.file.Bundle != null)
+			{
+				Parser.file.Bundle.RegisterForUpdate(Parser.m_GameObject.asset);
+			}
 			InitLists();
 			Changed = true;
 		}
@@ -587,7 +605,10 @@ namespace UnityPlugin
 			srcFrame.file.RemoveSubfile(srcGameObj);
 			srcFrame.file.RemoveSubfile(srcParent);
 
-			Parser.file.Bundle.RegisterForUpdate(Parser.m_GameObject.asset);
+			if (Parser.file.Bundle != null)
+			{
+				Parser.file.Bundle.RegisterForUpdate(Parser.m_GameObject.asset);
+			}
 			InitLists();
 			Changed = true;
 		}
@@ -886,7 +907,10 @@ namespace UnityPlugin
 			MeshRenderer meshR = Meshes[meshId];
 			meshR.m_Materials.RemoveAt(meshR.m_Materials.Count - 1);
 
-			Parser.file.Bundle.RegisterForUpdate(Parser.m_GameObject.asset);
+			if (Parser.file.Bundle != null)
+			{
+				Parser.file.Bundle.RegisterForUpdate(Parser.m_GameObject.asset);
+			}
 			Changed = true;
 		}
 
@@ -898,9 +922,15 @@ namespace UnityPlugin
 			if (mesh != null)
 			{
 				Parser.file.RemoveSubfile(mesh);
-				Parser.file.Bundle.DeleteComponent(mesh);
+				if (Parser.file.Bundle != null)
+				{
+					Parser.file.Bundle.DeleteComponent(mesh);
+				}
 			}
-			Parser.file.Bundle.DeleteComponent(meshR);
+			if (Parser.file.Bundle != null)
+			{
+				Parser.file.Bundle.DeleteComponent(meshR);
+			}
 			meshR.m_GameObject.instance.RemoveLinkedComponent(meshR);
 			Parser.file.RemoveSubfile(meshR);
 
@@ -1053,7 +1083,10 @@ namespace UnityPlugin
 				RemoveRendererMaterial(meshId);
 			}
 
-			Parser.file.Bundle.RegisterForUpdate(Parser.m_GameObject.asset);
+			if (Parser.file.Bundle != null)
+			{
+				Parser.file.Bundle.RegisterForUpdate(Parser.m_GameObject.asset);
+			}
 			Changed = true;
 		}
 
@@ -1165,7 +1198,10 @@ namespace UnityPlugin
 				Report.ReportLog("Warning! Missing Material added");
 			}
 
-			Parser.file.Bundle.RegisterForUpdate(Parser.m_GameObject.asset);
+			if (Parser.file.Bundle != null)
+			{
+				Parser.file.Bundle.RegisterForUpdate(Parser.m_GameObject.asset);
+			}
 			Changed = true;
 		}
 
@@ -1197,19 +1233,27 @@ namespace UnityPlugin
 		{
 			MeshRenderer meshR = Meshes[meshId];
 			Mesh mesh = Operations.GetMesh(meshR);
-			if (mesh.m_SubMeshes.Count == 1)
+			if (mesh.m_SubMeshes.Count == 1 && subMeshId == 0)
 			{
-				RemoveMeshRenderer(meshId);
+				Operations.SetMeshPtr(meshR, null);
+				Parser.file.RemoveSubfile(mesh);
+				if (Parser.file.Bundle != null)
+				{
+					Parser.file.Bundle.DeleteComponent(mesh);
+				}
 			}
 			else
 			{
 				Operations.vMesh vMesh = new Operations.vMesh(meshR, true);
 				vMesh.submeshes.RemoveAt(subMeshId);
 				vMesh.Flush();
-
-				Parser.file.Bundle.RegisterForUpdate(meshR);
-				Changed = true;
 			}
+
+			if (Parser.file.Bundle != null)
+			{
+				Parser.file.Bundle.RegisterForUpdate(meshR);
+			}
+			Changed = true;
 		}
 
 		[Plugin]
@@ -1250,7 +1294,10 @@ namespace UnityPlugin
 		{
 			Materials[id].m_Name = name;
 
-			Parser.file.Bundle.RegisterForUpdate(Materials[id]);
+			if (Parser.file.Bundle != null)
+			{
+				Parser.file.Bundle.RegisterForUpdate(Materials[id]);
+			}
 			Changed = true;
 		}
 
@@ -1316,7 +1363,10 @@ namespace UnityPlugin
 				Textures.Add(tex);
 			}
 
-			Parser.file.Bundle.RegisterForUpdate(Materials[id]);
+			if (Parser.file.Bundle != null)
+			{
+				Parser.file.Bundle.RegisterForUpdate(Materials[id]);
+			}
 			Changed = true;
 		}
 
@@ -1341,7 +1391,10 @@ namespace UnityPlugin
 				Textures.Add(tex);
 			}
 
-			Parser.file.Bundle.RegisterForUpdate(Materials[id]);
+			if (Parser.file.Bundle != null)
+			{
+				Parser.file.Bundle.RegisterForUpdate(Materials[id]);
+			}
 			Changed = true;
 		}
 
@@ -1368,7 +1421,10 @@ namespace UnityPlugin
 				}
 			}
 
-			Parser.file.Bundle.DeleteComponent(mat);
+			if (Parser.file.Bundle != null)
+			{
+				Parser.file.Bundle.DeleteComponent(mat);
+			}
 			Parser.file.RemoveSubfile(mat);
 			Materials.RemoveAt(id);
 			Changed = true;
@@ -1397,7 +1453,10 @@ namespace UnityPlugin
 			Material dest = Operations.FindMaterial(Materials, mat.Name);
 			Operations.ReplaceMaterial(dest, mat);
 
-			Parser.file.Bundle.RegisterForUpdate(dest);
+			if (Parser.file.Bundle != null)
+			{
+				Parser.file.Bundle.RegisterForUpdate(dest);
+			}
 			Changed = true;
 		}
 
@@ -1412,12 +1471,15 @@ namespace UnityPlugin
 					return;
 				}
 				mat.CopyTo(oldMat, false);
-				Parser.file.Bundle.RegisterForUpdate(oldMat);
+				if (Parser.file.Bundle != null)
+				{
+					Parser.file.Bundle.RegisterForUpdate(oldMat);
+				}
 			}
 			else
 			{
 				Material newMat;
-				Component m = Parser.file.Bundle.FindComponent(mat.m_Name, UnityClassID.Material);
+				Component m = Parser.file.Bundle != null ? Parser.file.Bundle.FindComponent(mat.m_Name, UnityClassID.Material) : null;
 				if (m == null)
 				{
 					newMat = mat.Clone(Parser.file, false);
@@ -1438,7 +1500,10 @@ namespace UnityPlugin
 					}
 					oldMat = (Material)m;
 					mat.CopyTo(oldMat, false);
-					Parser.file.Bundle.RegisterForUpdate(oldMat);
+					if (Parser.file.Bundle != null)
+					{
+						Parser.file.Bundle.RegisterForUpdate(oldMat);
+					}
 					newMat = oldMat;
 				}
 				if (!Materials.Contains(newMat))
@@ -1464,7 +1529,10 @@ namespace UnityPlugin
 
 			if (isNew)
 			{
-				Parser.file.Bundle.AddComponent(dstTex);
+				if (Parser.file.Bundle != null)
+				{
+					Parser.file.Bundle.AddComponent(dstTex);
+				}
 				Textures.Add(dstTex);
 			}
 			Changed = true;
@@ -1487,7 +1555,10 @@ namespace UnityPlugin
 
 				if (isNew)
 				{
-					Parser.file.Bundle.AddComponent(dstTex);
+					if (Parser.file.Bundle != null)
+					{
+						Parser.file.Bundle.AddComponent(dstTex);
+					}
 					Textures.Add(dstTex);
 				}
 				Changed = true;
@@ -1499,7 +1570,10 @@ namespace UnityPlugin
 		{
 			Textures[id].m_Name = name;
 
-			Parser.file.Bundle.RegisterForUpdate(Textures[id]);
+			if (Parser.file.Bundle != null)
+			{
+				Parser.file.Bundle.RegisterForUpdate(Textures[id]);
+			}
 			Changed = true;
 		}
 
@@ -1546,7 +1620,10 @@ namespace UnityPlugin
 				}
 			}
 
-			Parser.file.Bundle.DeleteComponent(tex);
+			if (Parser.file.Bundle != null)
+			{
+				Parser.file.Bundle.DeleteComponent(tex);
+			}
 			Parser.file.RemoveSubfile(tex);
 			Parser.file.Parser.Textures.Remove(tex);
 			Textures.RemoveAt(id);
@@ -1577,7 +1654,10 @@ namespace UnityPlugin
 			Textures.Add(tex);
 			tex.LoadFrom(image);
 
-			Parser.file.Bundle.AddComponent(tex);
+			if (Parser.file.Bundle != null)
+			{
+				Parser.file.Bundle.AddComponent(tex);
+			}
 			Changed = true;
 		}
 
@@ -1587,7 +1667,10 @@ namespace UnityPlugin
 			var oldTex = Textures[id];
 			oldTex.LoadFrom(image);
 
-			Parser.file.Bundle.RegisterForUpdate(oldTex);
+			if (Parser.file.Bundle != null)
+			{
+				Parser.file.Bundle.RegisterForUpdate(oldTex);
+			}
 			Changed = true;
 		}
 	}

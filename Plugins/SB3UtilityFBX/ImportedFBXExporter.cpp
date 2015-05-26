@@ -1002,8 +1002,6 @@ namespace SB3Utility
 		for (int meshIdx = 0; meshIdx < imported->MeshList->Count; meshIdx++)
 		{
 			ImportedMesh^ meshList = imported->MeshList[meshIdx];
-			int meshObjIdx = 0;
-			List<ImportedVertex^>^ vertList = meshList->SubmeshList[meshObjIdx]->VertexList;
 
 			ImportedMorph^ morph = nullptr;
 			for each (ImportedMorph^ m in imported->MorphList)
@@ -1039,36 +1037,28 @@ namespace SB3Utility
 			{
 				continue;
 			}
-			FbxNode* pBaseMeshNode = pBaseNode->GetChild(meshObjIdx);
-			FbxMesh* pBaseMesh = pBaseMeshNode->GetMesh();
-			char* pMorphClipName = NULL;
-			try
-			{
-				String^ morphClipName = gcnew String(pBaseMeshNode->GetName()) + "_morph_" + morph->ClipName;
-				pMorphClipName = StringToCharArray(morphClipName);
-				pBaseMeshNode->SetName(pMorphClipName);
-			}
-			finally
-			{
-				Marshal::FreeHGlobal((IntPtr)pMorphClipName);
-			}
 
-			FbxBlendShape* lBlendShape;
-			if (oneBlendShape)
+			int meshVertexIndex = 0;
+			for (int meshObjIdx = 0; meshObjIdx < meshList->SubmeshList->Count; meshObjIdx++)
 			{
-				WITH_MARSHALLED_STRING
-				(
-					pShapeName, morph->Name + "_BlendShape",
-					lBlendShape = FbxBlendShape::Create(pScene, pShapeName);
-				);
-				pBaseMesh->AddDeformer(lBlendShape);
-			}
-			List<ImportedMorphKeyframe^>^ keyframes = morph->KeyframeList;
-			for (int i = 0; i < keyframes->Count; i++)
-			{
-				ImportedMorphKeyframe^ keyframe = keyframes[i];
+				List<ImportedVertex^>^ vertList = meshList->SubmeshList[meshObjIdx]->VertexList;
+				FbxNode* pBaseMeshNode = pBaseNode->GetChild(meshObjIdx);
+				FbxMesh* pBaseMesh = pBaseMeshNode->GetMesh();
 
-				if (!oneBlendShape)
+				char* pMorphClipName = NULL;
+				try
+				{
+					String^ morphClipName = gcnew String(pBaseMeshNode->GetName()) + "_morph_" + morph->ClipName;
+					pMorphClipName = StringToCharArray(morphClipName);
+					pBaseMeshNode->SetName(pMorphClipName);
+				}
+				finally
+				{
+					Marshal::FreeHGlobal((IntPtr)pMorphClipName);
+				}
+
+				FbxBlendShape* lBlendShape;
+				if (oneBlendShape)
 				{
 					WITH_MARSHALLED_STRING
 					(
@@ -1077,58 +1067,82 @@ namespace SB3Utility
 					);
 					pBaseMesh->AddDeformer(lBlendShape);
 				}
-				FbxBlendShapeChannel* lBlendShapeChannel = FbxBlendShapeChannel::Create(pScene, "");
-				FbxShape* pShape;
-				WITH_MARSHALLED_STRING
-				(
-					pMorphShapeName, keyframe->Name, \
-					pShape = FbxShape::Create(pScene, pMorphShapeName);
-				);
-				lBlendShapeChannel->AddTargetShape(pShape);
-				lBlendShape->AddBlendShapeChannel(lBlendShapeChannel);
+				List<ImportedMorphKeyframe^>^ keyframes = morph->KeyframeList;
+				for (int i = 0; i < keyframes->Count; i++)
+				{
+					ImportedMorphKeyframe^ keyframe = keyframes[i];
 
-				pShape->InitControlPoints(vertList->Count);
-				FbxVector4* pControlPoints = pShape->GetControlPoints();
+					if (!oneBlendShape)
+					{
+						WITH_MARSHALLED_STRING
+						(
+							pShapeName, morph->Name + "_BlendShape",
+							lBlendShape = FbxBlendShape::Create(pScene, pShapeName);
+						);
+						pBaseMesh->AddDeformer(lBlendShape);
+					}
+					FbxBlendShapeChannel* lBlendShapeChannel = FbxBlendShapeChannel::Create(pScene, "");
+					FbxShape* pShape;
+					WITH_MARSHALLED_STRING
+					(
+						pMorphShapeName, keyframe->Name, \
+						pShape = FbxShape::Create(pScene, pMorphShapeName);
+					);
+					lBlendShapeChannel->AddTargetShape(pShape);
+					lBlendShape->AddBlendShapeChannel(lBlendShapeChannel);
 
-				FbxLayer* pLayer = pShape->GetLayer(0);
-				if (pLayer == NULL)
-				{
-					pShape->CreateLayer();
-					pLayer = pShape->GetLayer(0);
-				}
+					pShape->InitControlPoints(vertList->Count);
+					FbxVector4* pControlPoints = pShape->GetControlPoints();
 
-				for (int j = 0; j < vertList->Count; j++)
-				{
-					ImportedVertex^ vertex = vertList[j];
-					Vector3 coords = vertex->Position;
-					pControlPoints[j] = FbxVector4(coords.X, coords.Y, coords.Z);
-				}
-				List<unsigned short>^ meshIndices = keyframe->MorphedVertexIndices;
-				for (int j = 0; j < meshIndices->Count; j++)
-				{
-					Vector3 coords = keyframe->VertexList[j]->Position;
-					pControlPoints[meshIndices[j]] = FbxVector4(coords.X, coords.Y, coords.Z);
-				}
+					FbxLayer* pLayer = pShape->GetLayer(0);
+					if (pLayer == NULL)
+					{
+						pShape->CreateLayer();
+						pLayer = pShape->GetLayer(0);
+					}
 
-				FbxLayerElementVertexColor* pVertexColorLayer;
-				WITH_MARSHALLED_STRING
-				(
-					pColourLayerName, morph->KeyframeList[i]->Name,
-					pVertexColorLayer = FbxLayerElementVertexColor::Create(pBaseMesh, pColourLayerName);
-				);
-				pVertexColorLayer->SetMappingMode(FbxLayerElement::eByControlPoint);
-				pVertexColorLayer->SetReferenceMode(FbxLayerElement::eDirect);
-				for (int j = 0; j < vertList->Count; j++)
-				{
-					pVertexColorLayer->GetDirectArray().Add(FbxColor(1, 1, 1));
+					for (int j = 0; j < vertList->Count; j++)
+					{
+						ImportedVertex^ vertex = vertList[j];
+						Vector3 coords = vertex->Position;
+						pControlPoints[j] = FbxVector4(coords.X, coords.Y, coords.Z);
+					}
+					List<unsigned short>^ meshIndices = keyframe->MorphedVertexIndices;
+					for (int j = 0; j < meshIndices->Count; j++)
+					{
+						int controlPointIndex = meshIndices[j] - meshVertexIndex;
+						if (controlPointIndex >= 0 && controlPointIndex < vertList->Count)
+						{
+							Vector3 coords = keyframe->VertexList[j]->Position;
+							pControlPoints[controlPointIndex] = FbxVector4(coords.X, coords.Y, coords.Z);
+						}
+					}
+
+					FbxLayerElementVertexColor* pVertexColorLayer;
+					WITH_MARSHALLED_STRING
+					(
+						pColourLayerName, morph->KeyframeList[i]->Name,
+						pVertexColorLayer = FbxLayerElementVertexColor::Create(pBaseMesh, pColourLayerName);
+					);
+					pVertexColorLayer->SetMappingMode(FbxLayerElement::eByControlPoint);
+					pVertexColorLayer->SetReferenceMode(FbxLayerElement::eDirect);
+					for (int j = 0; j < vertList->Count; j++)
+					{
+						pVertexColorLayer->GetDirectArray().Add(FbxColor(1, 1, 1));
+					}
+					for (int j = 0; j < meshIndices->Count; j++)
+					{
+						int controlPointIndex = meshIndices[j] - meshVertexIndex;
+						if (controlPointIndex >= 0 && controlPointIndex < vertList->Count)
+						{
+							pVertexColorLayer->GetDirectArray().SetAt(controlPointIndex, FbxColor(0, 0, 1));
+						}
+					}
+					pBaseMesh->CreateLayer();
+					pLayer = pBaseMesh->GetLayer(pBaseMesh->GetLayerCount() - 1);
+					pLayer->SetVertexColors(pVertexColorLayer);
 				}
-				for (int j = 0; j < meshIndices->Count; j++)
-				{
-					pVertexColorLayer->GetDirectArray().SetAt(meshIndices[j], FbxColor(0, 0, 1));
-				}
-				pBaseMesh->CreateLayer();
-				pLayer = pBaseMesh->GetLayer(pBaseMesh->GetLayerCount() - 1);
-				pLayer->SetVertexColors(pVertexColorLayer);
+				meshVertexIndex += meshList->SubmeshList[meshObjIdx]->VertexList->Count;
 			}
 		}
 	}

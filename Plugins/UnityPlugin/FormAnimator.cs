@@ -62,11 +62,6 @@ namespace UnityPlugin
 
 		string exportDir;
 		FormAnimatorDragDrop dragOptions;
-		Label[] matMatrixLabel;
-		EditTextBox[][] matMatrixText = new EditTextBox[8][];
-		Label[] matValues;
-		Label[] matTexNamePurpose;
-		ComboBox[] matTexNameCombo;
 		bool SetComboboxEvent = false;
 
 		public string EditorFormVar { get; protected set; }
@@ -314,24 +309,14 @@ namespace UnityPlugin
 			panelTexturePic.Resize += new EventHandler(panelTexturePic_Resize);
 			splitContainer1.Panel2MinSize = tabControlViews.Width;
 
-			matTexNamePurpose = new Label[5] { labelMatTex1, labelMatTex2, labelMatTex3, labelMatTex4, labelMatTex5 };
-			matTexNameCombo = new ComboBox[5] { comboBoxMatTex1, comboBoxMatTex2, comboBoxMatTex3, comboBoxMatTex4, comboBoxMatTex5 };
-			foreach (ComboBox matTexCombo in matTexNameCombo)
-			{
-				matTexCombo.DisplayMember = "Item1";
-				matTexCombo.ValueMember = "Item2";
-			}
-
-			matMatrixLabel = new Label[7] { labelDiffuse, labelAmbient, labelSpecular, labelEmissive, labelRim, labelOutlineColour, labelShadow };
-			matMatrixText[0] = new EditTextBox[4] { textBoxMatDiffuseR, textBoxMatDiffuseG, textBoxMatDiffuseB, textBoxMatDiffuseA };
-			matMatrixText[1] = new EditTextBox[4] { textBoxMatAmbientR, textBoxMatAmbientG, textBoxMatAmbientB, textBoxMatAmbientA };
-			matMatrixText[2] = new EditTextBox[4] { textBoxMatSpecularR, textBoxMatSpecularG, textBoxMatSpecularB, textBoxMatSpecularA };
-			matMatrixText[3] = new EditTextBox[4] { textBoxMatEmissiveR, textBoxMatEmissiveG, textBoxMatEmissiveB, textBoxMatEmissiveA };
-			matMatrixText[4] = new EditTextBox[4] { textBoxMatRimR, textBoxMatRimG, textBoxMatRimB, textBoxMatRimA };
-			matMatrixText[5] = new EditTextBox[4] { textBoxMatOutlineR, textBoxMatOutlineG, textBoxMatOutlineB, textBoxMatOutlineA };
-			matMatrixText[6] = new EditTextBox[4] { textBoxMatShadowR, textBoxMatShadowG, textBoxMatShadowB, textBoxMatShadowA };
-			matMatrixText[7] = new EditTextBox[6] { textBoxMatSpecularPower, textBoxMatRimPower, textBoxMatOutline, textBoxMatExtra, textBoxMatExtra2, textBoxMatExtra3 };
-			matValues = new Label[6] { labelShininess, labelRimPower, labelOutline, labelExtra, labelExtra2, labelExtra3 };
+			dataGridViewMaterialTextures.RowHeadersDefaultCellStyle.Padding = new Padding(dataGridViewMaterialTextures.RowHeadersWidth);
+			dataGridViewMaterialTextures.RowPostPaint += dataGridView_RowPostPaint;
+			dataGridViewMaterialColours.RowHeadersDefaultCellStyle.Padding = new Padding(dataGridViewMaterialColours.RowHeadersWidth);
+			dataGridViewMaterialColours.RowPostPaint += dataGridView_RowPostPaint;
+			dataGridViewMaterialColours.CellValueChanged += dataGridViewMaterialColours_CellValueChanged;
+			dataGridViewMaterialValues.RowHeadersDefaultCellStyle.Padding = new Padding(dataGridViewMaterialValues.RowHeadersWidth);
+			dataGridViewMaterialValues.RowPostPaint += dataGridView_RowPostPaint;
+			dataGridViewMaterialValues.CellValueChanged += dataGridViewMaterialValues_CellValueChanged;
 			LoadMaterial(-1);
 
 			DataGridViewEditor.InitDataGridViewSRT(dataGridViewFrameSRT, dataGridViewFrameMatrix);
@@ -348,6 +333,10 @@ namespace UnityPlugin
 			ColumnSubmeshMaterial.ValueMember = "Item2";
 			ColumnSubmeshMaterial.DefaultCellStyle.NullValue = "(invalid)";
 
+			ColumnMaterialTexture.DisplayMember = "Item1";
+			ColumnMaterialTexture.ValueMember = "Item2";
+			ColumnMaterialTexture.DefaultCellStyle.NullValue = "(invalid)";
+
 			comboBoxAvatar.DisplayMember = "Item1";
 			comboBoxAvatar.ValueMember = "Item2";
 
@@ -356,21 +345,6 @@ namespace UnityPlugin
 
 			comboBoxRendererRootBone.DisplayMember = "Item1";
 			comboBoxRendererRootBone.ValueMember = "Item2";
-
-			for (int i = 0; i < matMatrixText.Length; i++)
-			{
-				for (int j = 0; j < matMatrixText[i].Length; j++)
-				{
-					matMatrixText[i][j].AfterEditTextChanged += new EventHandler(matMatrixText_AfterEditTextChanged);
-					matMatrixText[i][j].Tag = new Tuple<int, int>(i, j);
-				}
-			}
-
-			for (int i = 0; i < matTexNameCombo.Length; i++)
-			{
-				matTexNameCombo[i].Tag = i;
-				matTexNameCombo[i].SelectedIndexChanged += new EventHandler(matTexNameCombo_SelectedIndexChanged);
-			}
 
 			MeshExportFormat[] values = Enum.GetValues(typeof(MeshExportFormat)) as MeshExportFormat[];
 			string[] descriptions = new string[values.Length];
@@ -392,6 +366,18 @@ namespace UnityPlugin
 			}
 			comboBoxMorphExportFormat.Items.AddRange(descriptions);
 			comboBoxMorphExportFormat.SelectedIndex = 1;
+		}
+
+		// http://stackoverflow.com/questions/5825088/net-datagridview-remove-current-row-black-triangle
+		void dataGridView_RowPostPaint(object sender, DataGridViewRowPostPaintEventArgs e)
+		{
+			object o = ((DataGridView)sender).Rows[e.RowIndex].HeaderCell.Value;
+
+			e.Graphics.DrawString(
+				o != null ? o.ToString() : "",
+				((DataGridView)sender).Font,
+				Brushes.Black,
+				new PointF((float)e.RowBounds.Left + 2, (float)e.RowBounds.Top + 4));
 		}
 
 		void LoadAnimator(bool refreshLists)
@@ -875,29 +861,29 @@ namespace UnityPlugin
 				listViewTexture.ItemSelectionChanged += listViewTexture_ItemSelectionChanged;
 			}
 
-			for (int i = 0; i < matTexNameCombo.Length; i++)
-			{
-				matTexNameCombo[i].Items.Clear();
-				matTexNameCombo[i].Items.Add(new Tuple<string, Component>("(none)", null));
-			}
+			List<Tuple<string, int, Component>> columnTextures = new List<Tuple<string, int, Component>>(Editor.Textures.Count * 2);
+			columnTextures.Add
+			(
+				new Tuple<string, int, Component>("(none)", -1, null)
+			);
 			for (int i = 0; i < Editor.Parser.file.Components.Count; i++)
 			{
 				Component asset = Editor.Parser.file.Components[i];
 				if (asset.classID1 == UnityClassID.Texture2D || asset.classID1 == UnityClassID.Cubemap)
 				{
-					for (int j = 0; j < matTexNameCombo.Length; j++)
-					{
-						matTexNameCombo[j].Items.Add
+					columnTextures.Add
+					(
+						new Tuple<string, int, Component>
 						(
-							new Tuple<string, Component>
-							(
-								asset.pathID + " " + (asset is NotLoaded ? ((NotLoaded)asset).Name : ((Texture2D)asset).m_Name),
-								Editor.Parser.file.Components[i]
-							)
-						);
-					}
+							asset.pathID + " " + (asset is NotLoaded ? ((NotLoaded)asset).Name : ((Texture2D)asset).m_Name),
+							Editor.Textures.IndexOf(asset as Texture2D),
+							asset
+						)
+					);
 				}
 			}
+			ColumnMaterialTexture.DataSource = columnTextures;
+			SetComboboxEvent = false;
 
 			TreeNode texturesNode = new TreeNode("Textures");
 			TreeNode currentTexture = null;
@@ -1067,6 +1053,9 @@ namespace UnityPlugin
 						);
 					}
 					dataGridViewMesh.ClearSelection();
+					int newHeight = dataGridViewMesh.ColumnHeadersHeight + 2 + Math.Min(dataGridViewMesh.Rows.Count, 4) * 22;
+					dataGridViewMesh.Height = newHeight;
+					groupBoxMesh.Height = dataGridViewMesh.Height + 135;
 				}
 				else
 				{
@@ -1107,32 +1096,17 @@ namespace UnityPlugin
 			{
 				loadedMaterial = -1;
 			}
+			dataGridViewMaterialTextures.Rows.Clear();
+			dataGridViewMaterialColours.CellValueChanged -= dataGridViewMaterialColours_CellValueChanged;
+			dataGridViewMaterialColours.Rows.Clear();
+			dataGridViewMaterialValues.CellValueChanged -= dataGridViewMaterialValues_CellValueChanged;
+			dataGridViewMaterialValues.Rows.Clear();
 
 			if (id < 0)
 			{
 				textBoxMatName.Text = String.Empty;
-				for (int i = 0; i < matTexNameCombo.Length; i++)
-				{
-					matTexNamePurpose[i].Text = String.Empty;
-					matTexNameCombo[i].SelectedIndex = -1;
-				}
 				editTextBoxMatShader.Text = String.Empty;
 				comboBoxMatShaderKeywords.Items.Clear();
-				for (int i = 0; i < matMatrixText.Length; i++)
-				{
-					if (i < matMatrixLabel.Length)
-					{
-						matMatrixLabel[i].Text = String.Empty;
-					}
-					for (int j = 0; j < matMatrixText[i].Length; j++)
-					{
-						matMatrixText[i][j].Text = String.Empty;
-					}
-				}
-				for (int i = 0; i < matValues.Length; i++)
-				{
-					matValues[i].Text = String.Empty;
-				}
 			}
 			else
 			{
@@ -1153,59 +1127,102 @@ namespace UnityPlugin
 					comboBoxMatShaderKeywords.SelectedIndex = 0;
 				}
 
-				for (int i = 0; i < mat.m_SavedProperties.m_TexEnvs.Count && i < matTexNamePurpose.Length; i++)
+				for (int i = 0; i < mat.m_SavedProperties.m_TexEnvs.Count; i++)
 				{
 					var matTex = mat.m_SavedProperties.m_TexEnvs[i];
-					if (matTex.Value.m_Texture.instance == null)
-					{
-						matTexNamePurpose[i].Text = String.Empty;
-						matTexNameCombo[i].SelectedIndex = 0;
-					}
-					else
-					{
-						matTexNamePurpose[i].Text = ShortLabel(matTex.Key.name);
-						string matTexName = matTex.Value.m_Texture.instance.m_Name;
-						for (int j = 0; j < matTexNameCombo[i].Items.Count; j++)
+					dataGridViewMaterialTextures.Rows.Add
+					(
+						new object[]
 						{
-							Tuple<string, Component> item = (Tuple<string, Component>)matTexNameCombo[i].Items[j];
-							if (item.Item2 == matTex.Value.m_Texture.instance)
-							{
-								matTexNameCombo[i].SelectedIndex = j;
-								break;
-							}
+							matTex.Value.m_Texture.instance != null ? (object)Editor.Textures.IndexOf(matTex.Value.m_Texture.instance) : null,
 						}
+					);
+					dataGridViewMaterialTextures.Rows[i].HeaderCell.Value = ShortLabel(matTex.Key.name);
+					if (matTex.Value.m_Texture.m_FileID != 0)
+					{
+						Report.ReportLog(dataGridViewMaterialTextures.Rows[i].HeaderCell.Value + " with external Texture FileID=" + matTex.Value.m_Texture.m_FileID + " PathID=" + matTex.Value.m_Texture.m_PathID);
 					}
 				}
-				if (mat.m_SavedProperties.m_TexEnvs.Count > matTexNamePurpose.Length)
+				if (mat.m_SavedProperties.m_TexEnvs.Count == 0)
 				{
-					Report.ReportLog("Warning! Material " + mat.m_Name + " features " + mat.m_SavedProperties.m_TexEnvs.Count + " textures!");
+					dataGridViewMaterialTextures.Rows.Add
+					(
+						new object[] { null }
+					);
+					dataGridViewMaterialTextures.Rows[0].HeaderCell.Value = "No Texture";
+					dataGridViewMaterialTextures.Enabled = false;
 				}
+				else
+				{
+					dataGridViewMaterialTextures.Enabled = true;
+				}
+				int newHeight = dataGridViewMaterialTextures.ColumnHeadersHeight + 2 + Math.Min(dataGridViewMaterialTextures.Rows.Count, 6) * 22;
+				dataGridViewMaterialTextures.Height = newHeight;
 
-				for (int i = 0; i < mat.m_SavedProperties.m_Colors.Count && i < matMatrixLabel.Length; i++)
+				for (int i = 0; i < mat.m_SavedProperties.m_Colors.Count; i++)
 				{
 					var colPair = mat.m_SavedProperties.m_Colors[i];
-					matMatrixLabel[i].Text = ShortLabel(colPair.Key.name);
-					matMatrixText[i][0].Text = colPair.Value.Red.ToFloatString();
-					matMatrixText[i][1].Text = colPair.Value.Green.ToFloatString();
-					matMatrixText[i][2].Text = colPair.Value.Blue.ToFloatString();
-					matMatrixText[i][3].Text = colPair.Value.Alpha.ToFloatString();
+					dataGridViewMaterialColours.Rows.Add
+					(
+						new object[]
+						{
+							colPair.Value.Red,
+							colPair.Value.Green,
+							colPair.Value.Blue,
+							colPair.Value.Alpha
+						}
+					);
+					dataGridViewMaterialColours.Rows[i].HeaderCell.Value = ShortLabel(colPair.Key.name);
 				}
-				if (mat.m_SavedProperties.m_Colors.Count > matMatrixLabel.Length)
+				if (mat.m_SavedProperties.m_Colors.Count == 0)
 				{
-					Report.ReportLog("Warning! Material " + mat.m_Name + " features " + mat.m_SavedProperties.m_Colors.Count + " colours!");
+					dataGridViewMaterialColours.Rows.Add
+					(
+						new object[] { null, null, null, null }
+					);
+					dataGridViewMaterialColours.Rows[0].HeaderCell.Value = "No Color";
+					dataGridViewMaterialColours.Enabled = false;
 				}
+				else
+				{
+					dataGridViewMaterialColours.Enabled = true;
+				}
+				newHeight = dataGridViewMaterialColours.ColumnHeadersHeight + 2 + Math.Min(dataGridViewMaterialColours.Rows.Count, 6) * 22;
+				dataGridViewMaterialColours.Top = dataGridViewMaterialTextures.Top + dataGridViewMaterialTextures.Height + 8;
+				dataGridViewMaterialColours.Height = newHeight;
 
-				for (int i = 0; i < mat.m_SavedProperties.m_Floats.Count && i < matValues.Length; i++)
+				for (int i = 0; i < mat.m_SavedProperties.m_Floats.Count; i++)
 				{
 					var floatPair = mat.m_SavedProperties.m_Floats[i];
-					matValues[i].Text = ShortLabel(floatPair.Key.name);
-					matMatrixText[7][i].Text = floatPair.Value.ToFloatString();
+					dataGridViewMaterialValues.Rows.Add
+					(
+						new object[] { floatPair.Value }
+					);
+					dataGridViewMaterialValues.Rows[i].HeaderCell.Value = ShortLabel(floatPair.Key.name);
 				}
-				if (mat.m_SavedProperties.m_Floats.Count > matValues.Length)
+				if (mat.m_SavedProperties.m_Floats.Count == 0)
 				{
-					Report.ReportLog("Warning! Material " + mat.m_Name + " features " + mat.m_SavedProperties.m_Floats.Count + " values!");
+					dataGridViewMaterialValues.Rows.Add
+					(
+						new object[] { null }
+					);
+					dataGridViewMaterialValues.Rows[0].HeaderCell.Value = "No Value";
+					dataGridViewMaterialValues.Enabled = false;
 				}
+				else
+				{
+					dataGridViewMaterialValues.Enabled = true;
+				}
+				newHeight = 3 + Math.Min(dataGridViewMaterialValues.Rows.Count, 10) * 22;
+				dataGridViewMaterialValues.Top = dataGridViewMaterialColours.Top + dataGridViewMaterialColours.Height + 8;
+				dataGridViewMaterialValues.Height = newHeight;
+
+				buttonMaterialRemove.Top = dataGridViewMaterialValues.Top;
+				buttonMaterialCopy.Top = buttonMaterialRemove.Top + buttonMaterialRemove.Height + 8;
 			}
+
+			dataGridViewMaterialColours.CellValueChanged += dataGridViewMaterialColours_CellValueChanged;
+			dataGridViewMaterialValues.CellValueChanged += dataGridViewMaterialValues_CellValueChanged;
 			loadedMaterial = id;
 		}
 
@@ -2190,10 +2207,6 @@ namespace UnityPlugin
 								{
 									bonesCopyNear = false;
 								}
-							}
-							if (!bonesCopyNear)
-							{
-								dragOptions.radioButtonMeshReplace.Checked = true;
 							}
 						}
 						if (!dragOptions.checkBoxMeshNormalsLock.Checked)
@@ -3673,7 +3686,7 @@ namespace UnityPlugin
 
 		void HighlightSubmeshes()
 		{
-			if (loadedMesh < 0)
+			if (loadedMesh < 0 || Gui.Docking.DockRenderer.IsHidden)
 			{
 				return;
 			}
@@ -3822,6 +3835,31 @@ namespace UnityPlugin
 			}
 		}
 
+		private void buttonMeshSubmeshAddDeleteMaterial_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (loadedMesh < 0)
+				{
+					return;
+				}
+
+				if (sender == buttonMeshSubmeshAddMaterial)
+				{
+					Gui.Scripting.RunScript(EditorVar + ".AddRendererMaterial(meshId=" + loadedMesh + ", materialId=" + -1 + ")");
+				}
+				else if (Editor.Meshes[loadedMesh].m_Materials.Count > 0)
+				{
+					Gui.Scripting.RunScript(EditorVar + ".RemoveRendererMaterial(meshId=" + loadedMesh + ")");
+				}
+				LoadMesh(loadedMesh);
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
 		private void buttonMeshSubmeshRemove_Click(object sender, EventArgs e)
 		{
 			try
@@ -3842,17 +3880,21 @@ namespace UnityPlugin
 				}
 				indices.Sort();
 
-				bool meshRemoved = (indices.Count == dataGridViewMesh.Rows.Count);
-
+				Mesh mesh = Operations.GetMesh(Editor.Meshes[loadedMesh]);
+				int numSubmeshes = mesh != null ? mesh.m_SubMeshes.Count : 0;
 				for (int i = 0; i < indices.Count; i++)
 				{
 					int index = indices[i] - i;
-					Gui.Scripting.RunScript(EditorVar + ".RemoveSubMesh(meshId=" + loadedMesh + ", subMeshId=" + index + ")");
-					Changed = Changed;
+					if (index < numSubmeshes)
+					{
+						Gui.Scripting.RunScript(EditorVar + ".RemoveSubMesh(meshId=" + loadedMesh + ", subMeshId=" + index + ")");
+						Changed = Changed;
+					}
 				}
 
 				dataGridViewMesh.SelectionChanged += new EventHandler(dataGridViewMesh_SelectionChanged);
 
+				bool meshRemoved = Operations.GetMesh(Editor.Meshes[loadedMesh]) == null;
 				if (meshRemoved)
 				{
 					RecreateMeshes();
@@ -4040,6 +4082,11 @@ namespace UnityPlugin
 					Report.ReportLog("No morph clip was selected");
 					return;
 				}
+				if (listViewMesh.SelectedIndices.Count == 0)
+				{
+					Report.ReportLog("No mesh was selected");
+					return;
+				}
 
 				TreeNode meshNode = treeViewMorphKeyframes.SelectedNode;
 				if (meshNode.Parent != null)
@@ -4063,6 +4110,10 @@ namespace UnityPlugin
 				if (path.ToLower().EndsWith(".unity3d"))
 				{
 					path = path.Substring(0, path.Length - 8);
+				}
+				else if (path.ToLower().EndsWith(".assets"))
+				{
+					path = path.Substring(0, path.Length - 7);
 				}
 				path += @"\" + Editor.Parser.m_GameObject.instance.m_Name;
 				switch ((MorphExportFormat)comboBoxMorphExportFormat.SelectedIndex)
@@ -4308,59 +4359,95 @@ namespace UnityPlugin
 			listView.Sort();
 		}
 
-		void matTexNameCombo_SelectedIndexChanged(object sender, EventArgs e)
+		private void dataGridViewMaterialTextures_CellClick(object sender, DataGridViewCellEventArgs e)
 		{
 			try
 			{
-				if (loadedMaterial < 0)
+				if ((dataGridViewMaterialTextures.CurrentRow != null) && (dataGridViewMaterialTextures.CurrentCell.ColumnIndex == 0))
 				{
-					return;
+					dataGridViewMaterialTextures.BeginEdit(true);
 				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
 
+		private void dataGridViewMaterialTextures_DataError(object sender, DataGridViewDataErrorEventArgs e)
+		{
+			e.ThrowException = false;
+		}
+
+		// http://connect.microsoft.com/VisualStudio/feedback/details/151567/datagridviewcomboboxcell-needs-selectedindexchanged-event
+		private void dataGridViewMaterialTextures_EditingControlShowing(object sender, DataGridViewEditingControlShowingEventArgs e)
+		{
+			try
+			{
+				if (!SetComboboxEvent)
+				{
+					if (e.Control.GetType() == typeof(DataGridViewComboBoxEditingControl))
+					{
+						ComboBox comboBoxCell = (ComboBox)e.Control;
+						if (comboBoxCell != null)
+						{
+							//Remove an existing event-handler, if present, to avoid
+							//adding multiple handlers when the editing control is reused.
+							comboBoxCell.SelectionChangeCommitted -= new EventHandler(matTexComboBoxCell_SelectionChangeCommitted);
+
+							//Add the event handler.
+							comboBoxCell.SelectionChangeCommitted += new EventHandler(matTexComboBoxCell_SelectionChangeCommitted);
+							SetComboboxEvent = true;
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void matTexComboBoxCell_SelectionChangeCommitted(object sender, EventArgs e)
+		{
+			try
+			{
 				ComboBox combo = (ComboBox)sender;
-				int matTexIdx = (int)combo.Tag;
-				Component asset = ((Tuple<string, Component>)combo.Items[combo.SelectedIndex]).Item2;
-				int compIdx = Editor.Parser.file.Components.IndexOf(asset);
-				Gui.Scripting.RunScript(EditorVar + ".SetMaterialTexture(id=" + loadedMaterial + ", index=" + matTexIdx + ", componentIndex=" + compIdx + ")");
-				Changed = Changed;
-
-				InitTextures();
-				RecreateRenderObjects();
-				RecreateCrossRefs();
-				LoadMaterial(loadedMaterial);
-			}
-			catch (Exception ex)
-			{
-				Utility.ReportException(ex);
-			}
-		}
-
-		void matMatrixText_AfterEditTextChanged(object sender, EventArgs e)
-		{
-			try
-			{
-				if (loadedMaterial < 0)
+				if (combo.SelectedValue == null)
 				{
 					return;
 				}
 
+				List<Tuple<string, int, Component>> columnTextures = (List<Tuple<string, int, Component>>)ColumnMaterialTexture.DataSource;
+				int texIdx = combo.SelectedIndex != -1 ? columnTextures[combo.SelectedIndex].Item2 : -1;
+				int rowIdx = dataGridViewMaterialTextures.CurrentCell.RowIndex;
 				Material mat = Editor.Materials[loadedMaterial];
-				Tuple<int, int> rowCol = (Tuple<int, int>)((EditTextBox)sender).Tag;
-				int row = rowCol.Item1;
-				int col = rowCol.Item2;
-				if (row < 7)
+				Texture2D matTex = mat.m_SavedProperties.m_TexEnvs[rowIdx].Value.m_Texture.instance;
+				if (matTex == null || Editor.Textures.IndexOf(matTex) != texIdx)
 				{
-					Gui.Scripting.RunScript(EditorVar + ".SetMaterialColour(id=" + loadedMaterial + ", index=" + row + ", colour=" + MatMatrixColorScript(matMatrixText[row]) + ")");
-				}
-				else
-				{
-					Gui.Scripting.RunScript(EditorVar + ".SetMaterialValue(id=" + loadedMaterial + ", index=" + col + ", value=" + Single.Parse(((EditTextBox)sender).Text).ToFloatString() + ")");
-				}
-				Changed = Changed;
+					dataGridViewMesh.CommitEdit(DataGridViewDataErrorContexts.Commit);
 
-				RecreateRenderObjects();
-				RecreateCrossRefs();
-				LoadMaterial(loadedMaterial);
+						if (texIdx == -1 || Editor.Textures[texIdx] != matTex)
+						{
+							Gui.Scripting.RunScript(EditorVar + ".SetMaterialTexture(id=" + loadedMaterial + ", index=" + rowIdx + ", componentIndex=" + Editor.Parser.file.Components.IndexOf(columnTextures[combo.SelectedIndex].Item3) + ")");
+							Changed = Changed;
+						}
+						else
+						{
+							return;
+						}
+
+						if (texIdx == -1)
+						{
+							InitMaterials();
+							InitTextures();
+						}
+						RecreateRenderObjects();
+						RecreateCrossRefs();
+						matTex = mat.m_SavedProperties.m_TexEnvs[rowIdx].Value.m_Texture.instance;
+						dataGridViewMaterialTextures.CurrentCell.Value = Editor.Textures.IndexOf(matTex);
+						combo.SelectedValue = dataGridViewMaterialTextures.CurrentCell.Value;
+				}
 			}
 			catch (Exception ex)
 			{
@@ -4368,13 +4455,75 @@ namespace UnityPlugin
 			}
 		}
 
-		string MatMatrixColorScript(EditTextBox[] textBoxes)
+		private void dataGridViewMaterialTextures_KeyDown(object sender, KeyEventArgs e)
 		{
+			try
+			{
+				if (e.KeyData == Keys.Escape)
+				{
+					while (dataGridViewMaterialTextures.SelectedRows.Count > 0)
+					{
+						dataGridViewMaterialTextures.SelectedRows[0].Selected = false;
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void dataGridViewMaterialColours_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+		{
+			try
+			{
+				if (dataGridViewMaterialColours.SelectedCells[0].Value is string)
+				{
+					dataGridViewMaterialColours.SelectedCells[0].Value = Single.Parse((string)dataGridViewMaterialColours.SelectedCells[0].Value);
+					Gui.Scripting.RunScript(EditorVar + ".SetMaterialColour(id=" + loadedMaterial + ", index=" + e.RowIndex + ", colour=" + MatMatrixColorScript(e.RowIndex) + ")");
+					Changed = Changed;
+
+					RecreateRenderObjects();
+					RecreateCrossRefs();
+					LoadMaterial(loadedMaterial);
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		string MatMatrixColorScript(int index)
+		{
+			DataGridViewRow row = dataGridViewMaterialColours.Rows[index];
 			return "{ " +
-				Single.Parse(textBoxes[0].Text).ToFloatString() + ", " +
-				Single.Parse(textBoxes[1].Text).ToFloatString() + ", " +
-				Single.Parse(textBoxes[2].Text).ToFloatString() + ", " +
-				Single.Parse(textBoxes[3].Text).ToFloatString() + " }";
+				((float)row.Cells[0].Value).ToFloatString() + ", " +
+				((float)row.Cells[1].Value).ToFloatString() + ", " +
+				((float)row.Cells[2].Value).ToFloatString() + ", " +
+				((float)row.Cells[3].Value).ToFloatString() + " }";
+		}
+
+		private void dataGridViewMaterialValues_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+		{
+			try
+			{
+				if (dataGridViewMaterialValues.SelectedCells[0].Value is string)
+				{
+					float value = Single.Parse((string)dataGridViewMaterialValues.SelectedCells[0].Value);
+					dataGridViewMaterialValues.SelectedCells[0].Value = value;
+					Gui.Scripting.RunScript(EditorVar + ".SetMaterialValue(id=" + loadedMaterial + ", index=" + e.RowIndex + ", value=" + value.ToFloatString() + ")");
+					Changed = Changed;
+
+					RecreateRenderObjects();
+					RecreateCrossRefs();
+					LoadMaterial(loadedMaterial);
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
 		}
 
 		private void buttonMaterialRemove_Click(object sender, EventArgs e)

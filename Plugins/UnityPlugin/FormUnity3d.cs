@@ -1292,6 +1292,60 @@ namespace UnityPlugin
 			}
 		}
 
+		private void viewDataToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				ListView subfilesList = null;
+				if (tabControlAssets.SelectedTab == tabPageOthers)
+				{
+					subfilesList = othersList;
+				}
+				if (subfilesList != null)
+				{
+					foreach (ListViewItem item in subfilesList.SelectedItems)
+					{
+						Component asset = (Component)item.Tag;
+						switch (asset.classID2)
+						{
+						case UnityClassID.MonoBehaviour:
+							try
+							{
+								Editor.Parser.Cabinet.BeginLoadingSkippedComponents();
+								Editor.Parser.Cabinet.SourceStream.Position = ((NotLoaded)asset).offset;
+								PPtr<MonoScript> scriptRef = MonoBehaviour.LoadMonoScriptRef(Editor.Parser.Cabinet.SourceStream);
+								Report.ReportLog(asset.classID2 + " " + asset.classID1 + ": MonoScript FileID: " + scriptRef.m_FileID + ", PathID: " + scriptRef.m_PathID);
+							}
+							finally
+							{
+								Editor.Parser.Cabinet.EndLoadingSkippedComponents();
+							}
+							break;
+						case UnityClassID.MonoScript:
+							if (asset is NotLoaded)
+							{
+								asset = Editor.Parser.Cabinet.LoadComponent(asset.pathID);
+								item.Tag = asset;
+							}
+							MonoScript script = (MonoScript)asset;
+							Report.ReportLog
+							(
+								asset.classID1 + " PathID: " + asset.pathID
+								+ "\r\n\tClassName: " + script.m_ClassName
+								+ "\r\n\tNamespace: " + script.m_Namespace
+								+ "\r\n\tAssemply: " + script.m_AssemblyName
+							);
+							break;
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
 		private void othersList_DoubleClick(object sender, EventArgs e)
 		{
 			using (Stream stream = File.OpenRead(Editor.Parser.FilePath))

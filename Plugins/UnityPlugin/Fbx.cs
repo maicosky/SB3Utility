@@ -299,7 +299,6 @@ namespace UnityPlugin
 						morph.Name = iMesh.Name;
 						morph.ClipName = Operations.BlendShapeName(mesh);
 						morph.KeyframeList = new List<ImportedMorphKeyframe>(mesh.m_Shapes.shapes.Count);
-						List<ImportedVertex> vertList = iMesh.SubmeshList[0].VertexList;
 						for (int i = 0; i < mesh.m_Shapes.shapes.Count; i++)
 						{
 							ImportedMorphKeyframe keyframe = new ImportedMorphKeyframe();
@@ -310,7 +309,7 @@ namespace UnityPlugin
 							for (int j = (int)mesh.m_Shapes.shapes[i].firstVertex; j < lastVertIndex; j++)
 							{
 								BlendShapeVertex morphVert = mesh.m_Shapes.vertices[j];
-								ImportedVertex vert = vertList[(int)morphVert.index];
+								ImportedVertex vert = GetSourceVertex(iMesh.SubmeshList, (int)morphVert.index);
 								ImportedVertex destVert = new ImportedVertex();
 								destVert.Position = vert.Position + morphVert.vertex;
 								destVert.Normal = vert.Normal;
@@ -325,6 +324,20 @@ namespace UnityPlugin
 
 					MeshList.Add(iMesh);
 				}
+			}
+
+			private static ImportedVertex GetSourceVertex(List<ImportedSubmesh> submeshList, int morphVertIndex)
+			{
+				for (int i = 0; i < submeshList.Count; i++)
+				{
+					List<ImportedVertex> vertList = submeshList[i].VertexList;
+					if (morphVertIndex < vertList.Count)
+					{
+						return vertList[morphVertIndex];
+					}
+					morphVertIndex -= vertList.Count;
+				}
+				return null;
 			}
 
 			public void WorldCoordinates(int meshIdx, Matrix worldTransform)

@@ -1,5 +1,17 @@
-﻿[1.0.11]
+﻿[1.0.12]
   - UnityPlugin Update Only
+  - Fixed error when Renderer was hidden and several meshes were selected
+  - Added export/replace/display for morphs with meshes having more than one submesh
+  - Added Copy/Paste for Mesh, Avatar, TextAsset. Copy/Paste in *.assets files
+  - Fix for references to invalid assets
+  - Added add & delete Multi-Pass materials
+  - Changed that deleting the last submesh only deletes the Mesh, the Renderer remains
+  - Changed Material Editor Layout to show all material Textures, Colours and Values
+
+[1.0.11]
+  - UnityPlugin Update Only
+  - Added support for *.assets files and files without extension
+  - Added "Rename" for (loadable) Assets
   - Fix for virtual Animators being unopenable
   - Files without extension are treated like *.assets, all three backup extensions are editable
   - Meshes (and their morphs) are exported by reference to allow duplicate names
@@ -12,7 +24,6 @@
   - Fix for all names: encoding set to UTF-8
   - Fix for unknown childs of Transforms
   - Fix for setting a Material's texture slot to "none"
-  - Added "Rename" for (loadable) Assets
 
 [1.0.10]
   - UnityPlugin Update Only

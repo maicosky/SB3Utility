@@ -306,13 +306,16 @@ namespace UnityPlugin
 
 		public Material Clone(AssetCabinet file, bool cloneTextures)
 		{
-			Component mat = file.Bundle.FindComponent(m_Name, UnityClassID.Material);
+			Component mat = file.Bundle != null ? file.Bundle.FindComponent(m_Name, UnityClassID.Material) : null;
 			if (mat == null)
 			{
 				file.MergeTypeDefinition(this.file, UnityClassID.Material);
 
 				mat = new Material(file);
-				file.Bundle.AddComponent(m_Name, mat);
+				if (file.Bundle != null)
+				{
+					file.Bundle.AddComponent(m_Name, mat);
+				}
 				CopyTo((Material)mat, cloneTextures);
 			}
 			else if (mat is NotLoaded)

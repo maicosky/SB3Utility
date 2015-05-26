@@ -45,6 +45,7 @@
 			this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
 			this.markForCopyingtoolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.pasteAllMarkedtoolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
 			this.removeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
 			this.renameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -57,8 +58,10 @@
 			this.backupExtension3ToolStripEditTextBox = new SB3Utility.ToolStripEditTextBox();
 			this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
 			this.filterIncludedAssetsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
 			this.dumpAssetBundleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.dumpTypeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.viewDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.panel1 = new System.Windows.Forms.Panel();
 			this.tabControlAssets = new System.Windows.Forms.TabControl();
 			this.tabPageAnimators = new System.Windows.Forms.TabPage();
@@ -189,7 +192,7 @@
             this.toolStripSeparator2,
             this.markForCopyingtoolStripMenuItem,
             this.pasteAllMarkedtoolStripMenuItem,
-            this.removeToolStripMenuItem,
+            this.toolStripMenuItem1,
             this.toolStripSeparator3,
             this.renameToolStripMenuItem,
             this.multiRenameToolStripMenuItem});
@@ -226,7 +229,7 @@
 			this.markForCopyingtoolStripMenuItem.Name = "markForCopyingtoolStripMenuItem";
 			this.markForCopyingtoolStripMenuItem.Size = new System.Drawing.Size(156, 22);
 			this.markForCopyingtoolStripMenuItem.Text = "Mark for &Copying";
-			this.markForCopyingtoolStripMenuItem.ToolTipText = "Unmarks not selected assets from this tab";
+			this.markForCopyingtoolStripMenuItem.ToolTipText = "Unmarks not selected assets from this tab.";
 			this.markForCopyingtoolStripMenuItem.Click += new System.EventHandler(this.markForCopyingtoolStripMenuItem_Click);
 			// 
 			// pasteAllMarkedtoolStripMenuItem
@@ -234,12 +237,22 @@
 			this.pasteAllMarkedtoolStripMenuItem.Name = "pasteAllMarkedtoolStripMenuItem";
 			this.pasteAllMarkedtoolStripMenuItem.Size = new System.Drawing.Size(156, 22);
 			this.pasteAllMarkedtoolStripMenuItem.Text = "&Paste All Marked";
+			this.pasteAllMarkedtoolStripMenuItem.ToolTipText = "Supported Assets to be Pasted:\r\nAnimator, Virtual Animator, Avatar,\r\nMaterial, Sh" +
+    "ader, Texture2D, Cubemap,\r\nMesh, Sprite,\r\nMonoBehaviour, TextAsset";
 			this.pasteAllMarkedtoolStripMenuItem.Click += new System.EventHandler(this.pasteAllMarkedtoolStripMenuItem_Click);
+			// 
+			// toolStripMenuItem1
+			// 
+			this.toolStripMenuItem1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.removeToolStripMenuItem});
+			this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+			this.toolStripMenuItem1.Size = new System.Drawing.Size(156, 22);
+			this.toolStripMenuItem1.Text = "Attention!";
 			// 
 			// removeToolStripMenuItem
 			// 
 			this.removeToolStripMenuItem.Name = "removeToolStripMenuItem";
-			this.removeToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
+			this.removeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
 			this.removeToolStripMenuItem.Text = "Re&move";
 			this.removeToolStripMenuItem.Click += new System.EventHandler(this.removeToolStripMenuItem_Click);
 			// 
@@ -251,6 +264,7 @@
 			// renameToolStripMenuItem
 			// 
 			this.renameToolStripMenuItem.Name = "renameToolStripMenuItem";
+			this.renameToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F2;
 			this.renameToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
 			this.renameToolStripMenuItem.Text = "Re&name";
 			this.renameToolStripMenuItem.Click += new System.EventHandler(this.renameToolStripMenuItem_Click);
@@ -269,8 +283,10 @@
             this.backupExtensionToolStripMenuItem,
             this.toolStripSeparator7,
             this.filterIncludedAssetsToolStripMenuItem,
+            this.toolStripSeparator8,
             this.dumpAssetBundleToolStripMenuItem,
-            this.dumpTypeToolStripMenuItem});
+            this.dumpTypeToolStripMenuItem,
+            this.viewDataToolStripMenuItem});
 			this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
 			this.optionsToolStripMenuItem.Size = new System.Drawing.Size(56, 20);
 			this.optionsToolStripMenuItem.Text = "&Options";
@@ -322,6 +338,11 @@
 			this.filterIncludedAssetsToolStripMenuItem.Text = "&Filter Included Assets";
 			this.filterIncludedAssetsToolStripMenuItem.CheckedChanged += new System.EventHandler(this.filterIncludedAssetsToolStripMenuItem_CheckedChanged);
 			// 
+			// toolStripSeparator8
+			// 
+			this.toolStripSeparator8.Name = "toolStripSeparator8";
+			this.toolStripSeparator8.Size = new System.Drawing.Size(174, 6);
+			// 
 			// dumpAssetBundleToolStripMenuItem
 			// 
 			this.dumpAssetBundleToolStripMenuItem.Name = "dumpAssetBundleToolStripMenuItem";
@@ -335,6 +356,14 @@
 			this.dumpTypeToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
 			this.dumpTypeToolStripMenuItem.Text = "Dump Type";
 			this.dumpTypeToolStripMenuItem.Click += new System.EventHandler(this.dumpTypeToolStripMenuItem_Click);
+			// 
+			// viewDataToolStripMenuItem
+			// 
+			this.viewDataToolStripMenuItem.Name = "viewDataToolStripMenuItem";
+			this.viewDataToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
+			this.viewDataToolStripMenuItem.Text = "View Data";
+			this.viewDataToolStripMenuItem.ToolTipText = "For MonoBehaviour and MonoScript assets";
+			this.viewDataToolStripMenuItem.Click += new System.EventHandler(this.viewDataToolStripMenuItem_Click);
 			// 
 			// panel1
 			// 
@@ -674,7 +703,6 @@
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
 		private System.Windows.Forms.ToolStripMenuItem replaceFilesToolStripMenuItem;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
-		private System.Windows.Forms.ToolStripMenuItem removeToolStripMenuItem;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
 		private System.Windows.Forms.ToolStripMenuItem renameToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem multiRenameToolStripMenuItem;
@@ -720,5 +748,9 @@
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;
 		private SB3Utility.ToolStripEditTextBox backupExtension2ToolStripEditTextBox;
 		private SB3Utility.ToolStripEditTextBox backupExtension3ToolStripEditTextBox;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator8;
+		private System.Windows.Forms.ToolStripMenuItem viewDataToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
+		private System.Windows.Forms.ToolStripMenuItem removeToolStripMenuItem;
 	}
 }

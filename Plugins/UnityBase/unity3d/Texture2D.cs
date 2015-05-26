@@ -71,7 +71,7 @@ namespace UnityPlugin
 			m_FilterMode = 1;
 			m_MipBias = 0;
 			m_Aniso = 0;
-			m_WrapMode = 1;
+			m_WrapMode = 0;
 		}
 
 		public GLTextureSettings(Stream stream)
@@ -287,13 +287,18 @@ namespace UnityPlugin
 
 		public Texture2D Clone(AssetCabinet file)
 		{
-			Component tex = file.Bundle.FindComponent(m_Name, UnityClassID.Texture2D);
+			Component tex = file.Bundle != null
+				? file.Bundle.FindComponent(m_Name, UnityClassID.Texture2D)
+				: file.Parser.GetTexture(m_Name);
 			if (tex == null)
 			{
 				file.MergeTypeDefinition(this.file, UnityClassID.Texture2D);
 
 				tex = new Texture2D(file);
-				file.Bundle.AddComponent(m_Name, tex);
+				if (file.Bundle != null)
+				{
+					file.Bundle.AddComponent(m_Name, tex);
+				}
 				CopyAttributesTo((Texture2D)tex);
 				CopyImageTo((Texture2D)tex);
 			}

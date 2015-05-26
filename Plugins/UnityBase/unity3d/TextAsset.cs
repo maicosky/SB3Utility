@@ -26,6 +26,12 @@ namespace UnityPlugin
 			this.classID2 = classID2;
 		}
 
+		public TextAsset(AssetCabinet file)
+			: this(file, 0, UnityClassID.TextAsset, UnityClassID.TextAsset)
+		{
+			file.ReplaceSubfile(-1, this, null);
+		}
+
 		public void LoadFrom(Stream stream)
 		{
 			BinaryReader reader = new BinaryReader(stream);
@@ -40,6 +46,37 @@ namespace UnityPlugin
 			writer.WriteNameA4U8(m_Name);
 			writer.WriteNameA4U8(m_Script);
 			writer.WriteNameA4U8(m_PathName);
+		}
+
+		public TextAsset Clone(AssetCabinet file)
+		{
+			Component text = file.Components.Find
+			(
+				delegate(Component asset)
+				{
+					return asset.classID1 == UnityClassID.TextAsset &&
+						(asset is NotLoaded ? ((NotLoaded)asset).Name : ((TextAsset)asset).m_Name) == m_Name;
+				}
+			);
+			if (text == null)
+			{
+				file.MergeTypeDefinition(this.file, UnityClassID.TextAsset);
+
+				TextAsset dest = new TextAsset(file);
+				using (MemoryStream mem = new MemoryStream())
+				{
+					this.WriteTo(mem);
+					mem.Position = 0;
+					dest.LoadFrom(mem);
+				}
+				return dest;
+			}
+			else if (text is NotLoaded)
+			{
+				NotLoaded notLoaded = (NotLoaded)text;
+				text = file.LoadComponent(file.SourceStream, notLoaded);
+			}
+			return (TextAsset)text;
 		}
 
 		public void Export(string path)

@@ -688,13 +688,13 @@ namespace UnityPlugin
 			m_IsReadable = reader.ReadBoolean();
 			m_KeepVertices = reader.ReadBoolean();
 			m_KeepIndices = reader.ReadBoolean();
-			reader.ReadBytes(3);
+			reader.BaseStream.Position += 3;
 
 			int numIndexBytes = reader.ReadInt32();
 			m_IndexBuffer = reader.ReadBytes(numIndexBytes);
 			if ((numIndexBytes & 3) > 0)
 			{
-				reader.ReadBytes(4 - (numIndexBytes & 3));
+				reader.BaseStream.Position += 4 - (numIndexBytes & 3);
 			}
 
 			int numInfluences = reader.ReadInt32();
@@ -741,13 +741,13 @@ namespace UnityPlugin
 			writer.Write(m_IsReadable);
 			writer.Write(m_KeepVertices);
 			writer.Write(m_KeepIndices);
-			writer.Write(new byte[3]);
+			writer.BaseStream.Position += 3;
 
 			writer.Write(m_IndexBuffer.Length);
 			writer.Write(m_IndexBuffer);
 			if ((m_IndexBuffer.Length & 3) > 0)
 			{
-				writer.Write(new byte[4 - (m_IndexBuffer.Length & 3)]);
+				writer.BaseStream.Position += 4 - (m_IndexBuffer.Length & 3);
 			}
 
 			writer.Write(m_Skin.Count);

@@ -143,6 +143,13 @@ namespace UnityPlugin
 			}
 		}
 
+		public static PPtr<MonoScript> LoadMonoScriptRef(Stream stream)
+		{
+			BinaryReader reader = new BinaryReader(stream);
+			stream.Position += 12;
+			return new PPtr<MonoScript>(stream);
+		}
+
 		public void WriteTo(Stream stream)
 		{
 			Parser.type.WriteTo(stream);

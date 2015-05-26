@@ -453,239 +453,257 @@ namespace UnityPlugin
 		public dynamic LoadComponent(Stream stream, int index, NotLoaded comp)
 		{
 			stream.Position = comp.offset;
-			switch (comp.classID1)
+			try
 			{
-			case UnityClassID.AnimationClip:
+				switch (comp.classID1)
 				{
-					AnimationClip animationClip = new AnimationClip(this, comp.pathID, comp.classID1, comp.classID2);
-					ReplaceSubfile(index, animationClip, comp);
-					animationClip.LoadFrom(stream);
-					return animationClip;
-				}
-			case UnityClassID.Animator:
-				{
-					Animator animator = new Animator(this, comp.pathID, comp.classID1, comp.classID2);
-					ReplaceSubfile(index, animator, comp);
-					animator.LoadFrom(stream);
-					return animator;
-				}
-			case UnityClassID.AnimatorController:
-				{
-					AnimatorController animatorController = new AnimatorController(this, comp.pathID, comp.classID1, comp.classID2);
-					ReplaceSubfile(index, animatorController, comp);
-					animatorController.LoadFrom(stream);
-					return animatorController;
-				}
-			case UnityClassID.AssetBundle:
-				{
-					AssetBundle assetBundle = new AssetBundle(this, comp.pathID, comp.classID1, comp.classID2);
-					ReplaceSubfile(index, assetBundle, comp);
-					assetBundle.LoadFrom(stream);
-					return assetBundle;
-				}
-			case UnityClassID.AudioClip:
-				{
-					if (loadingReferencials)
+				case UnityClassID.AnimationClip:
 					{
-						return comp;
+						AnimationClip animationClip = new AnimationClip(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, animationClip, comp);
+						animationClip.LoadFrom(stream);
+						return animationClip;
 					}
-					AudioClip ac = new AudioClip(this, comp.pathID, comp.classID1, comp.classID2);
-					ReplaceSubfile(index, ac, comp);
-					ac.LoadFrom(stream);
-					return ac;
-				}
-			case UnityClassID.Avatar:
-				{
-					if (loadingReferencials)
+				case UnityClassID.Animator:
 					{
-						return comp;
+						Animator animator = new Animator(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, animator, comp);
+						animator.LoadFrom(stream);
+						return animator;
 					}
-					Avatar avatar = new Avatar(this, comp.pathID, comp.classID1, comp.classID2);
-					ReplaceSubfile(index, avatar, comp);
-					avatar.LoadFrom(stream);
-					return avatar;
-				}
-			case UnityClassID.Cubemap:
-				{
-					Cubemap cubemap = new Cubemap(this, comp.pathID, comp.classID1, comp.classID2);
-					ReplaceSubfile(index, cubemap, comp);
-					cubemap.LoadFrom(stream);
-					Parser.Textures.Add(cubemap);
-					return cubemap;
-				}
-			case UnityClassID.EllipsoidParticleEmitter:
-				{
-					EllipsoidParticleEmitter ellipsoid = new EllipsoidParticleEmitter(this, comp.pathID, comp.classID1, comp.classID2);
-					ReplaceSubfile(index, ellipsoid, comp);
-					ellipsoid.LoadFrom(stream);
-					return ellipsoid;
-				}
-			case UnityClassID.Light:
-				{
-					Light light = new Light(this, comp.pathID, comp.classID1, comp.classID2);
-					ReplaceSubfile(index, light, comp);
-					light.LoadFrom(stream);
-					return light;
-				}
-			case UnityClassID.GameObject:
-				{
-					GameObject gameObj = new GameObject(this, comp.pathID, comp.classID1, comp.classID2);
-					ReplaceSubfile(index, gameObj, comp);
-					gameObj.LoadFrom(stream);
-					return gameObj;
-				}
-			case UnityClassID.Material:
-				{
-					Material mat = new Material(this, comp.pathID, comp.classID1, comp.classID2);
-					ReplaceSubfile(index, mat, comp);
-					mat.LoadFrom(stream);
-					return mat;
-				}
-			case UnityClassID.Mesh:
-				{
-					if (loadingReferencials)
+				case UnityClassID.AnimatorController:
 					{
-						return comp;
+						AnimatorController animatorController = new AnimatorController(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, animatorController, comp);
+						animatorController.LoadFrom(stream);
+						return animatorController;
 					}
-					Mesh mesh = new Mesh(this, comp.pathID, comp.classID1, comp.classID2);
-					ReplaceSubfile(index, mesh, comp);
-					mesh.LoadFrom(stream);
-					return mesh;
-				}
-			case UnityClassID.MeshFilter:
-				{
-					MeshFilter meshFilter = new MeshFilter(this, comp.pathID, comp.classID1, comp.classID2);
-					ReplaceSubfile(index, meshFilter, comp);
-					meshFilter.LoadFrom(stream);
-					return meshFilter;
-				}
-			case UnityClassID.MeshRenderer:
-				{
-					MeshRenderer meshRenderer = new MeshRenderer(this, comp.pathID, comp.classID1, comp.classID2);
-					ReplaceSubfile(index, meshRenderer, comp);
-					meshRenderer.LoadFrom(stream);
-					return meshRenderer;
-				}
-			default:
-				if (comp.classID2 == UnityClassID.MonoBehaviour)
-				{
-					if (Types.Count > 0)
+				case UnityClassID.AssetBundle:
 					{
-						MonoBehaviour monoBehaviour = new MonoBehaviour(this, comp.pathID, comp.classID1, comp.classID2);
-						ReplaceSubfile(index, monoBehaviour, comp);
-						monoBehaviour.LoadFrom(stream);
-						return monoBehaviour;
+						AssetBundle assetBundle = new AssetBundle(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, assetBundle, comp);
+						assetBundle.LoadFrom(stream);
+						return assetBundle;
+					}
+				case UnityClassID.AudioClip:
+					{
+						if (loadingReferencials)
+						{
+							return comp;
+						}
+						AudioClip ac = new AudioClip(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, ac, comp);
+						ac.LoadFrom(stream);
+						return ac;
+					}
+				case UnityClassID.Avatar:
+					{
+						if (loadingReferencials)
+						{
+							return comp;
+						}
+						Avatar avatar = new Avatar(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, avatar, comp);
+						avatar.LoadFrom(stream);
+						return avatar;
+					}
+				case UnityClassID.Cubemap:
+					{
+						Cubemap cubemap = new Cubemap(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, cubemap, comp);
+						cubemap.LoadFrom(stream);
+						Parser.Textures.Add(cubemap);
+						return cubemap;
+					}
+				case UnityClassID.EllipsoidParticleEmitter:
+					{
+						EllipsoidParticleEmitter ellipsoid = new EllipsoidParticleEmitter(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, ellipsoid, comp);
+						ellipsoid.LoadFrom(stream);
+						return ellipsoid;
+					}
+				case UnityClassID.Light:
+					{
+						Light light = new Light(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, light, comp);
+						light.LoadFrom(stream);
+						return light;
+					}
+				case UnityClassID.GameObject:
+					{
+						GameObject gameObj = new GameObject(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, gameObj, comp);
+						gameObj.LoadFrom(stream);
+						return gameObj;
+					}
+				case UnityClassID.Material:
+					{
+						Material mat = new Material(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, mat, comp);
+						mat.LoadFrom(stream);
+						return mat;
+					}
+				case UnityClassID.Mesh:
+					{
+						if (loadingReferencials)
+						{
+							return comp;
+						}
+						Mesh mesh = new Mesh(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, mesh, comp);
+						mesh.LoadFrom(stream);
+						return mesh;
+					}
+				case UnityClassID.MeshFilter:
+					{
+						MeshFilter meshFilter = new MeshFilter(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, meshFilter, comp);
+						meshFilter.LoadFrom(stream);
+						return meshFilter;
+					}
+				case UnityClassID.MeshRenderer:
+					{
+						MeshRenderer meshRenderer = new MeshRenderer(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, meshRenderer, comp);
+						meshRenderer.LoadFrom(stream);
+						return meshRenderer;
+					}
+				default:
+					if (comp.classID2 == UnityClassID.MonoBehaviour)
+					{
+						if (Types.Count > 0)
+						{
+							MonoBehaviour monoBehaviour = new MonoBehaviour(this, comp.pathID, comp.classID1, comp.classID2);
+							ReplaceSubfile(index, monoBehaviour, comp);
+							monoBehaviour.LoadFrom(stream);
+							return monoBehaviour;
+						}
+						else
+						{
+							string message = comp.classID2 + " unhandled because of absence of Types in Cabinet (*.assets)";
+							if (!reported.Contains(message))
+							{
+								Report.ReportLog(message);
+								reported.Add(message);
+							}
+							return comp;
+						}
 					}
 					else
 					{
-						string message = comp.classID2 + " unhandled because of absence of Types in Cabinet (*.assets)";
+						string message = "Unhandled class: " + comp.classID1 + "/" + comp.classID2;
 						if (!reported.Contains(message))
 						{
 							Report.ReportLog(message);
 							reported.Add(message);
 						}
-						return comp;
 					}
-				}
-				else
-				{
-					string message = "Unhandled class: " + comp.classID1 + "/" + comp.classID2;
-					if (!reported.Contains(message))
+					break;
+				case UnityClassID.MonoScript:
 					{
-						Report.ReportLog(message);
-						reported.Add(message);
+						if (loadingReferencials)
+						{
+							return comp;
+						}
+						MonoScript monoScript = new MonoScript(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, monoScript, comp);
+						monoScript.LoadFrom(stream);
+						return monoScript;
 					}
-				}
-				break;
-			case UnityClassID.MonoScript:
-				{
-					if (loadingReferencials)
+				case UnityClassID.ParticleAnimator:
 					{
-						return comp;
+						ParticleAnimator particleAnimator = new ParticleAnimator(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, particleAnimator, comp);
+						particleAnimator.LoadFrom(stream);
+						return particleAnimator;
 					}
-					MonoScript monoScript = new MonoScript(this, comp.pathID, comp.classID1, comp.classID2);
-					ReplaceSubfile(index, monoScript, comp);
-					monoScript.LoadFrom(stream);
-					return monoScript;
-				}
-			case UnityClassID.ParticleAnimator:
-				{
-					ParticleAnimator particleAnimator = new ParticleAnimator(this, comp.pathID, comp.classID1, comp.classID2);
-					ReplaceSubfile(index, particleAnimator, comp);
-					particleAnimator.LoadFrom(stream);
-					return particleAnimator;
-				}
-			case UnityClassID.ParticleRenderer:
-				{
-					ParticleRenderer particleRenderer = new ParticleRenderer(this, comp.pathID, comp.classID1, comp.classID2);
-					ReplaceSubfile(index, particleRenderer, comp);
-					particleRenderer.LoadFrom(stream);
-					return particleRenderer;
-				}
-			case UnityClassID.ParticleSystem:
-				{
-					ParticleSystem particleSystem = new ParticleSystem(this, comp.pathID, comp.classID1, comp.classID2);
-					ReplaceSubfile(index, particleSystem, comp);
-					particleSystem.LoadFrom(stream);
-					return particleSystem;
-				}
-			case UnityClassID.ParticleSystemRenderer:
-				{
-					ParticleSystemRenderer particleSystemRenderer = new ParticleSystemRenderer(this, comp.pathID, comp.classID1, comp.classID2);
-					ReplaceSubfile(index, particleSystemRenderer, comp);
-					particleSystemRenderer.LoadFrom(stream);
-					return particleSystemRenderer;
-				}
-			case UnityClassID.Shader:
-				{
-					Shader shader = new Shader(this, comp.pathID, comp.classID1, comp.classID2);
-					ReplaceSubfile(index, shader, comp);
-					shader.LoadFrom(stream);
-					return shader;
-				}
-			case UnityClassID.SkinnedMeshRenderer:
-				{
-					SkinnedMeshRenderer sMesh = new SkinnedMeshRenderer(this, comp.pathID, comp.classID1, comp.classID2);
-					ReplaceSubfile(index, sMesh, comp);
-					sMesh.LoadFrom(stream);
-					return sMesh;
-				}
-			case UnityClassID.Sprite:
-				{
-					Sprite sprite = new Sprite(this, comp.pathID, comp.classID1, comp.classID2);
-					ReplaceSubfile(index, sprite, comp);
-					sprite.LoadFrom(stream);
-					return sprite;
-				}
-			case UnityClassID.TextAsset:
-				{
-					if (loadingReferencials)
+				case UnityClassID.ParticleRenderer:
 					{
-						return comp;
+						ParticleRenderer particleRenderer = new ParticleRenderer(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, particleRenderer, comp);
+						particleRenderer.LoadFrom(stream);
+						return particleRenderer;
 					}
-					TextAsset ta = new TextAsset(this, comp.pathID, comp.classID1, comp.classID2);
-					ReplaceSubfile(index, ta, comp);
-					ta.LoadFrom(stream);
-					return ta;
-				}
-			case UnityClassID.Texture2D:
-				{
-					if (loadingReferencials)
+				case UnityClassID.ParticleSystem:
 					{
-						return comp;
+						ParticleSystem particleSystem = new ParticleSystem(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, particleSystem, comp);
+						particleSystem.LoadFrom(stream);
+						return particleSystem;
 					}
-					Texture2D tex = new Texture2D(this, comp.pathID, comp.classID1, comp.classID2);
-					ReplaceSubfile(index, tex, comp);
-					tex.LoadFrom(stream);
-					Parser.Textures.Add(tex);
-					return tex;
+				case UnityClassID.ParticleSystemRenderer:
+					{
+						ParticleSystemRenderer particleSystemRenderer = new ParticleSystemRenderer(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, particleSystemRenderer, comp);
+						particleSystemRenderer.LoadFrom(stream);
+						return particleSystemRenderer;
+					}
+				case UnityClassID.Shader:
+					{
+						Shader shader = new Shader(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, shader, comp);
+						shader.LoadFrom(stream);
+						return shader;
+					}
+				case UnityClassID.SkinnedMeshRenderer:
+					{
+						SkinnedMeshRenderer sMesh = new SkinnedMeshRenderer(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, sMesh, comp);
+						sMesh.LoadFrom(stream);
+						return sMesh;
+					}
+				case UnityClassID.Sprite:
+					{
+						Sprite sprite = new Sprite(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, sprite, comp);
+						sprite.LoadFrom(stream);
+						return sprite;
+					}
+				case UnityClassID.TextAsset:
+					{
+						if (loadingReferencials)
+						{
+							return comp;
+						}
+						TextAsset ta = new TextAsset(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, ta, comp);
+						ta.LoadFrom(stream);
+						return ta;
+					}
+				case UnityClassID.Texture2D:
+					{
+						if (loadingReferencials)
+						{
+							return comp;
+						}
+						Texture2D tex = new Texture2D(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, tex, comp);
+						tex.LoadFrom(stream);
+						Parser.Textures.Add(tex);
+						return tex;
+					}
+				case UnityClassID.Transform:
+					{
+						Transform trans = new Transform(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, trans, comp);
+						trans.LoadFrom(stream);
+						return trans;
+					}
 				}
-			case UnityClassID.Transform:
+			}
+			catch
+			{
+				Report.ReportLog("Failed to load " + comp.classID1 + "/" + comp.classID2 + " PathID=" + comp.pathID);
+				foreach (NotLoaded notLoaded in RemovedList)
 				{
-					Transform trans = new Transform(this, comp.pathID, comp.classID1, comp.classID2);
-					ReplaceSubfile(index, trans, comp);
-					trans.LoadFrom(stream);
-					return trans;
+					if (notLoaded == comp)
+					{
+						RemovedList.Remove(notLoaded);
+						Components.RemoveAt(index);
+						notLoaded.replacement = null;
+						Components.Insert(index, notLoaded);
+						break;
+					}
 				}
 			}
 			return null;

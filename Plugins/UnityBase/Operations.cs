@@ -40,11 +40,11 @@ namespace UnityPlugin
 			return -1;
 		}
 
-		public static int FindBlendShapeIndex(Mesh mesh, string name)
+		public static int FindBlendShapeIndex(Mesh mesh, string keyframeName)
 		{
 			for (int i = 0; i < mesh.m_Shapes.channels.Count; i++)
 			{
-				if (mesh.m_Shapes.channels[i].name == name)
+				if (mesh.m_Shapes.channels[i].name.EndsWith(keyframeName))
 				{
 					return i;
 				}
@@ -231,8 +231,30 @@ namespace UnityPlugin
 			}
 		}
 
+		public static void SetMeshPtr(MeshRenderer meshR, Mesh mesh)
+		{
+			if (meshR is SkinnedMeshRenderer)
+			{
+				SkinnedMeshRenderer sMesh = (SkinnedMeshRenderer)meshR;
+				sMesh.m_Mesh = new PPtr<Mesh>(mesh);
+			}
+			else
+			{
+				MeshFilter filter = meshR.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshFilter);
+				if (filter != null)
+				{
+					filter.m_Mesh = new PPtr<Mesh>(mesh);
+				}
+			}
+		}
+
 		public static string BlendShapeName(Mesh mesh)
 		{
+			if (mesh.m_Shapes.channels.Count == 0)
+			{
+				return null;
+			}
+
 			string name = mesh.m_Shapes.channels[0].name;
 			int dotPos = name.IndexOf('.');
 			if (dotPos >= 0)
@@ -1032,38 +1054,49 @@ namespace UnityPlugin
 			try
 			{
 				vMesh morphMesh = new vMesh(sMesh, false);
-				List<vVertex> morphVerts = morphMesh.submeshes[0].vertexList;
 				foreach (ImportedMorphKeyframe wsMorph in wsMorphList.KeyframeList)
 				{
 					if (!wsMorphList.isMorphKeyframeEnabled(wsMorph))
 					{
 						continue;
 					}
-					if (mesh.m_VertexData.m_VertexCount != wsMorph.VertexList.Count)
+					List<vVertex> morphVerts = null;
+					int submeshIdx, firstVertIdx = 0;
+					for (submeshIdx = 0; submeshIdx < morphMesh.submeshes.Count; submeshIdx++)
 					{
-						Report.ReportLog("The SkinnedMeshRenderer " + sMesh.m_GameObject.instance.m_Name + "'s Mesh has a different number of vertices than specified in morph keyframe " + wsMorph.Name + ". Skipping this morph");
+						vSubmesh submesh = morphMesh.submeshes[submeshIdx];
+						if (submesh.vertexList.Count == wsMorph.VertexList.Count)
+						{
+							morphVerts = submesh.vertexList;
+							break;
+						}
+						firstVertIdx += submesh.vertexList.Count;
+					}
+					if (morphVerts == null)
+					{
+						Report.ReportLog("The SkinnedMeshRenderer " + sMesh.m_GameObject.instance.m_Name + "'s Mesh has no matching submesh with " + wsMorph.VertexList.Count + " vertices for morph keyframe " + wsMorph.Name + ". Skipping this morph");
 						continue;
 					}
 
 					MeshBlendShape shape;
-					int index = FindBlendShapeIndex(mesh, destMorphName + "." + wsMorph.Name);
+					int index = FindBlendShapeIndex(mesh, "." + wsMorph.Name);
 					if (index >= 0)
 					{
-						Report.ReportLog("Replacing morph keyframe " + wsMorph.Name);
+						Report.ReportLog("Replacing morph keyframe " + wsMorph.Name + " with " + mesh.m_Shapes.channels[index].name + " for submesh " + submeshIdx);
 						shape = mesh.m_Shapes.shapes[index];
 						shape.hasNormals |= replaceNormals;
 						shape.hasTangents |= replaceNormals;
 					}
 					else
 					{
-						Report.ReportLog("Adding morph keyframe " + wsMorph.Name);
+						Report.ReportLog("Adding morph keyframe " + wsMorph.Name + " for submesh " + submeshIdx);
 						shape = new MeshBlendShape();
 						shape.firstVertex = (uint)mesh.m_Shapes.vertices.Count;
 						shape.hasNormals = replaceNormals;
 						shape.hasTangents = replaceNormals;
 						mesh.m_Shapes.shapes.Add(shape);
 						MeshBlendShapeChannel channel = new MeshBlendShapeChannel();
-						channel.name = wsMorph.Name;
+						channel.name = destMorphName + "." + wsMorph.Name;
 						channel.nameHash = Animator.StringToHash(channel.name);
 						channel.frameIndex = mesh.m_Shapes.channels.Count;
 						channel.frameCount = 1;
@@ -1083,7 +1116,7 @@ namespace UnityPlugin
 						{
 							BlendShapeVertex destVert = new BlendShapeVertex();
 							destVert.vertex = diffVector;
-							destVert.index = (uint)i;
+							destVert.index = (uint)(i + firstVertIdx);
 							if (replaceNormals)
 							{
 								destVert.normal = srcVert.Normal;
@@ -1091,7 +1124,7 @@ namespace UnityPlugin
 							}
 							else if (shape.hasNormals)
 							{
-								BlendShapeVertex vert = FindBlendShapeVertex(shape, mesh.m_Shapes.vertices, (uint)i);
+								BlendShapeVertex vert = FindBlendShapeVertex(shape, mesh.m_Shapes.vertices, destVert.index);
 								if (vert != null)
 								{
 									destVert.normal = vert.normal;
@@ -1100,6 +1133,22 @@ namespace UnityPlugin
 							}
 							destVerts.Add(destVert);
 						}
+					}
+					if (morphMesh.submeshes.Count > 1)
+					{
+						List<BlendShapeVertex> vertsBeforeMorphedSubmesh = new List<BlendShapeVertex>((int)shape.vertexCount);
+						for (int i = (int)shape.firstVertex; i < shape.firstVertex + shape.vertexCount; i++)
+						{
+							if (mesh.m_Shapes.vertices[i].index < firstVertIdx)
+							{
+								vertsBeforeMorphedSubmesh.Add(mesh.m_Shapes.vertices[i]);
+							}
+							else if (mesh.m_Shapes.vertices[i].index >= firstVertIdx + morphVerts.Count)
+							{
+								destVerts.Add(mesh.m_Shapes.vertices[i]);
+							}
+						}
+						destVerts.InsertRange(0, vertsBeforeMorphedSubmesh);
 					}
 					destVerts.TrimExcess();
 

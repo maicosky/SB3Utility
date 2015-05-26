@@ -73,13 +73,16 @@ namespace UnityPlugin
 
 		public Shader Clone(AssetCabinet file)
 		{
-			Component sha = file.Bundle.FindComponent(m_Name, UnityClassID.Shader);
+			Component sha = file.Bundle != null ? file.Bundle.FindComponent(m_Name, UnityClassID.Shader) : null;
 			if (sha == null)
 			{
 				file.MergeTypeDefinition(this.file, UnityClassID.Shader);
 
 				Shader dest = new Shader(file);
-				file.Bundle.AddComponent(m_Name, dest);
+				if (file.Bundle != null)
+				{
+					file.Bundle.AddComponent(m_Name, dest);
+				}
 				dest.m_Name = m_Name;
 				dest.m_Script = m_Script;
 				dest.m_PathName = m_PathName;
