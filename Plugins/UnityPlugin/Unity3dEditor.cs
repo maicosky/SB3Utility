@@ -53,10 +53,7 @@ namespace UnityPlugin
 						}
 						if (!animatorFound)
 						{
-							Animator animator = new Animator(Parser.Cabinet, 0, 0, 0);
-							animator.m_Avatar = new PPtr<Avatar>((Component)null);
-							animator.m_GameObject = new PPtr<GameObject>(info.asset.asset);
-							VirtualAnimators.Add(animator);
+							CreateVirtualAnimator(info.asset.asset);
 						}
 					}
 				}
@@ -71,6 +68,25 @@ namespace UnityPlugin
 					Console.WriteLine("PathID=" + asset.pathID.ToString("D") + " id1=" + (int)asset.classID1 + "/" + asset.classID1 + " id2=" + asset.classID2 + " " + names[i]);
 				}
 			}
+		}
+
+		[Plugin]
+		public bool CreateVirtualAnimator(Component gameObject)
+		{
+			if (gameObject is NotLoaded && ((NotLoaded)gameObject).replacement != null)
+			{
+				gameObject = ((NotLoaded)gameObject).replacement;
+			}
+			if (gameObject is NotLoaded ? IsVirtualAnimator((NotLoaded)gameObject) : GetVirtualAnimator((GameObject)gameObject) != null)
+			{
+				return false;
+			}
+
+			Animator animator = new Animator(Parser.Cabinet, 0, 0, 0);
+			animator.m_Avatar = new PPtr<Avatar>((Component)null);
+			animator.m_GameObject = new PPtr<GameObject>(gameObject);
+			VirtualAnimators.Add(animator);
+			return true;
 		}
 
 		[Plugin]
@@ -141,9 +157,13 @@ namespace UnityPlugin
 						case UnityClassID.Camera:
 						case UnityClassID.CapsuleCollider:
 						case UnityClassID.FlareLayer:
+						case UnityClassID.LinkToGameObject:
+						case UnityClassID.LinkToGameObject223:
+						case UnityClassID.LinkToGameObject225:
 						case UnityClassID.MeshCollider:
 						case UnityClassID.MeshFilter:
 						case UnityClassID.MeshRenderer:
+						case UnityClassID.MultiLink:
 						case UnityClassID.Projector:
 						case UnityClassID.Rigidbody:
 						case UnityClassID.SkinnedMeshRenderer:
@@ -197,6 +217,19 @@ namespace UnityPlugin
 				}
 			}
 			return false;
+		}
+
+		public Animator GetVirtualAnimator(GameObject gameObject)
+		{
+			foreach (Animator a in VirtualAnimators)
+			{
+				if (a.m_GameObject.asset == gameObject ||
+					a.m_GameObject.asset is NotLoaded && ((NotLoaded)a.m_GameObject.asset).replacement == gameObject)
+				{
+					return a;
+				}
+			}
+			return null;
 		}
 
 		public Unity3dEditor(UnityParser parser) : this(parser, false) { }

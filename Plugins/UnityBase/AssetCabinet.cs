@@ -105,12 +105,12 @@ namespace UnityPlugin
 			Components = new List<Component>(numComponents);
 			for (int i = 0; i < numComponents; i++)
 			{
-				NotLoaded comp = new NotLoaded();
-				comp.pathID = reader.ReadInt32();
-				comp.offset = (uint)(parser.HeaderLength + parser.Offset) + (uint)DataPosition + reader.ReadUInt32();
-				comp.size = reader.ReadUInt32();
-				comp.classID1 = (UnityClassID)reader.ReadInt32();
-				comp.classID2 = (UnityClassID)reader.ReadInt32();
+				int pathID = reader.ReadInt32();
+				uint offset = (uint)(parser.HeaderLength + parser.Offset) + (uint)DataPosition + reader.ReadUInt32();
+				uint size = reader.ReadUInt32();
+				NotLoaded comp = new NotLoaded(this, pathID, (UnityClassID)reader.ReadInt32(), (UnityClassID)reader.ReadInt32());
+				comp.offset = offset;
+				comp.size = size;
 				Components.Add(comp);
 			}
 
@@ -147,6 +147,41 @@ namespace UnityPlugin
 					break;
 				}
 			}
+		}
+
+		public AssetCabinet(AssetCabinet source, UnityParser parser)
+		{
+			Parser = parser;
+
+			Format = source.Format;
+			Unknown6 = source.Unknown6;
+			Version = (string)source.Version.Clone();
+
+			Unknown7 = source.Unknown7;
+
+			int numTypes = source.Types.Count;
+			Types = new List<TypeDefinition>(numTypes);
+			for (int i = 0; i < numTypes; i++)
+			{
+				TypeDefinition t = source.Types[i];
+				Types.Add(t);
+			}
+
+			Unknown8 = source.Unknown8;
+
+			int numComponents = source.Components.Count;
+			Components = new List<Component>(numComponents);
+
+			int numRefs = source.References.Length;
+			References = new Reference[numRefs];
+			for (int i = 0; i < numRefs; i++)
+			{
+				References[i] = source.References[i];
+			}
+
+			RemovedList = new List<NotLoaded>();
+			loadingReferencials = false;
+			reported = new HashSet<string>();
 		}
 
 		private void ReadType(BinaryReader reader, TypeDefinitionString tds)
@@ -206,22 +241,50 @@ namespace UnityPlugin
 			uint[] offsets = new uint[Components.Count];
 			uint[] sizes = new uint[Components.Count];
 			byte[] align = new byte[3];
-			for (int i = 0; i < Components.Count; i++)
+			Dictionary<AssetCabinet, Stream> foreignNotLoaded = new Dictionary<AssetCabinet, Stream>();
+			try
 			{
-				offsets[i] = (uint)stream.Position;
-				Component comp = Components[i];
-				if (comp is NeedsSourceStreamForWriting)
+				for (int i = 0; i < Components.Count; i++)
 				{
-					((NeedsSourceStreamForWriting)comp).SourceStream = SourceStream;
+					offsets[i] = (uint)stream.Position;
+					Component comp = Components[i];
+					if (comp is NeedsSourceStreamForWriting)
+					{
+						if (comp.file == this)
+						{
+							((NeedsSourceStreamForWriting)comp).SourceStream = SourceStream;
+						}
+						else
+						{
+							Stream str;
+							if (!foreignNotLoaded.TryGetValue(comp.file, out str))
+							{
+								str = File.OpenRead(comp.file.Parser.FilePath);
+								foreignNotLoaded.Add(comp.file, str);
+							}
+							((NotLoaded)comp).SourceStream = str;
+						}
+					}
+					comp.WriteTo(stream);
+					sizes[i] = (uint)stream.Position - offsets[i];
+					int rest = 4 - (int)(stream.Position & 3);
+					if (rest < 4 && i < Components.Count - 1)
+					{
+						writer.Write(align, 0, rest);
+					}
+					Parser.worker.ReportProgress(50 + i * 49 / Components.Count);
 				}
-				comp.WriteTo(stream);
-				sizes[i] = (uint)stream.Position - offsets[i];
-				int rest = 4 - (int)(stream.Position & 3);
-				if (rest < 4 && i < Components.Count - 1)
+			}
+			finally
+			{
+				foreach (var foreign in foreignNotLoaded)
 				{
-					writer.Write(align, 0, rest);
+					foreign.Value.Close();
+					if (Parser.DeleteModFiles.Contains(foreign.Key))
+					{
+						File.Delete(foreign.Key.Parser.FilePath);
+					}
 				}
-				Parser.worker.ReportProgress(50 + i * 49 / Components.Count);
 			}
 			Parser.ContentLength = ContentLengthCopy = (int)stream.Position - (Parser.HeaderLength + Parser.Offset);
 
@@ -232,6 +295,7 @@ namespace UnityPlugin
 			writer.WriteInt32BE(DataPosition);
 
 			stream.Position = assetMetaPosition;
+			NotLoaded newAssetBundle = null;
 			for (int i = 0; i < Components.Count; i++)
 			{
 				Component comp = Components[i];
@@ -240,10 +304,25 @@ namespace UnityPlugin
 				writer.Write(sizes[i]);
 				writer.Write((int)comp.classID1);
 				writer.Write((int)comp.classID2);
+				if (comp.file != this)
+				{
+					NotLoaded notLoaded = new NotLoaded(this, comp.pathID, comp.classID1, comp.classID2);
+					notLoaded.size = sizes[i];
+					ReplaceSubfile(comp, notLoaded);
+					if (comp.classID1 == UnityClassID.AssetBundle)
+					{
+						newAssetBundle = notLoaded;
+					}
+					comp = notLoaded;
+				}
 				if (comp is NotLoaded)
 				{
 					((NotLoaded)comp).offset = offsets[i];
 				}
+			}
+			if (newAssetBundle != null)
+			{
+				Bundle = LoadComponent(stream, newAssetBundle);
 			}
 		}
 
@@ -282,7 +361,7 @@ namespace UnityPlugin
 				);
 				if (clsDef == null)
 				{
-					Report.ReportLog("Error! Class Definition for " + cls + " not found!");
+					Report.ReportLog("Warning! Class Definition for " + cls + " not found!");
 					return;
 				}
 				Types.Add(clsDef);
@@ -353,7 +432,7 @@ namespace UnityPlugin
 			return -1;
 		}
 
-		public dynamic FindComponent(int pathID, out int index)
+		public dynamic FindComponent(int pathID, out int index, bool show_error = true)
 		{
 			if (pathID == 0)
 			{
@@ -389,15 +468,18 @@ namespace UnityPlugin
 			}
 			catch { }
 
-			Report.ReportLog("FindComponent : pathID=" + pathID + " not found");
+			if (show_error)
+			{
+				Report.ReportLog("FindComponent : pathID=" + pathID + " not found");
+			}
 			index = -1;
 			return null;
 		}
 
-		public dynamic FindComponent(int pathID)
+		public dynamic FindComponent(int pathID, bool show_error = true)
 		{
 			int index_not_required;
-			return FindComponent(pathID, out index_not_required);
+			return FindComponent(pathID, out index_not_required, show_error);
 		}
 
 		public void BeginLoadingSkippedComponents()
@@ -571,6 +653,27 @@ namespace UnityPlugin
 						light.LoadFrom(stream);
 						return light;
 					}
+				case UnityClassID.LinkToGameObject:
+					{
+						LinkToGameObject link = new LinkToGameObject(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, link, comp);
+						link.LoadFrom(stream);
+						return link;
+					}
+				case UnityClassID.LinkToGameObject223:
+					{
+						LinkToGameObject223 link = new LinkToGameObject223(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, link, comp);
+						link.LoadFrom(stream);
+						return link;
+					}
+				case UnityClassID.LinkToGameObject225:
+					{
+						LinkToGameObject225 link = new LinkToGameObject225(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, link, comp);
+						link.LoadFrom(stream);
+						return link;
+					}
 				case UnityClassID.GameObject:
 					{
 						GameObject gameObj = new GameObject(this, comp.pathID, comp.classID1, comp.classID2);
@@ -658,6 +761,13 @@ namespace UnityPlugin
 						ReplaceSubfile(index, monoScript, comp);
 						monoScript.LoadFrom(stream);
 						return monoScript;
+					}
+				case UnityClassID.MultiLink:
+					{
+						MultiLink multi = new MultiLink(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, multi, comp);
+						multi.LoadFrom(stream);
+						return multi;
 					}
 				case UnityClassID.ParticleAnimator:
 					{
@@ -848,6 +958,23 @@ namespace UnityPlugin
 			}
 			Components.Insert(index, file);
 			file.pathID = replaced.pathID;
+		}
+
+		public void UnloadSubfile(Component comp)
+		{
+			int idx = Components.IndexOf(comp);
+			if (idx >= 0)
+			{
+				foreach (NotLoaded notLoaded in RemovedList)
+				{
+					if (notLoaded.replacement == comp)
+					{
+						Components.RemoveAt(idx);
+						Components.Insert(idx, notLoaded);
+						break;
+					}
+				}
+			}
 		}
 
 		public static string ToString(Component subfile)

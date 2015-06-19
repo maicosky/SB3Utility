@@ -89,9 +89,12 @@ namespace UnityPlugin
 				foreach (PPtr<Shader> asset in m_Dependencies)
 				{
 					sha = asset.asset;
-					Type t = sha.GetType();
-					MethodInfo info = t.GetMethod("Clone", new Type[] { typeof(AssetCabinet) });
-					sha = (Component)info.Invoke(sha, new object[] { file });
+					if (sha != null)
+					{
+						Type t = sha.GetType();
+						MethodInfo info = t.GetMethod("Clone", new Type[] { typeof(AssetCabinet) });
+						sha = (Component)info.Invoke(sha, new object[] { file });
+					}
 					dest.m_Dependencies.Add(new PPtr<Shader>(sha));
 				}
 				dest.m_ShaderIsBaked = m_ShaderIsBaked;
@@ -126,7 +129,8 @@ namespace UnityPlugin
 				writer.Write(System.Text.Encoding.UTF8.GetBytes("\n// Dependencies:\n"));
 				foreach (PPtr<Shader> shaderPtr in m_Dependencies)
 				{
-					writer.Write(System.Text.Encoding.UTF8.GetBytes("//\t" + shaderPtr.asset.classID1 + " " + AssetCabinet.ToString(shaderPtr.asset) + "\n"));
+					Component shader = shaderPtr.asset;
+					writer.Write(System.Text.Encoding.UTF8.GetBytes("//\t" + (shader != null ? shader.classID1 + " " + AssetCabinet.ToString(shader) : "NULL") + "\n"));
 				}
 				writer.BaseStream.SetLength(writer.BaseStream.Position);
 			}

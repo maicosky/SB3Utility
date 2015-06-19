@@ -28,6 +28,7 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormUnity3d));
 			this.menuStrip1 = new System.Windows.Forms.MenuStrip();
 			this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.exportPPToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -36,6 +37,15 @@
 			this.saveppAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
 			this.reopenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripSeparator9 = new System.Windows.Forms.ToolStripSeparator();
+			this.deployModToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.createModToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.selectAllLoadedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.unselectAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.patchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.applyModsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.revertPatchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.removeModsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
 			this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.assetsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -125,6 +135,10 @@
             this.saveppAsToolStripMenuItem,
             this.toolStripSeparator1,
             this.reopenToolStripMenuItem,
+            this.toolStripSeparator9,
+            this.deployModToolStripMenuItem,
+            this.patchToolStripMenuItem,
+            this.revertPatchToolStripMenuItem,
             this.toolStripSeparator6,
             this.closeToolStripMenuItem});
 			this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
@@ -170,6 +184,75 @@
 			this.reopenToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
 			this.reopenToolStripMenuItem.Text = "&Reopen .unity3d";
 			this.reopenToolStripMenuItem.Click += new System.EventHandler(this.reopenToolStripMenuItem_Click);
+			// 
+			// toolStripSeparator9
+			// 
+			this.toolStripSeparator9.Name = "toolStripSeparator9";
+			this.toolStripSeparator9.Size = new System.Drawing.Size(190, 6);
+			// 
+			// deployModToolStripMenuItem
+			// 
+			this.deployModToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.createModToolStripMenuItem,
+            this.selectAllLoadedToolStripMenuItem,
+            this.unselectAllToolStripMenuItem});
+			this.deployModToolStripMenuItem.Name = "deployModToolStripMenuItem";
+			this.deployModToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
+			this.deployModToolStripMenuItem.Text = "&Deploy Mod";
+			// 
+			// createModToolStripMenuItem
+			// 
+			this.createModToolStripMenuItem.Name = "createModToolStripMenuItem";
+			this.createModToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+			this.createModToolStripMenuItem.Text = "&Create Mod";
+			this.createModToolStripMenuItem.ToolTipText = resources.GetString("createModToolStripMenuItem.ToolTipText");
+			this.createModToolStripMenuItem.Click += new System.EventHandler(this.createModToolStripMenuItem_Click);
+			// 
+			// selectAllLoadedToolStripMenuItem
+			// 
+			this.selectAllLoadedToolStripMenuItem.Name = "selectAllLoadedToolStripMenuItem";
+			this.selectAllLoadedToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+			this.selectAllLoadedToolStripMenuItem.Text = "Select All &Loaded";
+			this.selectAllLoadedToolStripMenuItem.Click += new System.EventHandler(this.selectAllLoadedToolStripMenuItem_Click);
+			// 
+			// unselectAllToolStripMenuItem
+			// 
+			this.unselectAllToolStripMenuItem.Name = "unselectAllToolStripMenuItem";
+			this.unselectAllToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+			this.unselectAllToolStripMenuItem.Text = "&Unselect All";
+			this.unselectAllToolStripMenuItem.Click += new System.EventHandler(this.unselectAllToolStripMenuItem_Click);
+			// 
+			// patchToolStripMenuItem
+			// 
+			this.patchToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.applyModsToolStripMenuItem});
+			this.patchToolStripMenuItem.Name = "patchToolStripMenuItem";
+			this.patchToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
+			this.patchToolStripMenuItem.Text = "Pa&tch";
+			// 
+			// applyModsToolStripMenuItem
+			// 
+			this.applyModsToolStripMenuItem.Name = "applyModsToolStripMenuItem";
+			this.applyModsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.applyModsToolStripMenuItem.Text = "Apply &Mods";
+			this.applyModsToolStripMenuItem.ToolTipText = "All other Unity files will be used for patching!\r\nBut each will be applied only o" +
+    "nce.";
+			this.applyModsToolStripMenuItem.Click += new System.EventHandler(this.applyModsToolStripMenuItem_Click);
+			// 
+			// revertPatchToolStripMenuItem
+			// 
+			this.revertPatchToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.removeModsToolStripMenuItem});
+			this.revertPatchToolStripMenuItem.Name = "revertPatchToolStripMenuItem";
+			this.revertPatchToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
+			this.revertPatchToolStripMenuItem.Text = "Re&vert Patch";
+			// 
+			// removeModsToolStripMenuItem
+			// 
+			this.removeModsToolStripMenuItem.Name = "removeModsToolStripMenuItem";
+			this.removeModsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.removeModsToolStripMenuItem.Text = "Remove &Mods";
+			this.removeModsToolStripMenuItem.Click += new System.EventHandler(this.removeModsToolStripMenuItem_Click);
 			// 
 			// toolStripSeparator6
 			// 
@@ -757,5 +840,14 @@
 		private System.Windows.Forms.ToolStripMenuItem viewDataToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
 		private System.Windows.Forms.ToolStripMenuItem removeToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem deployModToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem createModToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem selectAllLoadedToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem unselectAllToolStripMenuItem;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator9;
+		private System.Windows.Forms.ToolStripMenuItem patchToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem applyModsToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem revertPatchToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem removeModsToolStripMenuItem;
 	}
 }

@@ -151,7 +151,7 @@ namespace UnityPlugin
 			Texture2D tex = null;
 			if (m_Cookie.instance != null)
 			{
-				tex = dest.file.Bundle.FindComponent(m_Cookie.instance.m_Name, UnityClassID.Texture2D);
+				tex = (Texture2D)dest.file.Bundle.FindComponent(m_Cookie.instance.m_Name, UnityClassID.Texture2D);
 				if (tex == null)
 				{
 					tex = m_Cookie.instance.Clone(dest.file);

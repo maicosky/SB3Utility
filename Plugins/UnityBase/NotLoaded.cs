@@ -24,6 +24,14 @@ namespace UnityPlugin
 
 		public string Name { get; set; }
 
+		public NotLoaded(AssetCabinet file, int pathID, UnityClassID classID1, UnityClassID classID2)
+		{
+			this.file = file;
+			this.pathID = pathID;
+			this.classID1 = classID1;
+			this.classID2 = classID2;
+		}
+
 		public Stream SourceStream { get; set; }
 
 		public void LoadFrom(Stream stream)

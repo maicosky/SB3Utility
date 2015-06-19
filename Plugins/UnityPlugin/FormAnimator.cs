@@ -703,21 +703,6 @@ namespace UnityPlugin
 					);
 				}
 			}
-
-			comboBoxRendererRootBone.Items.Clear();
-			comboBoxRendererRootBone.Items.Add(new Tuple<string, int>("(none)", -1));
-			for (int i = 0; i < Editor.Frames.Count; i++)
-			{
-				Transform frame = Editor.Frames[i];
-				comboBoxRendererRootBone.Items.Add
-				(
-					new Tuple<string, int>
-					(
-						frame.m_GameObject.instance.m_Name,
-						i
-					)
-				);
-			}
 		}
 
 		void InitMorphs()
@@ -920,7 +905,7 @@ namespace UnityPlugin
 			{
 				Transform frame = Editor.Frames[id];
 				comboBoxAvatar.SelectedIndexChanged -= comboBoxAvatar_SelectedIndexChanged;
-				if (id != 0 && frame.m_GameObject.instance.FindLinkedComponent(UnityClassID.Animator) == null)
+				if (id != 0 && (frame.m_GameObject.instance.FindLinkedComponent(UnityClassID.Animator) == null && GetVirtualAnimator(frame.m_GameObject.instance) == null))
 				{
 					labelTransformName.Text = "Transform Name";
 					comboBoxAvatar.SelectedIndex = -1;
@@ -929,14 +914,19 @@ namespace UnityPlugin
 				else
 				{
 					labelTransformName.Text = "Animator Name";
+					Animator vAnimator = GetVirtualAnimator(frame.m_GameObject.instance);
+					Avatar avatar = vAnimator != null ? vAnimator.m_Avatar.instance : Editor.Parser.m_Avatar.instance;
 					comboBoxAvatar.SelectedIndex = -1;
-					for (int i = 0; i < comboBoxAvatar.Items.Count; i++)
+					if (avatar != null)
 					{
-						Tuple<string, Component> item = (Tuple<string, Component>)comboBoxAvatar.Items[i];
-						if (item.Item2 == Editor.Parser.m_Avatar.instance)
+						for (int i = 0; i < comboBoxAvatar.Items.Count; i++)
 						{
-							comboBoxAvatar.SelectedIndex = i;
-							break;
+							Tuple<string, Component> item = (Tuple<string, Component>)comboBoxAvatar.Items[i];
+							if (item.Item2 == Editor.Parser.m_Avatar.instance)
+							{
+								comboBoxAvatar.SelectedIndex = i;
+								break;
+							}
 						}
 					}
 					comboBoxAvatar.Enabled = true;
@@ -946,6 +936,22 @@ namespace UnityPlugin
 				DataGridViewEditor.LoadMatrix(frame.m_LocalScale, frame.m_LocalRotation, frame.m_LocalPosition, dataGridViewFrameSRT, dataGridViewFrameMatrix);
 			}
 			loadedFrame = id;
+		}
+
+		Animator GetVirtualAnimator(GameObject gameObject)
+		{
+			foreach (var var in Gui.Scripting.Variables)
+			{
+				if (var.Value is Unity3dEditor)
+				{
+					Unity3dEditor unityEditor = (Unity3dEditor)var.Value;
+					if (unityEditor.Parser.Cabinet == Editor.Parser.file)
+					{
+						return unityEditor.GetVirtualAnimator(gameObject);
+					}
+				}
+			}
+			throw new Exception("Unity3dEditor not found");
 		}
 
 		void LoadBone(int[] id)
@@ -1002,6 +1008,26 @@ namespace UnityPlugin
 				if (meshR is SkinnedMeshRenderer)
 				{
 					SkinnedMeshRenderer sMesh = (SkinnedMeshRenderer)meshR;
+
+					comboBoxRendererRootBone.Items.Clear();
+					comboBoxRendererRootBone.Items.Add(new Tuple<string, int>("(none)", -1));
+					HashSet<Transform> skeleton = Operations.GetSkeleton(sMesh);
+					for (int i = 0; i < Editor.Frames.Count; i++)
+					{
+						Transform frame = Editor.Frames[i];
+						if (skeleton.Contains(frame))
+						{
+							comboBoxRendererRootBone.Items.Add
+							(
+								new Tuple<string, int>
+								(
+									frame.m_GameObject.instance.m_Name,
+									i
+								)
+							);
+						}
+					}
+
 					comboBoxRendererRootBone.SelectedIndex = sMesh.m_RootBone.instance != null ? comboBoxRendererRootBone.FindStringExact(sMesh.m_RootBone.instance.m_GameObject.instance.m_Name) : 0;
 				}
 				Mesh mesh = Operations.GetMesh(meshR);
@@ -2771,7 +2797,7 @@ namespace UnityPlugin
 			}
 		}
 
-		private void buttonFrameUnique_Click(object sender, EventArgs e)
+		private void buttonFrameVirtualAnimator_Click(object sender, EventArgs e)
 		{
 			try
 			{
@@ -2780,19 +2806,11 @@ namespace UnityPlugin
 					return;
 				}
 
-				Gui.Scripting.RunScript(EditorVar + ".UniqueFrame(id=" + loadedFrame + ")");
-				Changed = Changed;
-
-				if (treeViewObjectTree.SelectedNode.Tag is DragSource)
+				if ((bool)Gui.Scripting.RunScript(EditorVar + ".CreateVirtualAnimator(id=" + loadedFrame + ")"))
 				{
-					DragSource src = (DragSource)treeViewObjectTree.SelectedNode.Tag;
-					if (src.Type == typeof(Transform) && loadedFrame == (int)src.Id)
-					{
-						treeViewObjectTree.SelectedNode.Text = Editor.Frames[loadedFrame].m_GameObject.instance.m_Name;
-					}
+					RefreshFormUnity();
+					LoadFrame(loadedFrame);
 				}
-				RecreateFrames();
-				SyncWorkspaces();
 			}
 			catch (Exception ex)
 			{
@@ -3852,6 +3870,7 @@ namespace UnityPlugin
 			{
 				int topology = int.Parse((string)dataGridViewMesh.Rows[e.RowIndex].Cells[e.ColumnIndex].Value);
 				Gui.Scripting.RunScript(EditorVar + ".SetSubMeshTopology(meshId=" + loadedMesh + ", subMeshId=" + e.RowIndex + ", topology=" + topology + ")");
+				Changed = Changed;
 			}
 		}
 
@@ -3865,6 +3884,7 @@ namespace UnityPlugin
 			try
 			{
 				Gui.Scripting.RunScript(EditorVar + ".MirrorV(meshId=" + loadedMesh + ")");
+				Changed = Changed;
 
 				RecreateRenderObjects();
 			}
@@ -4684,18 +4704,7 @@ namespace UnityPlugin
 				LoadMesh(loadedMesh);
 				listViewMaterial.Items[oldMatIndex].Selected = true;
 
-				List<DockContent> formUnity3dList;
-				if (Gui.Docking.DockContents.TryGetValue(typeof(FormUnity3d), out formUnity3dList))
-				{
-					foreach (FormUnity3d form in formUnity3dList)
-					{
-						if (form.Editor.Parser.Cabinet == Editor.Parser.file)
-						{
-							form.InitSubfileLists(false);
-							break;
-						}
-					}
-				}
+				RefreshFormUnity();
 			}
 			catch (Exception ex)
 			{

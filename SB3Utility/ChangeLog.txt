@@ -1,4 +1,13 @@
-﻿[1.0.13]
+﻿[1.0.14]
+  - Limited selection of Transforms for the Root Bone to the skeleton of the SkinnedMeshRenderer
+  - Creating Virtual Animators at any Transform
+  - Fbx export doesn't export 0 weights
+  - Support for undocumented Assets 222, 223, 224, 225
+  - Fixed crash in Shader dependencies
+  - Fixed inversion of meshes when replacing unskinned meshes (e.g. from MQO or OBJ)
+  - Added mod creation, patching and removal
+
+[1.0.13]
   - Fixed texture corruption when textures were replaced from file menu
   - Added mass deletion with Shift-Delete at various places
   - Added DeleteMorphKeyframe()

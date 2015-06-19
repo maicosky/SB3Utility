@@ -65,7 +65,7 @@ namespace UnityPlugin
 						UnknownChilds = new List<PPtr<Transform>>();
 					}
 					UnknownChilds.Add(transPtr);
-					Report.ReportLog("Warning! Transform \"" + (m_GameObject.instance != null ? m_GameObject.instance.m_Name : "with unresolved name") + "\" has unhandled child " + i + (transPtr.asset != null ? " class=" + transPtr.asset.classID1 + "/" + transPtr.asset.classID2 : "") + " FileID=" + transPtr.m_FileID + " PathID=" + transPtr.m_PathID);
+					Report.ReportLog("Warning! Transform \"" + (m_GameObject.instance != null ? m_GameObject.instance.m_Name : "with unresolved name") + "\" has additional child " + i + (transPtr.asset != null ? " class=" + transPtr.asset.classID1 + "/" + transPtr.asset.classID2 : "") + " FileID=" + transPtr.m_FileID + " PathID=" + transPtr.m_PathID);
 				}
 			}
 

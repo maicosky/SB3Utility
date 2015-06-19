@@ -28,10 +28,10 @@ namespace UnityPlugin
 			PPtr<Object> objPtr = new PPtr<Object>(stream);
 			if (objPtr.m_FileID == 0 && objPtr.m_PathID != 0)
 			{
-				Component comp = file.FindComponent(objPtr.m_PathID);
+				Component comp = file.FindComponent(objPtr.m_PathID, false);
 				if (comp == null)
 				{
-					comp = new NotLoaded();
+					comp = new NotLoaded(file, objPtr.m_PathID, 0, 0);
 				}
 				asset = new PPtr<Object>(comp);
 			}
@@ -104,6 +104,13 @@ namespace UnityPlugin
 			NeedsUpdate = new HashSet<Component>();
 		}
 
+		public AssetBundle(AssetCabinet file) :
+			this(file, 0, UnityClassID.AssetBundle, UnityClassID.AssetBundle)
+		{
+			file.Components.Insert(0, this);
+			file.Bundle = this;
+		}
+
 		public void LoadFrom(Stream stream)
 		{
 			BinaryReader reader = new BinaryReader(stream);
@@ -116,11 +123,10 @@ namespace UnityPlugin
 				PPtr<Object> objPtr = new PPtr<Object>(stream);
 				if (objPtr.m_FileID == 0)
 				{
-					Component comp = file.FindComponent(objPtr.m_PathID);
+					Component comp = file.FindComponent(objPtr.m_PathID, false);
 					if (comp == null)
 					{
-						comp = new NotLoaded();
-						comp.pathID = objPtr.m_PathID;
+						comp = new NotLoaded(file, objPtr.m_PathID, 0, 0);
 					}
 					objPtr = new PPtr<Object>(comp);
 				}
@@ -200,7 +206,52 @@ namespace UnityPlugin
 			writer.Write(m_RuntimeCompatibility);
 		}
 
-		public dynamic FindComponent(string name, UnityClassID cls)
+		public AssetBundle Clone(AssetCabinet file)
+		{
+			if (file.Bundle != null)
+			{
+				return file.Bundle;
+			}
+
+			file.MergeTypeDefinition(this.file, UnityClassID.AssetBundle);
+			AssetBundle clone = new AssetBundle(file);
+			clone.pathID = pathID;
+			clone.m_Name = m_Name;
+			clone.m_PreloadTable = new List<PPtr<Object>>(m_PreloadTable.Count);
+			clone.m_PreloadTable.AddRange(m_PreloadTable);
+			clone.m_Container = new List<KeyValuePair<string, AssetInfo>>(file.Components.Count);
+			for (int i = 0; i < m_Container.Count; i++)
+			{
+				var containerEntry = m_Container[i];
+				bool keepKey = true;
+				int endIdx = containerEntry.Value.preloadIndex + containerEntry.Value.preloadSize;
+				for (int j = containerEntry.Value.preloadIndex; j < endIdx; j++)
+				{
+					if (((NotLoaded)containerEntry.Value.asset.asset).replacement == null)
+					{
+						keepKey = false;
+						break;
+					}
+				}
+				do
+				{
+					if (keepKey)
+					{
+						clone.m_Container.Add(m_Container[i]);
+					}
+				} while (++i < m_Container.Count && containerEntry.Key == m_Container[i].Key);
+			}
+
+			clone.m_MainAsset = new AssetInfo(file);
+			clone.m_MainAsset.asset = new PPtr<Object>((Component)null);
+
+			clone.m_ScriptCompatibility = (AssetBundleScriptInfo[])m_ScriptCompatibility.Clone();
+			clone.m_ClassCompatibility = (KeyValuePair<int, uint>[])m_ClassCompatibility.Clone();
+			clone.m_RuntimeCompatibility = m_RuntimeCompatibility;
+			return clone;
+		}
+
+		public Component FindComponent(string name, UnityClassID cls)
 		{
 			string lName = name.ToLower();
 			for (int i = 0; i < m_Container.Count; i++)
@@ -252,6 +303,31 @@ namespace UnityPlugin
 			m_Container.Insert(idx, new KeyValuePair<string, AssetInfo>(key, info));
 
 			RegisterForUpdate(asset);
+		}
+
+		public void AddComponents(string name, List<Component> assets)
+		{
+			string key = name.ToLower();
+			int idx;
+			for (idx = 0; idx < m_Container.Count; idx++)
+			{
+				if (m_Container[idx].Key.CompareTo(key) >= 0)
+				{
+					break;
+				}
+			}
+			--uniquePreloadIdx;
+			for (int i = 0; i < assets.Count; i++)
+			{
+				Component asset = assets[i];
+				AssetInfo info = new AssetInfo(file);
+				info.preloadIndex = uniquePreloadIdx;
+				info.preloadSize = 0;
+				info.asset = new PPtr<Object>(asset);
+				m_Container.Insert(idx++, new KeyValuePair<string, AssetInfo>(key, info));
+			}
+
+			RegisterForUpdate(assets[0]);
 		}
 
 		public void AppendComponent(string name, UnityClassID cls, Component asset)
@@ -754,7 +830,7 @@ namespace UnityPlugin
 						{
 							AddExternalAsset(assets, dep);
 						}
-						else
+						else if (dep.asset != null)
 						{
 							GetDependantAssets(dep.asset, assets, transforms, containerRelated);
 						}
@@ -806,7 +882,7 @@ namespace UnityPlugin
 					Component comp = file.FindComponent(objPtr.asset.pathID);
 					if (comp == null)
 					{
-						comp = new NotLoaded();
+						comp = new NotLoaded(file, objPtr.asset.pathID, 0, 0);
 					}
 					//if (comp.classID1 == UnityClassID.Material // comp.pathID != 0 && comp.classID1 != UnityClassID.GameObject && comp.classID1 != UnityClassID.Transform)
 					{

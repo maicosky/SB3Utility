@@ -153,7 +153,7 @@ namespace UnityPlugin
 			replaceSubmeshesOption = new bool[numSubmeshes];
 
 			List<Matrix> poseMatrices = new List<Matrix>(mesh.BoneList.Count);
-			List<PPtr<Transform>> bones = CreateBoneList(parser.RootTransform, mesh.BoneList, poseMatrices);
+			List<PPtr<Transform>> bones = CreateBoneList(parser.m_GameObject.instance.FindLinkedComponent(UnityClassID.Transform), mesh.BoneList, poseMatrices);
 
 			SkinnedMeshRenderer sMesh = new SkinnedMeshRenderer(parser.file);
 
@@ -289,12 +289,25 @@ namespace UnityPlugin
 
 					List<ImportedFace> faceList = mesh.SubmeshList[submeshIdx].FaceList;
 					submesh.firstByte = (uint)indexWriter.BaseStream.Position;
-					for (int j = 0; j < faceList.Count; j++)
+					if (mesh.BoneList.Count > 0)
 					{
-						int[] vertexIndices = faceList[j].VertexIndices;
-						indexWriter.Write((ushort)(vertexIndices[0] + submesh.firstVertex));
-						indexWriter.Write((ushort)(vertexIndices[1] + submesh.firstVertex));
-						indexWriter.Write((ushort)(vertexIndices[2] + submesh.firstVertex));
+						for (int j = 0; j < faceList.Count; j++)
+						{
+							int[] vertexIndices = faceList[j].VertexIndices;
+							indexWriter.Write((ushort)(vertexIndices[0] + submesh.firstVertex));
+							indexWriter.Write((ushort)(vertexIndices[1] + submesh.firstVertex));
+							indexWriter.Write((ushort)(vertexIndices[2] + submesh.firstVertex));
+						}
+					}
+					else
+					{
+						for (int j = 0; j < faceList.Count; j++)
+						{
+							int[] vertexIndices = faceList[j].VertexIndices;
+							indexWriter.Write((ushort)(vertexIndices[0] + submesh.firstVertex));
+							indexWriter.Write((ushort)(vertexIndices[2] + submesh.firstVertex));
+							indexWriter.Write((ushort)(vertexIndices[1] + submesh.firstVertex));
+						}
 					}
 				}
 				uMesh.m_LocalAABB.m_Extend -= uMesh.m_LocalAABB.m_Center;

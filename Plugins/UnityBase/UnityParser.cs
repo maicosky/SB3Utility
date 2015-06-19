@@ -161,6 +161,10 @@ namespace UnityPlugin
 		Sprite = 213,
 		LightProbeGroup = 220,
 		AnimatorOverrideController = 221,
+		LinkToGameObject = 222,
+		LinkToGameObject223 = 223,
+		MultiLink = 224,
+		LinkToGameObject225 = 225,
 		SpringJoint2D = 231,
 		HingeJoint2D = 233,
 		Prefab = 1001,
@@ -404,16 +408,19 @@ namespace UnityPlugin
 		private string destPath;
 		private bool keepBackup;
 		private string backupExt;
+		private bool keepPathIDs;
 		public BackgroundWorker worker;
+		public HashSet<AssetCabinet> DeleteModFiles { get; protected set; }
 
 		public UnityParser(string path)
 		{
 			FilePath = path;
 			using (BinaryReader reader = new BinaryReader(File.OpenRead(path)))
 			{
-				if (Path.GetExtension(path).ToLower() == ".unity3d")
+				byte[] extendedSignature = reader.ReadBytes(27);
+				if (System.Text.UTF8Encoding.Default.GetString(extendedSignature, 0, 8) == "UnityRaw")
 				{
-					ExtendedSignature = reader.ReadBytes(27);
+					ExtendedSignature = extendedSignature;
 					FileLength = reader.ReadInt32BE();
 					HeaderLength = reader.ReadInt32BE();
 					Unknown1 = reader.ReadInt32BE();
@@ -435,9 +442,19 @@ namespace UnityPlugin
 					ContentLength = reader.ReadInt32BE();
 					reader.BaseStream.Position = HeaderLength + Offset;
 				}
+				else
+				{
+					reader.BaseStream.Position -= extendedSignature.Length;
+				}
 				Cabinet = new AssetCabinet(reader.BaseStream, this);
 			}
 
+			InitTextures();
+			DeleteModFiles = new HashSet<AssetCabinet>();
+		}
+
+		private void InitTextures()
+		{
 			Textures = new List<Component>();
 			foreach (Component asset in Cabinet.Components)
 			{
@@ -448,11 +465,35 @@ namespace UnityPlugin
 			}
 		}
 
-		public BackgroundWorker WriteArchive(string destPath, bool keepBackup, string backupExtension, bool background)
+		public UnityParser(UnityParser source)
+		{
+			FilePath = source.FilePath;
+
+			if (source.ExtendedSignature != null)
+			{
+				ExtendedSignature = (byte[])source.ExtendedSignature.Clone();
+				HeaderLength = source.HeaderLength;
+				Unknown1 = source.Unknown1;
+				Unknown2 = source.Unknown2;
+				CabinetOffset = source.CabinetOffset;
+				LastByte = source.LastByte;
+
+				Unknown3 = source.Unknown3;
+				Name = (string)source.Name.Clone();
+				Offset = source.Offset;
+			}
+			Cabinet = new AssetCabinet(source.Cabinet, this);
+
+			InitTextures();
+			DeleteModFiles = new HashSet<AssetCabinet>();
+		}
+
+		public BackgroundWorker WriteArchive(string destPath, bool keepBackup, string backupExtension, bool background, bool keepPathIDs = false)
 		{
 			this.destPath = destPath;
 			this.keepBackup = keepBackup;
 			this.backupExt = backupExtension;
+			this.keepPathIDs = keepPathIDs;
 
 			worker = new BackgroundWorker();
 			worker.WorkerSupportsCancellation = true;
@@ -486,7 +527,7 @@ namespace UnityPlugin
 			{
 				using (BinaryWriter writer = new BinaryWriter(File.Create(newName)))
 				{
-					if (Path.GetExtension(FilePath).ToLower() == ".unity3d")
+					if (ExtendedSignature != null)
 					{
 						writer.BaseStream.Position = 27 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 1 + 4 + (Name.Length + 1) + 4 + 4;
 						if ((writer.BaseStream.Position & 3) > 0)
@@ -496,23 +537,26 @@ namespace UnityPlugin
 					}
 
 					bool needsLoadingRefs = false;
-					for (int i = 0; i < Cabinet.Components.Count; i++)
+					if (!keepPathIDs)
 					{
-						if (Cabinet.Components[i].pathID - 1 == i)
+						for (int i = 0; i < Cabinet.Components.Count; i++)
 						{
-							continue;
+							if (Cabinet.Components[i].pathID - 1 == i)
+							{
+								continue;
+							}
+							needsLoadingRefs = true;
+							while (i < Cabinet.Components.Count && Cabinet.Components[i].pathID == 0)
+							{
+								Cabinet.Components[i].pathID = i + 1;
+								i++;
+							}
+							if (i == Cabinet.Components.Count)
+							{
+								needsLoadingRefs = false;
+							}
+							break;
 						}
-						needsLoadingRefs = true;
-						while (i < Cabinet.Components.Count && Cabinet.Components[i].pathID == 0)
-						{
-							Cabinet.Components[i].pathID = i + 1;
-							i++;
-						}
-						if (i == Cabinet.Components.Count)
-						{
-							needsLoadingRefs = false;
-						}
-						break;
 					}
 					worker.ReportProgress(1);
 					using (Stream stream = File.OpenRead(FilePath))
@@ -537,11 +581,15 @@ namespace UnityPlugin
 									UnityClassID.FlareLayer,
 									UnityClassID.GameObject,
 									UnityClassID.Light,
+									UnityClassID.LinkToGameObject,
+									UnityClassID.LinkToGameObject223,
+									UnityClassID.LinkToGameObject225,
 									UnityClassID.Material,
 									UnityClassID.MeshCollider,
 									UnityClassID.MeshFilter,
 									UnityClassID.MeshRenderer,
 									UnityClassID.MonoBehaviour,
+									UnityClassID.MultiLink,
 									UnityClassID.ParticleAnimator,
 									UnityClassID.ParticleRenderer,
 									UnityClassID.ParticleSystem,
@@ -579,7 +627,7 @@ namespace UnityPlugin
 					FileLength = FileLengthCopy = (int)writer.BaseStream.Length;
 					Entry1Length = Entry1LengthCopy = FileLength - HeaderLength;
 
-					if (Path.GetExtension(FilePath).ToLower() == ".unity3d")
+					if (ExtendedSignature != null)
 					{
 						writer.BaseStream.Position = 0;
 						writer.Write(ExtendedSignature);

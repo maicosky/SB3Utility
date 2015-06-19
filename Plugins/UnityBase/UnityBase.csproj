@@ -59,6 +59,8 @@
     <Compile Include="unity3d\Camera.cs" />
     <Compile Include="unity3d\CapsuleCollider.cs" />
     <Compile Include="unity3d\AudioListener.cs" />
+    <Compile Include="unity3d\LinkToGameObject225.cs" />
+    <Compile Include="unity3d\LinkToGameObject223.cs" />
     <Compile Include="unity3d\Cubemap.cs" />
     <Compile Include="unity3d\EllipsoidParticleEmitter.cs" />
     <Compile Include="unity3d\Flare.cs" />
@@ -66,6 +68,7 @@
     <Compile Include="unity3d\GameObject.cs" />
     <Compile Include="unity3d\Component.cs" />
     <Compile Include="unity3d\Light.cs" />
+    <Compile Include="unity3d\LinkToGameObject.cs" />
     <Compile Include="unity3d\Material.cs" />
     <Compile Include="unity3d\Mesh.cs" />
     <Compile Include="unity3d\MeshCollider.cs" />
@@ -75,6 +78,7 @@
     <Compile Include="unity3d\MonoScript.cs" />
     <Compile Include="Operations.cs" />
     <Compile Include="Replace.cs" />
+    <Compile Include="unity3d\MultiLink.cs" />
     <Compile Include="unity3d\ParticleAnimator.cs" />
     <Compile Include="unity3d\ParticleRenderer.cs" />
     <Compile Include="unity3d\ParticleSystem.cs" />

@@ -680,67 +680,20 @@ namespace UnityPlugin
 		}
 
 		[Plugin]
-		public void UniqueFrame(int id)
+		public bool CreateVirtualAnimator(int id)
 		{
-			UniqueFrame(Frames[id]);
-		}
-
-		private void UniqueFrame(Transform frame)
-		{
-			for (int i = 0; i < frame.Count; i++)
+			foreach (var var in Gui.Scripting.Variables)
 			{
-				UniqueFrame(frame[i]);
-			}
-
-			int attempt = 1;
-			for (int i = 0; i < Frames.Count; i++)
-			{
-				Transform t = Frames[i];
-				if (t != frame && t.m_GameObject.instance.m_Name == frame.m_GameObject.instance.m_Name)
+				if (var.Value is Unity3dEditor)
 				{
-					++attempt;
-				}
-			}
-			if (attempt > 1)
-			{
-				string framePath = GetTransformPath(frame);
-
-				frame.m_GameObject.instance.m_Name += attempt;
-
-				int index = Parser.m_Avatar.instance.m_TOS.FindLastIndex
-				(
-					delegate(KeyValuePair<uint, string> data)
+					Unity3dEditor unityEditor = (Unity3dEditor)var.Value;
+					if (unityEditor.Parser.Cabinet == Parser.file)
 					{
-						return data.Value == framePath;
+						return unityEditor.CreateVirtualAnimator(Frames[id].m_GameObject.instance);
 					}
-				);
-				if (index >= 0)
-				{
-					string newName = framePath + attempt;
-					var pair = Parser.m_Avatar.instance.m_TOS[index];
-					Parser.m_Avatar.instance.m_TOS.RemoveAt(index);
-					Report.ReportLog("renaming " + framePath + " to " + newName);
-					if (frame.Count > 0)
-					{
-						for (int i = 0; i < Parser.m_Avatar.instance.m_TOS.Count; i++)
-						{
-							KeyValuePair<uint, string> data = Parser.m_Avatar.instance.m_TOS[i];
-							if (data.Value.StartsWith(framePath + "/"))
-							{
-								Parser.m_Avatar.instance.m_TOS.RemoveAt(i);
-								Parser.m_Avatar.instance.m_TOS.Insert(i, new KeyValuePair<uint, string>(data.Key, newName + data.Value.Substring(framePath.Length)));
-								Report.ReportLog("   child " + data.Value + " to " + Parser.m_Avatar.instance.m_TOS[i].Value);
-							}
-						}
-					}
-					Parser.m_Avatar.instance.m_TOS.Insert(index, new KeyValuePair<uint, string>(pair.Key, newName));
-				}
-				else
-				{
-					Report.ReportLog("adding " + framePath);
-					Parser.m_Avatar.instance.AddBone(frame.Parent, frame);
 				}
 			}
+			throw new Exception("Unity3dEditor not found");
 		}
 
 		public string GetTransformPath(Transform trans)
@@ -1664,14 +1617,14 @@ namespace UnityPlugin
 			for (int i = 0; i < shader.m_Dependencies.Count; i++)
 			{
 				var dep = shader.m_Dependencies[i];
-				if (dep.instance != null)
-				{
-					RemoveComponentFromShaders(dep.instance, asset);
-				}
-				else if (dep.asset == asset)
+				if (dep.asset == asset)
 				{
 					shader.m_Dependencies.RemoveAt(i);
 					i--;
+				}
+				else if (dep.instance != null)
+				{
+					RemoveComponentFromShaders(dep.instance, asset);
 				}
 			}
 		}

@@ -462,7 +462,7 @@ namespace SB3Utility
 							array<float>^ weights4 = vertex->Weights;
 							for (int k = 0; k < weights4->Length; k++)
 							{
-								if (boneIndices[k] < boneList->Count)
+								if (boneIndices[k] < boneList->Count && weights4[k] > 0)
 								{
 									FbxCluster* pCluster = pClusterArray->GetAt(boneIndices[k]);
 									pCluster->AddControlPointIndex(j, weights4[k]);

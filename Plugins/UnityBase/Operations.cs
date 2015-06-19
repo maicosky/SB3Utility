@@ -123,6 +123,43 @@ namespace UnityPlugin
 			}
 		}
 
+		public static Transform FindSkeletonRoot(SkinnedMeshRenderer sMesh)
+		{
+			HashSet<Transform> meshPath = new HashSet<Transform>();
+			Transform frame = sMesh.m_GameObject.instance.FindLinkedComponent(UnityClassID.Transform);
+			while (frame != null)
+			{
+				meshPath.Add(frame);
+				frame = frame.Parent;
+			}
+			frame = sMesh.m_Bones.Count > 0 ? sMesh.m_Bones[0].instance : null;
+			while (frame != null)
+			{
+				if (meshPath.Contains(frame.Parent))
+				{
+					return frame;
+				}
+				frame = frame.Parent;
+			}
+			return null;
+		}
+
+		public static HashSet<Transform> GetSkeleton(SkinnedMeshRenderer sMesh)
+		{
+			HashSet<Transform> skeleton = new HashSet<Transform>();
+			GetSkeleton(FindSkeletonRoot(sMesh), skeleton);
+			return skeleton;
+		}
+
+		static void GetSkeleton(Transform root, HashSet<Transform> skeleton)
+		{
+			skeleton.Add(root);
+			foreach (Transform child in root)
+			{
+				GetSkeleton(child, skeleton);
+			}
+		}
+
 		public static HashSet<string> SearchHierarchy(Transform frame, HashSet<string> meshNames)
 		{
 			HashSet<string> exportFrames = new HashSet<string>();
@@ -379,6 +416,8 @@ namespace UnityPlugin
 			public ushort[] index;
 		}
 
+		static HashSet<string> msgFilter = new HashSet<string>();
+
 		public class vSubmesh
 		{
 			public List<vVertex> vertexList;
@@ -423,6 +462,17 @@ namespace UnityPlugin
 							ChannelInfo cInfo = mesh.m_VertexData.m_Channels[chn];
 							if ((sInfo.channelMask & (1 << chn)) == 0)
 							{
+								continue;
+							}
+
+							if (cInfo.format == 1)
+							{
+								string msg = "Channel " + chn + " used in Stream " + str + " is in half precision format. This format not supported!";
+								if (!msgFilter.Contains(msg))
+								{
+									msgFilter.Add(msg);
+									Report.ReportLog(msg);
+								}
 								continue;
 							}
 
@@ -494,9 +544,12 @@ namespace UnityPlugin
 						else
 						{
 							submesh.matList.Add(new PPtr<Material>((Component)null));
-							Report.ReportLog("Warning! Missing Material in " + meshR.m_GameObject.instance.m_Name + " has been added");
 						}
 						submeshes.Add(submesh);
+					}
+					if (mesh.m_SubMeshes.Count > meshR.m_Materials.Count)
+					{
+						Report.ReportLog("Warning! Missing Materials in " + meshR.m_GameObject.instance.m_Name + " have been added: (" + (mesh.m_SubMeshes.Count - meshR.m_Materials.Count) + ")");
 					}
 				}
 

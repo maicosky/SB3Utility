@@ -36,6 +36,8 @@ namespace UnityPlugin
 
 		private const Keys MASS_DESTRUCTION_KEY_COMBINATION = Keys.Delete | Keys.Shift;
 
+		private HashSet<string> RemovedMods = new HashSet<string>();
+
 		public FormUnity3d(string path, string variable)
 		{
 			List<DockContent> formUnity3dList;
@@ -90,7 +92,13 @@ namespace UnityPlugin
 				ToolTipText = uParser.FilePath;
 				ShowHint = DockState.Document;
 
-				saveFileDialog1.Filter = ".unity3d Files (*.unity3d)|*.unity3d|All Files (*.*)|*.*";
+				saveFileDialog1.Filter = ".unity3d Files (*.unity3d;*.assets)|*.unity3d;*.assets|All Files (*.*)|*.*";
+				saveFileDialog1.InitialDirectory = Path.GetDirectoryName(uParser.FilePath);
+				int dotPos = uParser.FilePath.LastIndexOf('.');
+				if (dotPos > 0)
+				{
+					saveFileDialog1.DefaultExt = uParser.FilePath.Substring(dotPos + 1);
+				}
 
 				assetListViews.Add(animatorsList);
 				assetListViews.Add(materialsList);
@@ -285,10 +293,14 @@ namespace UnityPlugin
 					case UnityClassID.Camera:
 					case UnityClassID.CapsuleCollider:
 					case UnityClassID.FlareLayer:
+					case UnityClassID.LinkToGameObject:
+					case UnityClassID.LinkToGameObject223:
+					case UnityClassID.LinkToGameObject225:
 					case UnityClassID.Mesh:
 					case UnityClassID.MeshCollider:
 					case UnityClassID.MeshFilter:
 					case UnityClassID.MeshRenderer:
+					case UnityClassID.MultiLink:
 					case UnityClassID.Projector:
 					case UnityClassID.Rigidbody:
 					case UnityClassID.SkinnedMeshRenderer:
@@ -356,10 +368,14 @@ namespace UnityPlugin
 				case UnityClassID.Camera:
 				case UnityClassID.CapsuleCollider:
 				case UnityClassID.FlareLayer:
+				case UnityClassID.LinkToGameObject:
+				case UnityClassID.LinkToGameObject223:
+				case UnityClassID.LinkToGameObject225:
 				case UnityClassID.Mesh:
 				case UnityClassID.MeshCollider:
 				case UnityClassID.MeshFilter:
 				case UnityClassID.MeshRenderer:
+				case UnityClassID.MultiLink:
 				case UnityClassID.Projector:
 				case UnityClassID.Rigidbody:
 				case UnityClassID.SkinnedMeshRenderer:
@@ -376,7 +392,7 @@ namespace UnityPlugin
 						subfile.classID1 != UnityClassID.Cubemap &&
 						subfile.classID1 != UnityClassID.EllipsoidParticleEmitter &&
 						subfile.classID1 != UnityClassID.Light &&
-						subfile.classID2 != UnityClassID.MonoBehaviour &&
+						(subfile.classID2 != UnityClassID.MonoBehaviour || Editor.Parser.Cabinet.Types.Count == 0) &&
 						subfile.classID1 != UnityClassID.MonoScript &&
 						subfile.classID1 != UnityClassID.ParticleAnimator &&
 						subfile.classID1 != UnityClassID.ParticleRenderer &&
@@ -637,28 +653,13 @@ namespace UnityPlugin
 					EditedContent editorForm = (EditedContent)form;
 					if (!editorForm.Changed)
 					{
-						/*using (FileStream stream = File.OpenRead(Editor.Parser.FilePath))
-						{
-							List<IWriteFile> headerFromFile = Editor.Parser.Format.ppHeader.ReadHeader(stream, Editor.Parser.Format);
-							foreach (ppSubfile subfile in headerFromFile)
-							{
-								if (subfile.Name == (string)form.Tag)
-								{
-									headerFromFile.Remove(subfile);
-									int subfileIdx = Editor.FindSubfile(subfile.Name);
-									if (Editor.Parser.Subfiles[subfileIdx] == Gui.Scripting.Variables[parserVar])
-									{
-										Editor.ReplaceSubfile(subfile);
-									}
+						/*Component comp = (Component)Gui.Scripting.Variables[parserVar];
+						Editor.Parser.Cabinet.UnloadSubfile(comp);
 
-									ChildParserVars.Remove((string)form.Tag);
-									Gui.Scripting.RunScript(parserVar + "=null");
-									InitSubfileLists(false);
-									dontSwap = true;
-									break;
-								}
-							}
-						}*/
+						ChildParserVars.Remove((string)form.Tag);
+						Gui.Scripting.RunScript(parserVar + "=null");
+						InitSubfileLists(false);*/
+						dontSwap = true;
 					}
 					else
 					{
@@ -749,6 +750,10 @@ namespace UnityPlugin
 						ImportedTexture image = new ImportedTexture(mem, tex.m_Name);
 						Gui.ImageControl.Image = image;
 					}
+					if (!e.Item.Font.Bold)
+					{
+						e.Item.Font = new Font(imagesList.Font, FontStyle.Bold);
+					}
 				}
 			}
 			catch (Exception ex)
@@ -777,6 +782,10 @@ namespace UnityPlugin
 					Component subfile = (Component)e.Item.Tag;
 					AudioClip audioClip = Editor.Parser.LoadAsset(subfile.pathID);
 					soundLib.Play(e.Item.Text, audioClip.m_AudioData);
+					if (!e.Item.Font.Bold)
+					{
+						e.Item.Font = new Font(imagesList.Font, FontStyle.Bold);
+					}
 				}
 				else
 				{
@@ -802,6 +811,7 @@ namespace UnityPlugin
 		{
 			try
 			{
+				CloseEditors();
 				string backupExt = Path.GetExtension(Editor.Parser.FilePath);
 				backupExt = backupExt == String.Empty ? backupExt = "None" : backupExt.Substring(1);
 				backupExt = (string)Properties.Settings.Default["BackupExtension" + backupExt];
@@ -821,6 +831,7 @@ namespace UnityPlugin
 			{
 				if (saveFileDialog1.ShowDialog() == DialogResult.OK)
 				{
+					CloseEditors();
 					string backupExt = Path.GetExtension(Editor.Parser.FilePath);
 					backupExt = backupExt == String.Empty ? backupExt = "None" : backupExt.Substring(1);
 					backupExt = (string)Properties.Settings.Default["BackupExtension" + backupExt];
@@ -834,6 +845,29 @@ namespace UnityPlugin
 			catch (Exception ex)
 			{
 				Utility.ReportException(ex);
+			}
+		}
+
+		void CloseEditors()
+		{
+			if (RemovedMods.Count > 0)
+			{
+				foreach (var pair in ChildForms)
+				{
+					if (pair.Value.IsHidden)
+					{
+						pair.Value.Show();
+					}
+
+					pair.Value.FormClosing -= new FormClosingEventHandler(ChildForms_FormClosing);
+					pair.Value.Close();
+				}
+				ChildForms.Clear();
+				foreach (var parserVar in ChildParserVars.Values)
+				{
+					Gui.Scripting.Variables.Remove(parserVar);
+				}
+				ChildParserVars.Clear();
 			}
 		}
 
@@ -851,6 +885,25 @@ namespace UnityPlugin
 
 		void ClearChanges()
 		{
+			foreach (string originalsParserVar in RemovedMods)
+			{
+				UnityParser originalsParser = (UnityParser)Gui.Scripting.Variables[originalsParserVar];
+				List<DockContent> formUnity3dList;
+				if (Gui.Docking.DockContents.TryGetValue(typeof(FormUnity3d), out formUnity3dList))
+				{
+					foreach (var form in formUnity3dList)
+					{
+						var formParser = (UnityParser)Gui.Scripting.Variables[((FormUnity3d)form).ParserVar];
+						if (formParser == originalsParser)
+						{
+							form.Close();
+							break;
+						}
+					}
+				}
+			}
+			RemovedMods.Clear();
+
 			foreach (DockContent child in ChildForms.Values)
 			{
 				var editorForm = child as EditedContent;
@@ -1028,6 +1081,253 @@ namespace UnityPlugin
 				}
 			}
 			return true;
+		}
+
+		private void createModToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				saveFileDialog1.FileName = Path.GetFileNameWithoutExtension(Editor.Parser.FilePath) + "-mod1" + Path.GetExtension(Editor.Parser.FilePath);
+				if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+				{
+					var animators = OpenAnimatorsList();
+					string animEditors = String.Empty;
+					foreach (FormAnimator form in animators)
+					{
+						animEditors += (animEditors.Length == 0 ? "{" : ", ") + form.EditorVar;
+					}
+					if (animEditors.Length > 0)
+					{
+						animEditors += "}";
+					}
+					else
+					{
+						animEditors = "null";
+					}
+
+					string singlesArg = String.Empty;
+					foreach (ListViewItem i in imagesList.Items)
+					{
+						if (i.Selected)
+						{
+							Component asset = (Component)i.Tag;
+							singlesArg += (singlesArg.Length == 0 ? "{" : ", ") + asset.pathID;
+						}
+					}
+					foreach (ListViewItem i in soundsList.Items)
+					{
+						if (i.Selected)
+						{
+							Component asset = (Component)i.Tag;
+							singlesArg += (singlesArg.Length == 0 ? "{" : ", ") + asset.pathID;
+						}
+					}
+					foreach (ListViewItem i in othersList.Items)
+					{
+						if (i.Selected && !(i.Tag is AssetBundle) && !(i.Tag is MonoScript))
+						{
+							Component asset = (Component)i.Tag;
+							singlesArg += (singlesArg.Length == 0 ? "{" : ", ") + asset.pathID;
+						}
+					}
+					if (singlesArg.Length > 0)
+					{
+						singlesArg += "}";
+					}
+					else
+					{
+						singlesArg = "null";
+					}
+
+					string myExt = Path.GetExtension(Editor.Parser.FilePath).ToLower();
+					string bakExt;
+					switch (myExt)
+					{
+					case ".unity3d":
+						bakExt = (string)Properties.Settings.Default["BackupExtensionUnity3d"];
+						break;
+					case ".assets":
+						bakExt = (string)Properties.Settings.Default["BackupExtensionAssets"];
+						break;
+					default:
+						bakExt = (string)Properties.Settings.Default["BackupExtensionNone"];
+						break;
+					}
+					string orgParserVar = null;
+					string modParserVar = null;
+					try
+					{
+						string orgFilename = Path.GetDirectoryName(Editor.Parser.FilePath) + @"\" + Path.GetFileNameWithoutExtension(Editor.Parser.FilePath) + ".bak0" + bakExt;
+						if (File.Exists(orgFilename))
+						{
+							orgParserVar = Gui.Scripting.GetNextVariable("unityParser");
+							Gui.Scripting.RunScript(orgParserVar + " = OpenUnity3d(path=\"" + orgFilename + "\")");
+						}
+						else
+						{
+							foreach (var pair in Gui.Scripting.Variables)
+							{
+								if (pair.Value is FormUnity3d && (FormUnity3d)pair.Value != this
+									&& Path.GetFileName(Editor.Parser.FilePath) == Path.GetFileName(((FormUnity3d)pair.Value).Editor.Parser.FilePath))
+								{
+									FormUnity3d orgForm = (FormUnity3d)pair.Value;
+									orgParserVar = orgForm.ParserVar;
+									break;
+								}
+							}
+							if (orgParserVar == null)
+							{
+								Report.ReportLog("Original unmodded archive not found");
+								return;
+							}
+							bakExt = null;
+						}
+
+						modParserVar = Gui.Scripting.GetNextVariable("modParser");
+						Gui.Scripting.RunScript(modParserVar + " = DeployCollect(parser=" + ParserVar + ", animatorEditors=" + animEditors + ", singleAssets=" + singlesArg + ")");
+						BackgroundWorker worker = (BackgroundWorker)Gui.Scripting.RunScript("SaveMod(modParser=" + modParserVar + ", path=AddFirstNewPathID(originalParser=" + orgParserVar + ", modParser=" + modParserVar + ", path=\"" + saveFileDialog1.FileName + "\"), background=true)");
+						ShowBlockingDialog(Editor.Parser.FilePath, worker);
+					}
+					finally
+					{
+						if (modParserVar != null)
+						{
+							Gui.Scripting.Variables.Remove(modParserVar);
+						}
+						if (bakExt != null && orgParserVar != null)
+						{
+							Gui.Scripting.Variables.Remove(orgParserVar);
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void selectAllLoadedToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				foreach (ListViewItem i in animatorsList.Items)
+				{
+					if (i.Tag is Animator && ((Animator)i.Tag).m_GameObject.instance != null)
+					{
+						i.Selected = true;
+					}
+				}
+				foreach (ListViewItem i in imagesList.Items)
+				{
+					if (!(i.Tag is NotLoaded))
+					{
+						i.Selected = true;
+					}
+				}
+				foreach (ListViewItem i in soundsList.Items)
+				{
+					if (!(i.Tag is NotLoaded))
+					{
+						i.Selected = true;
+					}
+				}
+				foreach (ListViewItem i in othersList.Items)
+				{
+					if (!(i.Tag is NotLoaded) && !(i.Tag is AssetBundle) && !(i.Tag is MonoScript))
+					{
+						i.Selected = true;
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void unselectAllToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				animatorsList.SelectedItems.Clear();
+				imagesList.SelectedItems.Clear();
+				soundsList.SelectedItems.Clear();
+				othersList.SelectedItems.Clear();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void applyModsToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				HashSet<AssetCabinet> alreadyPatched = new HashSet<AssetCabinet>();
+				foreach (Component comp in Editor.Parser.Cabinet.Components)
+				{
+					alreadyPatched.Add(comp.file);
+				}
+				foreach (var pair in Gui.Scripting.Variables)
+				{
+					if (pair.Value is UnityParser && !alreadyPatched.Contains(((UnityParser)pair.Value).Cabinet))
+					{
+						if ((bool)Gui.Scripting.RunScript("ApplyMod(parser=" + ParserVar + ", modParser=" + pair.Key + ", saveOriginals=true)"))
+						{
+							Report.ReportLog(Path.GetFileName(((UnityParser)pair.Value).FilePath) + " applied.");
+							Changed = true;
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
+		private void removeModsToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				List<KeyValuePair<string, object>> modParsers = new List<KeyValuePair<string, object>>();
+				foreach (var pair in Gui.Scripting.Variables)
+				{
+					if (pair.Value is UnityParser && (UnityParser)pair.Value != Editor.Parser && ((UnityParser)pair.Value).FilePath.ToLower().Contains("-org-"))
+					{
+						modParsers.Add(pair);
+					}
+				}
+				if (modParsers.Count == 0)
+				{
+					Report.ReportLog("Nothing to remove.");
+					return;
+				}
+				modParsers.Sort
+				(
+					delegate(KeyValuePair<string, object> p1, KeyValuePair<string, object> p2)
+					{
+						UnityParser parser1 = (UnityParser)p1.Value;
+						UnityParser parser2 = (UnityParser)p2.Value;
+						return File.GetLastWriteTime(parser2.FilePath).CompareTo(File.GetLastWriteTime(parser1.FilePath));
+					}
+				);
+				foreach (var pair in modParsers)
+				{
+					if ((bool)Gui.Scripting.RunScript("RemoveMod(parser=" + ParserVar + ", originalsParser=" + pair.Key + ", deleteOriginals=true)"))
+					{
+						RemovedMods.Add(pair.Key);
+						Report.ReportLog(Path.GetFileName(((UnityParser)pair.Value).FilePath) + " removed. File queued for automatic deletion.");
+						Changed = true;
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
 		}
 
 		private void markForCopyingtoolStripMenuItem_Click(object sender, EventArgs e)
