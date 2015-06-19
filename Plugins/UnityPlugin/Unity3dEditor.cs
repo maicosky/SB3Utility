@@ -135,9 +135,20 @@ namespace UnityPlugin
 								}
 							}
 							break;
+						case UnityClassID.AudioListener:
+						case UnityClassID.AudioSource:
+						case UnityClassID.BoxCollider:
+						case UnityClassID.Camera:
+						case UnityClassID.CapsuleCollider:
+						case UnityClassID.FlareLayer:
+						case UnityClassID.MeshCollider:
 						case UnityClassID.MeshFilter:
 						case UnityClassID.MeshRenderer:
+						case UnityClassID.Projector:
+						case UnityClassID.Rigidbody:
 						case UnityClassID.SkinnedMeshRenderer:
+						case UnityClassID.SphereCollider:
+						case UnityClassID.SpriteRenderer:
 						case UnityClassID.Transform:
 							if (!filter)
 							{

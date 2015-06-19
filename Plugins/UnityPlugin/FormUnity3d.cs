@@ -279,11 +279,21 @@ namespace UnityPlugin
 				{
 					switch (subfile.classID1)
 					{
+					case UnityClassID.AudioSource:
+					case UnityClassID.AudioListener:
 					case UnityClassID.Avatar:
+					case UnityClassID.Camera:
+					case UnityClassID.CapsuleCollider:
+					case UnityClassID.FlareLayer:
 					case UnityClassID.Mesh:
+					case UnityClassID.MeshCollider:
 					case UnityClassID.MeshFilter:
 					case UnityClassID.MeshRenderer:
+					case UnityClassID.Projector:
+					case UnityClassID.Rigidbody:
 					case UnityClassID.SkinnedMeshRenderer:
+					case UnityClassID.SphereCollider:
+					case UnityClassID.SpriteRenderer:
 					case UnityClassID.Transform:
 					case UnityClassID.GameObject:
 						continue;
@@ -333,18 +343,28 @@ namespace UnityPlugin
 					}
 					break;
 				case UnityClassID.AudioClip:
-				case UnityClassID.AudioSource:
 					sounds.Add(item);
 					if (itemWidth > soundsListHeaderName.Width)
 					{
 						soundsListHeaderName.Width = itemWidth;
 					}
 					break;
+				case UnityClassID.AudioSource:
+				case UnityClassID.AudioListener:
 				case UnityClassID.Avatar:
+				case UnityClassID.BoxCollider:
+				case UnityClassID.Camera:
+				case UnityClassID.CapsuleCollider:
+				case UnityClassID.FlareLayer:
 				case UnityClassID.Mesh:
+				case UnityClassID.MeshCollider:
 				case UnityClassID.MeshFilter:
 				case UnityClassID.MeshRenderer:
+				case UnityClassID.Projector:
+				case UnityClassID.Rigidbody:
 				case UnityClassID.SkinnedMeshRenderer:
+				case UnityClassID.SphereCollider:
+				case UnityClassID.SpriteRenderer:
 				case UnityClassID.Transform:
 				case UnityClassID.GameObject:
 					filtered.Add(item);
@@ -526,7 +546,7 @@ namespace UnityPlugin
 			{
 				return;
 			}
-			//removeToolStripMenuItem_Click(sender, e);
+			removeToolStripMenuItem_Click(sender, e);
 		}
 
 		public List<FormAnimator> OpenAnimatorsList()
@@ -668,6 +688,35 @@ namespace UnityPlugin
 			}
 		}
 
+		private void anyListView_DoubleClick(object sender, EventArgs e)
+		{
+			using (Stream stream = File.OpenRead(Editor.Parser.FilePath))
+			{
+				bool format = false;
+				foreach (ListViewItem item in ((ListView)sender).SelectedItems)
+				{
+					if (item.Tag is NotLoaded)
+					{
+						item.Tag = Editor.Parser.Cabinet.LoadComponent(stream, (NotLoaded)item.Tag);
+						format = true;
+					}
+				}
+				if (format)
+				{
+					InitSubfileLists(false);
+				}
+			}
+		}
+
+		private void materialsList_KeyUp(object sender, KeyEventArgs e)
+		{
+			if (e.KeyData != MASS_DESTRUCTION_KEY_COMBINATION)
+			{
+				return;
+			}
+			removeToolStripMenuItem_Click(sender, e);
+		}
+
 		private void imagesList_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
 		{
 			try
@@ -714,7 +763,7 @@ namespace UnityPlugin
 			{
 				return;
 			}
-			//removeToolStripMenuItem_Click(sender, e);
+			removeToolStripMenuItem_Click(sender, e);
 		}
 
 		private void soundSubfilesList_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
@@ -746,7 +795,7 @@ namespace UnityPlugin
 			{
 				return;
 			}
-			//removeToolStripMenuItem_Click(sender, e);
+			removeToolStripMenuItem_Click(sender, e);
 		}
 
 		private void saveUnity3dToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1074,7 +1123,12 @@ namespace UnityPlugin
 			try
 			{
 				ListView subfilesList = null;
-				if (tabControlAssets.SelectedTab == tabPageImages)
+				if (tabControlAssets.SelectedTab == tabPageAnimators)
+				{
+					Report.ReportLog("Removing Animators is not implemented yet.");
+					return;
+				}
+				else if (tabControlAssets.SelectedTab == tabPageImages)
 				{
 					subfilesList = imagesList;
 				}
@@ -1346,25 +1400,13 @@ namespace UnityPlugin
 			}
 		}
 
-		private void othersList_DoubleClick(object sender, EventArgs e)
+		private void othersList_KeyUp(object sender, KeyEventArgs e)
 		{
-			using (Stream stream = File.OpenRead(Editor.Parser.FilePath))
+			if (e.KeyData != MASS_DESTRUCTION_KEY_COMBINATION)
 			{
-				bool format = false;
-				foreach (ListViewItem item in othersList.SelectedItems)
-				{
-					if (item.Tag is NotLoaded)
-					{
-						item.Tag = Editor.Parser.Cabinet.LoadComponent(stream, (NotLoaded)item.Tag);
-						item.Font = new Font(othersList.Font, FontStyle.Bold);
-						format = true;
-					}
-				}
-				if (format)
-				{
-					othersList.Columns[0].AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
-				}
+				return;
 			}
+			removeToolStripMenuItem_Click(sender, e);
 		}
 
 		private void filteredList_ColumnClick(object sender, ColumnClickEventArgs e)
@@ -1408,6 +1450,15 @@ namespace UnityPlugin
 				int cmp = String.Compare(((ListViewItem)x).SubItems[col].Text, ((ListViewItem)y).SubItems[col].Text);
 				return asc ? cmp : -cmp;
 			}
+		}
+
+		private void filteredList_KeyUp(object sender, KeyEventArgs e)
+		{
+			if (e.KeyData != MASS_DESTRUCTION_KEY_COMBINATION)
+			{
+				return;
+			}
+			removeToolStripMenuItem_Click(sender, e);
 		}
 	}
 }

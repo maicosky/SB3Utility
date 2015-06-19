@@ -371,10 +371,10 @@ namespace UnityPlugin
 				break;
 			case TextureFormat.RGB24:
 				byte[] tga_header = new byte[0x12]
-					{
-						0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-						(byte)m_Width, (byte)(m_Width >> 8), (byte)m_Height, (byte)(m_Height >> 8), 24, 0
-					};
+				{
+					0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+					(byte)m_Width, (byte)(m_Width >> 8), (byte)m_Height, (byte)(m_Height >> 8), 24, 0
+				};
 				writer.Write(tga_header);
 				buffer = new byte[image_data.Length];
 				for (int i = 0, j = 2; j < m_CompleteImageSize; i += 3, j += 3)
@@ -387,10 +387,10 @@ namespace UnityPlugin
 				break;
 			case TextureFormat.ARGB32:
 				tga_header = new byte[0x12]
-					{
-						0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-						(byte)m_Width, (byte)(m_Width >> 8), (byte)m_Height, (byte)(m_Height >> 8), 32, 0
-					};
+				{
+					0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+					(byte)m_Width, (byte)(m_Width >> 8), (byte)m_Height, (byte)(m_Height >> 8), 32, 0
+				};
 				writer.Write(tga_header);
 				buffer = new byte[image_data.Length];
 				for (int i = 0, j = 3, k = 1, l = 2; j < m_CompleteImageSize; i += 4, j += 4, k += 4, l += 4)

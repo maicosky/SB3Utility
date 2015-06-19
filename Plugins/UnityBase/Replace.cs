@@ -127,7 +127,7 @@ namespace UnityPlugin
 				{
 					message += " " + boneList[i].Name;
 				}
-				poseMatrices.Add(Matrix.Transpose(boneList[i].Matrix));
+				poseMatrices.Add(Matrix.Transpose(/*Operations.Mirror - Fbx mystic*/(boneList[i].Matrix)));
 				uBoneList.Add(new PPtr<Transform>(boneFrame));
 			}
 			if (message != string.Empty)
@@ -245,17 +245,24 @@ namespace UnityPlugin
 								switch (chn)
 								{
 								case 0:
-									vertWriter.Write(vert.Position);
-									min = Vector3.Minimize(min, vert.Position);
-									max = Vector3.Maximize(max, vert.Position);
+									Vector3 pos = vert.Position;
+									pos.X *= -1;
+									vertWriter.Write(pos);
+									min = Vector3.Minimize(min, pos);
+									max = Vector3.Maximize(max, pos);
 									break;
 								case 1:
-									vertWriter.Write(vert.Normal);
+									Vector3 normal = vert.Normal;
+									normal.X *= -1;
+									vertWriter.Write(normal);
 									break;
 								case 3:
 									vertWriter.Write(vert.UV);
 									break;
 								case 5:
+									Vector4 tangent = vert.Tangent;
+									tangent.X *= -1;
+									tangent.W *= -1;
 									vertWriter.Write(vert.Tangent);
 									break;
 								}
@@ -306,7 +313,7 @@ namespace UnityPlugin
 			bool[] worldCoords;
 			bool[] replaceSubmeshesOption;
 			SkinnedMeshRenderer sMesh = CreateSkinnedMeshRenderer(parser, materials, mesh, out indices, out worldCoords, out replaceSubmeshesOption);
-			vMesh destMesh = new Operations.vMesh(sMesh, true);
+			vMesh destMesh = new Operations.vMesh(sMesh, true, false);
 
 			SkinnedMeshRenderer sFrameMesh = frame.m_GameObject.instance.FindLinkedComponent(UnityClassID.SkinnedMeshRenderer);
 			MeshRenderer frameMeshR = sFrameMesh;
@@ -341,7 +348,7 @@ namespace UnityPlugin
 					sMesh.m_RootBone = new PPtr<Transform>((Component)null);
 				}
 
-				srcMesh = new Operations.vMesh(frameMeshR, true);
+				srcMesh = new Operations.vMesh(frameMeshR, true, false);
 				CopyUnknowns(frameMeshR, sMesh);
 
 				if (targetFullMesh && (normalsMethod == CopyMeshMethod.CopyNear || bonesMethod == CopyMeshMethod.CopyNear))
@@ -659,6 +666,13 @@ namespace UnityPlugin
 
 			Texture2D t2d = new Texture2D(null, tex.pathID, tex.classID1, tex.classID2);
 			t2d.LoadFrom(texture);
+			tex.m_MipMap = t2d.m_MipMap;
+			tex.m_Width = t2d.m_Width;
+			tex.m_Height = t2d.m_Height;
+			tex.m_CompleteImageSize = t2d.m_CompleteImageSize;
+			tex.m_TextureFormat = t2d.m_TextureFormat;
+			tex.m_ImageCount = t2d.m_ImageCount;
+			tex.m_TextureDimension = t2d.m_TextureDimension;
 			tex.image_data = t2d.image_data;
 		}
 	}

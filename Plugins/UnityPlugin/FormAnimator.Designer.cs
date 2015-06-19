@@ -31,28 +31,28 @@
 		private void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
-			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle14 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle15 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle16 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle17 = new System.Windows.Forms.DataGridViewCellStyle();
+			System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle18 = new System.Windows.Forms.DataGridViewCellStyle();
 			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
 			this.buttonObjectTreeRefresh = new System.Windows.Forms.Button();
 			this.buttonObjectTreeExpand = new System.Windows.Forms.Button();
 			this.label19 = new System.Windows.Forms.Label();
 			this.comboBoxMeshRendererMesh = new System.Windows.Forms.ComboBox();
 			this.buttonMeshNormals = new System.Windows.Forms.Button();
-			this.label8 = new System.Windows.Forms.Label();
 			this.checkBoxMorphFbxOptionEmbedMedia = new System.Windows.Forms.CheckBox();
 			this.checkBoxMorphFbxOptionOneBlendshape = new System.Windows.Forms.CheckBox();
 			this.buttonMorphExport = new System.Windows.Forms.Button();
-			this.textBoxFrameName = new SB3Utility.EditTextBox();
 			this.buttonBoneGetHash = new System.Windows.Forms.Button();
-			this.checkBoxMeshMultiPass = new System.Windows.Forms.CheckBox();
+			this.textBoxFrameName = new SB3Utility.EditTextBox();
+			this.buttonMeshSubmeshAddMaterial = new System.Windows.Forms.Button();
+			this.buttonMeshMirrorV = new System.Windows.Forms.Button();
 			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
 			this.tabControlLists = new System.Windows.Forms.TabControl();
 			this.tabPageObject = new System.Windows.Forms.TabPage();
@@ -130,7 +130,6 @@
 			this.labelTransformName = new System.Windows.Forms.Label();
 			this.tabPageBoneView = new System.Windows.Forms.TabPage();
 			this.label3 = new System.Windows.Forms.Label();
-			this.editTextBoxBoneHash = new SB3Utility.EditTextBox();
 			this.groupBox4 = new System.Windows.Forms.GroupBox();
 			this.numericBoneMatrixRatio = new System.Windows.Forms.NumericUpDown();
 			this.label9 = new System.Windows.Forms.Label();
@@ -153,6 +152,7 @@
 			this.buttonBoneRemove = new System.Windows.Forms.Button();
 			this.buttonBoneGotoFrame = new System.Windows.Forms.Button();
 			this.label25 = new System.Windows.Forms.Label();
+			this.editTextBoxBoneHash = new SB3Utility.EditTextBox();
 			this.textBoxBoneName = new SB3Utility.EditTextBox();
 			this.tabPageMeshView = new System.Windows.Forms.TabPage();
 			this.comboBoxRendererRootBone = new System.Windows.Forms.ComboBox();
@@ -191,7 +191,6 @@
 			this.buttonMeshRemove = new System.Windows.Forms.Button();
 			this.groupBoxMesh = new System.Windows.Forms.GroupBox();
 			this.buttonMeshSubmeshDeleteMaterial = new System.Windows.Forms.Button();
-			this.buttonMeshSubmeshAddMaterial = new System.Windows.Forms.Button();
 			this.label24 = new System.Windows.Forms.Label();
 			this.editTextBoxMeshRootBone = new SB3Utility.EditTextBox();
 			this.label26 = new System.Windows.Forms.Label();
@@ -212,7 +211,7 @@
 			this.checkBoxMorphTangents = new System.Windows.Forms.CheckBox();
 			this.checkBoxMorphNormals = new System.Windows.Forms.CheckBox();
 			this.label40 = new System.Windows.Forms.Label();
-			this.buttonMorphDeleteRef = new System.Windows.Forms.Button();
+			this.buttonMorphDeleteKeyframe = new System.Windows.Forms.Button();
 			this.buttonMorphRefDown = new System.Windows.Forms.Button();
 			this.buttonMorphRefUp = new System.Windows.Forms.Button();
 			this.label39 = new System.Windows.Forms.Label();
@@ -235,11 +234,10 @@
 			this.editTextBoxMatShader = new SB3Utility.EditTextBox();
 			this.label30 = new System.Windows.Forms.Label();
 			this.comboBoxMatShaderKeywords = new System.Windows.Forms.ComboBox();
-			this.label29 = new System.Windows.Forms.Label();
+			this.labelMaterialShaderUsed = new System.Windows.Forms.Label();
 			this.buttonMaterialRemove = new System.Windows.Forms.Button();
 			this.buttonMaterialCopy = new System.Windows.Forms.Button();
 			this.label17 = new System.Windows.Forms.Label();
-			this.textBoxMatName = new SB3Utility.EditTextBox();
 			this.dataGridViewMaterialColours = new System.Windows.Forms.DataGridView();
 			this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
 			this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -249,6 +247,7 @@
 			this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
 			this.dataGridViewMaterialTextures = new System.Windows.Forms.DataGridView();
 			this.ColumnMaterialTexture = new System.Windows.Forms.DataGridViewComboBoxColumn();
+			this.textBoxMatName = new SB3Utility.EditTextBox();
 			this.tabPageTextureView = new System.Windows.Forms.TabPage();
 			this.label37 = new System.Windows.Forms.Label();
 			this.label36 = new System.Windows.Forms.Label();
@@ -415,17 +414,6 @@
 			this.buttonMeshNormals.UseVisualStyleBackColor = true;
 			this.buttonMeshNormals.Click += new System.EventHandler(this.buttonMeshNormals_Click);
 			// 
-			// label8
-			// 
-			this.label8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.label8.AutoSize = true;
-			this.label8.Location = new System.Drawing.Point(3, 184);
-			this.label8.Name = "label8";
-			this.label8.Size = new System.Drawing.Size(55, 13);
-			this.label8.TabIndex = 125;
-			this.label8.Text = "Multi-Pass";
-			this.toolTip1.SetToolTip(this.label8, "Exceeding Materials will be used for SubMesh[0] in additional rendering passes.");
-			// 
 			// checkBoxMorphFbxOptionEmbedMedia
 			// 
 			this.checkBoxMorphFbxOptionEmbedMedia.AutoSize = true;
@@ -463,15 +451,6 @@
 			this.buttonMorphExport.UseVisualStyleBackColor = true;
 			this.buttonMorphExport.Click += new System.EventHandler(this.buttonMorphClipExport_Click);
 			// 
-			// textBoxFrameName
-			// 
-			this.textBoxFrameName.Location = new System.Drawing.Point(0, 19);
-			this.textBoxFrameName.Name = "textBoxFrameName";
-			this.textBoxFrameName.Size = new System.Drawing.Size(122, 20);
-			this.textBoxFrameName.TabIndex = 1;
-			this.toolTip1.SetToolTip(this.textBoxFrameName, "Warning for Transforms which are used as Bones!\r\nBones of Meshes are linked by th" +
-        "e hash value of this name!");
-			// 
 			// buttonBoneGetHash
 			// 
 			this.buttonBoneGetHash.Location = new System.Drawing.Point(177, 49);
@@ -483,19 +462,38 @@
 			this.buttonBoneGetHash.UseVisualStyleBackColor = true;
 			this.buttonBoneGetHash.Click += new System.EventHandler(this.buttonBoneGetHash_Click);
 			// 
-			// checkBoxMeshMultiPass
+			// textBoxFrameName
 			// 
-			this.checkBoxMeshMultiPass.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.checkBoxMeshMultiPass.AutoCheck = false;
-			this.checkBoxMeshMultiPass.AutoSize = true;
-			this.checkBoxMeshMultiPass.Enabled = false;
-			this.checkBoxMeshMultiPass.Location = new System.Drawing.Point(60, 184);
-			this.checkBoxMeshMultiPass.Name = "checkBoxMeshMultiPass";
-			this.checkBoxMeshMultiPass.Size = new System.Drawing.Size(15, 14);
-			this.checkBoxMeshMultiPass.TabIndex = 159;
-			this.checkBoxMeshMultiPass.TabStop = false;
-			this.toolTip1.SetToolTip(this.checkBoxMeshMultiPass, "Exceeding Materials will be used for SubMesh[0] in additional rendering passes.");
-			this.checkBoxMeshMultiPass.UseVisualStyleBackColor = true;
+			this.textBoxFrameName.Location = new System.Drawing.Point(0, 19);
+			this.textBoxFrameName.Name = "textBoxFrameName";
+			this.textBoxFrameName.Size = new System.Drawing.Size(122, 20);
+			this.textBoxFrameName.TabIndex = 1;
+			this.toolTip1.SetToolTip(this.textBoxFrameName, "Warning for Transforms which are used as Bones!\r\nBones of Meshes are linked by th" +
+        "e hash value of this name!");
+			// 
+			// buttonMeshSubmeshAddMaterial
+			// 
+			this.buttonMeshSubmeshAddMaterial.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.buttonMeshSubmeshAddMaterial.Location = new System.Drawing.Point(85, 179);
+			this.buttonMeshSubmeshAddMaterial.Name = "buttonMeshSubmeshAddMaterial";
+			this.buttonMeshSubmeshAddMaterial.Size = new System.Drawing.Size(84, 23);
+			this.buttonMeshSubmeshAddMaterial.TabIndex = 160;
+			this.buttonMeshSubmeshAddMaterial.Text = "Add Material";
+			this.toolTip1.SetToolTip(this.buttonMeshSubmeshAddMaterial, "Exceeding Materials will be used for SubMesh[0] in additional rendering passes.");
+			this.buttonMeshSubmeshAddMaterial.UseVisualStyleBackColor = true;
+			this.buttonMeshSubmeshAddMaterial.Click += new System.EventHandler(this.buttonMeshSubmeshAddDeleteMaterial_Click);
+			// 
+			// buttonMeshMirrorV
+			// 
+			this.buttonMeshMirrorV.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.buttonMeshMirrorV.Location = new System.Drawing.Point(5, 179);
+			this.buttonMeshMirrorV.Name = "buttonMeshMirrorV";
+			this.buttonMeshMirrorV.Size = new System.Drawing.Size(73, 23);
+			this.buttonMeshMirrorV.TabIndex = 159;
+			this.buttonMeshMirrorV.Text = "Mirror V";
+			this.toolTip1.SetToolTip(this.buttonMeshMirrorV, "Mirror V coordinates");
+			this.buttonMeshMirrorV.UseVisualStyleBackColor = true;
+			this.buttonMeshMirrorV.Click += new System.EventHandler(this.buttonMeshMirrorV_Click);
 			// 
 			// splitContainer1
 			// 
@@ -561,6 +559,7 @@
 			this.treeViewObjectTree.DragEnter += new System.Windows.Forms.DragEventHandler(this.treeViewObjectTree_DragEnter);
 			this.treeViewObjectTree.DragOver += new System.Windows.Forms.DragEventHandler(this.treeViewObjectTree_DragOver);
 			this.treeViewObjectTree.DragLeave += new System.EventHandler(this.treeViewObjectTree_DragLeave);
+			this.treeViewObjectTree.KeyUp += new System.Windows.Forms.KeyEventHandler(this.treeViewObjectTree_KeyUp);
 			// 
 			// panelObjectTreeBottom
 			// 
@@ -630,6 +629,7 @@
 			this.listViewMesh.UseCompatibleStateImageBehavior = false;
 			this.listViewMesh.View = System.Windows.Forms.View.Details;
 			this.listViewMesh.ItemSelectionChanged += new System.Windows.Forms.ListViewItemSelectionChangedEventHandler(this.listViewMesh_ItemSelectionChanged);
+			this.listViewMesh.KeyUp += new System.Windows.Forms.KeyEventHandler(this.listViewMesh_KeyUp);
 			// 
 			// meshlistHeaderNames
 			// 
@@ -767,6 +767,7 @@
 			this.treeViewMorphKeyframes.DragDrop += new System.Windows.Forms.DragEventHandler(this.treeViewMorphKeyframes_DragDrop);
 			this.treeViewMorphKeyframes.DragEnter += new System.Windows.Forms.DragEventHandler(this.treeViewMorphKeyframes_DragEnter);
 			this.treeViewMorphKeyframes.DragOver += new System.Windows.Forms.DragEventHandler(this.treeViewMorphKeyframes_DragOver);
+			this.treeViewMorphKeyframes.KeyUp += new System.Windows.Forms.KeyEventHandler(this.treeViewMorphKeyframes_KeyUp);
 			// 
 			// label57
 			// 
@@ -823,6 +824,7 @@
 			this.listViewMaterial.UseCompatibleStateImageBehavior = false;
 			this.listViewMaterial.View = System.Windows.Forms.View.Details;
 			this.listViewMaterial.ItemSelectionChanged += new System.Windows.Forms.ListViewItemSelectionChangedEventHandler(this.listViewMaterial_ItemSelectionChanged);
+			this.listViewMaterial.KeyUp += new System.Windows.Forms.KeyEventHandler(this.listViewMaterial_KeyUp);
 			// 
 			// splitContainerMaterialCrossRef
 			// 
@@ -1406,12 +1408,12 @@
 			// 
 			this.tabPageBoneView.Controls.Add(this.buttonBoneGetHash);
 			this.tabPageBoneView.Controls.Add(this.label3);
-			this.tabPageBoneView.Controls.Add(this.editTextBoxBoneHash);
 			this.tabPageBoneView.Controls.Add(this.groupBox4);
 			this.tabPageBoneView.Controls.Add(this.tabControlBoneMatrix);
 			this.tabPageBoneView.Controls.Add(this.buttonBoneRemove);
 			this.tabPageBoneView.Controls.Add(this.buttonBoneGotoFrame);
 			this.tabPageBoneView.Controls.Add(this.label25);
+			this.tabPageBoneView.Controls.Add(this.editTextBoxBoneHash);
 			this.tabPageBoneView.Controls.Add(this.textBoxBoneName);
 			this.tabPageBoneView.Location = new System.Drawing.Point(4, 22);
 			this.tabPageBoneView.Name = "tabPageBoneView";
@@ -1428,15 +1430,6 @@
 			this.label3.Size = new System.Drawing.Size(60, 13);
 			this.label3.TabIndex = 108;
 			this.label3.Text = "Bone Hash";
-			// 
-			// editTextBoxBoneHash
-			// 
-			this.editTextBoxBoneHash.Location = new System.Drawing.Point(179, 19);
-			this.editTextBoxBoneHash.Name = "editTextBoxBoneHash";
-			this.editTextBoxBoneHash.Size = new System.Drawing.Size(73, 20);
-			this.editTextBoxBoneHash.TabIndex = 5;
-			this.editTextBoxBoneHash.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-			this.editTextBoxBoneHash.AfterEditTextChanged += new System.EventHandler(this.editTextBoxBoneHash_AfterEditTextChanged);
 			// 
 			// groupBox4
 			// 
@@ -1714,6 +1707,15 @@
 			this.label25.Size = new System.Drawing.Size(82, 13);
 			this.label25.TabIndex = 106;
 			this.label25.Text = "Bone Transform";
+			// 
+			// editTextBoxBoneHash
+			// 
+			this.editTextBoxBoneHash.Location = new System.Drawing.Point(179, 19);
+			this.editTextBoxBoneHash.Name = "editTextBoxBoneHash";
+			this.editTextBoxBoneHash.Size = new System.Drawing.Size(73, 20);
+			this.editTextBoxBoneHash.TabIndex = 5;
+			this.editTextBoxBoneHash.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+			this.editTextBoxBoneHash.AfterEditTextChanged += new System.EventHandler(this.editTextBoxBoneHash_AfterEditTextChanged);
 			// 
 			// textBoxBoneName
 			// 
@@ -2147,6 +2149,7 @@
 			// 
 			// groupBoxMesh
 			// 
+			this.groupBoxMesh.Controls.Add(this.buttonMeshMirrorV);
 			this.groupBoxMesh.Controls.Add(this.buttonMeshSubmeshDeleteMaterial);
 			this.groupBoxMesh.Controls.Add(this.buttonMeshSubmeshAddMaterial);
 			this.groupBoxMesh.Controls.Add(this.label24);
@@ -2158,8 +2161,6 @@
 			this.groupBoxMesh.Controls.Add(this.buttonMeshSnapBorders);
 			this.groupBoxMesh.Controls.Add(this.dataGridViewMesh);
 			this.groupBoxMesh.Controls.Add(this.buttonMeshSubmeshRemove);
-			this.groupBoxMesh.Controls.Add(this.checkBoxMeshMultiPass);
-			this.groupBoxMesh.Controls.Add(this.label8);
 			this.groupBoxMesh.Location = new System.Drawing.Point(0, 250);
 			this.groupBoxMesh.Name = "groupBoxMesh";
 			this.groupBoxMesh.Size = new System.Drawing.Size(253, 238);
@@ -2177,17 +2178,6 @@
 			this.buttonMeshSubmeshDeleteMaterial.Text = "Delete Mat.";
 			this.buttonMeshSubmeshDeleteMaterial.UseVisualStyleBackColor = true;
 			this.buttonMeshSubmeshDeleteMaterial.Click += new System.EventHandler(this.buttonMeshSubmeshAddDeleteMaterial_Click);
-			// 
-			// buttonMeshSubmeshAddMaterial
-			// 
-			this.buttonMeshSubmeshAddMaterial.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.buttonMeshSubmeshAddMaterial.Location = new System.Drawing.Point(85, 179);
-			this.buttonMeshSubmeshAddMaterial.Name = "buttonMeshSubmeshAddMaterial";
-			this.buttonMeshSubmeshAddMaterial.Size = new System.Drawing.Size(84, 23);
-			this.buttonMeshSubmeshAddMaterial.TabIndex = 160;
-			this.buttonMeshSubmeshAddMaterial.Text = "Add Material";
-			this.buttonMeshSubmeshAddMaterial.UseVisualStyleBackColor = true;
-			this.buttonMeshSubmeshAddMaterial.Click += new System.EventHandler(this.buttonMeshSubmeshAddDeleteMaterial_Click);
 			// 
 			// label24
 			// 
@@ -2341,7 +2331,7 @@
 			this.tabPageMorphView.Controls.Add(this.checkBoxMorphTangents);
 			this.tabPageMorphView.Controls.Add(this.checkBoxMorphNormals);
 			this.tabPageMorphView.Controls.Add(this.label40);
-			this.tabPageMorphView.Controls.Add(this.buttonMorphDeleteRef);
+			this.tabPageMorphView.Controls.Add(this.buttonMorphDeleteKeyframe);
 			this.tabPageMorphView.Controls.Add(this.buttonMorphRefDown);
 			this.tabPageMorphView.Controls.Add(this.buttonMorphRefUp);
 			this.tabPageMorphView.Controls.Add(this.label39);
@@ -2411,16 +2401,16 @@
 			this.label40.TabIndex = 146;
 			this.label40.Text = "Frame Count";
 			// 
-			// buttonMorphDeleteRef
+			// buttonMorphDeleteKeyframe
 			// 
-			this.buttonMorphDeleteRef.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.buttonMorphDeleteRef.Enabled = false;
-			this.buttonMorphDeleteRef.Location = new System.Drawing.Point(98, 147);
-			this.buttonMorphDeleteRef.Name = "buttonMorphDeleteRef";
-			this.buttonMorphDeleteRef.Size = new System.Drawing.Size(75, 23);
-			this.buttonMorphDeleteRef.TabIndex = 36;
-			this.buttonMorphDeleteRef.Text = "Delete";
-			this.buttonMorphDeleteRef.UseVisualStyleBackColor = true;
+			this.buttonMorphDeleteKeyframe.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.buttonMorphDeleteKeyframe.Location = new System.Drawing.Point(98, 147);
+			this.buttonMorphDeleteKeyframe.Name = "buttonMorphDeleteKeyframe";
+			this.buttonMorphDeleteKeyframe.Size = new System.Drawing.Size(75, 23);
+			this.buttonMorphDeleteKeyframe.TabIndex = 36;
+			this.buttonMorphDeleteKeyframe.Text = "Delete";
+			this.buttonMorphDeleteKeyframe.UseVisualStyleBackColor = true;
+			this.buttonMorphDeleteKeyframe.Click += new System.EventHandler(this.buttonMorphDeleteKeyframe_Click);
 			// 
 			// buttonMorphRefDown
 			// 
@@ -2612,14 +2602,14 @@
 			this.tabPageMaterialView.Controls.Add(this.editTextBoxMatShader);
 			this.tabPageMaterialView.Controls.Add(this.label30);
 			this.tabPageMaterialView.Controls.Add(this.comboBoxMatShaderKeywords);
-			this.tabPageMaterialView.Controls.Add(this.label29);
+			this.tabPageMaterialView.Controls.Add(this.labelMaterialShaderUsed);
 			this.tabPageMaterialView.Controls.Add(this.buttonMaterialRemove);
 			this.tabPageMaterialView.Controls.Add(this.buttonMaterialCopy);
 			this.tabPageMaterialView.Controls.Add(this.label17);
-			this.tabPageMaterialView.Controls.Add(this.textBoxMatName);
 			this.tabPageMaterialView.Controls.Add(this.dataGridViewMaterialColours);
 			this.tabPageMaterialView.Controls.Add(this.dataGridViewMaterialValues);
 			this.tabPageMaterialView.Controls.Add(this.dataGridViewMaterialTextures);
+			this.tabPageMaterialView.Controls.Add(this.textBoxMatName);
 			this.tabPageMaterialView.Location = new System.Drawing.Point(4, 22);
 			this.tabPageMaterialView.Name = "tabPageMaterialView";
 			this.tabPageMaterialView.Size = new System.Drawing.Size(252, 509);
@@ -2629,9 +2619,9 @@
 			// 
 			// editTextBoxMatShader
 			// 
-			this.editTextBoxMatShader.Enabled = false;
 			this.editTextBoxMatShader.Location = new System.Drawing.Point(1, 56);
 			this.editTextBoxMatShader.Name = "editTextBoxMatShader";
+			this.editTextBoxMatShader.ReadOnly = true;
 			this.editTextBoxMatShader.Size = new System.Drawing.Size(150, 20);
 			this.editTextBoxMatShader.TabIndex = 4;
 			// 
@@ -2653,14 +2643,14 @@
 			this.comboBoxMatShaderKeywords.Sorted = true;
 			this.comboBoxMatShaderKeywords.TabIndex = 6;
 			// 
-			// label29
+			// labelMaterialShaderUsed
 			// 
-			this.label29.AutoSize = true;
-			this.label29.Location = new System.Drawing.Point(-2, 42);
-			this.label29.Name = "label29";
-			this.label29.Size = new System.Drawing.Size(69, 13);
-			this.label29.TabIndex = 3;
-			this.label29.Text = "Shader Used";
+			this.labelMaterialShaderUsed.AutoSize = true;
+			this.labelMaterialShaderUsed.Location = new System.Drawing.Point(-2, 42);
+			this.labelMaterialShaderUsed.Name = "labelMaterialShaderUsed";
+			this.labelMaterialShaderUsed.Size = new System.Drawing.Size(69, 13);
+			this.labelMaterialShaderUsed.TabIndex = 3;
+			this.labelMaterialShaderUsed.Text = "Shader Used";
 			// 
 			// buttonMaterialRemove
 			// 
@@ -2691,13 +2681,6 @@
 			this.label17.TabIndex = 1;
 			this.label17.Text = "Name";
 			// 
-			// textBoxMatName
-			// 
-			this.textBoxMatName.Location = new System.Drawing.Point(0, 19);
-			this.textBoxMatName.Name = "textBoxMatName";
-			this.textBoxMatName.Size = new System.Drawing.Size(250, 20);
-			this.textBoxMatName.TabIndex = 2;
-			// 
 			// dataGridViewMaterialColours
 			// 
 			this.dataGridViewMaterialColours.AllowUserToAddRows = false;
@@ -2711,30 +2694,30 @@
             this.dataGridViewTextBoxColumn2,
             this.dataGridViewTextBoxColumn3,
             this.Column1});
-			dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-			dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Window;
-			dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.ControlText;
-			dataGridViewCellStyle1.Format = "N4";
-			dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-			dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-			dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-			this.dataGridViewMaterialColours.DefaultCellStyle = dataGridViewCellStyle1;
+			dataGridViewCellStyle10.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+			dataGridViewCellStyle10.BackColor = System.Drawing.SystemColors.Window;
+			dataGridViewCellStyle10.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			dataGridViewCellStyle10.ForeColor = System.Drawing.SystemColors.ControlText;
+			dataGridViewCellStyle10.Format = "N4";
+			dataGridViewCellStyle10.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+			dataGridViewCellStyle10.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+			dataGridViewCellStyle10.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+			this.dataGridViewMaterialColours.DefaultCellStyle = dataGridViewCellStyle10;
 			this.dataGridViewMaterialColours.Location = new System.Drawing.Point(0, 212);
 			this.dataGridViewMaterialColours.MultiSelect = false;
 			this.dataGridViewMaterialColours.Name = "dataGridViewMaterialColours";
-			dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-			dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Control;
-			dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.WindowText;
-			dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-			dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-			dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-			this.dataGridViewMaterialColours.RowHeadersDefaultCellStyle = dataGridViewCellStyle2;
+			dataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+			dataGridViewCellStyle11.BackColor = System.Drawing.SystemColors.Control;
+			dataGridViewCellStyle11.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			dataGridViewCellStyle11.ForeColor = System.Drawing.SystemColors.WindowText;
+			dataGridViewCellStyle11.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+			dataGridViewCellStyle11.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+			dataGridViewCellStyle11.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+			this.dataGridViewMaterialColours.RowHeadersDefaultCellStyle = dataGridViewCellStyle11;
 			this.dataGridViewMaterialColours.RowHeadersWidth = 50;
-			dataGridViewCellStyle3.Format = "N4";
-			dataGridViewCellStyle3.NullValue = null;
-			this.dataGridViewMaterialColours.RowsDefaultCellStyle = dataGridViewCellStyle3;
+			dataGridViewCellStyle12.Format = "N4";
+			dataGridViewCellStyle12.NullValue = null;
+			this.dataGridViewMaterialColours.RowsDefaultCellStyle = dataGridViewCellStyle12;
 			this.dataGridViewMaterialColours.RowTemplate.DefaultCellStyle.Format = "N4";
 			this.dataGridViewMaterialColours.RowTemplate.DefaultCellStyle.NullValue = null;
 			this.dataGridViewMaterialColours.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
@@ -2784,29 +2767,29 @@
 			this.dataGridViewMaterialValues.ColumnHeadersVisible = false;
 			this.dataGridViewMaterialValues.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.dataGridViewTextBoxColumn4});
-			dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-			dataGridViewCellStyle4.BackColor = System.Drawing.SystemColors.Window;
-			dataGridViewCellStyle4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			dataGridViewCellStyle4.ForeColor = System.Drawing.SystemColors.ControlText;
-			dataGridViewCellStyle4.NullValue = null;
-			dataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-			dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-			dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-			this.dataGridViewMaterialValues.DefaultCellStyle = dataGridViewCellStyle4;
+			dataGridViewCellStyle13.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+			dataGridViewCellStyle13.BackColor = System.Drawing.SystemColors.Window;
+			dataGridViewCellStyle13.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			dataGridViewCellStyle13.ForeColor = System.Drawing.SystemColors.ControlText;
+			dataGridViewCellStyle13.NullValue = null;
+			dataGridViewCellStyle13.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+			dataGridViewCellStyle13.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+			dataGridViewCellStyle13.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+			this.dataGridViewMaterialValues.DefaultCellStyle = dataGridViewCellStyle13;
 			this.dataGridViewMaterialValues.Location = new System.Drawing.Point(0, 334);
 			this.dataGridViewMaterialValues.MultiSelect = false;
 			this.dataGridViewMaterialValues.Name = "dataGridViewMaterialValues";
-			dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-			dataGridViewCellStyle5.BackColor = System.Drawing.SystemColors.Control;
-			dataGridViewCellStyle5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			dataGridViewCellStyle5.ForeColor = System.Drawing.SystemColors.WindowText;
-			dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-			dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-			dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-			this.dataGridViewMaterialValues.RowHeadersDefaultCellStyle = dataGridViewCellStyle5;
+			dataGridViewCellStyle14.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+			dataGridViewCellStyle14.BackColor = System.Drawing.SystemColors.Control;
+			dataGridViewCellStyle14.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			dataGridViewCellStyle14.ForeColor = System.Drawing.SystemColors.WindowText;
+			dataGridViewCellStyle14.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+			dataGridViewCellStyle14.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+			dataGridViewCellStyle14.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+			this.dataGridViewMaterialValues.RowHeadersDefaultCellStyle = dataGridViewCellStyle14;
 			this.dataGridViewMaterialValues.RowHeadersWidth = 70;
-			dataGridViewCellStyle6.NullValue = null;
-			this.dataGridViewMaterialValues.RowsDefaultCellStyle = dataGridViewCellStyle6;
+			dataGridViewCellStyle15.NullValue = null;
+			this.dataGridViewMaterialValues.RowsDefaultCellStyle = dataGridViewCellStyle15;
 			this.dataGridViewMaterialValues.RowTemplate.DefaultCellStyle.NullValue = null;
 			this.dataGridViewMaterialValues.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
 			this.dataGridViewMaterialValues.Size = new System.Drawing.Size(150, 99);
@@ -2830,29 +2813,29 @@
 			this.dataGridViewMaterialTextures.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
 			this.dataGridViewMaterialTextures.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.ColumnMaterialTexture});
-			dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-			dataGridViewCellStyle7.BackColor = System.Drawing.SystemColors.Window;
-			dataGridViewCellStyle7.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			dataGridViewCellStyle7.ForeColor = System.Drawing.SystemColors.ControlText;
-			dataGridViewCellStyle7.NullValue = null;
-			dataGridViewCellStyle7.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-			dataGridViewCellStyle7.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-			dataGridViewCellStyle7.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-			this.dataGridViewMaterialTextures.DefaultCellStyle = dataGridViewCellStyle7;
+			dataGridViewCellStyle16.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+			dataGridViewCellStyle16.BackColor = System.Drawing.SystemColors.Window;
+			dataGridViewCellStyle16.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			dataGridViewCellStyle16.ForeColor = System.Drawing.SystemColors.ControlText;
+			dataGridViewCellStyle16.NullValue = null;
+			dataGridViewCellStyle16.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+			dataGridViewCellStyle16.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+			dataGridViewCellStyle16.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+			this.dataGridViewMaterialTextures.DefaultCellStyle = dataGridViewCellStyle16;
 			this.dataGridViewMaterialTextures.Location = new System.Drawing.Point(0, 82);
 			this.dataGridViewMaterialTextures.MultiSelect = false;
 			this.dataGridViewMaterialTextures.Name = "dataGridViewMaterialTextures";
-			dataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-			dataGridViewCellStyle8.BackColor = System.Drawing.SystemColors.Control;
-			dataGridViewCellStyle8.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			dataGridViewCellStyle8.ForeColor = System.Drawing.SystemColors.WindowText;
-			dataGridViewCellStyle8.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-			dataGridViewCellStyle8.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-			dataGridViewCellStyle8.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-			this.dataGridViewMaterialTextures.RowHeadersDefaultCellStyle = dataGridViewCellStyle8;
+			dataGridViewCellStyle17.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+			dataGridViewCellStyle17.BackColor = System.Drawing.SystemColors.Control;
+			dataGridViewCellStyle17.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			dataGridViewCellStyle17.ForeColor = System.Drawing.SystemColors.WindowText;
+			dataGridViewCellStyle17.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+			dataGridViewCellStyle17.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+			dataGridViewCellStyle17.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+			this.dataGridViewMaterialTextures.RowHeadersDefaultCellStyle = dataGridViewCellStyle17;
 			this.dataGridViewMaterialTextures.RowHeadersWidth = 75;
-			dataGridViewCellStyle9.NullValue = null;
-			this.dataGridViewMaterialTextures.RowsDefaultCellStyle = dataGridViewCellStyle9;
+			dataGridViewCellStyle18.NullValue = null;
+			this.dataGridViewMaterialTextures.RowsDefaultCellStyle = dataGridViewCellStyle18;
 			this.dataGridViewMaterialTextures.RowTemplate.DefaultCellStyle.NullValue = null;
 			this.dataGridViewMaterialTextures.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
 			this.dataGridViewMaterialTextures.Size = new System.Drawing.Size(250, 122);
@@ -2867,6 +2850,13 @@
 			this.ColumnMaterialTexture.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
 			this.ColumnMaterialTexture.HeaderText = "PathID Texture";
 			this.ColumnMaterialTexture.Name = "ColumnMaterialTexture";
+			// 
+			// textBoxMatName
+			// 
+			this.textBoxMatName.Location = new System.Drawing.Point(0, 19);
+			this.textBoxMatName.Name = "textBoxMatName";
+			this.textBoxMatName.Size = new System.Drawing.Size(250, 20);
+			this.textBoxMatName.TabIndex = 2;
 			// 
 			// tabPageTextureView
 			// 
@@ -3423,7 +3413,6 @@
 		private System.Windows.Forms.Label label13;
 		public SB3Utility.EditTextBox textBoxKeyframeRange;
 		private System.Windows.Forms.CheckBox checkBoxMeshExportFbxAllFrames;
-		private System.Windows.Forms.Label label8;
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.Button buttonMeshRemove;
 		private System.Windows.Forms.GroupBox groupBoxMesh;
@@ -3450,7 +3439,7 @@
 		private System.Windows.Forms.Label label15;
 		private System.Windows.Forms.Label label26;
 		public SB3Utility.EditTextBox editTextBoxMeshName;
-		private System.Windows.Forms.Label label29;
+		private System.Windows.Forms.Label labelMaterialShaderUsed;
 		private System.Windows.Forms.Label label30;
 		private System.Windows.Forms.ComboBox comboBoxMatShaderKeywords;
 		private SB3Utility.EditTextBox editTextBoxMatShader;
@@ -3487,7 +3476,6 @@
 		private System.Windows.Forms.DataGridViewComboBoxColumn ColumnSubmeshMaterial;
 		private System.Windows.Forms.DataGridViewTextBoxColumn Topology;
 		private System.Windows.Forms.ComboBox comboBoxRendererRootBone;
-		private System.Windows.Forms.CheckBox checkBoxMeshMultiPass;
 		private System.Windows.Forms.Button buttonFrameUnique;
 		private System.Windows.Forms.TabPage tabPageMorphView;
 		private System.Windows.Forms.TabPage tabPageMorph;
@@ -3497,7 +3485,7 @@
 		private System.Windows.Forms.Button buttonMorphRefDown;
 		private System.Windows.Forms.Label label39;
 		private System.Windows.Forms.Button buttonMorphRefUp;
-		private System.Windows.Forms.Button buttonMorphDeleteRef;
+		private System.Windows.Forms.Button buttonMorphDeleteKeyframe;
 		private SB3Utility.EditTextBox textBoxMorphFrameIndex;
 		private System.Windows.Forms.GroupBox groupBox7;
 		private System.Windows.Forms.GroupBox groupBox8;
@@ -3538,5 +3526,6 @@
 		private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
 		public System.Windows.Forms.DataGridView dataGridViewMaterialTextures;
 		private System.Windows.Forms.DataGridViewComboBoxColumn ColumnMaterialTexture;
+		private System.Windows.Forms.Button buttonMeshMirrorV;
 	}
 }

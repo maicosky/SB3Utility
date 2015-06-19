@@ -782,7 +782,7 @@ namespace UnityPlugin
 			Mesh mesh = smr.m_Mesh.instance;
 			if (mesh != null)
 			{
-				Operations.vMesh vMesh = new Operations.vMesh(smr, false);
+				Operations.vMesh vMesh = new Operations.vMesh(smr, false, false);
 				Transform boneFrame = smr.m_Bones[boneId].instance;
 				int parentBoneIdx = -1;
 				if (boneFrame != null)
@@ -942,7 +942,7 @@ namespace UnityPlugin
 		public void CalculateNormals(int id, double threshold)
 		{
 			MeshRenderer meshR = Meshes[id];
-			Operations.vMesh vMesh = new Operations.vMesh(meshR, true);
+			Operations.vMesh vMesh = new Operations.vMesh(meshR, true, false);
 			Operations.CalculateNormals(vMesh.submeshes, (float)threshold);
 			Changed = true;
 		}
@@ -970,7 +970,7 @@ namespace UnityPlugin
 		public void CalculateTangents(int id)
 		{
 			MeshRenderer meshR = Meshes[id];
-			Operations.vMesh vMesh = new Operations.vMesh(meshR, true);
+			Operations.vMesh vMesh = new Operations.vMesh(meshR, true, false);
 			Operations.CalculateTangents(vMesh.submeshes);
 			Changed = true;
 		}
@@ -1008,7 +1008,7 @@ namespace UnityPlugin
 					editor = (AnimatorEditor)editors[editorIdx];
 				}
 				MeshRenderer meshR = editor.Meshes[(int)(double)id];
-				Operations.vMesh vMesh = new Operations.vMesh(meshR, true);
+				Operations.vMesh vMesh = new Operations.vMesh(meshR, true, false);
 				meshList.Add(vMesh);
 				submeshList.AddRange(vMesh.submeshes);
 			}
@@ -1244,7 +1244,7 @@ namespace UnityPlugin
 			}
 			else
 			{
-				Operations.vMesh vMesh = new Operations.vMesh(meshR, true);
+				Operations.vMesh vMesh = new Operations.vMesh(meshR, true, false);
 				vMesh.submeshes.RemoveAt(subMeshId);
 				vMesh.Flush();
 			}
@@ -1253,6 +1253,23 @@ namespace UnityPlugin
 			{
 				Parser.file.Bundle.RegisterForUpdate(meshR);
 			}
+			Changed = true;
+		}
+
+		[Plugin]
+		public void MirrorV(int meshId)
+		{
+			MeshRenderer meshR = Meshes[meshId];
+			Operations.vMesh vMesh = new Operations.vMesh(meshR, true, false);
+			foreach (Operations.vSubmesh submesh in vMesh.submeshes)
+			{
+				foreach (Operations.vVertex vert in submesh.vertexList)
+				{
+					vert.uv.Y *= -1;
+				}
+			}
+			vMesh.Flush();
+
 			Changed = true;
 		}
 
@@ -1286,6 +1303,18 @@ namespace UnityPlugin
 				MeshBlendShapeChannel channel = mesh.m_Shapes.channels[morphIndex];
 				channel.frameIndex = index;
 				channel.frameCount = count;
+			}
+		}
+
+		[Plugin]
+		public void DeleteMorphKeyframe(int meshId, int morphIndex)
+		{
+			SkinnedMeshRenderer sMesh = (SkinnedMeshRenderer)Meshes[meshId];
+			Mesh mesh = Operations.GetMesh(sMesh);
+			if (mesh != null)
+			{
+				mesh.m_Shapes.shapes.RemoveAt(morphIndex);
+				mesh.m_Shapes.channels.RemoveAt(morphIndex);
 			}
 		}
 

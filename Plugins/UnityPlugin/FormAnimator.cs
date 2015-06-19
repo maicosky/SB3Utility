@@ -992,7 +992,6 @@ namespace UnityPlugin
 				comboBoxMeshRendererMesh.SelectedIndex = -1;
 				editTextBoxMeshName.Text = String.Empty;
 				comboBoxRendererRootBone.SelectedIndex = -1;
-				checkBoxMeshMultiPass.Checked = false;
 				editTextBoxMeshRootBone.Text = String.Empty;
 			}
 			else
@@ -1019,7 +1018,6 @@ namespace UnityPlugin
 					}
 
 					editTextBoxMeshName.Text = mesh.m_Name;
-					checkBoxMeshMultiPass.Checked = meshR.m_Materials.Count > mesh.m_SubMeshes.Count;
 					if (Editor.Parser.m_Avatar.instance != null)
 					{
 						editTextBoxMeshRootBone.Text = Editor.Parser.m_Avatar.instance.FindBoneName(mesh.m_RootBoneNameHash);
@@ -1059,24 +1057,8 @@ namespace UnityPlugin
 				}
 				else
 				{
-					PPtr<Mesh> meshPtr = null;
-					if (meshR is SkinnedMeshRenderer)
-					{
-						SkinnedMeshRenderer sMesh = (SkinnedMeshRenderer)meshR;
-						if (sMesh.m_Mesh.m_FileID != 0)
-						{
-							meshPtr = sMesh.m_Mesh;
-						}
-					}
-					else
-					{
-						MeshFilter filter = meshR.m_GameObject.instance.FindLinkedComponent(UnityClassID.MeshFilter);
-						if (filter.m_Mesh.m_FileID != 0)
-						{
-							meshPtr = filter.m_Mesh;
-						}
-					}
-					if (meshPtr != null)
+					PPtr<Mesh> meshPtr = Operations.GetMeshPtr(meshR);
+					if (meshPtr != null && meshPtr.m_FileID != 0)
 					{
 						editTextBoxMeshName.Text = "External Mesh FileID=" + meshPtr.m_FileID + " PathID=" + meshPtr.m_PathID;
 					}
@@ -1121,6 +1103,8 @@ namespace UnityPlugin
 				{
 					editTextBoxMatShader.Text = "External Shader FileID=" + mat.m_Shader.m_FileID + " PathID=" + mat.m_Shader.m_PathID;
 				}
+				toolTip1.SetToolTip(editTextBoxMatShader, editTextBoxMatShader.Text);
+				toolTip1.SetToolTip(labelMaterialShaderUsed, editTextBoxMatShader.Text);
 				if (mat.m_ShaderKeywords.Count > 0)
 				{
 					comboBoxMatShaderKeywords.Items.AddRange(mat.m_ShaderKeywords.ToArray());
@@ -1236,6 +1220,10 @@ namespace UnityPlugin
 		void LoadTexture(int id)
 		{
 			textureLoading = true;
+			if (pictureBoxTexture.Image != null)
+			{
+				pictureBoxTexture.Image.Dispose();
+			}
 			if (id < 0)
 			{
 				textBoxTexName.Text = String.Empty;
@@ -2290,6 +2278,38 @@ namespace UnityPlugin
 						form.InitSubfileLists(false);
 						break;
 					}
+				}
+			}
+		}
+
+		private void treeViewObjectTree_KeyUp(object sender, KeyEventArgs e)
+		{
+			if (e.KeyData != MASS_DESTRUCTION_KEY_COMBINATION || treeViewObjectTree.SelectedNode == null)
+			{
+				return;
+			}
+			DragSource? src = treeViewObjectTree.SelectedNode.Tag as DragSource?;
+			if (src != null)
+			{
+				if (src.Value.Type == typeof(Transform))
+				{
+					buttonFrameRemove_Click(null, null);
+				}
+				else if (src.Value.Type == typeof(MeshRenderer))
+				{
+					buttonMeshRemove_Click(null, null);
+				}
+				else if (src.Value.Type == typeof(Matrix))
+				{
+					buttonBoneRemove_Click(null, null);
+				}
+				else if (src.Value.Type == typeof(Material))
+				{
+					buttonMaterialRemove_Click(null, null);
+				}
+				else if (src.Value.Type == typeof(Texture2D))
+				{
+					buttonTextureRemove_Click(null, null);
 				}
 			}
 		}
@@ -3835,6 +3855,25 @@ namespace UnityPlugin
 			}
 		}
 
+		private void buttonMeshMirrorV_Click(object sender, EventArgs e)
+		{
+			if (loadedMesh < 0)
+			{
+				return;
+			}
+
+			try
+			{
+				Gui.Scripting.RunScript(EditorVar + ".MirrorV(meshId=" + loadedMesh + ")");
+
+				RecreateRenderObjects();
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
 		private void buttonMeshSubmeshAddDeleteMaterial_Click(object sender, EventArgs e)
 		{
 			try
@@ -4136,6 +4175,30 @@ namespace UnityPlugin
 			}
 		}
 
+		private void buttonMorphDeleteKeyframe_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				if (treeViewMorphKeyframes.SelectedNode == null)
+				{
+					Report.ReportLog("No morph clip was selected");
+					return;
+				}
+				if (treeViewMorphKeyframes.SelectedNode.Tag is int)
+				{
+					int index = (int)treeViewMorphKeyframes.SelectedNode.Tag;
+					TreeNode meshNode = treeViewMorphKeyframes.SelectedNode.Parent;
+					SkinnedMeshRenderer sMesh = (SkinnedMeshRenderer)meshNode.Tag;
+					Gui.Scripting.RunScript(EditorVar + ".DeleteMorphKeyframe(meshId=" + Editor.Meshes.IndexOf(sMesh) + ", morphIndex=" + index + ")");
+					InitMorphs();
+				}
+			}
+			catch (Exception ex)
+			{
+				Utility.ReportException(ex);
+			}
+		}
+
 		private void treeViewMorphKeyframes_ItemDrag(object sender, ItemDragEventArgs e)
 		{
 			try
@@ -4263,6 +4326,15 @@ namespace UnityPlugin
 			{
 				e.Effect = e.AllowedEffect & DragDropEffects.Copy;
 			}
+		}
+
+		private void treeViewMorphKeyframes_KeyUp(object sender, KeyEventArgs e)
+		{
+			if (e.KeyData != MASS_DESTRUCTION_KEY_COMBINATION)
+			{
+				return;
+			}
+			buttonMorphDeleteKeyframe_Click(null, null);
 		}
 
 		private void listViewMaterial_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)

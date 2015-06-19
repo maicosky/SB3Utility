@@ -101,16 +101,16 @@ namespace UnityPlugin
 						}
 					}
 
-					for (int j = 0; j < Textures.Length; j++)
-					{
-						Texture tex = Textures[j];
-						if ((tex != null) && !tex.Disposed)
-						{
-							tex.Dispose();
-						}
-					}
-
 					mesh = mesh.NextMeshContainer;
+				}
+			}
+
+			for (int i = 0; i < Textures.Length; i++)
+			{
+				Texture tex = Textures[i];
+				if ((tex != null) && !tex.Disposed)
+				{
+					tex.Dispose();
 				}
 			}
 
@@ -124,7 +124,7 @@ namespace UnityPlugin
 
 		public void Render()
 		{
-			UpdateFrameMatrices(rootFrame, Matrix.Identity);
+			UpdateFrameMatrices(rootFrame, Matrix.Scaling(-1, 1, 1));
 
 			for (int i = 0; i < meshFrames.Count; i++)
 			{
@@ -172,7 +172,7 @@ namespace UnityPlugin
 				{
 					device.SetRenderState(RenderState.VertexBlend, VertexBlend.Disable);
 					device.SetRenderState(RenderState.AmbientMaterialSource, ColorSource.Material);
-					device.SetTransform(TransformState.World, frame.CombinedTransform);
+					device.SetTransform(TransformState.World, frame.CombinedTransform * Matrix.Scaling(-1, 1, 1));
 				}
 
 				submeshNum = 0;
@@ -187,7 +187,7 @@ namespace UnityPlugin
 			{
 				MorphMeshContainer morphMeshContainer = (MorphMeshContainer)frame.MeshContainer;
 				device.SetRenderState(RenderState.AmbientMaterialSource, ColorSource.Material);
-				device.SetTransform(TransformState.World, frame.CombinedTransform);
+				device.SetTransform(TransformState.World, frame.CombinedTransform * Matrix.Scaling(-1, 1, 1));
 
 				submeshNum = 0;
 				while (morphMeshContainer != null)
@@ -206,7 +206,7 @@ namespace UnityPlugin
 				device.SetRenderState(RenderState.ZEnable, ZBufferType.UseZBuffer);
 				device.SetRenderState(RenderState.Lighting, true);
 
-				Cull culling = (Gui.Renderer.Culling) ? Cull.Counterclockwise : Cull.None;
+				Cull culling = (Gui.Renderer.Culling) ? Cull.Clockwise : Cull.None;
 				device.SetRenderState(RenderState.CullMode, culling);
 
 				FillMode fill = (Gui.Renderer.Wireframe) ? FillMode.Wireframe : FillMode.Solid;
@@ -274,7 +274,7 @@ namespace UnityPlugin
 			device.SetRenderState(RenderState.ZEnable, ZBufferType.UseZBuffer);
 			device.SetRenderState(RenderState.Lighting, true);
 
-			Cull culling = (Gui.Renderer.Culling) ? Cull.Counterclockwise : Cull.None;
+			Cull culling = (Gui.Renderer.Culling) ? Cull.Clockwise : Cull.None;
 			device.SetRenderState(RenderState.CullMode, culling);
 
 			FillMode fill = (Gui.Renderer.Wireframe) ? FillMode.Wireframe : FillMode.Solid;
@@ -342,8 +342,8 @@ namespace UnityPlugin
 			meshFrames = new List<AnimationFrame>(meshNames.Count);
 			HashSet<string> extractFrames = Operations.SearchHierarchy(editor.Parser.RootTransform, meshNames);
 			Dictionary<string, Tuple<Matrix, Matrix>> extractMatrices = new Dictionary<string, Tuple<Matrix, Matrix>>();
-			CreateCombinedMatrices(editor.Parser.RootTransform, extractFrames, Matrix.Identity, extractMatrices);
-			AnimationFrame rootFrame = CreateFrame(editor.Parser.RootTransform, editor, extractFrames, meshNames, device, Matrix.Identity, meshFrames, extractMatrices);
+			CreateCombinedMatrices(editor.Parser.RootTransform, extractFrames, Matrix.Scaling(-1, 1, 1), extractMatrices);
+			AnimationFrame rootFrame = CreateFrame(editor.Parser.RootTransform, editor, extractFrames, meshNames, device, meshFrames, extractMatrices);
 			SetupBoneMatrices(rootFrame, rootFrame);
 			return rootFrame;
 		}
@@ -352,7 +352,7 @@ namespace UnityPlugin
 
 		private void CreateCombinedMatrices(Transform frame, HashSet<string> extractFrames, Matrix combinedParent, Dictionary<string, Tuple<Matrix, Matrix>> extractMatrices)
 		{
-			Matrix combinedTransform = Matrix.Scaling(frame.m_LocalScale) * Matrix.RotationQuaternion(frame.m_LocalRotation) * Matrix.Translation(frame.m_LocalPosition) * combinedParent;
+			Matrix combinedTransform = combinedParent * Matrix.Scaling(frame.m_LocalScale) * Matrix.RotationQuaternion(frame.m_LocalRotation) * Matrix.Translation(frame.m_LocalPosition);
 			try
 			{
 				extractMatrices.Add(frame.GetTransformPath(), new Tuple<Matrix, Matrix>(combinedTransform, Matrix.Invert(combinedTransform)));
@@ -377,7 +377,7 @@ namespace UnityPlugin
 			}
 		}
 
-		private AnimationFrame CreateFrame(Transform frame, AnimatorEditor editor, HashSet<string> extractFrames, HashSet<string> meshNames, Device device, Matrix combinedParent, List<AnimationFrame> meshFrames, Dictionary<string, Tuple<Matrix, Matrix>> extractMatrices)
+		private AnimationFrame CreateFrame(Transform frame, AnimatorEditor editor, HashSet<string> extractFrames, HashSet<string> meshNames, Device device, List<AnimationFrame> meshFrames, Dictionary<string, Tuple<Matrix, Matrix>> extractMatrices)
 		{
 			AnimationFrame animationFrame = new AnimationFrame();
 			animationFrame.Name = frame.GetTransformPath();
@@ -424,7 +424,7 @@ namespace UnityPlugin
 									else if (i < numBones)
 									{
 										boneNames[i] = bone.GetTransformPath();
-										boneOffsets[i] = Matrix.Transpose(mesh.m_BindPose[i]);
+										boneOffsets[i] = Operations.Mirror(Matrix.Transpose(mesh.m_BindPose[i]));
 									}
 								}
 								extractCopy.CopyTo(boneNames, boneList.Count - invalidBones);
@@ -438,7 +438,7 @@ namespace UnityPlugin
 						AnimationMeshContainer[] meshContainers = new AnimationMeshContainer[mesh.m_SubMeshes.Count];
 						Vector3 min = new Vector3(Single.MaxValue);
 						Vector3 max = new Vector3(Single.MinValue);
-						Operations.vMesh vMesh = new Operations.vMesh(meshR, true);
+						Operations.vMesh vMesh = new Operations.vMesh(meshR, true, true);
 						for (int i = 0; i < mesh.m_SubMeshes.Count; i++)
 						{
 							Operations.vSubmesh submesh = vMesh.submeshes[i];
@@ -558,8 +558,9 @@ namespace UnityPlugin
 							}
 						}
 
-						min = Vector3.TransformCoordinate(min, animationFrame.CombinedTransform);
-						max = Vector3.TransformCoordinate(max, animationFrame.CombinedTransform);
+						Matrix mirrorCombined = Operations.Mirror(animationFrame.CombinedTransform);
+						min = Vector3.TransformCoordinate(min, mirrorCombined);
+						max = Vector3.TransformCoordinate(max, mirrorCombined);
 						animationFrame.Bounds = new BoundingBox(min, max);
 						animationFrame.MeshContainer = meshContainers[0];
 						meshFrames.Add(animationFrame);
@@ -572,7 +573,7 @@ namespace UnityPlugin
 				Transform child = frame[i];
 				if (extractFrames.Contains(child.GetTransformPath()))
 				{
-					AnimationFrame childAnimationFrame = CreateFrame(child, editor, extractFrames, meshNames, device, animationFrame.CombinedTransform, meshFrames, extractMatrices);
+					AnimationFrame childAnimationFrame = CreateFrame(child, editor, extractFrames, meshNames, device, meshFrames, extractMatrices);
 					childAnimationFrame.Parent = animationFrame;
 					animationFrame.AppendChild(childAnimationFrame);
 				}
@@ -892,9 +893,9 @@ namespace UnityPlugin
 
 		public void HighlightBone(MeshRenderer meshR, int boneIdx, bool show)
 		{
-			Operations.vMesh vMesh = new Operations.vMesh(meshR, false);
+			Operations.vMesh vMesh = new Operations.vMesh(meshR, false, true);
 			int submeshIdx = 0;
-			for (AnimationMeshContainer mesh = (AnimationMeshContainer)meshFrames[0].MeshContainer;
+			for (AnimationMeshContainer mesh = meshFrames[0].MeshContainer as AnimationMeshContainer;
 				 mesh != null;
 				 mesh = (AnimationMeshContainer)mesh.NextMeshContainer, submeshIdx++)
 			{
@@ -949,7 +950,7 @@ namespace UnityPlugin
 							morphMesh.IndexBuffer = animMesh.MeshData.Mesh.IndexBuffer;
 
 							morphMesh.VertexCount = (int)mesh.m_SubMeshes[meshObjIdx].vertexCount;
-							Operations.vMesh vMesh = new Operations.vMesh(sMesh, false);
+							Operations.vMesh vMesh = new Operations.vMesh(sMesh, false, false);
 							List<Operations.vVertex> vertexList = vMesh.submeshes[meshObjIdx].vertexList;
 							VertexBuffer vertBuffer = CreateMorphVertexBuffer(mesh.m_Shapes, keyframeIdx, vertexList, startVertexIdx);
 							morphMesh.StartBuffer = morphMesh.EndBuffer = vertBuffer;
@@ -988,7 +989,7 @@ namespace UnityPlugin
 					else
 					{
 						MorphMeshContainer morphMesh = frame.MeshContainer as MorphMeshContainer;
-						Operations.vMesh vMesh = new Operations.vMesh(sMesh, false);
+						Operations.vMesh vMesh = new Operations.vMesh(sMesh, false, false);
 						int startVertexIdx = 0;
 						for (int meshObjIdx = 0; meshObjIdx < mesh.m_SubMeshes.Count; meshObjIdx++)
 						{
@@ -1049,7 +1050,7 @@ namespace UnityPlugin
 				for (int i = 0; i < positions.Length; i++)
 				{
 					Vector3 pos = positions[i];
-					vertexStream.Write(pos.X);
+					vertexStream.Write(-pos.X);
 					vertexStream.Write(pos.Y);
 					vertexStream.Write(pos.Z);
 				}

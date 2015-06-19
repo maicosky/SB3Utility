@@ -496,6 +496,20 @@ namespace UnityPlugin
 						ac.LoadFrom(stream);
 						return ac;
 					}
+				case UnityClassID.AudioListener:
+					{
+						AudioListener audioListener = new AudioListener(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, audioListener, comp);
+						audioListener.LoadFrom(stream);
+						return audioListener;
+					}
+				case UnityClassID.AudioSource:
+					{
+						AudioSource audioSrc = new AudioSource(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, audioSrc, comp);
+						audioSrc.LoadFrom(stream);
+						return audioSrc;
+					}
 				case UnityClassID.Avatar:
 					{
 						if (loadingReferencials)
@@ -506,6 +520,27 @@ namespace UnityPlugin
 						ReplaceSubfile(index, avatar, comp);
 						avatar.LoadFrom(stream);
 						return avatar;
+					}
+				case UnityClassID.BoxCollider:
+					{
+						BoxCollider boxCol = new BoxCollider(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, boxCol, comp);
+						boxCol.LoadFrom(stream);
+						return boxCol;
+					}
+				case UnityClassID.Camera:
+					{
+						Camera camera = new Camera(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, camera, comp);
+						camera.LoadFrom(stream);
+						return camera;
+					}
+				case UnityClassID.CapsuleCollider:
+					{
+						CapsuleCollider capsuleCol = new CapsuleCollider(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, capsuleCol, comp);
+						capsuleCol.LoadFrom(stream);
+						return capsuleCol;
 					}
 				case UnityClassID.Cubemap:
 					{
@@ -521,6 +556,13 @@ namespace UnityPlugin
 						ReplaceSubfile(index, ellipsoid, comp);
 						ellipsoid.LoadFrom(stream);
 						return ellipsoid;
+					}
+				case UnityClassID.FlareLayer:
+					{
+						FlareLayer flareLayer = new FlareLayer(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, flareLayer, comp);
+						flareLayer.LoadFrom(stream);
+						return flareLayer;
 					}
 				case UnityClassID.Light:
 					{
@@ -553,6 +595,13 @@ namespace UnityPlugin
 						ReplaceSubfile(index, mesh, comp);
 						mesh.LoadFrom(stream);
 						return mesh;
+					}
+				case UnityClassID.MeshCollider:
+					{
+						MeshCollider meshCol = new MeshCollider(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, meshCol, comp);
+						meshCol.LoadFrom(stream);
+						return meshCol;
 					}
 				case UnityClassID.MeshFilter:
 					{
@@ -638,6 +687,20 @@ namespace UnityPlugin
 						particleSystemRenderer.LoadFrom(stream);
 						return particleSystemRenderer;
 					}
+				case UnityClassID.Projector:
+					{
+						Projector projector = new Projector(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, projector, comp);
+						projector.LoadFrom(stream);
+						return projector;
+					}
+				case UnityClassID.Rigidbody:
+					{
+						RigidBody rigidBody = new RigidBody(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, rigidBody, comp);
+						rigidBody.LoadFrom(stream);
+						return rigidBody;
+					}
 				case UnityClassID.Shader:
 					{
 						Shader shader = new Shader(this, comp.pathID, comp.classID1, comp.classID2);
@@ -652,12 +715,26 @@ namespace UnityPlugin
 						sMesh.LoadFrom(stream);
 						return sMesh;
 					}
+				case UnityClassID.SphereCollider:
+					{
+						SphereCollider sphereCol = new SphereCollider(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, sphereCol, comp);
+						sphereCol.LoadFrom(stream);
+						return sphereCol;
+					}
 				case UnityClassID.Sprite:
 					{
 						Sprite sprite = new Sprite(this, comp.pathID, comp.classID1, comp.classID2);
 						ReplaceSubfile(index, sprite, comp);
 						sprite.LoadFrom(stream);
 						return sprite;
+					}
+				case UnityClassID.SpriteRenderer:
+					{
+						SpriteRenderer spriteRenderer = new SpriteRenderer(this, comp.pathID, comp.classID1, comp.classID2);
+						ReplaceSubfile(index, spriteRenderer, comp);
+						spriteRenderer.LoadFrom(stream);
+						return spriteRenderer;
 					}
 				case UnityClassID.TextAsset:
 					{

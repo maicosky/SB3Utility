@@ -467,11 +467,13 @@ namespace UnityPlugin
 			public List<vSubmesh> submeshes;
 			protected MeshRenderer meshR;
 			protected bool faces;
+			protected bool mirror;
 
-			public vMesh(MeshRenderer meshR, bool faces)
+			public vMesh(MeshRenderer meshR, bool faces, bool mirror)
 			{
 				this.meshR = meshR;
 				this.faces = faces;
+				this.mirror = mirror;
 
 				Mesh mesh = GetMesh(meshR);
 				submeshes = new List<vSubmesh>(mesh.m_SubMeshes.Count);
@@ -495,6 +497,20 @@ namespace UnityPlugin
 							Report.ReportLog("Warning! Missing Material in " + meshR.m_GameObject.instance.m_Name + " has been added");
 						}
 						submeshes.Add(submesh);
+					}
+				}
+
+				if (mirror)
+				{
+					foreach (vSubmesh submesh in submeshes)
+					{
+						foreach (vVertex vert in submesh.vertexList)
+						{
+							vert.position.X *= -1;
+							vert.normal.X *= -1;
+							vert.tangent.X *= -1;
+							vert.tangent.W *= -1;
+						}
 					}
 				}
 			}
@@ -593,17 +609,33 @@ namespace UnityPlugin
 									switch (chn)
 									{
 									case 0:
-										vertWriter.Write(vert.position);
-										min = Vector3.Minimize(min, vert.position);
-										max = Vector3.Maximize(max, vert.position);
+										Vector3 pos = new Vector3(vert.position.X, vert.position.Y, vert.position.Z);
+										if (mirror)
+										{
+											pos.X *= -1;
+										}
+										vertWriter.Write(pos);
+										min = Vector3.Minimize(min, pos);
+										max = Vector3.Maximize(max, pos);
 										break;
 									case 1:
-										vertWriter.Write(vert.normal);
+										Vector3 normal = new Vector3(vert.normal.X, vert.normal.Y, vert.normal.Z);
+										if (mirror)
+										{
+											normal.X *= -1;
+										}
+										vertWriter.Write(normal);
 										break;
 									case 3:
 										vertWriter.Write(vert.uv);
 										break;
 									case 5:
+										Vector4 tangent = vert.tangent;
+										if (mirror)
+										{
+											tangent.X *= -1;
+											tangent.W *= -1;
+										}
 										vertWriter.Write(vert.tangent);
 										break;
 									}
@@ -669,6 +701,11 @@ namespace UnityPlugin
 					sMesh.m_AABB.m_Extend = sMesh.m_Mesh.instance.m_LocalAABB.m_Extend;
 				}
 			}
+		}
+
+		public static Matrix Mirror(Matrix m)
+		{
+			return Matrix.Scaling(-1, 1, 1) * m;
 		}
 
 		public static void CopyNormalsOrder(List<vVertex> src, List<vVertex> dest)
@@ -1053,7 +1090,7 @@ namespace UnityPlugin
 
 			try
 			{
-				vMesh morphMesh = new vMesh(sMesh, false);
+				vMesh morphMesh = new vMesh(sMesh, false, false);
 				foreach (ImportedMorphKeyframe wsMorph in wsMorphList.KeyframeList)
 				{
 					if (!wsMorphList.isMorphKeyframeEnabled(wsMorph))
@@ -1110,7 +1147,9 @@ namespace UnityPlugin
 					{
 						vVertex morphVert = morphVerts[i];
 						ImportedVertex srcVert = vertList[i];
-						Vector3 diffVector = srcVert.Position - morphVert.position;
+						Vector3 srcPos = srcVert.Position;
+						srcPos.X *= -1;
+						Vector3 diffVector = srcPos - morphVert.position;
 						float lenSquared = diffVector.LengthSquared();
 						if (lenSquared >= minSquaredDistance)
 						{
@@ -1119,8 +1158,10 @@ namespace UnityPlugin
 							destVert.index = (uint)(i + firstVertIdx);
 							if (replaceNormals)
 							{
-								destVert.normal = srcVert.Normal;
-								destVert.tangent = new Vector3(srcVert.Tangent.X, srcVert.Tangent.Y, srcVert.Tangent.Z);
+								Vector3 srcNormal = srcVert.Normal;
+								srcNormal.X *= -1;
+								destVert.normal = srcNormal;
+								destVert.tangent = new Vector3(-srcVert.Tangent.X, srcVert.Tangent.Y, srcVert.Tangent.Z);
 							}
 							else if (shape.hasNormals)
 							{

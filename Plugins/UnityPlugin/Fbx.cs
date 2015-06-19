@@ -125,6 +125,17 @@ namespace UnityPlugin
 				}
 
 				ConvertMeshRenderers(meshList, skins, morphs);
+				if (MeshList.Count > 0)
+				{
+					foreach (ImportedMesh mesh in MeshList)
+					{
+						if (mesh.BoneList != null && mesh.BoneList.Count > 0)
+						{
+							FrameList[0].Matrix = Operations.Mirror(FrameList[0].Matrix);
+							break;
+						}
+					}
+				}
 				AnimationList = new List<ImportedAnimation>();
 			}
 
@@ -228,16 +239,16 @@ namespace UnityPlugin
 										switch (chn)
 										{
 										case 0:
-											iVertex.Position = new SlimDX.Vector3(vertReader.ReadSingle(), vertReader.ReadSingle(), vertReader.ReadSingle());
+											iVertex.Position = new SlimDX.Vector3(-vertReader.ReadSingle(), vertReader.ReadSingle(), vertReader.ReadSingle());
 											break;
 										case 1:
-											iVertex.Normal = new SlimDX.Vector3(vertReader.ReadSingle(), vertReader.ReadSingle(), vertReader.ReadSingle());
+											iVertex.Normal = new SlimDX.Vector3(-vertReader.ReadSingle(), vertReader.ReadSingle(), vertReader.ReadSingle());
 											break;
 										case 3:
 											iVertex.UV = new float[2] { vertReader.ReadSingle(), vertReader.ReadSingle() };
 											break;
 										case 5:
-											iVertex.Tangent = new SlimDX.Vector4(vertReader.ReadSingle(), vertReader.ReadSingle(), vertReader.ReadSingle(), vertReader.ReadSingle());
+											iVertex.Tangent = new SlimDX.Vector4(-vertReader.ReadSingle(), vertReader.ReadSingle(), vertReader.ReadSingle(), -vertReader.ReadSingle());
 											break;
 										}
 									}
@@ -258,11 +269,31 @@ namespace UnityPlugin
 							int numFaces = (int)(submesh.indexCount / 3);
 							iSubmesh.FaceList = new List<ImportedFace>(numFaces);
 							indexReader.BaseStream.Position = submesh.firstByte;
-							for (int j = 0; j < numFaces; j++)
+							if (skins && meshR is SkinnedMeshRenderer && ((SkinnedMeshRenderer)meshR).m_Bones.Count > 0)
 							{
-								ImportedFace face = new ImportedFace();
-								face.VertexIndices = new int[3] { indexReader.ReadUInt16() - (int)submesh.firstVertex, indexReader.ReadUInt16() - (int)submesh.firstVertex, indexReader.ReadUInt16() - (int)submesh.firstVertex };
-								iSubmesh.FaceList.Add(face);
+								for (int j = 0; j < numFaces; j++)
+								{
+									ImportedFace face = new ImportedFace();
+									face.VertexIndices = new int[3]
+									{
+										indexReader.ReadUInt16() - (int)submesh.firstVertex,
+										indexReader.ReadUInt16() - (int)submesh.firstVertex,
+										indexReader.ReadUInt16() - (int)submesh.firstVertex
+									};
+									iSubmesh.FaceList.Add(face);
+								}
+							}
+							else
+							{
+								for (int j = 0; j < numFaces; j++)
+								{
+									ImportedFace face = new ImportedFace();
+									face.VertexIndices = new int[3];
+									face.VertexIndices[0] = indexReader.ReadUInt16() - (int)submesh.firstVertex;
+									face.VertexIndices[2] = indexReader.ReadUInt16() - (int)submesh.firstVertex;
+									face.VertexIndices[1] = indexReader.ReadUInt16() - (int)submesh.firstVertex;
+									iSubmesh.FaceList.Add(face);
+								}
 							}
 
 							iMesh.SubmeshList.Add(iSubmesh);
@@ -286,7 +317,7 @@ namespace UnityPlugin
 							ImportedBone bone = new ImportedBone();
 							uint boneHash = mesh.m_BoneNameHashes[i];
 							bone.Name = avatar.FindBoneName(boneHash);
-							bone.Matrix = Matrix.Transpose(mesh.m_BindPose[i]);
+							bone.Matrix = Operations.Mirror(Matrix.Transpose(mesh.m_BindPose[i]));
 							/*Transform boneMatrix = parser.Cabinet.FindAsset(sMesh.m_Bones[i].m_PathID);
 							bone.Matrix = Matrix.Invert(WorldTransform(boneMatrix, parser));*/
 							iMesh.BoneList.Add(bone);
@@ -311,9 +342,15 @@ namespace UnityPlugin
 								BlendShapeVertex morphVert = mesh.m_Shapes.vertices[j];
 								ImportedVertex vert = GetSourceVertex(iMesh.SubmeshList, (int)morphVert.index);
 								ImportedVertex destVert = new ImportedVertex();
-								destVert.Position = vert.Position + morphVert.vertex;
-								destVert.Normal = vert.Normal;
-								destVert.Tangent = vert.Tangent;
+								Vector3 morphPos = morphVert.vertex;
+								morphPos.X *= -1;
+								destVert.Position = vert.Position + morphPos;
+								Vector3 morphNormal = morphVert.normal;
+								morphNormal.X *= -1;
+								destVert.Normal = morphNormal;
+								Vector4 morphTangent = new Vector4(morphVert.tangent, 0);
+								morphTangent.X *= -1;
+								destVert.Tangent = morphTangent;
 								keyframe.VertexList.Add(destVert);
 								keyframe.MorphedVertexIndices.Add((ushort)morphVert.index);
 							}

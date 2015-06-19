@@ -1060,9 +1060,16 @@ namespace SB3Utility
 				FbxBlendShape* lBlendShape;
 				if (oneBlendShape)
 				{
+					String^ morphName;
+					int slashPos;
 					WITH_MARSHALLED_STRING
 					(
-						pShapeName, morph->Name + "_BlendShape",
+						pShapeName,
+						(
+							slashPos = morph->Name->LastIndexOf('/'),
+							morphName = morph->Name->Substring(slashPos + 1),
+							morphName + "_BlendShape"
+						),
 						lBlendShape = FbxBlendShape::Create(pScene, pShapeName);
 					);
 					pBaseMesh->AddDeformer(lBlendShape);

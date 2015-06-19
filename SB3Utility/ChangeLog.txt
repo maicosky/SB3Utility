@@ -1,12 +1,28 @@
-﻿[1.0.12]
+﻿[1.0.13]
+  - Fixed texture corruption when textures were replaced from file menu
+  - Added mass deletion with Shift-Delete at various places
+  - Added DeleteMorphKeyframe()
+  - Support for additional assets: AudioSource, AudioListener, BoxCollider, Camera, CapsuleCollider,
+       FlareLayer, MeshCollider, Projector, RigidBody, SphereCollider, SpriteRenderer
+  - Fixed crash when selecting a bone when morph was shown
+  - Changed orientation of X coordinate in renderer and all export/replace functions
+  - Added mirror V coordinate in Mesh Editor
+  - Fixed memory leak in Texture Editor's picture box
+
+[1.0.12]
   - UnityPlugin Update Only
-  - Fixed error when Renderer was hidden and several meshes were selected
+  - Fixed error when renderer was hidden and several meshes were selected
   - Added export/replace/display for morphs with meshes having more than one submesh
+  - Fixed export for morphs in *.assets files
   - Added Copy/Paste for Mesh, Avatar, TextAsset. Copy/Paste in *.assets files
   - Fix for references to invalid assets
   - Added add & delete Multi-Pass materials
   - Changed that deleting the last submesh only deletes the Mesh, the Renderer remains
   - Changed Material Editor Layout to show all material Textures, Colours and Values
+  - Fix for *.assets files: presence of AssetBundle is optional
+  - Added "View Data" which allows to search for MonoBehaviour and MonoScript information
+  - Changed default of Texture attribute: Wrap
+  - Changed default of replace mesh method: Merge
 
 [1.0.11]
   - UnityPlugin Update Only

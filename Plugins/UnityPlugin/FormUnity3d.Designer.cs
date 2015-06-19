@@ -252,7 +252,7 @@
 			// removeToolStripMenuItem
 			// 
 			this.removeToolStripMenuItem.Name = "removeToolStripMenuItem";
-			this.removeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.removeToolStripMenuItem.Size = new System.Drawing.Size(113, 22);
 			this.removeToolStripMenuItem.Text = "Re&move";
 			this.removeToolStripMenuItem.Click += new System.EventHandler(this.removeToolStripMenuItem_Click);
 			// 
@@ -458,6 +458,8 @@
 			this.materialsList.TabStop = false;
 			this.materialsList.UseCompatibleStateImageBehavior = false;
 			this.materialsList.View = System.Windows.Forms.View.Details;
+			this.materialsList.DoubleClick += new System.EventHandler(this.anyListView_DoubleClick);
+			this.materialsList.KeyUp += new System.Windows.Forms.KeyEventHandler(this.materialsList_KeyUp);
 			// 
 			// materialsListHeaderName
 			// 
@@ -587,7 +589,8 @@
 			this.othersList.TabStop = false;
 			this.othersList.UseCompatibleStateImageBehavior = false;
 			this.othersList.View = System.Windows.Forms.View.Details;
-			this.othersList.DoubleClick += new System.EventHandler(this.othersList_DoubleClick);
+			this.othersList.DoubleClick += new System.EventHandler(this.anyListView_DoubleClick);
+			this.othersList.KeyUp += new System.Windows.Forms.KeyEventHandler(this.othersList_KeyUp);
 			// 
 			// othersListHeaderNamePathID
 			// 
@@ -636,6 +639,8 @@
 			this.filteredList.UseCompatibleStateImageBehavior = false;
 			this.filteredList.View = System.Windows.Forms.View.Details;
 			this.filteredList.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.filteredList_ColumnClick);
+			this.filteredList.DoubleClick += new System.EventHandler(this.anyListView_DoubleClick);
+			this.filteredList.KeyUp += new System.Windows.Forms.KeyEventHandler(this.filteredList_KeyUp);
 			// 
 			// filteredHeaderNamePathID
 			// 
