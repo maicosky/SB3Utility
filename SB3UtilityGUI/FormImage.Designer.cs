@@ -41,6 +41,7 @@
 			this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+			this.pictureBox1.BackColor = System.Drawing.Color.DimGray;
 			this.pictureBox1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
 			this.pictureBox1.Location = new System.Drawing.Point(0, 0);
 			this.pictureBox1.Name = "pictureBox1";

@@ -102,6 +102,10 @@
       <Project>{a351dfab-3235-4cea-9916-1bae973b65ae}</Project>
       <Name>SB3Utility</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SB3UtilityPlugins\SB3UtilityPlugins.csproj">
+      <Project>{76c12fb4-aebf-4271-9cca-6f04a25ed266}</Project>
+      <Name>SB3UtilityPlugins</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SB3UtilityPP\SB3UtilityPP.csproj">
       <Project>{5647b104-8f58-4867-b849-dac65d5243bd}</Project>
       <Name>SB3UtilityPP</Name>

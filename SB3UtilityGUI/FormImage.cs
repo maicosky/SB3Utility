@@ -87,16 +87,37 @@ namespace SB3Utility
 
 					if (tex.Data.Length > 0x12)
 					{
-						ImageInformation imageInfo;
-						Texture renderTexture = Texture.FromMemory(Gui.Renderer.Device, tex.Data, 0, 0, -1, Usage.None, Format.Unknown, Pool.Managed, Filter.Default, Filter.Default, 0, out imageInfo);
-						DataStream stream = Texture.ToStream(renderTexture, ImageFileFormat.Bmp);
-						Bitmap bitmap = new Bitmap(stream);
-						stream.Dispose();
-						string format = renderTexture.GetLevelDescription(0).Format.GetDescription();
-						int bpp = (format.Contains("A8") ? 8 : 0)
-							+ (format.Contains("R8") ? 8 : 0) + (format.Contains("G8") ? 8 : 0) + (format.Contains("B8") ? 8 : 0);
-						renderTexture.Dispose();
-						pictureBox1.Image = bitmap;
+						Texture renderTexture = null;
+						try
+						{
+							ImageInformation imageInfo;
+							renderTexture = Texture.FromMemory(Gui.Renderer.Device, tex.Data, 0, 0, -1, Usage.None, Format.Unknown, Pool.Managed, Filter.Default, Filter.Default, 0, out imageInfo);
+							using (Image img = System.Drawing.Image.FromStream(Texture.ToStream(renderTexture, imageInfo.Height <= 512 && imageInfo.Width <= 512 ? ImageFileFormat.Png : ImageFileFormat.Bmp)))
+							{
+								int shift = 0;
+								for (int max = imageInfo.Width > imageInfo.Height ? imageInfo.Width : imageInfo.Height; max > 256; max >>= 1)
+								{
+									shift++;
+								}
+								pictureBox1.Image = new Bitmap(img, new Size(imageInfo.Width >> shift, imageInfo.Height >> shift));
+							}
+							string format = renderTexture.GetLevelDescription(0).Format.GetDescription();
+							int bpp = (format.Contains("A8") ? 8 : 0)
+								+ (format.Contains("R8") ? 8 : 0) + (format.Contains("G8") ? 8 : 0) + (format.Contains("B8") ? 8 : 0);
+							textBoxSize.Text = imageInfo.Width + "x" + imageInfo.Height + (bpp > 0 ? "x" + bpp : String.Empty);
+						}
+						catch (Exception e)
+						{
+							pictureBox1.Image = pictureBox1.ErrorImage;
+							Utility.ReportException(e);
+						}
+						finally
+						{
+							if (renderTexture != null)
+							{
+								renderTexture.Dispose();
+							}
+						}
 
 						ResizeImage();
 						if (!this.IsHidden)
@@ -105,7 +126,6 @@ namespace SB3Utility
 							Activate();
 							Enabled = true;
 						}
-						textBoxSize.Text = imageInfo.Width + "x" + imageInfo.Height + (bpp > 0 ? "x" + bpp : String.Empty);
 					}
 					else
 					{

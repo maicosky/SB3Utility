@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using SlimDX;
 using SlimDX.Direct3D9;
+using System.Runtime.InteropServices;
 
 using SB3Utility;
 
@@ -169,99 +171,139 @@ namespace UnityPlugin
 
 		public void LoadFrom(ImportedTexture tex)
 		{
-			m_Name = Path.GetFileNameWithoutExtension(tex.Name);
-
-			Device dev = new Device(new Direct3D(), 0, DeviceType.Hardware, new IntPtr(), CreateFlags.SoftwareVertexProcessing, new PresentParameters());
-			ImageInformation imageInfo;
-			using (Texture renderTexture = Texture.FromMemory(dev, tex.Data, 0, 0, -1, Usage.None, Format.Unknown, Pool.Managed, Filter.Default, Filter.Default, 0, out imageInfo))
+			TextureFormat destFormat = (TextureFormat)0;
+			Match nameWithFormat = Regex.Match(tex.Name, @"(.+)-([^-]+)(\..+)", RegexOptions.CultureInvariant);
+			if (nameWithFormat.Success)
 			{
-				m_Width = imageInfo.Width;
-				m_Height = imageInfo.Height;
+				m_Name = nameWithFormat.Groups[1].Value;
+				TextureFormat.TryParse(nameWithFormat.Groups[2].Value, true, out destFormat);
+			}
+			else
+			{
+				m_Name = Path.GetFileNameWithoutExtension(tex.Name);
+			}
 
-				TextureFormat tf;
-				if (TextureFormat.TryParse(imageInfo.Format.ToString(), true, out tf))
+			Device dev = null;
+			try
+			{
+				if (Gui.Renderer != null)
 				{
-					m_TextureFormat = tf;
-				}
-				else if (imageInfo.Format == Format.R8G8B8)
-				{
-					m_TextureFormat = TextureFormat.RGB24;
-				}
-				else if (imageInfo.Format == Format.A8R8G8B8)
-				{
-					m_TextureFormat = TextureFormat.ARGB32;
+					dev = Gui.Renderer.Device;
 				}
 				else
 				{
-					throw new Exception("Unknown format " + imageInfo.Format);
+					IntPtr handle = System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle;
+					if (handle.ToInt64() == 0)
+					{
+						handle = FindWindowByCaption(IntPtr.Zero, Console.Title);
+					}
+					dev = new Device(new Direct3D(), 0, DeviceType.Hardware, handle, CreateFlags.SoftwareVertexProcessing, new PresentParameters());
 				}
-
-				m_MipMap = imageInfo.MipLevels > 1;
-				m_ReadAllowed = true;
-				m_ImageCount = 1;
-				m_TextureDimension = 2;
-				m_TextureSettings = new GLTextureSettings();
-				m_ColorSpace = 1;
-
-				int bytesPerPixel = 0, originY = 0;
-				using (BinaryReader reader = new BinaryReader(new MemoryStream(tex.Data)))
+				ImageInformation imageInfo;
+				using (Texture renderTexture = Texture.FromMemory(dev, tex.Data, 0, 0, -1, Usage.None, Format.Unknown, Pool.Managed, Filter.Default, Filter.Default, 0, out imageInfo))
 				{
+					m_Width = imageInfo.Width;
+					m_Height = imageInfo.Height;
+
+					TextureFormat tf;
+					if (TextureFormat.TryParse(imageInfo.Format.ToString(), true, out tf))
+					{
+						m_TextureFormat = tf;
+					}
+					else if (imageInfo.Format == Format.R8G8B8)
+					{
+						m_TextureFormat = TextureFormat.RGB24;
+					}
+					else if (imageInfo.Format == Format.A8R8G8B8)
+					{
+						m_TextureFormat = destFormat != (TextureFormat)0 ? destFormat : TextureFormat.ARGB32;
+					}
+					else
+					{
+						throw new Exception("Unknown format " + imageInfo.Format);
+					}
+
+					m_MipMap = imageInfo.MipLevels > 1;
+					m_ReadAllowed = true;
+					m_ImageCount = 1;
+					m_TextureDimension = 2;
+					m_TextureSettings = new GLTextureSettings();
+					m_ColorSpace = 1;
+
+					int bytesPerPixel = 0, originY = 0;
+					using (BinaryReader reader = new BinaryReader(new MemoryStream(tex.Data)))
+					{
+						switch (m_TextureFormat)
+						{
+						case TextureFormat.DXT1:
+						case TextureFormat.DXT5:
+							reader.BaseStream.Position = 0x80;
+							m_CompleteImageSize = (int)(reader.BaseStream.Length - reader.BaseStream.Position);
+							break;
+						case TextureFormat.RGB24:
+						case TextureFormat.ARGB32:
+						case TextureFormat.RGBA32:
+							reader.BaseStream.Position = 0x0A;
+							originY = reader.ReadInt16();
+							reader.BaseStream.Position = 0x12;
+							bytesPerPixel = m_TextureFormat == TextureFormat.RGB24 ? 3 : 4;
+							m_CompleteImageSize = m_Width * m_Height * bytesPerPixel;
+							break;
+						}
+						image_data = reader.ReadBytes(m_CompleteImageSize);
+					}
 					switch (m_TextureFormat)
 					{
-					case TextureFormat.DXT1:
-					case TextureFormat.DXT5:
-						reader.BaseStream.Position = 0x80;
-						m_CompleteImageSize = (int)(reader.BaseStream.Length - reader.BaseStream.Position);
-						break;
 					case TextureFormat.RGB24:
+						for (int i = 0, j = 2; j < m_CompleteImageSize; i += 3, j += 3)
+						{
+							byte b = image_data[j];
+							image_data[j] = image_data[i];
+							image_data[i] = b;
+						}
+						break;
 					case TextureFormat.ARGB32:
-						reader.BaseStream.Position = 0x0A;
-						originY = reader.ReadInt16();
-						reader.BaseStream.Position = 0x12;
-						bytesPerPixel = m_TextureFormat == TextureFormat.RGB24 ? 3 : 4;
-						m_CompleteImageSize = m_Width * m_Height * bytesPerPixel;
+						for (int i = 0, j = 3, k = 1, l = 2; j < m_CompleteImageSize; i += 4, j += 4, k += 4, l += 4)
+						{
+							byte b = image_data[j];
+							image_data[j] = image_data[i];
+							image_data[i] = b;
+							b = image_data[l];
+							image_data[l] = image_data[k];
+							image_data[k] = b;
+						}
 						break;
 					}
-					image_data = reader.ReadBytes(m_CompleteImageSize);
-				}
-				switch (m_TextureFormat)
-				{
-				case TextureFormat.RGB24:
-					for (int i = 0, j = 2; j < m_CompleteImageSize; i += 3, j += 3)
+					if (bytesPerPixel > 0 && originY > 0)
 					{
-						byte b = image_data[j];
-						image_data[j] = image_data[i];
-						image_data[i] = b;
-					}
-					break;
-				case TextureFormat.ARGB32:
-					for (int i = 0, j = 3, k = 1, l = 2; j < m_CompleteImageSize; i += 4, j += 4, k += 4, l += 4)
-					{
-						byte b = image_data[j];
-						image_data[j] = image_data[i];
-						image_data[i] = b;
-						b = image_data[l];
-						image_data[l] = image_data[k];
-						image_data[k] = b;
-					}
-					break;
-				}
-				if (bytesPerPixel > 0 && originY > 0)
-				{
-					for (int srcIdx = 0, dstIdx = (originY - 1) * m_Width * bytesPerPixel; srcIdx < dstIdx; srcIdx += m_Width * bytesPerPixel, dstIdx -= m_Width * bytesPerPixel)
-					{
-						for (int i = 0; i < m_Width * bytesPerPixel; i++)
+						for (int srcIdx = 0, dstIdx = (originY - 1) * m_Width * bytesPerPixel; srcIdx < dstIdx; srcIdx += m_Width * bytesPerPixel, dstIdx -= m_Width * bytesPerPixel)
 						{
-							byte b = image_data[srcIdx + i];
-							image_data[srcIdx + i] = image_data[dstIdx + i];
-							image_data[dstIdx + i] = b;
+							for (int i = 0; i < m_Width * bytesPerPixel; i++)
+							{
+								byte b = image_data[srcIdx + i];
+								image_data[srcIdx + i] = image_data[dstIdx + i];
+								image_data[dstIdx + i] = b;
+							}
 						}
 					}
 				}
 			}
-			dev.Direct3D.Dispose();
-			dev.Dispose();
+			catch (Exception e)
+			{
+				Utility.ReportException(e);
+			}
+			finally
+			{
+				if (Gui.Renderer == null && dev != null)
+				{
+					dev.Direct3D.Dispose();
+					dev.Dispose();
+				}
+			}
 		}
+
+		[DllImport("user32.dll", EntryPoint = "FindWindow", SetLastError = true)]
+		public static extern IntPtr FindWindowByCaption(IntPtr zeroOnly, string lpWindowName);
 
 		public void WriteTo(Stream stream)
 		{
@@ -348,7 +390,7 @@ namespace UnityPlugin
 			}
 
 			string extension = m_TextureFormat == TextureFormat.DXT1 || m_TextureFormat == TextureFormat.DXT5 ? ".dds" : ".tga";
-			using (Stream stream = File.OpenWrite(path + "\\" + m_Name + extension))
+			using (Stream stream = File.OpenWrite(path + "\\" + m_Name + "-" + m_TextureFormat + extension))
 			{
 				Export(stream);
 			}
@@ -362,19 +404,12 @@ namespace UnityPlugin
 			{
 			case TextureFormat.DXT1:
 			case TextureFormat.DXT5:
-				byte[] dds_header = DDS.CreateHeader(m_Width, m_Height, 32, m_MipMap ? 2 : 0,
-					m_TextureFormat == TextureFormat.DXT1
-					? (byte)'D' | ((byte)'X' << 8) | ((byte)'T' << 16) | ((byte)'1' << 24)
-					: (byte)'D' | ((byte)'X' << 8) | ((byte)'T' << 16) | ((byte)'5' << 24));
+				byte[] dds_header = DDS.CreateHeader(m_Width, m_Height, 32, m_MipMap ? 2 : 0, m_TextureFormat);
 				writer.Write(dds_header);
 				buffer = image_data;
 				break;
 			case TextureFormat.RGB24:
-				byte[] tga_header = new byte[0x12]
-				{
-					0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-					(byte)m_Width, (byte)(m_Width >> 8), (byte)m_Height, (byte)(m_Height >> 8), 24, 0
-				};
+				byte[] tga_header = TGA.CreateHeader((ushort)m_Width, (ushort)m_Height, 24);
 				writer.Write(tga_header);
 				buffer = new byte[image_data.Length];
 				for (int i = 0, j = 2; j < m_CompleteImageSize; i += 3, j += 3)
@@ -386,11 +421,7 @@ namespace UnityPlugin
 				}
 				break;
 			case TextureFormat.ARGB32:
-				tga_header = new byte[0x12]
-				{
-					0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-					(byte)m_Width, (byte)(m_Width >> 8), (byte)m_Height, (byte)(m_Height >> 8), 32, 0
-				};
+				tga_header = TGA.CreateHeader((ushort)m_Width, (ushort)m_Height, 32);
 				writer.Write(tga_header);
 				buffer = new byte[image_data.Length];
 				for (int i = 0, j = 3, k = 1, l = 2; j < m_CompleteImageSize; i += 4, j += 4, k += 4, l += 4)
@@ -404,11 +435,12 @@ namespace UnityPlugin
 				}
 				break;
 			case TextureFormat.Alpha8:
-				tga_header = new byte[0x12]
-				{
-					0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-					(byte)m_Width, (byte)(m_Width >> 8), (byte)m_Height, (byte)(m_Height >> 8), 8, 0
-				};
+				tga_header = TGA.CreateHeader((ushort)m_Width, (ushort)m_Height, 8);
+				writer.Write(tga_header);
+				buffer = (byte[])image_data.Clone();
+				break;
+			case TextureFormat.RGBA32:
+				tga_header = TGA.CreateHeader((ushort)m_Width, (ushort)m_Height, 32);
 				writer.Write(tga_header);
 				buffer = (byte[])image_data.Clone();
 				break;
@@ -416,6 +448,25 @@ namespace UnityPlugin
 				throw new Exception("Unhandled Texture2D format: " + m_TextureFormat);
 			}
 			writer.Write(buffer);
+		}
+
+		static class TGA
+		{
+			public static byte[] CreateHeader(ushort width, ushort height, byte pixelDepth)
+			{
+				byte[] tga_header = new byte[0x12];
+				using (MemoryStream stream = new MemoryStream(tga_header))
+				{
+					BinaryWriter writer = new BinaryWriter(stream);
+					stream.Position = 2;
+					writer.Write((ushort)2);
+					stream.Position = 12;
+					writer.Write(width);
+					writer.Write(height);
+					writer.Write(pixelDepth);
+				}
+				return tga_header;
+			}
 		}
 
 		static class DDS
@@ -452,27 +503,30 @@ namespace UnityPlugin
 				DDSCAPS2_VOLUME				= 0x00200000
 			}
 
-			public static byte[] CreateHeader(int width, int height, int rgbBitCount, int mipMaps, int textureFormat)
+			public static byte[] CreateHeader(int width, int height, int rgbBitCount, int mipMaps, TextureFormat format)
 			{
+				int formatValue = format == TextureFormat.DXT1
+					? (byte)'D' | ((byte)'X' << 8) | ((byte)'T' << 16) | ((byte)'1' << 24)
+					: (byte)'D' | ((byte)'X' << 8) | ((byte)'T' << 16) | ((byte)'5' << 24);
 				uint[] header = new uint[32];
 				header[0] = (byte)'D' | ((byte)'D' << 8) | ((byte)'S' << 16) | ((byte)' ' << 24);
 				header[1] = 124; // sizeof DDS_HEADER
 				header[2] = (uint)(DDS_HEADER_FLAGS.DDSD_CAPS | DDS_HEADER_FLAGS.DDSD_HEIGHT | DDS_HEADER_FLAGS.DDSD_WIDTH | DDS_HEADER_FLAGS.DDSD_PIXELFORMAT | DDS_HEADER_FLAGS.DDSD_LINEARSIZE | (mipMaps > 0 ? DDS_HEADER_FLAGS.DDSD_MIPMAPCOUNT : 0));
 				header[3] = (uint)height;
 				header[4] = (uint)width;
-				header[5] = (uint)Math.Max(1, ((width + 3) / 4)) * 2048/*block_size*/;
-				header[7] = (uint)mipMaps;
+				header[5] = (uint)(Math.Max(1, ((width + 3) / 4)) * (format == TextureFormat.DXT1 ? 2 : 4)/*block_size*/ * height);
+				header[7] = (uint)(mipMaps == 0 ? 1 : mipMaps);
 
 				header[19] = 32; // sizeof DDS_PIXELFORMAT
 				header[20] = (uint)DDS_PIXEL_FORMAT.DDPF_FOURCC;
-				header[21] = (uint)textureFormat;
+				header[21] = (uint)formatValue;
 				header[22] = (uint)rgbBitCount;
 				header[23] = 0x00ff0000;
 				header[24] = 0x0000ff00;
 				header[25] = 0x000000ff;
 				header[26] = rgbBitCount == 32 ? 0xff000000 : 0;
 
-				header[27] = (uint)(DDS_CAPS.DDSCAPS_COMPLEX | DDS_CAPS.DDSCAPS_TEXTURE | DDS_CAPS.DDSCAPS_MIPMAP);
+				header[27] = (uint)(DDS_CAPS.DDSCAPS_TEXTURE | (mipMaps > 0 ? DDS_CAPS.DDSCAPS_COMPLEX | DDS_CAPS.DDSCAPS_MIPMAP : 0));
 
 				return ConvertToByteArray(header);
 			}

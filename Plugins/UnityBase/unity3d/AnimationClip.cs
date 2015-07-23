@@ -392,6 +392,84 @@ namespace UnityPlugin
 
 			writer.Write(curveCount);
 		}
+
+		public class StreamedKeyPart
+		{
+			public int index { get; set; }
+			public Vector3 tcb { get; set; }
+			public float value { get; set; }
+
+			public StreamedKeyPart() { }
+
+			public StreamedKeyPart(Stream stream)
+			{
+				LoadFrom(stream);
+			}
+
+			public void LoadFrom(Stream stream)
+			{
+				BinaryReader reader = new BinaryReader(stream);
+				index = reader.ReadInt32();
+				tcb = reader.ReadVector3();
+				value = reader.ReadSingle();
+			}
+
+			public static GenericBinding FindBinding(int index, List<GenericBinding> genericBindings)
+			{
+				int parts = 0;
+				for (int i = 0; i < genericBindings.Count; i++)
+				{
+					GenericBinding b = genericBindings[i];
+					parts += b.attribute == 1 || b.attribute == 3 ? 3 : 4;
+					if (parts > index)
+					{
+						return b;
+					}
+				}
+
+				return null;
+			}
+		}
+
+		public class StreamedFrame
+		{
+			public float time { get; set; }
+			public List<StreamedKeyPart> keyList { get; set; }
+
+			public StreamedFrame(Stream stream)
+			{
+				LoadFrom(stream);
+			}
+
+			public void LoadFrom(Stream stream)
+			{
+				BinaryReader reader = new BinaryReader(stream);
+				time = reader.ReadSingle();
+
+				int numKeys = reader.ReadInt32();
+				keyList = new List<StreamedKeyPart>(numKeys);
+				for (int i = 0; i < numKeys; i++)
+				{
+					keyList.Add(new StreamedKeyPart(stream));
+				}
+			}
+		}
+
+		public List<StreamedFrame> ReadData()
+		{
+			List<StreamedFrame> frameList = new List<StreamedFrame>();
+			using (Stream stream = new MemoryStream())
+			{
+				BinaryWriter writer = new BinaryWriter(stream);
+				writer.Write(data);
+				stream.Position = 0;
+				while (stream.Position < stream.Length)
+				{
+					frameList.Add(new StreamedFrame(stream));
+				}
+			}
+			return frameList;
+		}
 	}
 
 	public class DenseClip : IObjInfo
@@ -932,6 +1010,12 @@ namespace UnityPlugin
 			this.classID2 = classID2;
 		}
 
+		public AnimationClip(AssetCabinet file) :
+			this(file, 0, UnityClassID.AnimationClip, UnityClassID.AnimationClip)
+		{
+			file.ReplaceSubfile(-1, this, null);
+		}
+
 		public void LoadFrom(Stream stream)
 		{
 			BinaryReader reader = new BinaryReader(stream);
@@ -1056,6 +1140,42 @@ namespace UnityPlugin
 			{
 				m_Events[i].WriteTo(stream);
 			}
+		}
+
+		public AnimationClip Clone(AssetCabinet file)
+		{
+			Component clip = file.Components.Find
+			(
+				delegate(Component asset)
+				{
+					if (asset.classID1 == UnityClassID.AnimationClip)
+					{
+						if (asset is NotLoaded && ((NotLoaded)asset).Name == m_Name || ((AnimationClip)asset).m_Name == m_Name)
+						{
+							return true;
+						}
+					}
+					return false;
+				}
+			);
+			if (clip == null)
+			{
+				file.MergeTypeDefinition(this.file, UnityClassID.AnimationClip);
+
+				clip = new AnimationClip(file);
+			}
+			else if (clip is NotLoaded)
+			{
+				NotLoaded notLoaded = (NotLoaded)clip;
+				clip = file.LoadComponent(file.SourceStream, notLoaded);
+			}
+			using (MemoryStream mem = new MemoryStream())
+			{
+				WriteTo(mem);
+				mem.Position = 0;
+				clip.LoadFrom(mem);
+			}
+			return (AnimationClip)clip;
 		}
 	}
 }

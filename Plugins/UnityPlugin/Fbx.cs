@@ -125,17 +125,7 @@ namespace UnityPlugin
 				}
 
 				ConvertMeshRenderers(meshList, skins, morphs);
-				if (MeshList.Count > 0)
-				{
-					foreach (ImportedMesh mesh in MeshList)
-					{
-						if (mesh.BoneList != null && mesh.BoneList.Count > 0)
-						{
-							FrameList[0].Matrix = Operations.Mirror(FrameList[0].Matrix);
-							break;
-						}
-					}
-				}
+
 				AnimationList = new List<ImportedAnimation>();
 			}
 
@@ -144,7 +134,11 @@ namespace UnityPlugin
 				ImportedFrame frame = new ImportedFrame();
 				frame.Name = trans.m_GameObject.instance.m_Name;
 				frame.InitChildren(trans.Count);
-				frame.Matrix = Matrix.Scaling(trans.m_LocalScale) * Matrix.RotationQuaternion(trans.m_LocalRotation) * Matrix.Translation(trans.m_LocalPosition);
+				Vector3 euler = FbxUtility.QuaternionToEuler(trans.m_LocalRotation);
+				euler.Y *= -1;
+				euler.Z *= -1;
+				Quaternion mirroredRotation = FbxUtility.EulerToQuaternion(euler);
+				frame.Matrix = Matrix.Scaling(trans.m_LocalScale) * Matrix.RotationQuaternion(mirroredRotation) * Matrix.Translation(-trans.m_LocalPosition.X, trans.m_LocalPosition.Y, trans.m_LocalPosition.Z);
 				if (parent == null)
 				{
 					FrameList = new List<ImportedFrame>();
@@ -159,17 +153,6 @@ namespace UnityPlugin
 				{
 					ConvertFrames(child, frame);
 				}
-			}
-
-			private Matrix WorldTransform(ImportedFrame frame)
-			{
-				Matrix world = frame.Matrix;
-				while (frame != FrameList[0])
-				{
-					frame = frame.Parent;
-					world = world * frame.Matrix;
-				}
-				return world;
 			}
 
 			private void ConvertMeshRenderers(List<MeshRenderer> meshList, bool skins, bool morphs)
@@ -269,31 +252,14 @@ namespace UnityPlugin
 							int numFaces = (int)(submesh.indexCount / 3);
 							iSubmesh.FaceList = new List<ImportedFace>(numFaces);
 							indexReader.BaseStream.Position = submesh.firstByte;
-							if (skins && meshR is SkinnedMeshRenderer && ((SkinnedMeshRenderer)meshR).m_Bones.Count > 0)
+							for (int j = 0; j < numFaces; j++)
 							{
-								for (int j = 0; j < numFaces; j++)
-								{
-									ImportedFace face = new ImportedFace();
-									face.VertexIndices = new int[3]
-									{
-										indexReader.ReadUInt16() - (int)submesh.firstVertex,
-										indexReader.ReadUInt16() - (int)submesh.firstVertex,
-										indexReader.ReadUInt16() - (int)submesh.firstVertex
-									};
-									iSubmesh.FaceList.Add(face);
-								}
-							}
-							else
-							{
-								for (int j = 0; j < numFaces; j++)
-								{
-									ImportedFace face = new ImportedFace();
-									face.VertexIndices = new int[3];
-									face.VertexIndices[0] = indexReader.ReadUInt16() - (int)submesh.firstVertex;
-									face.VertexIndices[2] = indexReader.ReadUInt16() - (int)submesh.firstVertex;
-									face.VertexIndices[1] = indexReader.ReadUInt16() - (int)submesh.firstVertex;
-									iSubmesh.FaceList.Add(face);
-								}
+								ImportedFace face = new ImportedFace();
+								face.VertexIndices = new int[3];
+								face.VertexIndices[0] = indexReader.ReadUInt16() - (int)submesh.firstVertex;
+								face.VertexIndices[2] = indexReader.ReadUInt16() - (int)submesh.firstVertex;
+								face.VertexIndices[1] = indexReader.ReadUInt16() - (int)submesh.firstVertex;
+								iSubmesh.FaceList.Add(face);
 							}
 
 							iMesh.SubmeshList.Add(iSubmesh);
@@ -317,9 +283,18 @@ namespace UnityPlugin
 							ImportedBone bone = new ImportedBone();
 							uint boneHash = mesh.m_BoneNameHashes[i];
 							bone.Name = avatar.FindBoneName(boneHash);
-							bone.Matrix = Operations.Mirror(Matrix.Transpose(mesh.m_BindPose[i]));
-							/*Transform boneMatrix = parser.Cabinet.FindAsset(sMesh.m_Bones[i].m_PathID);
-							bone.Matrix = Matrix.Invert(WorldTransform(boneMatrix, parser));*/
+
+							Matrix m = Matrix.Transpose(mesh.m_BindPose[i]);
+							Vector3 s, t;
+							Quaternion q;
+							m.Decompose(out s, out q, out t);
+							t.X *= -1;
+							Vector3 euler = FbxUtility.QuaternionToEuler(q);
+							euler.Y *= -1;
+							euler.Z *= -1;
+							q = FbxUtility.EulerToQuaternion(euler);
+							bone.Matrix = Matrix.Scaling(s) * Matrix.RotationQuaternion(q) * Matrix.Translation(t);
+
 							iMesh.BoneList.Add(bone);
 						}
 					}
@@ -445,7 +420,7 @@ namespace UnityPlugin
 					Texture2D tex2D = tex.Value.m_Texture.instance;
 					if (tex2D != null)
 					{
-						iMat.Textures[i] = tex2D.m_Name + "-" + tex.Key.name + "-" + "offset(X" + tex.Value.m_Offset.X.ToFloatString() + "Y" + tex.Value.m_Offset.Y.ToFloatString() + ")-scale(X" + tex.Value.m_Scale.X.ToFloatString() + "Y" + tex.Value.m_Scale.Y.ToFloatString() + ")" + (tex2D.m_TextureFormat == TextureFormat.DXT1 || tex2D.m_TextureFormat == TextureFormat.DXT5 ? ".dds" : ".tga");
+						iMat.Textures[i] = tex2D.m_Name + "-" + tex2D.m_TextureFormat + (tex2D.m_TextureFormat == TextureFormat.DXT1 || tex2D.m_TextureFormat == TextureFormat.DXT5 ? ".dds" : ".tga");
 						ConvertTexture2D(tex2D, iMat.Textures[i]);
 					}
 				}

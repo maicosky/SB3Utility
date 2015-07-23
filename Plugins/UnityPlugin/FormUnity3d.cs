@@ -1646,49 +1646,251 @@ namespace UnityPlugin
 			}
 		}
 
+		static Avatar lastAvatar = null;
+
 		private void viewDataToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			try
 			{
 				ListView subfilesList = null;
-				if (tabControlAssets.SelectedTab == tabPageOthers)
+				if (tabControlAssets.SelectedTab == tabPageAnimators)
+				{
+					subfilesList = animatorsList;
+				}
+				else if (tabControlAssets.SelectedTab == tabPageMaterials)
+				{
+					subfilesList = materialsList;
+				}
+				else if (tabControlAssets.SelectedTab == tabPageOthers)
 				{
 					subfilesList = othersList;
 				}
 				if (subfilesList != null)
 				{
+					string[] srt = new string[4] { null, "Translation", "Rotation", "Scaling" };
+					char[] axis = new char[4] { 'X', 'Y', 'Z', 'W' };
 					foreach (ListViewItem item in subfilesList.SelectedItems)
 					{
 						Component asset = (Component)item.Tag;
+						if (asset.classID2 != UnityClassID.MonoBehaviour && asset is NotLoaded)
+						{
+							asset = Editor.Parser.Cabinet.LoadComponent(asset.pathID);
+							item.Tag = asset;
+						}
 						switch (asset.classID2)
 						{
-						case UnityClassID.MonoBehaviour:
-							try
+#if DEBUG
+						case UnityClassID.AnimationClip:
+							AnimationClip clip = (AnimationClip)asset;
+							string msg = clip.m_Name + " type=" + clip.m_AnimationType + " compressed=" + clip.m_Compressed + " useHighQ=" + clip.m_UseHighQualityCurve;
+							msg += (clip.m_RotationCurves.Count > 0 ? " rotC=" + clip.m_RotationCurves.Count : "") + (clip.m_CompressedRotationCurves.Count > 0 ? " compRotC=" + clip.m_CompressedRotationCurves.Count : "") + (clip.m_PositionCurves.Count > 0 ? " posC=" + clip.m_PositionCurves.Count : "") + (clip.m_ScaleCurves.Count > 0 ? " scaleC=" + clip.m_ScaleCurves.Count : "") + (clip.m_FloatCurves.Count > 0 ? " floatC=" + clip.m_FloatCurves.Count : "") + (clip.m_PPtrCurves.Count > 0 ? " ptrC=" + clip.m_PPtrCurves.Count : "");
+							msg += "\r\n sampleR=" + clip.m_SampleRate + " wrapM=" + clip.m_WrapMode;
+							msg += " muscleCSz=" + clip.m_MuscleClipSize +
+								" AvgSpd=" + clip.m_MuscleClip.m_AverageSpeed + " StartT=" + clip.m_MuscleClip.m_StartTime + " StopT=" + clip.m_MuscleClip.m_StopTime + " AvgAngSpd=" + clip.m_MuscleClip.m_AverageAngularSpeed +
+								(clip.m_MuscleClip.m_Clip.m_Binding.m_ValueArray.Count > 0 ? " bindVal=" + clip.m_MuscleClip.m_Clip.m_Binding.m_ValueArray.Count : "") +
+								(clip.m_MuscleClip.m_Clip.m_ConstantClip.data.Length > 0 ? "\r\n constC=" + clip.m_MuscleClip.m_Clip.m_ConstantClip.data.Length : "") +
+								"\r\n Sampl=(" + (clip.m_MuscleClip.m_Clip.m_DenseClip.m_SampleArray.Length > 0 ? "len=" + clip.m_MuscleClip.m_Clip.m_DenseClip.m_SampleArray.Length : "") + ", frames=" + clip.m_MuscleClip.m_Clip.m_DenseClip.m_FrameCount + ", curves=" + clip.m_MuscleClip.m_Clip.m_DenseClip.m_CurveCount + ", sampleR=" + clip.m_MuscleClip.m_Clip.m_DenseClip.m_SampleRate + ", beginT=" + clip.m_MuscleClip.m_Clip.m_DenseClip.m_BeginTime + ")" +
+								(clip.m_MuscleClip.m_Clip.m_StreamedClip.data.Length > 0 ? "\r\n streamedC=" + clip.m_MuscleClip.m_Clip.m_StreamedClip.data.Length + ", curves=" + clip.m_MuscleClip.m_Clip.m_StreamedClip.curveCount : "");
+							msg += (clip.m_MuscleClip.m_DeltaPose.m_DoFArray.Length > 0 ? "\r\n deltaPosDOF=" + clip.m_MuscleClip.m_DeltaPose.m_DoFArray.Length : "") + 
+								(clip.m_MuscleClip.m_DeltaPose.m_GoalArray.Count > 0 ? " deltaPosGoals=" + clip.m_MuscleClip.m_DeltaPose.m_GoalArray.Count : "") + 
+								(clip.m_MuscleClip.m_DeltaPose.m_LeftHandPose.m_DoFArray.Length > 0 ? " leftHandDOF=" + clip.m_MuscleClip.m_DeltaPose.m_LeftHandPose.m_DoFArray.Length : "") + 
+								(clip.m_MuscleClip.m_DeltaPose.m_RightHandPose.m_DoFArray.Length > 0 ? " rightHandDOF=" + clip.m_MuscleClip.m_DeltaPose.m_RightHandPose.m_DoFArray.Length : "") + 
+								(clip.m_MuscleClip.m_IndexArray.Length > 0 ? " Indices=" + clip.m_MuscleClip.m_IndexArray.Length : "") + (clip.m_MuscleClip.m_ValueArrayDelta.Count > 0 ? " valADelta=" + clip.m_MuscleClip.m_ValueArrayDelta.Count : "");
+							int[] a = new int[6];
+							int b = -1;
+							int c = -1;
+							uint[] d = new uint[6];
+							HashSet<uint> distinctConst = new HashSet<uint>();
+							HashSet<uint> distinctVariable = new HashSet<uint>();
+							foreach (var binding in clip.m_ClipBindingConstant.genericBindings)
 							{
-								Editor.Parser.Cabinet.BeginLoadingSkippedComponents();
-								Editor.Parser.Cabinet.SourceStream.Position = ((NotLoaded)asset).offset;
-								PPtr<MonoScript> scriptRef = MonoBehaviour.LoadMonoScriptRef(Editor.Parser.Cabinet.SourceStream);
-								Report.ReportLog(asset.classID2 + " " + asset.classID1 + ": MonoScript FileID: " + scriptRef.m_FileID + ", PathID: " + scriptRef.m_PathID);
+								//msg += "\r\n" + lastAvatar.FindBoneName(binding.path) + " " + binding.attribute;
+								if (binding.attribute != b)
+								{
+									c++;
+									b = (int)binding.attribute;
+									d[c] = binding.attribute;
+								}
+								a[c]++;
+								if (c >= 3)
+								{
+									distinctConst.Add(binding.path);
+								}
+								else
+								{
+									distinctVariable.Add(binding.path);
+								}
 							}
-							finally
+							msg += "\r\n Variable att(" + d[0] + ":" + a[0] + ", " + d[1] + ":" + a[1] + ", " + d[2] + ":" + a[2] + ") distinct=" + distinctVariable.Count + ", Const att(" + d[3] + ":" + a[3] + ", " + d[4] + ":" + a[4] + ", " + d[5] + ":" + a[5] + ") distinct=" + distinctConst.Count;
+							msg += (clip.m_Events.Count > 0 ? " events=" + clip.m_Events.Count : "");
+
+							if (clip.m_MuscleClip.m_Clip.m_DenseClip.m_SampleArray.Length > 0)
 							{
-								Editor.Parser.Cabinet.EndLoadingSkippedComponents();
+								msg += "\r\n\r\nDense Clip Sampled Data:";
+								for (int frameIdx = 0; frameIdx < clip.m_MuscleClip.m_Clip.m_DenseClip.m_FrameCount; frameIdx++)
+								{
+									if (frameIdx >= 4 && frameIdx < clip.m_MuscleClip.m_Clip.m_DenseClip.m_FrameCount - 1)
+									{
+										if (frameIdx == 4)
+										{
+											msg += "\r\n ...";
+										}
+										continue;
+									}
+									msg += "\r\n" + frameIdx;
+									int translations = 0, scalings = 0, sampleIdx = 0;
+									int skipRotations = d[0] == 2 ? a[0] * 4 : 0;
+									for (int curveIdx = 0; curveIdx < clip.m_MuscleClip.m_Clip.m_DenseClip.m_CurveCount; )
+									{
+										GenericBinding binding = StreamedClip.StreamedKeyPart.FindBinding(skipRotations + curveIdx, clip.m_ClipBindingConstant.genericBindings);
+										int numCoords = binding.attribute == 1 || binding.attribute == 3 ? 3 : 4;
+										string trackName = lastAvatar.FindBoneName(binding.path);
+										if (trackName == null)
+										{
+											msg += " binding doesn't match avatar";
+											frameIdx = clip.m_MuscleClip.m_Clip.m_DenseClip.m_FrameCount;
+											break;
+										}
+										if (trackName.Equals("cf_J_Shoulder_L") || binding.attribute == 1 && ++translations <= 2 || binding.attribute == 3 && ++scalings <= 2)
+										{
+											for (int j = 0; j < numCoords; j++)
+											{
+												msg += "\r\n " + curveIdx + ": value=" + clip.m_MuscleClip.m_Clip.m_DenseClip.m_SampleArray[frameIdx * clip.m_MuscleClip.m_Clip.m_DenseClip.m_CurveCount + sampleIdx]
+													+ " (" + trackName + ":" + srt[binding.attribute] + "-" + axis[j] + ")";
+												sampleIdx++;
+												curveIdx++;
+											}
+										}
+										else
+										{
+											sampleIdx += numCoords;
+											curveIdx += numCoords;
+										}
+									}
+								}
 							}
+							if (clip.m_MuscleClip.m_Clip.m_StreamedClip.data.Length > 0)
+							{
+								msg += "\r\n\r\nStreamed Clip Data:";
+								List<StreamedClip.StreamedFrame> frameList = clip.m_MuscleClip.m_Clip.m_StreamedClip.ReadData();
+								float minX = Single.MaxValue, maxX = Single.MinValue, minY = Single.MaxValue, maxY = Single.MinValue, minZ = Single.MaxValue, maxZ = Single.MinValue;
+								for (int frameIdx = 0; frameIdx < frameList.Count; frameIdx++)
+								{
+									/*if (frameIdx >= 10 && frameIdx < frameList.Count - 10)
+									{
+										if (frameIdx == 10)
+										{
+											msg += "\r\n... ... ...";
+										}
+										continue;
+									}*/
+									StreamedClip.StreamedFrame frame = frameList[frameIdx];
+									if (frameIdx < 7 || frameIdx >= frameList.Count - 7)
+									{
+										msg += "\r\n" + frameIdx + ": time=" + frame.time + (frameIdx + 1 < frameList.Count ? ", dt=" + (frameList[frameIdx + 1].time - frame.time) : "") + " curves=" + frame.keyList.Count;
+									}
+									else if (frameIdx == 7)
+									{
+										msg += "\r\n ... ... ...";
+									}
+									/*if (frameIdx >= 7 && frameIdx < frameList.Count - 7)
+									{
+										msg += " ...";
+										continue;
+									}*/
+									int translations = 0, scalings = 0;
+									for (int keyIndex = 0; keyIndex < frame.keyList.Count; )
+									{
+										StreamedClip.StreamedKeyPart key = frame.keyList[keyIndex];
+										GenericBinding binding = StreamedClip.StreamedKeyPart.FindBinding(key.index, clip.m_ClipBindingConstant.genericBindings);
+										int numParts = binding.attribute == 1 || binding.attribute == 3 ? 3 : 4;
+										string trackName = lastAvatar.FindBoneName(binding.path);
+										if (trackName == null)
+										{
+											msg += " binding doesn't match avatar";
+											frameIdx = frameList.Count;
+											break;
+										}
+										//if (trackName.Equals("cf_J_Shoulder_L") || binding.attribute == 1 && ++translations <= 3 || binding.attribute == 3 && ++scalings <= 3)
+										{
+											for (int j = 0; j < numParts; j++, keyIndex++)
+											{
+												key = frame.keyList[keyIndex];
+												if ((frameIdx < 7 || frameIdx >= frameList.Count - 7) && (trackName.Equals("cf_J_Shoulder_L") || binding.attribute == 1 && ++translations <= 3 || binding.attribute == 3 && ++scalings <= 3))
+												{
+													msg += "\r\n " + key.index + " (" + trackName + ":" + srt[binding.attribute] + "-" + axis[j] + ")" + ": tangent info=" + key.tcb + " value=" + key.value;
+												}
+												if (key.tcb.X < minX) minX = key.tcb.X;
+												if (key.tcb.X > maxX) maxX = key.tcb.X;
+												if (key.tcb.Y < minY) minY = key.tcb.Y;
+												if (key.tcb.Y > maxY) maxY = key.tcb.Y;
+												if (key.tcb.Z < minZ) minZ = key.tcb.Z;
+												if (key.tcb.Z > maxZ) maxZ = key.tcb.Z;
+											}
+										}
+										/*else
+										{
+											keyIndex += numParts;
+										}*/
+									}
+								}
+								msg += "\r\nminX=" + minX + " maxX=" + maxX + " minY=" + minY + " maxY=" + maxY + " minZ=" + minZ + " maxZ=" + maxZ;
+							}
+							Report.ReportLog(msg);
 							break;
-						case UnityClassID.MonoScript:
-							if (asset is NotLoaded)
+						case UnityClassID.AnimatorController:
+							AnimatorController animController = (AnimatorController)asset;
+							msg = animController.m_Name +
+								(animController.m_Controller.m_LayerArray.Length > 0 ? " layers= Body0=" + animController.m_Controller.m_LayerArray[0].m_BodyMask.word0.ToString("X8") + ",1=" + animController.m_Controller.m_LayerArray[0].m_BodyMask.word1.ToString("X8") + ", skMasks=" + animController.m_Controller.m_LayerArray.Length + ", skMask[0]Len=" + animController.m_Controller.m_LayerArray[0].m_SkeletonMask.m_Data.Length : "") +
+								(animController.m_Controller.m_StateMachineArray.Length > 0 ? " states=" + animController.m_Controller.m_StateMachineArray.Length +
+								" const=" + animController.m_Controller.m_StateMachineArray[0].m_StateConstantArray.Length +
+								", any=" + animController.m_Controller.m_StateMachineArray[0].m_AnyStateTransitionConstantArray.Length : "") +
+								(animController.m_Controller.m_Values.m_ValueArray.Count > 0 ? " values=" + animController.m_Controller.m_Values.m_ValueArray.Count : "") +
+								(animController.m_Controller.m_DefaultValues.m_BoolValues.Length > 0 ? " defBool=" + animController.m_Controller.m_DefaultValues.m_BoolValues.Length : "") +
+								(animController.m_Controller.m_DefaultValues.m_IntValues.Length > 0 ? " defInt=" + animController.m_Controller.m_DefaultValues.m_IntValues.Length : "") +
+								(animController.m_Controller.m_DefaultValues.m_FloatValues.Length > 0 ? " defFloat=" + animController.m_Controller.m_DefaultValues.m_FloatValues.Length : "") +
+								(animController.m_Controller.m_DefaultValues.m_PositionValues.Length > 0 ? " defPos=" + animController.m_Controller.m_DefaultValues.m_PositionValues.Length : "") +
+								(animController.m_Controller.m_DefaultValues.m_QuaternionValues.Length > 0 ? " defRot=" + animController.m_Controller.m_DefaultValues.m_QuaternionValues.Length : "") +
+								(animController.m_Controller.m_DefaultValues.m_ScaleValues.Length > 0 ? " defScale=" + animController.m_Controller.m_DefaultValues.m_ScaleValues.Length : "") +
+								" clips=" + animController.m_AnimationClips.Count;
+							/*foreach (var pair in animController.m_TOS)
 							{
-								asset = Editor.Parser.Cabinet.LoadComponent(asset.pathID);
-								item.Tag = asset;
+								msg += "\r\n   " + pair.Key + " " + pair.Value;
+							}*/
+							// clip names
+							for (int i = 0; i < animController.m_Controller.m_StateMachineArray[0].m_StateConstantArray.Length; i++)
+							{
+								StateConstant sConst = animController.m_Controller.m_StateMachineArray[0].m_StateConstantArray[i];
+								uint clipHash = sConst.m_LeafInfoArray[0].m_IDArray[0];
+								string clipName = null;
+								foreach (var pair in animController.m_TOS)
+								{
+									if (pair.Key == clipHash)
+									{
+										clipName = pair.Value;
+										break;
+									}
+								}
+								msg += "\r\n" + i + ": transC=" + sConst.m_TransitionConstantArray.Length + " blends=" + sConst.m_BlendTreeConstantIndexArray.Length + " blendIdx[0]=" + sConst.m_BlendTreeConstantIndexArray[0] + ", leaves=" + sConst.m_LeafInfoArray.Length + " leaveID[0]=" + clipName + "/clip=" + (animController.m_AnimationClips[i].instance.m_Name) + ", blends=" + sConst.m_BlendTreeConstantArray.Length + " nodes=" + sConst.m_BlendTreeConstantArray[0].m_NodeArray.Length + " blendTreeNode0chlds=" + sConst.m_BlendTreeConstantArray[0].m_NodeArray[0].m_ChildIndices.Length;
 							}
-							MonoScript script = (MonoScript)asset;
-							Report.ReportLog
-							(
-								asset.classID1 + " PathID: " + asset.pathID
-								+ "\r\n\tClassName: " + script.m_ClassName
-								+ "\r\n\tNamespace: " + script.m_Namespace
-								+ "\r\n\tAssemply: " + script.m_AssemblyName
-							);
+							Report.ReportLog(msg);
+							break;
+						case UnityClassID.Animator:
+							lastAvatar = ((Animator)asset).m_Avatar.instance;
+							AnimatorEditor aEditor = new AnimatorEditor((Animator)asset);
+							msg = "Frames=" + aEditor.Frames.Count + " AvTOS=" + lastAvatar.m_TOS.Count + " AskX=" + lastAvatar.m_Avatar.m_AvatarSkeletonPose.m_X.Count + " DpX=" + lastAvatar.m_Avatar.m_DefaultPose.m_X.Count + " RmspX=" + lastAvatar.m_Avatar.m_RootMotionSkeletonPose.m_X.Count + " HspX=" + lastAvatar.m_Avatar.m_Human.m_SkeletonPose.m_X.Count + " Sk1=" + lastAvatar.m_Avatar.m_AvatarSkeleton.m_Node.Count + "," + lastAvatar.m_Avatar.m_AvatarSkeleton.m_ID.Count + "," + lastAvatar.m_Avatar.m_AvatarSkeleton.m_AxesArray.Count + " Sk2=" + lastAvatar.m_Avatar.m_RootMotionSkeleton.m_Node.Count + "," + lastAvatar.m_Avatar.m_RootMotionSkeleton.m_ID.Count + "," + lastAvatar.m_Avatar.m_RootMotionSkeleton.m_AxesArray.Count + " Sk3=" + lastAvatar.m_Avatar.m_Human.m_Skeleton.m_Node.Count + "," + lastAvatar.m_Avatar.m_Human.m_Skeleton.m_ID.Count + "," + lastAvatar.m_Avatar.m_Human.m_Skeleton.m_AxesArray.Count;
+							foreach (var pair in lastAvatar.m_TOS)
+							{
+								msg += "\r\n   " + pair.Key + " " + pair.Value;
+							}
+							Report.ReportLog(msg);
+							break;
+#endif
+						case UnityClassID.MonoBehaviour:
+						case UnityClassID.MonoScript:
+						case UnityClassID.Material:
+						case UnityClassID.Shader:
+							Gui.Scripting.RunScript(EditorVar + ".ViewAssetData(pathID=" + asset.pathID + ")");
 							break;
 						}
 					}

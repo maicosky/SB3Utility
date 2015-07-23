@@ -3,6 +3,7 @@
 #include "SB3UtilityFBX.h"
 
 using namespace System::Reflection;
+using namespace System::Text::RegularExpressions;
 
 namespace SB3Utility
 {
@@ -101,9 +102,6 @@ namespace SB3Utility
 		FbxArray<FbxNode*>* pMeshArray = NULL;
 		try
 		{
-			pMeshArray = new FbxArray<FbxNode*>();
-			bool hasShapes = false;
-
 			for (int i = 0; i < pNode->GetChildCount(); i++)
 			{
 				FbxNode* pNodeChild = pNode->GetChild(i);
@@ -127,16 +125,33 @@ namespace SB3Utility
 							break;
 
 						case FbxNodeAttribute::eMesh:
-							if (pNodeChild->GetMesh()->GetShapeCount() > 0)
-							{
-								hasShapes = true;
-							}
-							pMeshArray->Add(pNodeChild);
 							break;
 
 						default:
 							FbxString str = FbxString(lAttributeType);
 							Report::ReportLog(gcnew String("Warning: ") + gcnew String(pNodeChild->GetName()) + gcnew String(" has unsupported node attribute type ") + gcnew String(str.Buffer()));
+							break;
+					}
+				}
+			}
+
+			pMeshArray = new FbxArray<FbxNode*>();
+			bool hasShapes = false;
+			for (int i = 0; i < pNode->GetChildCount(); i++)
+			{
+				FbxNode* pNodeChild = pNode->GetChild(i);
+				if (pNodeChild->GetNodeAttribute() != NULL)
+				{
+					FbxNodeAttribute::EType lAttributeType = pNodeChild->GetNodeAttribute()->GetAttributeType();
+
+					switch (lAttributeType)
+					{
+						case FbxNodeAttribute::eMesh:
+							if (pNodeChild->GetMesh()->GetShapeCount() > 0)
+							{
+								hasShapes = true;
+							}
+							pMeshArray->Add(pNodeChild);
 							break;
 					}
 				}
@@ -148,7 +163,51 @@ namespace SB3Utility
 			}
 			else
 			{
-				ImportMesh(parent, pMeshArray);
+				if (parent != nullptr)
+				{
+					ImportMesh(parent, pMeshArray);
+				}
+				else
+				{
+					for (int i = 0; i < pMeshArray->GetCount(); i++)
+					{
+						FbxNode* pMeshNode = pMeshArray->GetAt(i);
+						String^ meshName = gcnew String(pMeshNode->GetName());
+						Match^ match = Regex::Match(meshName, gcnew String("(.+)_\\d+"));
+						ImportedFrame^ frame = nullptr;
+						if (match->Success)
+						{
+							String^ frameName = match->Groups[1]->Value;
+							frame = ImportedHelpers::FindFrame(frameName, FrameList[0]);
+						}
+						FbxArray<FbxNode*>* meshList = new FbxArray<FbxNode*>();
+						try
+						{
+							meshList->Add(pMeshNode);
+							pMeshArray->RemoveAt(i--);
+							for (int j = i + 1; j < pMeshArray->GetCount(); j++)
+							{
+								pMeshNode = pMeshArray->GetAt(j);
+								meshName = gcnew String(pMeshNode->GetName());
+								match = Regex::Match(meshName, gcnew String("(.+)_\\d+"));
+								if (match->Success)
+								{
+									String^ frameName = match->Groups[1]->Value;
+									if (frame == ImportedHelpers::FindFrame(frameName, FrameList[0]))
+									{
+										meshList->Add(pMeshNode);
+										pMeshArray->RemoveAt(j--);
+									}
+								}
+							}
+							ImportMesh(frame, meshList);
+						}
+						finally
+						{
+							delete meshList;
+						}
+					}
+				}
 			}
 		}
 		finally
@@ -265,6 +324,12 @@ namespace SB3Utility
 				if (pLayerUV != NULL)
 				{
 					pLayerElementUV = pLayerUV->GetUVs();
+					for (int j = 0; j < pLayerElementUV->GetDirectArray().GetCount(); j++)
+					{
+						FbxVector2& uvRef = pLayerElementUV->GetDirectArray()[j];
+						uvRef[1] *= -1;
+						pLayerElementUV->GetDirectArray().SetAt(j, uvRef);
+					}
 				}
 
 				if (!tangents)
@@ -317,7 +382,7 @@ namespace SB3Utility
 						{
 							FbxVector2 uv;
 							GetVector(pLayerElementUV, uv, controlPointIdx, vertCount);
-							vert->uv = gcnew array<float>(2) { (float)uv[0], -(float)uv[1] };
+							vert->uv = gcnew array<float>(2) { (float)uv[0], (float)uv[1] };
 						}
 
 						if (pLayerElementTangent != NULL)
@@ -444,29 +509,39 @@ namespace SB3Utility
 
 						FbxNode* pLinkNode = pCluster->GetLink();
 						String^ boneName = gcnew String(pLinkNode->GetName());
+						ImportedBone^ boneInfo = nullptr;
 						int boneIdx;
 						if (!boneDic->TryGetValue(boneName, boneIdx))
 						{
-							ImportedBone^ boneInfo = gcnew ImportedBone();
-							boneList->Add(boneInfo);
+							boneInfo = gcnew ImportedBone();
 							boneInfo->Name = boneName;
 							boneInfo->Matrix = boneMatrix;
 
 							boneIdx = boneDic->Count;
-							boneDic->Add(boneName, boneIdx);
 						}
 
 						int* lIndices = pCluster->GetControlPointIndices();
 						double* lWeights = pCluster->GetControlPointWeights();
 						int numIndices = pCluster->GetControlPointIndicesCount();
+						bool boneUsed = false;
 						for (int k = 0; k < numIndices; k++)
 						{
 							List<Vertex^>^ vert = vertMap[lIndices[k]];
 							for (int m = 0; m < vert->Count; m++)
 							{
-								vert[m]->boneIndices->Add(boneIdx);
-								vert[m]->weights->Add((float)lWeights[k]);
+								if (lWeights[k] > 0)
+								{
+									vert[m]->boneIndices->Add(boneIdx);
+									vert[m]->weights->Add((float)lWeights[k]);
+									boneUsed = true;
+								}
 							}
+						}
+
+						if (boneInfo != nullptr && boneUsed)
+						{
+							boneList->Add(boneInfo);
+							boneDic->Add(boneName, boneIdx);
 						}
 					}
 				}
@@ -699,7 +774,7 @@ namespace SB3Utility
 				for (int j = 0; j < rootNode->GetChildCount(); j++)
 				{
 					FbxNode* rootChild = rootNode->GetChild(j);
-					Type^ animType = GetAnimationType(pAnimStack->GetMember<FbxAnimLayer>(0), pScene->GetRootNode());
+					Type^ animType = GetAnimationType(pAnimStack->GetMember<FbxAnimLayer>(0), rootChild);
 					ConstructorInfo^ ctor = animType->GetConstructor(Type::EmptyTypes);
 					if (animType == ImportedKeyframedAnimation::typeid)
 					{
@@ -757,6 +832,26 @@ namespace SB3Utility
 
 			if (pAnimCurveSX->KeyGetCount() != pAnimCurveRX->KeyGetCount() || pAnimCurveSX->KeyGetCount() != pAnimCurveTX->KeyGetCount())
 			{
+				return ImportedSampledAnimation::typeid;
+			}
+		}
+		else
+		{
+			int numTCurves = 0;
+			if (pAnimCurveTX) numTCurves++;
+			if (pAnimCurveTY) numTCurves++;
+			if (pAnimCurveTZ) numTCurves++;
+			int numRCurves = 0;
+			if (pAnimCurveRX) numRCurves++;
+			if (pAnimCurveRY) numRCurves++;
+			if (pAnimCurveRZ) numRCurves++;
+			int numSCurves = 0;
+			if (pAnimCurveSX) numSCurves++;
+			if (pAnimCurveSY) numSCurves++;
+			if (pAnimCurveSZ) numSCurves++;
+			if (numTCurves || numRCurves || numSCurves)
+			{
+				Report::ReportLog("Track " + gcnew String(pNode->GetName()) + " misses curves for" + (numTCurves == 0 ? " Translation" : "") + (numRCurves == 0 ? " Rotation" : "") + (numSCurves == 0 ? " Scaling" : ""));
 				return ImportedSampledAnimation::typeid;
 			}
 		}

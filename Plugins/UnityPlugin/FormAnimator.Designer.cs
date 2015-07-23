@@ -53,6 +53,14 @@
 			this.textBoxFrameName = new SB3Utility.EditTextBox();
 			this.buttonMeshSubmeshAddMaterial = new System.Windows.Forms.Button();
 			this.buttonMeshMirrorV = new System.Windows.Forms.Button();
+			this.panelMeshExportOptionsFbx = new System.Windows.Forms.Panel();
+			this.checkBoxMeshExportFbxLinearInterpolation = new System.Windows.Forms.CheckBox();
+			this.checkBoxMeshExportNoMesh = new System.Windows.Forms.CheckBox();
+			this.checkBoxMeshExportAllBones = new System.Windows.Forms.CheckBox();
+			this.checkBoxMeshExportFbxSkins = new System.Windows.Forms.CheckBox();
+			this.label13 = new System.Windows.Forms.Label();
+			this.textBoxKeyframeRange = new SB3Utility.EditTextBox();
+			this.checkBoxMeshExportFbxAllFrames = new System.Windows.Forms.CheckBox();
 			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
 			this.tabControlLists = new System.Windows.Forms.TabControl();
 			this.tabPageObject = new System.Windows.Forms.TabPage();
@@ -179,14 +187,6 @@
 			this.checkBoxMeshExportMqoSortMeshes = new System.Windows.Forms.CheckBox();
 			this.checkBoxMeshExportMqoSingleFile = new System.Windows.Forms.CheckBox();
 			this.checkBoxMeshExportMqoWorldCoords = new System.Windows.Forms.CheckBox();
-			this.panelMeshExportOptionsFbx = new System.Windows.Forms.Panel();
-			this.checkBoxMeshExportFbxLinearInterpolation = new System.Windows.Forms.CheckBox();
-			this.checkBoxMeshExportNoMesh = new System.Windows.Forms.CheckBox();
-			this.checkBoxMeshExportAllBones = new System.Windows.Forms.CheckBox();
-			this.checkBoxMeshExportFbxSkins = new System.Windows.Forms.CheckBox();
-			this.label13 = new System.Windows.Forms.Label();
-			this.textBoxKeyframeRange = new SB3Utility.EditTextBox();
-			this.checkBoxMeshExportFbxAllFrames = new System.Windows.Forms.CheckBox();
 			this.label1 = new System.Windows.Forms.Label();
 			this.buttonMeshRemove = new System.Windows.Forms.Button();
 			this.groupBoxMesh = new System.Windows.Forms.GroupBox();
@@ -246,7 +246,6 @@
 			this.dataGridViewMaterialValues = new System.Windows.Forms.DataGridView();
 			this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
 			this.dataGridViewMaterialTextures = new System.Windows.Forms.DataGridView();
-			this.ColumnMaterialTexture = new System.Windows.Forms.DataGridViewComboBoxColumn();
 			this.textBoxMatName = new SB3Utility.EditTextBox();
 			this.tabPageTextureView = new System.Windows.Forms.TabPage();
 			this.label37 = new System.Windows.Forms.Label();
@@ -278,6 +277,10 @@
 			this.editTextBoxTexImageCount = new SB3Utility.EditTextBox();
 			this.textBoxTexSize = new SB3Utility.EditTextBox();
 			this.textBoxTexName = new SB3Utility.EditTextBox();
+			this.ColumnMaterialTexture = new System.Windows.Forms.DataGridViewComboBoxColumn();
+			this.ColumnMaterialOffset = new System.Windows.Forms.DataGridViewTextBoxColumn();
+			this.ColumnMaterialScale = new System.Windows.Forms.DataGridViewTextBoxColumn();
+			this.panelMeshExportOptionsFbx.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
 			this.splitContainer1.Panel1.SuspendLayout();
 			this.splitContainer1.Panel2.SuspendLayout();
@@ -342,7 +345,6 @@
 			((System.ComponentModel.ISupportInitialize)(this.numericMeshExportDirectXKeyframeLength)).BeginInit();
 			this.panelMeshExportOptionsCollada.SuspendLayout();
 			this.panelMeshExportOptionsMqo.SuspendLayout();
-			this.panelMeshExportOptionsFbx.SuspendLayout();
 			this.groupBoxMesh.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridViewMesh)).BeginInit();
 			this.tabPageMorphView.SuspendLayout();
@@ -494,6 +496,108 @@
 			this.toolTip1.SetToolTip(this.buttonMeshMirrorV, "Mirror V coordinates");
 			this.buttonMeshMirrorV.UseVisualStyleBackColor = true;
 			this.buttonMeshMirrorV.Click += new System.EventHandler(this.buttonMeshMirrorV_Click);
+			// 
+			// panelMeshExportOptionsFbx
+			// 
+			this.panelMeshExportOptionsFbx.Controls.Add(this.checkBoxMeshExportFbxLinearInterpolation);
+			this.panelMeshExportOptionsFbx.Controls.Add(this.checkBoxMeshExportNoMesh);
+			this.panelMeshExportOptionsFbx.Controls.Add(this.checkBoxMeshExportAllBones);
+			this.panelMeshExportOptionsFbx.Controls.Add(this.checkBoxMeshExportFbxSkins);
+			this.panelMeshExportOptionsFbx.Controls.Add(this.label13);
+			this.panelMeshExportOptionsFbx.Controls.Add(this.textBoxKeyframeRange);
+			this.panelMeshExportOptionsFbx.Controls.Add(this.checkBoxMeshExportFbxAllFrames);
+			this.panelMeshExportOptionsFbx.Location = new System.Drawing.Point(3, 40);
+			this.panelMeshExportOptionsFbx.Name = "panelMeshExportOptionsFbx";
+			this.panelMeshExportOptionsFbx.Size = new System.Drawing.Size(246, 47);
+			this.panelMeshExportOptionsFbx.TabIndex = 260;
+			this.toolTip1.SetToolTip(this.panelMeshExportOptionsFbx, "Warning! Bind Pose will not be exported!");
+			// 
+			// checkBoxMeshExportFbxLinearInterpolation
+			// 
+			this.checkBoxMeshExportFbxLinearInterpolation.AutoSize = true;
+			this.checkBoxMeshExportFbxLinearInterpolation.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
+			this.checkBoxMeshExportFbxLinearInterpolation.Checked = true;
+			this.checkBoxMeshExportFbxLinearInterpolation.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.checkBoxMeshExportFbxLinearInterpolation.Enabled = false;
+			this.checkBoxMeshExportFbxLinearInterpolation.Location = new System.Drawing.Point(185, 25);
+			this.checkBoxMeshExportFbxLinearInterpolation.Name = "checkBoxMeshExportFbxLinearInterpolation";
+			this.checkBoxMeshExportFbxLinearInterpolation.Size = new System.Drawing.Size(55, 17);
+			this.checkBoxMeshExportFbxLinearInterpolation.TabIndex = 273;
+			this.checkBoxMeshExportFbxLinearInterpolation.TabStop = false;
+			this.checkBoxMeshExportFbxLinearInterpolation.Text = "Linear";
+			this.checkBoxMeshExportFbxLinearInterpolation.UseVisualStyleBackColor = true;
+			// 
+			// checkBoxMeshExportNoMesh
+			// 
+			this.checkBoxMeshExportNoMesh.AutoSize = true;
+			this.checkBoxMeshExportNoMesh.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
+			this.checkBoxMeshExportNoMesh.Location = new System.Drawing.Point(-2, 25);
+			this.checkBoxMeshExportNoMesh.Name = "checkBoxMeshExportNoMesh";
+			this.checkBoxMeshExportNoMesh.Size = new System.Drawing.Size(69, 17);
+			this.checkBoxMeshExportNoMesh.TabIndex = 272;
+			this.checkBoxMeshExportNoMesh.TabStop = false;
+			this.checkBoxMeshExportNoMesh.Text = "No Mesh";
+			this.checkBoxMeshExportNoMesh.UseVisualStyleBackColor = true;
+			// 
+			// checkBoxMeshExportAllBones
+			// 
+			this.checkBoxMeshExportAllBones.AutoSize = true;
+			this.checkBoxMeshExportAllBones.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
+			this.checkBoxMeshExportAllBones.Checked = true;
+			this.checkBoxMeshExportAllBones.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.checkBoxMeshExportAllBones.Location = new System.Drawing.Point(149, 2);
+			this.checkBoxMeshExportAllBones.Name = "checkBoxMeshExportAllBones";
+			this.checkBoxMeshExportAllBones.Size = new System.Drawing.Size(70, 17);
+			this.checkBoxMeshExportAllBones.TabIndex = 266;
+			this.checkBoxMeshExportAllBones.TabStop = false;
+			this.checkBoxMeshExportAllBones.Text = "All Bones";
+			this.checkBoxMeshExportAllBones.UseVisualStyleBackColor = true;
+			// 
+			// checkBoxMeshExportFbxSkins
+			// 
+			this.checkBoxMeshExportFbxSkins.AutoSize = true;
+			this.checkBoxMeshExportFbxSkins.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
+			this.checkBoxMeshExportFbxSkins.Checked = true;
+			this.checkBoxMeshExportFbxSkins.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.checkBoxMeshExportFbxSkins.Location = new System.Drawing.Point(84, 2);
+			this.checkBoxMeshExportFbxSkins.Name = "checkBoxMeshExportFbxSkins";
+			this.checkBoxMeshExportFbxSkins.Size = new System.Drawing.Size(52, 17);
+			this.checkBoxMeshExportFbxSkins.TabIndex = 264;
+			this.checkBoxMeshExportFbxSkins.TabStop = false;
+			this.checkBoxMeshExportFbxSkins.Text = "Skins";
+			this.checkBoxMeshExportFbxSkins.UseVisualStyleBackColor = true;
+			// 
+			// label13
+			// 
+			this.label13.AutoSize = true;
+			this.label13.Location = new System.Drawing.Point(75, 26);
+			this.label13.Name = "label13";
+			this.label13.Size = new System.Drawing.Size(56, 13);
+			this.label13.TabIndex = 268;
+			this.label13.Text = "Keyframes";
+			// 
+			// textBoxKeyframeRange
+			// 
+			this.textBoxKeyframeRange.Enabled = false;
+			this.textBoxKeyframeRange.Location = new System.Drawing.Point(133, 23);
+			this.textBoxKeyframeRange.MaxLength = 10;
+			this.textBoxKeyframeRange.Name = "textBoxKeyframeRange";
+			this.textBoxKeyframeRange.Size = new System.Drawing.Size(45, 20);
+			this.textBoxKeyframeRange.TabIndex = 268;
+			this.textBoxKeyframeRange.TabStop = false;
+			this.textBoxKeyframeRange.Text = "-1-0";
+			// 
+			// checkBoxMeshExportFbxAllFrames
+			// 
+			this.checkBoxMeshExportFbxAllFrames.AutoSize = true;
+			this.checkBoxMeshExportFbxAllFrames.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
+			this.checkBoxMeshExportFbxAllFrames.Location = new System.Drawing.Point(-2, 2);
+			this.checkBoxMeshExportFbxAllFrames.Name = "checkBoxMeshExportFbxAllFrames";
+			this.checkBoxMeshExportFbxAllFrames.Size = new System.Drawing.Size(74, 17);
+			this.checkBoxMeshExportFbxAllFrames.TabIndex = 262;
+			this.checkBoxMeshExportFbxAllFrames.TabStop = false;
+			this.checkBoxMeshExportFbxAllFrames.Text = "All Frames";
+			this.checkBoxMeshExportFbxAllFrames.UseVisualStyleBackColor = true;
 			// 
 			// splitContainer1
 			// 
@@ -1836,11 +1940,11 @@
 			this.groupBox2.Controls.Add(this.label28);
 			this.groupBox2.Controls.Add(this.comboBoxMeshExportFormat);
 			this.groupBox2.Controls.Add(this.buttonMeshExport);
+			this.groupBox2.Controls.Add(this.panelMeshExportOptionsFbx);
 			this.groupBox2.Controls.Add(this.panelMeshExportOptionsDefault);
 			this.groupBox2.Controls.Add(this.panelMeshExportOptionsDirectX);
 			this.groupBox2.Controls.Add(this.panelMeshExportOptionsCollada);
 			this.groupBox2.Controls.Add(this.panelMeshExportOptionsMqo);
-			this.groupBox2.Controls.Add(this.panelMeshExportOptionsFbx);
 			this.groupBox2.Location = new System.Drawing.Point(0, 85);
 			this.groupBox2.Name = "groupBox2";
 			this.groupBox2.Size = new System.Drawing.Size(253, 90);
@@ -2025,107 +2129,6 @@
 			this.checkBoxMeshExportMqoWorldCoords.TabStop = false;
 			this.checkBoxMeshExportMqoWorldCoords.Text = "World Coordinates";
 			this.checkBoxMeshExportMqoWorldCoords.UseVisualStyleBackColor = true;
-			// 
-			// panelMeshExportOptionsFbx
-			// 
-			this.panelMeshExportOptionsFbx.Controls.Add(this.checkBoxMeshExportFbxLinearInterpolation);
-			this.panelMeshExportOptionsFbx.Controls.Add(this.checkBoxMeshExportNoMesh);
-			this.panelMeshExportOptionsFbx.Controls.Add(this.checkBoxMeshExportAllBones);
-			this.panelMeshExportOptionsFbx.Controls.Add(this.checkBoxMeshExportFbxSkins);
-			this.panelMeshExportOptionsFbx.Controls.Add(this.label13);
-			this.panelMeshExportOptionsFbx.Controls.Add(this.textBoxKeyframeRange);
-			this.panelMeshExportOptionsFbx.Controls.Add(this.checkBoxMeshExportFbxAllFrames);
-			this.panelMeshExportOptionsFbx.Location = new System.Drawing.Point(3, 40);
-			this.panelMeshExportOptionsFbx.Name = "panelMeshExportOptionsFbx";
-			this.panelMeshExportOptionsFbx.Size = new System.Drawing.Size(246, 47);
-			this.panelMeshExportOptionsFbx.TabIndex = 260;
-			// 
-			// checkBoxMeshExportFbxLinearInterpolation
-			// 
-			this.checkBoxMeshExportFbxLinearInterpolation.AutoSize = true;
-			this.checkBoxMeshExportFbxLinearInterpolation.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
-			this.checkBoxMeshExportFbxLinearInterpolation.Checked = true;
-			this.checkBoxMeshExportFbxLinearInterpolation.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.checkBoxMeshExportFbxLinearInterpolation.Enabled = false;
-			this.checkBoxMeshExportFbxLinearInterpolation.Location = new System.Drawing.Point(185, 25);
-			this.checkBoxMeshExportFbxLinearInterpolation.Name = "checkBoxMeshExportFbxLinearInterpolation";
-			this.checkBoxMeshExportFbxLinearInterpolation.Size = new System.Drawing.Size(55, 17);
-			this.checkBoxMeshExportFbxLinearInterpolation.TabIndex = 273;
-			this.checkBoxMeshExportFbxLinearInterpolation.TabStop = false;
-			this.checkBoxMeshExportFbxLinearInterpolation.Text = "Linear";
-			this.checkBoxMeshExportFbxLinearInterpolation.UseVisualStyleBackColor = true;
-			// 
-			// checkBoxMeshExportNoMesh
-			// 
-			this.checkBoxMeshExportNoMesh.AutoSize = true;
-			this.checkBoxMeshExportNoMesh.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
-			this.checkBoxMeshExportNoMesh.Location = new System.Drawing.Point(-2, 25);
-			this.checkBoxMeshExportNoMesh.Name = "checkBoxMeshExportNoMesh";
-			this.checkBoxMeshExportNoMesh.Size = new System.Drawing.Size(69, 17);
-			this.checkBoxMeshExportNoMesh.TabIndex = 272;
-			this.checkBoxMeshExportNoMesh.TabStop = false;
-			this.checkBoxMeshExportNoMesh.Text = "No Mesh";
-			this.checkBoxMeshExportNoMesh.UseVisualStyleBackColor = true;
-			// 
-			// checkBoxMeshExportAllBones
-			// 
-			this.checkBoxMeshExportAllBones.AutoSize = true;
-			this.checkBoxMeshExportAllBones.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
-			this.checkBoxMeshExportAllBones.Checked = true;
-			this.checkBoxMeshExportAllBones.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.checkBoxMeshExportAllBones.Location = new System.Drawing.Point(149, 2);
-			this.checkBoxMeshExportAllBones.Name = "checkBoxMeshExportAllBones";
-			this.checkBoxMeshExportAllBones.Size = new System.Drawing.Size(70, 17);
-			this.checkBoxMeshExportAllBones.TabIndex = 266;
-			this.checkBoxMeshExportAllBones.TabStop = false;
-			this.checkBoxMeshExportAllBones.Text = "All Bones";
-			this.checkBoxMeshExportAllBones.UseVisualStyleBackColor = true;
-			// 
-			// checkBoxMeshExportFbxSkins
-			// 
-			this.checkBoxMeshExportFbxSkins.AutoSize = true;
-			this.checkBoxMeshExportFbxSkins.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
-			this.checkBoxMeshExportFbxSkins.Checked = true;
-			this.checkBoxMeshExportFbxSkins.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.checkBoxMeshExportFbxSkins.Location = new System.Drawing.Point(84, 2);
-			this.checkBoxMeshExportFbxSkins.Name = "checkBoxMeshExportFbxSkins";
-			this.checkBoxMeshExportFbxSkins.Size = new System.Drawing.Size(52, 17);
-			this.checkBoxMeshExportFbxSkins.TabIndex = 264;
-			this.checkBoxMeshExportFbxSkins.TabStop = false;
-			this.checkBoxMeshExportFbxSkins.Text = "Skins";
-			this.checkBoxMeshExportFbxSkins.UseVisualStyleBackColor = true;
-			// 
-			// label13
-			// 
-			this.label13.AutoSize = true;
-			this.label13.Location = new System.Drawing.Point(75, 26);
-			this.label13.Name = "label13";
-			this.label13.Size = new System.Drawing.Size(56, 13);
-			this.label13.TabIndex = 268;
-			this.label13.Text = "Keyframes";
-			// 
-			// textBoxKeyframeRange
-			// 
-			this.textBoxKeyframeRange.Enabled = false;
-			this.textBoxKeyframeRange.Location = new System.Drawing.Point(133, 23);
-			this.textBoxKeyframeRange.MaxLength = 10;
-			this.textBoxKeyframeRange.Name = "textBoxKeyframeRange";
-			this.textBoxKeyframeRange.Size = new System.Drawing.Size(45, 20);
-			this.textBoxKeyframeRange.TabIndex = 268;
-			this.textBoxKeyframeRange.TabStop = false;
-			this.textBoxKeyframeRange.Text = "-1-0";
-			// 
-			// checkBoxMeshExportFbxAllFrames
-			// 
-			this.checkBoxMeshExportFbxAllFrames.AutoSize = true;
-			this.checkBoxMeshExportFbxAllFrames.CheckAlign = System.Drawing.ContentAlignment.BottomRight;
-			this.checkBoxMeshExportFbxAllFrames.Location = new System.Drawing.Point(-2, 2);
-			this.checkBoxMeshExportFbxAllFrames.Name = "checkBoxMeshExportFbxAllFrames";
-			this.checkBoxMeshExportFbxAllFrames.Size = new System.Drawing.Size(74, 17);
-			this.checkBoxMeshExportFbxAllFrames.TabIndex = 262;
-			this.checkBoxMeshExportFbxAllFrames.TabStop = false;
-			this.checkBoxMeshExportFbxAllFrames.Text = "All Frames";
-			this.checkBoxMeshExportFbxAllFrames.UseVisualStyleBackColor = true;
 			// 
 			// label1
 			// 
@@ -2811,7 +2814,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.dataGridViewMaterialTextures.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
 			this.dataGridViewMaterialTextures.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.ColumnMaterialTexture});
+            this.ColumnMaterialTexture,
+            this.ColumnMaterialOffset,
+            this.ColumnMaterialScale});
 			dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
 			dataGridViewCellStyle7.BackColor = System.Drawing.SystemColors.Window;
 			dataGridViewCellStyle7.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -2843,12 +2848,6 @@
 			this.dataGridViewMaterialTextures.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dataGridViewMaterialTextures_DataError);
 			this.dataGridViewMaterialTextures.EditingControlShowing += new System.Windows.Forms.DataGridViewEditingControlShowingEventHandler(this.dataGridViewMaterialTextures_EditingControlShowing);
 			this.dataGridViewMaterialTextures.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dataGridViewMaterialTextures_KeyDown);
-			// 
-			// ColumnMaterialTexture
-			// 
-			this.ColumnMaterialTexture.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-			this.ColumnMaterialTexture.HeaderText = "PathID Texture";
-			this.ColumnMaterialTexture.Name = "ColumnMaterialTexture";
 			// 
 			// textBoxMatName
 			// 
@@ -3031,6 +3030,7 @@
 			this.pictureBoxTexture.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+			this.pictureBoxTexture.BackColor = System.Drawing.Color.DimGray;
 			this.pictureBoxTexture.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
 			this.pictureBoxTexture.Location = new System.Drawing.Point(0, 0);
 			this.pictureBoxTexture.Name = "pictureBoxTexture";
@@ -3169,6 +3169,30 @@
 			this.textBoxTexName.Size = new System.Drawing.Size(164, 20);
 			this.textBoxTexName.TabIndex = 5;
 			// 
+			// ColumnMaterialTexture
+			// 
+			this.ColumnMaterialTexture.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+			this.ColumnMaterialTexture.HeaderText = "PathID Texture";
+			this.ColumnMaterialTexture.Name = "ColumnMaterialTexture";
+			// 
+			// ColumnMaterialOffset
+			// 
+			this.ColumnMaterialOffset.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCellsExceptHeader;
+			this.ColumnMaterialOffset.HeaderText = "Offset";
+			this.ColumnMaterialOffset.Name = "ColumnMaterialOffset";
+			this.ColumnMaterialOffset.ReadOnly = true;
+			this.ColumnMaterialOffset.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+			this.ColumnMaterialOffset.Width = 5;
+			// 
+			// ColumnMaterialScale
+			// 
+			this.ColumnMaterialScale.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCellsExceptHeader;
+			this.ColumnMaterialScale.HeaderText = "Scale";
+			this.ColumnMaterialScale.Name = "ColumnMaterialScale";
+			this.ColumnMaterialScale.ReadOnly = true;
+			this.ColumnMaterialScale.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+			this.ColumnMaterialScale.Width = 5;
+			// 
 			// FormAnimator
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -3178,6 +3202,8 @@
 			this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.Name = "FormAnimator";
 			this.Text = "FormAnimator";
+			this.panelMeshExportOptionsFbx.ResumeLayout(false);
+			this.panelMeshExportOptionsFbx.PerformLayout();
 			this.splitContainer1.Panel1.ResumeLayout(false);
 			this.splitContainer1.Panel2.ResumeLayout(false);
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
@@ -3260,8 +3286,6 @@
 			this.panelMeshExportOptionsCollada.PerformLayout();
 			this.panelMeshExportOptionsMqo.ResumeLayout(false);
 			this.panelMeshExportOptionsMqo.PerformLayout();
-			this.panelMeshExportOptionsFbx.ResumeLayout(false);
-			this.panelMeshExportOptionsFbx.PerformLayout();
 			this.groupBoxMesh.ResumeLayout(false);
 			this.groupBoxMesh.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.dataGridViewMesh)).EndInit();
@@ -3524,7 +3548,9 @@
 		public System.Windows.Forms.DataGridView dataGridViewMaterialValues;
 		private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
 		public System.Windows.Forms.DataGridView dataGridViewMaterialTextures;
-		private System.Windows.Forms.DataGridViewComboBoxColumn ColumnMaterialTexture;
 		private System.Windows.Forms.Button buttonMeshMirrorV;
+		private System.Windows.Forms.DataGridViewComboBoxColumn ColumnMaterialTexture;
+		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnMaterialOffset;
+		private System.Windows.Forms.DataGridViewTextBoxColumn ColumnMaterialScale;
 	}
 }

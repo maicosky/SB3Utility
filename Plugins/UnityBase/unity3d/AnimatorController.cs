@@ -34,7 +34,7 @@ namespace UnityPlugin
 
 	public class SkeletonMask : IObjInfo
 	{
-		SkeletonMaskElement[] m_Data { get; set; }
+		public SkeletonMaskElement[] m_Data { get; set; }
 
 		public SkeletonMask(Stream stream)
 		{

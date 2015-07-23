@@ -169,11 +169,20 @@ namespace UnityPlugin
 						try
 						{
 							Texture2D tex = mat.m_SavedProperties.m_TexEnvs[0].Value.m_Texture.instance;
+							for (int i = 1; i < mat.m_SavedProperties.m_TexEnvs.Count; i++)
+							{
+								var texProp = mat.m_SavedProperties.m_TexEnvs[i];
+								if (texProp.Key.name == "_MainTex")
+								{
+									tex = texProp.Value.m_Texture.instance;
+									break;
+								}
+							}
 							if (tex != null)
 							{
-								string matTexName = tex.m_Name;
+								string matTexName = tex.m_Name + "-" + tex.m_TextureFormat;
 								string extension = tex.m_TextureFormat == TextureFormat.DXT1 || tex.m_TextureFormat == TextureFormat.DXT5 ? ".dds" : ".tga";
-								s += " tex(\"" + Path.GetFileName(matTexName) + extension + "\")";
+								s += " tex(\"" + matTexName + extension + "\")";
 							}
 						}
 						catch { }
@@ -233,6 +242,15 @@ namespace UnityPlugin
 					try
 					{
 						Texture2D matTex = mat.m_SavedProperties.m_TexEnvs[0].Value.m_Texture.instance;
+						for (int i = 1; i < mat.m_SavedProperties.m_TexEnvs.Count; i++)
+						{
+							var texProp = mat.m_SavedProperties.m_TexEnvs[i];
+							if (texProp.Key.name == "_MainTex")
+							{
+								matTex = texProp.Value.m_Texture.instance;
+								break;
+							}
+						}
 						if (matTex != null && !usedTextures.Contains(matTex))
 						{
 							usedTextures.Add(matTex);
@@ -301,7 +319,17 @@ namespace UnityPlugin
 
 					string dest = Utility.GetDestFile(dir, morphObj.m_GameObject.instance.m_Name + "-" + mesh.m_Name + "-", ".morph.mqo");
 					Material mat = morphObj.m_Materials[0].instance;
-					Export(dest, mat, mat.m_SavedProperties.m_TexEnvs[0].Value.m_Texture.instance);
+					Texture2D matTex = mat.m_SavedProperties.m_TexEnvs[0].Value.m_Texture.instance;
+					for (int i = 1; i < mat.m_SavedProperties.m_TexEnvs.Count; i++)
+					{
+						var texProp = mat.m_SavedProperties.m_TexEnvs[i];
+						if (texProp.Key.name == "_MainTex")
+						{
+							matTex = texProp.Value.m_Texture.instance;
+							break;
+						}
+					}
+					Export(dest, mat, matTex);
 					foreach (Texture2D tex in usedTextures)
 					{
 						try

@@ -70,6 +70,15 @@ namespace UnityPlugin
 			}
 		}
 
+		public Unity3dEditor(UnityParser parser) : this(parser, false) { }
+		public Unity3dEditor(string path) : this(new UnityParser(path), true) { }
+
+		public bool Changed
+		{
+			get { return contentChanged; }
+			set { contentChanged = value; }
+		}
+
 		[Plugin]
 		public bool CreateVirtualAnimator(Component gameObject)
 		{
@@ -121,6 +130,7 @@ namespace UnityPlugin
 						case UnityClassID.AudioClip:
 						case UnityClassID.AnimationClip:
 						case UnityClassID.AnimatorController:
+						case UnityClassID.AnimatorOverrideController:
 						case UnityClassID.Cubemap:
 						case UnityClassID.Material:
 						case UnityClassID.Shader:
@@ -230,15 +240,6 @@ namespace UnityPlugin
 				}
 			}
 			return null;
-		}
-
-		public Unity3dEditor(UnityParser parser) : this(parser, false) { }
-		public Unity3dEditor(string path) : this(new UnityParser(path), true) { }
-
-		public bool Changed
-		{
-			get { return contentChanged; }
-			set { contentChanged = value; }
 		}
 
 		[Plugin]
@@ -712,6 +713,10 @@ namespace UnityPlugin
 								TextAsset text = (TextAsset)loaded;
 								text.Clone(Parser.Cabinet);
 								break;
+							case UnityClassID.AnimationClip:
+								AnimationClip clip = (AnimationClip)loaded;
+								clip.Clone(Parser.Cabinet);
+								break;
 							}
 						}
 
@@ -775,6 +780,10 @@ namespace UnityPlugin
 					}
 				}
 			}
+			if (Parser.Cabinet.Bundle != null)
+			{
+				Parser.Cabinet.Bundle.RegisterForUpdate(asset);
+			}
 			Type t = asset.GetType();
 			PropertyInfo info = t.GetProperty("m_GameObject");
 			if (info != null)
@@ -793,6 +802,54 @@ namespace UnityPlugin
 				return true;
 			}
 			return false;
+		}
+
+		[Plugin]
+		public void ViewAssetData(int pathID)
+		{
+			Component asset = Parser.Cabinet.FindComponent(pathID);
+			if (asset.classID2 != UnityClassID.MonoBehaviour && asset is NotLoaded)
+			{
+				asset = Parser.Cabinet.LoadComponent(pathID);
+			}
+			string msg = "";
+			switch (asset.classID2)
+			{
+			case UnityClassID.MonoBehaviour:
+				try
+				{
+					Parser.Cabinet.BeginLoadingSkippedComponents();
+					Parser.Cabinet.SourceStream.Position = ((NotLoaded)asset).offset;
+					PPtr<MonoScript> scriptRef = MonoBehaviour.LoadMonoScriptRef(Parser.Cabinet.SourceStream);
+					msg += " ClassID1=" + asset.classID1 + " MonoScript=(FileID=" + scriptRef.m_FileID + " PathID=" + scriptRef.m_PathID + ")";
+				}
+				finally
+				{
+					Parser.Cabinet.EndLoadingSkippedComponents();
+				}
+				break;
+			case UnityClassID.MonoScript:
+				MonoScript script = (MonoScript)asset;
+				msg += " ClassName=\"" + script.m_ClassName + "\" Namespace=\"" + script.m_Namespace + "\" Assemply=\"" + script.m_AssemblyName + "\"";
+				break;
+			case UnityClassID.Material:
+				Material material = (Material)asset;
+				msg += " Name=\"" + material.m_Name + "\" Shader=(" + (material.m_Shader.instance != null ? "Name=\"" + material.m_Shader.instance.m_Name + "\" PathID=" + material.m_Shader.instance.pathID : "none") + ")";
+				break;
+			case UnityClassID.Shader:
+				Shader shader = (Shader)asset;
+				for (int i = 0; i < shader.m_Dependencies.Count; i++)
+				{
+					Component dep = shader.m_Dependencies[i].asset;
+					if (dep != null)
+					{
+						msg += (i == 0 ? "" : ", ") + "Class=" + dep.classID1 + " PathID=" + dep.pathID;
+					}
+				}
+				msg = " Name=\"" + shader.m_Name + "\" Dependencies=(" + msg + ")";
+				break;
+			}
+			Report.ReportLog("Class=" + asset.classID2 + " PathID=" + asset.pathID + msg);
 		}
 	}
 }

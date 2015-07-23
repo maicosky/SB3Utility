@@ -147,7 +147,11 @@ namespace UnityPlugin
 		public static HashSet<Transform> GetSkeleton(SkinnedMeshRenderer sMesh)
 		{
 			HashSet<Transform> skeleton = new HashSet<Transform>();
-			GetSkeleton(FindSkeletonRoot(sMesh), skeleton);
+			Transform root = FindSkeletonRoot(sMesh);
+			if (root != null)
+			{
+				GetSkeleton(root, skeleton);
+			}
 			return skeleton;
 		}
 
@@ -495,6 +499,7 @@ namespace UnityPlugin
 						}
 					}
 				}
+				Report.ReportLog("vert0 tangent=" + vertexList[0].tangent);
 
 				if (faces)
 				{

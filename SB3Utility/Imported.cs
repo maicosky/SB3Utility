@@ -233,6 +233,17 @@ namespace SB3Utility
 			return null;
 		}
 
+		public static Matrix WorldTransform(ImportedFrame frame)
+		{
+			Matrix world = frame.Matrix;
+			while (frame.Parent != null)
+			{
+				frame = frame.Parent;
+				world = world * frame.Matrix;
+			}
+			return world;
+		}
+
 		public static ImportedMesh FindMesh(String frameName, List<ImportedMesh> importedMeshList)
 		{
 			foreach (ImportedMesh mesh in importedMeshList)

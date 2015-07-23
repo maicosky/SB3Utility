@@ -1,4 +1,9 @@
-﻿[1.0.14]
+﻿[1.0.15]
+  - Added support for Blender's FBX files
+  - Changed mirroring of the skeleton in UnityPlugin for FBX output and replacement
+  - Added AnimatorEditor.GetTransformHash() and Unity3dEditor.ViewAssetData() in UnityPlugin
+
+[1.0.14]
   - Limited selection of Transforms for the Root Bone to the skeleton of the SkinnedMeshRenderer
   - Creating Virtual Animators at any Transform
   - Fbx export doesn't export 0 weights

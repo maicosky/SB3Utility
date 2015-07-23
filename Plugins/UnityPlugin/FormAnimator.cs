@@ -74,7 +74,7 @@ namespace UnityPlugin
 		int loadedMaterial = -1;
 		int loadedTexture = -1;
 
-		Matrix[] copyMatrices = new Matrix[10];
+		static Matrix[] copyMatrices = new Matrix[10];
 
 		Dictionary<int, List<KeyList<Material>>> crossRefMeshMaterials = new Dictionary<int,List<KeyList<Material>>>();
 		Dictionary<int, List<KeyList<Texture2D>>> crossRefMeshTextures = new Dictionary<int,List<KeyList<Texture2D>>>();
@@ -925,6 +925,7 @@ namespace UnityPlugin
 							if (item.Item2 == Editor.Parser.m_Avatar.instance)
 							{
 								comboBoxAvatar.SelectedIndex = i;
+								toolTip1.SetToolTip(comboBoxAvatar, comboBoxAvatar.Text);
 								break;
 							}
 						}
@@ -1145,6 +1146,8 @@ namespace UnityPlugin
 						new object[]
 						{
 							matTex.Value.m_Texture.instance != null ? (object)Editor.Textures.IndexOf(matTex.Value.m_Texture.instance) : null,
+							matTex.Value.m_Offset.X + "," + matTex.Value.m_Offset.Y,
+							matTex.Value.m_Scale.X + "," + matTex.Value.m_Scale.Y
 						}
 					);
 					dataGridViewMaterialTextures.Rows[i].HeaderCell.Value = ShortLabel(matTex.Key.name);
@@ -1249,6 +1252,7 @@ namespace UnityPlugin
 			if (pictureBoxTexture.Image != null)
 			{
 				pictureBoxTexture.Image.Dispose();
+				pictureBoxTexture.Image = null;
 			}
 			if (id < 0)
 			{
@@ -1264,7 +1268,6 @@ namespace UnityPlugin
 				editTextBoxTexMipBias.Text = String.Empty;
 				editTextBoxTexAniso.Text = String.Empty;
 				editTextBoxTexWrapMode.Text = String.Empty;
-				pictureBoxTexture.Image = null;
 			}
 			else
 			{
@@ -1283,13 +1286,26 @@ namespace UnityPlugin
 				editTextBoxTexAniso.Text = tex.m_TextureSettings.m_Aniso.ToString();
 				editTextBoxTexWrapMode.Text = tex.m_TextureSettings.m_WrapMode.ToString();
 
+				ImportedTexture impTex;
 				using (MemoryStream mem = new MemoryStream())
 				{
 					tex.Export(mem);
 					mem.Position = 0;
-					ImportedTexture image = new ImportedTexture(mem, tex.m_Name);
-					Texture renderTexture = Texture.FromMemory(Gui.Renderer.Device, image.Data);
-					Bitmap bitmap = new Bitmap(Texture.ToStream(renderTexture, ImageFileFormat.Bmp));
+					impTex = new ImportedTexture(mem, tex.m_Name);
+				}
+				Texture renderTexture = null;
+				try
+				{
+					renderTexture = Texture.FromMemory(Gui.Renderer.Device, impTex.Data);
+					using (Image image = Image.FromStream(Texture.ToStream(renderTexture, tex.m_Height <= 512 && tex.m_Width <= 512 ? ImageFileFormat.Png : ImageFileFormat.Bmp)))
+					{
+						int shift = 0;
+						for (int max = tex.m_Width > tex.m_Height ? tex.m_Width : tex.m_Height; max > 256; max >>= 1)
+						{
+							shift++;
+						}
+						pictureBoxTexture.Image = new Bitmap(image, new Size(tex.m_Width >> shift, tex.m_Height >> shift));
+					}
 					string format = renderTexture.GetLevelDescription(0).Format.GetDescription();
 					int bpp = (format.Contains("A8") ? 8 : 0)
 						+ (format.Contains("R8") ? 8 : 0)
@@ -1299,8 +1315,18 @@ namespace UnityPlugin
 					{
 						textBoxTexSize.Text += "x" + bpp;
 					}
-					renderTexture.Dispose();
-					pictureBoxTexture.Image = bitmap;
+				}
+				catch (Exception e)
+				{
+					pictureBoxTexture.Image = pictureBoxTexture.ErrorImage;
+					Utility.ReportException(e);
+				}
+				finally
+				{
+					if (renderTexture != null)
+					{
+						renderTexture.Dispose();
+					}
 				}
 
 				ResizeImage();
@@ -3106,8 +3132,7 @@ namespace UnityPlugin
 					return;
 				}
 
-				string bonePath = Editor.GetTransformPath(Editor.Frames[loadedFrame]);
-				uint pathHash = Animator.StringToHash(bonePath);
+				uint pathHash = (uint)Gui.Scripting.RunScript(EditorVar + ".GetTransformHash(id=" + loadedFrame + ")");
 				editTextBoxBoneHash.Text = pathHash.ToString();
 				editTextBoxBoneHash.Focus();
 				editTextBoxBoneHash.Select(editTextBoxBoneHash.Text.Length, 0);
@@ -4979,13 +5004,19 @@ namespace UnityPlugin
 				Decimal y = (Decimal)panelTexturePic.Height / pictureBoxTexture.Image.Height;
 				if (x > y)
 				{
-					pictureBoxTexture.Width = Decimal.ToInt32(pictureBoxTexture.Image.Width * y);
-					pictureBoxTexture.Height = Decimal.ToInt32(pictureBoxTexture.Image.Height * y);
+					pictureBoxTexture.Size = new Size
+					(
+						Decimal.ToInt32(pictureBoxTexture.Image.Width * y),
+						Decimal.ToInt32(pictureBoxTexture.Image.Height * y)
+					);
 				}
 				else
 				{
-					pictureBoxTexture.Width = Decimal.ToInt32(pictureBoxTexture.Image.Width * x);
-					pictureBoxTexture.Height = Decimal.ToInt32(pictureBoxTexture.Image.Height * x);
+					pictureBoxTexture.Size = new Size
+					(
+						Decimal.ToInt32(pictureBoxTexture.Image.Width * x),
+						Decimal.ToInt32(pictureBoxTexture.Image.Height * x)
+					);
 				}
 			}
 		}

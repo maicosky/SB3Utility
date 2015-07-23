@@ -233,7 +233,7 @@
 			// applyModsToolStripMenuItem
 			// 
 			this.applyModsToolStripMenuItem.Name = "applyModsToolStripMenuItem";
-			this.applyModsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.applyModsToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
 			this.applyModsToolStripMenuItem.Text = "Apply &Mods";
 			this.applyModsToolStripMenuItem.ToolTipText = "All other Unity files will be used for patching!\r\nBut each will be applied only o" +
     "nce.";
@@ -250,7 +250,7 @@
 			// removeModsToolStripMenuItem
 			// 
 			this.removeModsToolStripMenuItem.Name = "removeModsToolStripMenuItem";
-			this.removeModsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.removeModsToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
 			this.removeModsToolStripMenuItem.Text = "Remove &Mods";
 			this.removeModsToolStripMenuItem.Click += new System.EventHandler(this.removeModsToolStripMenuItem_Click);
 			// 
@@ -320,8 +320,9 @@
 			this.pasteAllMarkedtoolStripMenuItem.Name = "pasteAllMarkedtoolStripMenuItem";
 			this.pasteAllMarkedtoolStripMenuItem.Size = new System.Drawing.Size(156, 22);
 			this.pasteAllMarkedtoolStripMenuItem.Text = "&Paste All Marked";
-			this.pasteAllMarkedtoolStripMenuItem.ToolTipText = "Supported Assets to be Pasted:\r\nAnimator, Virtual Animator, Avatar,\r\nMaterial, Sh" +
-    "ader, Texture2D, Cubemap,\r\nMesh, Sprite,\r\nMonoBehaviour, TextAsset";
+			this.pasteAllMarkedtoolStripMenuItem.ToolTipText = "Supported Assets to be Pasted:\r\nAnimationClip, Animator, Virtual Animator,\r\nAvata" +
+    "r, Material, Shader, Texture2D,\r\nCubemap, Mesh, Sprite,\r\nMonoBehaviour, TextAsse" +
+    "t";
 			this.pasteAllMarkedtoolStripMenuItem.Click += new System.EventHandler(this.pasteAllMarkedtoolStripMenuItem_Click);
 			// 
 			// toolStripMenuItem1
@@ -443,6 +444,7 @@
 			// viewDataToolStripMenuItem
 			// 
 			this.viewDataToolStripMenuItem.Name = "viewDataToolStripMenuItem";
+			this.viewDataToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.V)));
 			this.viewDataToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
 			this.viewDataToolStripMenuItem.Text = "View Data";
 			this.viewDataToolStripMenuItem.ToolTipText = "For MonoBehaviour and MonoScript assets";

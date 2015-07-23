@@ -22,7 +22,11 @@ namespace UnityPlugin
 			Vector3 t, s;
 			Quaternion r;
 			frame.Matrix.Decompose(out s, out r, out t);
-			trans.m_LocalRotation = r;
+			t.X *= -1;
+			Vector3 euler = FbxUtility.QuaternionToEuler(r);
+			euler.Y *= -1;
+			euler.Z *= -1;
+			trans.m_LocalRotation = FbxUtility.EulerToQuaternion(euler);
 			trans.m_LocalPosition = t;
 			trans.m_LocalScale = s;
 
@@ -116,7 +120,7 @@ namespace UnityPlugin
 			}
 		}
 
-		public static List<PPtr<Transform>> CreateBoneList(Transform root, List<ImportedBone> boneList, List<Matrix> poseMatrices)
+		public static List<PPtr<Transform>> CreateBoneList(Transform root, Matrix meshTransform, List<ImportedBone> boneList, List<Matrix> poseMatrices)
 		{
 			List<PPtr<Transform>> uBoneList = new List<PPtr<Transform>>(boneList.Count);
 			string message = string.Empty;
@@ -127,7 +131,18 @@ namespace UnityPlugin
 				{
 					message += " " + boneList[i].Name;
 				}
-				poseMatrices.Add(Matrix.Transpose(/*Operations.Mirror - Fbx mystic*/(boneList[i].Matrix)));
+
+				Vector3 s, t;
+				Quaternion q;
+				boneList[i].Matrix.Decompose(out s, out q, out t);
+				t.X *= -1;
+				Vector3 euler = FbxUtility.QuaternionToEuler(q);
+				euler.Y *= -1;
+				euler.Z *= -1;
+				q = FbxUtility.EulerToQuaternion(euler);
+				Matrix m = Matrix.Scaling(s) * Matrix.RotationQuaternion(q) * Matrix.Translation(t);
+				poseMatrices.Add(Matrix.Transpose(meshTransform * m));
+
 				uBoneList.Add(new PPtr<Transform>(boneFrame));
 			}
 			if (message != string.Empty)
@@ -137,7 +152,7 @@ namespace UnityPlugin
 			return uBoneList;
 		}
 
-		public static SkinnedMeshRenderer CreateSkinnedMeshRenderer(Animator parser, List<Material> materials, WorkspaceMesh mesh, out int[] indices, out bool[] worldCoords, out bool[] replaceSubmeshesOption)
+		public static SkinnedMeshRenderer CreateSkinnedMeshRenderer(Animator parser, List<Material> materials, WorkspaceMesh mesh, Matrix meshMatrix, out int[] indices, out bool[] worldCoords, out bool[] replaceSubmeshesOption)
 		{
 			int numUncheckedSubmeshes = 0;
 			foreach (ImportedSubmesh submesh in mesh.SubmeshList)
@@ -153,7 +168,8 @@ namespace UnityPlugin
 			replaceSubmeshesOption = new bool[numSubmeshes];
 
 			List<Matrix> poseMatrices = new List<Matrix>(mesh.BoneList.Count);
-			List<PPtr<Transform>> bones = CreateBoneList(parser.m_GameObject.instance.FindLinkedComponent(UnityClassID.Transform), mesh.BoneList, poseMatrices);
+			Transform animatorTransform = parser.m_GameObject.instance.FindLinkedComponent(UnityClassID.Transform);
+			List<PPtr<Transform>> bones = CreateBoneList(animatorTransform, meshMatrix, mesh.BoneList, poseMatrices);
 
 			SkinnedMeshRenderer sMesh = new SkinnedMeshRenderer(parser.file);
 
@@ -263,7 +279,7 @@ namespace UnityPlugin
 									Vector4 tangent = vert.Tangent;
 									tangent.X *= -1;
 									tangent.W *= -1;
-									vertWriter.Write(vert.Tangent);
+									vertWriter.Write(tangent);
 									break;
 								}
 							}
@@ -289,25 +305,12 @@ namespace UnityPlugin
 
 					List<ImportedFace> faceList = mesh.SubmeshList[submeshIdx].FaceList;
 					submesh.firstByte = (uint)indexWriter.BaseStream.Position;
-					if (mesh.BoneList.Count > 0)
+					for (int j = 0; j < faceList.Count; j++)
 					{
-						for (int j = 0; j < faceList.Count; j++)
-						{
-							int[] vertexIndices = faceList[j].VertexIndices;
-							indexWriter.Write((ushort)(vertexIndices[0] + submesh.firstVertex));
-							indexWriter.Write((ushort)(vertexIndices[1] + submesh.firstVertex));
-							indexWriter.Write((ushort)(vertexIndices[2] + submesh.firstVertex));
-						}
-					}
-					else
-					{
-						for (int j = 0; j < faceList.Count; j++)
-						{
-							int[] vertexIndices = faceList[j].VertexIndices;
-							indexWriter.Write((ushort)(vertexIndices[0] + submesh.firstVertex));
-							indexWriter.Write((ushort)(vertexIndices[2] + submesh.firstVertex));
-							indexWriter.Write((ushort)(vertexIndices[1] + submesh.firstVertex));
-						}
+						int[] vertexIndices = faceList[j].VertexIndices;
+						indexWriter.Write((ushort)(vertexIndices[0] + submesh.firstVertex));
+						indexWriter.Write((ushort)(vertexIndices[2] + submesh.firstVertex));
+						indexWriter.Write((ushort)(vertexIndices[1] + submesh.firstVertex));
 					}
 				}
 				uMesh.m_LocalAABB.m_Extend -= uMesh.m_LocalAABB.m_Center;
@@ -320,12 +323,11 @@ namespace UnityPlugin
 		public static void ReplaceMeshRenderer(Transform frame, Transform rootBone, Animator parser, List<Material> materials, WorkspaceMesh mesh, bool merge, CopyMeshMethod normalsMethod, CopyMeshMethod bonesMethod, bool targetFullMesh)
 		{
 			Matrix transform = Transform.WorldTransform(frame);
-			transform.Invert();
 
 			int[] indices;
 			bool[] worldCoords;
 			bool[] replaceSubmeshesOption;
-			SkinnedMeshRenderer sMesh = CreateSkinnedMeshRenderer(parser, materials, mesh, out indices, out worldCoords, out replaceSubmeshesOption);
+			SkinnedMeshRenderer sMesh = CreateSkinnedMeshRenderer(parser, materials, mesh, transform, out indices, out worldCoords, out replaceSubmeshesOption);
 			vMesh destMesh = new Operations.vMesh(sMesh, true, false);
 
 			SkinnedMeshRenderer sFrameMesh = frame.m_GameObject.instance.FindLinkedComponent(UnityClassID.SkinnedMeshRenderer);
@@ -383,6 +385,7 @@ namespace UnityPlugin
 				}
 			}
 
+			transform.Invert();
 			vSubmesh[] replaceSubmeshes = (srcMesh == null) ? null : new vSubmesh[srcMesh.submeshes.Count];
 			List<vSubmesh> addSubmeshes = new List<vSubmesh>(destMesh.submeshes.Count);
 			for (int i = 0; i < destMesh.submeshes.Count; i++)

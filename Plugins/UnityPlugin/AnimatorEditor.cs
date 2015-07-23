@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using SlimDX;
 
 using SB3Utility;
@@ -699,6 +700,13 @@ namespace UnityPlugin
 		public string GetTransformPath(Transform trans)
 		{
 			return (trans.Parent != null && trans.Parent.Parent != null ? GetTransformPath(trans.Parent) + "/" : String.Empty) + trans.m_GameObject.instance.m_Name;
+		}
+
+		[Plugin]
+		public uint GetTransformHash(int id)
+		{
+			string bonePath = GetTransformPath(Frames[id]);
+			return Animator.StringToHash(bonePath);
 		}
 
 		[Plugin]
@@ -1500,7 +1508,17 @@ namespace UnityPlugin
 		[Plugin]
 		public void MergeTexture(ImportedTexture tex)
 		{
-			Texture2D dstTex = Parser.file.Parser.GetTexture(tex.Name);
+			string texName;
+			Match m = Regex.Match(tex.Name, @"(.+)-([^-]+)(\..+)", RegexOptions.CultureInvariant);
+			if (m.Success)
+			{
+				texName = m.Groups[1].Value;
+			}
+			else
+			{
+				texName = Path.GetFileNameWithoutExtension(tex.Name);
+			}
+			Texture2D dstTex = Parser.file.Parser.GetTexture(texName);
 			bool isNew = false;
 			if (dstTex == null)
 			{
