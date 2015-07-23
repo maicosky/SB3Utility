@@ -499,7 +499,6 @@ namespace UnityPlugin
 						}
 					}
 				}
-				Report.ReportLog("vert0 tangent=" + vertexList[0].tangent);
 
 				if (faces)
 				{

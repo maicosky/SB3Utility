@@ -1,4 +1,16 @@
-﻿[1.0.15]
+﻿[1.0.16]
+  - Changed Texture naming to include original format name
+  - Changed Texture preview to use less memory and show Alpha layer
+  - Fixed missing Tangent mirroring. Tangent are still not like originals.
+  - Fixed bone matrices in transformed hierarchies
+  - Fix for boneless mesh replacement
+  - Fix for RGBA32 texture format in SBPR
+  - Fixed Texture replacement for XP
+  - Fixed renaming of assets in Unity3d files
+  - Added support for AnimationClips to be copied & pasted
+  - Changed Transform Matrix "Copy & Paste" in Animator editor to work between Animators
+
+[1.0.15]
   - Added support for Blender's FBX files
   - Changed mirroring of the skeleton in UnityPlugin for FBX output and replacement
   - Added AnimatorEditor.GetTransformHash() and Unity3dEditor.ViewAssetData() in UnityPlugin
